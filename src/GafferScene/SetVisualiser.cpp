@@ -123,24 +123,25 @@ const StringDataPtr fragmentSource()
 		"#endif\n"
 
 		"uniform vec3 colors[" +
-		std::to_string( g_maxShaderColors ) + "];"
-											  "uniform int numColors;"
-											  "uniform float stripeWidth;"
+		std::to_string( g_maxShaderColors ) +
+		"];"
+		"uniform int numColors;"
+		"uniform float stripeWidth;"
 
-											  "in vec3 fragmentN;"
-											  "in vec3 fragmentI;"
+		"in vec3 fragmentN;"
+		"in vec3 fragmentI;"
 
-											  "void main()"
-											  "{"
-											  "	float f = abs( dot( normalize( fragmentI ), normalize( fragmentN ) ) );"
-											  "	gl_FragColor = vec4( f, f, f, 1.0 );"
-											  "	if( numColors > 0 )"
-											  "	{"
-											  "		float stripeIndex = floor( (gl_FragCoord.x - gl_FragCoord.y) / stripeWidth );"
-											  "		stripeIndex = mod( stripeIndex, float(numColors) );"
-											  "		gl_FragColor = ( gl_FragColor * 0.8 + 0.2 ) * vec4( colors[ int(stripeIndex) ], 1.0 );"
-											  "	}"
-											  "}"
+		"void main()"
+		"{"
+		"	float f = abs( dot( normalize( fragmentI ), normalize( fragmentN ) ) );"
+		"	gl_FragColor = vec4( f, f, f, 1.0 );"
+		"	if( numColors > 0 )"
+		"	{"
+		"		float stripeIndex = floor( (gl_FragCoord.x - gl_FragCoord.y) / stripeWidth );"
+		"		stripeIndex = mod( stripeIndex, float(numColors) );"
+		"		gl_FragColor = ( gl_FragColor * 0.8 + 0.2 ) * vec4( colors[ int(stripeIndex) ], 1.0 );"
+		"	}"
+		"}"
 	);
 	return g_fragmentSource;
 }
@@ -169,8 +170,7 @@ GAFFER_NODE_DEFINE_TYPE( SetVisualiser );
 
 size_t SetVisualiser::g_firstPlugIndex = 0;
 
-SetVisualiser::SetVisualiser( const std::string &name )
-	: AttributeProcessor( name )
+SetVisualiser::SetVisualiser( const std::string &name ) : AttributeProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -186,9 +186,7 @@ SetVisualiser::SetVisualiser( const std::string &name )
 	globalPlug()->setName( "__global" );
 }
 
-SetVisualiser::~SetVisualiser()
-{
-}
+SetVisualiser::~SetVisualiser() {}
 
 Gaffer::StringPlug *SetVisualiser::setsPlug()
 {
@@ -248,11 +246,7 @@ void SetVisualiser::affects( const Gaffer::Plug *input, AffectedPlugsContainer &
 	// the input plugs directly) allows us to better take advantage of Gaffers
 	// plug value caching and avoid some duplicate set processing work.
 
-	if(
-		input == setsPlug() ||
-		colorOverridesPlug()->isAncestorOf( input ) ||
-		input == inPlug()->setNamesPlug()
-	)
+	if( input == setsPlug() || colorOverridesPlug()->isAncestorOf( input ) || input == inPlug()->setNamesPlug() )
 	{
 		outputs.push_back( outSetsPlug() );
 	}
@@ -325,11 +319,8 @@ void SetVisualiser::compute( Gaffer::ValuePlug *output, const Gaffer::Context *c
 
 bool SetVisualiser::affectsProcessedAttributes( const Gaffer::Plug *input ) const
 {
-	return AttributeProcessor::affectsProcessedAttributes( input ) ||
-		input == includeInheritedPlug() ||
-		input == stripeWidthPlug() ||
-		input == outSetsPlug() ||
-		input == inPlug()->setPlug();
+	return AttributeProcessor::affectsProcessedAttributes( input ) || input == includeInheritedPlug() ||
+		input == stripeWidthPlug() || input == outSetsPlug() || input == inPlug()->setPlug();
 }
 
 void SetVisualiser::hashProcessedAttributes( const Gaffer::Context *context, MurmurHash &h ) const
@@ -361,7 +352,9 @@ void SetVisualiser::hashProcessedAttributes( const Gaffer::Context *context, Mur
 	stripeWidthPlug()->hash( h );
 }
 
-ConstCompoundObjectPtr SetVisualiser::computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const
+ConstCompoundObjectPtr SetVisualiser::computeProcessedAttributes(
+	const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes
+) const
 {
 	auto path = context->getIfExists<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
 	if( !path )

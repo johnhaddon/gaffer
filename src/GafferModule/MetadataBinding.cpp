@@ -63,10 +63,7 @@ InternedString g_descriptionName( "description" );
 
 struct PythonValueFunction
 {
-	PythonValueFunction( object fn )
-		: m_fn( fn )
-	{
-	}
+	PythonValueFunction( object fn ) : m_fn( fn ) {}
 
 	ConstDataPtr operator () ( InternedString target )
 	{
@@ -82,24 +79,22 @@ struct PythonValueFunction
 		}
 	}
 
-	private:
+private:
 
 	object m_fn;
 };
 
 struct PythonGraphComponentValueFunction
 {
-	PythonGraphComponentValueFunction( object fn )
-		: m_fn( fn )
-	{
-	}
+	PythonGraphComponentValueFunction( object fn ) : m_fn( fn ) {}
 
 	ConstDataPtr operator () ( const GraphComponent *graphComponent )
 	{
 		IECorePython::ScopedGILLock gilLock;
 		try
 		{
-			ConstDataPtr result = extract<ConstDataPtr>( m_fn( GraphComponentPtr( const_cast<GraphComponent *>( graphComponent ) ) ) );
+			ConstDataPtr result =
+				extract<ConstDataPtr>( m_fn( GraphComponentPtr( const_cast<GraphComponent *>( graphComponent ) ) ) );
 			return result;
 		}
 		catch( const boost::python::error_already_set & )
@@ -108,17 +103,14 @@ struct PythonGraphComponentValueFunction
 		}
 	}
 
-	private:
+private:
 
 	object m_fn;
 };
 
 struct PythonPlugValueFunction
 {
-	PythonPlugValueFunction( object fn )
-		: m_fn( fn )
-	{
-	}
+	PythonPlugValueFunction( object fn ) : m_fn( fn ) {}
 
 	ConstDataPtr operator () ( const Plug *plug )
 	{
@@ -134,7 +126,7 @@ struct PythonPlugValueFunction
 		}
 	}
 
-	private:
+private:
 
 	object m_fn;
 };
@@ -240,13 +232,17 @@ object value( IECore::InternedString target, IECore::InternedString key, bool co
 	return dataToPython( d.get(), copy );
 }
 
-object graphComponentValue( const GraphComponent &graphComponent, IECore::InternedString key, unsigned registrationTypes, bool copy )
+object graphComponentValue(
+	const GraphComponent &graphComponent, IECore::InternedString key, unsigned registrationTypes, bool copy
+)
 {
 	ConstDataPtr d = Metadata::value( &graphComponent, key, registrationTypes );
 	return dataToPython( d.get(), copy );
 }
 
-object graphComponentValueDeprecated( const GraphComponent &graphComponent, IECore::InternedString key, bool instanceOnly, bool copy )
+object graphComponentValueDeprecated(
+	const GraphComponent &graphComponent, IECore::InternedString key, bool instanceOnly, bool copy
+)
 {
 	ConstDataPtr d = Metadata::value( &graphComponent, key, instanceOnly );
 	return dataToPython( d.get(), copy );
@@ -285,10 +281,7 @@ object registerNode( tuple args, dict kw )
 				{
 					InternedString name = extract<InternedString>( plugValuesItems[vi][0] );
 					Metadata::registerValue(
-						nodeTypeId,
-						plugPath,
-						name,
-						objectToPlugValueFunction( name, plugValuesItems[vi][1] )
+						nodeTypeId, plugPath, name, objectToPlugValueFunction( name, plugValuesItems[vi][1] )
 					);
 				}
 			}
@@ -298,10 +291,7 @@ object registerNode( tuple args, dict kw )
 				{
 					InternedString name = extract<InternedString>( plugValues[vi] );
 					Metadata::registerValue(
-						nodeTypeId,
-						plugPath,
-						name,
-						objectToPlugValueFunction( name, plugValues[vi + 1] )
+						nodeTypeId, plugPath, name, objectToPlugValueFunction( name, plugValues[vi + 1] )
 					);
 				}
 			}
@@ -319,17 +309,24 @@ void registerPlugValue( IECore::TypeId nodeTypeId, const char *plugPath, IECore:
 struct ValueChangedSlotCaller
 {
 
-	void operator () ( boost::python::object slot, IECore::InternedString target, IECore::InternedString key, Metadata::ValueChangedReason reason )
+	void operator () (
+		boost::python::object slot, IECore::InternedString target, IECore::InternedString key,
+		Metadata::ValueChangedReason reason
+	)
 	{
 		slot( target.c_str(), key.c_str(), reason );
 	}
 
-	void operator () ( boost::python::object slot, Node *node, IECore::InternedString key, Metadata::ValueChangedReason reason )
+	void operator () (
+		boost::python::object slot, Node *node, IECore::InternedString key, Metadata::ValueChangedReason reason
+	)
 	{
 		slot( NodePtr( node ), key.c_str(), reason );
 	}
 
-	void operator () ( boost::python::object slot, Plug *plug, IECore::InternedString key, Metadata::ValueChangedReason reason )
+	void operator () (
+		boost::python::object slot, Plug *plug, IECore::InternedString key, Metadata::ValueChangedReason reason
+	)
 	{
 		slot( PlugPtr( plug ), key.c_str(), reason );
 	}
@@ -344,7 +341,10 @@ struct ValueChangedSlotCaller
 		slot( nodeTypeId, key.c_str(), NodePtr( node ) );
 	}
 
-	void operator () ( boost::python::object slot, IECore::TypeId nodeTypeId, const StringAlgo::MatchPattern &plugPath, IECore::InternedString key, Plug *plug )
+	void operator () (
+		boost::python::object slot, IECore::TypeId nodeTypeId, const StringAlgo::MatchPattern &plugPath,
+		IECore::InternedString key, Plug *plug
+	)
 	{
 		slot( nodeTypeId, plugPath.c_str(), key.c_str(), PlugPtr( plug ) );
 	}
@@ -450,61 +450,135 @@ void GafferModule::bindMetadata()
 			.value( "InstanceRegistration", Metadata::ValueChangedReason::InstanceRegistration )
 			.value( "InstanceDeregistration", Metadata::ValueChangedReason::InstanceDeregistration );
 
-		SignalClass<Metadata::ValueChangedSignal, DefaultSignalCaller<Metadata::ValueChangedSignal>, ValueChangedSlotCaller>( "ValueChangedSignal" );
-		SignalClass<Metadata::NodeValueChangedSignal, DefaultSignalCaller<Metadata::NodeValueChangedSignal>, ValueChangedSlotCaller>( "NodeValueChangedSignal" );
-		SignalClass<Metadata::PlugValueChangedSignal, DefaultSignalCaller<Metadata::PlugValueChangedSignal>, ValueChangedSlotCaller>( "PlugValueChangedSignal" );
-		SignalClass<Metadata::LegacyValueChangedSignal, DefaultSignalCaller<Metadata::LegacyValueChangedSignal>, ValueChangedSlotCaller>( "LegacyValueChangedSignal" );
-		SignalClass<Metadata::LegacyNodeValueChangedSignal, DefaultSignalCaller<Metadata::LegacyNodeValueChangedSignal>, ValueChangedSlotCaller>( "LegacyNodeValueChangedSignal" );
-		SignalClass<Metadata::LegacyPlugValueChangedSignal, DefaultSignalCaller<Metadata::LegacyPlugValueChangedSignal>, ValueChangedSlotCaller>( "LegacyPlugValueChangedSignal" );
+		SignalClass<
+			Metadata::ValueChangedSignal, DefaultSignalCaller<Metadata::ValueChangedSignal>, ValueChangedSlotCaller>(
+			"ValueChangedSignal"
+		);
+		SignalClass<
+			Metadata::NodeValueChangedSignal, DefaultSignalCaller<Metadata::NodeValueChangedSignal>,
+			ValueChangedSlotCaller>( "NodeValueChangedSignal" );
+		SignalClass<
+			Metadata::PlugValueChangedSignal, DefaultSignalCaller<Metadata::PlugValueChangedSignal>,
+			ValueChangedSlotCaller>( "PlugValueChangedSignal" );
+		SignalClass<
+			Metadata::LegacyValueChangedSignal, DefaultSignalCaller<Metadata::LegacyValueChangedSignal>,
+			ValueChangedSlotCaller>( "LegacyValueChangedSignal" );
+		SignalClass<
+			Metadata::LegacyNodeValueChangedSignal, DefaultSignalCaller<Metadata::LegacyNodeValueChangedSignal>,
+			ValueChangedSlotCaller>( "LegacyNodeValueChangedSignal" );
+		SignalClass<
+			Metadata::LegacyPlugValueChangedSignal, DefaultSignalCaller<Metadata::LegacyPlugValueChangedSignal>,
+			ValueChangedSlotCaller>( "LegacyPlugValueChangedSignal" );
 	}
 
-	metadataClass
-		.def( "registerValue", &registerValue )
+	metadataClass.def( "registerValue", &registerValue )
 		.def( "registerValue", &registerNodeValue )
 		.def( "registerValue", &registerPlugValue )
-		.def( "registerValue", &registerInstanceValue, ( boost::python::arg( "target" ), boost::python::arg( "value" ), boost::python::arg( "persistent" ) = true ) )
+		.def(
+			"registerValue", &registerInstanceValue,
+			( boost::python::arg( "target" ), boost::python::arg( "value" ), boost::python::arg( "persistent" ) = true )
+		)
 		.staticmethod( "registerValue" )
 
 		.def( "registerValues", &registerValues )
 		.staticmethod( "registerValues" )
 
 		.def( "registeredValues", &registeredValues )
-		.def( "registeredValues", &registeredGraphComponentValuesDeprecated, ( boost::python::arg( "target" ), boost::python::arg( "instanceOnly" ) = false, boost::python::arg( "persistentOnly" ) = false ) )
-		.def( "registeredValues", &registeredGraphComponentValues, ( boost::python::arg( "target" ), boost::python::arg( "registrationTypes" ) = Metadata::RegistrationTypes::All ) )
+		.def(
+			"registeredValues", &registeredGraphComponentValuesDeprecated,
+			( boost::python::arg( "target" ), boost::python::arg( "instanceOnly" ) = false,
+			  boost::python::arg( "persistentOnly" ) = false )
+		)
+		.def(
+			"registeredValues", &registeredGraphComponentValues,
+			( boost::python::arg( "target" ),
+			  boost::python::arg( "registrationTypes" ) = Metadata::RegistrationTypes::All )
+		)
 		.staticmethod( "registeredValues" )
 
-		.def( "value", &value, ( boost::python::arg( "target" ), boost::python::arg( "key" ), boost::python::arg( "_copy" ) = true ) )
-		.def( "value", &graphComponentValueDeprecated, ( boost::python::arg( "target" ), boost::python::arg( "key" ), boost::python::arg( "instanceOnly" ) = false, boost::python::arg( "_copy" ) = true ) )
-		.def( "value", &graphComponentValue, ( boost::python::arg( "target" ), boost::python::arg( "registrationTypes" ) = Metadata::RegistrationTypes::All, boost::python::arg( "_copy" ) = true ) )
+		.def(
+			"value", &value,
+			( boost::python::arg( "target" ), boost::python::arg( "key" ), boost::python::arg( "_copy" ) = true )
+		)
+		.def(
+			"value", &graphComponentValueDeprecated,
+			( boost::python::arg( "target" ), boost::python::arg( "key" ), boost::python::arg( "instanceOnly" ) = false,
+			  boost::python::arg( "_copy" ) = true )
+		)
+		.def(
+			"value", &graphComponentValue,
+			( boost::python::arg( "target" ),
+			  boost::python::arg( "registrationTypes" ) = Metadata::RegistrationTypes::All,
+			  boost::python::arg( "_copy" ) = true )
+		)
 		.staticmethod( "value" )
 
-		.def( "deregisterValue", (void ( * )( IECore::InternedString, IECore::InternedString ))&Metadata::deregisterValue )
+		.def(
+			"deregisterValue", (void ( * )( IECore::InternedString, IECore::InternedString ))&Metadata::deregisterValue
+		)
 		.def( "deregisterValue", (void ( * )( IECore::TypeId, IECore::InternedString ))&Metadata::deregisterValue )
-		.def( "deregisterValue", (void ( * )( IECore::TypeId, const StringAlgo::MatchPattern &, IECore::InternedString ))&Metadata::deregisterValue )
+		.def(
+			"deregisterValue",
+			(
+				void ( * )( IECore::TypeId, const StringAlgo::MatchPattern &, IECore::InternedString )
+			)&Metadata::deregisterValue
+		)
 		.def( "deregisterValue", &deregisterInstanceValue )
 		.staticmethod( "deregisterValue" )
 
 		.def( "registerNode", boost::python::raw_function( &registerNode, 1 ) )
 		.staticmethod( "registerNode" )
 
-		.def( "valueChangedSignal", ( Metadata::LegacyValueChangedSignal & (*)() ) & Metadata::valueChangedSignal, return_value_policy<reference_existing_object>() )
-		.def( "valueChangedSignal", ( Metadata::ValueChangedSignal & (*)( InternedString ) ) & Metadata::valueChangedSignal, return_value_policy<reference_existing_object>() )
+		.def(
+			"valueChangedSignal", ( Metadata::LegacyValueChangedSignal & (*)() ) & Metadata::valueChangedSignal,
+			return_value_policy<reference_existing_object>()
+		)
+		.def(
+			"valueChangedSignal",
+			( Metadata::ValueChangedSignal & (*)( InternedString ) ) & Metadata::valueChangedSignal,
+			return_value_policy<reference_existing_object>()
+		)
 		.staticmethod( "valueChangedSignal" )
 
-		.def( "nodeValueChangedSignal", ( Metadata::LegacyNodeValueChangedSignal & (*)() ) & Metadata::nodeValueChangedSignal, return_value_policy<reference_existing_object>() )
-		.def( "nodeValueChangedSignal", ( Metadata::NodeValueChangedSignal & (*)(Gaffer::Node *)) & Metadata::nodeValueChangedSignal, return_value_policy<reference_existing_object>() )
+		.def(
+			"nodeValueChangedSignal",
+			( Metadata::LegacyNodeValueChangedSignal & (*)() ) & Metadata::nodeValueChangedSignal,
+			return_value_policy<reference_existing_object>()
+		)
+		.def(
+			"nodeValueChangedSignal",
+			( Metadata::NodeValueChangedSignal & (*)(Gaffer::Node *)) & Metadata::nodeValueChangedSignal,
+			return_value_policy<reference_existing_object>()
+		)
 		.staticmethod( "nodeValueChangedSignal" )
 
-		.def( "plugValueChangedSignal", ( Metadata::LegacyPlugValueChangedSignal & (*)() ) & Metadata::plugValueChangedSignal, return_value_policy<reference_existing_object>() )
-		.def( "plugValueChangedSignal", ( Metadata::PlugValueChangedSignal & (*)(Gaffer::Node *)) & Metadata::plugValueChangedSignal, return_value_policy<reference_existing_object>() )
+		.def(
+			"plugValueChangedSignal",
+			( Metadata::LegacyPlugValueChangedSignal & (*)() ) & Metadata::plugValueChangedSignal,
+			return_value_policy<reference_existing_object>()
+		)
+		.def(
+			"plugValueChangedSignal",
+			( Metadata::PlugValueChangedSignal & (*)(Gaffer::Node *)) & Metadata::plugValueChangedSignal,
+			return_value_policy<reference_existing_object>()
+		)
 		.staticmethod( "plugValueChangedSignal" )
 
-		.def( "targetsWithMetadata", &targetsWithMetadataWrapper, ( boost::python::arg( "targetPattern" ), boost::python::arg( "key" ) ) )
+		.def(
+			"targetsWithMetadata", &targetsWithMetadataWrapper,
+			( boost::python::arg( "targetPattern" ), boost::python::arg( "key" ) )
+		)
 		.staticmethod( "targetsWithMetadata" )
 
-		.def( "plugsWithMetadata", &plugsWithMetadata, ( boost::python::arg( "root" ), boost::python::arg( "key" ), boost::python::arg( "instanceOnly" ) = false ) )
+		.def(
+			"plugsWithMetadata", &plugsWithMetadata,
+			( boost::python::arg( "root" ), boost::python::arg( "key" ), boost::python::arg( "instanceOnly" ) = false )
+		)
 		.staticmethod( "plugsWithMetadata" )
 
-		.def( "nodesWithMetadata", &nodesWithMetadata, ( boost::python::arg( "root" ), boost::python::arg( "key" ), boost::python::arg( "instanceOnly" ) = false ) )
+		.def(
+			"nodesWithMetadata", &nodesWithMetadata,
+			( boost::python::arg( "root" ), boost::python::arg( "key" ), boost::python::arg( "instanceOnly" ) = false )
+		)
 		.staticmethod( "nodesWithMetadata" );
 }

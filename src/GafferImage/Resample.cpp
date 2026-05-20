@@ -118,10 +118,7 @@ Passes requiredPasses( const Resample *resample, const ImagePlug *image, const O
 // Rounds min down, and max up, while converting from float to int.
 Box2i box2fToBox2i( const Box2f &b )
 {
-	return Box2i(
-		V2i( floor( b.min.x ), floor( b.min.y ) ),
-		V2i( ceil( b.max.x ), ceil( b.max.y ) )
-	);
+	return Box2i( V2i( floor( b.min.x ), floor( b.min.y ) ), V2i( ceil( b.max.x ), ceil( b.max.y ) ) );
 }
 
 // Calculates the scale and offset needed to convert from output
@@ -141,15 +138,15 @@ V2f inputFilterRadius( const OIIO::Filter2D *filter, const V2f &inputFilterScale
 		return V2f( 0.0f );
 	}
 
-	return V2f(
-		filter->width() * inputFilterScale.x * 0.5f,
-		filter->height() * inputFilterScale.y * 0.5f
-	);
+	return V2f( filter->width() * inputFilterScale.x * 0.5f, filter->height() * inputFilterScale.y * 0.5f );
 }
 
 // Returns the input region that will need to be sampled when
 // generating a given output tile.
-Box2i inputRegion( const V2i &tileOrigin, unsigned passes, const V2f &ratio, const V2f &offset, const OIIO::Filter2D *filter, const V2f &inputFilterScale )
+Box2i inputRegion(
+	const V2i &tileOrigin, unsigned passes, const V2f &ratio, const V2f &offset, const OIIO::Filter2D *filter,
+	const V2f &inputFilterScale
+)
 {
 	Box2f outputRegion( V2f( tileOrigin ), tileOrigin + V2f( ImagePlug::tileSize() ) );
 	V2f filterRadius = inputFilterRadius( filter, inputFilterScale );
@@ -228,10 +225,7 @@ inline std::pair<int, int> filterSupport( const float filterRadius, const int x,
 {
 	float iX = ( x + 0.5f ) / ratio + offset;
 
-	return std::make_pair(
-		(int)ceilf( iX - 0.5f - filterRadius ),
-		(int)floorf( iX + 0.5f + filterRadius )
-	);
+	return std::make_pair( (int)ceilf( iX - 0.5f - filterRadius ), (int)floorf( iX + 0.5f + filterRadius ) );
 }
 
 // Precomputes all the filter weights for a whole row or column of a tile. For separable
@@ -242,7 +236,10 @@ inline std::pair<int, int> filterSupport( const float filterRadius, const int x,
 /// only computed once and then reused. At the time of writing, profiles indicate that
 /// accessing pixels via the Sampler is the main bottleneck, but once that is optimised
 /// perhaps cached filter weights could have a benefit.
-void filterWeights1D( const OIIO::Filter2D *filter, const float inputFilterScale, const float filterRadius, const int x, const float ratio, const float offset, Passes pass, std::vector<int> &supportRanges, std::vector<float> &weights )
+void filterWeights1D(
+	const OIIO::Filter2D *filter, const float inputFilterScale, const float filterRadius, const int x,
+	const float ratio, const float offset, Passes pass, std::vector<int> &supportRanges, std::vector<float> &weights
+)
 {
 	weights.reserve( ( 2 * ceilf( filterRadius ) + 1 ) * ImagePlug::tileSize() );
 	supportRanges.reserve( 2 * ImagePlug::tileSize() );
@@ -281,7 +278,10 @@ void filterWeights1D( const OIIO::Filter2D *filter, const float inputFilterScale
 // for all pixels. This means we don't loop over output pixels at all here - we just compute the weights
 // for one output pixel, and return one 2D support for this pixel - it just gets shifted for each adjacent
 // pixel.
-void filterWeights2D( const OIIO::Filter2D *filter, const V2f inputFilterScale, const V2f filterRadius, const V2i p, const V2f ratio, const V2f offset, Box2i &support, std::vector<float> &weights )
+void filterWeights2D(
+	const OIIO::Filter2D *filter, const V2f inputFilterScale, const V2f filterRadius, const V2i p, const V2f ratio,
+	const V2f offset, Box2i &support, std::vector<float> &weights
+)
 {
 	weights.reserve( ( 2 * ceilf( filterRadius.x ) + 1 ) * ( 2 * ceilf( filterRadius.y ) + 1 ) );
 	weights.resize( 0 );
@@ -344,17 +344,15 @@ struct MixRange
 // Given the filter parameters, find the total range of input values, and for each input value, give the
 // possible other input values it may be filtered together with
 void computeMixing(
-	float filterRadius, int tileOrigin, float ratio, float offset,
-	std::vector<MixRange> &mixing, int &mixingOrigin, int &mixingSize
+	float filterRadius, int tileOrigin, float ratio, float offset, std::vector<MixRange> &mixing, int &mixingOrigin,
+	int &mixingSize
 )
 {
 	for( int i = 0; i < ImagePlug::tileSize(); i++ )
 	{
 		// Find the range of inputs for this output pixel
 		int inputMin, inputMax;
-		std::tie( inputMin, inputMax ) = filterSupport(
-			filterRadius, tileOrigin + i, ratio, offset
-		);
+		std::tie( inputMin, inputMax ) = filterSupport( filterRadius, tileOrigin + i, ratio, offset );
 
 		if( i == 0 )
 		{
@@ -387,7 +385,7 @@ struct ContributionElement
 
 class DeepResampleData : public IECore::Data
 {
-	public:
+public:
 
 	IntVectorDataPtr sampleOffsetsData;
 	FloatVectorDataPtr AData;
@@ -447,10 +445,8 @@ struct SampledDepth
 // Given the channel data for a pixel, and all depths it may be evaluated at, convert it to a list of
 // SampledDepths will all information needed to evaluate it at any of those depths.
 void samplePixelDepths(
-	int count,
-	const boost::span<const float> &z, const boost::span<const float> &zBack, const boost::span<const float> &alpha,
-	const std::vector<float> &depths,
-	std::vector<SampledDepth> &result
+	int count, const boost::span<const float> &z, const boost::span<const float> &zBack,
+	const boost::span<const float> &alpha, const std::vector<float> &depths, std::vector<SampledDepth> &result
 )
 {
 	// This is the maximum possible size of the result - it's usually larger than necessary, by an average
@@ -530,7 +526,9 @@ void samplePixelDepths(
 					if( segmentAlpha == 0.0f )
 					{
 						// If the segment has 0 alpha, the EXR deep spec mandates a different, linear behaviour
-						result.push_back( SampledDepth{ depth, ( 1.0f - accumAlpha ) * depthFraction, accumAlpha, (int)endSample } );
+						result.push_back(
+							SampledDepth{ depth, ( 1.0f - accumAlpha ) * depthFraction, accumAlpha, (int)endSample }
+						);
 					}
 					else
 					{
@@ -539,7 +537,10 @@ void samplePixelDepths(
 						// the fraction of this segment that we're taking, multiplied by occlusion from previous
 						// segments.
 						float curAlpha = -expm1f( depthFraction * log1MinusAlpha );
-						result.push_back( SampledDepth{ depth, std::min( 1.0f, curAlpha / segmentAlpha ) * ( 1.0f - accumAlpha ), accumAlpha + curAlpha * ( 1.0f - accumAlpha ), (int)endSample } );
+						result.push_back(
+							SampledDepth{ depth, std::min( 1.0f, curAlpha / segmentAlpha ) * ( 1.0f - accumAlpha ),
+										  accumAlpha + curAlpha * ( 1.0f - accumAlpha ), (int)endSample }
+						);
 					}
 				}
 
@@ -722,11 +723,14 @@ int linearCombineSampledPixels(
 				// there is noticeable error introduced by doing this sum in float, rather than double.
 				// And if we have to use double precision anyway, we have plenty of precision to keep
 				// an accurate running sum.
-				totalAccumAlpha += ( (double)curSamples[curIndex].accumAlpha - ( sourceIndex[i] >= 0 ? (double)curSamples[sourceIndex[i]].accumAlpha : 0.0 ) ) * weights[i];
+				totalAccumAlpha += ( (double)curSamples[curIndex].accumAlpha -
+									 ( sourceIndex[i] >= 0 ? (double)curSamples[sourceIndex[i]].accumAlpha : 0.0 ) ) *
+					weights[i];
 
 				if( contributionElements )
 				{
-					if( curSamples[curIndex].type == DepthSamplePoint && curIndex - sourceIndex[i] == 2 && curSamples[curIndex - 1].type == DepthSamplePoint )
+					if( curSamples[curIndex].type == DepthSamplePoint && curIndex - sourceIndex[i] == 2 &&
+						curSamples[curIndex - 1].type == DepthSamplePoint )
 					{
 						// "Double Point Sample" - this is an unfortunate special case.
 						// Usually, we include a single source index per source in each output sample, and this
@@ -746,8 +750,11 @@ int linearCombineSampledPixels(
 						// combining these two segments into one ... this is not part of the standard definition
 						// of "tidy" however.
 						contributionCount++;
-						float skippedContribution = curSamples[curIndex - 1].linearContribution / ( 1.0 - prevTotalAccumAlpha );
-						contributionElements->push_back( ContributionElement{ (int)i, sourceOrigIndex[i], weights[i] * skippedContribution } );
+						float skippedContribution =
+							curSamples[curIndex - 1].linearContribution / ( 1.0 - prevTotalAccumAlpha );
+						contributionElements->push_back(
+							ContributionElement{ (int)i, sourceOrigIndex[i], weights[i] * skippedContribution }
+						);
 
 						sourceOrigIndex[i]++;
 					}
@@ -758,17 +765,19 @@ int linearCombineSampledPixels(
 					// * if it's an interpolated sample, we must substract off the fraction already output
 					// * and we must include occlusion from the output segments so far
 					float prevContribution = 0.0f;
-					if( curSamples[curIndex].type != DepthSamplePoint && curSamples[sourceIndex[i]].type >= DepthSampleInterpolated )
+					if( curSamples[curIndex].type != DepthSamplePoint &&
+						curSamples[sourceIndex[i]].type >= DepthSampleInterpolated )
 					{
 						prevContribution = curSamples[sourceIndex[i]].linearContribution;
 					}
 					float linearContribution =
-						( curSamples[curIndex].linearContribution - prevContribution ) /
-						( 1.0 - prevTotalAccumAlpha );
+						( curSamples[curIndex].linearContribution - prevContribution ) / ( 1.0 - prevTotalAccumAlpha );
 
 					assert( linearContribution >= 0.0f );
 
-					contributionElements->push_back( ContributionElement{ (int)i, sourceOrigIndex[i], weights[i] * linearContribution } );
+					contributionElements->push_back(
+						ContributionElement{ (int)i, sourceOrigIndex[i], weights[i] * linearContribution }
+					);
 
 					if( curSamples[curIndex].type < DepthSampleInterpolated )
 					{
@@ -911,11 +920,11 @@ int linearCombineSampledPixels(
 					float linearContribution = 0.0f;
 					// The first contribution segment we find may be the end of a segment which we've already
 					// output some interpolated segments from, in which case we need to subtract that.
-					if( firstSegment && curSamples[curIndex].type == DepthSampleEnd && sourceIndex[i] >= 0 && curSamples[sourceIndex[i]].type >= DepthSampleInterpolated )
+					if( firstSegment && curSamples[curIndex].type == DepthSampleEnd && sourceIndex[i] >= 0 &&
+						curSamples[sourceIndex[i]].type >= DepthSampleInterpolated )
 					{
 						float prevContribution = curSamples[sourceIndex[i]].linearContribution;
-						linearContribution =
-							( curSamples[curIndex].linearContribution - prevContribution ) /
+						linearContribution = ( curSamples[curIndex].linearContribution - prevContribution ) /
 							( 1.0f - prevTotalAccumAlpha );
 					}
 					else
@@ -925,7 +934,9 @@ int linearCombineSampledPixels(
 
 					// Add to the list of contributions
 					contributionCount++;
-					contributionElements->push_back( ContributionElement{ (int)i, sourceOrigIndex[i], weights[i] * linearContribution } );
+					contributionElements->push_back(
+						ContributionElement{ (int)i, sourceOrigIndex[i], weights[i] * linearContribution }
+					);
 
 					sourceOrigIndex[i]++;
 					firstSegment = false;
@@ -960,17 +971,15 @@ int linearCombineSampledPixels(
 // subset to merge.
 class MergeListsByIndices
 {
-	public:
+public:
 
 	MergeListsByIndices( const std::vector<std::vector<float>> &allLists )
-		: m_allLists( allLists ), m_listPositions( allLists.size() )
+		: m_allLists( allLists ),
+		  m_listPositions( allLists.size() )
 	{
 	}
 
-	void clear()
-	{
-		m_heap.resize( 0 );
-	}
+	void clear() { m_heap.resize( 0 ); }
 
 	void addList( int i )
 	{
@@ -1027,16 +1036,13 @@ class MergeListsByIndices
 		}
 	}
 
-	private:
+private:
 
 	struct HeapEntry
 	{
 		float depth;
 		int listIndex;
-		inline bool operator < ( const HeapEntry &other ) const
-		{
-			return depth > other.depth;
-		}
+		inline bool operator < ( const HeapEntry &other ) const { return depth > other.depth; }
 	};
 
 	std::vector<HeapEntry> m_heap;
@@ -1054,8 +1060,7 @@ GAFFER_NODE_DEFINE_TYPE( Resample );
 
 size_t Resample::g_firstPlugIndex = 0;
 
-Resample::Resample( const std::string &name )
-	: ImageProcessor( name )
+Resample::Resample( const std::string &name ) : ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new M33fPlug( "matrix" ) );
@@ -1091,9 +1096,7 @@ Resample::Resample( const std::string &name )
 	horizontalPassPlug()->deepPlug()->setInput( inPlug()->deepPlug() );
 }
 
-Resample::~Resample()
-{
-}
+Resample::~Resample() {}
 
 Gaffer::M33fPlug *Resample::matrixPlug()
 {
@@ -1199,59 +1202,33 @@ void Resample::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outpu
 {
 	ImageProcessor::affects( input, outputs );
 
-	if(
-		input == inPlug()->dataWindowPlug() ||
-		input == matrixPlug() ||
-		input == expandDataWindowPlug() ||
-		input == filterPlug() ||
-		input->parent<V2fPlug>() == filterScalePlug() ||
-		input == debugPlug()
-	)
+	if( input == inPlug()->dataWindowPlug() || input == matrixPlug() || input == expandDataWindowPlug() ||
+		input == filterPlug() || input->parent<V2fPlug>() == filterScalePlug() || input == debugPlug() )
 	{
 		outputs.push_back( outPlug()->dataWindowPlug() );
 		outputs.push_back( horizontalPassPlug()->dataWindowPlug() );
 	}
 
-	if(
-		input == inPlug()->dataWindowPlug() ||
-		input == matrixPlug() ||
-		input == filterPlug() ||
-		input->parent<V2fPlug>() == filterScalePlug() ||
-		input == inPlug()->channelDataPlug() ||
-		input == boundingModePlug() ||
-		input == debugPlug() ||
-		input == filterDeepPlug() ||
-		input == inPlug()->deepPlug() ||
-		input == deepResampleDataPlug()
-	)
+	if( input == inPlug()->dataWindowPlug() || input == matrixPlug() || input == filterPlug() ||
+		input->parent<V2fPlug>() == filterScalePlug() || input == inPlug()->channelDataPlug() ||
+		input == boundingModePlug() || input == debugPlug() || input == filterDeepPlug() ||
+		input == inPlug()->deepPlug() || input == deepResampleDataPlug() )
 	{
 		outputs.push_back( outPlug()->channelDataPlug() );
 		outputs.push_back( horizontalPassPlug()->channelDataPlug() );
 	}
 
-	if(
-		input == inPlug()->channelNamesPlug() ||
-		input == inPlug()->dataWindowPlug() ||
-		input == matrixPlug() ||
-		input == filterPlug() ||
-		input->parent<V2fPlug>() == filterScalePlug() ||
-		input == tidyInPlug()->channelDataPlug() ||
-		input == tidyInPlug()->sampleOffsetsPlug() ||
-		input == boundingModePlug()
-	)
+	if( input == inPlug()->channelNamesPlug() || input == inPlug()->dataWindowPlug() || input == matrixPlug() ||
+		input == filterPlug() || input->parent<V2fPlug>() == filterScalePlug() ||
+		input == tidyInPlug()->channelDataPlug() || input == tidyInPlug()->sampleOffsetsPlug() ||
+		input == boundingModePlug() )
 	{
 		outputs.push_back( deepResampleDataPlug() );
 	}
 
-	if(
-		input == inPlug()->dataWindowPlug() ||
-		input == deepResampleDataPlug() ||
-		input == matrixPlug() ||
-		input == filterPlug() ||
-		input == boundingModePlug() ||
-		input == filterDeepPlug() ||
-		input == inPlug()->deepPlug()
-	)
+	if( input == inPlug()->dataWindowPlug() || input == deepResampleDataPlug() || input == matrixPlug() ||
+		input == filterPlug() || input == boundingModePlug() || input == filterDeepPlug() ||
+		input == inPlug()->deepPlug() )
 	{
 		outputs.push_back( outPlug()->sampleOffsetsPlug() );
 	}
@@ -1447,14 +1424,8 @@ void Resample::compute( Gaffer::ValuePlug *output, const Gaffer::Context *contex
 	// the range of inputs it is mixed with.
 	std::vector<MixRange> horizontalMixing, verticalMixing;
 	V2i inputOrigin, inputSize;
-	computeMixing(
-		filterRadius.x, tileOrigin.x, ratio.x, offset.x,
-		horizontalMixing, inputOrigin.x, inputSize.x
-	);
-	computeMixing(
-		filterRadius.y, tileOrigin.y, ratio.y, offset.y,
-		verticalMixing, inputOrigin.y, inputSize.y
-	);
+	computeMixing( filterRadius.x, tileOrigin.x, ratio.x, offset.x, horizontalMixing, inputOrigin.x, inputSize.x );
+	computeMixing( filterRadius.y, tileOrigin.y, ratio.y, offset.y, verticalMixing, inputOrigin.y, inputSize.y );
 
 	// Now that we have these lists defining the rectangular range that each input pixel will be mixed with,
 	// we start by collecting all the depths from other input pixels in the same row that are mixed with
@@ -1565,9 +1536,7 @@ void Resample::compute( Gaffer::ValuePlug *output, const Gaffer::Context *contex
 
 			// Sample this pixel at all depths where we may need to evaluate it
 			samplePixelDepths(
-				pixelCount, pixelZ, pixelZBack, pixelAlpha,
-				fullyMixedDepths,
-				sampledPixels[y * inputSize.x + x]
+				pixelCount, pixelZ, pixelZBack, pixelAlpha, fullyMixedDepths, sampledPixels[y * inputSize.x + x]
 			);
 		}
 	}
@@ -1639,8 +1608,7 @@ void Resample::compute( Gaffer::ValuePlug *output, const Gaffer::Context *contex
 
 			// Assert all our accesses are in bounds
 			assert(
-				support.min.x + supportOffset.x >= inputOrigin.x &&
-				support.min.y + supportOffset.y >= inputOrigin.y &&
+				support.min.x + supportOffset.x >= inputOrigin.x && support.min.y + supportOffset.y >= inputOrigin.y &&
 				support.max.x + supportOffset.x <= inputOrigin.x + inputSize.x &&
 				support.max.y + supportOffset.y <= inputOrigin.y + inputSize.y
 			);
@@ -1651,7 +1619,9 @@ void Resample::compute( Gaffer::ValuePlug *output, const Gaffer::Context *contex
 
 			if( hasArbitraryChannel )
 			{
-				result->contributionSupports.push_back( Imath::Box2i( support.min + supportOffset, support.max + supportOffset ) );
+				result->contributionSupports.push_back(
+					Imath::Box2i( support.min + supportOffset, support.max + supportOffset )
+				);
 			}
 
 			// Collect all the sampled input pixel which contribute to this output pixel
@@ -1666,7 +1636,8 @@ void Resample::compute( Gaffer::ValuePlug *output, const Gaffer::Context *contex
 					}
 					else
 					{
-						contributingPixels[i] = &sampledPixels[( iy - inputOrigin.y ) * horizontalMixing.size() + ix - inputOrigin.x];
+						contributingPixels[i] =
+							&sampledPixels[( iy - inputOrigin.y ) * horizontalMixing.size() + ix - inputOrigin.x];
 					}
 
 					i++;
@@ -1682,17 +1653,14 @@ void Resample::compute( Gaffer::ValuePlug *output, const Gaffer::Context *contex
 			if( hasArbitraryChannel )
 			{
 				numSamples = linearCombineSampledPixels(
-					contributingPixels, weights,
-					outputAlpha, outputZ, outputZBack,
-					&result->contributionCounts, &result->contributionElements
+					contributingPixels, weights, outputAlpha, outputZ, outputZBack, &result->contributionCounts,
+					&result->contributionElements
 				);
 			}
 			else
 			{
 				numSamples = linearCombineSampledPixels(
-					contributingPixels, weights,
-					outputAlpha, outputZ, outputZBack,
-					nullptr, nullptr
+					contributingPixels, weights, outputAlpha, outputZ, outputZBack, nullptr, nullptr
 				);
 			}
 			currentOutputSampleOffset += numSamples;
@@ -1703,7 +1671,9 @@ void Resample::compute( Gaffer::ValuePlug *output, const Gaffer::Context *contex
 	static_cast<ObjectPlug *>( output )->setValue( result );
 }
 
-void Resample::hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Resample::hashDataWindow(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashDataWindow( parent, context, h );
 
@@ -1745,7 +1715,8 @@ Imath::Box2i Resample::computeDataWindow( const Gaffer::Context *context, const 
 			inputFilterScale *= filterScalePlug()->getValue();
 		}
 
-		const V2f filterRadius = filter ? V2f( filter->width(), filter->height() ) * inputFilterScale * 0.5f : V2f( 0.0f );
+		const V2f filterRadius =
+			filter ? V2f( filter->width(), filter->height() ) * inputFilterScale * 0.5f : V2f( 0.0f );
 
 		dstDataWindow.min -= filterRadius * ratio;
 		dstDataWindow.max += filterRadius * ratio;
@@ -1789,7 +1760,9 @@ Imath::Box2i Resample::computeDataWindow( const Gaffer::Context *context, const 
 	return dataWindow;
 }
 
-void Resample::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Resample::hashChannelData(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashChannelData( parent, context, h );
 
@@ -1839,7 +1812,9 @@ void Resample::hashChannelData( const GafferImage::ImagePlug *parent, const Gaff
 			outPlug()->sampleOffsetsPlug()->hash( h );
 		}
 
-		if( filter && ( channelName == ImageAlgo::channelNameZ || channelName == ImageAlgo::channelNameZBack || channelName == ImageAlgo::channelNameA ) )
+		if( filter &&
+			( channelName == ImageAlgo::channelNameZ || channelName == ImageAlgo::channelNameZBack ||
+			  channelName == ImageAlgo::channelNameA ) )
 		{
 			h.append( channelName );
 		}
@@ -1870,12 +1845,7 @@ void Resample::hashChannelData( const GafferImage::ImagePlug *parent, const Gaff
 		h.append( true );
 	}
 
-	Sampler sampler(
-		passes == Vertical ? horizontalPassPlug() : inPlug(),
-		channelName,
-		ir,
-		boundingMode
-	);
+	Sampler sampler( passes == Vertical ? horizontalPassPlug() : inPlug(), channelName, ir, boundingMode );
 	sampler.hash( h );
 
 	// Another tile might happen to need to filter over the same input
@@ -1884,7 +1854,10 @@ void Resample::hashChannelData( const GafferImage::ImagePlug *parent, const Gaff
 	h.append( tileOrigin );
 }
 
-IECore::ConstFloatVectorDataPtr Resample::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr Resample::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	V2f ratio, offset;
 	V2f inputFilterScale( 0 );
@@ -1946,7 +1919,9 @@ IECore::ConstFloatVectorDataPtr Resample::computeChannelData( const std::string 
 				for( oP.x = tileBound.min.x; oP.x < tileBound.max.x; ++oP.x )
 				{
 					boost::span<const float> channelSamples = sampleOffsetsSampler.sample( *iPxIt, iPy );
-					memcpy( &result[outputSamplePosition], &channelSamples[0], channelSamples.size() * sizeof( float ) );
+					memcpy(
+						&result[outputSamplePosition], &channelSamples[0], channelSamples.size() * sizeof( float )
+					);
 					outputSamplePosition += channelSamples.size();
 					++iPxIt;
 				}
@@ -1956,9 +1931,8 @@ IECore::ConstFloatVectorDataPtr Resample::computeChannelData( const std::string 
 		}
 
 
-		ConstDeepResampleDataPtr deepResampleData = boost::static_pointer_cast<const DeepResampleData>(
-			deepResampleDataPlug()->getValue()
-		);
+		ConstDeepResampleDataPtr deepResampleData =
+			boost::static_pointer_cast<const DeepResampleData>( deepResampleDataPlug()->getValue() );
 
 		if( channelName == ImageAlgo::channelNameZ )
 		{
@@ -2008,8 +1982,9 @@ IECore::ConstFloatVectorDataPtr Resample::computeChannelData( const std::string 
 				float combinedChannelValue = 0;
 				for( int j = 0; j < contributionCounts[i]; j++ )
 				{
-					float contributionChannelValue = channelSamples[contributionElements[contributionIndex].sourceIndex]
-																   [contributionElements[contributionIndex].sampleIndex];
+					float contributionChannelValue =
+						channelSamples[contributionElements[contributionIndex].sourceIndex]
+									  [contributionElements[contributionIndex].sampleIndex];
 					combinedChannelValue += contributionElements[contributionIndex].weight * contributionChannelValue;
 					contributionIndex++;
 				}
@@ -2022,12 +1997,7 @@ IECore::ConstFloatVectorDataPtr Resample::computeChannelData( const std::string 
 		return resultData;
 	}
 
-	Sampler sampler(
-		passes == Vertical ? horizontalPassPlug() : inPlug(),
-		channelName,
-		ir,
-		boundingMode
-	);
+	Sampler sampler( passes == Vertical ? horizontalPassPlug() : inPlug(), channelName, ir, boundingMode );
 
 	const V2f filterRadius = inputFilterRadius( filter, inputFilterScale );
 
@@ -2161,7 +2131,10 @@ IECore::ConstFloatVectorDataPtr Resample::computeChannelData( const std::string 
 		// we precompute the weights now to avoid repeating work later.
 		std::vector<int> supportRanges;
 		std::vector<float> weights;
-		filterWeights1D( filter, inputFilterScale.x, filterRadius.x, tileBound.min.x, ratio.x, offset.x, Horizontal, supportRanges, weights );
+		filterWeights1D(
+			filter, inputFilterScale.x, filterRadius.x, tileBound.min.x, ratio.x, offset.x, Horizontal, supportRanges,
+			weights
+		);
 
 		V2i oP; // output pixel position
 
@@ -2176,11 +2149,14 @@ IECore::ConstFloatVectorDataPtr Resample::computeChannelData( const std::string 
 				float v = 0.0f;
 				float totalW = 0.0f;
 
-				sampler.visitPixels( Imath::Box2i( Imath::V2i( *supportIt, oP.y ), Imath::V2i( *( supportIt + 1 ), oP.y + 1 ) ), [&wIt, &v, &totalW]( float cur, int x, int y ) {
-					const float w = *wIt++;
-					v += w * cur;
-					totalW += w;
-				} );
+				sampler.visitPixels(
+					Imath::Box2i( Imath::V2i( *supportIt, oP.y ), Imath::V2i( *( supportIt + 1 ), oP.y + 1 ) ),
+					[&wIt, &v, &totalW]( float cur, int x, int y ) {
+						const float w = *wIt++;
+						v += w * cur;
+						totalW += w;
+					}
+				);
 
 				supportIt += 2;
 
@@ -2201,7 +2177,10 @@ IECore::ConstFloatVectorDataPtr Resample::computeChannelData( const std::string 
 		// we precompute the weights now to avoid repeating work later.
 		std::vector<int> supportRanges;
 		std::vector<float> weights;
-		filterWeights1D( filter, inputFilterScale.y, filterRadius.y, tileBound.min.y, ratio.y, offset.y, Vertical, supportRanges, weights );
+		filterWeights1D(
+			filter, inputFilterScale.y, filterRadius.y, tileBound.min.y, ratio.y, offset.y, Vertical, supportRanges,
+			weights
+		);
 
 		std::vector<int>::const_iterator supportIt = supportRanges.begin();
 		std::vector<float>::const_iterator rowWeightsIt = weights.begin();
@@ -2217,11 +2196,14 @@ IECore::ConstFloatVectorDataPtr Resample::computeChannelData( const std::string 
 
 				std::vector<float>::const_iterator wIt = rowWeightsIt;
 
-				sampler.visitPixels( Imath::Box2i( Imath::V2i( oP.x, *supportIt ), Imath::V2i( oP.x + 1, *( supportIt + 1 ) ) ), [&wIt, &v, &totalW]( float cur, int x, int y ) {
-					const float w = *wIt++;
-					v += w * cur;
-					totalW += w;
-				} );
+				sampler.visitPixels(
+					Imath::Box2i( Imath::V2i( oP.x, *supportIt ), Imath::V2i( oP.x + 1, *( supportIt + 1 ) ) ),
+					[&wIt, &v, &totalW]( float cur, int x, int y ) {
+						const float w = *wIt++;
+						v += w * cur;
+						totalW += w;
+					}
+				);
 
 
 				if( totalW != 0.0f )
@@ -2240,7 +2222,9 @@ IECore::ConstFloatVectorDataPtr Resample::computeChannelData( const std::string 
 	return resultData;
 }
 
-void Resample::hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Resample::hashSampleOffsets(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	if( !inPlug()->deep() )
 	{
@@ -2284,7 +2268,9 @@ void Resample::hashSampleOffsets( const GafferImage::ImagePlug *parent, const Ga
 	DeepPixelAccessor( tidyInPlug(), "", ir, boundingMode ).hash( h );
 }
 
-IECore::ConstIntVectorDataPtr Resample::computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstIntVectorDataPtr Resample::computeSampleOffsets(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	if( !inPlug()->deep() )
 	{
@@ -2310,9 +2296,8 @@ IECore::ConstIntVectorDataPtr Resample::computeSampleOffsets( const Imath::V2i &
 
 	if( filter )
 	{
-		ConstDeepResampleDataPtr deepResampleData = boost::static_pointer_cast<const DeepResampleData>(
-			deepResampleDataPlug()->getValue()
-		);
+		ConstDeepResampleDataPtr deepResampleData =
+			boost::static_pointer_cast<const DeepResampleData>( deepResampleDataPlug()->getValue() );
 		return deepResampleData->sampleOffsetsData;
 	}
 

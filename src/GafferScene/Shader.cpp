@@ -180,12 +180,9 @@ struct CycleDetector
 		}
 	}
 
-	~CycleDetector()
-	{
-		m_downstreamShaders.erase( m_shaderAndContext );
-	}
+	~CycleDetector() { m_downstreamShaders.erase( m_shaderAndContext ); }
 
-	private:
+private:
 
 	DownstreamShaders &m_downstreamShaders;
 	const ShaderAndHash m_shaderAndContext;
@@ -214,12 +211,9 @@ struct OptionalScopedContext
 class Shader::NetworkBuilder
 {
 
-	public:
+public:
 
-	NetworkBuilder( const Gaffer::Plug *output )
-		: m_output( output ), m_hasProxyNodes( false )
-	{
-	}
+	NetworkBuilder( const Gaffer::Plug *output ) : m_output( output ), m_hasProxyNodes( false ) {}
 
 	IECore::MurmurHash networkHash()
 	{
@@ -274,12 +268,14 @@ class Shader::NetworkBuilder
 		return nullptr;
 	}
 
-	private:
+private:
 
 	// Returns the effective shader parameter that should be used taking into account
 	// enabledPlug() and correspondingInput(). Accepts either output or input parameters
 	// and may return either an output or input parameter.
-	const Gaffer::Plug *effectiveParameter( const Gaffer::Plug *parameterPlug, OptionalScopedContext &parameterContext ) const
+	const Gaffer::Plug *effectiveParameter(
+		const Gaffer::Plug *parameterPlug, OptionalScopedContext &parameterContext
+	) const
 	{
 		while( true )
 		{
@@ -369,7 +365,9 @@ class Shader::NetworkBuilder
 		const Gaffer::Plug *effectiveParameter = this->effectiveParameter( parameterPlug, parameterContext );
 		if( effectiveParameter && isOutputParameter( effectiveParameter ) )
 		{
-			throw IECore::Exception( fmt::format( "Shader connections to {} are not supported.", parameterPlug->fullName() ) );
+			throw IECore::Exception(
+				fmt::format( "Shader connections to {} are not supported.", parameterPlug->fullName() )
+			);
 		}
 	}
 
@@ -409,13 +407,10 @@ class Shader::NetworkBuilder
 			return handle;
 		}
 
-		IECoreScene::ShaderPtr shader = new IECoreScene::Shader(
-			shaderNode->namePlug()->getValue(), shaderNode->typePlug()->getValue()
-		);
-		if(
-			!ShaderTweakProxy::isProxy( shader.get() ) &&
-			shaderNode != m_output->node() && !boost::ends_with( shader->getType(), "shader" )
-		)
+		IECoreScene::ShaderPtr shader =
+			new IECoreScene::Shader( shaderNode->namePlug()->getValue(), shaderNode->typePlug()->getValue() );
+		if( !ShaderTweakProxy::isProxy( shader.get() ) && shaderNode != m_output->node() &&
+			!boost::ends_with( shader->getType(), "shader" ) )
 		{
 			// Some renderers (Arnold for one) allow surface shaders to be connected
 			// as inputs to other shaders, so we may need to change the shader type to
@@ -441,7 +436,8 @@ class Shader::NetworkBuilder
 		/// it again.
 		shader->blindData()->writable()[g_label] = new IECore::StringData( nodeName );
 		shader->blindData()->writable()[g_gafferNodeName] = new IECore::StringData( nodeName );
-		shader->blindData()->writable()[g_gafferNodeColor] = new IECore::Color3fData( shaderNode->nodeColorPlug()->getValue() );
+		shader->blindData()->writable()[g_gafferNodeColor] =
+			new IECore::Color3fData( shaderNode->nodeColorPlug()->getValue() );
 
 		vector<IECoreScene::ShaderNetwork::Connection> inputConnections;
 		addParameterWalk( shaderNode->parametersPlug(), IECore::InternedString(), shader.get(), inputConnections );
@@ -484,7 +480,10 @@ class Shader::NetworkBuilder
 		}
 	}
 
-	void addParameterWalk( const Gaffer::Plug *parameter, const IECore::InternedString &parameterName, IECoreScene::Shader *shader, vector<IECoreScene::ShaderNetwork::Connection> &connections )
+	void addParameterWalk(
+		const Gaffer::Plug *parameter, const IECore::InternedString &parameterName, IECoreScene::Shader *shader,
+		vector<IECoreScene::ShaderNetwork::Connection> &connections
+	)
 	{
 		if( !isLeafParameter( parameter ) || parameter->parent<Node>() )
 		{
@@ -552,7 +551,10 @@ class Shader::NetworkBuilder
 		}
 	}
 
-	void addParameter( const Gaffer::Plug *parameter, const IECore::InternedString &parameterName, IECoreScene::Shader *shader, vector<IECoreScene::ShaderNetwork::Connection> &connections )
+	void addParameter(
+		const Gaffer::Plug *parameter, const IECore::InternedString &parameterName, IECoreScene::Shader *shader,
+		vector<IECoreScene::ShaderNetwork::Connection> &connections
+	)
 	{
 		OptionalScopedContext parameterContext;
 		const Gaffer::Plug *effectiveParameter = this->effectiveParameter( parameter, parameterContext );
@@ -595,7 +597,9 @@ class Shader::NetworkBuilder
 				shader->parameters()[parameterName] = value;
 			}
 
-			connections.push_back( { outputParameterForPlug( effectiveParameter ), { IECore::InternedString(), parameterName } } );
+			connections.push_back(
+				{ outputParameterForPlug( effectiveParameter ), { IECore::InternedString(), parameterName } }
+			);
 		}
 	}
 
@@ -653,7 +657,8 @@ class Shader::NetworkBuilder
 				for( Plug::InputIterator it( yPlug ); !it.done(); ++it )
 				{
 					parameterContext.scope.reset();
-					const Gaffer::Plug *effectiveCompParameter = this->effectiveParameter( it->get(), parameterContext );
+					const Gaffer::Plug *effectiveCompParameter =
+						this->effectiveParameter( it->get(), parameterContext );
 					if( effectiveCompParameter && isOutputParameter( effectiveCompParameter ) )
 					{
 						hasInput = true;
@@ -674,7 +679,10 @@ class Shader::NetworkBuilder
 		}
 	}
 
-	void addParameterComponentConnections( const Gaffer::Plug *parameter, const IECore::InternedString &parameterName, vector<IECoreScene::ShaderNetwork::Connection> &connections )
+	void addParameterComponentConnections(
+		const Gaffer::Plug *parameter, const IECore::InternedString &parameterName,
+		vector<IECoreScene::ShaderNetwork::Connection> &connections
+	)
 	{
 		if( isCompoundNumericPlug( parameter ) )
 		{
@@ -686,26 +694,37 @@ class Shader::NetworkBuilder
 				{
 					IECore::InternedString inputName = parameterName.string() + "." + ( *it )->getName().string();
 
-					connections.push_back( { outputParameterForPlug( effectiveParameter ), { IECore::InternedString(), inputName } } );
+					connections.push_back(
+						{ outputParameterForPlug( effectiveParameter ), { IECore::InternedString(), inputName } }
+					);
 				}
 			}
 		}
 		else if( (Gaffer::TypeId)parameter->typeId() == RampffPlugTypeId )
 		{
-			addRampParameterComponentConnections<RampffPlug>( (const RampffPlug *)parameter, parameterName, connections );
+			addRampParameterComponentConnections<RampffPlug>(
+				(const RampffPlug *)parameter, parameterName, connections
+			);
 		}
 		else if( (Gaffer::TypeId)parameter->typeId() == RampfColor3fPlugTypeId )
 		{
-			addRampParameterComponentConnections<RampfColor3fPlug>( (const RampfColor3fPlug *)parameter, parameterName, connections );
+			addRampParameterComponentConnections<RampfColor3fPlug>(
+				(const RampfColor3fPlug *)parameter, parameterName, connections
+			);
 		}
 		else if( (Gaffer::TypeId)parameter->typeId() == RampfColor4fPlugTypeId )
 		{
-			addRampParameterComponentConnections<RampfColor4fPlug>( (const RampfColor4fPlug *)parameter, parameterName, connections );
+			addRampParameterComponentConnections<RampfColor4fPlug>(
+				(const RampfColor4fPlug *)parameter, parameterName, connections
+			);
 		}
 	}
 
 	template<typename T>
-	void addRampParameterComponentConnections( const T *parameter, const IECore::InternedString &parameterName, vector<IECoreScene::ShaderNetwork::Connection> &connections )
+	void addRampParameterComponentConnections(
+		const T *parameter, const IECore::InternedString &parameterName,
+		vector<IECoreScene::ShaderNetwork::Connection> &connections
+	)
 	{
 		const int n = parameter->numPoints();
 		std::vector<std::tuple<int, std::string, IECoreScene::ShaderNetwork::Parameter>> inputs;
@@ -724,10 +743,15 @@ class Shader::NetworkBuilder
 				for( Plug::InputIterator it( yPlug ); !it.done(); ++it )
 				{
 					parameterContext.scope.reset();
-					const Gaffer::Plug *effectiveCompParameter = this->effectiveParameter( it->get(), parameterContext );
+					const Gaffer::Plug *effectiveCompParameter =
+						this->effectiveParameter( it->get(), parameterContext );
 					if( effectiveCompParameter && isOutputParameter( effectiveCompParameter ) )
 					{
-						inputs.push_back( std::make_tuple( i, "." + ( *it )->getName().string(), outputParameterForPlug( effectiveCompParameter ) ) );
+						inputs.push_back(
+							std::make_tuple(
+								i, "." + ( *it )->getName().string(), outputParameterForPlug( effectiveCompParameter )
+							)
+						);
 					}
 				}
 			}
@@ -759,10 +783,8 @@ class Shader::NetworkBuilder
 		{
 			int index = applySort[origIndex];
 
-			IECore::InternedString inputName = fmt::format(
-				FMT_COMPILE( "{}[{}].y{}" ),
-				parameterName.string(), index, componentSuffix
-			);
+			IECore::InternedString inputName =
+				fmt::format( FMT_COMPILE( "{}[{}].y{}" ), parameterName.string(), index, componentSuffix );
 			connections.push_back( { sourceParameter, { IECore::InternedString(), inputName } } );
 		}
 	}
@@ -794,8 +816,7 @@ GAFFER_NODE_DEFINE_TYPE( Shader );
 size_t Shader::g_firstPlugIndex = 0;
 const IECore::InternedString Shader::g_outputParameterContextName( "scene:shader:outputParameter" );
 
-Shader::Shader( const std::string &name )
-	: ComputeNode( name )
+Shader::Shader( const std::string &name ) : ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "name", Gaffer::Plug::In, "", Plug::Default & ~Plug::Serialisable ) );
@@ -803,7 +824,10 @@ Shader::Shader( const std::string &name )
 	addChild( new StringPlug( "attributeSuffix", Gaffer::Plug::In, "" ) );
 	addChild( new Plug( "parameters", Plug::In, Plug::Default & ~Plug::AcceptsInputs ) );
 	addChild( new BoolPlug( "enabled", Gaffer::Plug::In, true ) );
-	addChild( new StringPlug( "__nodeName", Gaffer::Plug::In, name, Plug::Default & ~( Plug::Serialisable | Plug::AcceptsInputs ), IECore::StringAlgo::NoSubstitutions ) );
+	addChild( new StringPlug(
+		"__nodeName", Gaffer::Plug::In, name, Plug::Default & ~( Plug::Serialisable | Plug::AcceptsInputs ),
+		IECore::StringAlgo::NoSubstitutions
+	) );
 	addChild( new Color3fPlug( "__nodeColor", Gaffer::Plug::In, Color3f( 0.0f ) ) );
 	nodeColorPlug()->setFlags( Plug::Serialisable | Plug::AcceptsInputs, false );
 	addChild( new CompoundObjectPlug( "__outAttributes", Plug::Out, new IECore::CompoundObject ) );
@@ -811,9 +835,7 @@ Shader::Shader( const std::string &name )
 	Metadata::nodeValueChangedSignal( this ).connect( boost::bind( &Shader::nodeMetadataChanged, this, ::_2 ) );
 }
 
-Shader::~Shader()
-{
-}
+Shader::~Shader() {}
 
 Gaffer::StringPlug *Shader::namePlug()
 {
@@ -924,12 +946,8 @@ IECore::ConstCompoundObjectPtr Shader::attributes() const
 
 bool Shader::affectsAttributes( const Gaffer::Plug *input ) const
 {
-	return parametersPlug()->isAncestorOf( input ) ||
-		input == enabledPlug() ||
-		input == nodeNamePlug() ||
-		input == namePlug() ||
-		input == typePlug() ||
-		input->parent<Plug>() == nodeColorPlug() ||
+	return parametersPlug()->isAncestorOf( input ) || input == enabledPlug() || input == nodeNamePlug() ||
+		input == namePlug() || input == typePlug() || input->parent<Plug>() == nodeColorPlug() ||
 		input == attributeSuffixPlug();
 }
 
@@ -997,9 +1015,7 @@ void Shader::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs
 Gaffer::Plug *Shader::correspondingInput( const Gaffer::Plug *output )
 {
 	// Better to do a few harmless casts than manage a duplicate implementation.
-	return const_cast<Gaffer::Plug *>(
-		const_cast<const Shader *>( this )->correspondingInput( output )
-	);
+	return const_cast<Gaffer::Plug *>( const_cast<const Shader *>( this )->correspondingInput( output ) );
 }
 
 const Gaffer::Plug *Shader::correspondingInput( const Gaffer::Plug *output ) const
@@ -1021,13 +1037,17 @@ const Gaffer::Plug *Shader::correspondingInput( const Gaffer::Plug *output ) con
 				// us, so we can just ignore it.
 				return nullptr;
 			}
-			IECore::ConstStringDataPtr metadata = Metadata::value<const IECore::StringData>( metadataTarget, g_correspondingInputMetadataName );
+			IECore::ConstStringDataPtr metadata =
+				Metadata::value<const IECore::StringData>( metadataTarget, g_correspondingInputMetadataName );
 			if( metadata )
 			{
 				const Plug *result = parametersPlug()->getChild<Plug>( metadata->readable() );
 				if( !result )
 				{
-					IECore::msg( IECore::Msg::Error, "Shader::correspondingInput", fmt::format( "Parameter \"{}\" does not exist", metadata->readable() ) );
+					IECore::msg(
+						IECore::Msg::Error, "Shader::correspondingInput",
+						fmt::format( "Parameter \"{}\" does not exist", metadata->readable() )
+					);
 				}
 				return result;
 			}
@@ -1166,7 +1186,9 @@ void Shader::nodeMetadataChanged( IECore::InternedString key )
 	}
 }
 
-const ValuePlug *Shader::parameterSource( const Plug *output, const IECoreScene::ShaderNetwork::Parameter &parameter ) const
+const ValuePlug *Shader::parameterSource(
+	const Plug *output, const IECoreScene::ShaderNetwork::Parameter &parameter
+) const
 {
 	Context::EditableScope cleanContext( Context::current() );
 	cleanContext.remove( g_outputParameterContextName );

@@ -72,20 +72,21 @@ LightVisualisers &lightVisualisers()
 //////////////////////////////////////////////////////////////////////////
 
 
-LightVisualiser::LightVisualiser()
-{
-}
+LightVisualiser::LightVisualiser() {}
 
-LightVisualiser::~LightVisualiser()
-{
-}
+LightVisualiser::~LightVisualiser() {}
 
-void LightVisualiser::registerLightVisualiser( const IECore::InternedString &attributeName, const IECore::InternedString &shaderName, ConstLightVisualiserPtr visualiser )
+void LightVisualiser::registerLightVisualiser(
+	const IECore::InternedString &attributeName, const IECore::InternedString &shaderName,
+	ConstLightVisualiserPtr visualiser
+)
 {
 	lightVisualisers()[AttributeAndShaderNames( attributeName, shaderName )] = visualiser;
 }
 
-Visualisations LightVisualiser::allVisualisations( const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state )
+Visualisations LightVisualiser::allVisualisations(
+	const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state
+)
 {
 	Visualisations resultVis;
 
@@ -107,7 +108,8 @@ Visualisations LightVisualiser::allVisualisations( const IECore::CompoundObject 
 			continue;
 		}
 
-		const IECoreScene::ShaderNetwork *shaderNetwork = IECore::runTimeCast<const IECoreScene::ShaderNetwork>( it->second.get() );
+		const IECoreScene::ShaderNetwork *shaderNetwork =
+			IECore::runTimeCast<const IECoreScene::ShaderNetwork>( it->second.get() );
 		if( !shaderNetwork )
 		{
 			continue;
@@ -154,7 +156,8 @@ Visualisations LightVisualiser::allVisualisations( const IECore::CompoundObject 
 			{
 				for( auto &r : l )
 				{
-					if( StringAlgo::matchMultiple( it->first, r.first.first ) && StringAlgo::matchMultiple( shaderName, r.first.second ) )
+					if( StringAlgo::matchMultiple( it->first, r.first.first ) &&
+						StringAlgo::matchMultiple( shaderName, r.first.second ) )
 					{
 						visualiser = r.second.get();
 						break;

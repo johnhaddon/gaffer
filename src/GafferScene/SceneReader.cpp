@@ -117,9 +117,7 @@ ValuePlug::CachePolicy cachePolicyFromEnv( const char *name )
 {
 	if( const char *cp = getenv( name ) )
 	{
-		IECore::msg(
-			IECore::Msg::Info, "SceneReader", fmt::format( "{} is set to {}.", name, cp )
-		);
+		IECore::msg( IECore::Msg::Info, "SceneReader", fmt::format( "{} is set to {}.", name, cp ) );
 
 		if( !strcmp( cp, "TaskCollaboration" ) )
 		{
@@ -142,13 +140,13 @@ ValuePlug::CachePolicy cachePolicyFromEnv( const char *name )
 }
 
 const ValuePlug::CachePolicy g_objectCachePolicy = cachePolicyFromEnv( "GAFFERSCENE_SCENEREADER_OBJECT_CACHEPOLICY" );
-const ValuePlug::CachePolicy g_setNamesCachePolicy = cachePolicyFromEnv( "GAFFERSCENE_SCENEREADER_SETNAMES_CACHEPOLICY" );
+const ValuePlug::CachePolicy g_setNamesCachePolicy =
+	cachePolicyFromEnv( "GAFFERSCENE_SCENEREADER_SETNAMES_CACHEPOLICY" );
 const ValuePlug::CachePolicy g_setCachePolicy = cachePolicyFromEnv( "GAFFERSCENE_SCENEREADER_SET_CACHEPOLICY" );
 
 } // namespace
 
-SceneReader::SceneReader( const std::string &name )
-	: SceneNode( name )
+SceneReader::SceneReader( const std::string &name ) : SceneNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "fileName" ) );
@@ -160,9 +158,7 @@ SceneReader::SceneReader( const std::string &name )
 	plugSetSignal().connect( boost::bind( &SceneReader::plugSet, this, ::_1 ) );
 }
 
-SceneReader::~SceneReader()
-{
-}
+SceneReader::~SceneReader() {}
 
 Gaffer::StringPlug *SceneReader::fileNamePlug()
 {
@@ -210,11 +206,7 @@ void SceneReader::affects( const Gaffer::Plug *input, AffectedPlugsContainer &ou
 
 	const bool affectsScene = input == fileNamePlug() || input == refreshCountPlug();
 
-	if(
-		affectsScene ||
-		input == outPlug()->childBoundsPlug() ||
-		transformPlug()->isAncestorOf( input )
-	)
+	if( affectsScene || input == outPlug()->childBoundsPlug() || transformPlug()->isAncestorOf( input ) )
 	{
 		outputs.push_back( outPlug()->boundPlug() );
 	}
@@ -271,7 +263,9 @@ Gaffer::ValuePlug::CachePolicy SceneReader::computeCachePolicy( const Gaffer::Va
 	return SceneNode::computeCachePolicy( output );
 }
 
-void SceneReader::hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void SceneReader::hashBound(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	SceneNode::hashBound( path, context, parent, h );
 
@@ -308,7 +302,9 @@ void SceneReader::hashBound( const ScenePath &path, const Gaffer::Context *conte
 	}
 }
 
-Imath::Box3f SceneReader::computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::Box3f SceneReader::computeBound(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ConstSceneInterfacePtr s = scene( path, context );
 	if( !s )
@@ -339,7 +335,9 @@ Imath::Box3f SceneReader::computeBound( const ScenePath &path, const Gaffer::Con
 	return result;
 }
 
-void SceneReader::hashTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void SceneReader::hashTransform(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	SceneNode::hashTransform( path, context, parent, h );
 
@@ -359,7 +357,9 @@ void SceneReader::hashTransform( const ScenePath &path, const Gaffer::Context *c
 	}
 }
 
-Imath::M44f SceneReader::computeTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::M44f SceneReader::computeTransform(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ConstSceneInterfacePtr s = scene( path, context );
 	if( !s )
@@ -369,9 +369,7 @@ Imath::M44f SceneReader::computeTransform( const ScenePath &path, const Gaffer::
 
 	const M44d t = s->readTransformAsMatrix( timeAsDouble( context ) );
 	M44f result = M44f(
-		t[0][0], t[0][1], t[0][2], t[0][3],
-		t[1][0], t[1][1], t[1][2], t[1][3],
-		t[2][0], t[2][1], t[2][2], t[2][3],
+		t[0][0], t[0][1], t[0][2], t[0][3], t[1][0], t[1][1], t[1][2], t[1][3], t[2][0], t[2][1], t[2][2], t[2][3],
 		t[3][0], t[3][1], t[3][2], t[3][3]
 	);
 
@@ -382,7 +380,9 @@ Imath::M44f SceneReader::computeTransform( const ScenePath &path, const Gaffer::
 	return result;
 }
 
-void SceneReader::hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void SceneReader::hashAttributes(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	int refreshCount = 0;
 	ConstSceneInterfacePtr s = scene( path, context, &refreshCount );
@@ -398,7 +398,9 @@ void SceneReader::hashAttributes( const ScenePath &path, const Gaffer::Context *
 	s->hash( SceneInterface::AttributesHash, timeAsDouble( context ), h );
 }
 
-IECore::ConstCompoundObjectPtr SceneReader::computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstCompoundObjectPtr SceneReader::computeAttributes(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ConstSceneInterfacePtr s = scene( path, context );
 	if( !s )
@@ -436,8 +438,7 @@ IECore::ConstCompoundObjectPtr SceneReader::computeAttributes( const ScenePath &
 			IECore::msg(
 				IECore::Msg::Warning, "SceneReader::computeAttributes",
 				fmt::format(
-					"Failed to load attribute \"{}\" at location \"{}\"",
-					it->string(), ScenePlug::pathToString( path )
+					"Failed to load attribute \"{}\" at location \"{}\"", it->string(), ScenePlug::pathToString( path )
 				)
 			);
 		}
@@ -446,7 +447,9 @@ IECore::ConstCompoundObjectPtr SceneReader::computeAttributes( const ScenePath &
 	return result;
 }
 
-void SceneReader::hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void SceneReader::hashObject(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	int refreshCount = 0;
 	ConstSceneInterfacePtr s = scene( path, context, &refreshCount );
@@ -463,7 +466,9 @@ void SceneReader::hashObject( const ScenePath &path, const Gaffer::Context *cont
 	s->hash( SceneInterface::ObjectHash, timeAsDouble( context ), h );
 }
 
-IECore::ConstObjectPtr SceneReader::computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstObjectPtr SceneReader::computeObject(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ConstSceneInterfacePtr s = scene( path, context );
 	if( !s || !s->hasObject() )
@@ -481,7 +486,9 @@ IECore::ConstObjectPtr SceneReader::computeObject( const ScenePath &path, const 
 	return o ? o : parent->objectPlug()->defaultValue();
 }
 
-void SceneReader::hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void SceneReader::hashChildNames(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	int refreshCount = 0;
 	string tags;
@@ -500,7 +507,9 @@ void SceneReader::hashChildNames( const ScenePath &path, const Gaffer::Context *
 	s->hash( SceneInterface::ChildNamesHash, timeAsDouble( context ), h );
 }
 
-IECore::ConstInternedStringVectorDataPtr SceneReader::computeChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstInternedStringVectorDataPtr SceneReader::computeChildNames(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	string tagsString;
 	ConstSceneInterfacePtr s = scene( path, context, nullptr, &tagsString );
@@ -533,7 +542,8 @@ IECore::ConstInternedStringVectorDataPtr SceneReader::computeChildNames( const S
 			child->readTags( childTags, IECoreScene::SceneInterface::EveryTag );
 
 			bool childMatches = false;
-			for( SceneInterface::NameList::const_iterator tIt = childTags.begin(), tEIt = childTags.end(); tIt != tEIt; ++tIt )
+			for( SceneInterface::NameList::const_iterator tIt = childTags.begin(), tEIt = childTags.end(); tIt != tEIt;
+				 ++tIt )
 			{
 				if( find( tags.begin(), tags.end(), *tIt ) != tags.end() )
 				{
@@ -559,7 +569,9 @@ void SceneReader::hashGlobals( const Gaffer::Context *context, const ScenePlug *
 	h = outPlug()->globalsPlug()->defaultValue()->Object::hash();
 }
 
-IECore::ConstCompoundObjectPtr SceneReader::computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstCompoundObjectPtr SceneReader::computeGlobals(
+	const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	return outPlug()->globalsPlug()->defaultValue();
 }
@@ -571,7 +583,9 @@ void SceneReader::hashSetNames( const Gaffer::Context *context, const ScenePlug 
 	refreshCountPlug()->hash( h );
 }
 
-IECore::ConstInternedStringVectorDataPtr SceneReader::computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstInternedStringVectorDataPtr SceneReader::computeSetNames(
+	const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ConstSceneInterfacePtr s = scene( ScenePath(), context );
 	if( !s )
@@ -597,7 +611,10 @@ IECore::ConstInternedStringVectorDataPtr SceneReader::computeSetNames( const Gaf
 	return result;
 }
 
-void SceneReader::hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void SceneReader::hashSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent,
+	IECore::MurmurHash &h
+) const
 {
 	SceneNode::hashSet( setName, context, parent, h );
 
@@ -609,7 +626,10 @@ void SceneReader::hashSet( const IECore::InternedString &setName, const Gaffer::
 	h.append( setName );
 }
 
-static void loadSetWalk( const SceneInterface *s, const InternedString &setName, const Gaffer::Context *context, PathMatcher &set, const vector<InternedString> &path )
+static void loadSetWalk(
+	const SceneInterface *s, const InternedString &setName, const Gaffer::Context *context, PathMatcher &set,
+	const vector<InternedString> &path
+)
 {
 	if( s->hasTag( setName, SceneInterface::LocalTag ) )
 	{
@@ -640,10 +660,13 @@ static void loadSetWalk( const SceneInterface *s, const InternedString &setName,
 	}
 }
 
-IECore::ConstPathMatcherDataPtr SceneReader::computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstPathMatcherDataPtr SceneReader::computeSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ConstInternedStringVectorDataPtr setNamesData = parent->setNames();
-	if( find( setNamesData->readable().begin(), setNamesData->readable().end(), setName ) == setNamesData->readable().end() )
+	if( find( setNamesData->readable().begin(), setNamesData->readable().end(), setName ) ==
+		setNamesData->readable().end() )
 	{
 		// As documented on `SceneNode::computeSet()`, we may be called with set names
 		// that are not present in `out.setNames`, and it is our responsibility to
@@ -683,7 +706,9 @@ IECore::ConstPathMatcherDataPtr SceneReader::computeSet( const IECore::InternedS
 
 	if( useSetsAPI( rootScene.get() ) )
 	{
-		return new PathMatcherData( rootScene->readSet( setNameToRead, /* readDescendantSets = */ true, context->canceller() ) );
+		return new PathMatcherData(
+			rootScene->readSet( setNameToRead, /* readDescendantSets = */ true, context->canceller() )
+		);
 	}
 	else
 	{
@@ -706,7 +731,9 @@ void SceneReader::plugSet( Gaffer::Plug *plug )
 	}
 }
 
-ConstSceneInterfacePtr SceneReader::scene( const ScenePath &path, const Gaffer::Context *context, int *refreshCount, std::string *tags ) const
+ConstSceneInterfacePtr SceneReader::scene(
+	const ScenePath &path, const Gaffer::Context *context, int *refreshCount, std::string *tags
+) const
 {
 	ScenePlug::GlobalScope globalScope( context );
 

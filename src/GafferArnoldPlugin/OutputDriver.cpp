@@ -66,10 +66,7 @@ const AtString g_pixelAspectRatioArnoldString( "pixel_aspect_ratio" );
 struct LocalData
 {
 
-	LocalData()
-		: numOutputs( 0 )
-	{
-	}
+	LocalData() : numOutputs( 0 ) {}
 
 	DisplayDriverPtr displayDriver;
 	ConstCompoundDataPtr displayDriverParameters;
@@ -111,9 +108,7 @@ void driverInitialize( AtRenderSession *session, AtNode *node )
 	AiNodeSetLocalData( node, new LocalData );
 }
 
-void driverUpdate( AtRenderSession *session, AtNode *node )
-{
-}
+void driverUpdate( AtRenderSession *session, AtNode *node ) {}
 
 bool driverSupportsPixelType( const AtNode *node, uint8_t pixelType )
 {
@@ -138,7 +133,9 @@ const char **driverExtension()
 	return nullptr;
 }
 
-void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displayWindow, AtBBox2 dataWindow, int bucketSize )
+void driverOpen(
+	AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displayWindow, AtBBox2 dataWindow, int bucketSize
+)
 {
 	LocalData *localData = (LocalData *)AiNodeGetLocalData( node );
 	localData->numOutputs = 0;
@@ -189,14 +186,10 @@ void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displa
 
 	/// \todo Make Convert.h
 	Box2i cortexDisplayWindow(
-		V2i( displayWindow.minx, displayWindow.miny ),
-		V2i( displayWindow.maxx, displayWindow.maxy )
+		V2i( displayWindow.minx, displayWindow.miny ), V2i( displayWindow.maxx, displayWindow.maxy )
 	);
 
-	Box2i cortexDataWindow(
-		V2i( dataWindow.minx, dataWindow.miny ),
-		V2i( dataWindow.maxx, dataWindow.maxy )
-	);
+	Box2i cortexDataWindow( V2i( dataWindow.minx, dataWindow.miny ), V2i( dataWindow.maxx, dataWindow.maxy ) );
 
 	// IECore::DisplayDriver lacks any official mechanism for passing
 	// the pixel aspect ratio, so for now we just pass it via the
@@ -213,13 +206,11 @@ void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displa
 	// the same driver for every stage of a progressive render.
 	if( localData->displayDriver )
 	{
-		if(
-			localData->displayDriver->typeName() == driverType &&
+		if( localData->displayDriver->typeName() == driverType &&
 			localData->displayDriver->displayWindow() == cortexDisplayWindow &&
 			localData->displayDriver->dataWindow() == cortexDataWindow &&
 			localData->displayDriver->channelNames() == channelNames &&
-			localData->displayDriverParameters->isEqualTo( parameters.get() )
-		)
+			localData->displayDriverParameters->isEqualTo( parameters.get() ) )
 		{
 			// Can reuse
 			return;
@@ -229,7 +220,11 @@ void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displa
 	// Couldn't reuse a driver, so create one from scratch.
 	try
 	{
-		localData->assignDisplayDriver( IECoreImage::DisplayDriver::create( driverType, cortexDisplayWindow, cortexDataWindow, channelNames, parameters ) );
+		localData->assignDisplayDriver(
+			IECoreImage::DisplayDriver::create(
+				driverType, cortexDisplayWindow, cortexDataWindow, channelNames, parameters
+			)
+		);
 		localData->displayDriverParameters = parameters;
 	}
 	catch( const std::exception &e )
@@ -245,15 +240,19 @@ bool driverNeedsBucket( AtNode *node, int x, int y, int sx, int sy, uint16_t tId
 	return true;
 }
 
-void driverPrepareBucket( AtNode *node, int x, int y, int sx, int sy, uint16_t tId )
+void driverPrepareBucket( AtNode *node, int x, int y, int sx, int sy, uint16_t tId ) {}
+
+void driverProcessBucket(
+	AtNode *node, struct AtOutputIterator *iterator, struct AtAOVSampleIterator *sample_iterator, int x, int y, int sx,
+	int sy, uint16_t tId
+)
 {
 }
 
-void driverProcessBucket( AtNode *node, struct AtOutputIterator *iterator, struct AtAOVSampleIterator *sample_iterator, int x, int y, int sx, int sy, uint16_t tId )
-{
-}
-
-void driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator, struct AtAOVSampleIterator *sampleIterator, int x, int y, int sx, int sy )
+void driverWriteBucket(
+	AtNode *node, struct AtOutputIterator *iterator, struct AtAOVSampleIterator *sampleIterator, int x, int y, int sx,
+	int sy
+)
 {
 	LocalData *localData = (LocalData *)AiNodeGetLocalData( node );
 	if( !localData->displayDriver )
@@ -319,10 +318,7 @@ void driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator, struct 
 		imageData = &interleavedData[0];
 	}
 
-	Box2i bucketBox(
-		V2i( x, y ),
-		V2i( x + sx - 1, y + sy - 1 )
-	);
+	Box2i bucketBox( V2i( x, y ), V2i( x + sx - 1, y + sy - 1 ) );
 
 	try
 	{
@@ -362,28 +358,13 @@ AI_EXPORT_LIB bool NodeLoader( int i, AtNodeLib *node )
 {
 	if( i == 0 )
 	{
-		static AtCommonMethods commonMethods = {
-			nullptr, // Whole plugin init
-			nullptr, // Whole plugin cleanup
-			driverParameters,
-			driverInitialize,
-			driverUpdate,
-			driverFinish
-		};
-		static AtDriverNodeMethods driverMethods = {
-			driverSupportsPixelType,
-			driverExtension,
-			driverOpen,
-			driverNeedsBucket,
-			driverPrepareBucket,
-			driverProcessBucket,
-			driverWriteBucket,
-			driverClose
-		};
-		static AtNodeMethods nodeMethods = {
-			&commonMethods,
-			&driverMethods
-		};
+		static AtCommonMethods commonMethods = { nullptr, // Whole plugin init
+												 nullptr, // Whole plugin cleanup
+												 driverParameters, driverInitialize, driverUpdate, driverFinish };
+		static AtDriverNodeMethods driverMethods = { driverSupportsPixelType, driverExtension,	   driverOpen,
+													 driverNeedsBucket,		  driverPrepareBucket, driverProcessBucket,
+													 driverWriteBucket,		  driverClose };
+		static AtNodeMethods nodeMethods = { &commonMethods, &driverMethods };
 
 		node->node_type = AI_NODE_DRIVER;
 		node->output_type = AI_TYPE_NONE;

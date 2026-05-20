@@ -74,23 +74,46 @@ const InternedString g_shaderNodeName( "gaffer:nodeName" );
 // InspectorColumn
 //////////////////////////////////////////////////////////////////////////
 
-InspectorColumn::InspectorColumn( GafferSceneUI::Private::InspectorPtr inspector, const std::string &columnName, const std::string &columnToolTip, PathColumn::SizeMode sizeMode )
-	: InspectorColumn( inspector, PathColumn::CellData( headerValue( columnName != "" ? columnName : inspector->name() ), nullptr, nullptr, new IECore::StringData( columnToolTip ) ), sizeMode )
+InspectorColumn::InspectorColumn(
+	GafferSceneUI::Private::InspectorPtr inspector, const std::string &columnName, const std::string &columnToolTip,
+	PathColumn::SizeMode sizeMode
+)
+	: InspectorColumn(
+		  inspector,
+		  PathColumn::CellData(
+			  headerValue( columnName != "" ? columnName : inspector->name() ), nullptr, nullptr,
+			  new IECore::StringData( columnToolTip )
+		  ),
+		  sizeMode
+	  )
 {
 }
 
-InspectorColumn::InspectorColumn( GafferSceneUI::Private::InspectorPtr inspector, const CellData &headerData, PathColumn::SizeMode sizeMode )
-	: PathColumn( sizeMode ), m_inspector( inspector ), m_headerData( headerData ), m_contextProperty( "inspector:context" )
+InspectorColumn::InspectorColumn(
+	GafferSceneUI::Private::InspectorPtr inspector, const CellData &headerData, PathColumn::SizeMode sizeMode
+)
+	: PathColumn( sizeMode ),
+	  m_inspector( inspector ),
+	  m_headerData( headerData ),
+	  m_contextProperty( "inspector:context" )
 {
 	inspector->dirtiedSignal().connect( boost::bind( &InspectorColumn::inspectorDirtied, this ) );
 }
 
-InspectorColumn::InspectorColumn( IECore::InternedString inspectorProperty, const CellData &headerData, IECore::InternedString contextProperty, PathColumn::SizeMode sizeMode )
-	: PathColumn( sizeMode ), m_inspector( inspectorProperty ), m_headerData( headerData ), m_contextProperty( contextProperty )
+InspectorColumn::InspectorColumn(
+	IECore::InternedString inspectorProperty, const CellData &headerData, IECore::InternedString contextProperty,
+	PathColumn::SizeMode sizeMode
+)
+	: PathColumn( sizeMode ),
+	  m_inspector( inspectorProperty ),
+	  m_headerData( headerData ),
+	  m_contextProperty( contextProperty )
 {
 }
 
-GafferSceneUI::Private::ConstInspectorPtr InspectorColumn::inspector( const Gaffer::Path &path, const IECore::Canceller *canceller ) const
+GafferSceneUI::Private::ConstInspectorPtr InspectorColumn::inspector(
+	const Gaffer::Path &path, const IECore::Canceller *canceller
+) const
 {
 	if( auto i = std::get_if<InspectorPtr>( &m_inspector ) )
 	{
@@ -100,7 +123,9 @@ GafferSceneUI::Private::ConstInspectorPtr InspectorColumn::inspector( const Gaff
 	return IECore::runTimeCast<const Inspector>( path.property( std::get<InternedString>( m_inspector ), canceller ) );
 }
 
-GafferSceneUI::Private::Inspector::ResultPtr InspectorColumn::inspect( const Gaffer::Path &path, const IECore::Canceller *canceller ) const
+GafferSceneUI::Private::Inspector::ResultPtr InspectorColumn::inspect(
+	const Gaffer::Path &path, const IECore::Canceller *canceller
+) const
 {
 	ConstInspectorPtr i = inspector( path, canceller );
 	if( !i )
@@ -154,7 +179,9 @@ Gaffer::PathPtr InspectorColumn::historyPath( const Gaffer::Path &path, const IE
 	return i->historyPath();
 }
 
-Gaffer::ConstContextPtr InspectorColumn::inspectorContext( const Gaffer::Path &path, const IECore::Canceller *canceller ) const
+Gaffer::ConstContextPtr InspectorColumn::inspectorContext(
+	const Gaffer::Path &path, const IECore::Canceller *canceller
+) const
 {
 	return path.contextProperty( m_contextProperty, canceller );
 }
@@ -165,7 +192,9 @@ PathColumn::CellData InspectorColumn::cellData( const Gaffer::Path &path, const 
 	return cellDataFromInspection( inspectorResult.get() );
 }
 
-PathColumn::CellData InspectorColumn::headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const
+PathColumn::CellData InspectorColumn::headerData(
+	const Gaffer::Path &rootPath, const IECore::Canceller *canceller
+) const
 {
 	return m_headerData;
 }
@@ -248,7 +277,9 @@ PathColumn::CellData InspectorColumn::cellDataFromValue( const IECore::Object *v
 	return CellData();
 }
 
-PathColumn::CellData InspectorColumn::cellDataFromInspection( const GafferSceneUI::Private::Inspector::Result *inspection ) const
+PathColumn::CellData InspectorColumn::cellDataFromInspection(
+	const GafferSceneUI::Private::Inspector::Result *inspection
+) const
 {
 	CellData result;
 	if( !inspection )
@@ -273,7 +304,8 @@ PathColumn::CellData InspectorColumn::cellDataFromInspection( const GafferSceneU
 		}
 		else
 		{
-			const GraphComponent *settingsNode = source->ancestor( RunTimeTyped::typeIdFromTypeName( "GafferUI::Editor::Settings" ) );
+			const GraphComponent *settingsNode =
+				source->ancestor( RunTimeTyped::typeIdFromTypeName( "GafferUI::Editor::Settings" ) );
 			toolTip = "External Source : " + source->relativeName( settingsNode );
 		}
 	}

@@ -54,7 +54,7 @@ namespace GafferBindings
 template<typename WrappedType>
 class ComputeNodeWrapper : public DependencyNodeWrapper<WrappedType>
 {
-	public:
+public:
 
 	template<typename... Args>
 	ComputeNodeWrapper( PyObject *self, Args &&...args )
@@ -78,11 +78,8 @@ class ComputeNodeWrapper : public DependencyNodeWrapper<WrappedType>
 				if( f )
 				{
 					boost::python::object pythonHash( h );
-					f(
-						Gaffer::ValuePlugPtr( const_cast<Gaffer::ValuePlug *>( output ) ),
-						Gaffer::ContextPtr( const_cast<Gaffer::Context *>( context ) ),
-						pythonHash
-					);
+					f( Gaffer::ValuePlugPtr( const_cast<Gaffer::ValuePlug *>( output ) ),
+					   Gaffer::ContextPtr( const_cast<Gaffer::Context *>( context ) ), pythonHash );
 					h = boost::python::extract<IECore::MurmurHash>( pythonHash );
 				}
 			}
@@ -125,7 +122,8 @@ class ComputeNodeWrapper : public DependencyNodeWrapper<WrappedType>
 				boost::python::object f = this->methodOverride( "hashCachePolicy" );
 				if( f )
 				{
-					boost::python::object policy = f( Gaffer::ValuePlugPtr( const_cast<Gaffer::ValuePlug *>( output ) ) );
+					boost::python::object policy =
+						f( Gaffer::ValuePlugPtr( const_cast<Gaffer::ValuePlug *>( output ) ) );
 					return boost::python::extract<Gaffer::ValuePlug::CachePolicy>( policy );
 				}
 			}
@@ -147,7 +145,8 @@ class ComputeNodeWrapper : public DependencyNodeWrapper<WrappedType>
 				boost::python::object f = this->methodOverride( "computeCachePolicy" );
 				if( f )
 				{
-					boost::python::object policy = f( Gaffer::ValuePlugPtr( const_cast<Gaffer::ValuePlug *>( output ) ) );
+					boost::python::object policy =
+						f( Gaffer::ValuePlugPtr( const_cast<Gaffer::ValuePlug *>( output ) ) );
 					return boost::python::extract<Gaffer::ValuePlug::CachePolicy>( policy );
 				}
 			}

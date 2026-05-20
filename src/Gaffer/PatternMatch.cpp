@@ -44,8 +44,7 @@ GAFFER_NODE_DEFINE_TYPE( PatternMatch );
 
 size_t PatternMatch::g_firstPlugIndex = 0;
 
-PatternMatch::PatternMatch( const std::string &name )
-	: ComputeNode( name )
+PatternMatch::PatternMatch( const std::string &name ) : ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -55,9 +54,7 @@ PatternMatch::PatternMatch( const std::string &name )
 	addChild( new BoolPlug( "match", Plug::Out ) );
 }
 
-PatternMatch::~PatternMatch()
-{
-}
+PatternMatch::~PatternMatch() {}
 
 StringPlug *PatternMatch::stringPlug()
 {
@@ -103,11 +100,7 @@ void PatternMatch::affects( const Plug *input, AffectedPlugsContainer &outputs )
 {
 	ComputeNode::affects( input, outputs );
 
-	if(
-		input == stringPlug() ||
-		input == patternPlug() ||
-		input == enabledPlug()
-	)
+	if( input == stringPlug() || input == patternPlug() || input == enabledPlug() )
 	{
 		outputs.push_back( matchPlug() );
 	}

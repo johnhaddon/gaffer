@@ -108,7 +108,9 @@ std::string g_outputPrefix( "output:" );
 IECore::InternedString g_imageNameContextName( "catalogue:imageName" );
 
 
-std::shared_ptr<const GafferScene::RenderManifest> findRenderManifest( const GafferImage::ImagePlug *imagePlug, bool onlyIfCurrentlyRendering )
+std::shared_ptr<const GafferScene::RenderManifest> findRenderManifest(
+	const GafferImage::ImagePlug *imagePlug, bool onlyIfCurrentlyRendering
+)
 {
 	const ScriptNode *scriptNode = imagePlug->node()->scriptNode();
 	if( !scriptNode )
@@ -170,10 +172,9 @@ std::shared_ptr<const GafferScene::RenderManifest> findRenderManifest( const Gaf
 class Catalogue::InternalImage : public ImageNode
 {
 
-	public:
+public:
 
-	InternalImage( const std::string &name = "InternalImage" )
-		: ImageNode( name )
+	InternalImage( const std::string &name = "InternalImage" ) : ImageNode( name )
 	{
 		storeIndexOfNextChild( g_firstChildIndex );
 
@@ -216,12 +217,14 @@ class Catalogue::InternalImage : public ImageNode
 		addChild( new GafferImage::ImageMetadata() );
 		imageMetadata()->inPlug()->setInput( imageSwitch()->outPlug() );
 
-		NameValuePlugPtr descriptionMeta = new NameValuePlug( "ImageDescription", new StringData(), true, "imageDescription" );
+		NameValuePlugPtr descriptionMeta =
+			new NameValuePlug( "ImageDescription", new StringData(), true, "imageDescription" );
 		imageMetadata()->metadataPlug()->addChild( descriptionMeta );
 		descriptionMeta->valuePlug()->setInput( descriptionPlug() );
 		descriptionMeta->enabledPlug()->setInput( descriptionPlug() ); // Enable only for non-empty strings
 
-		NameValuePlugPtr isRenderingMeta = new NameValuePlug( g_isRenderingMetadataName, new BoolData( true ), true, "isRendering" );
+		NameValuePlugPtr isRenderingMeta =
+			new NameValuePlug( g_isRenderingMetadataName, new BoolData( true ), true, "isRendering" );
 		imageMetadata()->metadataPlug()->addChild( isRenderingMeta );
 
 		outPlug()->setInput( imageMetadata()->outPlug() );
@@ -237,25 +240,13 @@ class Catalogue::InternalImage : public ImageNode
 		}
 	}
 
-	StringPlug *fileNamePlug()
-	{
-		return getChild<StringPlug>( g_firstChildIndex );
-	}
+	StringPlug *fileNamePlug() { return getChild<StringPlug>( g_firstChildIndex ); }
 
-	const StringPlug *fileNamePlug() const
-	{
-		return getChild<StringPlug>( g_firstChildIndex );
-	}
+	const StringPlug *fileNamePlug() const { return getChild<StringPlug>( g_firstChildIndex ); }
 
-	StringPlug *descriptionPlug()
-	{
-		return getChild<StringPlug>( g_firstChildIndex + 1 );
-	}
+	StringPlug *descriptionPlug() { return getChild<StringPlug>( g_firstChildIndex + 1 ); }
 
-	const StringPlug *descriptionPlug() const
-	{
-		return getChild<StringPlug>( g_firstChildIndex + 1 );
-	}
+	const StringPlug *descriptionPlug() const { return getChild<StringPlug>( g_firstChildIndex + 1 ); }
 
 	void copyFrom( const InternalImage *other )
 	{
@@ -317,7 +308,8 @@ class Catalogue::InternalImage : public ImageNode
 		// `clientPID` parameter provided by `IECoreImage::ClientDisplayDriver`.
 		const StringData *renderIDData = parameters->member<StringData>( "gaffer:renderID" );
 		const IntData *clientPIDData = parameters->member<IntData>( "clientPID" );
-		const string renderID = renderIDData ? renderIDData->readable() : ( clientPIDData ? to_string( clientPIDData->readable() ) : "unknown" );
+		const string renderID = renderIDData ? renderIDData->readable() :
+											   ( clientPIDData ? to_string( clientPIDData->readable() ) : "unknown" );
 		if( !m_renderID.empty() && m_renderID != renderID )
 		{
 			return false;
@@ -385,11 +377,8 @@ class Catalogue::InternalImage : public ImageNode
 					/// \todo GraphComponent or GraphComponentAlgo really should have
 					/// a utility for sanitising names and/or we should loosen the naming
 					/// restrictions anyway.
-					const std::string name = boost::regex_replace(
-						nameData->readable(),
-						boost::regex( "(^[0-9])|([^0-9a-zA-Z_]+)" ),
-						"_"
-					);
+					const std::string name =
+						boost::regex_replace( nameData->readable(), boost::regex( "(^[0-9])|([^0-9a-zA-Z_]+)" ), "_" );
 					image->setName( name );
 				}
 			}
@@ -433,9 +422,11 @@ class Catalogue::InternalImage : public ImageNode
 		m_saver = AsynchronousSaver::create( this, findRenderManifest( outPlug(), false ) );
 	}
 
-	protected:
+protected:
 
-	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override
+	void hashChannelData(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override
 	{
 		assert( m_saver );
 		AsynchronousSaver::ChannelDataHashes::const_iterator it = m_saver->channelDataHashes.find(
@@ -454,16 +445,20 @@ class Catalogue::InternalImage : public ImageNode
 		}
 	}
 
-	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override
+	IECore::ConstFloatVectorDataPtr computeChannelData(
+		const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+		const GafferImage::ImagePlug *parent
+	) const override
 	{
 		return imageReader()->outPlug()->channelDataPlug()->getValue();
 	}
 
-	private:
+private:
 
 	void isRendering( bool rendering )
 	{
-		NameValuePlug *isRendering = static_cast<NameValuePlug *>( imageMetadata()->metadataPlug()->getChild( "isRendering" ) );
+		NameValuePlug *isRendering =
+			static_cast<NameValuePlug *>( imageMetadata()->metadataPlug()->getChild( "isRendering" ) );
 		static_cast<BoolPlug *>( isRendering->enabledPlug() )->setValue( rendering );
 	}
 
@@ -489,45 +484,27 @@ class Catalogue::InternalImage : public ImageNode
 		m_displays.clear();
 	}
 
-	GafferImage::ImageReader *imageReader()
-	{
-		return getChild<GafferImage::ImageReader>( g_firstChildIndex + 2 );
-	}
+	GafferImage::ImageReader *imageReader() { return getChild<GafferImage::ImageReader>( g_firstChildIndex + 2 ); }
 
 	const GafferImage::ImageReader *imageReader() const
 	{
 		return getChild<GafferImage::ImageReader>( g_firstChildIndex + 2 );
 	}
 
-	GafferImage::CopyChannels *copyChannels()
-	{
-		return getChild<GafferImage::CopyChannels>( g_firstChildIndex + 3 );
-	}
+	GafferImage::CopyChannels *copyChannels() { return getChild<GafferImage::CopyChannels>( g_firstChildIndex + 3 ); }
 
 	const GafferImage::CopyChannels *copyChannels() const
 	{
 		return getChild<GafferImage::CopyChannels>( g_firstChildIndex + 3 );
 	}
 
-	GafferImage::Text *text()
-	{
-		return getChild<GafferImage::Text>( g_firstChildIndex + 4 );
-	}
+	GafferImage::Text *text() { return getChild<GafferImage::Text>( g_firstChildIndex + 4 ); }
 
-	const GafferImage::Text *text() const
-	{
-		return getChild<GafferImage::Text>( g_firstChildIndex + 4 );
-	}
+	const GafferImage::Text *text() const { return getChild<GafferImage::Text>( g_firstChildIndex + 4 ); }
 
-	Switch *imageSwitch()
-	{
-		return getChild<Switch>( g_firstChildIndex + 5 );
-	}
+	Switch *imageSwitch() { return getChild<Switch>( g_firstChildIndex + 5 ); }
 
-	const Switch *imageSwitch() const
-	{
-		return getChild<Switch>( g_firstChildIndex + 5 );
-	}
+	const Switch *imageSwitch() const { return getChild<Switch>( g_firstChildIndex + 5 ); }
 
 	GafferImage::ImageMetadata *imageMetadata()
 	{
@@ -545,7 +522,9 @@ class Catalogue::InternalImage : public ImageNode
 		using Ptr = std::shared_ptr<AsynchronousSaver>;
 		using WeakPtr = std::weak_ptr<AsynchronousSaver>;
 
-		static Ptr create( InternalImage *client, const std::shared_ptr<const GafferScene::RenderManifest> &renderManifest )
+		static Ptr create(
+			InternalImage *client, const std::shared_ptr<const GafferScene::RenderManifest> &renderManifest
+		)
 		{
 			// We use a copy of the image to do the saving, because the original
 			// might be modified on the main thread while we save in the background.
@@ -564,7 +543,8 @@ class Catalogue::InternalImage : public ImageNode
 			imageCopy->imageSwitch()->indexPlug()->setValue( 1 );
 
 			// If there's nowhere to save, then a saver is useless, so return null.
-			const std::filesystem::path fileName = client->parent<Catalogue>()->generateFileName( imageCopy->outPlug() );
+			const std::filesystem::path fileName =
+				client->parent<Catalogue>()->generateFileName( imageCopy->outPlug() );
 			if( fileName.empty() )
 			{
 				return nullptr;
@@ -615,18 +595,18 @@ class Catalogue::InternalImage : public ImageNode
 			}
 		}
 
-		void deregisterClient( InternalImage *client )
-		{
-			m_clients.erase( client );
-		}
+		void deregisterClient( InternalImage *client ) { m_clients.erase( client ); }
 
 		using TileIndex = std::pair<std::string, Imath::V2i>;
 		using ChannelDataHashes = boost::unordered_map<TileIndex, IECore::MurmurHash>;
 		ChannelDataHashes channelDataHashes;
 
-		private:
+	private:
 
-		AsynchronousSaver( InternalImagePtr imageCopy, const std::filesystem::path &filePath, const std::shared_ptr<const GafferScene::RenderManifest> &renderManifest )
+		AsynchronousSaver(
+			InternalImagePtr imageCopy, const std::filesystem::path &filePath,
+			const std::shared_ptr<const GafferScene::RenderManifest> &renderManifest
+		)
 			: m_imageCopy( imageCopy )
 		{
 			// Set up an ImageWriter to do the actual saving.
@@ -643,12 +623,15 @@ class Catalogue::InternalImage : public ImageNode
 			// Set up a spreadsheet that will set the data type to full 32 bit floats when storing the
 			// "id" or "instanceID" channel. We are currently using integers bitcast to floats for ids
 			// ... converting these to 16 bit floats completely destroys the data.
-			StringPlug *dataTypePlug = m_writer->fileFormatSettingsPlug( "openexr" )->getChild<StringPlug>( "dataType" );
+			StringPlug *dataTypePlug =
+				m_writer->fileFormatSettingsPlug( "openexr" )->getChild<StringPlug>( "dataType" );
 
 			Gaffer::SpreadsheetPtr spreadsheet = new Gaffer::Spreadsheet();
 			m_writer->addChild( spreadsheet );
 			spreadsheet->selectorPlug()->setValue( "${imageWriter:channelName}" );
-			spreadsheet->rowsPlug()->addColumn( new Gaffer::StringPlug( "dataType", Gaffer::Plug::Direction::In, "half" ) );
+			spreadsheet->rowsPlug()->addColumn(
+				new Gaffer::StringPlug( "dataType", Gaffer::Plug::Direction::In, "half" )
+			);
 			Spreadsheet::RowPlug *row = spreadsheet->rowsPlug()->addRow();
 			row->namePlug()->setValue( "id instanceID" );
 			row->cellsPlug()->getChild<Spreadsheet::CellPlug>( 0 )->valuePlug<StringPlug>()->setValue( "float" );
@@ -664,9 +647,7 @@ class Catalogue::InternalImage : public ImageNode
 				m_manifestDest.replace_filename( manifestFilename );
 
 				m_modifyMetadata->metadataPlug()->addChild(
-					new NameValuePlug(
-						"gaffer:renderManifestFilePath", new StringData( manifestFilename )
-					)
+					new NameValuePlug( "gaffer:renderManifestFilePath", new StringData( manifestFilename ) )
 				);
 
 				// We don't make a copy of this in the foreground thread to avoid the delay.
@@ -699,9 +680,10 @@ class Catalogue::InternalImage : public ImageNode
 					return imagePlug->channelDataPlug()->hash();
 				},
 				// Gather
-				[this]( const GafferImage::ImagePlug *imagePlug, const string &channelName, const Imath::V2i &tileOrigin, const IECore::MurmurHash &tileHash ) {
-					channelDataHashes[TileIndex( channelName, tileOrigin )] = tileHash;
-				}
+				[this](
+					const GafferImage::ImagePlug *imagePlug, const string &channelName, const Imath::V2i &tileOrigin,
+					const IECore::MurmurHash &tileHash
+				) { channelDataHashes[TileIndex( channelName, tileOrigin )] = tileHash; }
 			);
 
 			try
@@ -718,14 +700,12 @@ class Catalogue::InternalImage : public ImageNode
 			// we absolutely _must not_ create a Ptr here on the
 			// background thread - ownership must be managed on
 			// the UI thread only (see ~AsynchronousSaver).
-			ParallelAlgo::callOnUIThread(
-				[forWrapUp] {
-					if( Ptr that = forWrapUp.lock() )
-					{
-						that->wrapUp();
-					}
+			ParallelAlgo::callOnUIThread( [forWrapUp] {
+				if( Ptr that = forWrapUp.lock() )
+				{
+					that->wrapUp();
 				}
-			);
+			} );
 		}
 
 		void wrapUp()
@@ -787,8 +767,7 @@ size_t Catalogue::InternalImage::g_firstChildIndex = 0;
 
 GAFFER_PLUG_DEFINE_TYPE( Catalogue::Image );
 
-Catalogue::Image::Image( const std::string &name, Direction direction, unsigned flags )
-	: Plug( name, direction, flags )
+Catalogue::Image::Image( const std::string &name, Direction direction, unsigned flags ) : Plug( name, direction, flags )
 {
 	addChild( new StringPlug( "fileName" ) );
 	addChild( new StringPlug( "description" ) );
@@ -850,11 +829,7 @@ Catalogue::Image::Ptr Catalogue::Image::load( const std::filesystem::path &fileN
 	/// sanitisation in GraphComponent.
 	std::string name = fileName.stem().string();
 	std::replace_if(
-		name.begin(), name.end(),
-		[]( char c ) {
-			return !std::isalnum( c, std::locale::classic() );
-		},
-		'_'
+		name.begin(), name.end(), []( char c ) { return !std::isalnum( c, std::locale::classic() ); }, '_'
 	);
 	if( std::isdigit( name[0], std::locale::classic() ) )
 	{
@@ -920,10 +895,7 @@ bool undoingOrRedoing( const Node *node )
 		return false;
 	}
 
-	return (
-		script->currentActionStage() == Action::Undo ||
-		script->currentActionStage() == Action::Redo
-	);
+	return ( script->currentActionStage() == Action::Undo || script->currentActionStage() == Action::Redo );
 }
 
 } // namespace
@@ -932,8 +904,7 @@ GAFFER_NODE_DEFINE_TYPE( Catalogue );
 
 size_t Catalogue::g_firstPlugIndex = 0;
 
-Catalogue::Catalogue( const std::string &name )
-	: ImageNode( name )
+Catalogue::Catalogue( const std::string &name ) : ImageNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -992,9 +963,7 @@ Catalogue::Catalogue( const std::string &name )
 	plugSetSignal().connect( boost::bind( &Catalogue::plugSet, this, ::_1 ) );
 }
 
-Catalogue::~Catalogue()
-{
-}
+Catalogue::~Catalogue() {}
 
 Gaffer::Plug *Catalogue::imagesPlug()
 {
@@ -1194,7 +1163,8 @@ void Catalogue::imageAdded( GraphComponent *graphComponent )
 	internalImage->fileNamePlug()->setInput( image->fileNamePlug() );
 	internalImage->descriptionPlug()->setInput( image->descriptionPlug() );
 
-	GafferImage::ImagePlug *nextSwitchInput = static_cast<GafferImage::ImagePlug *>( imageSwitch()->inPlugs()->children().back().get() );
+	GafferImage::ImagePlug *nextSwitchInput =
+		static_cast<GafferImage::ImagePlug *>( imageSwitch()->inPlugs()->children().back().get() );
 	nextSwitchInput->setInput( internalImage->outPlug() );
 }
 
@@ -1506,7 +1476,8 @@ void Catalogue::compute( ValuePlug *output, const Context *context ) const
 		{
 			Context::EditableScope mapScope( context );
 			mapScope.remove( g_imageNameContextName );
-			ConstImageIndexMapDataPtr imageIndexMap = boost::static_pointer_cast<const ImageIndexMapData>( imageIndexMapPlug()->getValue() );
+			ConstImageIndexMapDataPtr imageIndexMap =
+				boost::static_pointer_cast<const ImageIndexMapData>( imageIndexMapPlug()->getValue() );
 			auto it = imageIndexMap->map.find( imageName );
 			if( it != imageIndexMap->map.end() )
 			{

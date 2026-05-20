@@ -66,8 +66,7 @@ TranslateTool::ToolDescription<TranslateTool, SceneView> TranslateTool::g_toolDe
 
 size_t TranslateTool::g_firstPlugIndex = 0;
 
-TranslateTool::TranslateTool( SceneView *view, const std::string &name )
-	: TransformTool( view, name )
+TranslateTool::TranslateTool( SceneView *view, const std::string &name ) : TransformTool( view, name )
 {
 
 	static Style::Axes axes[] = { Style::X, Style::Y, Style::Z, Style::XY, Style::XZ, Style::YZ, Style::XYZ };
@@ -102,9 +101,7 @@ TranslateTool::TranslateTool( SceneView *view, const std::string &name )
 	addChild( new IntPlug( "orientation", Plug::In, Parent, Local, World ) );
 }
 
-TranslateTool::~TranslateTool()
-{
-}
+TranslateTool::~TranslateTool() {}
 
 Gaffer::IntPlug *TranslateTool::orientationPlug()
 {
@@ -123,16 +120,13 @@ bool TranslateTool::affectsHandles( const Gaffer::Plug *input ) const
 		return true;
 	}
 
-	return input == orientationPlug() ||
-		input == scenePlug()->transformPlug();
+	return input == orientationPlug() || input == scenePlug()->transformPlug();
 }
 
 void TranslateTool::updateHandles( float rasterScale )
 {
 	const Orientation orientation = static_cast<Orientation>( orientationPlug()->getValue() );
-	handles()->setTransform(
-		selection().back().orientedTransform( orientation )
-	);
+	handles()->setTransform( selection().back().orientedTransform( orientation ) );
 
 	// Because we provide multiple orientations, the handles
 	// may well not be aligned with the axes of the transform
@@ -365,11 +359,7 @@ void TranslateTool::Translation::apply( const Imath::V3f &offset )
 		FloatPlug *plug = translatePlug->getChild( i );
 		if( canSetValueOrAddKey( plug ) )
 		{
-			setValueOrAddKey(
-				plug,
-				m_selection.context()->getTime(),
-				( *m_origin )[i] + offsetInTransformSpace[i]
-			);
+			setValueOrAddKey( plug, m_selection.context()->getTime(), ( *m_origin )[i] + offsetInTransformSpace[i] );
 		}
 	}
 }

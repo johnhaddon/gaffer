@@ -90,7 +90,7 @@ template<typename T>
 class CompoundNumericPlugSerialiser : public ValuePlugSerialiser
 {
 
-	public:
+public:
 
 	std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override
 	{
@@ -140,7 +140,16 @@ PlugClass<T> bind()
 	using V = typename T::ValueType;
 
 	PlugClass<T> cls;
-	cls.def( init<const char *, Plug::Direction, V, V, V, unsigned, IECore::GeometricData::Interpretation>( ( boost::python::arg_( "name" ) = GraphComponent::defaultName<T>(), boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "defaultValue" ) = V( 0 ), boost::python::arg_( "minValue" ) = V( std::numeric_limits<typename V::BaseType>::lowest() ), boost::python::arg_( "maxValue" ) = V( std::numeric_limits<typename V::BaseType>::max() ), boost::python::arg_( "flags" ) = Plug::Default, boost::python::arg_( "interpretation" ) = IECore::GeometricData::None ) ) )
+	cls.def(
+		   init<const char *, Plug::Direction, V, V, V, unsigned, IECore::GeometricData::Interpretation>(
+			   ( boost::python::arg_( "name" ) = GraphComponent::defaultName<T>(),
+				 boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "defaultValue" ) = V( 0 ),
+				 boost::python::arg_( "minValue" ) = V( std::numeric_limits<typename V::BaseType>::lowest() ),
+				 boost::python::arg_( "maxValue" ) = V( std::numeric_limits<typename V::BaseType>::max() ),
+				 boost::python::arg_( "flags" ) = Plug::Default,
+				 boost::python::arg_( "interpretation" ) = IECore::GeometricData::None )
+		   )
+	)
 		.def( "defaultValue", &T::defaultValue )
 		.def( "hasMinValue", &T::hasMinValue )
 		.def( "hasMaxValue", &T::hasMaxValue )
@@ -158,7 +167,9 @@ PlugClass<T> bind()
 	scope s = cls;
 
 	const PyTypeObject *valueType = boost::python::to_python_value<const V &>().get_pytype();
-	s.attr( "ValueType" ) = boost::python::object( boost::python::handle<>( boost::python::borrowed( const_cast<PyTypeObject *>( valueType ) ) ) );
+	s.attr( "ValueType" ) = boost::python::object(
+		boost::python::handle<>( boost::python::borrowed( const_cast<PyTypeObject *>( valueType ) ) )
+	);
 
 	Serialisation::registerSerialiser( T::staticTypeId(), new CompoundNumericPlugSerialiser<T>() );
 
@@ -173,7 +184,6 @@ void GafferModule::bindCompoundNumericPlug()
 	bind<V3fPlug>();
 	bind<V2iPlug>();
 	bind<V3iPlug>();
-	bind<Color3fPlug>()
-		.def( "setValue", &setValue<Color3fPlug, Imath::V3f> );
+	bind<Color3fPlug>().def( "setValue", &setValue<Color3fPlug, Imath::V3f> );
 	bind<Color4fPlug>();
 }

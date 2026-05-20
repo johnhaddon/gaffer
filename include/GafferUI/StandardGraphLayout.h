@@ -55,7 +55,7 @@ IE_CORE_FORWARDDECLARE( ConnectionGadget )
 class GAFFERUI_API StandardGraphLayout : public GraphLayout
 {
 
-	public:
+public:
 
 	StandardGraphLayout();
 	~StandardGraphLayout() override;
@@ -65,8 +65,12 @@ class GAFFERUI_API StandardGraphLayout : public GraphLayout
 	bool connectNode( GraphGadget *graph, Gaffer::Node *node, Gaffer::Set *potentialInputs ) const override;
 	bool connectNodes( GraphGadget *graph, Gaffer::Set *nodes, Gaffer::Set *potentialInputs ) const override;
 
-	void positionNode( GraphGadget *graph, Gaffer::Node *node, const Imath::V2f &fallbackPosition = Imath::V2f( 0 ) ) const override;
-	void positionNodes( GraphGadget *graph, Gaffer::Set *nodes, const Imath::V2f &fallbackPosition = Imath::V2f( 0 ) ) const override;
+	void positionNode(
+		GraphGadget *graph, Gaffer::Node *node, const Imath::V2f &fallbackPosition = Imath::V2f( 0 )
+	) const override;
+	void positionNodes(
+		GraphGadget *graph, Gaffer::Set *nodes, const Imath::V2f &fallbackPosition = Imath::V2f( 0 )
+	) const override;
 
 	void layoutNodes( GraphGadget *graph, Gaffer::Set *nodes ) const override;
 
@@ -82,9 +86,11 @@ class GAFFERUI_API StandardGraphLayout : public GraphLayout
 	float getNodeSeparationScale() const;
 	//@}
 
-	private:
+private:
 
-	bool connectNodeInternal( GraphGadget *graph, Gaffer::Node *node, Gaffer::Set *potentialInputs, bool insertIfPossible ) const;
+	bool connectNodeInternal(
+		GraphGadget *graph, Gaffer::Node *node, Gaffer::Set *potentialInputs, bool insertIfPossible
+	) const;
 
 	struct Endpoint
 	{

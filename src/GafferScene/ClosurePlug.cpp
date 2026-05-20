@@ -54,9 +54,7 @@ ClosurePlug::ClosurePlug( const std::string &name, Direction direction, unsigned
 {
 }
 
-ClosurePlug::~ClosurePlug()
-{
-}
+ClosurePlug::~ClosurePlug() {}
 
 bool ClosurePlug::acceptsChild( const GraphComponent *potentialChild ) const
 {

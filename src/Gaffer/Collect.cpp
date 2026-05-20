@@ -98,16 +98,13 @@ void filterVectors( CompoundObject *compoundObject, const vector<unsigned char> 
 				value = new BoolVectorData( vector<bool>( d->readable().begin(), d->readable().end() ) );
 			}
 
-			IECore::dispatch(
-				static_cast<Data *>( value.get() ),
-				[&]( auto *data ) {
-					using DataType = remove_pointer_t<decltype( data )>;
-					if constexpr( TypeTraits::IsVectorTypedData<DataType>::value )
-					{
-						filterVector( data->writable(), filter );
-					}
+			IECore::dispatch( static_cast<Data *>( value.get() ), [&]( auto *data ) {
+				using DataType = remove_pointer_t<decltype( data )>;
+				if constexpr( TypeTraits::IsVectorTypedData<DataType>::value )
+				{
+					filterVector( data->writable(), filter );
 				}
-			);
+			} );
 		}
 	}
 }
@@ -199,8 +196,7 @@ struct OutputTraits
 {
 	using ContainerType = vector<typename InputPlugType::ValueType>;
 	using ObjectType = std::conditional_t<
-		IECore::TypeTraits::IsVec<typename ContainerType::value_type>::value,
-		IECore::GeometricTypedData<ContainerType>,
+		IECore::TypeTraits::IsVec<typename ContainerType::value_type>::value, IECore::GeometricTypedData<ContainerType>,
 		IECore::TypedData<ContainerType>>;
 	using PlugType = TypedObjectPlug<ObjectType>;
 	static ContainerType &container( ObjectType &object ) { return object.writable(); }
@@ -243,8 +239,7 @@ GAFFER_NODE_DEFINE_TYPE( Collect );
 
 size_t Collect::g_firstPlugIndex = 0;
 
-Collect::Collect( const std::string &name )
-	: ComputeNode( name )
+Collect::Collect( const std::string &name ) : ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -264,9 +259,7 @@ Collect::Collect( const std::string &name )
 	inPlug()->childRemovedSignal().connect( boost::bind( &Collect::inputRemoved, this, ::_2 ) );
 }
 
-Collect::~Collect()
-{
-}
+Collect::~Collect() {}
 
 StringPlug *Collect::contextVariablePlug()
 {
@@ -358,12 +351,10 @@ bool Collect::canAddInput( const ValuePlug *prototype ) const
 ValuePlug *Collect::addInput( const ValuePlug *prototype )
 {
 	ValuePlugPtr output;
-	dispatchPlugFunction(
-		prototype, [&output]( auto *plug ) {
-			using OutputTraits = OutputTraits<remove_const_t<remove_pointer_t<decltype( plug )>>>;
-			output = new typename OutputTraits::PlugType( plug->getName(), Plug::Out );
-		}
-	);
+	dispatchPlugFunction( prototype, [&output]( auto *plug ) {
+		using OutputTraits = OutputTraits<remove_const_t<remove_pointer_t<decltype( plug )>>>;
+		output = new typename OutputTraits::PlugType( plug->getName(), Plug::Out );
+	} );
 
 	if( !output )
 	{
@@ -393,9 +384,7 @@ const ValuePlug *Collect::outputPlugForInput( const ValuePlug *inputPlug ) const
 {
 	if( inputPlug->parent() != inPlug() )
 	{
-		throw IECore::Exception(
-			fmt::format( "`{}` is not an input of `{}`", inputPlug->fullName(), fullName() )
-		);
+		throw IECore::Exception( fmt::format( "`{}` is not an input of `{}`", inputPlug->fullName(), fullName() ) );
 	}
 
 	const ValuePlug *result = outPlug()->getChild<ValuePlug>( inputPlug->getName() );
@@ -417,9 +406,7 @@ const ValuePlug *Collect::inputPlugForOutput( const ValuePlug *outputPlug ) cons
 {
 	if( outputPlug->parent() != outPlug() )
 	{
-		throw IECore::Exception(
-			fmt::format( "`{}` is not an output of `{}`", outputPlug->fullName(), fullName() )
-		);
+		throw IECore::Exception( fmt::format( "`{}` is not an output of `{}`", outputPlug->fullName(), fullName() ) );
 	}
 
 	const ValuePlug *result = inPlug()->getChild<ValuePlug>( outputPlug->getName() );
@@ -436,13 +423,8 @@ void Collect::affects( const Plug *input, AffectedPlugsContainer &outputs ) cons
 {
 	ComputeNode::affects( input, outputs );
 
-	if(
-		input == contextValuesPlug() ||
-		input == contextVariablePlug() ||
-		input == indexContextVariablePlug() ||
-		input == enabledPlug() ||
-		inPlug()->isAncestorOf( input )
-	)
+	if( input == contextValuesPlug() || input == contextVariablePlug() || input == indexContextVariablePlug() ||
+		input == enabledPlug() || inPlug()->isAncestorOf( input ) )
 	{
 		outputs.push_back( collectionPlug() );
 	}
@@ -479,8 +461,7 @@ void Collect::hash( const ValuePlug *output, const Context *context, IECore::Mur
 
 		const IECore::MurmurHash reduction = tbb::parallel_deterministic_reduce(
 
-			IntRange( 0, contextValues.size() ),
-			MurmurHash(),
+			IntRange( 0, contextValues.size() ), MurmurHash(),
 
 			[&]( const IntRange &range, MurmurHash hash ) {
 				Context::EditableScope scope( threadState );
@@ -503,8 +484,7 @@ void Collect::hash( const ValuePlug *output, const Context *context, IECore::Mur
 				return x;
 			},
 
-			simple_partitioner(),
-			taskGroupContext
+			simple_partitioner(), taskGroupContext
 		);
 
 		h.append( reduction );
@@ -537,16 +517,13 @@ void Collect::compute( ValuePlug *output, const Context *context ) const
 		CompoundObjectPtr result = new CompoundObject;
 		for( auto &input : ValuePlug::Range( *inPlug() ) )
 		{
-			dispatchPlugFunction(
-				input.get(),
-				[&]( auto *plug ) {
-					using OutputTraits = OutputTraits<remove_const_t<remove_pointer_t<decltype( plug )>>>;
-					typename OutputTraits::ObjectType::Ptr object = new typename OutputTraits::ObjectType;
-					OutputTraits::container( *object ).resize( contextValues.size() );
-					toCollect.push_back( { input.get(), object.get() } );
-					result->members()[input->getName()] = object;
-				}
-			);
+			dispatchPlugFunction( input.get(), [&]( auto *plug ) {
+				using OutputTraits = OutputTraits<remove_const_t<remove_pointer_t<decltype( plug )>>>;
+				typename OutputTraits::ObjectType::Ptr object = new typename OutputTraits::ObjectType;
+				OutputTraits::container( *object ).resize( contextValues.size() );
+				toCollect.push_back( { input.get(), object.get() } );
+				result->members()[input->getName()] = object;
+			} );
 		}
 
 		// Perform collection in parallel.
@@ -565,14 +542,11 @@ void Collect::compute( ValuePlug *output, const Context *context ) const
 
 					for( auto [input, object] : toCollect )
 					{
-						dispatchPlugFunction(
-							input,
-							[&, object = object]( auto *plug ) {
-								using OutputTraits = OutputTraits<remove_const_t<remove_pointer_t<decltype( plug )>>>;
-								auto typedObject = static_cast<typename OutputTraits::ObjectType *>( object );
-								OutputTraits::container( *typedObject )[index] = OutputTraits::collect( plug );
-							}
-						);
+						dispatchPlugFunction( input, [&, object = object]( auto *plug ) {
+							using OutputTraits = OutputTraits<remove_const_t<remove_pointer_t<decltype( plug )>>>;
+							auto typedObject = static_cast<typename OutputTraits::ObjectType *>( object );
+							OutputTraits::container( *typedObject )[index] = OutputTraits::collect( plug );
+						} );
 					}
 				}
 			},
@@ -591,19 +565,18 @@ void Collect::compute( ValuePlug *output, const Context *context ) const
 		ConstCompoundObjectPtr collection = collectionPlug()->getValue();
 		const ValuePlug *input = inputPlugForOutput( output );
 
-		dispatchPlugFunction(
-			input,
-			[&]( auto *plug ) {
-				using OutputTraits = OutputTraits<remove_const_t<remove_pointer_t<decltype( plug )>>>;
-				auto object = collection->member<typename OutputTraits::PlugType::ValueType>( output->getName(), true );
-				static_cast<typename OutputTraits::PlugType *>( output )->setValue( object );
-			}
-		);
+		dispatchPlugFunction( input, [&]( auto *plug ) {
+			using OutputTraits = OutputTraits<remove_const_t<remove_pointer_t<decltype( plug )>>>;
+			auto object = collection->member<typename OutputTraits::PlugType::ValueType>( output->getName(), true );
+			static_cast<typename OutputTraits::PlugType *>( output )->setValue( object );
+		} );
 	}
 	else if( output == enabledValuesPlug() )
 	{
 		ConstCompoundObjectPtr collection = collectionPlug()->getValue();
-		static_cast<ObjectPlug *>( output )->setValue( collection->member<StringVectorData>( g_enabledOutputs, /* throwExceptions = */ true ) );
+		static_cast<ObjectPlug *>( output )->setValue(
+			collection->member<StringVectorData>( g_enabledOutputs, /* throwExceptions = */ true )
+		);
 	}
 }
 
@@ -627,7 +600,8 @@ ValuePlug::CachePolicy Collect::computeCachePolicy( const ValuePlug *output ) co
 
 void Collect::inputAdded( GraphComponent *input )
 {
-	m_inputNameChangedConnections[input] = input->nameChangedSignal().connect( boost::bind( &Collect::inputNameChanged, this, ::_1, ::_2 ) );
+	m_inputNameChangedConnections[input] =
+		input->nameChangedSignal().connect( boost::bind( &Collect::inputNameChanged, this, ::_1, ::_2 ) );
 }
 
 void Collect::inputRemoved( GraphComponent *input )

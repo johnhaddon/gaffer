@@ -69,7 +69,7 @@ const ScenePlug::ScenePath g_root;
 class Parent::ParentScope : public ScenePlug::GlobalScope
 {
 
-	public:
+public:
 
 	ParentScope( const Parent *parent, const ScenePlug::ScenePath &sourcePath, const Context *context )
 		: ScenePlug::GlobalScope( context )
@@ -82,7 +82,7 @@ class Parent::ParentScope : public ScenePlug::GlobalScope
 		}
 	}
 
-	private:
+private:
 
 	std::string m_sourceString;
 };
@@ -91,12 +91,16 @@ class Parent::ParentScope : public ScenePlug::GlobalScope
 class Parent::SourceScope : public ParentScope
 {
 
-	public:
+public:
 
-	SourceScope( const Parent *parent, const ScenePlug::ScenePath &sourcePath, const ScenePlug::ScenePath &branchPath, const Context *context )
+	SourceScope(
+		const Parent *parent, const ScenePlug::ScenePath &sourcePath, const ScenePlug::ScenePath &branchPath,
+		const Context *context
+	)
 		: ParentScope( parent, sourcePath, context )
 	{
-		Private::ConstChildNamesMapPtr mapping = boost::static_pointer_cast<const Private::ChildNamesMap>( parent->mappingPlug()->getValue() );
+		Private::ConstChildNamesMapPtr mapping =
+			boost::static_pointer_cast<const Private::ChildNamesMap>( parent->mappingPlug()->getValue() );
 
 		const Private::ChildNamesMap::Input &input = mapping->input( branchPath[0] );
 		m_sourcePlug = parent->childrenPlug()->getChild<ScenePlug>( input.index );
@@ -108,12 +112,9 @@ class Parent::SourceScope : public ParentScope
 		set( ScenePlug::scenePathContextName, &m_sourcePath );
 	}
 
-	const ScenePlug *sourcePlug() const
-	{
-		return m_sourcePlug;
-	}
+	const ScenePlug *sourcePlug() const { return m_sourcePlug; }
 
-	private:
+private:
 
 	const ScenePlug *m_sourcePlug;
 	ScenePlug::ScenePath m_sourcePath;
@@ -127,8 +128,7 @@ GAFFER_NODE_DEFINE_TYPE( Parent );
 
 size_t Parent::g_firstPlugIndex = 0;
 
-Parent::Parent( const std::string &name )
-	: BranchCreator( name )
+Parent::Parent( const std::string &name ) : BranchCreator( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ArrayPlug( "children", Plug::In, new ScenePlug( "child0" ) ) );
@@ -136,9 +136,7 @@ Parent::Parent( const std::string &name )
 	addChild( new Gaffer::ObjectPlug( "__mapping", Gaffer::Plug::Out, IECore::NullObject::defaultNullObject() ) );
 }
 
-Parent::~Parent()
-{
-}
+Parent::~Parent() {}
 
 Gaffer::ArrayPlug *Parent::childrenPlug()
 {
@@ -222,7 +220,9 @@ bool Parent::affectsBranchBound( const Gaffer::Plug *input ) const
 	return affectsSourceScope( input ) || isChildrenPlug( input, inPlug()->boundPlug()->getName() );
 }
 
-void Parent::hashBranchBound( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Parent::hashBranchBound(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	if( branchPath.size() == 0 )
 	{
@@ -243,7 +243,9 @@ void Parent::hashBranchBound( const ScenePath &sourcePath, const ScenePath &bran
 	}
 }
 
-Imath::Box3f Parent::computeBranchBound( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+Imath::Box3f Parent::computeBranchBound(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	if( branchPath.size() == 0 )
 	{
@@ -276,13 +278,17 @@ bool Parent::affectsBranchTransform( const Gaffer::Plug *input ) const
 	return affectsSourceScope( input ) || isChildrenPlug( input, inPlug()->transformPlug()->getName() );
 }
 
-void Parent::hashBranchTransform( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Parent::hashBranchTransform(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	SourceScope s( this, sourcePath, branchPath, context );
 	h = s.sourcePlug()->transformPlug()->hash();
 }
 
-Imath::M44f Parent::computeBranchTransform( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+Imath::M44f Parent::computeBranchTransform(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	SourceScope s( this, sourcePath, branchPath, context );
 	return s.sourcePlug()->transformPlug()->getValue();
@@ -293,13 +299,17 @@ bool Parent::affectsBranchAttributes( const Gaffer::Plug *input ) const
 	return affectsSourceScope( input ) || isChildrenPlug( input, inPlug()->attributesPlug()->getName() );
 }
 
-void Parent::hashBranchAttributes( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Parent::hashBranchAttributes(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	SourceScope s( this, sourcePath, branchPath, context );
 	h = s.sourcePlug()->attributesPlug()->hash();
 }
 
-IECore::ConstCompoundObjectPtr Parent::computeBranchAttributes( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+IECore::ConstCompoundObjectPtr Parent::computeBranchAttributes(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	SourceScope s( this, sourcePath, branchPath, context );
 	return s.sourcePlug()->attributesPlug()->getValue();
@@ -310,13 +320,17 @@ bool Parent::affectsBranchObject( const Gaffer::Plug *input ) const
 	return affectsSourceScope( input ) || isChildrenPlug( input, inPlug()->objectPlug()->getName() );
 }
 
-void Parent::hashBranchObject( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Parent::hashBranchObject(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	SourceScope s( this, sourcePath, branchPath, context );
 	h = s.sourcePlug()->objectPlug()->hash();
 }
 
-IECore::ConstObjectPtr Parent::computeBranchObject( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+IECore::ConstObjectPtr Parent::computeBranchObject(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	SourceScope s( this, sourcePath, branchPath, context );
 	return s.sourcePlug()->objectPlug()->getValue();
@@ -327,7 +341,9 @@ bool Parent::affectsBranchChildNames( const Gaffer::Plug *input ) const
 	return affectsSourceScope( input ) || isChildrenPlug( input, inPlug()->childNamesPlug()->getName() );
 }
 
-void Parent::hashBranchChildNames( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Parent::hashBranchChildNames(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	if( branchPath.size() == 0 )
 	{
@@ -342,12 +358,15 @@ void Parent::hashBranchChildNames( const ScenePath &sourcePath, const ScenePath 
 	}
 }
 
-IECore::ConstInternedStringVectorDataPtr Parent::computeBranchChildNames( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+IECore::ConstInternedStringVectorDataPtr Parent::computeBranchChildNames(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	if( branchPath.size() == 0 )
 	{
 		ParentScope s( this, sourcePath, context );
-		Private::ConstChildNamesMapPtr mapping = boost::static_pointer_cast<const Private::ChildNamesMap>( mappingPlug()->getValue() );
+		Private::ConstChildNamesMapPtr mapping =
+			boost::static_pointer_cast<const Private::ChildNamesMap>( mappingPlug()->getValue() );
 		return mapping->outputChildNames();
 	}
 	else
@@ -362,7 +381,9 @@ bool Parent::affectsBranchSetNames( const Gaffer::Plug *input ) const
 	return affectsParentScope( input ) || isChildrenPlug( input, inPlug()->setNamesPlug()->getName() );
 }
 
-void Parent::hashBranchSetNames( const ScenePath &sourcePath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Parent::hashBranchSetNames(
+	const ScenePath &sourcePath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	BranchCreator::hashBranchSetNames( sourcePath, context, h );
 
@@ -373,7 +394,9 @@ void Parent::hashBranchSetNames( const ScenePath &sourcePath, const Gaffer::Cont
 	}
 }
 
-IECore::ConstInternedStringVectorDataPtr Parent::computeBranchSetNames( const ScenePath &sourcePath, const Gaffer::Context *context ) const
+IECore::ConstInternedStringVectorDataPtr Parent::computeBranchSetNames(
+	const ScenePath &sourcePath, const Gaffer::Context *context
+) const
 {
 	ParentScope s( this, sourcePath, context );
 
@@ -407,7 +430,10 @@ bool Parent::affectsBranchSet( const Gaffer::Plug *input ) const
 	return affectsParentScope( input ) || isChildrenPlug( input, inPlug()->setPlug()->getName() );
 }
 
-void Parent::hashBranchSet( const ScenePath &sourcePath, const IECore::InternedString &setName, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Parent::hashBranchSet(
+	const ScenePath &sourcePath, const IECore::InternedString &setName, const Gaffer::Context *context,
+	IECore::MurmurHash &h
+) const
 {
 	BranchCreator::hashBranchSet( sourcePath, setName, context, h );
 
@@ -423,7 +449,9 @@ void Parent::hashBranchSet( const ScenePath &sourcePath, const IECore::InternedS
 	mappingPlug()->hash( h );
 }
 
-IECore::ConstPathMatcherDataPtr Parent::computeBranchSet( const ScenePath &sourcePath, const IECore::InternedString &setName, const Gaffer::Context *context ) const
+IECore::ConstPathMatcherDataPtr Parent::computeBranchSet(
+	const ScenePath &sourcePath, const IECore::InternedString &setName, const Gaffer::Context *context
+) const
 {
 	ParentScope s( this, sourcePath, context );
 	s.set( ScenePlug::setNameContextName, &setName );
@@ -436,7 +464,8 @@ IECore::ConstPathMatcherDataPtr Parent::computeBranchSet( const ScenePath &sourc
 	}
 
 	s.remove( ScenePlug::setNameContextName );
-	Private::ConstChildNamesMapPtr mapping = boost::static_pointer_cast<const Private::ChildNamesMap>( mappingPlug()->getValue() );
+	Private::ConstChildNamesMapPtr mapping =
+		boost::static_pointer_cast<const Private::ChildNamesMap>( mappingPlug()->getValue() );
 
 	PathMatcherDataPtr resultData = new PathMatcherData;
 	resultData->writable().addPaths( mapping->set( inputSets ) );

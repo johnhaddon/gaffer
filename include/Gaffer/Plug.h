@@ -55,22 +55,27 @@ IE_CORE_FORWARDDECLARE( Node )
 	using Iterator = Gaffer::FilteredChildIterator<Gaffer::Plug::TypePredicate<TYPE>>; \
 	using InputIterator = Gaffer::FilteredChildIterator<Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::In>>; \
 	using OutputIterator = Gaffer::FilteredChildIterator<Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::Out>>; \
-	using RecursiveIterator = Gaffer::FilteredRecursiveChildIterator<Gaffer::Plug::TypePredicate<TYPE>, Gaffer::Plug::TypePredicate<>>; \
-	using RecursiveInputIterator = Gaffer::FilteredRecursiveChildIterator<Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::In>, Gaffer::Plug::TypePredicate<>>; \
-	using RecursiveOutputIterator = Gaffer::FilteredRecursiveChildIterator<Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::Out>, Gaffer::Plug::TypePredicate<>>; \
+	using RecursiveIterator = \
+		Gaffer::FilteredRecursiveChildIterator<Gaffer::Plug::TypePredicate<TYPE>, Gaffer::Plug::TypePredicate<>>; \
+	using RecursiveInputIterator = Gaffer::FilteredRecursiveChildIterator< \
+		Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::In>, Gaffer::Plug::TypePredicate<>>; \
+	using RecursiveOutputIterator = Gaffer::FilteredRecursiveChildIterator< \
+		Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::Out>, Gaffer::Plug::TypePredicate<>>; \
 	using Range = Gaffer::FilteredChildRange<Gaffer::Plug::TypePredicate<TYPE>>; \
 	using InputRange = Gaffer::FilteredChildRange<Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::In>>; \
 	using OutputRange = Gaffer::FilteredChildRange<Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::Out>>; \
-	using RecursiveRange = Gaffer::FilteredRecursiveChildRange<Gaffer::Plug::TypePredicate<TYPE>, Gaffer::Plug::TypePredicate<>>; \
-	using RecursiveInputRange = Gaffer::FilteredRecursiveChildRange<Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::In>, Gaffer::Plug::TypePredicate<>>; \
-	using RecursiveOutputRange = Gaffer::FilteredRecursiveChildRange<Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::Out>, Gaffer::Plug::TypePredicate<>>;
+	using RecursiveRange = \
+		Gaffer::FilteredRecursiveChildRange<Gaffer::Plug::TypePredicate<TYPE>, Gaffer::Plug::TypePredicate<>>; \
+	using RecursiveInputRange = Gaffer::FilteredRecursiveChildRange< \
+		Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::In>, Gaffer::Plug::TypePredicate<>>; \
+	using RecursiveOutputRange = Gaffer::FilteredRecursiveChildRange< \
+		Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::Out>, Gaffer::Plug::TypePredicate<>>;
 
 #define GAFFER_PLUG_DECLARE_TYPE( TYPE, TYPEID, BASETYPE ) \
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( TYPE, TYPEID, BASETYPE ) \
 	GAFFER_PLUG_DECLARE_TYPE_ALIASES( TYPE )
 
-#define GAFFER_PLUG_DEFINE_TYPE( TYPE ) \
-	IE_CORE_DEFINERUNTIMETYPED( TYPE )
+#define GAFFER_PLUG_DEFINE_TYPE( TYPE ) IE_CORE_DEFINERUNTIMETYPED( TYPE )
 
 #define GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( TYPE, BASETYPE ) \
 	IECORE_RUNTIMETYPED_DECLARETEMPLATE( TYPE, BASETYPE ) \
@@ -99,7 +104,7 @@ IE_CORE_FORWARDDECLARE( Node )
 class GAFFER_API Plug : public GraphComponent
 {
 
-	public:
+public:
 
 	enum Direction
 	{
@@ -225,7 +230,7 @@ class GAFFER_API Plug : public GraphComponent
 	/// Creates a new Plug which is a copy of this, but with a specified name and direction.
 	virtual PlugPtr createCounterpart( const std::string &name, Direction direction ) const;
 
-	protected:
+protected:
 
 	void nameChanged( IECore::InternedString oldName ) override;
 	void parentChanging( Gaffer::GraphComponent *newParent ) override;
@@ -255,7 +260,7 @@ class GAFFER_API Plug : public GraphComponent
 	/// > deferred until the DirtyPropagationScope closes.
 	static void flushDirtyPropagationScope();
 
-	private:
+private:
 
 	static void propagateDirtinessAtLeaves( Plug *plugToDirty );
 

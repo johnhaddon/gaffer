@@ -81,10 +81,12 @@ struct Dependencies : public IECore::RefCounted
 class TestProcess : public Process
 {
 
-	public:
+public:
 
 	TestProcess( const Plug *plug, int result, const Dependencies::ConstPtr &dependencies )
-		: Process( g_staticType, plug, plug ), m_result( result ), m_dependencies( dependencies )
+		: Process( g_staticType, plug, plug ),
+		  m_result( result ),
+		  m_dependencies( dependencies )
 	{
 	}
 
@@ -117,7 +119,9 @@ class TestProcess : public Process
 				int actualResult;
 				if( expectedResult >= 0 )
 				{
-					actualResult = Process::acquireCollaborativeResult<TestProcess>( expectedResult, p, expectedResult, dependency.second );
+					actualResult = Process::acquireCollaborativeResult<TestProcess>(
+						expectedResult, p, expectedResult, dependency.second
+					);
 				}
 				else
 				{
@@ -136,12 +140,9 @@ class TestProcess : public Process
 	using CacheType = IECorePreview::LRUCache<int, int, IECorePreview::LRUCachePolicy::Parallel>;
 	static CacheType g_cache;
 
-	static size_t cacheCostFunction( int value )
-	{
-		return 1;
-	}
+	static size_t cacheCostFunction( int value ) { return 1; }
 
-	private:
+private:
 
 	const int m_result;
 	const Dependencies::ConstPtr m_dependencies;
@@ -153,7 +154,9 @@ TestProcess::CacheType TestProcess::g_cache( TestProcess::CacheType::GetterFunct
 // Spoof type so that we can use PerformanceMonitor to check we get the processes we expect in ProcessTest.py.
 const IECore::InternedString TestProcess::g_staticType( "computeNode:compute" );
 
-Dependencies::ConstPtr dependenciesFromDict( dict dependenciesDict, std::unordered_map<const PyObject *, Dependencies::ConstPtr> &converted )
+Dependencies::ConstPtr dependenciesFromDict(
+	dict dependenciesDict, std::unordered_map<const PyObject *, Dependencies::ConstPtr> &converted
+)
 {
 	auto it = converted.find( dependenciesDict.ptr() );
 	if( it != converted.end() )

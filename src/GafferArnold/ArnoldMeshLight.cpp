@@ -50,10 +50,9 @@ namespace
 
 const ConstCompoundObjectPtr g_hiddenVisibilityAttributes = [] {
 	const std::vector<std::string> names = {
-		"ai:visibility:shadow",
-		"ai:visibility:diffuse_reflect", "ai:visibility:specular_reflect",
-		"ai:visibility:diffuse_transmit", "ai:visibility:specular_transmit",
-		"ai:visibility:volume", "ai:visibility:subsurface"
+		"ai:visibility:shadow",			  "ai:visibility:diffuse_reflect",	 "ai:visibility:specular_reflect",
+		"ai:visibility:diffuse_transmit", "ai:visibility:specular_transmit", "ai:visibility:volume",
+		"ai:visibility:subsurface"
 	};
 
 	const CompoundObjectPtr result = new CompoundObject;
@@ -69,10 +68,11 @@ const ConstCompoundObjectPtr g_hiddenVisibilityAttributes = [] {
 GAFFER_NODE_DEFINE_TYPE( ArnoldMeshLight );
 
 ArnoldMeshLight::ArnoldMeshLight( const std::string &name )
-	: GafferScene::MeshLight(
-		  name,
-		  [] { ArnoldShaderPtr shader = new ArnoldShader; shader->loadShader( "mesh_light" ); return shader; }()
-	  )
+	: GafferScene::MeshLight( name, [] {
+		  ArnoldShaderPtr shader = new ArnoldShader;
+		  shader->loadShader( "mesh_light" );
+		  return shader;
+	  }() )
 {
 
 	// Hide the object from the majority of ray types, since we don't want to
@@ -87,15 +87,12 @@ ArnoldMeshLight::ArnoldMeshLight( const std::string &name )
 	/// \todo We could promote as OptionalValuePlug to avoid exposing the
 	/// `name` plug unnecessarily.
 
-	NameValuePlugPtr internalCameraVisibilityPlug = new NameValuePlug(
-		"ai:visibility:camera", new BoolPlug( "value", Plug::In, true ), false, "cameraVisibility"
-	);
+	NameValuePlugPtr internalCameraVisibilityPlug =
+		new NameValuePlug( "ai:visibility:camera", new BoolPlug( "value", Plug::In, true ), false, "cameraVisibility" );
 	customAttributes()->attributesPlug()->addChild( internalCameraVisibilityPlug );
 	PlugPtr cameraVisibilityPlug = internalCameraVisibilityPlug->createCounterpart( "cameraVisibility", Plug::In );
 	addChild( cameraVisibilityPlug );
 	internalCameraVisibilityPlug->setInput( cameraVisibilityPlug );
 }
 
-ArnoldMeshLight::~ArnoldMeshLight()
-{
-}
+ArnoldMeshLight::~ArnoldMeshLight() {}

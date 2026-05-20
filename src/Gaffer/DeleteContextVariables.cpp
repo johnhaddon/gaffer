@@ -46,16 +46,13 @@ GAFFER_NODE_DEFINE_TYPE( DeleteContextVariables );
 
 size_t DeleteContextVariables::g_firstPlugIndex;
 
-DeleteContextVariables::DeleteContextVariables( const std::string &name )
-	: ContextProcessor( name )
+DeleteContextVariables::DeleteContextVariables( const std::string &name ) : ContextProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "variables" ) );
 }
 
-DeleteContextVariables::~DeleteContextVariables()
-{
-}
+DeleteContextVariables::~DeleteContextVariables() {}
 
 StringPlug *DeleteContextVariables::variablesPlug()
 {
@@ -72,7 +69,9 @@ bool DeleteContextVariables::affectsContext( const Plug *input ) const
 	return input == variablesPlug();
 }
 
-void DeleteContextVariables::processContext( Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const
+void DeleteContextVariables::processContext(
+	Context::EditableScope &context, IECore::ConstRefCountedPtr &storage
+) const
 {
 	context.removeMatching( variablesPlug()->getValue() );
 }

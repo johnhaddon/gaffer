@@ -59,7 +59,7 @@ class LightFilter;
 class LightLinker
 {
 
-	public:
+public:
 
 	LightLinker();
 
@@ -70,7 +70,9 @@ class LightLinker
 	// changes made to the scene, and may all be called
 	// concurrently.
 
-	IECoreScene::ConstShaderNetworkPtr registerFilterLinks( Light *light, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lightFilters );
+	IECoreScene::ConstShaderNetworkPtr registerFilterLinks(
+		Light *light, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lightFilters
+	);
 	void deregisterFilterLinks( Light *light, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lightFilters );
 	void dirtyLightFilter( const LightFilter *lightFilter );
 
@@ -94,12 +96,14 @@ class LightLinker
 	// not be called concurrently with other methods.
 	void updateDirtyLinks();
 
-	private:
+private:
 
 	// Light Filter Linking
 	// ====================
 
-	static IECoreScene::ConstShaderNetworkPtr lightFilterShader( const IECoreScenePreview::Renderer::ObjectSet *filters );
+	static IECoreScene::ConstShaderNetworkPtr lightFilterShader(
+		const IECoreScenePreview::Renderer::ObjectSet *filters
+	);
 	void updateDirtyFilterLinks();
 
 	// Data structure for tracking dependencies between light filters and

@@ -81,10 +81,7 @@ struct NoduleSlotCaller
 
 struct NodeGadgetCreator
 {
-	NodeGadgetCreator( object fn )
-		: m_fn( fn )
-	{
-	}
+	NodeGadgetCreator( object fn ) : m_fn( fn ) {}
 
 	NodeGadgetPtr operator () ( Gaffer::NodePtr node )
 	{
@@ -93,7 +90,7 @@ struct NodeGadgetCreator
 		return result;
 	}
 
-	private:
+private:
 
 	object m_fn;
 };
@@ -111,7 +108,7 @@ void registerNodeGadget2( const std::string &nodeGadgetType, object creator, IEC
 class StandardNodeGadgetWrapper : public NodeGadgetWrapper<StandardNodeGadget>
 {
 
-	public:
+public:
 
 	StandardNodeGadgetWrapper( PyObject *self, Gaffer::NodePtr node )
 		: NodeGadgetWrapper<StandardNodeGadget>( self, node )
@@ -171,16 +168,23 @@ void GafferUIModule::bindNodeGadget()
 	using Wrapper = NodeGadgetWrapper<NodeGadget>;
 
 	NodeGadgetClass<NodeGadget, Wrapper>()
-		.def( "node", ( Gaffer::Node * (NodeGadget::*)() ) & NodeGadget::node, return_value_policy<CastToIntrusivePtr>() )
+		.def(
+			"node", ( Gaffer::Node * (NodeGadget::*)() ) & NodeGadget::node, return_value_policy<CastToIntrusivePtr>()
+		)
 		.def( "noduleAddedSignal", &NodeGadget::noduleAddedSignal, return_internal_reference<1>() )
 		.def( "noduleRemovedSignal", &NodeGadget::noduleRemovedSignal, return_internal_reference<1>() )
 		.def( "create", &NodeGadget::create )
 		.staticmethod( "create" )
 		.def( "registerNodeGadget", &registerNodeGadget1 )
-		.def( "registerNodeGadget", &registerNodeGadget2, ( arg( "nodeGadgetType" ), arg( "creator" ), arg( "nodeType" ) = IECore::InvalidTypeId ) )
+		.def(
+			"registerNodeGadget", &registerNodeGadget2,
+			( arg( "nodeGadgetType" ), arg( "creator" ), arg( "nodeType" ) = IECore::InvalidTypeId )
+		)
 		.staticmethod( "registerNodeGadget" );
 
-	SignalClass<NodeGadget::NoduleSignal, DefaultSignalCaller<NodeGadget::NoduleSignal>, NoduleSlotCaller>( "NoduleSignal" );
+	SignalClass<NodeGadget::NoduleSignal, DefaultSignalCaller<NodeGadget::NoduleSignal>, NoduleSlotCaller>(
+		"NoduleSignal"
+	);
 
 	{
 		scope s = NodeGadgetClass<StandardNodeGadget, StandardNodeGadgetWrapper>()
@@ -204,9 +208,7 @@ void GafferUIModule::bindNodeGadget()
 		.def( "frame", &frame )
 		.def( "framed", &framed );
 
-	NodeGadgetClass<DotNodeGadget>()
-		.def( init<Gaffer::NodePtr>() );
+	NodeGadgetClass<DotNodeGadget>().def( init<Gaffer::NodePtr>() );
 
-	NodeGadgetClass<AuxiliaryNodeGadget>()
-		.def( init<Gaffer::NodePtr>() );
+	NodeGadgetClass<AuxiliaryNodeGadget>().def( init<Gaffer::NodePtr>() );
 }

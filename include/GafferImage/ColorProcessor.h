@@ -48,7 +48,7 @@ namespace GafferImage
 class GAFFERIMAGE_API ColorProcessor : public ImageProcessor
 {
 
-	public:
+public:
 
 	explicit ColorProcessor( const std::string &name = defaultName<ColorProcessor>() );
 	~ColorProcessor() override;
@@ -63,14 +63,15 @@ class GAFFERIMAGE_API ColorProcessor : public ImageProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
 	/// Function object used to implement the processing of color values.
-	using ColorProcessorFunction = std::function<void( IECore::FloatVectorData *r, IECore::FloatVectorData *g, IECore::FloatVectorData *b )>;
+	using ColorProcessorFunction =
+		std::function<void( IECore::FloatVectorData *r, IECore::FloatVectorData *g, IECore::FloatVectorData *b )>;
 
 	/// Must be implemented by derived classes to return true if the specified input is used in `colorProcessor()`.
 	virtual bool affectsColorProcessor( const Gaffer::Plug *input ) const = 0;
@@ -80,10 +81,15 @@ class GAFFERIMAGE_API ColorProcessor : public ImageProcessor
 	/// may be returned, in which case the node will pass through the input image data unchanged.
 	virtual ColorProcessorFunction colorProcessor( const Gaffer::Context *context ) const = 0;
 
-	private:
+private:
 
-	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const final;
-	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const final;
+	void hashChannelData(
+		const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const final;
+	IECore::ConstFloatVectorDataPtr computeChannelData(
+		const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+		const ImagePlug *parent
+	) const final;
 
 	Gaffer::ObjectPlug *colorProcessorPlug();
 	const Gaffer::ObjectPlug *colorProcessorPlug() const;

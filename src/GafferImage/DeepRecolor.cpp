@@ -48,8 +48,7 @@ GAFFER_NODE_DEFINE_TYPE( DeepRecolor );
 
 size_t DeepRecolor::g_firstPlugIndex = 0;
 
-DeepRecolor::DeepRecolor( const std::string &name )
-	: ImageProcessor( name )
+DeepRecolor::DeepRecolor( const std::string &name ) : ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "colorSource" ) );
@@ -63,9 +62,7 @@ DeepRecolor::DeepRecolor( const std::string &name )
 	outPlug()->sampleOffsetsPlug()->setInput( inPlug()->sampleOffsetsPlug() );
 }
 
-DeepRecolor::~DeepRecolor()
-{
-}
+DeepRecolor::~DeepRecolor() {}
 
 GafferImage::ImagePlug *DeepRecolor::colorSourcePlug()
 {
@@ -96,26 +93,23 @@ void DeepRecolor::affects( const Gaffer::Plug *input, AffectedPlugsContainer &ou
 		outputs.push_back( outPlug()->viewNamesPlug() );
 	}
 
-	if( input == inPlug()->channelDataPlug() ||
-		input == inPlug()->channelNamesPlug() ||
-		input == inPlug()->sampleOffsetsPlug() ||
-		input == colorSourcePlug()->channelDataPlug() ||
-		input == colorSourcePlug()->dataWindowPlug() ||
-		input == colorSourcePlug()->channelNamesPlug() ||
-		input == colorSourcePlug()->deepPlug() ||
-		input == useColorSourceAlphaPlug() )
+	if( input == inPlug()->channelDataPlug() || input == inPlug()->channelNamesPlug() ||
+		input == inPlug()->sampleOffsetsPlug() || input == colorSourcePlug()->channelDataPlug() ||
+		input == colorSourcePlug()->dataWindowPlug() || input == colorSourcePlug()->channelNamesPlug() ||
+		input == colorSourcePlug()->deepPlug() || input == useColorSourceAlphaPlug() )
 	{
 		outputs.push_back( outPlug()->channelDataPlug() );
 	}
 
-	if( input == inPlug()->channelNamesPlug() ||
-		input == colorSourcePlug()->channelNamesPlug() )
+	if( input == inPlug()->channelNamesPlug() || input == colorSourcePlug()->channelNamesPlug() )
 	{
 		outputs.push_back( outPlug()->channelNamesPlug() );
 	}
 }
 
-void DeepRecolor::hashViewNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepRecolor::hashViewNames(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashViewNames( output, context, h );
 
@@ -123,7 +117,9 @@ void DeepRecolor::hashViewNames( const GafferImage::ImagePlug *output, const Gaf
 	colorSourcePlug()->viewNamesPlug()->hash( h );
 }
 
-IECore::ConstStringVectorDataPtr DeepRecolor::computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr DeepRecolor::computeViewNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	IECore::ConstStringVectorDataPtr inViewsData = inPlug()->viewNamesPlug()->getValue();
 
@@ -135,7 +131,9 @@ IECore::ConstStringVectorDataPtr DeepRecolor::computeViewNames( const Gaffer::Co
 	return inViewsData;
 }
 
-void DeepRecolor::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepRecolor::hashChannelData(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	const Imath::V2i tileOrigin = context->get<Imath::V2i>( ImagePlug::tileOriginContextName );
 	const std::string &channelName = context->get<std::string>( ImagePlug::channelNameContextName );
@@ -146,10 +144,8 @@ void DeepRecolor::hashChannelData( const GafferImage::ImagePlug *output, const G
 
 	bool useColorSourceAlpha = useColorSourceAlphaPlug()->getValue();
 	ConstStringVectorDataPtr colorSourceChannelNames = colorSourcePlug()->channelNamesPlug()->getValue();
-	if(
-		channelName == "Z" || channelName == "ZBack" || ( ( !useColorSourceAlpha ) && channelName == "A" ) ||
-		!ImageAlgo::channelExists( colorSourceChannelNames->readable(), channelName )
-	)
+	if( channelName == "Z" || channelName == "ZBack" || ( ( !useColorSourceAlpha ) && channelName == "A" ) ||
+		!ImageAlgo::channelExists( colorSourceChannelNames->readable(), channelName ) )
 	{
 		reusedScope.setTileOrigin( &tileOrigin );
 		reusedScope.setChannelName( &channelName );
@@ -199,7 +195,10 @@ void DeepRecolor::hashChannelData( const GafferImage::ImagePlug *output, const G
 	h.append( boundInTile );
 }
 
-IECore::ConstFloatVectorDataPtr DeepRecolor::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr DeepRecolor::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	ImagePlug::ChannelDataScope reusedScope( context );
 	reusedScope.remove( ImagePlug::channelNameContextName );
@@ -207,10 +206,8 @@ IECore::ConstFloatVectorDataPtr DeepRecolor::computeChannelData( const std::stri
 
 	bool useColorSourceAlpha = useColorSourceAlphaPlug()->getValue();
 	ConstStringVectorDataPtr colorSourceChannelNames = colorSourcePlug()->channelNamesPlug()->getValue();
-	if(
-		channelName == "Z" || channelName == "ZBack" || ( ( !useColorSourceAlpha ) && channelName == "A" ) ||
-		!ImageAlgo::channelExists( colorSourceChannelNames->readable(), channelName )
-	)
+	if( channelName == "Z" || channelName == "ZBack" || ( ( !useColorSourceAlpha ) && channelName == "A" ) ||
+		!ImageAlgo::channelExists( colorSourceChannelNames->readable(), channelName ) )
 	{
 		reusedScope.setTileOrigin( &tileOrigin );
 		reusedScope.setChannelName( &channelName );
@@ -343,7 +340,8 @@ IECore::ConstFloatVectorDataPtr DeepRecolor::computeChannelData( const std::stri
 
 						for( int k = prevOffset; k < offset; k++ )
 						{
-							result[k] = -expm1( -std::min( maxContribute, -log1pf( -deepAlpha[k] ) ) * depthMultiplier );
+							result[k] =
+								-expm1( -std::min( maxContribute, -log1pf( -deepAlpha[k] ) ) * depthMultiplier );
 						}
 					}
 				}
@@ -389,7 +387,9 @@ IECore::ConstFloatVectorDataPtr DeepRecolor::computeChannelData( const std::stri
 	return resultData;
 }
 
-void DeepRecolor::hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepRecolor::hashChannelNames(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashChannelNames( output, context, h );
 
@@ -397,7 +397,9 @@ void DeepRecolor::hashChannelNames( const GafferImage::ImagePlug *output, const 
 	colorSourcePlug()->channelNamesPlug()->hash( h );
 }
 
-IECore::ConstStringVectorDataPtr DeepRecolor::computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr DeepRecolor::computeChannelNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	IECore::ConstStringVectorDataPtr inChannelsData = inPlug()->channelNamesPlug()->getValue();
 	IECore::ConstStringVectorDataPtr colorChannelsData = colorSourcePlug()->channelNamesPlug()->getValue();

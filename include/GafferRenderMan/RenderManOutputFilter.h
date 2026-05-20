@@ -50,11 +50,13 @@ namespace GafferRenderMan
 class GAFFERRENDERMAN_API RenderManOutputFilter : public GafferScene::GlobalsProcessor
 {
 
-	public:
+public:
 
 	~RenderManOutputFilter() override;
 
-	GAFFER_NODE_DECLARE_TYPE( GafferRenderMan::RenderManOutputFilter, RenderManOutputFilterTypeId, GafferScene::GlobalsProcessor );
+	GAFFER_NODE_DECLARE_TYPE(
+		GafferRenderMan::RenderManOutputFilter, RenderManOutputFilterTypeId, GafferScene::GlobalsProcessor
+	);
 
 	enum class Mode
 	{
@@ -71,7 +73,7 @@ class GAFFERRENDERMAN_API RenderManOutputFilter : public GafferScene::GlobalsPro
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
 	enum class FilterType
 	{
@@ -84,9 +86,11 @@ class GAFFERRENDERMAN_API RenderManOutputFilter : public GafferScene::GlobalsPro
 	bool acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const override;
 
 	void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedGlobals(
+		const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals
+	) const override;
 
-	private:
+private:
 
 	const FilterType m_filterType;
 	static size_t g_firstPlugIndex;

@@ -104,11 +104,15 @@ IECoreGL::GroupPtr line( const V3f &p0, const V3f &p1 )
 {
 	IntVectorDataPtr vertsPerCurve = new IntVectorData();
 	vertsPerCurve->writable().push_back( 2 );
-	IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive( CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurve );
+	IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive(
+		CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurve
+	);
 	V3fVectorDataPtr verts = new V3fVectorData();
 	verts->writable().push_back( p0 );
 	verts->writable().push_back( p1 );
-	curves->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, verts ) );
+	curves->addPrimitiveVariable(
+		"P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, verts )
+	);
 
 	IECoreGL::GroupPtr result = new IECoreGL::Group();
 	result->addChild( curves );
@@ -163,7 +167,8 @@ IECoreGL::MeshPrimitivePtr cylinder( bool forSelection )
 		vertexIds.push_back( ii * 2 );
 	}
 
-	IECoreScene::MeshPrimitivePtr mesh = new IECoreScene::MeshPrimitive( verticesPerFaceData, vertexIdsData, "linear", pData );
+	IECoreScene::MeshPrimitivePtr mesh =
+		new IECoreScene::MeshPrimitive( verticesPerFaceData, vertexIdsData, "linear", pData );
 	IECoreGL::ToGLMeshConverterPtr converter = new ToGLMeshConverter( mesh );
 	result = runTimeCast<IECoreGL::MeshPrimitive>( converter->convert() );
 
@@ -203,9 +208,7 @@ IECoreGL::MeshPrimitivePtr torus( bool forSelection )
 		for( int j = 0; j < numDivisionsJ; ++j )
 		{
 			const float jAngle = 2 * M_PI * (float)j / (float)( numDivisionsJ - 1 );
-			p.push_back(
-				circleCenter + radiusJ * ( cos( jAngle ) * v + V3f( 0, sin( jAngle ), 0 ) )
-			);
+			p.push_back( circleCenter + radiusJ * ( cos( jAngle ) * v + V3f( 0, sin( jAngle ), 0 ) ) );
 
 			const int jj = j == numDivisionsJ - 1 ? 0 : j + 1;
 
@@ -218,7 +221,8 @@ IECoreGL::MeshPrimitivePtr torus( bool forSelection )
 		}
 	}
 
-	IECoreScene::MeshPrimitivePtr mesh = new IECoreScene::MeshPrimitive( verticesPerFaceData, vertexIdsData, "linear", pData );
+	IECoreScene::MeshPrimitivePtr mesh =
+		new IECoreScene::MeshPrimitive( verticesPerFaceData, vertexIdsData, "linear", pData );
 	IECoreGL::ToGLMeshConverterPtr converter = new ToGLMeshConverter( mesh );
 	result = runTimeCast<IECoreGL::MeshPrimitive>( converter->convert() );
 
@@ -259,7 +263,8 @@ IECoreGL::MeshPrimitivePtr cone()
 		vertexIds.push_back( i == numDivisions - 1 ? 1 : i + 2 );
 	}
 
-	IECoreScene::MeshPrimitivePtr mesh = new IECoreScene::MeshPrimitive( verticesPerFaceData, vertexIdsData, "linear", pData );
+	IECoreScene::MeshPrimitivePtr mesh =
+		new IECoreScene::MeshPrimitive( verticesPerFaceData, vertexIdsData, "linear", pData );
 	IECoreGL::ToGLMeshConverterPtr converter = new ToGLMeshConverter( mesh );
 	result = runTimeCast<IECoreGL::MeshPrimitive>( converter->convert() );
 
@@ -274,9 +279,7 @@ IECoreGL::MeshPrimitivePtr cube()
 		return result;
 	}
 
-	IECoreScene::MeshPrimitivePtr mesh = IECoreScene::MeshPrimitive::createBox(
-		Box3f( V3f( -1 ), V3f( 1 ) )
-	);
+	IECoreScene::MeshPrimitivePtr mesh = IECoreScene::MeshPrimitive::createBox( Box3f( V3f( -1 ), V3f( 1 ) ) );
 
 	IECoreGL::ToGLMeshConverterPtr converter = new ToGLMeshConverter( mesh );
 	result = runTimeCast<IECoreGL::MeshPrimitive>( converter->convert() );
@@ -300,9 +303,10 @@ IECoreGL::GroupPtr translateHandle( Style::Axes axes, bool forSelection )
 
 	IECoreGL::GroupPtr group = new IECoreGL::Group;
 	group->getState()->add( new IECoreGL::Color( colorForAxes( axes ) ) );
-	group->getState()->add(
-		new IECoreGL::ShaderStateComponent( ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "", IECoreGL::Shader::constantFragmentSource(), new CompoundObject )
-	);
+	group->getState()->add( new IECoreGL::ShaderStateComponent(
+		ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "",
+		IECoreGL::Shader::constantFragmentSource(), new CompoundObject
+	) );
 
 	if( axes == Style::X || axes == Style::Y || axes == Style::Z )
 	{
@@ -373,9 +377,10 @@ IECoreGL::GroupPtr rotateHandle( Style::Axes axes, bool forSelection )
 		group->addChild( torus( forSelection ) );
 
 		group->getState()->add( new IECoreGL::Color( colorForAxes( axes ) ) );
-		group->getState()->add(
-			new IECoreGL::ShaderStateComponent( ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "", IECoreGL::Shader::constantFragmentSource(), new CompoundObject )
-		);
+		group->getState()->add( new IECoreGL::ShaderStateComponent(
+			ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "",
+			IECoreGL::Shader::constantFragmentSource(), new CompoundObject
+		) );
 
 		if( axes == Style::X )
 		{
@@ -409,9 +414,10 @@ const IECoreGL::Group *rotateHandleXYZHighlight()
 
 	group = new IECoreGL::Group();
 	group->addChild( new SpherePrimitive( 1.03f, 0.99 ) );
-	group->getState()->add(
-		new IECoreGL::ShaderStateComponent( ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "", IECoreGL::Shader::constantFragmentSource(), new CompoundObject )
-	);
+	group->getState()->add( new IECoreGL::ShaderStateComponent(
+		ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "",
+		IECoreGL::Shader::constantFragmentSource(), new CompoundObject
+	) );
 
 	return group.get();
 }
@@ -433,7 +439,9 @@ IECoreGL::GroupPtr scaleHandle( Style::Axes axes, bool forSelection )
 	{
 		IECoreGL::GroupPtr cubeGroup = new IECoreGL::Group;
 		cubeGroup->addChild( cube() );
-		cubeGroup->setTransform( M44f().scale( V3f( 0.1 ) ) * M44f().translate( V3f( 0, axes == Style::XYZ ? 0 : 1, 0 ) ) );
+		cubeGroup->setTransform(
+			M44f().scale( V3f( 0.1 ) ) * M44f().translate( V3f( 0, axes == Style::XYZ ? 0 : 1, 0 ) )
+		);
 
 		group = new IECoreGL::Group;
 
@@ -444,9 +452,10 @@ IECoreGL::GroupPtr scaleHandle( Style::Axes axes, bool forSelection )
 		group->addChild( cubeGroup );
 
 		group->getState()->add( new IECoreGL::Color( colorForAxes( axes ) ) );
-		group->getState()->add(
-			new IECoreGL::ShaderStateComponent( ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "", IECoreGL::Shader::constantFragmentSource(), new CompoundObject )
-		);
+		group->getState()->add( new IECoreGL::ShaderStateComponent(
+			ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "",
+			IECoreGL::Shader::constantFragmentSource(), new CompoundObject
+		) );
 
 		if( axes == Style::X )
 		{
@@ -519,8 +528,7 @@ float luminance( const Color3f &c )
 
 IE_CORE_DEFINERUNTIMETYPED( StandardStyle );
 
-StandardStyle::StandardStyle()
-	: m_highlightState( new IECoreGL::State( /* complete = */ false ) )
+StandardStyle::StandardStyle() : m_highlightState( new IECoreGL::State( /* complete = */ false ) )
 {
 	setFont( LabelText, FontLoader::defaultFontLoader()->load( "VeraBd.ttf" ) );
 	setFontScale( LabelText, 1.0f );
@@ -541,9 +549,7 @@ StandardStyle::StandardStyle()
 	setColor( AnimationCurveColor, Color3f( 1.0, 1.0, 1.0 ) );
 }
 
-StandardStyle::~StandardStyle()
-{
-}
+StandardStyle::~StandardStyle() {}
 
 void StandardStyle::bind( const Style *currentStyle ) const
 {
@@ -605,7 +611,9 @@ Imath::Box3f StandardStyle::textBound( TextType textType, const std::string &tex
 	);
 }
 
-void StandardStyle::renderText( TextType textType, const std::string &text, State state, const Imath::Color4f *userColor ) const
+void StandardStyle::renderText(
+	TextType textType, const std::string &text, State state, const Imath::Color4f *userColor
+) const
 {
 	glEnable( GL_TEXTURE_2D );
 	glActiveTexture( GL_TEXTURE0 );
@@ -641,7 +649,9 @@ void StandardStyle::renderText( TextType textType, const std::string &text, Stat
 	glPopMatrix();
 }
 
-void StandardStyle::renderWrappedText( TextType textType, const std::string &text, const Imath::Box2f &bound, State state ) const
+void StandardStyle::renderWrappedText(
+	TextType textType, const std::string &text, const Imath::Box2f &bound, State state
+) const
 {
 	IECoreGL::Font *glFont = m_fonts[textType].get();
 	const IECoreScene::Font *coreFont = glFont->coreFont();
@@ -702,7 +712,9 @@ void StandardStyle::renderFrame( const Imath::Box2f &frame, float borderWidth, S
 	renderNodeFrame( frame, borderWidth, state );
 }
 
-void StandardStyle::renderNodeFrame( const Imath::Box2f &contents, float borderWidth, State state, const Imath::Color3f *userColor ) const
+void StandardStyle::renderNodeFrame(
+	const Imath::Box2f &contents, float borderWidth, State state, const Imath::Color3f *userColor
+) const
 {
 	renderFrameInternal( contents, borderWidth, 0.15f / borderWidth, colorForState( RaisedColor, state, userColor ) );
 }
@@ -737,7 +749,10 @@ void StandardStyle::renderNodule( float radius, State state, const Imath::Color3
 	glEnd();
 }
 
-void StandardStyle::renderConnection( const Imath::V3f &srcPosition, const Imath::V3f &srcTangent, const Imath::V3f &dstPosition, const Imath::V3f &dstTangent, State state, const Imath::Color3f *userColor ) const
+void StandardStyle::renderConnection(
+	const Imath::V3f &srcPosition, const Imath::V3f &srcTangent, const Imath::V3f &dstPosition,
+	const Imath::V3f &dstTangent, State state, const Imath::Color3f *userColor
+) const
 {
 	float connectionWidth = min( 1.5f, max( 0.5f, m_pixelSize * 3.0f ) );
 	glUniform1f( g_lineWidthParameter, connectionWidth );
@@ -747,7 +762,9 @@ void StandardStyle::renderConnection( const Imath::V3f &srcPosition, const Imath
 	renderConnectionInternal( srcPosition, srcTangent, dstPosition, dstTangent );
 }
 
-void StandardStyle::renderAuxiliaryConnection( const Imath::Box2f &srcNodeFrame, const Imath::Box2f &dstNodeFrame, State state ) const
+void StandardStyle::renderAuxiliaryConnection(
+	const Imath::Box2f &srcNodeFrame, const Imath::Box2f &dstNodeFrame, State state
+) const
 {
 	glUniform1i( g_isCurveParameter, 1 );
 	glUniform1i( g_borderParameter, 0 );
@@ -801,7 +818,10 @@ void StandardStyle::renderAuxiliaryConnection( const Imath::Box2f &srcNodeFrame,
 	glCallList( connectionDisplayList() );
 }
 
-void StandardStyle::renderAuxiliaryConnection( const Imath::V2f &srcPosition, const Imath::V2f &srcTangent, const Imath::V2f &dstPosition, const Imath::V2f &dstTangent, State state ) const
+void StandardStyle::renderAuxiliaryConnection(
+	const Imath::V2f &srcPosition, const Imath::V2f &srcTangent, const Imath::V2f &dstPosition,
+	const Imath::V2f &dstTangent, State state
+) const
 {
 	glUniform1f( g_lineWidthParameter, 0.2 );
 	glColor( colorForState( AuxiliaryConnectionColor, state ) );
@@ -814,7 +834,10 @@ void StandardStyle::renderAuxiliaryConnection( const Imath::V2f &srcPosition, co
 	renderConnectionInternal( p0, t0, p1, t1 );
 }
 
-Imath::V3f StandardStyle::closestPointOnConnection( const Imath::V3f &p, const Imath::V3f &srcPosition, const Imath::V3f &srcTangent, const Imath::V3f &dstPosition, const Imath::V3f &dstTangent ) const
+Imath::V3f StandardStyle::closestPointOnConnection(
+	const Imath::V3f &p, const Imath::V3f &srcPosition, const Imath::V3f &srcTangent, const Imath::V3f &dstPosition,
+	const Imath::V3f &dstTangent
+) const
 {
 	V3f dir = ( dstPosition - srcPosition ).normalized();
 
@@ -844,7 +867,9 @@ Imath::V3f StandardStyle::closestPointOnConnection( const Imath::V3f &p, const I
 	}
 }
 
-Imath::V2f StandardStyle::renderAnnotation( const Imath::V2f &origin, const std::string &text, State state, const Imath::Color3f *userColor ) const
+Imath::V2f StandardStyle::renderAnnotation(
+	const Imath::V2f &origin, const std::string &text, State state, const Imath::Color3f *userColor
+) const
 {
 	const Box3f textBounds = textBound( BodyText, text );
 	if( textBounds.isEmpty() )
@@ -866,15 +891,12 @@ Imath::V2f StandardStyle::renderAnnotation( const Imath::V2f &origin, const std:
 	const Color4f midGrey( 0.65, 0.65, 0.65, 1.0 );
 
 	renderFrameInternal(
-		Box2f( V2f( 0, textBounds.min.y ), V2f( textBounds.max.x, characterBound.max.y ) ),
-		padding, borderWidth, colorForState( RaisedColor, state, userColor )
+		Box2f( V2f( 0, textBounds.min.y ), V2f( textBounds.max.x, characterBound.max.y ) ), padding, borderWidth,
+		colorForState( RaisedColor, state, userColor )
 	);
 
 	const Color3f &color = userColor ? *userColor : defaultColor;
-	renderText(
-		Style::BodyText, text, Style::NormalState,
-		luminance( color ) > 0.4 ? &darkGrey : &midGrey
-	);
+	renderText( Style::BodyText, text, Style::NormalState, luminance( color ) > 0.4 ? &darkGrey : &midGrey );
 
 	glPopMatrix();
 
@@ -915,7 +937,10 @@ void StandardStyle::renderRectangle( const Imath::Box2f &box ) const
 	glEnd();
 }
 
-void StandardStyle::renderAnimationCurve( const std::vector<Imath::V2f> &vertices, const bool inKeyRange, const State state, const Imath::Color3f *const userColor ) const
+void StandardStyle::renderAnimationCurve(
+	const std::vector<Imath::V2f> &vertices, const bool inKeyRange, const State state,
+	const Imath::Color3f *const userColor
+) const
 {
 
 	bool const selectMode = ( IECoreGL::Selector::currentSelector() != nullptr );
@@ -971,10 +996,7 @@ void StandardStyle::renderAnimationCurve( const std::vector<Imath::V2f> &vertice
 
 	glBegin( GL_LINE_STRIP );
 
-	for( const Imath::V2f
-			 *it = vertices.data(),
-			 *const itEnd = vertices.data() + vertices.size();
-		 it != itEnd; ++it )
+	for( const Imath::V2f *it = vertices.data(), *const itEnd = vertices.data() + vertices.size(); it != itEnd; ++it )
 	{
 		glVertex2f( it->x, it->y );
 	}
@@ -995,7 +1017,9 @@ void StandardStyle::renderAnimationCurve( const std::vector<Imath::V2f> &vertice
 	( lineStipple ) ? glEnable( GL_LINE_STIPPLE ) : glDisable( GL_LINE_STIPPLE );
 }
 
-void StandardStyle::renderAnimationKey( const Imath::V2f &position, State state, float size, const Imath::Color3f *userColor ) const
+void StandardStyle::renderAnimationKey(
+	const Imath::V2f &position, State state, float size, const Imath::Color3f *userColor
+) const
 {
 	glColor( colorForState( AnimationCurveColor, state, userColor ) );
 	renderSolidRectangle( Box2f( position - V2f( size ), position + V2f( size ) ) );
@@ -1025,12 +1049,7 @@ void StandardStyle::renderSelectionBox( const Imath::Box2f &box ) const
 	glUniform1i( g_edgeAntiAliasingParameter, 0 );
 	glUniform1i( g_textureTypeParameter, 0 );
 
-	Color4f c(
-		m_colors[HighlightColor][0],
-		m_colors[HighlightColor][1],
-		m_colors[HighlightColor][2],
-		0.25f
-	);
+	Color4f c( m_colors[HighlightColor][0], m_colors[HighlightColor][1], m_colors[HighlightColor][2], 0.25f );
 	glColor( c );
 
 	glBegin( GL_QUADS );
@@ -1225,7 +1244,10 @@ float StandardStyle::getFontScale( TextType textType ) const
 	return m_fontScales[textType];
 }
 
-void StandardStyle::renderConnectionInternal( const Imath::V3f &srcPosition, const Imath::V3f &srcTangent, const Imath::V3f &dstPosition, const Imath::V3f &dstTangent ) const
+void StandardStyle::renderConnectionInternal(
+	const Imath::V3f &srcPosition, const Imath::V3f &srcTangent, const Imath::V3f &dstPosition,
+	const Imath::V3f &dstTangent
+) const
 {
 	glUniform1i( g_isCurveParameter, 1 );
 	glUniform1i( g_borderParameter, 0 );
@@ -1290,7 +1312,9 @@ unsigned int StandardStyle::connectionDisplayList()
 	return g_list;
 }
 
-void StandardStyle::renderFrameInternal( const Imath::Box2f &contents, float padding, float borderWidth, const Imath::Color3f &userColor ) const
+void StandardStyle::renderFrameInternal(
+	const Imath::Box2f &contents, float padding, float borderWidth, const Imath::Color3f &userColor
+) const
 {
 	Box2f b = contents;
 	V2f p( padding );

@@ -46,11 +46,9 @@ namespace MeshAlgo
 {
 
 GAFFERSCENE_API IECoreScene::MeshPrimitivePtr tessellateMesh(
-	const IECoreScene::MeshPrimitive &mesh, int divisions,
-	bool calculateNormals = false, IECore::InternedString scheme = "",
-	IECore::InternedString interpolateBoundary = "",
-	IECore::InternedString faceVaryingLinearInterpolation = "",
-	IECore::InternedString triangleSubdivisionRule = "",
+	const IECoreScene::MeshPrimitive &mesh, int divisions, bool calculateNormals = false,
+	IECore::InternedString scheme = "", IECore::InternedString interpolateBoundary = "",
+	IECore::InternedString faceVaryingLinearInterpolation = "", IECore::InternedString triangleSubdivisionRule = "",
 	const IECore::Canceller *canceller = nullptr
 );
 

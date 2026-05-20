@@ -52,8 +52,7 @@ GAFFER_NODE_DEFINE_TYPE( Random );
 
 size_t Random::g_firstPlugIndex = 0;
 
-Random::Random( const std::string &name )
-	: ComputeNode( name )
+Random::Random( const std::string &name ) : ComputeNode( name )
 {
 
 	storeIndexOfNextChild( g_firstPlugIndex );
@@ -71,9 +70,7 @@ Random::Random( const std::string &name )
 	addChild( new Color3fPlug( "outColor", Plug::Out ) );
 }
 
-Random::~Random()
-{
-}
+Random::~Random() {}
 
 IntPlug *Random::seedPlug()
 {
@@ -182,9 +179,7 @@ void Random::affects( const Plug *input, AffectedPlugsContainer &outputs ) const
 		outputs.push_back( outFloatPlug() );
 	}
 	else if(
-		input->parent<Plug>() == baseColorPlug() ||
-		input == huePlug() ||
-		input == saturationPlug() ||
+		input->parent<Plug>() == baseColorPlug() || input == huePlug() || input == saturationPlug() ||
 		input == valuePlug()
 	)
 	{

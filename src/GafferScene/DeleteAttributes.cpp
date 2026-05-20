@@ -62,9 +62,7 @@ DeleteAttributes::DeleteAttributes( const std::string &name )
 	}
 }
 
-DeleteAttributes::~DeleteAttributes()
-{
-}
+DeleteAttributes::~DeleteAttributes() {}
 
 Gaffer::StringPlug *DeleteAttributes::namesPlug()
 {
@@ -90,18 +88,16 @@ void DeleteAttributes::affects( const Gaffer::Plug *input, AffectedPlugsContaine
 {
 	FilteredSceneProcessor::affects( input, outputs );
 
-	if(
-		input == filterPlug() ||
-		input == namesPlug() ||
-		input == invertNamesPlug() ||
-		input == inPlug()->attributesPlug()
-	)
+	if( input == filterPlug() || input == namesPlug() || input == invertNamesPlug() ||
+		input == inPlug()->attributesPlug() )
 	{
 		outputs.push_back( outPlug()->attributesPlug() );
 	}
 }
 
-DeleteAttributes::Operation DeleteAttributes::operation( const Gaffer::Context *context, std::string &names, bool &invertNames ) const
+DeleteAttributes::Operation DeleteAttributes::operation(
+	const Gaffer::Context *context, std::string &names, bool &invertNames
+) const
 {
 	if( !( filterValue( context ) & PathMatcher::ExactMatch ) )
 	{
@@ -115,10 +111,7 @@ DeleteAttributes::Operation DeleteAttributes::operation( const Gaffer::Context *
 	{
 		return Operation::PassThrough;
 	}
-	else if(
-		( !invertNames && names == "*" ) ||
-		( invertNames && names == "" )
-	)
+	else if( ( !invertNames && names == "*" ) || ( invertNames && names == "" ) )
 	{
 		return Operation::Clear;
 	}
@@ -126,7 +119,9 @@ DeleteAttributes::Operation DeleteAttributes::operation( const Gaffer::Context *
 	return Operation::Delete;
 }
 
-void DeleteAttributes::hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void DeleteAttributes::hashAttributes(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	string names;
 	bool invertNames;
@@ -148,7 +143,9 @@ void DeleteAttributes::hashAttributes( const ScenePath &path, const Gaffer::Cont
 	}
 }
 
-IECore::ConstCompoundObjectPtr DeleteAttributes::computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstCompoundObjectPtr DeleteAttributes::computeAttributes(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	string names;
 	bool invertNames;

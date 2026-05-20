@@ -58,8 +58,7 @@ GAFFER_NODE_DEFINE_TYPE( ImageToPoints );
 
 size_t ImageToPoints::g_firstPlugIndex = 0;
 
-ImageToPoints::ImageToPoints( const std::string &name )
-	: ObjectSource( name, "points" )
+ImageToPoints::ImageToPoints( const std::string &name ) : ObjectSource( name, "points" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "image" ) );
@@ -72,9 +71,7 @@ ImageToPoints::ImageToPoints( const std::string &name )
 	addChild( new FloatPlug( "alphaThreshold" ) );
 }
 
-ImageToPoints::~ImageToPoints()
-{
-}
+ImageToPoints::~ImageToPoints() {}
 
 GafferImage::ImagePlug *ImageToPoints::imagePlug()
 {
@@ -160,18 +157,10 @@ void ImageToPoints::affects( const Plug *input, AffectedPlugsContainer &outputs 
 {
 	ObjectSource::affects( input, outputs );
 
-	if(
-		input == imagePlug()->formatPlug() ||
-		input == imagePlug()->dataWindowPlug() ||
-		input == imagePlug()->channelNamesPlug() ||
-		input == imagePlug()->channelDataPlug() ||
-		input == positionPlug() ||
-		input == primitiveVariablesPlug() ||
-		input == widthPlug() ||
-		input == widthChannelPlug() ||
-		input == ignoreTransparentPlug() ||
-		input == alphaThresholdPlug()
-	)
+	if( input == imagePlug()->formatPlug() || input == imagePlug()->dataWindowPlug() ||
+		input == imagePlug()->channelNamesPlug() || input == imagePlug()->channelDataPlug() ||
+		input == positionPlug() || input == primitiveVariablesPlug() || input == widthPlug() ||
+		input == widthChannelPlug() || input == ignoreTransparentPlug() || input == alphaThresholdPlug() )
 	{
 		outputs.push_back( sourcePlug() );
 	}
@@ -216,9 +205,8 @@ void ImageToPoints::hashSource( const Gaffer::Context *context, IECore::MurmurHa
 		imagePlug(),
 		[&]( const ImagePlug *image, const V2i &tileOrigin ) {
 			const Box2i tileBound( tileOrigin, tileOrigin + V2i( ImagePlug::tileSize() ) );
-			const Box2i validTileBound = BufferAlgo::intersection(
-				BufferAlgo::intersection( tileBound, dataWindow ), displayWindow
-			);
+			const Box2i validTileBound =
+				BufferAlgo::intersection( BufferAlgo::intersection( tileBound, dataWindow ), displayWindow );
 
 			MurmurHash tileHash;
 			tileHash.append( validTileBound );
@@ -233,13 +221,11 @@ void ImageToPoints::hashSource( const Gaffer::Context *context, IECore::MurmurHa
 		BufferAlgo::intersection( displayWindow, dataWindow )
 	);
 
-	const MurmurHash tilesHash = threadLocalHash.combine(
-		[]( const MurmurHash &a, const MurmurHash &b ) {
-			// See SceneAlgo's ThreadablePathHashAccumulator for further discussion of
-			// this "sum of hashes" strategy for deterministic parallel hashing.
-			return MurmurHash( a.h1() + b.h1(), a.h2() + b.h2() );
-		}
-	);
+	const MurmurHash tilesHash = threadLocalHash.combine( []( const MurmurHash &a, const MurmurHash &b ) {
+		// See SceneAlgo's ThreadablePathHashAccumulator for further discussion of
+		// this "sum of hashes" strategy for deterministic parallel hashing.
+		return MurmurHash( a.h1() + b.h1(), a.h2() + b.h2() );
+	} );
 	h.append( tilesHash );
 
 	alphaThresholdPlug()->hash( h );
@@ -261,7 +247,8 @@ IECore::ConstObjectPtr ImageToPoints::computeSource( const Context *context ) co
 	// discarded, so we don't even need to allocate space for it in the buffer.
 
 	const bool ignoreTransparent = ignoreTransparentPlug()->getValue();
-	const Box2i bufferWindow = ignoreTransparent ? BufferAlgo::intersection( dataWindow, displayWindow ) : displayWindow;
+	const Box2i bufferWindow =
+		ignoreTransparent ? BufferAlgo::intersection( dataWindow, displayWindow ) : displayWindow;
 	const size_t numPixels = bufferWindow.size().x * bufferWindow.size().y;
 
 	// Make a PointsPrimitive with all the primitive variables specified
@@ -336,9 +323,8 @@ IECore::ConstObjectPtr ImageToPoints::computeSource( const Context *context ) co
 		imagePlug(),
 		[&]( const ImagePlug *image, const V2i &tileOrigin ) {
 			const Box2i tileBound( tileOrigin, tileOrigin + V2i( ImagePlug::tileSize() ) );
-			const Box2i validTileBound = BufferAlgo::intersection(
-				BufferAlgo::intersection( tileBound, dataWindow ), bufferWindow
-			);
+			const Box2i validTileBound =
+				BufferAlgo::intersection( BufferAlgo::intersection( tileBound, dataWindow ), bufferWindow );
 
 			for( const auto &mapping : mappings )
 			{
@@ -352,7 +338,8 @@ IECore::ConstObjectPtr ImageToPoints::computeSource( const Context *context ) co
 					for( int y = validTileBound.min.y; y < validTileBound.max.y; ++y )
 					{
 						size_t inIndex = BufferAlgo::index( V2i( validTileBound.min.x, y ), tileBound );
-						size_t outIndex = BufferAlgo::index( V2i( validTileBound.min.x, y ), bufferWindow ) * stride + destination.offset;
+						size_t outIndex = BufferAlgo::index( V2i( validTileBound.min.x, y ), bufferWindow ) * stride +
+							destination.offset;
 						if( !isWidth )
 						{
 							for( int x = validTileBound.min.x; x < validTileBound.max.x; ++x )
@@ -388,35 +375,30 @@ IECore::ConstObjectPtr ImageToPoints::computeSource( const Context *context ) co
 		const float alphaThreshold = alphaThresholdPlug()->getValue();
 		for( auto &[name, variable] : pointsPrimitive->variables )
 		{
-			IECore::dispatch(
-				variable.data.get(),
-				[&]( auto *typedData ) {
-					using DataType = typename std::remove_pointer_t<decltype( typedData )>;
-					if constexpr( TypeTraits::IsVectorTypedData<DataType>::value )
+			IECore::dispatch( variable.data.get(), [&]( auto *typedData ) {
+				using DataType = typename std::remove_pointer_t<decltype( typedData )>;
+				if constexpr( TypeTraits::IsVectorTypedData<DataType>::value )
+				{
+					auto &typedVector = typedData->writable();
+					size_t newIndex = 0;
+					for( size_t oldIndex = 0; oldIndex < typedVector.size(); ++oldIndex )
 					{
-						auto &typedVector = typedData->writable();
-						size_t newIndex = 0;
-						for( size_t oldIndex = 0; oldIndex < typedVector.size(); ++oldIndex )
+						if( alphaBuffer[oldIndex] > alphaThreshold )
 						{
-							if( alphaBuffer[oldIndex] > alphaThreshold )
+							if( newIndex != oldIndex )
 							{
-								if( newIndex != oldIndex )
-								{
-									typedVector[newIndex] = std::move( typedVector[oldIndex] );
-								}
-								++newIndex;
+								typedVector[newIndex] = std::move( typedVector[oldIndex] );
 							}
+							++newIndex;
 						}
-						typedVector.resize( newIndex );
-						typedVector.shrink_to_fit();
 					}
+					typedVector.resize( newIndex );
+					typedVector.shrink_to_fit();
 				}
-			);
+			} );
 		}
 
-		pointsPrimitive->setNumPoints(
-			pointsPrimitive->variableData<V3fVectorData>( "P" )->readable().size()
-		);
+		pointsPrimitive->setNumPoints( pointsPrimitive->variableData<V3fVectorData>( "P" )->readable().size() );
 	}
 
 	return pointsPrimitive;
@@ -445,7 +427,9 @@ std::vector<ImageToPoints::ChannelMapping> ImageToPoints::channelMappings() cons
 		auto positionIt = find( positionChannels.begin(), positionChannels.end(), channelName );
 		if( positionIt != positionChannels.end() && positionIt - positionChannels.begin() < 3 )
 		{
-			mapping.destinations.push_back( { "P", V3fVectorData::staticTypeId(), static_cast<size_t>( positionIt - positionChannels.begin() ) } );
+			mapping.destinations.push_back(
+				{ "P", V3fVectorData::staticTypeId(), static_cast<size_t>( positionIt - positionChannels.begin() ) }
+			);
 			numPositionMappings++;
 		}
 
@@ -458,7 +442,9 @@ std::vector<ImageToPoints::ChannelMapping> ImageToPoints::channelMappings() cons
 			{
 				// Map R, G and B to the components of colour primitive variables.
 				const string layerName = ImageAlgo::layerName( channelName );
-				mapping.destinations.push_back( { layerName == "" ? "Cs" : layerName, Color3fVectorData::staticTypeId(), (size_t)colorIndex } );
+				mapping.destinations.push_back(
+					{ layerName == "" ? "Cs" : layerName, Color3fVectorData::staticTypeId(), (size_t)colorIndex }
+				);
 			}
 			else
 			{

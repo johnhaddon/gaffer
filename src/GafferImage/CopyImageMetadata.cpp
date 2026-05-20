@@ -52,8 +52,7 @@ GAFFER_NODE_DEFINE_TYPE( CopyImageMetadata );
 
 size_t CopyImageMetadata::g_firstPlugIndex = 0;
 
-CopyImageMetadata::CopyImageMetadata( const std::string &name )
-	: MetadataProcessor( name )
+CopyImageMetadata::CopyImageMetadata( const std::string &name ) : MetadataProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "copyFrom" ) );
@@ -61,9 +60,7 @@ CopyImageMetadata::CopyImageMetadata( const std::string &name )
 	addChild( new BoolPlug( "invertNames" ) );
 }
 
-CopyImageMetadata::~CopyImageMetadata()
-{
-}
+CopyImageMetadata::~CopyImageMetadata() {}
 
 ImagePlug *CopyImageMetadata::copyFromPlug()
 {
@@ -99,7 +96,8 @@ void CopyImageMetadata::affects( const Gaffer::Plug *input, AffectedPlugsContain
 {
 	MetadataProcessor::affects( input, outputs );
 
-	if( input == inPlug()->viewNamesPlug() || input == copyFromPlug()->metadataPlug() || input == namesPlug() || input == invertNamesPlug() )
+	if( input == inPlug()->viewNamesPlug() || input == copyFromPlug()->metadataPlug() || input == namesPlug() ||
+		input == invertNamesPlug() )
 	{
 		outputs.push_back( outPlug()->metadataPlug() );
 	}
@@ -116,7 +114,9 @@ void CopyImageMetadata::hashProcessedMetadata( const Gaffer::Context *context, I
 	}
 }
 
-IECore::ConstCompoundDataPtr CopyImageMetadata::computeProcessedMetadata( const Gaffer::Context *context, const IECore::CompoundData *inputMetadata ) const
+IECore::ConstCompoundDataPtr CopyImageMetadata::computeProcessedMetadata(
+	const Gaffer::Context *context, const IECore::CompoundData *inputMetadata
+) const
 {
 	if( !ImageAlgo::viewIsValid( context, copyFromPlug()->viewNames()->readable() ) )
 	{
@@ -138,7 +138,9 @@ IECore::ConstCompoundDataPtr CopyImageMetadata::computeProcessedMetadata( const 
 	}
 
 	IECore::CompoundDataPtr result = inputMetadata->copy();
-	for( IECore::CompoundData::ValueType::const_iterator it = copyFrom->readable().begin(), eIt = copyFrom->readable().end(); it != eIt; ++it )
+	for( IECore::CompoundData::ValueType::const_iterator it = copyFrom->readable().begin(),
+														 eIt = copyFrom->readable().end();
+		 it != eIt; ++it )
 	{
 		if( StringAlgo::matchMultiple( it->first.c_str(), names.c_str() ) != invert )
 		{

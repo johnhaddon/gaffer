@@ -69,7 +69,7 @@ namespace
 class Environment
 {
 
-	public:
+public:
 
 	Environment()
 	{
@@ -96,7 +96,7 @@ class Environment
 		return nullptr;
 	}
 
-	private:
+private:
 
 	using Map = boost::container::flat_map<IECore::InternedString, IECore::InternedString>;
 	Map m_map;
@@ -116,7 +116,9 @@ Context::Value::Value( const IECore::InternedString &name, const IECore::Data *v
 }
 
 Context::Value::Value( IECore::TypeId typeId, const void *value, const IECore::MurmurHash &hash )
-	: m_typeId( typeId ), m_value( value ), m_hash( hash )
+	: m_typeId( typeId ),
+	  m_value( value ),
+	  m_hash( hash )
 {
 }
 
@@ -227,17 +229,13 @@ Context::TypeDescription<Color4fVectorData> g_color4fVectorTypeDescription;
 static InternedString g_frame( "frame" );
 static InternedString g_framesPerSecond( "framesPerSecond" );
 
-Context::Context()
-	: m_changedSignal( nullptr ), m_hashValid( false ), m_canceller( nullptr )
+Context::Context() : m_changedSignal( nullptr ), m_hashValid( false ), m_canceller( nullptr )
 {
 	set( g_frame, 1.0f );
 	set( g_framesPerSecond, 24.0f );
 }
 
-Context::Context( const Context &other )
-	: Context( other, CopyMode::Owning )
-{
-}
+Context::Context( const Context &other ) : Context( other, CopyMode::Owning ) {}
 
 Context::Context( const Context &other, CopyMode mode )
 	: m_changedSignal( nullptr ),
@@ -264,10 +262,7 @@ Context::Context( const Context &other, CopyMode mode )
 		for( auto &i : other.m_map )
 		{
 			auto allocIt = other.m_allocMap.find( i.first );
-			if(
-				allocIt != other.m_allocMap.end() &&
-				i.second.references( allocIt->second.get() )
-			)
+			if( allocIt != other.m_allocMap.end() && i.second.references( allocIt->second.get() ) )
 			{
 				// The value is already owned by `other`, and is immutable, so we
 				// can just share ownership with it.
@@ -284,8 +279,7 @@ Context::Context( const Context &other, CopyMode mode )
 	}
 }
 
-Context::Context( const Context &other, const IECore::ConstCancellerPtr &canceller )
-	: Context( other )
+Context::Context( const Context &other, const IECore::ConstCancellerPtr &canceller ) : Context( other )
 {
 	if( m_canceller )
 	{
@@ -295,8 +289,7 @@ Context::Context( const Context &other, const IECore::ConstCancellerPtr &cancell
 	m_canceller = m_cancellerOwner.get();
 }
 
-Context::Context( const Context &other, bool omitCanceller )
-	: Context( other )
+Context::Context( const Context &other, bool omitCanceller ) : Context( other )
 {
 	if( omitCanceller )
 	{
@@ -462,8 +455,7 @@ std::string Context::substitute( const std::string &s, unsigned substitutions ) 
 // Scope and current context implementation
 //////////////////////////////////////////////////////////////////////////
 
-Context::Scope::Scope( const Context *context )
-	: ThreadState::Scope( /* push = */ static_cast<bool>( context ) )
+Context::Scope::Scope( const Context *context ) : ThreadState::Scope( /* push = */ static_cast<bool>( context ) )
 {
 	if( m_threadState )
 	{
@@ -475,9 +467,7 @@ Context::Scope::Scope( const Context *context )
 	}
 }
 
-Context::Scope::~Scope()
-{
-}
+Context::Scope::~Scope() {}
 
 Context::EditableScope::EditableScope( const Context *context )
 	: m_context( new Context( *context, CopyMode::NonOwning ) )
@@ -486,14 +476,13 @@ Context::EditableScope::EditableScope( const Context *context )
 }
 
 Context::EditableScope::EditableScope( const ThreadState &threadState )
-	: ThreadState::Scope( threadState ), m_context( new Context( *threadState.m_context, CopyMode::NonOwning ) )
+	: ThreadState::Scope( threadState ),
+	  m_context( new Context( *threadState.m_context, CopyMode::NonOwning ) )
 {
 	m_threadState->m_context = m_context.get();
 }
 
-Context::EditableScope::~EditableScope()
-{
-}
+Context::EditableScope::~EditableScope() {}
 
 void Context::EditableScope::setCanceller( const IECore::Canceller *canceller )
 {
@@ -540,10 +529,7 @@ const Context *Context::current()
 // SubstitutionProvider implementation
 //////////////////////////////////////////////////////////////////////////
 
-Context::SubstitutionProvider::SubstitutionProvider( const Context *context )
-	: m_context( context )
-{
-}
+Context::SubstitutionProvider::SubstitutionProvider( const Context *context ) : m_context( context ) {}
 
 int Context::SubstitutionProvider::frame() const
 {
@@ -564,14 +550,11 @@ const std::string &Context::SubstitutionProvider::variable( const boost::string_
 				recurse = true;
 				return *static_cast<const IECore::InternedString *>( value->rawValue() );
 			case IECore::FloatDataTypeId :
-				m_formattedString = boost::lexical_cast<std::string>(
-					*static_cast<const float *>( value->rawValue() )
-				);
+				m_formattedString =
+					boost::lexical_cast<std::string>( *static_cast<const float *>( value->rawValue() ) );
 				return m_formattedString;
 			case IECore::IntDataTypeId :
-				m_formattedString = boost::lexical_cast<std::string>(
-					*static_cast<const int *>( value->rawValue() )
-				);
+				m_formattedString = boost::lexical_cast<std::string>( *static_cast<const int *>( value->rawValue() ) );
 				return m_formattedString;
 			case IECore::InternedStringVectorDataTypeId : {
 				// This is unashamedly tailored to the needs of GafferScene's `${scene:path}`

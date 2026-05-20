@@ -104,7 +104,9 @@ void matchingPathsWrapper2( const FilterPlug &filterPlug, const ScenePlug &scene
 	SceneAlgo::matchingPaths( &filterPlug, &scene, paths );
 }
 
-void matchingPathsWrapper3( const FilterPlug &filterPlug, const ScenePlug &scene, const ScenePlug::ScenePath &root, PathMatcher &paths )
+void matchingPathsWrapper3(
+	const FilterPlug &filterPlug, const ScenePlug &scene, const ScenePlug::ScenePath &root, PathMatcher &paths
+)
 {
 	// gil release in case the scene traversal dips back into python:
 	IECorePython::ScopedGILRelease r;
@@ -118,7 +120,9 @@ void matchingPathsWrapper4( const PathMatcher &filter, const ScenePlug &scene, P
 	SceneAlgo::matchingPaths( filter, &scene, paths );
 }
 
-IECore::MurmurHash matchingPathsHashWrapper1( const GafferScene::FilterPlug &filterPlug, const ScenePlug &scene, const ScenePlug::ScenePath &root )
+IECore::MurmurHash matchingPathsHashWrapper1(
+	const GafferScene::FilterPlug &filterPlug, const ScenePlug &scene, const ScenePlug::ScenePath &root
+)
 {
 	IECorePython::ScopedGILRelease r;
 	return SceneAlgo::matchingPathsHash( &filterPlug, &scene, root );
@@ -132,18 +136,17 @@ IECore::MurmurHash matchingPathsHashWrapper2( const IECore::PathMatcher &filter,
 
 std::shared_ptr<boost::python::object> withGILAcquireDeleter( const boost::python::object &o )
 {
-	return std::shared_ptr<boost::python::object>(
-		new boost::python::object( o ),
-		[]( boost::python::object *o ) {
-			// Custom deleter. We must hold the GIL when deleting Python
-			// objects.
-			IECorePython::ScopedGILLock gilLock;
-			delete o;
-		}
-	);
+	return std::shared_ptr<boost::python::object>( new boost::python::object( o ), []( boost::python::object *o ) {
+		// Custom deleter. We must hold the GIL when deleting Python
+		// objects.
+		IECorePython::ScopedGILLock gilLock;
+		delete o;
+	} );
 }
 
-void parallelGatherLocationsWrapper( const ScenePlug &scene, object locationFunctor, object gatherFunctor, const ScenePlug::ScenePath &root )
+void parallelGatherLocationsWrapper(
+	const ScenePlug &scene, object locationFunctor, object gatherFunctor, const ScenePlug::ScenePath &root
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
 
@@ -186,7 +189,9 @@ IECore::PathMatcher findAllWrapper( const ScenePlug &scene, object predicate, co
 	);
 }
 
-IECore::PathMatcher findAllWithAttributeWrapper( const ScenePlug &scene, InternedString name, const Object *value, const ScenePlug::ScenePath &root )
+IECore::PathMatcher findAllWithAttributeWrapper(
+	const ScenePlug &scene, InternedString name, const Object *value, const ScenePlug::ScenePath &root
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	return SceneAlgo::findAllWithAttribute( &scene, name, value, root );
@@ -275,7 +280,9 @@ void attributeHistorySetAttributeValue( SceneAlgo::AttributeHistory &h, ConstObj
 	h.attributeValue = v;
 }
 
-SceneAlgo::AttributeHistory::Ptr attributeHistoryWrapper( const SceneAlgo::History &attributesHistory, const InternedString &attributeName, const IECore::Canceller *canceller )
+SceneAlgo::AttributeHistory::Ptr attributeHistoryWrapper(
+	const SceneAlgo::History &attributesHistory, const InternedString &attributeName, const IECore::Canceller *canceller
+)
 {
 	IECorePython::ScopedGILRelease r;
 	return SceneAlgo::attributeHistory( &attributesHistory, attributeName, canceller );
@@ -303,7 +310,9 @@ void optionHistorySetOptionValue( SceneAlgo::OptionHistory &h, ConstObjectPtr v 
 	h.optionValue = v;
 }
 
-SceneAlgo::OptionHistory::Ptr optionHistoryWrapper( const SceneAlgo::History &globalsHistory, const InternedString &optionName )
+SceneAlgo::OptionHistory::Ptr optionHistoryWrapper(
+	const SceneAlgo::History &globalsHistory, const InternedString &optionName
+)
 {
 	IECorePython::ScopedGILRelease r;
 	return SceneAlgo::optionHistory( &globalsHistory, optionName );
@@ -314,24 +323,32 @@ std::string primitiveVariableHistoryGetPrimitiveVariableName( const SceneAlgo::P
 	return h.primitiveVariableName.string();
 }
 
-void primitiveVariableHistorySetPrimitiveVariableName( SceneAlgo::PrimitiveVariableHistory &h, IECore::InternedString n )
+void primitiveVariableHistorySetPrimitiveVariableName(
+	SceneAlgo::PrimitiveVariableHistory &h, IECore::InternedString n
+)
 {
 	h.primitiveVariableName = n;
 }
 
-IECoreScene::PrimitiveVariable primitiveVariableHistoryGetPrimitiveVariableValue( const SceneAlgo::PrimitiveVariableHistory &h )
+IECoreScene::PrimitiveVariable primitiveVariableHistoryGetPrimitiveVariableValue(
+	const SceneAlgo::PrimitiveVariableHistory &h
+)
 {
 	// Returning a copy because `primitiveVariableValue` is const, and owned by Gaffer's cache.
 	// Allowing modification in Python would be catastrophic and hard to debug.
 	return IECoreScene::PrimitiveVariable( h.primitiveVariableValue, true );
 }
 
-void primitiveVariableHistorySetPrimitiveVariableValue( SceneAlgo::PrimitiveVariableHistory &h, const IECoreScene::PrimitiveVariable &v )
+void primitiveVariableHistorySetPrimitiveVariableValue(
+	SceneAlgo::PrimitiveVariableHistory &h, const IECoreScene::PrimitiveVariable &v
+)
 {
 	h.primitiveVariableValue = v;
 }
 
-SceneAlgo::PrimitiveVariableHistory::Ptr primitiveVariableHistoryWrapper( const SceneAlgo::History &primitiveVariablesHistory, const InternedString &primitiveVariableName )
+SceneAlgo::PrimitiveVariableHistory::Ptr primitiveVariableHistoryWrapper(
+	const SceneAlgo::History &primitiveVariablesHistory, const InternedString &primitiveVariableName
+)
 {
 	IECorePython::ScopedGILRelease r;
 	return SceneAlgo::primitiveVariableHistory( &primitiveVariablesHistory, primitiveVariableName );
@@ -349,7 +366,9 @@ SceneProcessorPtr objectTweaksWrapper( const ScenePlug &scene, const ScenePlug::
 	return SceneAlgo::objectTweaks( &scene, path );
 }
 
-ShaderTweaksPtr shaderTweaksWrapper( const ScenePlug &scene, const ScenePlug::ScenePath &path, const InternedString &attributeName )
+ShaderTweaksPtr shaderTweaksWrapper(
+	const ScenePlug &scene, const ScenePlug::ScenePath &path, const InternedString &attributeName
+)
 {
 	IECorePython::ScopedGILRelease r;
 	return SceneAlgo::shaderTweaks( &scene, path, attributeName );
@@ -400,10 +419,7 @@ IECore::MurmurHash hierarchyHashWrapper( const ScenePlug &scene, const ScenePlug
 struct RenderAdaptorWrapper
 {
 
-	RenderAdaptorWrapper( object pythonAdaptor )
-		: m_pythonAdaptor( pythonAdaptor )
-	{
-	}
+	RenderAdaptorWrapper( object pythonAdaptor ) : m_pythonAdaptor( pythonAdaptor ) {}
 
 	SceneProcessorPtr operator () ()
 	{
@@ -419,17 +435,21 @@ struct RenderAdaptorWrapper
 		}
 	}
 
-	private:
+private:
 
 	object m_pythonAdaptor;
 };
 
-void registerRenderAdaptorWrapper( const std::string &name, object adaptor, const std::string &client, const std::string &renderer )
+void registerRenderAdaptorWrapper(
+	const std::string &name, object adaptor, const std::string &client, const std::string &renderer
+)
 {
 	SceneAlgo::registerRenderAdaptor( name, RenderAdaptorWrapper( adaptor ), client, renderer );
 }
 
-void applyCameraGlobalsWrapper( IECoreScene::Camera &camera, const IECore::CompoundObject &globals, const ScenePlug &scene )
+void applyCameraGlobalsWrapper(
+	IECoreScene::Camera &camera, const IECore::CompoundObject &globals, const ScenePlug &scene
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	SceneAlgo::applyCameraGlobals( &camera, &globals, &scene );
@@ -459,23 +479,17 @@ void bindSceneAlgo()
 	def( "matchingPathsHash", &matchingPathsHashWrapper1, ( arg( "filter" ), arg( "scene" ), arg( "root" ) = "/" ) );
 	def( "matchingPathsHash", &matchingPathsHashWrapper2, ( arg( "filter" ), arg( "scene" ) ) );
 
-	def( "parallelGatherLocations", &parallelGatherLocationsWrapper, ( arg( "scene" ), arg( "locationFunctor" ), arg( "gatherFunctor" ), arg( "root" ) = "/" ) );
+	def( "parallelGatherLocations", &parallelGatherLocationsWrapper,
+		 ( arg( "scene" ), arg( "locationFunctor" ), arg( "gatherFunctor" ), arg( "root" ) = "/" ) );
 
 	def( "findAll", &findAllWrapper, ( arg( "scene" ), arg( "predicate" ), arg( "root" ) = "/" ) );
-	def( "findAllWithAttribute", &findAllWithAttributeWrapper, ( arg( "scene" ), arg( "name" ), arg( "value" ) = object(), arg( "root" ) = "/" ) );
+	def( "findAllWithAttribute", &findAllWithAttributeWrapper,
+		 ( arg( "scene" ), arg( "name" ), arg( "value" ) = object(), arg( "root" ) = "/" ) );
 
 	def( "shutter", &shutterWrapper );
 	def( "setExists", &setExistsWrapper );
-	def(
-		"sets",
-		&setsWrapper1,
-		( arg( "scene" ), arg( "_copy" ) = true )
-	);
-	def(
-		"sets",
-		&setsWrapper2,
-		( arg( "scene" ), arg( "setNames" ), arg( "_copy" ) = true )
-	);
+	def( "sets", &setsWrapper1, ( arg( "scene" ), arg( "_copy" ) = true ) );
+	def( "sets", &setsWrapper2, ( arg( "scene" ), arg( "setNames" ), arg( "_copy" ) = true ) );
 
 	// History
 
@@ -498,7 +512,8 @@ void bindSceneAlgo()
 		.add_property( "attributeName", &attributeHistoryGetAttributeName, &attributeHistorySetAttributeName )
 		.add_property( "attributeValue", &attributeHistoryGetAttributeValue, &attributeHistorySetAttributeValue );
 
-	def( "attributeHistory", &attributeHistoryWrapper, ( arg( "attributesHistory" ), arg( "attribute" ), arg( "canceller" ) = object() ) );
+	def( "attributeHistory", &attributeHistoryWrapper,
+		 ( arg( "attributesHistory" ), arg( "attribute" ), arg( "canceller" ) = object() ) );
 
 	IECorePython::RefCountedClass<SceneAlgo::OptionHistory, SceneAlgo::History>( "OptionHistory" )
 		.add_property( "optionName", &optionHistoryGetOptionName, &optionHistorySetOptionName )
@@ -507,8 +522,14 @@ void bindSceneAlgo()
 	def( "optionHistory", &optionHistoryWrapper );
 
 	IECorePython::RefCountedClass<SceneAlgo::PrimitiveVariableHistory, SceneAlgo::History>( "PrimitiveVariableHistory" )
-		.add_property( "primitiveVariableName", &primitiveVariableHistoryGetPrimitiveVariableName, &primitiveVariableHistorySetPrimitiveVariableName )
-		.add_property( "primitiveVariableValue", &primitiveVariableHistoryGetPrimitiveVariableValue, &primitiveVariableHistorySetPrimitiveVariableValue );
+		.add_property(
+			"primitiveVariableName", &primitiveVariableHistoryGetPrimitiveVariableName,
+			&primitiveVariableHistorySetPrimitiveVariableName
+		)
+		.add_property(
+			"primitiveVariableValue", &primitiveVariableHistoryGetPrimitiveVariableValue,
+			&primitiveVariableHistorySetPrimitiveVariableValue
+		);
 
 	def( "primitiveVariableHistory", &primitiveVariableHistoryWrapper );
 
@@ -534,7 +555,8 @@ void bindSceneAlgo()
 
 	// Render adaptors
 
-	def( "registerRenderAdaptor", &registerRenderAdaptorWrapper, ( arg( "name" ), arg( "adaptor" ), arg( "client" ) = "*", arg( "renderer" ) = "*" ) );
+	def( "registerRenderAdaptor", &registerRenderAdaptorWrapper,
+		 ( arg( "name" ), arg( "adaptor" ), arg( "client" ) = "*", arg( "renderer" ) = "*" ) );
 	def( "deregisterRenderAdaptor", &SceneAlgo::deregisterRenderAdaptor );
 	def( "createRenderAdaptors", &SceneAlgo::createRenderAdaptors );
 

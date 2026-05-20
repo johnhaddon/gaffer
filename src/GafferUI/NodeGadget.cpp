@@ -92,18 +92,14 @@ NodeCreatorMap &nodeCreators()
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( NodeGadget );
 
-NodeGadget::NodeGadget( Gaffer::NodePtr node )
-	: m_active( false ), m_node( node.get() )
-{
-}
+NodeGadget::NodeGadget( Gaffer::NodePtr node ) : m_active( false ), m_node( node.get() ) {}
 
-NodeGadget::~NodeGadget()
-{
-}
+NodeGadget::~NodeGadget() {}
 
 NodeGadgetPtr NodeGadget::create( Gaffer::NodePtr node )
 {
-	IECore::ConstStringDataPtr nodeGadgetType = Gaffer::Metadata::value<IECore::StringData>( node.get(), "nodeGadget:type" );
+	IECore::ConstStringDataPtr nodeGadgetType =
+		Gaffer::Metadata::value<IECore::StringData>( node.get(), "nodeGadget:type" );
 	if( nodeGadgetType )
 	{
 		if( nodeGadgetType->readable() == "" )
@@ -118,7 +114,12 @@ NodeGadgetPtr NodeGadget::create( Gaffer::NodePtr node )
 		}
 		else
 		{
-			IECore::msg( IECore::Msg::Warning, "NodeGadget::create", fmt::format( "Nonexistent type \"{}\" requested for node \"{}\"", nodeGadgetType->readable(), node->fullName() ) );
+			IECore::msg(
+				IECore::Msg::Warning, "NodeGadget::create",
+				fmt::format(
+					"Nonexistent type \"{}\" requested for node \"{}\"", nodeGadgetType->readable(), node->fullName()
+				)
+			);
 		}
 	}
 
@@ -138,7 +139,9 @@ NodeGadgetPtr NodeGadget::create( Gaffer::NodePtr node )
 	return nullptr;
 }
 
-void NodeGadget::registerNodeGadget( const std::string &nodeGadgetType, NodeGadgetCreator creator, IECore::TypeId nodeType )
+void NodeGadget::registerNodeGadget(
+	const std::string &nodeGadgetType, NodeGadgetCreator creator, IECore::TypeId nodeType
+)
 {
 	typeCreators()[nodeGadgetType] = creator;
 	if( nodeType != IECore::InvalidTypeId )

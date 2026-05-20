@@ -56,13 +56,12 @@ namespace IECoreScenePreview
 class GAFFERSCENE_API CapturingRenderer : public Renderer
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( CapturingRenderer )
 
 	CapturingRenderer(
-		RenderType type = RenderType::Interactive,
-		const std::string &fileName = "",
+		RenderType type = RenderType::Interactive, const std::string &fileName = "",
 		const IECore::MessageHandlerPtr &messageHandler = IECore::MessageHandlerPtr()
 	);
 	~CapturingRenderer() override;
@@ -73,13 +72,13 @@ class GAFFERSCENE_API CapturingRenderer : public Renderer
 	class GAFFERSCENE_API CapturedAttributes : public AttributesInterface
 	{
 
-		public:
+	public:
 
 		IE_CORE_DECLAREMEMBERPTR( CapturedAttributes );
 
 		const IECore::CompoundObject *attributes() const;
 
-		private:
+	private:
 
 		CapturedAttributes( const IECore::ConstCompoundObjectPtr &attributes );
 
@@ -96,7 +95,7 @@ class GAFFERSCENE_API CapturingRenderer : public Renderer
 	class GAFFERSCENE_API CapturedObject : public ObjectInterface
 	{
 
-		public:
+	public:
 
 		IE_CORE_DECLAREMEMBERPTR( CapturedObject )
 
@@ -132,9 +131,12 @@ class GAFFERSCENE_API CapturingRenderer : public Renderer
 		void assignID( uint32_t id ) override;
 		void assignInstanceID( uint32_t instanceID ) override;
 
-		private:
+	private:
 
-		CapturedObject( CapturingRenderer *renderer, const std::string &name, const IECoreScenePreview::Renderer::ObjectSamples &samples, const SampleTimes &times );
+		CapturedObject(
+			CapturingRenderer *renderer, const std::string &name,
+			const IECoreScenePreview::Renderer::ObjectSamples &samples, const SampleTimes &times
+		);
 
 		friend class CapturingRenderer;
 
@@ -163,14 +165,26 @@ class GAFFERSCENE_API CapturingRenderer : public Renderer
 	void option( const IECore::InternedString &name, const IECore::Object *value ) override;
 	void output( const IECore::InternedString &name, const IECoreScene::Output *output ) override;
 	AttributesInterfacePtr attributes( const IECore::CompoundObject *attributes ) override;
-	ObjectInterfacePtr camera( const std::string &name, const CameraSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
-	ObjectInterfacePtr light( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
-	ObjectInterfacePtr lightFilter( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
-	ObjectInterfacePtr object( const std::string &name, const IECoreScenePreview::Renderer::ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
+	ObjectInterfacePtr camera(
+		const std::string &name, const CameraSamples &samples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) override;
+	ObjectInterfacePtr light(
+		const std::string &name, const ObjectSamples &samples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) override;
+	ObjectInterfacePtr lightFilter(
+		const std::string &name, const ObjectSamples &samples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) override;
+	ObjectInterfacePtr object(
+		const std::string &name, const IECoreScenePreview::Renderer::ObjectSamples &samples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) override;
 	void render() override;
 	void pause() override;
 
-	private:
+private:
 
 	void checkPaused() const;
 

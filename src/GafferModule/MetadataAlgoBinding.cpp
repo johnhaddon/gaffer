@@ -167,7 +167,10 @@ list annotationTemplatesWrapper( bool userOnly )
 // Copying
 // =======
 
-void deprecatedCopyWrapper( const GraphComponent &from, GraphComponent &to, const IECore::StringAlgo::MatchPattern &exclude, bool persistentOnly, bool persistent )
+void deprecatedCopyWrapper(
+	const GraphComponent &from, GraphComponent &to, const IECore::StringAlgo::MatchPattern &exclude,
+	bool persistentOnly, bool persistent
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	copy( &from, &to, exclude, persistentOnly, persistent );
@@ -188,8 +191,7 @@ void copyIfWrapper( const GraphComponent &from, GraphComponent &to, object predi
 			IECorePython::ScopedGILLock gilLock;
 			return (bool)predicate(
 				GraphComponentPtr( const_cast<GraphComponent *>( from ) ),
-				GraphComponentPtr( const_cast<GraphComponent *>( to ) ),
-				name.string()
+				GraphComponentPtr( const_cast<GraphComponent *>( to ) ), name.string()
 			);
 		},
 		persistent
@@ -220,7 +222,9 @@ void deregisterRedundantValuesWrapper( GraphComponent &g )
 	return deregisterRedundantValues( &g );
 }
 
-ValuePlugPtr createPlugFromMetadataWrapper( const std::string &name, Plug::Direction direction, unsigned flags, const std::string &target )
+ValuePlugPtr createPlugFromMetadataWrapper(
+	const std::string &name, Plug::Direction direction, unsigned flags, const std::string &target
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	return MetadataAlgo::createPlugFromMetadata( name, direction, flags, target );
@@ -250,37 +254,39 @@ void GafferModule::bindMetadataAlgo()
 	// Read only
 	// =========
 
-	def( "setReadOnly", &setReadOnlyWrapper, ( arg( "graphComponent" ), arg( "readOnly" ), arg( "persistent" ) = true ) );
+	def( "setReadOnly", &setReadOnlyWrapper,
+		 ( arg( "graphComponent" ), arg( "readOnly" ), arg( "persistent" ) = true ) );
 	def( "getReadOnly", &getReadOnly );
-	def( "setChildNodesAreReadOnly", &setChildNodesAreReadOnlyWrapper, ( arg( "node" ), arg( "readOnly" ), arg( "persistent" ) = true ) );
+	def( "setChildNodesAreReadOnly", &setChildNodesAreReadOnlyWrapper,
+		 ( arg( "node" ), arg( "readOnly" ), arg( "persistent" ) = true ) );
 	def( "getChildNodesAreReadOnly", &getChildNodesAreReadOnly );
 	def( "readOnly", &readOnlyWrapper );
 	def( "readOnlyReason", &readOnlyReasonWrapper );
-	def(
-		"readOnlyAffectedByChange",
-		(bool ( * )( const GraphComponent *, IECore::TypeId, const IECore::StringAlgo::MatchPattern &, const IECore::InternedString &, const Gaffer::Plug * ))&readOnlyAffectedByChange,
-		( arg( "graphComponent" ), arg( "changedNodeTypeId" ), arg( "changedPlugPath" ), arg( "changedKey" ), arg( "changedPlug" ) )
-	);
-	def(
-		"readOnlyAffectedByChange",
-		(bool ( * )( const GraphComponent *, IECore::TypeId, const IECore::InternedString &, const Gaffer::Node * ))&readOnlyAffectedByChange,
-		( arg( "graphComponent" ), arg( "changedNodeTypeId" ), arg( "changedKey" ), arg( "changedNode" ) )
-	);
-	def(
-		"readOnlyAffectedByChange",
-		(bool ( * )( const GraphComponent *, const GraphComponent *, const IECore::InternedString & ))&readOnlyAffectedByChange,
-		( arg( "graphComponent" ), arg( "changedGraphComponent" ), arg( "changedKey" ) )
-	);
-	def(
-		"readOnlyAffectedByChange",
-		(bool ( * )( const IECore::InternedString & ))&readOnlyAffectedByChange,
-		( arg( "changedKey" ) )
-	);
+	def( "readOnlyAffectedByChange",
+		 (bool ( * )(
+			 const GraphComponent *, IECore::TypeId, const IECore::StringAlgo::MatchPattern &,
+			 const IECore::InternedString &, const Gaffer::Plug *
+		 ))&readOnlyAffectedByChange,
+		 ( arg( "graphComponent" ), arg( "changedNodeTypeId" ), arg( "changedPlugPath" ), arg( "changedKey" ),
+		   arg( "changedPlug" ) ) );
+	def( "readOnlyAffectedByChange",
+		 (
+			 bool ( * )( const GraphComponent *, IECore::TypeId, const IECore::InternedString &, const Gaffer::Node * )
+		 )&readOnlyAffectedByChange,
+		 ( arg( "graphComponent" ), arg( "changedNodeTypeId" ), arg( "changedKey" ), arg( "changedNode" ) ) );
+	def( "readOnlyAffectedByChange",
+		 (
+			 bool ( * )( const GraphComponent *, const GraphComponent *, const IECore::InternedString & )
+		 )&readOnlyAffectedByChange,
+		 ( arg( "graphComponent" ), arg( "changedGraphComponent" ), arg( "changedKey" ) ) );
+	def( "readOnlyAffectedByChange", (bool ( * )( const IECore::InternedString & ))&readOnlyAffectedByChange,
+		 ( arg( "changedKey" ) ) );
 
 	// Bookmarks
 	// =========
 
-	def( "setBookmarked", &setBookmarkedWrapper, ( arg( "graphComponent" ), arg( "bookmarked" ), arg( "persistent" ) = true ) );
+	def( "setBookmarked", &setBookmarkedWrapper,
+		 ( arg( "graphComponent" ), arg( "bookmarked" ), arg( "persistent" ) = true ) );
 	def( "getBookmarked", &getBookmarked );
 	def( "bookmarkedAffectedByChange", &bookmarkedAffectedByChange );
 	def( "bookmarks", &bookmarksWrapper );
@@ -302,12 +308,14 @@ void GafferModule::bindMetadataAlgo()
 		.def( self != self )
 		.def( !self );
 
-	def( "addAnnotation", &addAnnotationWrapper, ( arg( "node" ), arg( "name" ), arg( "annotation" ), arg( "persistent" ) = true ) );
+	def( "addAnnotation", &addAnnotationWrapper,
+		 ( arg( "node" ), arg( "name" ), arg( "annotation" ), arg( "persistent" ) = true ) );
 	def( "getAnnotation", &getAnnotationWrapper, ( arg( "node" ), arg( "name" ), arg( "inheritTemplate" ) = false ) );
 	def( "removeAnnotation", &removeAnnotationWrapper, ( arg( "node" ), arg( "name" ) ) );
 	def( "annotations", &annotationsWrapper, ( arg( "node" ), arg( "types" ) = Metadata::RegistrationTypes::All ) );
 
-	def( "addAnnotationTemplate", &addAnnotationTemplate, ( arg( "name" ), arg( "annotation" ), arg( "user" ) = true ) );
+	def( "addAnnotationTemplate", &addAnnotationTemplate,
+		 ( arg( "name" ), arg( "annotation" ), arg( "user" ) = true ) );
 	def( "getAnnotationTemplate", &getAnnotationTemplateWrapper, ( arg( "name" ) ) );
 	def( "removeAnnotationTemplate", &removeAnnotationTemplate, arg( "name" ) );
 	def( "annotationTemplates", &annotationTemplatesWrapper, arg( "userOnly" ) = false );
@@ -317,44 +325,40 @@ void GafferModule::bindMetadataAlgo()
 	// Change queries
 	// ==============
 
-	def(
-		"affectedByChange",
-		(bool ( * )( const Plug *, IECore::TypeId, const IECore::StringAlgo::MatchPattern &, const Plug * ))&affectedByChange,
-		( arg( "plug" ), arg( "changedNodeTypeId" ), arg( "changedPlugPath" ), arg( "changedPlug" ) )
-	);
-	def(
-		"affectedByChange",
-		(bool ( * )( const Node *node, IECore::TypeId changedNodeTypeId, const Node *changedNode ))&affectedByChange,
-		( arg( "node" ), arg( "changedNodeTypeId" ), arg( "changedNode" ) )
-	);
+	def( "affectedByChange",
+		 (
+			 bool ( * )( const Plug *, IECore::TypeId, const IECore::StringAlgo::MatchPattern &, const Plug * )
+		 )&affectedByChange,
+		 ( arg( "plug" ), arg( "changedNodeTypeId" ), arg( "changedPlugPath" ), arg( "changedPlug" ) ) );
+	def( "affectedByChange",
+		 (bool ( * )( const Node *node, IECore::TypeId changedNodeTypeId, const Node *changedNode ))&affectedByChange,
+		 ( arg( "node" ), arg( "changedNodeTypeId" ), arg( "changedNode" ) ) );
 
-	def(
-		"childAffectedByChange",
-		(bool ( * )( const GraphComponent *, IECore::TypeId, const IECore::StringAlgo::MatchPattern &, const Gaffer::Plug * ))&childAffectedByChange,
-		( arg( "parent" ), arg( "changedNodeTypeId" ), arg( "changedPlugPath" ), arg( "changedPlug" ) )
-	);
-	def(
-		"childAffectedByChange",
-		(bool ( * )( const GraphComponent *, IECore::TypeId, const Gaffer::Node * ))&childAffectedByChange,
-		( arg( "parent" ), arg( "changedNodeTypeId" ), arg( "changedNode" ) )
-	);
+	def( "childAffectedByChange",
+		 (bool ( * )(
+			 const GraphComponent *, IECore::TypeId, const IECore::StringAlgo::MatchPattern &, const Gaffer::Plug *
+		 ))&childAffectedByChange,
+		 ( arg( "parent" ), arg( "changedNodeTypeId" ), arg( "changedPlugPath" ), arg( "changedPlug" ) ) );
+	def( "childAffectedByChange",
+		 (bool ( * )( const GraphComponent *, IECore::TypeId, const Gaffer::Node * ))&childAffectedByChange,
+		 ( arg( "parent" ), arg( "changedNodeTypeId" ), arg( "changedNode" ) ) );
 
-	def(
-		"ancestorAffectedByChange",
-		(bool ( * )( const Plug *, IECore::TypeId, const IECore::StringAlgo::MatchPattern &, const Gaffer::Plug * ))&ancestorAffectedByChange,
-		( arg( "plug" ), arg( "changedNodeTypeId" ), arg( "changedPlugPath" ), arg( "changedPlug" ) )
-	);
+	def( "ancestorAffectedByChange",
+		 (
+			 bool ( * )( const Plug *, IECore::TypeId, const IECore::StringAlgo::MatchPattern &, const Gaffer::Plug * )
+		 )&ancestorAffectedByChange,
+		 ( arg( "plug" ), arg( "changedNodeTypeId" ), arg( "changedPlugPath" ), arg( "changedPlug" ) ) );
 
-	def(
-		"ancestorAffectedByChange",
-		(bool ( * )( const GraphComponent *, IECore::TypeId, const Gaffer::Node * ))&ancestorAffectedByChange,
-		( arg( "graphComponent" ), arg( "changedNodeTypeId" ), arg( "changedNode" ) )
-	);
+	def( "ancestorAffectedByChange",
+		 (bool ( * )( const GraphComponent *, IECore::TypeId, const Gaffer::Node * ))&ancestorAffectedByChange,
+		 ( arg( "graphComponent" ), arg( "changedNodeTypeId" ), arg( "changedNode" ) ) );
 
 	// Copying
 	// =======
 
-	def( "copy", &deprecatedCopyWrapper, ( arg( "from" ), arg( "to" ), arg( "exclude" ) = "", arg( "persistentOnly" ) = true, arg( "persistent" ) = true ) );
+	def( "copy", &deprecatedCopyWrapper,
+		 ( arg( "from" ), arg( "to" ), arg( "exclude" ) = "", arg( "persistentOnly" ) = true,
+		   arg( "persistent" ) = true ) );
 	def( "copy", &copyWrapper, ( arg( "from" ), arg( "to" ), arg( "persistent" ) ) );
 	def( "copyIf", &copyIfWrapper, ( arg( "from" ), arg( "to" ), arg( "predicate" ), arg( "persistent" ) = true ) );
 

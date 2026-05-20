@@ -48,7 +48,9 @@ IECORE_POP_DEFAULT_VISIBILITY
 namespace IECoreCycles
 {
 
-IEDisplayOutputDriver::IEDisplayOutputDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const IECore::CompoundDataMap &layers )
+IEDisplayOutputDriver::IEDisplayOutputDriver(
+	const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const IECore::CompoundDataMap &layers
+)
 	: m_dataWindow( dataWindow )
 {
 	const ccl::NodeEnum &typeEnum = *ccl::Pass::get_type_enum();
@@ -110,11 +112,8 @@ IEDisplayOutputDriver::IEDisplayOutputDriver( const Imath::Box2i &displayWindow,
 		}
 
 		layer.displayDriver = IECoreImage::DisplayDriver::create(
-			layerData->member<IECore::StringData>( "driverType", true )->readable(),
-			displayWindow,
-			dataWindow,
-			channelNames,
-			layerData
+			layerData->member<IECore::StringData>( "driverType", true )->readable(), displayWindow, dataWindow,
+			channelNames, layerData
 		);
 
 		m_layers.push_back( layer );
@@ -149,8 +148,7 @@ void IEDisplayOutputDriver::write_render_tile( const Tile &tile )
 	// Cortex wants them relative to the true origin, independent of either
 	// data or display windows.
 	const Imath::Box2i cortexBound(
-		m_dataWindow.min + Imath::V2i( x, y ),
-		m_dataWindow.min + Imath::V2i( x + w - 1, y + h - 1 )
+		m_dataWindow.min + Imath::V2i( x, y ), m_dataWindow.min + Imath::V2i( x + w - 1, y + h - 1 )
 	);
 
 	std::vector<float> pixels( w * h * 4 );

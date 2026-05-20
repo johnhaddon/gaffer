@@ -51,7 +51,10 @@ namespace Detail
 {
 
 template<typename ThreadableFunctor>
-void parallelProcessLocationsWalk( const GafferScene::ScenePlug *scene, const Gaffer::ThreadState &threadState, const ScenePlug::ScenePath &path, ThreadableFunctor &f, tbb::task_group_context &taskGroupContext )
+void parallelProcessLocationsWalk(
+	const GafferScene::ScenePlug *scene, const Gaffer::ThreadState &threadState, const ScenePlug::ScenePath &path,
+	ThreadableFunctor &f, tbb::task_group_context &taskGroupContext
+)
 {
 	ScenePlug::PathScope pathScope( threadState, &path );
 
@@ -95,7 +98,11 @@ void parallelProcessLocationsWalk( const GafferScene::ScenePlug *scene, const Ga
 template<class ThreadableFunctor>
 struct ThreadableFilteredFunctor
 {
-	ThreadableFilteredFunctor( ThreadableFunctor &f, const GafferScene::FilterPlug *filter ) : m_f( f ), m_filter( filter ) {}
+	ThreadableFilteredFunctor( ThreadableFunctor &f, const GafferScene::FilterPlug *filter )
+		: m_f( f ),
+		  m_filter( filter )
+	{
+	}
 
 	bool operator () ( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &path )
 	{
@@ -120,10 +127,7 @@ template<class ThreadableFunctor>
 struct PathMatcherFunctor
 {
 
-	PathMatcherFunctor( ThreadableFunctor &f, const IECore::PathMatcher &filter )
-		: m_f( f ), m_filter( filter )
-	{
-	}
+	PathMatcherFunctor( ThreadableFunctor &f, const IECore::PathMatcher &filter ) : m_f( f ), m_filter( filter ) {}
 
 	bool operator () ( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &path )
 	{
@@ -139,7 +143,7 @@ struct PathMatcherFunctor
 		return match & IECore::PathMatcher::DescendantMatch;
 	}
 
-	private:
+private:
 
 	ThreadableFunctor &m_f;
 	const IECore::PathMatcher &m_filter;
@@ -151,9 +155,13 @@ namespace SceneAlgo
 {
 
 template<class ThreadableFunctor>
-void parallelProcessLocations( const GafferScene::ScenePlug *scene, ThreadableFunctor &f, const ScenePlug::ScenePath &root )
+void parallelProcessLocations(
+	const GafferScene::ScenePlug *scene, ThreadableFunctor &f, const ScenePlug::ScenePath &root
+)
 {
-	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated ); // Prevents outer tasks silently cancelling our tasks
+	tbb::task_group_context taskGroupContext(
+		tbb::task_group_context::isolated
+	); // Prevents outer tasks silently cancelling our tasks
 	Detail::parallelProcessLocationsWalk( scene, Gaffer::ThreadState::current(), root, f, taskGroupContext );
 }
 
@@ -163,21 +171,24 @@ void parallelTraverse( const ScenePlug *scene, ThreadableFunctor &f, const Scene
 	// `parallelProcessLocations()` takes a copy of the functor at each location, whereas
 	// `parallelTraverse()` is intended to use the same functor for all locations. Wrap the
 	// functor in a cheap-to-copy lambda, so that the functor itself won't be copied.
-	auto reference = [&f]( const ScenePlug *scene, const ScenePlug::ScenePath &path ) {
-		return f( scene, path );
-	};
+	auto reference = [&f]( const ScenePlug *scene, const ScenePlug::ScenePath &path ) { return f( scene, path ); };
 	parallelProcessLocations( scene, reference, root );
 }
 
 template<class ThreadableFunctor>
-void filteredParallelTraverse( const ScenePlug *scene, const GafferScene::FilterPlug *filterPlug, ThreadableFunctor &f, const ScenePlug::ScenePath &root )
+void filteredParallelTraverse(
+	const ScenePlug *scene, const GafferScene::FilterPlug *filterPlug, ThreadableFunctor &f,
+	const ScenePlug::ScenePath &root
+)
 {
 	Detail::ThreadableFilteredFunctor<ThreadableFunctor> ff( f, filterPlug );
 	parallelTraverse( scene, ff, root );
 }
 
 template<class ThreadableFunctor>
-void filteredParallelTraverse( const ScenePlug *scene, const IECore::PathMatcher &filter, ThreadableFunctor &f, const ScenePlug::ScenePath &root )
+void filteredParallelTraverse(
+	const ScenePlug *scene, const IECore::PathMatcher &filter, ThreadableFunctor &f, const ScenePlug::ScenePath &root
+)
 {
 	Detail::PathMatcherFunctor<ThreadableFunctor> ff( f, filter );
 	parallelTraverse( scene, ff, root );
@@ -185,7 +196,10 @@ void filteredParallelTraverse( const ScenePlug *scene, const IECore::PathMatcher
 
 
 template<class LocationFunctor, class GatherFunctor>
-void parallelGatherLocations( const ScenePlug *scene, LocationFunctor &&locationFunctor, GatherFunctor &&gatherFunctor, const ScenePlug::ScenePath &root )
+void parallelGatherLocations(
+	const ScenePlug *scene, LocationFunctor &&locationFunctor, GatherFunctor &&gatherFunctor,
+	const ScenePlug::ScenePath &root
+)
 {
 	// We use `parallelTraverse()` to run `locationFunctor`, passing the results to
 	// `gatherFunctor` on the current thread via a queue. In testing, this proved to
@@ -203,23 +217,24 @@ void parallelGatherLocations( const ScenePlug *scene, LocationFunctor &&location
 		return true;
 	};
 
-	tbb::task_arena( tbb::task_arena::attach() ).enqueue(
+	tbb::task_arena( tbb::task_arena::attach() )
+		.enqueue(
 
-		[&, &threadState = Gaffer::ThreadState::current()]() {
-			Gaffer::ThreadState::Scope threadStateScope( threadState );
-			try
-			{
-				SceneAlgo::parallelTraverse( scene, locationFunctorWrapper, root );
+			[&, &threadState = Gaffer::ThreadState::current()]() {
+				Gaffer::ThreadState::Scope threadStateScope( threadState );
+				try
+				{
+					SceneAlgo::parallelTraverse( scene, locationFunctorWrapper, root );
+				}
+				catch( ... )
+				{
+					queue.push( std::current_exception() );
+					return;
+				}
+				queue.push( std::monostate() );
 			}
-			catch( ... )
-			{
-				queue.push( std::current_exception() );
-				return;
-			}
-			queue.push( std::monostate() );
-		}
 
-	);
+		);
 
 	while( true )
 	{
@@ -274,13 +289,11 @@ IECore::PathMatcher findAll( const ScenePlug *scene, Predicate &&predicate, cons
 
 	parallelTraverse( scene, f, root );
 
-	return threadResults.combine(
-		[]( const IECore::PathMatcher &a, const IECore::PathMatcher &b ) {
-			IECore::PathMatcher c = a;
-			c.addPaths( b );
-			return c;
-		}
-	);
+	return threadResults.combine( []( const IECore::PathMatcher &a, const IECore::PathMatcher &b ) {
+		IECore::PathMatcher c = a;
+		c.addPaths( b );
+		return c;
+	} );
 }
 
 } // namespace SceneAlgo
@@ -291,9 +304,8 @@ namespace Detail
 template<typename T, typename LocationFunctor, typename MergeChildrenFunctor, typename ReduceFunctor>
 T parallelReduceLocationsWalk(
 	const GafferScene::ScenePlug *scene, const Gaffer::ThreadState &threadState, const ScenePlug::ScenePath &path,
-	const T &identity,
-	LocationFunctor &&locationFunctor, MergeChildrenFunctor &&mergeChildrenFunctor, ReduceFunctor &&reduceFunctor,
-	tbb::task_group_context &taskGroupContext
+	const T &identity, LocationFunctor &&locationFunctor, MergeChildrenFunctor &&mergeChildrenFunctor,
+	ReduceFunctor &&reduceFunctor, tbb::task_group_context &taskGroupContext
 )
 {
 	ScenePlug::PathScope pathScope( threadState, &path );
@@ -330,35 +342,33 @@ T parallelReduceLocationsWalk(
 		tbb::task_group_context &m_taskGroupContext;
 
 		LoopBody(
-			const GafferScene::ScenePlug *scene,
-			const Gaffer::ThreadState &threadState,
-			const ScenePlug::ScenePath &path,
-			const T &identity,
-			LocationFunctor &&locationFunctor,
-			MergeChildrenFunctor &&mergeChildrenFunctor,
-			ReduceFunctor &&reduceFunctor,
+			const GafferScene::ScenePlug *scene, const Gaffer::ThreadState &threadState,
+			const ScenePlug::ScenePath &path, const T &identity, LocationFunctor &&locationFunctor,
+			MergeChildrenFunctor &&mergeChildrenFunctor, ReduceFunctor &&reduceFunctor,
 			tbb::task_group_context &taskGroupContext
-		) : m_result( identity ),
-			m_scene( scene ),
-			m_threadState( threadState ),
-			m_path( path ),
-			m_identity( identity ),
-			m_locationFunctor( locationFunctor ),
-			m_mergeChildrenFunctor( mergeChildrenFunctor ),
-			m_reduceFunctor( reduceFunctor ),
-			m_taskGroupContext( taskGroupContext )
+		)
+			: m_result( identity ),
+			  m_scene( scene ),
+			  m_threadState( threadState ),
+			  m_path( path ),
+			  m_identity( identity ),
+			  m_locationFunctor( locationFunctor ),
+			  m_mergeChildrenFunctor( mergeChildrenFunctor ),
+			  m_reduceFunctor( reduceFunctor ),
+			  m_taskGroupContext( taskGroupContext )
 		{
 		}
 
-		LoopBody( LoopBody &s, tbb::split ) : m_result( s.m_identity ),
-											  m_scene( s.m_scene ),
-											  m_threadState( s.m_threadState ),
-											  m_path( s.m_path ),
-											  m_identity( s.m_identity ),
-											  m_locationFunctor( s.m_locationFunctor ),
-											  m_mergeChildrenFunctor( s.m_mergeChildrenFunctor ),
-											  m_reduceFunctor( s.m_reduceFunctor ),
-											  m_taskGroupContext( s.m_taskGroupContext )
+		LoopBody( LoopBody &s, tbb::split )
+			: m_result( s.m_identity ),
+			  m_scene( s.m_scene ),
+			  m_threadState( s.m_threadState ),
+			  m_path( s.m_path ),
+			  m_identity( s.m_identity ),
+			  m_locationFunctor( s.m_locationFunctor ),
+			  m_mergeChildrenFunctor( s.m_mergeChildrenFunctor ),
+			  m_reduceFunctor( s.m_reduceFunctor ),
+			  m_taskGroupContext( s.m_taskGroupContext )
 		{
 		}
 
@@ -373,25 +383,18 @@ T parallelReduceLocationsWalk(
 				m_reduceFunctor(
 					m_result,
 					parallelReduceLocationsWalk(
-						m_scene, m_threadState, childPath,
-						m_identity, m_locationFunctor, m_mergeChildrenFunctor, m_reduceFunctor,
-						m_taskGroupContext
+						m_scene, m_threadState, childPath, m_identity, m_locationFunctor, m_mergeChildrenFunctor,
+						m_reduceFunctor, m_taskGroupContext
 					)
 				);
 			}
 		}
 
-		void join( LoopBody &rhs )
-		{
-			m_reduceFunctor( m_result, rhs.m_result );
-		}
+		void join( LoopBody &rhs ) { m_reduceFunctor( m_result, rhs.m_result ); }
 	};
 
 	LoopBody loopBody(
-		scene, threadState, path,
-		identity,
-		locationFunctor, mergeChildrenFunctor, reduceFunctor,
-		taskGroupContext
+		scene, threadState, path, identity, locationFunctor, mergeChildrenFunctor, reduceFunctor, taskGroupContext
 	);
 
 	if( childNames.size() > 1 )
@@ -416,10 +419,8 @@ namespace SceneAlgo
 
 template<typename T, typename LocationFunctor, typename ReduceFunctor>
 T parallelReduceLocations(
-	const GafferScene::ScenePlug *scene,
-	const T &identity,
-	LocationFunctor &&locationFunctor, ReduceFunctor &&reduceFunctor,
-	const ScenePlug::ScenePath &root
+	const GafferScene::ScenePlug *scene, const T &identity, LocationFunctor &&locationFunctor,
+	ReduceFunctor &&reduceFunctor, const ScenePlug::ScenePath &root
 )
 {
 	return parallelReduceLocations( scene, identity, locationFunctor, reduceFunctor, reduceFunctor, root );
@@ -427,18 +428,15 @@ T parallelReduceLocations(
 
 template<typename T, typename LocationFunctor, typename MergeChildrenFunctor, typename ReduceFunctor>
 T parallelReduceLocations(
-	const GafferScene::ScenePlug *scene,
-	const T &identity,
-	LocationFunctor &&locationFunctor, MergeChildrenFunctor &&mergeChildrenFunctor, ReduceFunctor &&reduceFunctor,
-	const ScenePlug::ScenePath &root
+	const GafferScene::ScenePlug *scene, const T &identity, LocationFunctor &&locationFunctor,
+	MergeChildrenFunctor &&mergeChildrenFunctor, ReduceFunctor &&reduceFunctor, const ScenePlug::ScenePath &root
 )
 {
 	// Prevents outer tasks silently cancelling our tasks
 	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
 
 	return Detail::parallelReduceLocationsWalk(
-		scene, Gaffer::ThreadState::current(), root, identity,
-		locationFunctor, mergeChildrenFunctor, reduceFunctor,
+		scene, Gaffer::ThreadState::current(), root, identity, locationFunctor, mergeChildrenFunctor, reduceFunctor,
 		taskGroupContext
 	);
 }

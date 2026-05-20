@@ -49,8 +49,7 @@ GAFFER_NODE_DEFINE_TYPE( Sphere );
 
 size_t Sphere::g_firstPlugIndex = 0;
 
-Sphere::Sphere( const std::string &name )
-	: ObjectSource( name, "sphere" )
+Sphere::Sphere( const std::string &name ) : ObjectSource( name, "sphere" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new IntPlug( "type", Plug::In, Sphere::Mesh, Sphere::Primitive, Sphere::Mesh ) );
@@ -61,9 +60,7 @@ Sphere::Sphere( const std::string &name )
 	addChild( new V2iPlug( "divisions", Plug::In, V2i( 20, 40 ), V2i( 3, 6 ) ) );
 }
 
-Sphere::~Sphere()
-{
-}
+Sphere::~Sphere() {}
 
 Gaffer::IntPlug *Sphere::typePlug()
 {
@@ -129,7 +126,8 @@ void Sphere::affects( const Plug *input, AffectedPlugsContainer &outputs ) const
 {
 	ObjectSource::affects( input, outputs );
 
-	if( input == typePlug() || input == radiusPlug() || input == zMinPlug() || input == zMaxPlug() || input == thetaMaxPlug() )
+	if( input == typePlug() || input == radiusPlug() || input == zMinPlug() || input == zMaxPlug() ||
+		input == thetaMaxPlug() )
 	{
 		outputs.push_back( sourcePlug() );
 	}
@@ -165,6 +163,8 @@ IECore::ConstObjectPtr Sphere::computeSource( const Context *context ) const
 	}
 	else
 	{
-		return MeshPrimitive::createSphere( radius, zMin, zMax, thetaMax, divisionsPlug()->getValue(), context->canceller() );
+		return MeshPrimitive::createSphere(
+			radius, zMin, zMax, thetaMax, divisionsPlug()->getValue(), context->canceller()
+		);
 	}
 }

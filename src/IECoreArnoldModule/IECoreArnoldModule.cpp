@@ -113,8 +113,7 @@ object universeWrapper( UniverseBlock &universeBlock )
 		object arnold = import( "arnold" );
 		object ctypes = import( "ctypes" );
 		return ctypes.attr( "cast" )(
-			(uint64_t)universeBlock.universe(),
-			ctypes.attr( "POINTER" )( object( arnold.attr( "AtUniverse" ) ) )
+			(uint64_t)universeBlock.universe(), ctypes.attr( "POINTER" )( object( arnold.attr( "AtUniverse" ) ) )
 		);
 	}
 	else
@@ -129,12 +128,17 @@ object convertWrapper( const IECore::Object *object, boost::python::object unive
 	return atNodeToPythonObject( NodeAlgo::convert( object, pythonObjectToAtUniverse( universe ), nodeName, nullptr ) );
 }
 
-object convertWrapper2( object pythonSamples, float motionStart, float motionEnd, boost::python::object universe, const std::string &nodeName )
+object convertWrapper2(
+	object pythonSamples, float motionStart, float motionEnd, boost::python::object universe,
+	const std::string &nodeName
+)
 {
 	IECoreScenePreview::Renderer::ObjectSamples samples;
 	container_utils::extend_container( samples, pythonSamples );
 
-	return atNodeToPythonObject( NodeAlgo::convert( samples, motionStart, motionEnd, pythonObjectToAtUniverse( universe ), nodeName, nullptr ) );
+	return atNodeToPythonObject(
+		NodeAlgo::convert( samples, motionStart, motionEnd, pythonObjectToAtUniverse( universe ), nodeName, nullptr )
+	);
 }
 
 void setParameter( object &pythonNode, const char *name, const IECore::Data *data, const std::string &messageContext )
@@ -149,9 +153,12 @@ IECore::DataPtr getParameter( object &pythonNode, const char *name )
 	return ParameterAlgo::getParameter( node, name );
 }
 
-list shaderNetworkAlgoConvert( const IECoreScene::ShaderNetwork *shaderNetwork, object universe, const std::string &name )
+list shaderNetworkAlgoConvert(
+	const IECoreScene::ShaderNetwork *shaderNetwork, object universe, const std::string &name
+)
 {
-	std::vector<AtNode *> nodes = ShaderNetworkAlgo::convert( shaderNetwork, pythonObjectToAtUniverse( universe ), name );
+	std::vector<AtNode *> nodes =
+		ShaderNetworkAlgo::convert( shaderNetwork, pythonObjectToAtUniverse( universe ), name );
 	list result;
 	for( const auto &n : nodes )
 	{
@@ -203,7 +210,8 @@ BOOST_PYTHON_MODULE( _IECoreArnold )
 		scope().attr( "ParameterAlgo" ) = parameterAlgoModule;
 		scope parameterAlgoModuleScope( parameterAlgoModule );
 
-		def( "setParameter", &setParameter, ( arg( "node" ), arg( "name" ), arg( "data" ), arg( "messageContext" ) = "ParameterAlgo::setParameter" ) );
+		def( "setParameter", &setParameter,
+			 ( arg( "node" ), arg( "name" ), arg( "data" ), arg( "messageContext" ) = "ParameterAlgo::setParameter" ) );
 		def( "getParameter", &getParameter );
 	}
 

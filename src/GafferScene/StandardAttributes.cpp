@@ -55,13 +55,13 @@ const std::string g_metadataTargets(
 
 GAFFER_NODE_DEFINE_TYPE( StandardAttributes );
 
-StandardAttributes::StandardAttributes( const std::string &name )
-	: Attributes( name )
+StandardAttributes::StandardAttributes( const std::string &name ) : Attributes( name )
 {
 
 	for( const auto &target : Metadata::targetsWithMetadata( g_metadataTargets, g_defaultValue ) )
 	{
-		if( auto valuePlug = MetadataAlgo::createPlugFromMetadata( "value", Plug::Direction::In, Plug::Flags::Default, target ) )
+		if( auto valuePlug =
+				MetadataAlgo::createPlugFromMetadata( "value", Plug::Direction::In, Plug::Flags::Default, target ) )
 		{
 			const std::string attributeName = target.string().substr( 10 );
 			NameValuePlugPtr attributePlug = new NameValuePlug( attributeName, valuePlug, false, attributeName );
@@ -70,6 +70,4 @@ StandardAttributes::StandardAttributes( const std::string &name )
 	}
 }
 
-StandardAttributes::~StandardAttributes()
-{
-}
+StandardAttributes::~StandardAttributes() {}

@@ -42,14 +42,11 @@ using namespace GafferUI;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ContainerGadget );
 
-ContainerGadget::ContainerGadget( const std::string &name )
-	: Gadget( name ), m_padding( Box3f( V3f( 0 ), V3f( 0 ) ) )
+ContainerGadget::ContainerGadget( const std::string &name ) : Gadget( name ), m_padding( Box3f( V3f( 0 ), V3f( 0 ) ) )
 {
 }
 
-ContainerGadget::~ContainerGadget()
-{
-}
+ContainerGadget::~ContainerGadget() {}
 
 Imath::Box3f ContainerGadget::bound() const
 {

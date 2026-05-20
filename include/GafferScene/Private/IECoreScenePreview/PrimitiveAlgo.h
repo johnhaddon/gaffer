@@ -49,8 +49,7 @@ namespace PrimitiveAlgo
 // Transform a primitive by a given matrix. Applies an appropriate transform to any primitive
 // variables that have an interpretation of point, vector or normal.
 GAFFERSCENE_API void transformPrimitive(
-	IECoreScene::Primitive &primitive, Imath::M44f matrix,
-	const IECore::Canceller *canceller = nullptr
+	IECoreScene::Primitive &primitive, Imath::M44f matrix, const IECore::Canceller *canceller = nullptr
 );
 
 // Merge a list of primitives with matching transforms into a single combined primitive.

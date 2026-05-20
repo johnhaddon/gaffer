@@ -88,16 +88,13 @@ void parallelGetValue( const T *plug, int iterations )
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	const ThreadState &threadState = ThreadState::current();
-	tbb::parallel_for(
-		tbb::blocked_range<int>( 0, iterations ),
-		[&]( const tbb::blocked_range<int> &r ) {
-			ThreadState::Scope scope( threadState );
-			for( int i = r.begin(); i < r.end(); ++i )
-			{
-				plug->getValue();
-			}
+	tbb::parallel_for( tbb::blocked_range<int>( 0, iterations ), [&]( const tbb::blocked_range<int> &r ) {
+		ThreadState::Scope scope( threadState );
+		for( int i = r.begin(); i < r.end(); ++i )
+		{
+			plug->getValue();
 		}
-	);
+	} );
 }
 
 // Variant of the above which stores the iteration in a context variable, allowing

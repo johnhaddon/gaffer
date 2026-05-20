@@ -54,19 +54,17 @@ namespace
 class CameraVisualiser : public ObjectVisualiser
 {
 
-	public:
+public:
 
 	using ObjectType = IECoreScene::Camera;
 
-	CameraVisualiser()
-	{
-	}
+	CameraVisualiser() {}
 
-	~CameraVisualiser() override
-	{
-	}
+	~CameraVisualiser() override {}
 
-	IECoreGL::CurvesPrimitivePtr createFrustum( const std::string &projection, const Box2f &screenWindow, const V2f &clippingPlanes, float offset = 0.0f ) const
+	IECoreGL::CurvesPrimitivePtr createFrustum(
+		const std::string &projection, const Box2f &screenWindow, const V2f &clippingPlanes, float offset = 0.0f
+	) const
 	{
 
 		IECore::V3fVectorDataPtr pData = new IECore::V3fVectorData;
@@ -121,8 +119,12 @@ class CameraVisualiser : public ObjectVisualiser
 		p.push_back( V3f( near.min.x, near.max.y, -clippingPlanes[0] ) );
 		p.push_back( V3f( far.min.x, far.max.y, -clippingPlanes[1] ) );
 
-		IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurveData );
-		curves->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
+		IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive(
+			IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurveData
+		);
+		curves->addPrimitiveVariable(
+			"P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData )
+		);
 
 		return curves;
 	}
@@ -176,7 +178,8 @@ class CameraVisualiser : public ObjectVisualiser
 
 		static const float restXs[2] = { b.min.x, b.max.x };
 		static const float restZs[6] = { b.min.z, size.z * 0.3f, size.z * 0.4f, size.z * 0.8f, size.z * 0.9f, b.max.z };
-		static const float restYs[6] = { b.min.y, b.min.y, b.min.y + restHeight, b.min.y + restHeight, backMinY, backMinY };
+		static const float restYs[6] = { b.min.y,  b.min.y, b.min.y + restHeight, b.min.y + restHeight,
+										 backMinY, backMinY };
 
 		// front to back
 		for( const float x : restXs )
@@ -215,7 +218,8 @@ class CameraVisualiser : public ObjectVisualiser
 
 		static const float handleThickness = size.y * 0.3f;
 		static const float handleXs[2] = { b.min.x * 0.1f, b.max.x * 0.1f };
-		static const float handleYs[3] = { b.max.y, b.max.y + handleThickness, b.max.y + handleThickness + ( handleXs[1] - handleXs[0] ) };
+		static const float handleYs[3] = { b.max.y, b.max.y + handleThickness,
+										   b.max.y + handleThickness + ( handleXs[1] - handleXs[0] ) };
 		static const float handleZs[4] = { b.min.z + 0.1f, b.min.z + 0.15f, b.max.z - 0.45f, b.max.z - 0.4f };
 
 		// Outer handle
@@ -250,8 +254,12 @@ class CameraVisualiser : public ObjectVisualiser
 		p.push_back( V3f( handleXs[0], handleYs[2], handleZs[3] ) );
 		p.push_back( V3f( handleXs[1], handleYs[2], handleZs[3] ) );
 
-		IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurveData );
-		curves->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
+		IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive(
+			IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurveData
+		);
+		curves->addPrimitiveVariable(
+			"P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData )
+		);
 
 		return curves;
 	}
@@ -302,7 +310,7 @@ class CameraVisualiser : public ObjectVisualiser
 		return { boxVis, frustumVis };
 	}
 
-	protected:
+protected:
 
 	static ObjectVisualiserDescription<CameraVisualiser> g_visualiserDescription;
 };

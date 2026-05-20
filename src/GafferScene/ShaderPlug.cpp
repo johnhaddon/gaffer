@@ -104,8 +104,7 @@ bool isParameterType( const Plug *plug )
 			// GafferRenderMan. It may be that we should move ClosurePlug to
 			// GafferScene anyway, and give it an additional property to say what
 			// type of closure it is.
-			return plug->isInstanceOf( "GafferOSL::ClosurePlug" ) ||
-				plug->isInstanceOf( "GafferRenderMan::BXDFPlug" );
+			return plug->isInstanceOf( "GafferOSL::ClosurePlug" ) || plug->isInstanceOf( "GafferRenderMan::BXDFPlug" );
 	}
 }
 
@@ -120,14 +119,11 @@ const IECore::InternedString g_out( "out" );
 
 GAFFER_PLUG_DEFINE_TYPE( ShaderPlug );
 
-ShaderPlug::ShaderPlug( const std::string &name, Direction direction, unsigned flags )
-	: Plug( name, direction, flags )
+ShaderPlug::ShaderPlug( const std::string &name, Direction direction, unsigned flags ) : Plug( name, direction, flags )
 {
 }
 
-ShaderPlug::~ShaderPlug()
-{
-}
+ShaderPlug::~ShaderPlug() {}
 
 bool ShaderPlug::acceptsChild( const GraphComponent *potentialChild ) const
 {
@@ -183,11 +179,9 @@ bool ShaderPlug::acceptsInput( const Gaffer::Plug *input ) const
 	const Node *sourceNode = sourcePlug->node();
 	if( auto switchNode = runTimeCast<const Switch>( sourceNode ) )
 	{
-		if(
-			sourcePlug == switchNode->outPlug() ||
+		if( sourcePlug == switchNode->outPlug() ||
 			( switchNode->outPlug() && switchNode->outPlug()->isAncestorOf( sourcePlug ) ) ||
-			sourcePlug->parent() == switchNode->inPlugs()
-		)
+			sourcePlug->parent() == switchNode->inPlugs() )
 		{
 			// Reject switches which have inputs from non-shader nodes.
 			for( Plug::Iterator it( switchNode->inPlugs() ); !it.done(); ++it )
@@ -201,8 +195,7 @@ bool ShaderPlug::acceptsInput( const Gaffer::Plug *input ) const
 		}
 	}
 	else if(
-		runTimeCast<const ContextProcessor>( sourceNode ) ||
-		runTimeCast<const Loop>( sourceNode ) ||
+		runTimeCast<const ContextProcessor>( sourceNode ) || runTimeCast<const Loop>( sourceNode ) ||
 		runTimeCast<const Spreadsheet>( sourceNode )
 	)
 	{
@@ -221,11 +214,8 @@ bool ShaderPlug::acceptsInput( const Gaffer::Plug *input ) const
 	// to `sourcePlug`, we'll be consulted about any inputs it will receive, so we
 	// can reject non-shaders then.
 
-	if(
-		runTimeCast<const SubGraph>( sourceNode ) ||
-		runTimeCast<const Dot>( sourceNode ) ||
-		runTimeCast<const BoxIO>( sourceNode )
-	)
+	if( runTimeCast<const SubGraph>( sourceNode ) || runTimeCast<const Dot>( sourceNode ) ||
+		runTimeCast<const BoxIO>( sourceNode ) )
 	{
 		return true;
 	}
@@ -267,9 +257,11 @@ IECore::ConstCompoundObjectPtr ShaderPlug::attributes() const
 		// Check for outputs from ShaderTweakProxy, which should only be used with ShaderTweaks nodes
 		for( const auto &i : result->members() )
 		{
-			if( const IECoreScene::ShaderNetwork *shaderNetwork = IECore::runTimeCast<const IECoreScene::ShaderNetwork>( i.second.get() ) )
+			if( const IECoreScene::ShaderNetwork *shaderNetwork =
+					IECore::runTimeCast<const IECoreScene::ShaderNetwork>( i.second.get() ) )
 			{
-				if( const BoolData *hasProxyNodes = shaderNetwork->blindData()->member<IECore::BoolData>( hasProxyNodesIdentifier ) )
+				if( const BoolData *hasProxyNodes =
+						shaderNetwork->blindData()->member<IECore::BoolData>( hasProxyNodesIdentifier ) )
 				{
 					if( hasProxyNodes->readable() )
 					{
@@ -325,10 +317,7 @@ const Gaffer::Plug *ShaderPlug::shaderOutPlug( ShaderContext &shaderContext ) co
 	}
 
 	const Plug *shaderOutPlug = shader->outPlug();
-	if(
-		!shaderOutPlug ||
-		( source != shaderOutPlug && !shaderOutPlug->isAncestorOf( source ) )
-	)
+	if( !shaderOutPlug || ( source != shaderOutPlug && !shaderOutPlug->isAncestorOf( source ) ) )
 	{
 		return nullptr;
 	}

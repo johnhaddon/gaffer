@@ -57,9 +57,12 @@ namespace IECoreRenderMan
 class Globals : public boost::noncopyable
 {
 
-	public:
+public:
 
-	Globals( RtUString rileyVariant, IECoreScenePreview::Renderer::RenderType renderType, const IECore::MessageHandlerPtr &messageHandler );
+	Globals(
+		RtUString rileyVariant, IECoreScenePreview::Renderer::RenderType renderType,
+		const IECore::MessageHandlerPtr &messageHandler
+	);
 	~Globals();
 
 	void option( const IECore::InternedString &name, const IECore::Object *value );
@@ -73,7 +76,7 @@ class Globals : public boost::noncopyable
 	void render();
 	void pause();
 
-	private:
+private:
 
 	bool worldBegun();
 	void updateIntegrator();

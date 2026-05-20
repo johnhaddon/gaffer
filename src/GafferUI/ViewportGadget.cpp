@@ -134,7 +134,9 @@ IECoreGL::BufferPtr rectUvBuffer()
 
 bool checkGLArbTextureFloat()
 {
-	bool supported = std::regex_match( std::string( (const char *)glGetString( GL_EXTENSIONS ) ), std::regex( R"(.*GL_ARB_texture_float( |\n).*)" ) );
+	bool supported = std::regex_match(
+		std::string( (const char *)glGetString( GL_EXTENSIONS ) ), std::regex( R"(.*GL_ARB_texture_float( |\n).*)" )
+	);
 	if( !supported )
 	{
 		IECore::msg(
@@ -172,10 +174,16 @@ V2i glViewportSize()
 class ViewportGadget::CameraController : public boost::noncopyable
 {
 
-	public:
+public:
 
 	CameraController()
-		: m_planarMovement( true ), m_tumblingEnabled( true ), m_dollyingEnabled( true ), m_camera( new IECoreScene::Camera() ), m_maxPlanarZoom( 0.0f ), m_planarScale( 1.0f ), m_centerOfInterest( 1.0f )
+		: m_planarMovement( true ),
+		  m_tumblingEnabled( true ),
+		  m_dollyingEnabled( true ),
+		  m_camera( new IECoreScene::Camera() ),
+		  m_maxPlanarZoom( 0.0f ),
+		  m_planarScale( 1.0f ),
+		  m_centerOfInterest( 1.0f )
 	{
 		// Force existence of parameter (see `getViewportResolution()`)
 		m_camera->setResolution( m_camera->getResolution() );
@@ -219,61 +227,28 @@ class ViewportGadget::CameraController : public boost::noncopyable
 		m_planarMovement = planarMovement;
 	}
 
-	bool getPlanarMovement() const
-	{
-		return m_planarMovement;
-	}
+	bool getPlanarMovement() const { return m_planarMovement; }
 
-	void setTumblingEnabled( bool tumblingEnabled )
-	{
-		m_tumblingEnabled = tumblingEnabled;
-	}
+	void setTumblingEnabled( bool tumblingEnabled ) { m_tumblingEnabled = tumblingEnabled; }
 
-	bool getTumblingEnabled() const
-	{
-		return m_tumblingEnabled;
-	}
+	bool getTumblingEnabled() const { return m_tumblingEnabled; }
 
-	void setDollyingEnabled( bool dollyingEnabled )
-	{
-		m_dollyingEnabled = dollyingEnabled;
-	}
+	void setDollyingEnabled( bool dollyingEnabled ) { m_dollyingEnabled = dollyingEnabled; }
 
-	bool getDollyingEnabled() const
-	{
-		return m_dollyingEnabled;
-	}
+	bool getDollyingEnabled() const { return m_dollyingEnabled; }
 
-	void setTransform( const M44f &transform )
-	{
-		m_transform = transform;
-	}
+	void setTransform( const M44f &transform ) { m_transform = transform; }
 
-	const M44f &getTransform() const
-	{
-		return m_transform;
-	}
+	const M44f &getTransform() const { return m_transform; }
 
 	/// Positive.
-	void setCenterOfInterest( float centerOfInterest )
-	{
-		m_centerOfInterest = centerOfInterest;
-	}
+	void setCenterOfInterest( float centerOfInterest ) { m_centerOfInterest = centerOfInterest; }
 
-	float getCenterOfInterest()
-	{
-		return m_centerOfInterest;
-	}
+	float getCenterOfInterest() { return m_centerOfInterest; }
 
-	void setMaxPlanarZoom( const Imath::V2f &scale )
-	{
-		m_maxPlanarZoom = scale;
-	}
+	void setMaxPlanarZoom( const Imath::V2f &scale ) { m_maxPlanarZoom = scale; }
 
-	Imath::V2f getMaxPlanarZoom()
-	{
-		return m_maxPlanarZoom;
-	}
+	Imath::V2f getMaxPlanarZoom() { return m_maxPlanarZoom; }
 
 	/// Set the resolution of the viewport we are working in
 	void setViewportResolution( const Imath::V2i &viewportResolution )
@@ -287,15 +262,9 @@ class ViewportGadget::CameraController : public boost::noncopyable
 		return m_camera->parametersData()->member<V2iData>( "resolution" )->readable();
 	}
 
-	void setClippingPlanes( const Imath::V2f &clippingPlanes )
-	{
-		m_camera->setClippingPlanes( clippingPlanes );
-	}
+	void setClippingPlanes( const Imath::V2f &clippingPlanes ) { m_camera->setClippingPlanes( clippingPlanes ); }
 
-	const Imath::V2f getClippingPlanes() const
-	{
-		return m_camera->getClippingPlanes();
-	}
+	const Imath::V2f getClippingPlanes() const { return m_camera->getClippingPlanes(); }
 
 	/// Moves the camera to frame the specified box, keeping the
 	/// current viewing direction unchanged.
@@ -318,7 +287,10 @@ class ViewportGadget::CameraController : public boost::noncopyable
 
 	/// Moves the camera to frame the specified box, viewing it from the
 	/// specified direction, and with the specified up vector.
-	ViewportGadget::CameraFlags frame( const Imath::Box3f &box, const Imath::V3f &viewDirection, const Imath::V3f &upVector = Imath::V3f( 0, 1, 0 ), bool variableAspectZoom = false )
+	ViewportGadget::CameraFlags frame(
+		const Imath::Box3f &box, const Imath::V3f &viewDirection, const Imath::V3f &upVector = Imath::V3f( 0, 1, 0 ),
+		bool variableAspectZoom = false
+	)
 	{
 		if( !( std::isfinite( box.min.length() ) && std::isfinite( box.max.length() ) ) )
 		{
@@ -471,10 +443,7 @@ class ViewportGadget::CameraController : public boost::noncopyable
 				lerpfactor( cameraPosition.x, normalizedScreenWindow.min.x, normalizedScreenWindow.max.x ),
 				lerpfactor( cameraPosition.y, normalizedScreenWindow.max.y, normalizedScreenWindow.min.y )
 			);
-			return V2f(
-				ndcPosition.x * resolution.x,
-				ndcPosition.y * resolution.y
-			);
+			return V2f( ndcPosition.x * resolution.x, ndcPosition.y * resolution.y );
 		}
 	}
 
@@ -575,11 +544,13 @@ class ViewportGadget::CameraController : public boost::noncopyable
 	/// tracking and unmodified MMB drags, though.
 	MotionType cameraMotionType( const ButtonEvent &event, bool variableAspectZoom, bool preciseMotionAllowed )
 	{
-		if(
-			( ( event.modifiers == ModifiableEvent::Alt ) || ( preciseMotionAllowed && ( event.modifiers == ModifiableEvent::ShiftAlt ) ) ) ||
-			( event.buttons == ButtonEvent::Middle && ( event.modifiers == ModifiableEvent::None || ( preciseMotionAllowed && ( event.modifiers == ModifiableEvent::Shift ) ) ) ) ||
-			( variableAspectZoom && event.modifiers & ModifiableEvent::Alt && event.modifiers & ModifiableEvent::Control && event.buttons == ButtonEvent::Right )
-		)
+		if( ( ( event.modifiers == ModifiableEvent::Alt ) ||
+			  ( preciseMotionAllowed && ( event.modifiers == ModifiableEvent::ShiftAlt ) ) ) ||
+			( event.buttons == ButtonEvent::Middle &&
+			  ( event.modifiers == ModifiableEvent::None ||
+				( preciseMotionAllowed && ( event.modifiers == ModifiableEvent::Shift ) ) ) ) ||
+			( variableAspectZoom && event.modifiers & ModifiableEvent::Alt &&
+			  event.modifiers & ModifiableEvent::Control && event.buttons == ButtonEvent::Right ) )
 		{
 			switch( event.buttons )
 			{
@@ -597,7 +568,7 @@ class ViewportGadget::CameraController : public boost::noncopyable
 		return CameraController::None;
 	}
 
-	private:
+private:
 
 	CameraFlags track( const Imath::V2f &p )
 	{
@@ -696,16 +667,15 @@ class ViewportGadget::CameraController : public boost::noncopyable
 
 			if( m_maxPlanarZoom != V2f( 0.0f ) )
 			{
-				m_planarScale = V2f(
-					std::max( m_planarScale.x, 1.0f / m_maxPlanarZoom.x ),
-					std::max( m_planarScale.y, 1.0f / m_maxPlanarZoom.y )
-				);
+				m_planarScale =
+					V2f( std::max( m_planarScale.x, 1.0f / m_maxPlanarZoom.x ),
+						 std::max( m_planarScale.y, 1.0f / m_maxPlanarZoom.y ) );
 			}
 
 			// Also apply a transform to keep the origin of the scale centered on the
 			// starting cursor position
-			V2f offset = V2f( -1, 1 ) * ( m_planarScale - m_motionPlanarScale ) *
-				( m_motionStart - V2f( 0.5 ) * resolution );
+			V2f offset =
+				V2f( -1, 1 ) * ( m_planarScale - m_motionPlanarScale ) * ( m_motionStart - V2f( 0.5 ) * resolution );
 			M44f t = m_motionMatrix;
 			t.translate( V3f( offset.x, offset.y, 0 ) );
 			m_transform = t;
@@ -1110,7 +1080,9 @@ std::vector<Gadget *> ViewportGadget::gadgetsAtInternal( const Imath::V2f &raste
 	return gadgetsAtInternal( Box2f( rasterPosition - V2f( 1 ), rasterPosition + V2f( 1 ) ), Layer::None, dragging );
 }
 
-std::vector<Gadget *> ViewportGadget::gadgetsAtInternal( const Imath::Box2f &rasterRegion, Gadget::Layer filterLayer, bool dragging ) const
+std::vector<Gadget *> ViewportGadget::gadgetsAtInternal(
+	const Imath::Box2f &rasterRegion, Gadget::Layer filterLayer, bool dragging
+) const
 {
 	std::vector<HitRecord> selection;
 	{
@@ -1182,13 +1154,9 @@ Imath::V2f ViewportGadget::worldToRasterSpace( const Imath::V3f &worldPosition )
 
 void ViewportGadget::render() const
 {
-	const_cast<ViewportGadget *>( this )->preRenderSignal()(
-		const_cast<ViewportGadget *>( this )
-	);
+	const_cast<ViewportGadget *>( this )->preRenderSignal()( const_cast<ViewportGadget *>( this ) );
 
-	IECoreGL::ToGLConverterPtr converter = new IECoreGL::ToGLCameraConverter(
-		m_cameraController->getCamera()
-	);
+	IECoreGL::ToGLConverterPtr converter = new IECoreGL::ToGLCameraConverter( m_cameraController->getCamera() );
 	IECoreGL::CameraPtr camera = boost::static_pointer_cast<IECoreGL::Camera>( converter->convert() );
 	camera->setTransform( getCameraTransform() );
 	camera->render( nullptr );
@@ -1222,7 +1190,10 @@ void ViewportGadget::childDirtied( DirtyType dirtyType )
 	renderRequestSignal()( this );
 }
 
-void ViewportGadget::renderLayerInternal( RenderReason reason, Gadget::Layer layer, const M44f &viewTransform, const Box3f &bound, IECoreGL::Selector *selector ) const
+void ViewportGadget::renderLayerInternal(
+	RenderReason reason, Gadget::Layer layer, const M44f &viewTransform, const Box3f &bound,
+	IECoreGL::Selector *selector
+) const
 {
 	const Style *currentStyle = nullptr;
 	for( unsigned int i = 0; i < m_renderItems.size(); i++ )
@@ -1326,7 +1297,8 @@ void ViewportGadget::renderInternal( RenderReason reason, Gadget::Layer filterLa
 		glBindFramebuffer( GL_FRAMEBUFFER, outputFramebuffer );
 
 		const PostProcessShader &layerShader = m_postProcessShaders[layerIndex];
-		const PostProcessShader *shader = layerShader.setup ? &layerShader : PostProcessShader::defaultPostProcessShader();
+		const PostProcessShader *shader =
+			layerShader.setup ? &layerShader : PostProcessShader::defaultPostProcessShader();
 
 		IECoreGL::Shader::Setup::ScopedBinding shaderBinding( *shader->setup );
 		glActiveTexture( GL_TEXTURE0 + shader->textureParameter->textureUnit );
@@ -1410,7 +1382,10 @@ GLuint ViewportGadget::acquireFramebuffer() const
 	GLenum framebufferStatus = glCheckFramebufferStatus( GL_DRAW_FRAMEBUFFER );
 	if( framebufferStatus != GL_FRAMEBUFFER_COMPLETE )
 	{
-		IECore::msg( IECore::Msg::Warning, "GafferUI::ViewportGadget", "Multisampled framebuffer error : " + std::to_string( framebufferStatus ) );
+		IECore::msg(
+			IECore::Msg::Warning, "GafferUI::ViewportGadget",
+			"Multisampled framebuffer error : " + std::to_string( framebufferStatus )
+		);
 	}
 
 	// Create downsampled framebuffer
@@ -1420,20 +1395,27 @@ GLuint ViewportGadget::acquireFramebuffer() const
 	// Resize color texture and attach to downsampled framebuffer
 	glBindTexture( GL_TEXTURE_2D, m_downsampledFramebufferTexture );
 	glTexImage2D( GL_TEXTURE_2D, 0, colorFormat, size.x, size.y, 0, GL_RGBA, GL_FLOAT, nullptr );
-	glFramebufferTexture2D( GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_downsampledFramebufferTexture, 0 );
+	glFramebufferTexture2D(
+		GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_downsampledFramebufferTexture, 0
+	);
 
 	// Validate downsampled framebuffer
 	framebufferStatus = glCheckFramebufferStatus( GL_DRAW_FRAMEBUFFER );
 	if( framebufferStatus != GL_FRAMEBUFFER_COMPLETE )
 	{
-		IECore::msg( IECore::Msg::Warning, "GafferUI::ViewportGadget", "Downsampled framebuffer error : " + std::to_string( framebufferStatus ) );
+		IECore::msg(
+			IECore::Msg::Warning, "GafferUI::ViewportGadget",
+			"Downsampled framebuffer error : " + std::to_string( framebufferStatus )
+		);
 	}
 
 	m_framebufferSize = size;
 	return m_framebuffer;
 }
 
-void ViewportGadget::getRenderItems( const Gadget *gadget, M44f transform, const Style *style, std::vector<RenderItem> &renderItems )
+void ViewportGadget::getRenderItems(
+	const Gadget *gadget, M44f transform, const Style *style, std::vector<RenderItem> &renderItems
+)
 {
 	const Box3f bound = gadget->renderBound();
 	bool boundSpecial = bound.isEmpty() || bound == g_infiniteBox;
@@ -1451,7 +1433,9 @@ void ViewportGadget::getRenderItems( const Gadget *gadget, M44f transform, const
 	unsigned layerMask = gadget->layerMask();
 	if( layerMask )
 	{
-		renderItems.push_back( { gadget, style, transform, boundSpecial ? bound : Imath::transform( bound, transform ), layerMask } );
+		renderItems.push_back(
+			{ gadget, style, transform, boundSpecial ? bound : Imath::transform( bound, transform ), layerMask }
+		);
 	}
 
 	for( const auto &i : gadget->children() )
@@ -1509,7 +1493,8 @@ void ViewportGadget::childRemoved( GraphComponent *parent, GraphComponent *child
 
 bool ViewportGadget::buttonPress( GadgetPtr gadget, const ButtonEvent &event )
 {
-	if( m_dragButton != ButtonEvent::None && m_dragButton != ButtonEvent::Middle && event.buttons == ( m_dragButton | ButtonEvent::Middle ) )
+	if( m_dragButton != ButtonEvent::None && m_dragButton != ButtonEvent::Middle &&
+		event.buttons == ( m_dragButton | ButtonEvent::Middle ) )
 	{
 		m_cameraMotionDuringDrag = true;
 
@@ -1524,7 +1509,8 @@ bool ViewportGadget::buttonPress( GadgetPtr gadget, const ButtonEvent &event )
 	// A child's interaction with an unmodifier MMB drag takes precedence over camera moves
 	bool unmodifiedMiddleDrag = event.buttons == ButtonEvent::Middle && event.modifiers == ModifiableEvent::None;
 
-	if( !unmodifiedMiddleDrag && m_cameraController->cameraMotionType( event, m_variableAspectZoom, m_preciseMotionAllowed ) )
+	if( !unmodifiedMiddleDrag &&
+		m_cameraController->cameraMotionType( event, m_variableAspectZoom, m_preciseMotionAllowed ) )
 	{
 		// accept press so we get a dragBegin opportunity for camera movement
 		return true;
@@ -1561,7 +1547,10 @@ bool ViewportGadget::buttonRelease( GadgetPtr gadget, const ButtonEvent &event )
 		if( getCameraEditable() )
 		{
 			updateMotionState( event );
-			const CameraFlags changes = m_cameraController->motionEnd( motionPositionFromEvent( event ), m_variableAspectZoom && ( event.modifiers & ModifiableEvent::Control ) != 0 );
+			const CameraFlags changes = m_cameraController->motionEnd(
+				motionPositionFromEvent( event ),
+				m_variableAspectZoom && ( event.modifiers & ModifiableEvent::Control ) != 0
+			);
 			if( changes != CameraFlags::None )
 			{
 				m_cameraChangedSignal( this, changes );
@@ -1609,7 +1598,9 @@ void ViewportGadget::updateGadgetUnderMouse( const ButtonEvent &event )
 	}
 }
 
-void ViewportGadget::emitEnterLeaveEvents( GadgetPtr newGadgetUnderMouse, GadgetPtr oldGadgetUnderMouse, const ButtonEvent &event )
+void ViewportGadget::emitEnterLeaveEvents(
+	GadgetPtr newGadgetUnderMouse, GadgetPtr oldGadgetUnderMouse, const ButtonEvent &event
+)
 {
 
 	// figure out the lowest point in the hierarchy where the entered status is unchanged.
@@ -1696,7 +1687,8 @@ IECore::RunTimeTypedPtr ViewportGadget::dragBegin( GadgetPtr gadget, const DragD
 	m_dragButton = event.buttons;
 	m_dragTrackingThreshold = std::numeric_limits<float>::max();
 
-	CameraController::MotionType cameraMotionType = m_cameraController->cameraMotionType( event, m_variableAspectZoom, m_preciseMotionAllowed );
+	CameraController::MotionType cameraMotionType =
+		m_cameraController->cameraMotionType( event, m_variableAspectZoom, m_preciseMotionAllowed );
 	bool unmodifiedMiddleDrag = event.buttons == ButtonEvent::Middle && event.modifiers == ModifiableEvent::None;
 
 	if( ( !cameraMotionType || unmodifiedMiddleDrag ) && m_lastButtonPressGadget )
@@ -1768,7 +1760,10 @@ bool ViewportGadget::dragMove( GadgetPtr gadget, const DragDropEvent &event )
 		if( getCameraEditable() )
 		{
 			updateMotionState( event );
-			const CameraFlags changes = m_cameraController->motionUpdate( motionPositionFromEvent( event ), m_variableAspectZoom && ( event.modifiers & ModifiableEvent::Control ) != 0 );
+			const CameraFlags changes = m_cameraController->motionUpdate(
+				motionPositionFromEvent( event ),
+				m_variableAspectZoom && ( event.modifiers & ModifiableEvent::Control ) != 0
+			);
 			if( changes != CameraFlags::None )
 			{
 				m_cameraChangedSignal( this, changes );
@@ -1817,11 +1812,8 @@ void ViewportGadget::trackDrag( const DragDropEvent &event )
 	// early out if tracking is off for any reason, or
 	// the drag didn't originate from within the viewport.
 
-	if(
-		getDragTracking() == DragTracking::NoDragTracking ||
-		!getCameraEditable() ||
-		!this->isAncestorOf( event.sourceGadget.get() )
-	)
+	if( getDragTracking() == DragTracking::NoDragTracking || !getCameraEditable() ||
+		!this->isAncestorOf( event.sourceGadget.get() ) )
 	{
 		m_dragTrackingIdleConnection.disconnect();
 		return;
@@ -1836,8 +1828,7 @@ void ViewportGadget::trackDrag( const DragDropEvent &event )
 	const float borderWidth = std::min( std::min( viewport.x, viewport.y ) / 8.0f, 60.0f );
 
 	const Box3f viewportBox(
-		V3f( borderWidth, borderWidth, -1000.0f ),
-		V3f( viewport.x - borderWidth, viewport.y - borderWidth, 1000.0f )
+		V3f( borderWidth, borderWidth, -1000.0f ), V3f( viewport.x - borderWidth, viewport.y - borderWidth, 1000.0f )
 	);
 
 	// figure out the offset, if any, of the mouse outside this central box.
@@ -1846,10 +1837,9 @@ void ViewportGadget::trackDrag( const DragDropEvent &event )
 	if( !viewportBox.intersects( event.line.p0 ) )
 	{
 		const V3f offset3 = event.line.p0 - closestPointOnBox( event.line.p0, viewportBox );
-		offset = V2f(
-			getDragTracking() & DragTracking::XDragTracking ? offset3.x : 0,
-			getDragTracking() & DragTracking::YDragTracking ? offset3.y : 0
-		);
+		offset =
+			V2f( getDragTracking() & DragTracking::XDragTracking ? offset3.x : 0,
+				 getDragTracking() & DragTracking::YDragTracking ? offset3.y : 0 );
 	}
 
 	const float offsetLength = clamp( offset.length(), 0.0f, borderWidth );
@@ -1868,7 +1858,8 @@ void ViewportGadget::trackDrag( const DragDropEvent &event )
 	// experience where a viewport edge is at the edge of the screen and the mouse
 	// can't go any further.
 
-	m_dragTrackingVelocity = -offset.normalized() * borderWidth * lerpfactor( offsetLength, m_dragTrackingThreshold, borderWidth );
+	m_dragTrackingVelocity =
+		-offset.normalized() * borderWidth * lerpfactor( offsetLength, m_dragTrackingThreshold, borderWidth );
 
 	// we don't actually do the scrolling in this function - instead we ensure that
 	// trackDragIdle will be called to apply the scrolling on idle events.
@@ -2055,7 +2046,10 @@ bool ViewportGadget::dragEnd( GadgetPtr gadget, const DragDropEvent &event )
 		if( getCameraEditable() )
 		{
 			updateMotionState( event );
-			const CameraFlags changes = m_cameraController->motionEnd( motionPositionFromEvent( event ), m_variableAspectZoom && ( event.modifiers & ModifiableEvent::Control ) != 0 );
+			const CameraFlags changes = m_cameraController->motionEnd(
+				motionPositionFromEvent( event ),
+				m_variableAspectZoom && ( event.modifiers & ModifiableEvent::Control ) != 0
+			);
 			if( changes != CameraFlags::None )
 			{
 				m_cameraChangedSignal( this, changes );
@@ -2137,7 +2131,9 @@ void ViewportGadget::eventToGadgetSpace( ButtonEvent &event, Gadget *gadget )
 }
 
 template<typename Event, typename Signal>
-typename Signal::result_type ViewportGadget::dispatchEvent( std::vector<Gadget *> &gadgets, Signal &( Gadget::*signalGetter )(), const Event &event, Gadget *&handler )
+typename Signal::result_type ViewportGadget::dispatchEvent(
+	std::vector<Gadget *> &gadgets, Signal &( Gadget::*signalGetter )(), const Event &event, Gadget *&handler
+)
 {
 	for( Gadget *it : gadgets )
 	{
@@ -2161,7 +2157,9 @@ typename Signal::result_type ViewportGadget::dispatchEvent( std::vector<Gadget *
 }
 
 template<typename Event, typename Signal>
-typename Signal::result_type ViewportGadget::dispatchEvent( Gadget *gadget, Signal &( Gadget::*signalGetter )(), const Event &event )
+typename Signal::result_type ViewportGadget::dispatchEvent(
+	Gadget *gadget, Signal &( Gadget::*signalGetter )(), const Event &event
+)
 {
 	Event transformedEvent( event );
 	eventToGadgetSpace( transformedEvent, gadget );
@@ -2173,7 +2171,10 @@ typename Signal::result_type ViewportGadget::dispatchEvent( Gadget *gadget, Sign
 // SelectionScope implementation
 //////////////////////////////////////////////////////////////////////////
 
-ViewportGadget::SelectionScope::SelectionScope( const IECore::LineSegment3f &lineInGadgetSpace, const Gadget *gadget, std::vector<IECoreGL::HitRecord> &selection, IECoreGL::Selector::Mode mode )
+ViewportGadget::SelectionScope::SelectionScope(
+	const IECore::LineSegment3f &lineInGadgetSpace, const Gadget *gadget, std::vector<IECoreGL::HitRecord> &selection,
+	IECoreGL::Selector::Mode mode
+)
 	: m_selection( selection )
 {
 	const ViewportGadget *viewportGadget = gadget->ancestor<ViewportGadget>();
@@ -2181,7 +2182,10 @@ ViewportGadget::SelectionScope::SelectionScope( const IECore::LineSegment3f &lin
 	begin( viewportGadget, rasterPosition, gadget->fullTransform(), mode );
 }
 
-ViewportGadget::SelectionScope::SelectionScope( const Imath::V3f &corner0InGadgetSpace, const Imath::V3f &corner1InGadgetSpace, const Gadget *gadget, std::vector<IECoreGL::HitRecord> &selection, IECoreGL::Selector::Mode mode )
+ViewportGadget::SelectionScope::SelectionScope(
+	const Imath::V3f &corner0InGadgetSpace, const Imath::V3f &corner1InGadgetSpace, const Gadget *gadget,
+	std::vector<IECoreGL::HitRecord> &selection, IECoreGL::Selector::Mode mode
+)
 	: m_selection( selection )
 {
 	const ViewportGadget *viewportGadget = gadget->ancestor<ViewportGadget>();
@@ -2193,7 +2197,10 @@ ViewportGadget::SelectionScope::SelectionScope( const Imath::V3f &corner0InGadge
 	begin( viewportGadget, rasterRegion, gadget->fullTransform(), mode );
 }
 
-ViewportGadget::SelectionScope::SelectionScope( const ViewportGadget *viewportGadget, const Imath::Box2f &rasterRegion, std::vector<IECoreGL::HitRecord> &selection, IECoreGL::Selector::Mode mode )
+ViewportGadget::SelectionScope::SelectionScope(
+	const ViewportGadget *viewportGadget, const Imath::Box2f &rasterRegion, std::vector<IECoreGL::HitRecord> &selection,
+	IECoreGL::Selector::Mode mode
+)
 	: m_selection( selection )
 {
 	begin( viewportGadget, rasterRegion, M44f(), mode );
@@ -2209,17 +2216,18 @@ IECoreGL::State *ViewportGadget::SelectionScope::baseState()
 	return m_selector->baseState();
 }
 
-void ViewportGadget::SelectionScope::begin( const ViewportGadget *viewportGadget, const Imath::V2f &rasterPosition, const Imath::M44f &transform, IECoreGL::Selector::Mode mode )
+void ViewportGadget::SelectionScope::begin(
+	const ViewportGadget *viewportGadget, const Imath::V2f &rasterPosition, const Imath::M44f &transform,
+	IECoreGL::Selector::Mode mode
+)
 {
-	begin(
-		viewportGadget,
-		Box2f( rasterPosition - V2f( 1 ), rasterPosition + V2f( 1 ) ),
-		transform,
-		mode
-	);
+	begin( viewportGadget, Box2f( rasterPosition - V2f( 1 ), rasterPosition + V2f( 1 ) ), transform, mode );
 }
 
-void ViewportGadget::SelectionScope::begin( const ViewportGadget *viewportGadget, const Imath::Box2f &rasterRegion, const Imath::M44f &transform, IECoreGL::Selector::Mode mode )
+void ViewportGadget::SelectionScope::begin(
+	const ViewportGadget *viewportGadget, const Imath::Box2f &rasterRegion, const Imath::M44f &transform,
+	IECoreGL::Selector::Mode mode
+)
 {
 	glPushAttrib( GL_ALL_ATTRIB_BITS );
 	glPushClientAttrib( GL_CLIENT_ALL_ATTRIB_BITS );
@@ -2227,9 +2235,8 @@ void ViewportGadget::SelectionScope::begin( const ViewportGadget *viewportGadget
 	V2f viewport = viewportGadget->getViewport();
 	Box2f ndcRegion( rasterRegion.min / viewport, rasterRegion.max / viewport );
 
-	IECoreGL::ToGLConverterPtr converter = new IECoreGL::ToGLCameraConverter(
-		viewportGadget->m_cameraController->getCamera()
-	);
+	IECoreGL::ToGLConverterPtr converter =
+		new IECoreGL::ToGLCameraConverter( viewportGadget->m_cameraController->getCamera() );
 	IECoreGL::CameraPtr camera = boost::static_pointer_cast<IECoreGL::Camera>( converter->convert() );
 	camera->setTransform( viewportGadget->getCameraTransform() );
 	/// \todo It would be better to base this on whether we have a depth buffer or not, but
@@ -2345,8 +2352,7 @@ void main()
 
 } // namespace
 
-ViewportGadget::PostProcessShader::PostProcessShader( const IECoreGL::Shader::ConstSetupPtr &setup )
-	: setup( setup )
+ViewportGadget::PostProcessShader::PostProcessShader( const IECoreGL::Shader::ConstSetupPtr &setup ) : setup( setup )
 {
 	textureParameter = setup->shader()->uniformParameter( "framebufferTexture" );
 	if( !textureParameter || textureParameter->type != GL_SAMPLER_2D )
@@ -2369,12 +2375,10 @@ ViewportGadget::PostProcessShader::PostProcessShader( const IECoreGL::Shader::Co
 
 const ViewportGadget::PostProcessShader *ViewportGadget::PostProcessShader::defaultPostProcessShader()
 {
-	static const PostProcessShader *g_default = new PostProcessShader(
-		new IECoreGL::Shader::Setup(
-			IECoreGL::ShaderLoader::defaultShaderLoader()->create(
-				g_defaultPostProcessVertexSource, "", g_defaultPostProcessFragmentSource
-			)
+	static const PostProcessShader *g_default = new PostProcessShader( new IECoreGL::Shader::Setup(
+		IECoreGL::ShaderLoader::defaultShaderLoader()->create(
+			g_defaultPostProcessVertexSource, "", g_defaultPostProcessFragmentSource
 		)
-	);
+	) );
 	return g_default;
 }

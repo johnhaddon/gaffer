@@ -68,8 +68,7 @@ namespace VisualiserAlgo
 //    with an '_'.
 //
 GAFFERARNOLDUI_API IECoreScene::ShaderNetworkPtr conformToOSLNetwork(
-	const IECoreScene::ShaderNetwork::Parameter &output,
-	const IECoreScene::ShaderNetwork *shaderNetwork
+	const IECoreScene::ShaderNetwork::Parameter &output, const IECoreScene::ShaderNetwork *shaderNetwork
 );
 
 } // namespace VisualiserAlgo

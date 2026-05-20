@@ -55,8 +55,7 @@ GAFFER_NODE_DEFINE_TYPE( Camera );
 
 size_t Camera::g_firstPlugIndex = 0;
 
-Camera::Camera( const std::string &name )
-	: ObjectSource( name, "camera" )
+Camera::Camera( const std::string &name ) : ObjectSource( name, "camera" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "projection", Plug::In, "perspective" ) );
@@ -73,27 +72,51 @@ Camera::Camera( const std::string &name )
 	addChild( new V2fPlug( "clippingPlanes", Plug::In, V2f( 0.01, 100000 ), V2f( 0 ) ) );
 
 	addChild( new CompoundDataPlug( "renderSettingOverrides" ) );
-	renderSettingOverridesPlug()->addChild( new NameValuePlug( "filmFit", new IntData( IECoreScene::Camera::Horizontal ), false, "filmFit" ) );
-	renderSettingOverridesPlug()->addChild( new NameValuePlug( "shutter", new V2fData( V2f( -0.5, 0.5 ) ), false, "shutter" ) );
-	renderSettingOverridesPlug()->addChild( new NameValuePlug( "resolution", new V2iData( V2i( 1024, 1024 ) ), false, "resolution" ) );
-	renderSettingOverridesPlug()->addChild( new NameValuePlug( "pixelAspectRatio", new FloatData( 1.0f ), false, "pixelAspectRatio" ) );
-	renderSettingOverridesPlug()->addChild( new NameValuePlug( "resolutionMultiplier", new FloatData( 1.0f ), false, "resolutionMultiplier" ) );
+	renderSettingOverridesPlug()->addChild(
+		new NameValuePlug( "filmFit", new IntData( IECoreScene::Camera::Horizontal ), false, "filmFit" )
+	);
+	renderSettingOverridesPlug()->addChild(
+		new NameValuePlug( "shutter", new V2fData( V2f( -0.5, 0.5 ) ), false, "shutter" )
+	);
+	renderSettingOverridesPlug()->addChild(
+		new NameValuePlug( "resolution", new V2iData( V2i( 1024, 1024 ) ), false, "resolution" )
+	);
+	renderSettingOverridesPlug()->addChild(
+		new NameValuePlug( "pixelAspectRatio", new FloatData( 1.0f ), false, "pixelAspectRatio" )
+	);
+	renderSettingOverridesPlug()->addChild(
+		new NameValuePlug( "resolutionMultiplier", new FloatData( 1.0f ), false, "resolutionMultiplier" )
+	);
 	renderSettingOverridesPlug()->addChild( new NameValuePlug( "overscan", new BoolData( false ), false, "overscan" ) );
-	renderSettingOverridesPlug()->addChild( new NameValuePlug( "overscanLeft", new FloatData( 0.0f ), false, "overscanLeft" ) );
-	renderSettingOverridesPlug()->addChild( new NameValuePlug( "overscanRight", new FloatData( 0.0f ), false, "overscanRight" ) );
-	renderSettingOverridesPlug()->addChild( new NameValuePlug( "overscanTop", new FloatData( 0.0f ), false, "overscanTop" ) );
-	renderSettingOverridesPlug()->addChild( new NameValuePlug( "overscanBottom", new FloatData( 0.0f ), false, "overscanBottom" ) );
-	renderSettingOverridesPlug()->addChild( new NameValuePlug( "cropWindow", new Box2fData( Box2f( V2f( 0.0f ), V2f( 1.0f ) ) ), false, "cropWindow" ) );
-	renderSettingOverridesPlug()->addChild( new NameValuePlug( "depthOfField", new BoolData( false ), false, "depthOfField" ) );
+	renderSettingOverridesPlug()->addChild(
+		new NameValuePlug( "overscanLeft", new FloatData( 0.0f ), false, "overscanLeft" )
+	);
+	renderSettingOverridesPlug()->addChild(
+		new NameValuePlug( "overscanRight", new FloatData( 0.0f ), false, "overscanRight" )
+	);
+	renderSettingOverridesPlug()->addChild(
+		new NameValuePlug( "overscanTop", new FloatData( 0.0f ), false, "overscanTop" )
+	);
+	renderSettingOverridesPlug()->addChild(
+		new NameValuePlug( "overscanBottom", new FloatData( 0.0f ), false, "overscanBottom" )
+	);
+	renderSettingOverridesPlug()->addChild(
+		new NameValuePlug( "cropWindow", new Box2fData( Box2f( V2f( 0.0f ), V2f( 1.0f ) ) ), false, "cropWindow" )
+	);
+	renderSettingOverridesPlug()->addChild(
+		new NameValuePlug( "depthOfField", new BoolData( false ), false, "depthOfField" )
+	);
 
 	addChild( new CompoundDataPlug( "visualiserAttributes" ) );
-	visualiserAttributesPlug()->addChild( new Gaffer::NameValuePlug( "gl:visualiser:scale", new FloatPlug( "value", Gaffer::Plug::Direction::In, 1.0f, 0.01f ), false, "scale" ) );
-	visualiserAttributesPlug()->addChild( new NameValuePlug( "gl:visualiser:frustum", new StringData( "whenSelected" ), false, "frustum" ) );
+	visualiserAttributesPlug()->addChild( new Gaffer::NameValuePlug(
+		"gl:visualiser:scale", new FloatPlug( "value", Gaffer::Plug::Direction::In, 1.0f, 0.01f ), false, "scale"
+	) );
+	visualiserAttributesPlug()->addChild(
+		new NameValuePlug( "gl:visualiser:frustum", new StringData( "whenSelected" ), false, "frustum" )
+	);
 }
 
-Camera::~Camera()
-{
-}
+Camera::~Camera() {}
 
 Gaffer::StringPlug *Camera::projectionPlug()
 {
@@ -239,21 +262,11 @@ void Camera::affects( const Plug *input, AffectedPlugsContainer &outputs ) const
 {
 	ObjectSource::affects( input, outputs );
 
-	if(
-		input == projectionPlug() ||
-		input == perspectiveModePlug() ||
-		input == fieldOfViewPlug() ||
-		input == apertureAspectRatioPlug() ||
-		input->parent<Plug>() == aperturePlug() ||
-		input == focalLengthPlug() ||
-		input->parent<Plug>() == orthographicAperturePlug() ||
-		input->parent<Plug>() == apertureOffsetPlug() ||
-		input == fStopPlug() ||
-		input == focalLengthWorldScalePlug() ||
-		input == focusDistancePlug() ||
-		input->parent<Plug>() == clippingPlanesPlug() ||
-		renderSettingOverridesPlug()->isAncestorOf( input )
-	)
+	if( input == projectionPlug() || input == perspectiveModePlug() || input == fieldOfViewPlug() ||
+		input == apertureAspectRatioPlug() || input->parent<Plug>() == aperturePlug() || input == focalLengthPlug() ||
+		input->parent<Plug>() == orthographicAperturePlug() || input->parent<Plug>() == apertureOffsetPlug() ||
+		input == fStopPlug() || input == focalLengthWorldScalePlug() || input == focusDistancePlug() ||
+		input->parent<Plug>() == clippingPlanesPlug() || renderSettingOverridesPlug()->isAncestorOf( input ) )
 	{
 		outputs.push_back( sourcePlug() );
 	}
@@ -323,13 +336,17 @@ IECore::ConstInternedStringVectorDataPtr Camera::computeStandardSetNames() const
 	return result;
 }
 
-void Camera::hashAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Camera::hashAttributes(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	ObjectSource::hashAttributes( path, context, parent, h );
 	visualiserAttributesPlug()->hash( h );
 }
 
-IECore::ConstCompoundObjectPtr Camera::computeAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstCompoundObjectPtr Camera::computeAttributes(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	IECore::CompoundObjectPtr result = new IECore::CompoundObject;
 	IECore::ConstCompoundObjectPtr attr = ObjectSource::computeAttributes( path, context, parent );

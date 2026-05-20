@@ -110,7 +110,9 @@ struct HashCacheKey
 {
 	HashCacheKey() {};
 	HashCacheKey( const ValuePlug *plug, const Context *context, uint64_t dirtyCount )
-		: plug( plug ), contextHash( context->hash() ), dirtyCount( dirtyCount )
+		: plug( plug ),
+		  contextHash( context->hash() ),
+		  dirtyCount( dirtyCount )
 	{
 	}
 
@@ -154,12 +156,18 @@ ValuePlug::HashCacheMode defaultHashCacheMode()
 	{
 		if( !strcmp( e, "Legacy" ) )
 		{
-			IECore::msg( IECore::Msg::Warning, "Gaffer", "GAFFER_HASHCACHE_MODE is Legacy. Interactive performance will be affected." );
+			IECore::msg(
+				IECore::Msg::Warning, "Gaffer",
+				"GAFFER_HASHCACHE_MODE is Legacy. Interactive performance will be affected."
+			);
 			return ValuePlug::HashCacheMode::Legacy;
 		}
 		else if( !strcmp( e, "Checked" ) )
 		{
-			IECore::msg( IECore::Msg::Warning, "Gaffer", "GAFFER_HASHCACHE_MODE is Checked. Performance will be slow.  Use this setting only for debugging, not in production." );
+			IECore::msg(
+				IECore::Msg::Warning, "Gaffer",
+				"GAFFER_HASHCACHE_MODE is Checked. Performance will be slow.  Use this setting only for debugging, not in production."
+			);
 			return ValuePlug::HashCacheMode::Checked;
 		}
 		else if( !strcmp( e, "Standard" ) )
@@ -168,7 +176,10 @@ ValuePlug::HashCacheMode defaultHashCacheMode()
 		}
 		else
 		{
-			IECore::msg( IECore::Msg::Warning, "ValuePlug", "Invalid value for GAFFER_HASHCACHE_MODE. Must be Standard, Checked or Legacy." );
+			IECore::msg(
+				IECore::Msg::Warning, "ValuePlug",
+				"Invalid value for GAFFER_HASHCACHE_MODE. Must be Standard, Checked or Legacy."
+			);
 		}
 	}
 	return ValuePlug::HashCacheMode::Standard;
@@ -184,10 +195,7 @@ namespace std
 template<>
 struct hash<HashCacheKey>
 {
-	size_t operator () ( const HashCacheKey &k ) const noexcept
-	{
-		return tbb_hasher( k );
-	}
+	size_t operator () ( const HashCacheKey &k ) const noexcept { return tbb_hasher( k ); }
 };
 
 } // namespace std
@@ -195,7 +203,7 @@ struct hash<HashCacheKey>
 class ValuePlug::HashProcess : public Process
 {
 
-	public:
+public:
 
 	// Interface used by ValuePlug.
 
@@ -228,7 +236,8 @@ class ValuePlug::HashProcess : public Process
 		// one per context, computed by ComputeNode::hash(). Pull the value from our cache, or compute it
 		// using a HashProcess instance.
 
-		Plug::flushDirtyPropagationScope(); // Ensure any pending calls to `dirty()` are made before we look up `m_dirtyCount`.
+		Plug::
+			flushDirtyPropagationScope(); // Ensure any pending calls to `dirty()` are made before we look up `m_dirtyCount`.
 
 		const ComputeNode *computeNode = IECore::runTimeCast<const ComputeNode>( p->node() );
 		const ThreadState &threadState = ThreadState::current();
@@ -261,12 +270,12 @@ class ValuePlug::HashProcess : public Process
 
 		auto acquireHash = [&]( const HashCacheKey &cacheKey ) {
 			// Before we use this key, check that the dirty count hasn't maxed out
-			if(
-				cacheKey.dirtyCount == DIRTY_COUNT_RANGE_MAX ||
-				cacheKey.dirtyCount == DIRTY_COUNT_RANGE_MAX + 1 + DIRTY_COUNT_RANGE_MAX
-			)
+			if( cacheKey.dirtyCount == DIRTY_COUNT_RANGE_MAX ||
+				cacheKey.dirtyCount == DIRTY_COUNT_RANGE_MAX + 1 + DIRTY_COUNT_RANGE_MAX )
 			{
-				throw IECore::Exception( "Dirty count exceeded max. Either you've left Gaffer running for 100 million years, or a strange bug is incrementing dirty counts way too fast." );
+				throw IECore::Exception(
+					"Dirty count exceeded max. Either you've left Gaffer running for 100 million years, or a strange bug is incrementing dirty counts way too fast."
+				);
 			}
 
 			// Check for an already-cached value in our thread-local cache, and return it if we have one.
@@ -325,7 +334,9 @@ class ValuePlug::HashProcess : public Process
 				// approach, which can be done by throwing and then immediately wrapping.
 				try
 				{
-					throw IECore::Exception( "Detected undeclared dependency. Fix DependencyNode::affects() implementation." );
+					throw IECore::Exception(
+						"Detected undeclared dependency. Fix DependencyNode::affects() implementation."
+					);
 				}
 				catch( ... )
 				{
@@ -343,10 +354,7 @@ class ValuePlug::HashProcess : public Process
 		}
 	}
 
-	static size_t getCacheSizeLimit()
-	{
-		return g_cacheSizeLimit;
-	}
+	static size_t getCacheSizeLimit() { return g_cacheSizeLimit; }
 
 	static void setCacheSizeLimit( size_t maxEntriesPerThread )
 	{
@@ -411,17 +419,15 @@ class ValuePlug::HashProcess : public Process
 		clearCache();
 	}
 
-	static ValuePlug::HashCacheMode getHashCacheMode()
-	{
-		return g_hashCacheMode;
-	}
+	static ValuePlug::HashCacheMode getHashCacheMode() { return g_hashCacheMode; }
 
 	static const IECore::InternedString staticType;
 
 	// Interface required by `Process::acquireCollaborativeResult()`.
 
 	HashProcess( const ValuePlug *plug, const ValuePlug *destinationPlug, const ComputeNode *computeNode )
-		: Process( staticType, plug, destinationPlug ), m_computeNode( computeNode )
+		: Process( staticType, plug, destinationPlug ),
+		  m_computeNode( computeNode )
 	{
 	}
 
@@ -452,15 +458,13 @@ class ValuePlug::HashProcess : public Process
 		}
 	}
 
-	using CacheType = IECorePreview::LRUCache<HashCacheKey, IECore::MurmurHash, IECorePreview::LRUCachePolicy::Parallel>;
+	using CacheType =
+		IECorePreview::LRUCache<HashCacheKey, IECore::MurmurHash, IECorePreview::LRUCachePolicy::Parallel>;
 	static CacheType g_cache;
 
-	static size_t cacheCostFunction( const IECore::MurmurHash &value )
-	{
-		return 1;
-	}
+	static size_t cacheCostFunction( const IECore::MurmurHash &value ) { return 1; }
 
-	private:
+private:
 
 	const ComputeNode *m_computeNode;
 
@@ -470,23 +474,37 @@ class ValuePlug::HashProcess : public Process
 	struct ThreadData
 	{
 		// Using a null `GetterFunction` because it will never get called, because we only ever call `getIfCached()`.
-		ThreadData() : cache( CacheType::GetterFunction(), g_cacheSizeLimit, CacheType::RemovalCallback(), /* cacheErrors = */ false ), clearCache( 0 ) {}
-		using CacheType = IECorePreview::LRUCache<HashCacheKey, IECore::MurmurHash, IECorePreview::LRUCachePolicy::Serial>;
+		ThreadData()
+			: cache(
+				  CacheType::GetterFunction(), g_cacheSizeLimit, CacheType::RemovalCallback(), /* cacheErrors = */ false
+			  ),
+			  clearCache( 0 )
+		{
+		}
+		using CacheType =
+			IECorePreview::LRUCache<HashCacheKey, IECore::MurmurHash, IECorePreview::LRUCachePolicy::Serial>;
 		CacheType cache;
 		// Flag to request that hashCache be cleared.
 		std::atomic_int clearCache;
 	};
 
-	static tbb::enumerable_thread_specific<ThreadData, tbb::cache_aligned_allocator<ThreadData>, tbb::ets_key_per_instance> g_threadData;
+	static tbb::enumerable_thread_specific<
+		ThreadData, tbb::cache_aligned_allocator<ThreadData>, tbb::ets_key_per_instance>
+		g_threadData;
 	static std::atomic_size_t g_cacheSizeLimit;
 };
 
 const IECore::InternedString ValuePlug::HashProcess::staticType( ValuePlug::hashProcessType() );
-tbb::enumerable_thread_specific<ValuePlug::HashProcess::ThreadData, tbb::cache_aligned_allocator<ValuePlug::HashProcess::ThreadData>, tbb::ets_key_per_instance> ValuePlug::HashProcess::g_threadData;
+tbb::enumerable_thread_specific<
+	ValuePlug::HashProcess::ThreadData, tbb::cache_aligned_allocator<ValuePlug::HashProcess::ThreadData>,
+	tbb::ets_key_per_instance>
+	ValuePlug::HashProcess::g_threadData;
 // Default limit corresponds to a cost of roughly 25Mb per thread.
 std::atomic_size_t ValuePlug::HashProcess::g_cacheSizeLimit( 128000 );
 // Using a null `GetterFunction` because it will never get called, because we only ever call `getIfCached()`.
-ValuePlug::HashProcess::CacheType ValuePlug::HashProcess::g_cache( CacheType::GetterFunction(), g_cacheSizeLimit, CacheType::RemovalCallback(), /* cacheErrors = */ false );
+ValuePlug::HashProcess::CacheType ValuePlug::HashProcess::g_cache(
+	CacheType::GetterFunction(), g_cacheSizeLimit, CacheType::RemovalCallback(), /* cacheErrors = */ false
+);
 std::atomic<uint64_t> ValuePlug::HashProcess::g_legacyGlobalDirtyCount( 0 );
 ValuePlug::HashCacheMode ValuePlug::HashProcess::g_hashCacheMode( defaultHashCacheMode() );
 
@@ -498,31 +516,21 @@ ValuePlug::HashCacheMode ValuePlug::HashProcess::g_hashCacheMode( defaultHashCac
 class ValuePlug::ComputeProcess : public Process
 {
 
-	public:
+public:
 
 	// Interface used by ValuePlug.
 
-	static size_t getCacheMemoryLimit()
-	{
-		return g_cache.getMaxCost();
-	}
+	static size_t getCacheMemoryLimit() { return g_cache.getMaxCost(); }
 
-	static void setCacheMemoryLimit( size_t bytes )
-	{
-		return g_cache.setMaxCost( bytes );
-	}
+	static void setCacheMemoryLimit( size_t bytes ) { return g_cache.setMaxCost( bytes ); }
 
-	static size_t cacheMemoryUsage()
-	{
-		return g_cache.currentCost();
-	}
+	static size_t cacheMemoryUsage() { return g_cache.currentCost(); }
 
-	static void clearCache()
-	{
-		g_cache.clear();
-	}
+	static void clearCache() { g_cache.clear(); }
 
-	static const IECore::Object *value( const ValuePlug *plug, IECore::ConstObjectPtr &owner, const IECore::MurmurHash *precomputedHash )
+	static const IECore::Object *value(
+		const ValuePlug *plug, IECore::ConstObjectPtr &owner, const IECore::MurmurHash *precomputedHash
+	)
 	{
 		const ValuePlug *p = sourcePlug( plug );
 
@@ -619,9 +627,7 @@ class ValuePlug::ComputeProcess : public Process
 		}
 		else
 		{
-			owner = acquireCollaborativeResult<ComputeProcess>(
-				hash, p, plug, computeNode
-			);
+			owner = acquireCollaborativeResult<ComputeProcess>( hash, p, plug, computeNode );
 			return owner.get();
 		}
 	}
@@ -631,13 +637,20 @@ class ValuePlug::ComputeProcess : public Process
 		const Process *process = Process::current();
 		if( !process || process->type() != staticType )
 		{
-			throw IECore::Exception( fmt::format( "Cannot set value for plug \"{}\" except during computation.", plug->fullName() ) );
+			throw IECore::Exception(
+				fmt::format( "Cannot set value for plug \"{}\" except during computation.", plug->fullName() )
+			);
 		}
 
 		const ComputeProcess *computeProcess = static_cast<const ComputeProcess *>( process );
 		if( computeProcess->plug() != plug )
 		{
-			throw IECore::Exception( fmt::format( "Cannot set value for plug \"{}\" during computation for plug \"{}\".", plug->fullName(), computeProcess->plug()->fullName() ) );
+			throw IECore::Exception(
+				fmt::format(
+					"Cannot set value for plug \"{}\" during computation for plug \"{}\".", plug->fullName(),
+					computeProcess->plug()->fullName()
+				)
+			);
 		}
 
 		const_cast<ComputeProcess *>( computeProcess )->m_result = result;
@@ -648,7 +661,8 @@ class ValuePlug::ComputeProcess : public Process
 	// Interface required by `Process::acquireCollaborativeResult()`.
 
 	ComputeProcess( const ValuePlug *plug, const ValuePlug *destinationPlug, const ComputeNode *computeNode )
-		: Process( staticType, plug, destinationPlug ), m_computeNode( computeNode )
+		: Process( staticType, plug, destinationPlug ),
+		  m_computeNode( computeNode )
 	{
 	}
 
@@ -692,15 +706,13 @@ class ValuePlug::ComputeProcess : public Process
 	}
 
 	using ResultType = IECore::ConstObjectPtr;
-	using CacheType = IECorePreview::LRUCache<IECore::MurmurHash, IECore::ConstObjectPtr, IECorePreview::LRUCachePolicy::Parallel>;
+	using CacheType =
+		IECorePreview::LRUCache<IECore::MurmurHash, IECore::ConstObjectPtr, IECorePreview::LRUCachePolicy::Parallel>;
 	static CacheType g_cache;
 
-	static size_t cacheCostFunction( const IECore::ConstObjectPtr &v )
-	{
-		return v->memoryUsage();
-	}
+	static size_t cacheCostFunction( const IECore::ConstObjectPtr &v ) { return v->memoryUsage(); }
 
-	private:
+private:
 
 	const ComputeNode *m_computeNode;
 	IECore::ConstObjectPtr m_result;
@@ -709,7 +721,9 @@ class ValuePlug::ComputeProcess : public Process
 const IECore::InternedString ValuePlug::ComputeProcess::staticType( ValuePlug::computeProcessType() );
 // Using a null `GetterFunction` because it will never get called, because we only ever call `getIfCached()`.
 // Note : The default size here is overridden by `startup/Gaffer/cache.py`.
-ValuePlug::ComputeProcess::CacheType ValuePlug::ComputeProcess::g_cache( CacheType::GetterFunction(), 1024 * 1024 * 1024 * 1, CacheType::RemovalCallback(), /* cacheErrors = */ false ); // 1 gig
+ValuePlug::ComputeProcess::CacheType ValuePlug::ComputeProcess::g_cache(
+	CacheType::GetterFunction(), 1024 * 1024 * 1024 * 1, CacheType::RemovalCallback(), /* cacheErrors = */ false
+); // 1 gig
 
 //////////////////////////////////////////////////////////////////////////
 // SetValueAction implementation
@@ -718,21 +732,20 @@ ValuePlug::ComputeProcess::CacheType ValuePlug::ComputeProcess::g_cache( CacheTy
 class ValuePlug::SetValueAction : public Gaffer::Action
 {
 
-	public:
+public:
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::ValuePlug::SetValueAction, SetValueActionTypeId, Gaffer::Action );
 
 	SetValueAction( ValuePlugPtr plug, IECore::ConstObjectPtr value )
-		: m_plug( plug ), m_doValue( value ), m_undoValue( plug->m_staticValue )
+		: m_plug( plug ),
+		  m_doValue( value ),
+		  m_undoValue( plug->m_staticValue )
 	{
 	}
 
-	protected:
+protected:
 
-	GraphComponent *subject() const override
-	{
-		return m_plug.get();
-	}
+	GraphComponent *subject() const override { return m_plug.get(); }
 
 	void doAction() override
 	{
@@ -762,7 +775,7 @@ class ValuePlug::SetValueAction : public Gaffer::Action
 		m_doValue = setValueAction->m_doValue;
 	}
 
-	private:
+private:
 
 	ValuePlugPtr m_plug;
 	IECore::ConstObjectPtr m_doValue;
@@ -788,15 +801,23 @@ GAFFER_PLUG_DEFINE_TYPE( ValuePlug );
 /// passed to this function. Perhaps by having a central map of unique values here,
 /// or by doing it more intelligently in the derived classes (where we could avoid
 /// even creating the values before figuring out if we've already got them somewhere).
-ValuePlug::ValuePlug( const std::string &name, Direction direction, IECore::ConstObjectPtr defaultValue, unsigned flags )
-	: Plug( name, direction, flags ), m_defaultValue( defaultValue ), m_staticValue( defaultValue ), m_dirtyCount( g_dirtyCountEpoch )
+ValuePlug::ValuePlug(
+	const std::string &name, Direction direction, IECore::ConstObjectPtr defaultValue, unsigned flags
+)
+	: Plug( name, direction, flags ),
+	  m_defaultValue( defaultValue ),
+	  m_staticValue( defaultValue ),
+	  m_dirtyCount( g_dirtyCountEpoch )
 {
 	assert( m_defaultValue );
 	assert( m_staticValue );
 }
 
 ValuePlug::ValuePlug( const std::string &name, Direction direction, unsigned flags )
-	: Plug( name, direction, flags ), m_defaultValue( nullptr ), m_staticValue( nullptr ), m_dirtyCount( g_dirtyCountEpoch )
+	: Plug( name, direction, flags ),
+	  m_defaultValue( nullptr ),
+	  m_staticValue( nullptr ),
+	  m_dirtyCount( g_dirtyCountEpoch )
 {
 }
 
@@ -897,7 +918,8 @@ void ValuePlug::setFrom( const ValuePlug *other )
 	}
 
 	ChildContainer::const_iterator it, otherIt;
-	for( it = children().begin(), otherIt = typedOther->children().begin(); it != children().end() && otherIt != typedOther->children().end(); it++, otherIt++ )
+	for( it = children().begin(), otherIt = typedOther->children().begin();
+		 it != children().end() && otherIt != typedOther->children().end(); it++, otherIt++ )
 	{
 		// We use `runTimeCast()` here as a concession to NameValuePlug,
 		// which egregiously ignores the wishes of our `acceptsChild()`
@@ -939,8 +961,7 @@ bool ValuePlug::isSetToDefault() const
 			// the default.
 			return false;
 		}
-		return s->m_staticValue == m_defaultValue ||
-			s->m_staticValue->isEqualTo( m_defaultValue.get() );
+		return s->m_staticValue == m_defaultValue || s->m_staticValue->isEqualTo( m_defaultValue.get() );
 		;
 	}
 	else
@@ -1029,7 +1050,9 @@ const IECore::Object *ValuePlug::defaultObjectValue() const
 	return m_defaultValue.get();
 }
 
-const IECore::Object *ValuePlug::getValueInternal( IECore::ConstObjectPtr &owner, const IECore::MurmurHash *precomputedHash ) const
+const IECore::Object *ValuePlug::getValueInternal(
+	IECore::ConstObjectPtr &owner, const IECore::MurmurHash *precomputedHash
+) const
 {
 	return ComputeProcess::value( this, owner, precomputedHash );
 }

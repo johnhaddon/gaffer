@@ -48,24 +48,19 @@ using namespace boost::placeholders;
 using namespace GafferScene;
 
 SceneFilterPathFilter::SceneFilterPathFilter( FilterPtr sceneFilter, IECore::CompoundDataPtr userData )
-	: PathFilter( userData ), m_sceneFilter( sceneFilter )
+	: PathFilter( userData ),
+	  m_sceneFilter( sceneFilter )
 {
-	m_plugDirtiedConnection = sceneFilter->plugDirtiedSignal().connect(
-		boost::bind( &SceneFilterPathFilter::plugDirtied, this, ::_1 )
-	);
+	m_plugDirtiedConnection =
+		sceneFilter->plugDirtiedSignal().connect( boost::bind( &SceneFilterPathFilter::plugDirtied, this, ::_1 ) );
 }
 
-SceneFilterPathFilter::~SceneFilterPathFilter()
-{
-}
+SceneFilterPathFilter::~SceneFilterPathFilter() {}
 
 struct SceneFilterPathFilter::Remove
 {
 
-	Remove( const Filter *filter )
-		: m_filter( filter )
-	{
-	}
+	Remove( const Filter *filter ) : m_filter( filter ) {}
 
 	bool operator () ( const Gaffer::PathPtr &path )
 	{
@@ -92,10 +87,12 @@ struct SceneFilterPathFilter::Remove
 		Filter::setInputScene( m_context.get(), scenePath->getScene() );
 		m_context->set( ScenePlug::scenePathContextName, path->names() );
 		Gaffer::Context::Scope s( m_context.get() );
-		return !( m_filter->outPlug()->getValue() & ( IECore::PathMatcher::DescendantMatch | IECore::PathMatcher::ExactMatch ) );
+		return !(
+			m_filter->outPlug()->getValue() & ( IECore::PathMatcher::DescendantMatch | IECore::PathMatcher::ExactMatch )
+		);
 	}
 
-	private:
+private:
 
 	const Filter *m_filter;
 	Gaffer::ConstContextPtr m_baseContext;
@@ -104,14 +101,7 @@ struct SceneFilterPathFilter::Remove
 
 void SceneFilterPathFilter::doFilter( std::vector<Gaffer::PathPtr> &paths, const IECore::Canceller *canceller ) const
 {
-	paths.erase(
-		std::remove_if(
-			paths.begin(),
-			paths.end(),
-			Remove( m_sceneFilter.get() )
-		),
-		paths.end()
-	);
+	paths.erase( std::remove_if( paths.begin(), paths.end(), Remove( m_sceneFilter.get() ) ), paths.end() );
 }
 
 void SceneFilterPathFilter::plugDirtied( const Gaffer::Plug *plug )

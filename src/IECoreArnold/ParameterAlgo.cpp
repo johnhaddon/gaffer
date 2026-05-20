@@ -64,23 +64,37 @@ inline const T *dataCast( const char *name, const IECore::Data *data, const std:
 	{
 		return result;
 	}
-	msg( Msg::Warning, messageContext, fmt::format( "Unsupported value type \"{}\" for parameter \"{}\" (expected {}).", data->typeName(), name, T::staticTypeName() ) );
+	msg( Msg::Warning, messageContext,
+		 fmt::format(
+			 "Unsupported value type \"{}\" for parameter \"{}\" (expected {}).", data->typeName(), name,
+			 T::staticTypeName()
+		 ) );
 	return nullptr;
 }
 
-void setParameterInternal( AtNode *node, AtString name, int parameterType, bool array, const IECore::Data *value, const std::string &messageContext )
+void setParameterInternal(
+	AtNode *node, AtString name, int parameterType, bool array, const IECore::Data *value,
+	const std::string &messageContext
+)
 {
 	if( array )
 	{
 		AtArray *a = ParameterAlgo::dataToArray( value, parameterType );
 		if( !a )
 		{
-			msg( Msg::Warning, messageContext, fmt::format( "Unable to create array from data of type \"{}\" for parameter \"{}\"", value->typeName(), name ) );
+			msg( Msg::Warning, messageContext,
+				 fmt::format(
+					 "Unable to create array from data of type \"{}\" for parameter \"{}\"", value->typeName(), name
+				 ) );
 			return;
 		}
 		if( AiArrayGetType( a ) != parameterType )
 		{
-			msg( Msg::Warning, messageContext, fmt::format( "Unable to create array of type {} from data of type \"{}\" for parameter \"{}\"", AiParamGetTypeName( parameterType ), value->typeName(), name ) );
+			msg( Msg::Warning, messageContext,
+				 fmt::format(
+					 "Unable to create array of type {} from data of type \"{}\" for parameter \"{}\"",
+					 AiParamGetTypeName( parameterType ), value->typeName(), name
+				 ) );
 			return;
 		}
 		AiNodeSetArray( node, name, a );
@@ -99,7 +113,10 @@ void setParameterInternal( AtNode *node, AtString name, int parameterType, bool 
 					}
 					else
 					{
-						msg( Msg::Warning, "setParameter", fmt::format( "Int64Data value {} is out of range for parameter \"{}\"", data->readable(), name ) );
+						msg( Msg::Warning, "setParameter",
+							 fmt::format(
+								 "Int64Data value {} is out of range for parameter \"{}\"", data->readable(), name
+							 ) );
 					}
 				}
 				else if( const IntData *data = dataCast<IntData>( name, value, messageContext ) )
@@ -117,7 +134,10 @@ void setParameterInternal( AtNode *node, AtString name, int parameterType, bool 
 					}
 					else
 					{
-						msg( Msg::Warning, "setParameter", fmt::format( "UInt64Data value {} is out of range for parameter \"{}\"", data->readable(), name ) );
+						msg( Msg::Warning, "setParameter",
+							 fmt::format(
+								 "UInt64Data value {} is out of range for parameter \"{}\"", data->readable(), name
+							 ) );
 					}
 				}
 				else if( const IntData *data = runTimeCast<const IntData>( value ) )
@@ -261,7 +281,11 @@ void setParameterInternal( AtNode *node, AtString name, int parameterType, bool 
 					nodeStr = AiNodeEntryGetName( AiNodeGetNodeEntry( node ) );
 				}
 
-				msg( Msg::Warning, messageContext, fmt::format( "Arnold parameter \"{}\" on node \"{}\" has unsupported type \"{}\".", name, nodeStr, AiParamGetTypeName( parameterType ) ) );
+				msg( Msg::Warning, messageContext,
+					 fmt::format(
+						 "Arnold parameter \"{}\" on node \"{}\" has unsupported type \"{}\".", name, nodeStr,
+						 AiParamGetTypeName( parameterType )
+					 ) );
 			}
 		}
 	}
@@ -360,7 +384,9 @@ namespace IECoreArnold
 namespace ParameterAlgo
 {
 
-void setParameter( AtNode *node, const AtParamEntry *parameter, const IECore::Data *value, const std::string &messageContext )
+void setParameter(
+	AtNode *node, const AtParamEntry *parameter, const IECore::Data *value, const std::string &messageContext
+)
 {
 	bool isArray = false;
 	int type = AiParamGetType( parameter );
@@ -400,11 +426,8 @@ void setParameter( AtNode *node, AtString name, const IECore::Data *value, const
 		}
 		else
 		{
-			msg(
-				Msg::Warning,
-				messageContext,
-				fmt::format( "Unsupported data type \"{}\" for name \"{}\"", value->typeName(), name )
-			);
+			msg( Msg::Warning, messageContext,
+				 fmt::format( "Unsupported data type \"{}\" for name \"{}\"", value->typeName(), name ) );
 		}
 	}
 }
@@ -473,11 +496,8 @@ void getParameters( AtNode *node, IECore::CompoundDataMap &values )
 		}
 		else
 		{
-			msg(
-				Msg::Warning,
-				"getParameters",
-				fmt::format( "Unable to convert user parameter \"{}\"", AiUserParamGetName( param ) )
-			);
+			msg( Msg::Warning, "getParameters",
+				 fmt::format( "Unable to convert user parameter \"{}\"", AiUserParamGetName( param ) ) );
 		}
 	}
 	AiUserParamIteratorDestroy( it );
@@ -626,10 +646,7 @@ AtArray *dataToArray( const DataSamples &samples, int aiType )
 	}
 
 	const size_t arraySize = size( samples.front() );
-	ArrayPtr array(
-		AiArrayAllocate( arraySize, samples.size(), aiType ),
-		AiArrayDestroy
-	);
+	ArrayPtr array( AiArrayAllocate( arraySize, samples.size(), aiType ), AiArrayDestroy );
 
 	for( auto it = samples.begin(); it != samples.end(); ++it )
 	{

@@ -56,8 +56,7 @@ GAFFER_NODE_DEFINE_TYPE( ShaderTweakProxy );
 
 size_t ShaderTweakProxy::g_firstPlugIndex;
 
-ShaderTweakProxy::ShaderTweakProxy( const std::string &name )
-	: Shader( name )
+ShaderTweakProxy::ShaderTweakProxy( const std::string &name ) : Shader( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -65,9 +64,7 @@ ShaderTweakProxy::ShaderTweakProxy( const std::string &name )
 	parametersPlug()->addChild( new StringPlug( "targetShader", Plug::Direction::In, "" ) );
 }
 
-ShaderTweakProxy::~ShaderTweakProxy()
-{
-}
+ShaderTweakProxy::~ShaderTweakProxy() {}
 
 ShaderTweakProxy::ShaderLoaderCreatorMap &ShaderTweakProxy::shaderLoaderCreators()
 {
@@ -91,7 +88,9 @@ void ShaderTweakProxy::typePrefixAndSourceShaderName( std::string &typePrefix, s
 	size_t sep = shaderName.find( ":" );
 	if( sep == std::string::npos )
 	{
-		throw IECore::Exception( fmt::format( "Malformed ShaderTweakProxy shader name \"{}\". Must include type prefix.", shaderName ) );
+		throw IECore::Exception(
+			fmt::format( "Malformed ShaderTweakProxy shader name \"{}\". Must include type prefix.", shaderName )
+		);
 	}
 
 	typePrefix = shaderName.substr( 0, sep );
@@ -133,7 +132,12 @@ void ShaderTweakProxy::loadShader( const std::string &shaderName, bool keepExist
 			possibilityList.push_back( "\"" + i.first + "\"" );
 		}
 		std::string possibilities = boost::algorithm::join( possibilityList, ", " );
-		throw IECore::Exception( fmt::format( "No ShaderTweakProxy shader loader registered for type prefix \"{}\", options are {}", shaderTypePrefix, possibilities ) );
+		throw IECore::Exception(
+			fmt::format(
+				"No ShaderTweakProxy shader loader registered for type prefix \"{}\", options are {}", shaderTypePrefix,
+				possibilities
+			)
+		);
 	}
 
 	loaderNode->loadShader( sourceShaderName );

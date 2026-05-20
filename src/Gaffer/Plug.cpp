@@ -87,7 +87,11 @@ bool allDescendantInputsAreNull( const Plug *plug )
 GAFFER_PLUG_DEFINE_TYPE( Plug );
 
 Plug::Plug( const std::string &name, Direction direction, unsigned flags )
-	: GraphComponent( name ), m_direction( direction ), m_input( nullptr ), m_flags( None ), m_skipNextUpdateInputFromChildInputs( false )
+	: GraphComponent( name ),
+	  m_direction( direction ),
+	  m_input( nullptr ),
+	  m_flags( None ),
+	  m_skipNextUpdateInputFromChildInputs( false )
 {
 	setFlags( flags );
 }
@@ -134,7 +138,8 @@ bool Plug::acceptsParent( const GraphComponent *potentialParent ) const
 	{
 		return false;
 	}
-	return potentialParent->isInstanceOf( (IECore::TypeId)NodeTypeId ) || potentialParent->isInstanceOf( Plug::staticTypeId() );
+	return potentialParent->isInstanceOf( (IECore::TypeId)NodeTypeId ) ||
+		potentialParent->isInstanceOf( Plug::staticTypeId() );
 }
 
 unsigned Plug::getFlags() const
@@ -169,8 +174,7 @@ void Plug::setFlags( unsigned flags )
 		// We have references to us, so should implement things
 		// in an undoable manner.
 		Action::enact(
-			this,
-			boost::bind( &Plug::setFlagsInternal, this, flags ),
+			this, boost::bind( &Plug::setFlagsInternal, this, flags ),
 			boost::bind( &Plug::setFlagsInternal, this, m_flags )
 		);
 	}
@@ -201,26 +205,24 @@ void Plug::setFlagsInternal( unsigned flags )
 class Plug::AcceptsInputCache
 {
 
-	private:
+private:
 
 	struct ThreadData;
 	using PlugPair = std::pair<const Plug *, const Plug *>;
 	using ResultMap = boost::unordered_map<PlugPair, bool>;
 
-	public:
+public:
 
 	class Accessor
 	{
 
-		public:
+	public:
 
-		Accessor( const Plug *plug, const Plug *input )
-			: m_threadData( g_threadData.local() )
+		Accessor( const Plug *plug, const Plug *input ) : m_threadData( g_threadData.local() )
 		{
 			++m_threadData.depth;
-			std::pair<ResultMap::iterator, bool> i = m_threadData.cache.insert(
-				ResultMap::value_type( PlugPair( plug, input ), false )
-			);
+			std::pair<ResultMap::iterator, bool> i =
+				m_threadData.cache.insert( ResultMap::value_type( PlugPair( plug, input ), false ) );
 			if( i.second )
 			{
 				i.first->second = plug->acceptsInputInternal( input );
@@ -238,18 +240,15 @@ class Plug::AcceptsInputCache
 			}
 		}
 
-		bool get() const
-		{
-			return m_result;
-		}
+		bool get() const { return m_result; }
 
-		private:
+	private:
 
 		bool m_result;
 		ThreadData &m_threadData;
 	};
 
-	private:
+private:
 
 	struct ThreadData
 	{
@@ -351,8 +350,7 @@ void Plug::setInput( PlugPtr input, bool setChildInputs, bool updateParentInput 
 			// still have inputs of their own that we're meant
 			// to be clearing, so we need to be careful about
 			// when we take the shortcut.
-			!setChildInputs ||
-			allDescendantInputsAreNull( this )
+			!setChildInputs || allDescendantInputsAreNull( this )
 		)
 		{
 			return;
@@ -395,8 +393,7 @@ void Plug::setInput( PlugPtr input, bool setChildInputs, bool updateParentInput 
 		// someone is referring to us, so we're definitely fully constructed and we may have a ScriptNode
 		// above us, so we should do things in a way compatible with the undo system.
 		Action::enact(
-			this,
-			boost::bind( &Plug::setInputInternal, PlugPtr( this ), input, true ),
+			this, boost::bind( &Plug::setInputInternal, PlugPtr( this ), input, true ),
 			boost::bind( &Plug::setInputInternal, PlugPtr( this ), PlugPtr( m_input ), true )
 		);
 	}
@@ -577,7 +574,8 @@ void Plug::parentChanging( Gaffer::GraphComponent *newParent )
 
 	ScriptNode *scriptNode = ancestor<ScriptNode>();
 	scriptNode = scriptNode ? scriptNode : ( newParent ? newParent->ancestor<ScriptNode>() : nullptr );
-	if( scriptNode && ( scriptNode->currentActionStage() == Action::Undo || scriptNode->currentActionStage() == Action::Redo ) )
+	if( scriptNode &&
+		( scriptNode->currentActionStage() == Action::Undo || scriptNode->currentActionStage() == Action::Redo ) )
 	{
 		return;
 	}
@@ -667,7 +665,9 @@ void Plug::childrenReordered( const std::vector<size_t> &oldIndices )
 		{
 			IECore::msg(
 				IECore::Msg::Warning, "Plug::childrenReordered",
-				fmt::format( "Not reordering output \"{}\" because its size doesn't match the input", output->fullName() )
+				fmt::format(
+					"Not reordering output \"{}\" because its size doesn't match the input", output->fullName()
+				)
 			);
 			continue;
 		}
@@ -729,12 +729,9 @@ void Plug::propagateDirtinessAtLeaves( Plug *plugToDirty )
 class Plug::DirtyPlugs
 {
 
-	public:
+public:
 
-	DirtyPlugs()
-		: m_scopeCount( 0 ), m_emitting( false )
-	{
-	}
+	DirtyPlugs() : m_scopeCount( 0 ), m_emitting( false ) {}
 
 	void insert( Plug *plugToDirty )
 	{
@@ -760,11 +757,7 @@ class Plug::DirtyPlugs
 			InsertedVertex v = insertVertex( const_cast<Plug *>( &*it ) );
 			if( !it->getFlags( Plug::AcceptsDependencyCycles ) )
 			{
-				add_edge(
-					v.first,
-					insertVertex( const_cast<Plug *>( it.upstream() ) ).first,
-					m_graph
-				);
+				add_edge( v.first, insertVertex( const_cast<Plug *>( it.upstream() ) ).first, m_graph );
 			}
 
 			if( !v.second )
@@ -776,10 +769,7 @@ class Plug::DirtyPlugs
 		}
 	}
 
-	void pushScope()
-	{
-		m_scopeCount++;
-	}
+	void pushScope() { m_scopeCount++; }
 
 	void popScope()
 	{
@@ -813,7 +803,7 @@ class Plug::DirtyPlugs
 		return g_dirtyPlugs.local();
 	}
 
-	private:
+private:
 
 	// We use this graph structure to keep track of the dirty propagation.
 	// Vertices in the graph represent plugs which have been dirtied, and
@@ -885,8 +875,7 @@ class Plug::DirtyPlugs
 			IECore::msg(
 				IECore::Msg::Error, "Plug dirty propagation",
 				fmt::format(
-					"Cycle detected between {} and {}",
-					graph[boost::target( e, graph )]->fullName(),
+					"Cycle detected between {} and {}", graph[boost::target( e, graph )]->fullName(),
 					graph[boost::source( e, graph )]->fullName()
 				)
 			);
@@ -984,6 +973,4 @@ void Plug::flushDirtyPropagationScope()
 	DirtyPlugs::local().flush();
 }
 
-void Plug::dirty()
-{
-}
+void Plug::dirty() {}

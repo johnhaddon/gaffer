@@ -67,9 +67,7 @@ template<typename T>
 DataPtr dataFromVDB( const openvdb::math::Vec3<T> &value )
 {
 	using ImathType = Imath::Vec3<T>;
-	return new GeometricTypedData<ImathType>(
-		ImathType( value.x(), value.y(), value.z() )
-	);
+	return new GeometricTypedData<ImathType>( ImathType( value.x(), value.y(), value.z() ) );
 }
 
 openvdb::GridBase::ConstPtr grid( const ObjectPlug &objectPlug, const std::string &gridName )
@@ -153,45 +151,45 @@ struct GridPropertyCacheGetterKey
 {
 
 	GridPropertyCacheGetterKey( const ObjectPlug *objectPlug, const std::string &gridName )
-		: objectPlug( objectPlug ), gridName( gridName )
+		: objectPlug( objectPlug ),
+		  gridName( gridName )
 	{
 		hash = objectPlug->hash();
 		hash.append( gridName );
 	}
 
-	operator const IECore::MurmurHash &() const
-	{
-		return hash;
-	}
+	operator const IECore::MurmurHash &() const { return hash; }
 
 	IECore::MurmurHash hash;
 	const ObjectPlug *objectPlug;
 	const string gridName;
 };
 
-struct GridPropertyCache : public IECorePreview::LRUCache<MurmurHash, ConstDataPtr, IECorePreview::LRUCachePolicy::Parallel, GridPropertyCacheGetterKey>
+struct GridPropertyCache
+	: public IECorePreview::LRUCache<
+		  MurmurHash, ConstDataPtr, IECorePreview::LRUCachePolicy::Parallel, GridPropertyCacheGetterKey>
 {
 
 	using PropertyGetter = std::function<ConstDataPtr( const openvdb::GridBase *grid )>;
 
 	GridPropertyCache( PropertyGetter propertyGetter )
-		: IECorePreview::LRUCache<MurmurHash, ConstDataPtr, IECorePreview::LRUCachePolicy::Parallel, GridPropertyCacheGetterKey>(
-			  [propertyGetter]( const GridPropertyCacheGetterKey &key, size_t &cost, const IECore::Canceller *canceller ) -> ConstDataPtr {
+		: IECorePreview::LRUCache<
+			  MurmurHash, ConstDataPtr, IECorePreview::LRUCachePolicy::Parallel, GridPropertyCacheGetterKey>(
+			  [propertyGetter](
+				  const GridPropertyCacheGetterKey &key, size_t &cost, const IECore::Canceller *canceller
+			  ) -> ConstDataPtr {
 				  cost = 1;
 				  if( openvdb::GridBase::ConstPtr g = grid( *key.objectPlug, key.gridName ) )
 				  {
 					  // The OpenVDB function called by our PropertyGetters typically
 					  // use TBB tasks. Isolate them so they don't go stealing unrelated
 					  // tasks that could lead to deadlock.
-					  return tbb::this_task_arena::isolate(
-						  [&]() {
-							  return propertyGetter( g.get() );
-						  }
-					  );
+					  return tbb::this_task_arena::isolate( [&]() { return propertyGetter( g.get() ); } );
 				  }
 				  return nullptr;
 			  },
-			  /* maxCost = */ 1000 // Properties are small but expensive to compute - might as well cache a bunch of them.
+			  /* maxCost = */
+			  1000 // Properties are small but expensive to compute - might as well cache a bunch of them.
 		  )
 	{
 	}
@@ -200,11 +198,9 @@ struct GridPropertyCache : public IECorePreview::LRUCache<MurmurHash, ConstDataP
 DataPtr gridActiveVoxels( const ObjectPlug &objectPlug, const std::string &gridName )
 {
 	IECorePython::ScopedGILRelease gilRelease;
-	static GridPropertyCache g_cache(
-		[]( const openvdb::GridBase *grid ) {
-			return new Int64Data( grid->activeVoxelCount() );
-		}
-	);
+	static GridPropertyCache g_cache( []( const openvdb::GridBase *grid ) {
+		return new Int64Data( grid->activeVoxelCount() );
+	} );
 
 	return boost::const_pointer_cast<Data>( g_cache.get( { &objectPlug, gridName } ) );
 }
@@ -212,17 +208,15 @@ DataPtr gridActiveVoxels( const ObjectPlug &objectPlug, const std::string &gridN
 DataPtr gridVoxelBound( const ObjectPlug &objectPlug, const std::string &gridName )
 {
 	IECorePython::ScopedGILRelease gilRelease;
-	static GridPropertyCache g_cache(
-		[]( const openvdb::GridBase *grid ) {
-			const auto box = grid->evalActiveVoxelBoundingBox();
-			return new Box3iData(
-				Imath::Box3i(
-					Imath::V3i( box.min().x(), box.min().y(), box.min().z() ),
-					Imath::V3i( box.max().x(), box.max().y(), box.max().z() )
-				)
-			);
-		}
-	);
+	static GridPropertyCache g_cache( []( const openvdb::GridBase *grid ) {
+		const auto box = grid->evalActiveVoxelBoundingBox();
+		return new Box3iData(
+			Imath::Box3i(
+				Imath::V3i( box.min().x(), box.min().y(), box.min().z() ),
+				Imath::V3i( box.max().x(), box.max().y(), box.max().z() )
+			)
+		);
+	} );
 
 	return boost::const_pointer_cast<Data>( g_cache.get( { &objectPlug, gridName } ) );
 }
@@ -230,11 +224,9 @@ DataPtr gridVoxelBound( const ObjectPlug &objectPlug, const std::string &gridNam
 DataPtr gridMemoryUsage( const ObjectPlug &objectPlug, const std::string &gridName )
 {
 	IECorePython::ScopedGILRelease gilRelease;
-	static GridPropertyCache g_cache(
-		[]( const openvdb::GridBase *grid ) {
-			return new UInt64Data( grid->memUsage() );
-		}
-	);
+	static GridPropertyCache g_cache( []( const openvdb::GridBase *grid ) {
+		return new UInt64Data( grid->memUsage() );
+	} );
 
 	return boost::const_pointer_cast<Data>( g_cache.get( { &objectPlug, gridName } ) );
 }
@@ -275,10 +267,16 @@ BOOST_PYTHON_MODULE( _GafferVDBUI )
 {
 
 	def( "_gridValueType", &gridValueType, ( boost::python::arg( "objectPlug" ), boost::python::arg( "gridName" ) ) );
-	def( "_gridActiveVoxels", &gridActiveVoxels, ( boost::python::arg( "objectPlug" ), boost::python::arg( "gridName" ) ) );
+	def( "_gridActiveVoxels", &gridActiveVoxels,
+		 ( boost::python::arg( "objectPlug" ), boost::python::arg( "gridName" ) ) );
 	def( "_gridVoxelBound", &gridVoxelBound, ( boost::python::arg( "objectPlug" ), boost::python::arg( "gridName" ) ) );
-	def( "_gridMemoryUsage", &gridMemoryUsage, ( boost::python::arg( "objectPlug" ), boost::python::arg( "gridName" ) ) );
-	def( "_gridMinMaxValue", &gridMinMaxValue, ( boost::python::arg( "objectPlug" ), boost::python::arg( "gridName" ) ) );
-	def( "_gridMetadataNames", &gridMetadataNames, ( boost::python::arg( "objectPlug" ), boost::python::arg( "gridName" ) ) );
-	def( "_gridMetadata", &gridMetadata, ( boost::python::arg( "objectPlug" ), boost::python::arg( "gridName" ), boost::python::arg( "metadataName" ) ) );
+	def( "_gridMemoryUsage", &gridMemoryUsage,
+		 ( boost::python::arg( "objectPlug" ), boost::python::arg( "gridName" ) ) );
+	def( "_gridMinMaxValue", &gridMinMaxValue,
+		 ( boost::python::arg( "objectPlug" ), boost::python::arg( "gridName" ) ) );
+	def( "_gridMetadataNames", &gridMetadataNames,
+		 ( boost::python::arg( "objectPlug" ), boost::python::arg( "gridName" ) ) );
+	def( "_gridMetadata", &gridMetadata,
+		 ( boost::python::arg( "objectPlug" ), boost::python::arg( "gridName" ),
+		   boost::python::arg( "metadataName" ) ) );
 }

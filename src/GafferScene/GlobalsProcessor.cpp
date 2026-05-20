@@ -42,8 +42,7 @@ using namespace GafferScene;
 
 GAFFER_NODE_DEFINE_TYPE( GlobalsProcessor );
 
-GlobalsProcessor::GlobalsProcessor( const std::string &name )
-	: SceneProcessor( name )
+GlobalsProcessor::GlobalsProcessor( const std::string &name ) : SceneProcessor( name )
 {
 	// Fast pass-throughs for everything except the globals
 	outPlug()->boundPlug()->setInput( inPlug()->boundPlug() );
@@ -56,9 +55,7 @@ GlobalsProcessor::GlobalsProcessor( const std::string &name )
 	outPlug()->childBoundsPlug()->setInput( inPlug()->childBoundsPlug() );
 }
 
-GlobalsProcessor::~GlobalsProcessor()
-{
-}
+GlobalsProcessor::~GlobalsProcessor() {}
 
 void GlobalsProcessor::affects( const Plug *input, AffectedPlugsContainer &outputs ) const
 {
@@ -70,14 +67,18 @@ void GlobalsProcessor::affects( const Plug *input, AffectedPlugsContainer &outpu
 	}
 }
 
-void GlobalsProcessor::hashGlobals( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void GlobalsProcessor::hashGlobals(
+	const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	SceneProcessor::hashGlobals( context, parent, h );
 	inPlug()->globalsPlug()->hash( h );
 	hashProcessedGlobals( context, h );
 }
 
-IECore::ConstCompoundObjectPtr GlobalsProcessor::computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstCompoundObjectPtr GlobalsProcessor::computeGlobals(
+	const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	IECore::ConstCompoundObjectPtr globals = inPlug()->globalsPlug()->getValue();
 	return computeProcessedGlobals( context, globals );

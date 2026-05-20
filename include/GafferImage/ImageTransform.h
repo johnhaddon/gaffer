@@ -53,7 +53,7 @@ IE_CORE_FORWARDDECLARE( Resample )
 
 class GAFFERIMAGE_API ImageTransform : public FlatImageProcessor
 {
-	public:
+public:
 
 	explicit ImageTransform( const std::string &name = defaultName<ImageTransform>() );
 	~ImageTransform() override;
@@ -74,21 +74,30 @@ class GAFFERIMAGE_API ImageTransform : public FlatImageProcessor
 	Gaffer::BoolPlug *concatenatePlug();
 	const Gaffer::BoolPlug *concatenatePlug() const;
 
-	protected:
+protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-	void hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashDeep(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
 	bool computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	void hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashDataWindow(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
 	Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashChannelData(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData(
+		const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+		const ImagePlug *parent
+	) const override;
 
-	private:
+private:
 
 	// Output plug to compute the matrix for the internal
 	// Resample.

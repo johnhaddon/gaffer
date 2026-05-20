@@ -55,7 +55,7 @@ namespace GafferSceneUI
 class OutputBuffer
 {
 
-	public:
+public:
 
 	/// Calls `renderer->output()` to create outputs that will be sent to
 	/// this buffer.
@@ -84,12 +84,11 @@ class OutputBuffer
 
 	/// See `SceneGadget::snapshotToFile()` for documentation.
 	void snapshotToFile(
-		const std::filesystem::path &fileName,
-		const Imath::Box2f &resolutionGate = Imath::Box2f(),
+		const std::filesystem::path &fileName, const Imath::Box2f &resolutionGate = Imath::Box2f(),
 		const IECore::CompoundData *metadata = nullptr
 	);
 
-	private:
+private:
 
 	class DisplayDriver;
 

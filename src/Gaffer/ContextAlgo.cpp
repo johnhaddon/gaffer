@@ -71,11 +71,11 @@ GlobalScope::GlobalScope( const Context *context, const Plug *plug )
 	}
 }
 
-GlobalScope::~GlobalScope()
-{
-}
+GlobalScope::~GlobalScope() {}
 
-GlobalScope::Registration::Registration( IECore::TypeId plugTypeId, const std::initializer_list<IECore::InternedString> &variablesToErase )
+GlobalScope::Registration::Registration(
+	IECore::TypeId plugTypeId, const std::initializer_list<IECore::InternedString> &variablesToErase
+)
 {
 	vector<InternedString> &v = globalScopeMap()[plugTypeId];
 	v.insert( v.end(), variablesToErase );

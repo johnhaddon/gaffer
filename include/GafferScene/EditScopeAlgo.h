@@ -72,7 +72,9 @@ GAFFERSCENE_API const Gaffer::GraphComponent *prunedReadOnlyReason( const Gaffer
 
 /// Edits the visibility of `path`. When `visible` is true, this prefers inheriting visibility by removing the `scene:visible` attribute.
 GAFFERSCENE_API void setVisibility( Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, bool visible );
-GAFFERSCENE_API const Gaffer::GraphComponent *visibilityReadOnlyReason( const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path );
+GAFFERSCENE_API const Gaffer::GraphComponent *visibilityReadOnlyReason(
+	const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path
+);
 
 // Transforms
 // ==========
@@ -83,9 +85,7 @@ struct GAFFERSCENE_API TransformEdit
 {
 
 	TransformEdit(
-		const Gaffer::V3fPlugPtr &translate,
-		const Gaffer::V3fPlugPtr &rotate,
-		const Gaffer::V3fPlugPtr &scale,
+		const Gaffer::V3fPlugPtr &translate, const Gaffer::V3fPlugPtr &rotate, const Gaffer::V3fPlugPtr &scale,
 		const Gaffer::V3fPlugPtr &pivot
 	);
 	TransformEdit( const TransformEdit &rhs ) = default;
@@ -104,29 +104,54 @@ struct GAFFERSCENE_API TransformEdit
 };
 
 GAFFERSCENE_API bool hasTransformEdit( const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path );
-GAFFERSCENE_API std::optional<TransformEdit> acquireTransformEdit( Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, bool createIfNecessary = true );
+GAFFERSCENE_API std::optional<TransformEdit> acquireTransformEdit(
+	Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, bool createIfNecessary = true
+);
 GAFFERSCENE_API void removeTransformEdit( Gaffer::EditScope *scope, const ScenePlug::ScenePath &path );
-GAFFERSCENE_API const Gaffer::GraphComponent *transformEditReadOnlyReason( const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path );
+GAFFERSCENE_API const Gaffer::GraphComponent *transformEditReadOnlyReason(
+	const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path
+);
 
 // Shaders
 // =======
 //
 // These methods edit shader parameters for a particular location.
 
-GAFFERSCENE_API bool hasParameterEdit( const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute, const IECoreScene::ShaderNetwork::Parameter &parameter );
-GAFFERSCENE_API Gaffer::TweakPlug *acquireParameterEdit( Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute, const IECoreScene::ShaderNetwork::Parameter &parameter, bool createIfNecessary = true );
-GAFFERSCENE_API void removeParameterEdit( Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute, const IECoreScene::ShaderNetwork::Parameter &parameter );
-GAFFERSCENE_API const Gaffer::GraphComponent *parameterEditReadOnlyReason( const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute, const IECoreScene::ShaderNetwork::Parameter &parameter );
+GAFFERSCENE_API bool hasParameterEdit(
+	const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute,
+	const IECoreScene::ShaderNetwork::Parameter &parameter
+);
+GAFFERSCENE_API Gaffer::TweakPlug *acquireParameterEdit(
+	Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute,
+	const IECoreScene::ShaderNetwork::Parameter &parameter, bool createIfNecessary = true
+);
+GAFFERSCENE_API void removeParameterEdit(
+	Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute,
+	const IECoreScene::ShaderNetwork::Parameter &parameter
+);
+GAFFERSCENE_API const Gaffer::GraphComponent *parameterEditReadOnlyReason(
+	const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute,
+	const IECoreScene::ShaderNetwork::Parameter &parameter
+);
 
 // Attributes
 // ==========
 //
 // These methods edit attributes for a particular location.
 
-GAFFERSCENE_API bool hasAttributeEdit( const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute );
-GAFFERSCENE_API Gaffer::TweakPlug *acquireAttributeEdit( Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute, bool createIfNecessary = true );
-GAFFERSCENE_API void removeAttributeEdit( Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute );
-GAFFERSCENE_API const Gaffer::GraphComponent *attributeEditReadOnlyReason( const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute );
+GAFFERSCENE_API bool hasAttributeEdit(
+	const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute
+);
+GAFFERSCENE_API Gaffer::TweakPlug *acquireAttributeEdit(
+	Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute,
+	bool createIfNecessary = true
+);
+GAFFERSCENE_API void removeAttributeEdit(
+	Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute
+);
+GAFFERSCENE_API const Gaffer::GraphComponent *attributeEditReadOnlyReason(
+	const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute
+);
 
 // Sets
 // ==========
@@ -140,10 +165,17 @@ enum class SetMembership
 	Unchanged
 };
 
-GAFFERSCENE_API Gaffer::ValuePlug *acquireSetEdits( Gaffer::EditScope *scope, const std::string &set, bool createIfNecessary = true );
-GAFFERSCENE_API void setSetMembership( Gaffer::EditScope *scope, const IECore::PathMatcher &paths, const std::string &set, SetMembership state );
-GAFFERSCENE_API SetMembership getSetMembership( Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &set );
-GAFFERSCENE_API const Gaffer::GraphComponent *setMembershipReadOnlyReason( const Gaffer::EditScope *scope, const std::string &set, SetMembership state );
+GAFFERSCENE_API Gaffer::ValuePlug *acquireSetEdits(
+	Gaffer::EditScope *scope, const std::string &set, bool createIfNecessary = true
+);
+GAFFERSCENE_API void setSetMembership(
+	Gaffer::EditScope *scope, const IECore::PathMatcher &paths, const std::string &set, SetMembership state
+);
+GAFFERSCENE_API SetMembership
+getSetMembership( Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &set );
+GAFFERSCENE_API const Gaffer::GraphComponent *setMembershipReadOnlyReason(
+	const Gaffer::EditScope *scope, const std::string &set, SetMembership state
+);
 
 // Options
 // =======
@@ -151,9 +183,13 @@ GAFFERSCENE_API const Gaffer::GraphComponent *setMembershipReadOnlyReason( const
 // These methods edit global scene options.
 
 GAFFERSCENE_API bool hasOptionEdit( const Gaffer::EditScope *scope, const std::string &option );
-GAFFERSCENE_API Gaffer::TweakPlug *acquireOptionEdit( Gaffer::EditScope *scope, const std::string &option, bool createIfNecessary = true );
+GAFFERSCENE_API Gaffer::TweakPlug *acquireOptionEdit(
+	Gaffer::EditScope *scope, const std::string &option, bool createIfNecessary = true
+);
 GAFFERSCENE_API void removeOptionEdit( Gaffer::EditScope *scope, const std::string &option );
-GAFFERSCENE_API const Gaffer::GraphComponent *optionEditReadOnlyReason( const Gaffer::EditScope *scope, const std::string &option );
+GAFFERSCENE_API const Gaffer::GraphComponent *optionEditReadOnlyReason(
+	const Gaffer::EditScope *scope, const std::string &option
+);
 
 
 // Render Pass Options
@@ -161,16 +197,28 @@ GAFFERSCENE_API const Gaffer::GraphComponent *optionEditReadOnlyReason( const Ga
 //
 // These methods edit scene options for a particular render pass.
 
-GAFFERSCENE_API bool hasRenderPassOptionEdit( const Gaffer::EditScope *scope, const std::string &renderPass, const std::string &option );
-GAFFERSCENE_API Gaffer::TweakPlug *acquireRenderPassOptionEdit( Gaffer::EditScope *scope, const std::string &renderPass, const std::string &option, bool createIfNecessary = true );
-GAFFERSCENE_API void removeRenderPassOptionEdit( Gaffer::EditScope *scope, const std::string &renderPass, const std::string &option );
-GAFFERSCENE_API const Gaffer::GraphComponent *renderPassOptionEditReadOnlyReason( const Gaffer::EditScope *scope, const std::string &renderPass, const std::string &option );
+GAFFERSCENE_API bool hasRenderPassOptionEdit(
+	const Gaffer::EditScope *scope, const std::string &renderPass, const std::string &option
+);
+GAFFERSCENE_API Gaffer::TweakPlug *acquireRenderPassOptionEdit(
+	Gaffer::EditScope *scope, const std::string &renderPass, const std::string &option, bool createIfNecessary = true
+);
+GAFFERSCENE_API void removeRenderPassOptionEdit(
+	Gaffer::EditScope *scope, const std::string &renderPass, const std::string &option
+);
+GAFFERSCENE_API const Gaffer::GraphComponent *renderPassOptionEditReadOnlyReason(
+	const Gaffer::EditScope *scope, const std::string &renderPass, const std::string &option
+);
 
 GAFFERSCENE_API const Gaffer::GraphComponent *renderPassesReadOnlyReason( const Gaffer::EditScope *scope );
 /// Renames the render pass `oldName` to `newName` inside `scope`. Returns `true` if renaming occurred.
-GAFFERSCENE_API bool renameRenderPass( Gaffer::EditScope *scope, const std::string &oldName, const std::string &newName );
+GAFFERSCENE_API bool renameRenderPass(
+	Gaffer::EditScope *scope, const std::string &oldName, const std::string &newName
+);
 /// Returns the reason why a render pass could not be renamed to `newName`.
-GAFFERSCENE_API std::optional<std::string> renameRenderPassNonEditableReason( const Gaffer::EditScope *scope, const std::string &newName );
+GAFFERSCENE_API std::optional<std::string> renameRenderPassNonEditableReason(
+	const Gaffer::EditScope *scope, const std::string &newName
+);
 
 } // namespace EditScopeAlgo
 

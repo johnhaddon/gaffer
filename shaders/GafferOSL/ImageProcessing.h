@@ -63,7 +63,10 @@ color inLayer( string layerName, color defaultValue )
 		greenName = concat( layerName, ".", greenName );
 		blueName = concat( layerName, ".", blueName );
 	}
-	return color( inChannel( redName, defaultValue[0] ), inChannel( greenName, defaultValue[1] ), inChannel( blueName, defaultValue[2] ) );
+	return color(
+		inChannel( redName, defaultValue[0] ), inChannel( greenName, defaultValue[1] ),
+		inChannel( blueName, defaultValue[2] )
+	);
 }
 
 closure color outLayer( string layerName, color layerColor )
@@ -78,7 +81,8 @@ closure color outLayer( string layerName, color layerColor )
 		blueName = concat( layerName, ".", blueName );
 	}
 
-	return outChannel( redName, layerColor[0] ) + outChannel( greenName, layerColor[1] ) + outChannel( blueName, layerColor[2] );
+	return outChannel( redName, layerColor[0] ) + outChannel( greenName, layerColor[1] ) +
+		outChannel( blueName, layerColor[2] );
 }
 
 #endif // GAFFEROSL_IMAGEPROCESSING_H

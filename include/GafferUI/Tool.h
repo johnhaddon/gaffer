@@ -74,7 +74,7 @@ IE_CORE_FORWARDDECLARE( View )
 class GAFFERUI_API Tool : public Gaffer::Node
 {
 
-	public:
+public:
 
 	explicit Tool( View *view, const std::string &name = defaultName<Tool>() );
 	~Tool() override;
@@ -107,15 +107,12 @@ class GAFFERUI_API Tool : public Gaffer::Node
 	static void registeredTools( IECore::TypeId viewType, std::vector<std::string> &toolNames );
 	//@}
 
-	protected:
+protected:
 
 	template<typename ToolType, typename ViewType>
 	struct ToolDescription
 	{
-		ToolDescription()
-		{
-			registerTool( ToolType::staticTypeName(), ViewType::staticTypeId(), creator );
-		}
+		ToolDescription() { registerTool( ToolType::staticTypeName(), ViewType::staticTypeId(), creator ); }
 
 		static ToolPtr creator( View *view )
 		{
@@ -130,7 +127,7 @@ class GAFFERUI_API Tool : public Gaffer::Node
 
 	void parentChanged( GraphComponent *oldParent ) override;
 
-	private:
+private:
 
 	static size_t g_firstPlugIndex;
 };

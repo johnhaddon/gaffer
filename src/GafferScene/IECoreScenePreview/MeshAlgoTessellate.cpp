@@ -65,7 +65,9 @@ namespace
 {
 
 template<class F, typename... Args>
-typename std::invoke_result_t<F, Data *, Args &&...> dispatchVectorData( const IECore::Data *data, F &&functor, Args &&...args )
+typename std::invoke_result_t<F, Data *, Args &&...> dispatchVectorData(
+	const IECore::Data *data, F &&functor, Args &&...args
+)
 {
 	IECore::dispatch( data, [&]( const auto *typedData ) {
 		using DataType = typename std::remove_cv_t<std::remove_pointer_t<decltype( typedData )>>;
@@ -74,7 +76,9 @@ typename std::invoke_result_t<F, Data *, Args &&...> dispatchVectorData( const I
 			return functor( typedData, std::forward<Args>( args )... );
 		}
 
-		throw IECore::Exception( "Invalid primitive variable type, this message should never be seen because we earlier check isPrimitiveVariableValid" );
+		throw IECore::Exception(
+			"Invalid primitive variable type, this message should never be seen because we earlier check isPrimitiveVariableValid"
+		);
 	} );
 }
 
@@ -249,7 +253,9 @@ T fromFloats( float *v )
 	}
 	else if constexpr( is_specialization_of_v<T, Imath::Matrix44> )
 	{
-		return T( v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8], v[9], v[10], v[11], v[12], v[13], v[14], v[15] );
+		return T(
+			v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8], v[9], v[10], v[11], v[12], v[13], v[14], v[15]
+		);
 	}
 	else if constexpr( std::is_same_v<T, std::string> || std::is_same_v<T, IECore::InternedString> )
 	{
@@ -258,7 +264,10 @@ T fromFloats( float *v )
 }
 
 // Translate topology, crease, and corner data from an IECore::MeshPrimitive into the opensubdiv format.
-void setTopologyCreasesAndCorners( OSDF::TopologyDescriptor &desc, const IECoreScene::MeshPrimitive &inputMesh, std::vector<int> &expandedIds, std::vector<float> &expandedSharpnesses )
+void setTopologyCreasesAndCorners(
+	OSDF::TopologyDescriptor &desc, const IECoreScene::MeshPrimitive &inputMesh, std::vector<int> &expandedIds,
+	std::vector<float> &expandedSharpnesses
+)
 {
 	desc.numVertices = inputMesh.variableSize( PrimitiveVariable::Vertex );
 	desc.numFaces = inputMesh.variableSize( PrimitiveVariable::Uniform );
@@ -325,9 +334,7 @@ void setTopologyCreasesAndCorners( OSDF::TopologyDescriptor &desc, const IECoreS
 // This is used to deduplicated any facevarying indices that belong to different vertices.
 struct FaceVaryingMatch
 {
-	FaceVaryingMatch( int vi, int fvi ) : vertexIndex( vi ), faceVaryingIndex( fvi )
-	{
-	}
+	FaceVaryingMatch( int vi, int fvi ) : vertexIndex( vi ), faceVaryingIndex( fvi ) {}
 
 	bool operator == ( const FaceVaryingMatch &other ) const
 	{
@@ -356,11 +363,10 @@ struct FaceVaryingMatchHash
 
 struct PrimvarSetup
 {
-	PrimvarSetup(
-		const std::string &name, const PrimitiveVariable &var,
-		const std::vector<int> *vertexIds = nullptr
-	)
-		: m_name( name ), m_var( var ), m_outIndicesWritable( nullptr )
+	PrimvarSetup( const std::string &name, const PrimitiveVariable &var, const std::vector<int> *vertexIds = nullptr )
+		: m_name( name ),
+		  m_var( var ),
+		  m_outIndicesWritable( nullptr )
 	{
 		if( var.interpolation == PrimitiveVariable::FaceVarying )
 		{
@@ -419,7 +425,9 @@ struct PrimvarSetup
 						// If we haven't allocated the override indices yet, start by filling in all the indices
 						// we've already processed ( which didn't have any conflicts )
 						m_overrideFaceVaryingIndices.reserve( vertexIds->size() );
-						m_overrideFaceVaryingIndices.insert( m_overrideFaceVaryingIndices.begin(), &fvIndices[0], &fvIndices[i] );
+						m_overrideFaceVaryingIndices.insert(
+							m_overrideFaceVaryingIndices.begin(), &fvIndices[0], &fvIndices[i]
+						);
 						overriding = true;
 					}
 
@@ -430,7 +438,10 @@ struct PrimvarSetup
 					//
 					// We try the emplace - if we've already seen a version of this faceVarying index for this
 					// vertex, then we'll get that instead.
-					auto [it, success] = faceVaryingMatches.emplace( FaceVaryingMatch( ( *vertexIds )[i], fvIndices[i] ), (int)( numBaseElements + m_deduplicatedReindex.size() ) );
+					auto [it, success] = faceVaryingMatches.emplace(
+						FaceVaryingMatch( ( *vertexIds )[i], fvIndices[i] ),
+						(int)( numBaseElements + m_deduplicatedReindex.size() )
+					);
 					if( success )
 					{
 						m_deduplicatedReindex.push_back( faceVaryingIndex );
@@ -462,18 +473,17 @@ struct PrimvarSetup
 		// just reuse the input data, and only need to write new indices.
 		if( m_var.interpolation != PrimitiveVariable::Uniform )
 		{
-			dispatchVectorData(
-				m_var.data.get(),
-				[&]( const auto *typedData ) -> void {
-					using DataType = typename std::decay_t<decltype( *typedData )>;
-					typename DataType::Ptr outData = new DataType();
-					outData->writable().resize( outputSize );
-					m_outWritable = &( outData->writable() );
-					m_outData = outData;
-				}
-			);
+			dispatchVectorData( m_var.data.get(), [&]( const auto *typedData ) -> void {
+				using DataType = typename std::decay_t<decltype( *typedData )>;
+				typename DataType::Ptr outData = new DataType();
+				outData->writable().resize( outputSize );
+				m_outWritable = &( outData->writable() );
+				m_outData = outData;
+			} );
 
-			IECore::setGeometricInterpretation( m_outData.get(), IECore::getGeometricInterpretation( m_var.data.get() ) );
+			IECore::setGeometricInterpretation(
+				m_outData.get(), IECore::getGeometricInterpretation( m_var.data.get() )
+			);
 		}
 
 		if( outputIndexSize != -1 )
@@ -498,12 +508,9 @@ struct PrimvarSetup
 
 // Create PrimvarSetup's for the variables we need to interpolate
 void setupVariables(
-	const MeshPrimitive &mesh, bool calculateNormals,
-	PrimvarSetup &posPrimvarSetup,
-	std::vector<PrimvarSetup> &vertexPrimvarSetups,
-	std::vector<PrimvarSetup> &uniformPrimvarSetups,
-	std::vector<PrimvarSetup> &faceVaryingPrimvarSetups,
-	const IECore::Canceller *canceller
+	const MeshPrimitive &mesh, bool calculateNormals, PrimvarSetup &posPrimvarSetup,
+	std::vector<PrimvarSetup> &vertexPrimvarSetups, std::vector<PrimvarSetup> &uniformPrimvarSetups,
+	std::vector<PrimvarSetup> &faceVaryingPrimvarSetups, const IECore::Canceller *canceller
 )
 {
 	const std::vector<int> &vertexIds = mesh.vertexIds()->readable();
@@ -558,20 +565,14 @@ int intVectorAccumulate( std::vector<int> &v )
 // Define a thread-safe SurfaceFactory using tbb mutexes
 struct MutexReadGuard
 {
-	MutexReadGuard( tbb::spin_rw_mutex &m )
-		: m_guard( m, false )
-	{
-	}
+	MutexReadGuard( tbb::spin_rw_mutex &m ) : m_guard( m, false ) {}
 
 	tbb::spin_rw_mutex::scoped_lock m_guard;
 };
 
 struct MutexWriteGuard
 {
-	MutexWriteGuard( tbb::spin_rw_mutex &m )
-		: m_guard( m, true )
-	{
-	}
+	MutexWriteGuard( tbb::spin_rw_mutex &m ) : m_guard( m, true ) {}
 
 	tbb::spin_rw_mutex::scoped_lock m_guard;
 };
@@ -611,7 +612,9 @@ struct EdgeOwner
 // All vertex primvars share the same topology, but each FaceVarying primvar needs its own.
 struct PrimvarTopology
 {
-	PrimvarTopology( const OSDF::TopologyLevel &meshTopology, int faceVaryingChannel = -1 ) : m_mesh( meshTopology ), m_faceVaryingChannel( faceVaryingChannel )
+	PrimvarTopology( const OSDF::TopologyLevel &meshTopology, int faceVaryingChannel = -1 )
+		: m_mesh( meshTopology ),
+		  m_faceVaryingChannel( faceVaryingChannel )
 	{
 		m_facePointOffsets.resize( m_mesh.GetNumFaces() );
 		m_vertexOwners.resize(
@@ -621,7 +624,10 @@ struct PrimvarTopology
 		m_edgeOwners.resize( m_mesh.GetNumEdges(), { -1, -1, false } );
 	}
 
-	inline void addFace( int faceIndex, const OSDB::Tessellation &tessPattern, const OSDF::ConstIndexArray &fVerts, const OSDF::ConstIndexArray &fEdges, int tessUniformRate )
+	inline void addFace(
+		int faceIndex, const OSDB::Tessellation &tessPattern, const OSDF::ConstIndexArray &fVerts,
+		const OSDF::ConstIndexArray &fEdges, int tessUniformRate
+	)
 	{
 		OSDF::ConstIndexArray fvarValues;
 		if( m_faceVaryingChannel != -1 )
@@ -658,7 +664,8 @@ struct PrimvarTopology
 				// adjacent faces at this vertex
 				for( int j = 0; j < adjFaces.size(); j++ )
 				{
-					if( fvarValues[i] == m_mesh.GetFaceFVarValues( adjFaces[j], m_faceVaryingChannel )[adjFaceLocalIndices[j]] )
+					if( fvarValues[i] ==
+						m_mesh.GetFaceFVarValues( adjFaces[j], m_faceVaryingChannel )[adjFaceLocalIndices[j]] )
 					{
 						if( !m_mesh.IsFaceHole( adjFaces[j] ) )
 						{
@@ -725,17 +732,11 @@ struct PrimvarTopology
 	}
 
 	// Record a face that doesn't correspond to any output facets
-	inline void addHole( int faceIndex )
-	{
-		m_facePointOffsets[faceIndex] = 0;
-	}
+	inline void addHole( int faceIndex ) { m_facePointOffsets[faceIndex] = 0; }
 
 	// Must be called after all faces have had their points counted during the first parallel loop,
 	// but before we use these offsets in the second parallel loop
-	int accumulateFacePoints()
-	{
-		return intVectorAccumulate( m_facePointOffsets );
-	}
+	int accumulateFacePoints() { return intVectorAccumulate( m_facePointOffsets ); }
 
 	const OSDF::TopologyLevel &m_mesh;
 	const int m_faceVaryingChannel;
@@ -748,8 +749,8 @@ struct PrimvarTopology
 // Call OpenSubdiv's Evaluate function, and store the result in one of our types
 template<class T>
 void evaluateSurface(
-	const OSDB::Surface<float> &surface, const float *patchPointData, const float *uv,
-	int outIndex, std::vector<T> &out, T *outNormals = nullptr
+	const OSDB::Surface<float> &surface, const float *patchPointData, const float *uv, int outIndex,
+	std::vector<T> &out, T *outNormals = nullptr
 )
 {
 	constexpr int typeSize = numFloatsForType<T>();
@@ -801,14 +802,11 @@ struct TessellationTempBuffers
 // degenerate quads.
 template<class T>
 void tessellateVariable(
-	const OSDB::Surface<float> &surface, int faceIndex,
-	const OSDF::ConstIndexArray &fVerts, const OSDF::ConstIndexArray &fEdges,
-	int tessUniformRate, const OSDB::Tessellation &tessPattern, const std::vector<Imath::V2f> &coords,
-	const PrimvarTopology &primvarTopology,
-	TessellationTempBuffers &buffers,
-	PrimvarSetup &setup,
-	const IECore::Canceller *canceller,
-	int outIndicesIndex, int *outVerticesPerFace = nullptr, T *outNormals = nullptr
+	const OSDB::Surface<float> &surface, int faceIndex, const OSDF::ConstIndexArray &fVerts,
+	const OSDF::ConstIndexArray &fEdges, int tessUniformRate, const OSDB::Tessellation &tessPattern,
+	const std::vector<Imath::V2f> &coords, const PrimvarTopology &primvarTopology, TessellationTempBuffers &buffers,
+	PrimvarSetup &setup, const IECore::Canceller *canceller, int outIndicesIndex, int *outVerticesPerFace = nullptr,
+	T *outNormals = nullptr
 )
 {
 	std::vector<T> &out = *(std::vector<T> *)( setup.m_outWritable );
@@ -910,8 +908,8 @@ void tessellateVariable(
 		{
 			// We are the owner - evaluate the primvar at this corner
 			evaluateSurface<T>(
-				surface, buffers.patchPoints.data(), (float *)&tessBoundaryCoords[boundaryIndex],
-				outOffset++, out, outNormals
+				surface, buffers.patchPoints.data(), (float *)&tessBoundaryCoords[boundaryIndex], outOffset++, out,
+				outNormals
 			);
 		}
 
@@ -1003,8 +1001,7 @@ void tessellateVariable(
 		{
 			Canceller::check( canceller );
 			evaluateSurface<T>(
-				surface, buffers.patchPoints.data(), (float *)&tessInteriorCoords[i],
-				outOffset++, out, outNormals
+				surface, buffers.patchPoints.data(), (float *)&tessInteriorCoords[i], outOffset++, out, outNormals
 			);
 		}
 	}
@@ -1048,7 +1045,8 @@ void tessellateVariable(
 
 		// TransformFacetCoordIndices seems to incorrectly not be labelled as const, so we cheat
 		// with a const_cast
-		const_cast<OSDB::Tessellation *>( &tessPattern )->TransformFacetCoordIndices( outIndices, buffers.boundaryIndices.data(), tessInteriorOffset );
+		const_cast<OSDB::Tessellation *>( &tessPattern )
+			->TransformFacetCoordIndices( outIndices, buffers.boundaryIndices.data(), tessInteriorOffset );
 
 		if( needsCollapse )
 		{
@@ -1078,43 +1076,34 @@ void tessellateVariable(
 
 // Output tessellations for all primvar setups for one face
 void tessellateVariables(
-	const SurfaceFactory &meshSurfaceFactory, const OSDB::Tessellation &tessPattern,
-	int faceIndex, OSDF::ConstIndexArray fVerts, OSDF::ConstIndexArray fEdges,
-	int tessUniformRate, const std::vector<Imath::V2f> &tessCoords,
-	std::vector<int> &outVerticesPerFace, int faceFacetOffset, int faceFacetVertexOffset,
-	const PrimvarTopology &vertexTopology, const OSDB::Surface<float> &vertexSurface,
-	PrimvarSetup &posPrimvarSetup, std::vector<Imath::V3f> &outNormals,
-	std::vector<PrimvarSetup> &vertexPrimvarSetups, std::vector<PrimvarSetup> &uniformPrimvarSetups,
-	const std::vector<PrimvarTopology> &faceVaryingTopologies, std::vector<PrimvarSetup> &faceVaryingPrimvarSetups,
-	TessellationTempBuffers &buffers,
+	const SurfaceFactory &meshSurfaceFactory, const OSDB::Tessellation &tessPattern, int faceIndex,
+	OSDF::ConstIndexArray fVerts, OSDF::ConstIndexArray fEdges, int tessUniformRate,
+	const std::vector<Imath::V2f> &tessCoords, std::vector<int> &outVerticesPerFace, int faceFacetOffset,
+	int faceFacetVertexOffset, const PrimvarTopology &vertexTopology, const OSDB::Surface<float> &vertexSurface,
+	PrimvarSetup &posPrimvarSetup, std::vector<Imath::V3f> &outNormals, std::vector<PrimvarSetup> &vertexPrimvarSetups,
+	std::vector<PrimvarSetup> &uniformPrimvarSetups, const std::vector<PrimvarTopology> &faceVaryingTopologies,
+	std::vector<PrimvarSetup> &faceVaryingPrimvarSetups, TessellationTempBuffers &buffers,
 	const IECore::Canceller *canceller
 )
 {
 	const int numFacets = tessPattern.GetNumFacets();
 
 	tessellateVariable<Imath::V3f>(
-		vertexSurface, faceIndex, fVerts, fEdges, tessUniformRate, tessPattern, tessCoords,
-		vertexTopology,
-		buffers,
-		posPrimvarSetup, canceller, faceFacetVertexOffset,
-		&outVerticesPerFace[faceFacetOffset], outNormals.size() ? outNormals.data() : nullptr
+		vertexSurface, faceIndex, fVerts, fEdges, tessUniformRate, tessPattern, tessCoords, vertexTopology, buffers,
+		posPrimvarSetup, canceller, faceFacetVertexOffset, &outVerticesPerFace[faceFacetOffset],
+		outNormals.size() ? outNormals.data() : nullptr
 	);
 
 	for( PrimvarSetup &setup : vertexPrimvarSetups )
 	{
-		dispatchVectorData(
-			setup.m_var.data.get(),
-			[&]( const auto *typedData ) -> void {
-				using ElementType = typename std::remove_pointer_t<decltype( typedData )>::ValueType::value_type;
+		dispatchVectorData( setup.m_var.data.get(), [&]( const auto *typedData ) -> void {
+			using ElementType = typename std::remove_pointer_t<decltype( typedData )>::ValueType::value_type;
 
-				tessellateVariable<ElementType>(
-					vertexSurface, faceIndex, fVerts, fEdges, tessUniformRate, tessPattern, tessCoords,
-					vertexTopology,
-					buffers,
-					setup, canceller, faceFacetVertexOffset
-				);
-			}
-		);
+			tessellateVariable<ElementType>(
+				vertexSurface, faceIndex, fVerts, fEdges, tessUniformRate, tessPattern, tessCoords, vertexTopology,
+				buffers, setup, canceller, faceFacetVertexOffset
+			);
+		} );
 	}
 
 	for( PrimvarSetup &setup : uniformPrimvarSetups )
@@ -1133,18 +1122,13 @@ void tessellateVariables(
 			continue;
 		}
 
-		dispatchVectorData(
-			faceVaryingPrimvarSetups[i].m_var.data.get(),
-			[&]( const auto *typedData ) -> void {
-				using ElementType = typename std::remove_pointer_t<decltype( typedData )>::ValueType::value_type;
-				tessellateVariable<ElementType>(
-					buffers.faceVaryingSurface, faceIndex, fVerts, fEdges, tessUniformRate, tessPattern, tessCoords,
-					faceVaryingTopologies[i],
-					buffers,
-					faceVaryingPrimvarSetups[i], canceller, faceFacetVertexOffset
-				);
-			}
-		);
+		dispatchVectorData( faceVaryingPrimvarSetups[i].m_var.data.get(), [&]( const auto *typedData ) -> void {
+			using ElementType = typename std::remove_pointer_t<decltype( typedData )>::ValueType::value_type;
+			tessellateVariable<ElementType>(
+				buffers.faceVaryingSurface, faceIndex, fVerts, fEdges, tessUniformRate, tessPattern, tessCoords,
+				faceVaryingTopologies[i], buffers, faceVaryingPrimvarSetups[i], canceller, faceFacetVertexOffset
+			);
+		} );
 	}
 }
 
@@ -1250,11 +1234,9 @@ OpenSubdiv::Sdc::Options::TriangleSubdivision triangleSubdivisionFromString( con
 } // namespace
 
 MeshPrimitivePtr MeshAlgo::tessellateMesh(
-	const MeshPrimitive &inputMesh, int divisions,
-	bool calculateNormals, IECore::InternedString scheme,
+	const MeshPrimitive &inputMesh, int divisions, bool calculateNormals, IECore::InternedString scheme,
 	IECore::InternedString interpolateBoundary, IECore::InternedString faceVaryingLinearInterpolation,
-	IECore::InternedString triangleSubdivisionRule,
-	const IECore::Canceller *canceller
+	IECore::InternedString triangleSubdivisionRule, const IECore::Canceller *canceller
 )
 {
 	if( !inputMesh.verticesPerFace()->readable().size() )
@@ -1313,8 +1295,8 @@ MeshPrimitivePtr MeshAlgo::tessellateMesh(
 	std::vector<PrimvarSetup> uniformPrimvarSetups;
 	std::vector<PrimvarSetup> faceVaryingPrimvarSetups;
 	setupVariables(
-		inputMesh, calculateNormals,
-		posPrimvarSetup, vertexPrimvarSetups, uniformPrimvarSetups, faceVaryingPrimvarSetups, canceller
+		inputMesh, calculateNormals, posPrimvarSetup, vertexPrimvarSetups, uniformPrimvarSetups,
+		faceVaryingPrimvarSetups, canceller
 	);
 
 	if( interpolateBoundary == "" )
@@ -1370,7 +1352,11 @@ MeshPrimitivePtr MeshAlgo::tessellateMesh(
 
 	// Instantiate a FarTopologyRefiner from the descriptor
 	Canceller::check( canceller );
-	std::unique_ptr<OSDF::TopologyRefiner> refiner( OSDF::TopologyRefinerFactory<Descriptor>::Create( desc, OSDF::TopologyRefinerFactory<Descriptor>::Options( osScheme, options ) ) );
+	std::unique_ptr<OSDF::TopologyRefiner> refiner(
+		OSDF::TopologyRefinerFactory<Descriptor>::Create(
+			desc, OSDF::TopologyRefinerFactory<Descriptor>::Options( osScheme, options )
+		)
+	);
 
 	SurfaceFactory::Options surfaceOptions;
 
@@ -1451,13 +1437,10 @@ MeshPrimitivePtr MeshAlgo::tessellateMesh(
 				OSDF::ConstIndexArray fVerts = baseLevel.GetFaceVertices( faceIndex );
 				OSDF::ConstIndexArray fEdges = baseLevel.GetFaceEdges( faceIndex );
 
-				OSDB::Tessellation tessPattern(
-					faceSurface.GetParameterization(), tessUniformRate, tessOptions
-				);
+				OSDB::Tessellation tessPattern( faceSurface.GetParameterization(), tessUniformRate, tessOptions );
 
 				faceFacetOffsets[faceIndex] = tessPattern.GetNumFacets();
-				faceFacetVertexOffsets[faceIndex] =
-					tessPattern.GetNumFacets() * tessFacetSize -
+				faceFacetVertexOffsets[faceIndex] = tessPattern.GetNumFacets() * tessFacetSize -
 					numDegenerateQuadsInTessellation( tessFacetSize, fVerts.size(), tessUniformRate );
 
 				vertexTopology.addFace( faceIndex, tessPattern, fVerts, fEdges, tessUniformRate );
@@ -1468,8 +1451,7 @@ MeshPrimitivePtr MeshAlgo::tessellateMesh(
 				}
 			}
 		},
-		tbb::static_partitioner(),
-		taskGroupContext
+		tbb::static_partitioner(), taskGroupContext
 	);
 
 	// All off our offset arrays are initially filled with counts, which we must accumulate in order to convert
@@ -1553,22 +1535,21 @@ MeshPrimitivePtr MeshAlgo::tessellateMesh(
 				tessPattern.GetCoords( (float *)tessCoords.data() );
 
 				tessellateVariables(
-					meshSurfaceFactory, tessPattern,
-					faceIndex, baseLevel.GetFaceVertices( faceIndex ), baseLevel.GetFaceEdges( faceIndex ),
-					tessUniformRate, tessCoords,
-					outVerticesPerFace, faceFacetOffsets[faceIndex], faceFacetVertexOffsets[faceIndex],
-					vertexTopology, vertexSurface, posPrimvarSetup, outNormals,
-					vertexPrimvarSetups, uniformPrimvarSetups,
-					faceVaryingTopologies, faceVaryingPrimvarSetups,
-					tessellationTempBuffers, canceller
+					meshSurfaceFactory, tessPattern, faceIndex, baseLevel.GetFaceVertices( faceIndex ),
+					baseLevel.GetFaceEdges( faceIndex ), tessUniformRate, tessCoords, outVerticesPerFace,
+					faceFacetOffsets[faceIndex], faceFacetVertexOffsets[faceIndex], vertexTopology, vertexSurface,
+					posPrimvarSetup, outNormals, vertexPrimvarSetups, uniformPrimvarSetups, faceVaryingTopologies,
+					faceVaryingPrimvarSetups, tessellationTempBuffers, canceller
 				);
 			}
 		},
-		tbb::auto_partitioner(),
-		taskGroupContext
+		tbb::auto_partitioner(), taskGroupContext
 	);
 
-	MeshPrimitivePtr result = new MeshPrimitive( outVerticesPerFaceData, posPrimvarSetup.m_outIndicesData, "linear", IECore::runTimeCast<IECore::V3fVectorData>( posPrimvarSetup.m_outData.get() ) );
+	MeshPrimitivePtr result = new MeshPrimitive(
+		outVerticesPerFaceData, posPrimvarSetup.m_outIndicesData, "linear",
+		IECore::runTimeCast<IECore::V3fVectorData>( posPrimvarSetup.m_outData.get() )
+	);
 
 	if( calculateNormals )
 	{
@@ -1582,12 +1563,14 @@ MeshPrimitivePtr MeshAlgo::tessellateMesh(
 
 	for( PrimvarSetup &setup : uniformPrimvarSetups )
 	{
-		result->variables[setup.m_name] = PrimitiveVariable( PrimitiveVariable::Uniform, setup.m_var.data, setup.m_outIndicesData );
+		result->variables[setup.m_name] =
+			PrimitiveVariable( PrimitiveVariable::Uniform, setup.m_var.data, setup.m_outIndicesData );
 	}
 
 	for( PrimvarSetup &setup : faceVaryingPrimvarSetups )
 	{
-		result->variables[setup.m_name] = PrimitiveVariable( PrimitiveVariable::FaceVarying, setup.m_outData, setup.m_outIndicesData );
+		result->variables[setup.m_name] =
+			PrimitiveVariable( PrimitiveVariable::FaceVarying, setup.m_outData, setup.m_outIndicesData );
 	}
 
 	// We didn't need to make setups to hold interpolated data for constant primvars, we just copy them
@@ -1596,7 +1579,8 @@ MeshPrimitivePtr MeshAlgo::tessellateMesh(
 	{
 		if( it.second.interpolation == PrimitiveVariable::Constant )
 		{
-			result->variables[it.first] = PrimitiveVariable( PrimitiveVariable::Constant, it.second.data, it.second.indices );
+			result->variables[it.first] =
+				PrimitiveVariable( PrimitiveVariable::Constant, it.second.data, it.second.indices );
 		}
 	}
 

@@ -44,8 +44,7 @@ namespace GafferImage
 
 GAFFER_NODE_DEFINE_TYPE( MetadataProcessor );
 
-MetadataProcessor::MetadataProcessor( const std::string &name )
-	: ImageProcessor( name )
+MetadataProcessor::MetadataProcessor( const std::string &name ) : ImageProcessor( name )
 {
 	// Direct pass-through for the things we don't ever change.
 	outPlug()->viewNamesPlug()->setInput( inPlug()->viewNamesPlug() );
@@ -57,9 +56,7 @@ MetadataProcessor::MetadataProcessor( const std::string &name )
 	outPlug()->channelDataPlug()->setInput( inPlug()->channelDataPlug() );
 }
 
-MetadataProcessor::~MetadataProcessor()
-{
-}
+MetadataProcessor::~MetadataProcessor() {}
 
 void MetadataProcessor::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const
 {
@@ -71,14 +68,18 @@ void MetadataProcessor::affects( const Gaffer::Plug *input, AffectedPlugsContain
 	}
 }
 
-void MetadataProcessor::hashMetadata( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void MetadataProcessor::hashMetadata(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashMetadata( parent, context, h );
 	inPlug()->metadataPlug()->hash( h );
 	hashProcessedMetadata( context, h );
 }
 
-IECore::ConstCompoundDataPtr MetadataProcessor::computeMetadata( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstCompoundDataPtr MetadataProcessor::computeMetadata(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	IECore::ConstCompoundDataPtr metadata = inPlug()->metadataPlug()->getValue();
 	return computeProcessedMetadata( context, metadata.get() );

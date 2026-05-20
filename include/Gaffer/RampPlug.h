@@ -59,7 +59,7 @@ template<typename T>
 class GAFFER_API RampPlug : public ValuePlug
 {
 
-	public:
+public:
 
 	using ValueType = T;
 	using XPlugType = typename PlugType<typename T::XType>::Type;
@@ -68,9 +68,7 @@ class GAFFER_API RampPlug : public ValuePlug
 	GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( RampPlug<T>, ValuePlug );
 
 	explicit RampPlug(
-		const std::string &name = defaultName<RampPlug>(),
-		Direction direction = In,
-		const T &defaultValue = T(),
+		const std::string &name = defaultName<RampPlug>(), Direction direction = In, const T &defaultValue = T(),
 		unsigned flags = Default
 	);
 	~RampPlug() override;
@@ -111,7 +109,7 @@ class GAFFER_API RampPlug : public ValuePlug
 	YPlugType *pointYPlug( unsigned pointIndex );
 	const YPlugType *pointYPlug( unsigned pointIndex ) const;
 
-	private:
+private:
 
 	T m_defaultValue;
 };

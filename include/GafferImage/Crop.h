@@ -48,7 +48,7 @@ IE_CORE_FORWARDDECLARE( FormatPlug );
 
 class GAFFERIMAGE_API Crop : public ImageProcessor
 {
-	public:
+public:
 
 	explicit Crop( const std::string &name = defaultName<Crop>() );
 	~Crop() override;
@@ -87,9 +87,11 @@ class GAFFERIMAGE_API Crop : public ImageProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
-	void hashFormat( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashFormat(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
 
 	GafferImage::Format computeFormat( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
@@ -99,7 +101,7 @@ class GAFFERIMAGE_API Crop : public ImageProcessor
 	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 	Gaffer::ValuePlug::CachePolicy hashCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-	private:
+private:
 
 	Gaffer::AtomicBox2iPlug *cropWindowPlug();
 	const Gaffer::AtomicBox2iPlug *cropWindowPlug() const;

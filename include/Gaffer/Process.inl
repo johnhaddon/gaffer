@@ -233,7 +233,7 @@ namespace Gaffer
 class GAFFER_API Process::Collaboration : public IECore::RefCounted
 {
 
-	public:
+public:
 
 	// Work around https://bugs.llvm.org/show_bug.cgi?id=32978
 	~Collaboration() noexcept( true ) override;
@@ -267,7 +267,7 @@ class GAFFER_API Process::Collaboration : public IECore::RefCounted
 template<typename ProcessType>
 class Process::TypedCollaboration : public Process::Collaboration
 {
-	public:
+public:
 
 	std::variant<std::monostate, std::exception_ptr, typename ProcessType::ResultType> result;
 
@@ -300,7 +300,8 @@ class Process::TypedCollaboration : public Process::Collaboration
 };
 
 template<typename ProcessType>
-typename Process::TypedCollaboration<ProcessType>::PendingCollaborations Process::TypedCollaboration<ProcessType>::g_pendingCollaborations;
+typename Process::TypedCollaboration<ProcessType>::PendingCollaborations
+	Process::TypedCollaboration<ProcessType>::g_pendingCollaborations;
 
 template<typename ProcessType, typename... ProcessArguments>
 typename ProcessType::ResultType Process::acquireCollaborativeResult(
@@ -308,7 +309,8 @@ typename ProcessType::ResultType Process::acquireCollaborativeResult(
 )
 {
 	const ThreadState &threadState = ThreadState::current();
-	const Collaboration *currentCollaboration = threadState.process() ? threadState.process()->m_collaboration : nullptr;
+	const Collaboration *currentCollaboration =
+		threadState.process() ? threadState.process()->m_collaboration : nullptr;
 
 	// Check for any in-flight computes for the same cache key. If we find a
 	// suitable one, we'll wait for it and use its result.
@@ -375,15 +377,15 @@ typename ProcessType::ResultType Process::acquireCollaborativeResult(
 				// Collaboration has a different canceller than ours. Forward
 				// cancellation requests from our canceller, so that our clients
 				// can cancel execution too.
-				cancellationScope.emplace( const_cast<IECore::Canceller *>( currentCanceller ), collaboration->canceller );
+				cancellationScope.emplace(
+					const_cast<IECore::Canceller *>( currentCanceller ), collaboration->canceller
+				);
 			}
 		}
 
 		accessor.release();
 
-		collaboration->arena.execute(
-			[&] { return collaboration->taskGroup.wait(); }
-		);
+		collaboration->arena.execute( [&] { return collaboration->taskGroup.wait(); } );
 
 		return collaboration->resultOrException();
 	}
@@ -406,57 +408,55 @@ typename ProcessType::ResultType Process::acquireCollaborativeResult(
 		collaboration->dependents.insert( currentCollaboration );
 	}
 
-	collaboration->arena.execute(
-		[&] {
-			return collaboration->taskGroup.run_and_wait(
-				[&] {
-					// Publish ourselves so that other threads can collaborate
-					// by calling `collaboration->taskGroup.wait()`.
-					accessor->second.push_back( collaboration );
-					accessor.release();
+	collaboration->arena.execute( [&] {
+		return collaboration->taskGroup.run_and_wait( [&] {
+			// Publish ourselves so that other threads can collaborate
+			// by calling `collaboration->taskGroup.wait()`.
+			accessor->second.push_back( collaboration );
+			accessor.release();
 
-					try
-					{
-						ProcessType process( std::forward<ProcessArguments>( args )... );
-						process.m_collaboration = collaboration.get();
-						collaboration->result = process.run();
-						// Publish result to cache before we remove ourself from
-						// `g_pendingCollaborations`, so that other threads will
-						// be able to get the result one way or the other.
-						ProcessType::g_cache.setIfUncached(
-							cacheKey, std::get<typename ProcessType::ResultType>( collaboration->result ),
-							ProcessType::cacheCostFunction
-						);
-					}
-					catch( ... )
-					{
-						// We want to manage the exception ourselves anyway,
-						// but its also imperative that we don't allow `task_group::wait()`
-						// to see it, because then we'd hit a thread-safety bug in
-						// `tbb::task_group_context::reset()`.
-						collaboration->result = std::current_exception();
-					}
+			try
+			{
+				ProcessType process( std::forward<ProcessArguments>( args )... );
+				process.m_collaboration = collaboration.get();
+				collaboration->result = process.run();
+				// Publish result to cache before we remove ourself from
+				// `g_pendingCollaborations`, so that other threads will
+				// be able to get the result one way or the other.
+				ProcessType::g_cache.setIfUncached(
+					cacheKey, std::get<typename ProcessType::ResultType>( collaboration->result ),
+					ProcessType::cacheCostFunction
+				);
+			}
+			catch( ... )
+			{
+				// We want to manage the exception ourselves anyway,
+				// but its also imperative that we don't allow `task_group::wait()`
+				// to see it, because then we'd hit a thread-safety bug in
+				// `tbb::task_group_context::reset()`.
+				collaboration->result = std::current_exception();
+			}
 
-					// Now we're done, remove `collaboration` from the pending collaborations.
-					[[maybe_unused]] const bool found = CollaborationType::g_pendingCollaborations.find( accessor, cacheKey );
-					assert( found );
-					auto toErase = std::find( accessor->second.begin(), accessor->second.end(), collaboration );
-					assert( toErase != accessor->second.end() );
-					accessor->second.erase( toErase );
-					if( accessor->second.empty() )
-					{
-						CollaborationType::g_pendingCollaborations.erase( accessor );
-					}
-					accessor.release();
-				}
-			);
-		}
-	);
+			// Now we're done, remove `collaboration` from the pending collaborations.
+			[[maybe_unused]] const bool found = CollaborationType::g_pendingCollaborations.find( accessor, cacheKey );
+			assert( found );
+			auto toErase = std::find( accessor->second.begin(), accessor->second.end(), collaboration );
+			assert( toErase != accessor->second.end() );
+			accessor->second.erase( toErase );
+			if( accessor->second.empty() )
+			{
+				CollaborationType::g_pendingCollaborations.erase( accessor );
+			}
+			accessor.release();
+		} );
+	} );
 
 	return collaboration->resultOrException();
 }
 
-inline bool Process::forceMonitoring( const ThreadState &s, const Plug *plug, const IECore::InternedString &processType )
+inline bool Process::forceMonitoring(
+	const ThreadState &s, const Plug *plug, const IECore::InternedString &processType
+)
 {
 	if( s.m_mightForceMonitoring )
 	{

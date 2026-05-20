@@ -99,9 +99,7 @@ void podVectorResizeUninitialized( std::vector<T> &v, size_t s )
 	struct TNoInit
 	{
 		T data;
-		TNoInit() noexcept
-		{
-		}
+		TNoInit() noexcept {}
 	};
 
 #ifdef NDEBUG
@@ -121,17 +119,11 @@ const std::string g_oiioCompression( "compression" );
 
 struct ChannelMapEntry
 {
-	ChannelMapEntry( int subImage, int channelIndex )
-		: subImage( subImage ), channelIndex( channelIndex )
-	{
-	}
+	ChannelMapEntry( int subImage, int channelIndex ) : subImage( subImage ), channelIndex( channelIndex ) {}
 
 	ChannelMapEntry( const ChannelMapEntry & ) = default;
 
-	ChannelMapEntry()
-		: subImage( 0 ), channelIndex( 0 )
-	{
-	}
+	ChannelMapEntry() : subImage( 0 ), channelIndex( 0 ) {}
 
 	ChannelMapEntry &operator = ( const ChannelMapEntry &rhs ) = default;
 
@@ -165,7 +157,10 @@ V2i coordinateDivide( V2i a, V2i b )
 	return V2i( coordinateDivide( a.x, b.x ), coordinateDivide( a.y, b.y ) );
 }
 
-std::string channelNameFromEXR( std::string view, std::string part, std::string channel, bool useHeuristics, bool singlePartMultiView, bool isMultiPartExr )
+std::string channelNameFromEXR(
+	std::string view, std::string part, std::string channel, bool useHeuristics, bool singlePartMultiView,
+	bool isMultiPartExr
+)
 {
 	if( !useHeuristics )
 	{
@@ -239,16 +234,23 @@ std::string channelNameFromEXR( std::string view, std::string part, std::string 
 		}
 	}
 
-	layerTokens.erase( std::remove_if( layerTokens.begin(), layerTokens.end(), [view, baseName]( const std::string &i ) {
-						   // Remove any tokens from the layer name that are useless.  This is usually
-						   // because they are alternate names for the default layer - Nuke puts channels
-						   // from the default layer in layers named "rgba", "depth", or "other", depending
-						   // on the channel name.  If a token matches the view name, we assume it's a view
-						   // token, and can be removed ( we represent views seperately ).
-						   std::string lower = boost::algorithm::to_lower_copy( i );
-						   return lower == "main" || lower == "rgb" || lower == "rgba" || lower == "other" || ( lower == "depth" && baseName == "Z" ) || ( lower == "id" && baseName == "id" ) || ( lower == "instanceid" && baseName == "instanceID" ) || i == view || lower == "";
-					   } ),
-					   layerTokens.end() );
+	layerTokens.erase(
+		std::remove_if(
+			layerTokens.begin(), layerTokens.end(),
+			[view, baseName]( const std::string &i ) {
+				// Remove any tokens from the layer name that are useless.  This is usually
+				// because they are alternate names for the default layer - Nuke puts channels
+				// from the default layer in layers named "rgba", "depth", or "other", depending
+				// on the channel name.  If a token matches the view name, we assume it's a view
+				// token, and can be removed ( we represent views seperately ).
+				std::string lower = boost::algorithm::to_lower_copy( i );
+				return lower == "main" || lower == "rgb" || lower == "rgba" || lower == "other" ||
+					( lower == "depth" && baseName == "Z" ) || ( lower == "id" && baseName == "id" ) ||
+					( lower == "instanceid" && baseName == "instanceID" ) || i == view || lower == "";
+			}
+		),
+		layerTokens.end()
+	);
 
 	// Nuke uses non-standard "red", "green", "blue" and "alpha", and other
 	// packages use lower case "r", "g", "b", "a". In some cases I suspect the
@@ -301,9 +303,7 @@ std::string channelNameFromEXR( std::string view, std::string part, std::string 
 }
 
 inline void basicBlit(
-	int width, int height,
-	const float *src, int srcStrideX, int srcStrideY,
-	float *dst, int dstStrideX, int dstStrideY
+	int width, int height, const float *src, int srcStrideX, int srcStrideY, float *dst, int dstStrideX, int dstStrideY
 )
 {
 	/*
@@ -343,9 +343,7 @@ inline void basicBlit(
 // Similar to the basic blit, but copies sample counts from OIIO::DeepData
 // The x strides are hardcoded to 1, since this fits all our usage
 inline void sampleCountBlit(
-	int width, int height,
-	const OIIO::DeepData &src, int srcStartIndex, int srcStrideY,
-	int *dst, int dstStrideY
+	int width, int height, const OIIO::DeepData &src, int srcStartIndex, int srcStrideY, int *dst, int dstStrideY
 )
 {
 	for( int i = 0; i < height; i++ )
@@ -367,8 +365,7 @@ inline void sampleCountBlit(
 // The x strides are hardcoded to 1, since this fits all our usage, and
 // allows for optimization
 inline void deepBlit(
-	int width, int height,
-	const OIIO::DeepData &src, int channel, int srcStartIndex, int srcStrideY,
+	int width, int height, const OIIO::DeepData &src, int channel, int srcStartIndex, int srcStrideY,
 	const int *dstOffsets, int dstStartIndex, int dstStrideY, float *dst
 )
 {
@@ -401,9 +398,8 @@ inline void deepBlit(
 // The Gaffer targets are a series of tiles of a fixed size, with separate tiles for each channel.
 
 void blitOIIORectToTileBatch(
-	int numChannels, float *buffer, const Box2i &rect,
-	const V2i &tileBatchSize, const V3i &tileBatchOrigin, std::vector<float *> &tilePointers,
-	const vector<Box2i> &tileDataWindows
+	int numChannels, float *buffer, const Box2i &rect, const V2i &tileBatchSize, const V3i &tileBatchOrigin,
+	std::vector<float *> &tilePointers, const vector<Box2i> &tileDataWindows
 )
 {
 	const unsigned int tileBatchChannelSize = tileBatchSize.x * tileBatchSize.y;
@@ -441,16 +437,16 @@ void blitOIIORectToTileBatch(
 			// Note that in order to account for the OIIO rect being upside down relative to Gaffer,
 			// we offset this start index to the last row of the source rect, and pass a negative
 			// srcStrideY to basicBlit.
-			int rectStartIndex = clampedMinX - tileRelMinX +
-				( rectSize.y - 1 - ( clampedMinY - tileRelMinY ) ) * rectSize.x;
+			int rectStartIndex =
+				clampedMinX - tileRelMinX + ( rectSize.y - 1 - ( clampedMinY - tileRelMinY ) ) * rectSize.x;
 
 			for( int channel = 0; channel < numChannels; channel++ )
 			{
 				basicBlit(
-					width, height, &buffer[rectStartIndex * numChannels + channel],
-					numChannels, -numChannels * rectSize.x,
-					&tilePointers[channel * tileBatchChannelSize + tileBatchIndex][tileStartIndex],
-					1, ImagePlug::tileSize()
+					width, height, &buffer[rectStartIndex * numChannels + channel], numChannels,
+					-numChannels * rectSize.x,
+					&tilePointers[channel * tileBatchChannelSize + tileBatchIndex][tileStartIndex], 1,
+					ImagePlug::tileSize()
 				);
 			}
 
@@ -461,14 +457,9 @@ void blitOIIORectToTileBatch(
 			// and happens exactly once, whoever blits to the pixel at the minimum of the data window
 			// of a partially covered tile, is responsible for zeroing out all the parts of that tile
 			// outside the data window.
-			if(
-				!(
-					tileDataWindows[tileBatchIndex].min.x == 0 &&
-					tileDataWindows[tileBatchIndex].min.y == 0 &&
-					tileDataWindows[tileBatchIndex].max.x == ImagePlug::tileSize() &&
-					tileDataWindows[tileBatchIndex].max.y == ImagePlug::tileSize()
-				)
-			)
+			if( !( tileDataWindows[tileBatchIndex].min.x == 0 && tileDataWindows[tileBatchIndex].min.y == 0 &&
+				   tileDataWindows[tileBatchIndex].max.x == ImagePlug::tileSize() &&
+				   tileDataWindows[tileBatchIndex].max.y == ImagePlug::tileSize() ) )
 			{
 				const Box2i &tileDataWindow = tileDataWindows[tileBatchIndex];
 				if( tileStartIndex == tileDataWindow.min.y * ImagePlug::tileSize() + tileDataWindow.min.x )
@@ -481,8 +472,7 @@ void blitOIIORectToTileBatch(
 							if( y < tileDataWindow.min.y || y >= tileDataWindow.max.y )
 							{
 								memset(
-									&tilePtr[y * ImagePlug::tileSize()], 0,
-									sizeof( float ) * ImagePlug::tileSize()
+									&tilePtr[y * ImagePlug::tileSize()], 0, sizeof( float ) * ImagePlug::tileSize()
 								);
 								continue;
 							}
@@ -490,8 +480,7 @@ void blitOIIORectToTileBatch(
 							if( tileDataWindow.min.x > 0 )
 							{
 								memset(
-									&tilePtr[y * ImagePlug::tileSize()], 0,
-									sizeof( float ) * tileDataWindow.min.x
+									&tilePtr[y * ImagePlug::tileSize()], 0, sizeof( float ) * tileDataWindow.min.x
 								);
 							}
 
@@ -511,8 +500,8 @@ void blitOIIORectToTileBatch(
 }
 
 void blitOIIOSampleCountsToTileBatch(
-	const OIIO::DeepData &deepData, const Box2i &rect,
-	const V2i &tileBatchSize, const V3i &tileBatchOrigin, std::vector<int *> &tilePointers
+	const OIIO::DeepData &deepData, const Box2i &rect, const V2i &tileBatchSize, const V3i &tileBatchOrigin,
+	std::vector<int *> &tilePointers
 )
 {
 	const V2i rectSize = rect.size();
@@ -548,13 +537,11 @@ void blitOIIOSampleCountsToTileBatch(
 			// Note that in order to account for the OIIO rect being upside down relative to Gaffer,
 			// we offset this start index to the last row of the source rect, and pass a negative
 			// srcStrideY to basicBlit.
-			int rectStartIndex = clampedMinX - tileRelMinX +
-				( rectSize.y - 1 - ( clampedMinY - tileRelMinY ) ) * rectSize.x;
+			int rectStartIndex =
+				clampedMinX - tileRelMinX + ( rectSize.y - 1 - ( clampedMinY - tileRelMinY ) ) * rectSize.x;
 
 			sampleCountBlit(
-				width, height, deepData, rectStartIndex,
-				-rectSize.x,
-				&tilePointers[tileBatchIndex][tileStartIndex],
+				width, height, deepData, rectStartIndex, -rectSize.x, &tilePointers[tileBatchIndex][tileStartIndex],
 				ImagePlug::tileSize()
 			);
 		}
@@ -562,9 +549,8 @@ void blitOIIOSampleCountsToTileBatch(
 }
 
 void blitDeepOIIORectToTileBatch(
-	int numChannels, const OIIO::DeepData &deepData, const Box2i &rect,
-	const V2i &tileBatchSize, const V3i &tileBatchOrigin, std::vector<float *> &tileChannelPointers,
-	const std::vector<int *> &tileOffsetPointers
+	int numChannels, const OIIO::DeepData &deepData, const Box2i &rect, const V2i &tileBatchSize,
+	const V3i &tileBatchOrigin, std::vector<float *> &tileChannelPointers, const std::vector<int *> &tileOffsetPointers
 )
 {
 	const unsigned int tileBatchChannelSize = tileBatchSize.x * tileBatchSize.y;
@@ -602,15 +588,14 @@ void blitDeepOIIORectToTileBatch(
 			// Note that in order to account for the OIIO rect being upside down relative to Gaffer,
 			// we offset this start index to the last row of the source rect, and pass a negative
 			// srcStrideY to basicBlit.
-			int rectStartIndex = clampedMinX - tileRelMinX +
-				( rectSize.y - 1 - ( clampedMinY - tileRelMinY ) ) * rectSize.x;
+			int rectStartIndex =
+				clampedMinX - tileRelMinX + ( rectSize.y - 1 - ( clampedMinY - tileRelMinY ) ) * rectSize.x;
 
 			for( int channel = 0; channel < numChannels; channel++ )
 			{
 				deepBlit(
-					width, height,
-					deepData, channel, rectStartIndex, -rectSize.x,
-					tileOffsetPointers[tileBatchIndex], tileStartIndex, ImagePlug::tileSize(),
+					width, height, deepData, channel, rectStartIndex, -rectSize.x, tileOffsetPointers[tileBatchIndex],
+					tileStartIndex, ImagePlug::tileSize(),
 					tileChannelPointers[channel * tileBatchChannelSize + tileBatchIndex]
 				);
 			}
@@ -625,12 +610,8 @@ void accumulateSampleOffsets( int *sampleOffsets, const Box2i &tileDataWindow )
 {
 	int accum = 0;
 
-	if(
-		tileDataWindow.min.x == 0 &&
-		tileDataWindow.min.y == 0 &&
-		tileDataWindow.max.x == ImagePlug::tileSize() &&
-		tileDataWindow.max.y == ImagePlug::tileSize()
-	)
+	if( tileDataWindow.min.x == 0 && tileDataWindow.min.y == 0 && tileDataWindow.max.x == ImagePlug::tileSize() &&
+		tileDataWindow.max.y == ImagePlug::tileSize() )
 	{
 		// Whole tile is within data window, we are just doing a running sum of everything.
 		int *last = sampleOffsets + ImagePlug::tilePixels();
@@ -684,15 +665,12 @@ std::vector<Box2i> calculateTileDataWindows(
 		int tx = subIndex % tileBatchSize.x;
 		int ty = subIndex / tileBatchSize.x;
 		V2i tileOrigin(
-			tileBatchOrigin.x + tx * ImagePlug::tileSize(),
-			tileBatchOrigin.y + ty * ImagePlug::tileSize()
+			tileBatchOrigin.x + tx * ImagePlug::tileSize(), tileBatchOrigin.y + ty * ImagePlug::tileSize()
 		);
 
 		Box2i tileRelativeBound( gafferDataWindow.min - tileOrigin, gafferDataWindow.max - tileOrigin );
-		result[subIndex] = BufferAlgo::intersection(
-			tileRelativeBound,
-			Box2i( V2i( 0 ), V2i( ImagePlug::tileSize() ) )
-		);
+		result[subIndex] =
+			BufferAlgo::intersection( tileRelativeBound, Box2i( V2i( 0 ), V2i( ImagePlug::tileSize() ) ) );
 	}
 	return result;
 }
@@ -734,11 +712,15 @@ Box2i expandToGrid( Box2i region, V2i gridOrigin, V2i gridSize )
 class File
 {
 
-	public:
+public:
 
 	// Create a File handle object for an image input and image spec
-	File( std::unique_ptr<ImageInput> imageInput, const std::string &filePath, ImageReader::ChannelInterpretation channelNaming )
-		: m_imageInput( std::move( imageInput ) ), m_filePath( filePath )
+	File(
+		std::unique_ptr<ImageInput> imageInput, const std::string &filePath,
+		ImageReader::ChannelInterpretation channelNaming
+	)
+		: m_imageInput( std::move( imageInput ) ),
+		  m_filePath( filePath )
 	{
 		m_viewNamesData = new StringVectorData();
 		auto &viewNames = m_viewNamesData->writable();
@@ -759,7 +741,9 @@ class File
 
 			if( currentSpec.depth != 1 )
 			{
-				throw IECore::Exception( "OpenImageIOReader : " + filePath + " : GafferImage does not support 3D pixel arrays " );
+				throw IECore::Exception(
+					"OpenImageIOReader : " + filePath + " : GafferImage does not support 3D pixel arrays "
+				);
 			}
 
 			std::string viewName = currentSpec.get_string_attribute( "view", "" );
@@ -773,10 +757,7 @@ class File
 					{
 						IECore::msg(
 							IECore::Msg::Warning, "OpenImageIOReader",
-							fmt::format(
-								"Ignoring invalid \"multiView\" attribute in \"{}\".",
-								filePath
-							)
+							fmt::format( "Ignoring invalid \"multiView\" attribute in \"{}\".", filePath )
 						);
 					}
 					else
@@ -835,8 +816,12 @@ class File
 					// better to not use the data window stored in view->imageSpec, and instead use
 					// a data window we store ourselves as a Box2i.  Maybe the View constructor should set
 					// imageSpec.width and height to 0 to enforce this?
-					int maxDataX = std::max( currentSpec.x + currentSpec.width, currentView->imageSpec.x + currentView->imageSpec.width );
-					int maxDataY = std::max( currentSpec.y + currentSpec.height, currentView->imageSpec.y + currentView->imageSpec.height );
+					int maxDataX = std::max(
+						currentSpec.x + currentSpec.width, currentView->imageSpec.x + currentView->imageSpec.width
+					);
+					int maxDataY = std::max(
+						currentSpec.y + currentSpec.height, currentView->imageSpec.y + currentView->imageSpec.height
+					);
 					int minDataX = std::min( currentSpec.x, currentView->imageSpec.x );
 					int minDataY = std::min( currentSpec.y, currentView->imageSpec.y );
 					currentView->imageSpec.x = minDataX;
@@ -908,7 +893,8 @@ class File
 					// channelNameFromEXR has a more thorough heuristic for the Default channelNaming mode
 					std::string legacySubImageName = subImageName;
 
-					if( boost::iequals( legacySubImageName, "RGBA" ) || boost::iequals( legacySubImageName, "RGB" ) || boost::iequals( legacySubImageName, "depth" ) )
+					if( boost::iequals( legacySubImageName, "RGBA" ) || boost::iequals( legacySubImageName, "RGB" ) ||
+						boost::iequals( legacySubImageName, "depth" ) )
 					{
 						legacySubImageName = "";
 					}
@@ -919,8 +905,8 @@ class File
 				{
 					channelName = channelNameFromEXR(
 						channelViewName, subImageName.str(), n,
-						channelNaming != ImageReader::ChannelInterpretation::Specification,
-						singlePartMultiView, isMultiPartExr
+						channelNaming != ImageReader::ChannelInterpretation::Specification, singlePartMultiView,
+						isMultiPartExr
 					);
 				}
 
@@ -943,13 +929,15 @@ class File
 				}
 				else
 				{
-					channelView->channelMap[channelName] = ChannelMapEntry( subImageIndex, &n - &currentSpec.channelnames[0] );
+					channelView->channelMap[channelName] =
+						ChannelMapEntry( subImageIndex, &n - &currentSpec.channelnames[0] );
 					channelView->channelNames.push_back( channelName );
 				}
 			}
 		}
 
-		if( channelNaming != ImageReader::ChannelInterpretation::Specification && viewNames.size() == 1 && viewNames[0] == "main" )
+		if( channelNaming != ImageReader::ChannelInterpretation::Specification && viewNames.size() == 1 &&
+			viewNames[0] == "main" )
 		{
 			// When Nuke writes images without specific views to EXR, it creates a single view named "main".
 			// We want to treat this like a default EXR that doesn't specify anything about views, so we
@@ -986,9 +974,8 @@ class File
 		const Box2i gafferDataWindow = flopDisplayWindow( fileDataWindow, spec );
 
 		// The region of each tile that is within the data window
-		const std::vector<Box2i> tileDataWindows = calculateTileDataWindows(
-			tileBatchNumTiles, tileBatchOrigin, view.tileBatchSize, gafferDataWindow
-		);
+		const std::vector<Box2i> tileDataWindows =
+			calculateTileDataWindows( tileBatchNumTiles, tileBatchOrigin, view.tileBatchSize, gafferDataWindow );
 
 		if( !spec.deep )
 		{
@@ -1010,7 +997,8 @@ class File
 					//
 					// The const_cast is safe because we will never write to these tiles, and our output
 					// is treated as const.
-					resultChannels->members()[subIndex] = const_cast<IECore::FloatVectorData *>( ImagePlug::blackTile() );
+					resultChannels->members()[subIndex] =
+						const_cast<IECore::FloatVectorData *>( ImagePlug::blackTile() );
 
 					// To ensure that we never write to the tiles that must be treated as const, we set
 					// the pointer used for writing these tiles to a nullptr.
@@ -1042,7 +1030,8 @@ class File
 					// batch size is constant, and the image could be smaller than that, resulting in tiles
 					// outside the data window that are never used, and it's better not to have uninitialized
 					// data lying around, so we do the same trick as we do for flat images here:
-					resultOffsets->members()[subIndex] = const_cast<IECore::IntVectorData *>( ImagePlug::emptyTileSampleOffsets() );
+					resultOffsets->members()[subIndex] =
+						const_cast<IECore::IntVectorData *>( ImagePlug::emptyTileSampleOffsets() );
 					tileOffsetPointers[subIndex] = nullptr;
 				}
 			}
@@ -1052,8 +1041,7 @@ class File
 		// and convert it from Gaffer coordinates to file coordinates.
 		const V2i tileBatchOriginXY( tileBatchOrigin.x, tileBatchOrigin.y );
 		const Box2i targetRegion = BufferAlgo::intersection(
-			Box2i( tileBatchOriginXY, tileBatchOriginXY + view.tileBatchSize * ImagePlug::tileSize() ),
-			gafferDataWindow
+			Box2i( tileBatchOriginXY, tileBatchOriginXY + view.tileBatchSize * ImagePlug::tileSize() ), gafferDataWindow
 		);
 		const Box2i fileTargetRegion = flopDisplayWindow( targetRegion, view.imageSpec );
 
@@ -1066,8 +1054,7 @@ class File
 		std::vector<Box2i> deepRects;
 
 		bool usingExrCore =
-			strcmp( m_imageInput->format_name(), "openexr" ) == 0 &&
-			OIIO::get_int_attribute( "openexr:core" );
+			strcmp( m_imageInput->format_name(), "openexr" ) == 0 && OIIO::get_int_attribute( "openexr:core" );
 
 		tbb::enumerable_thread_specific<std::vector<float>> threadBuffers;
 		tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
@@ -1095,9 +1082,8 @@ class File
 
 			std::vector<float> buffer;
 			processFileRegionScanline(
-				spec, tileBatchOrigin, fileTargetRegion, buffer,
-				view.tileBatchSize, tileChannelPointers, tileDataWindows,
-				deepRectsData.size() ? &deepRectsData[0] : nullptr,
+				spec, tileBatchOrigin, fileTargetRegion, buffer, view.tileBatchSize, tileChannelPointers,
+				tileDataWindows, deepRectsData.size() ? &deepRectsData[0] : nullptr,
 				deepRects.size() ? &deepRects[0] : nullptr, tileOffsetPointers
 			);
 		}
@@ -1131,10 +1117,13 @@ class File
 			// it's important that these batches are aligned to the data origin in EXR space, not aligned
 			// to the Gaffer tiles.
 			int scanlineBatch = compressionBatch;
-			int scanlineBatchOffset = ( ( fileTargetRegion.min.y - fileDataOrigin.y ) / compressionBatch ) * compressionBatch + fileDataOrigin.y;
+			int scanlineBatchOffset =
+				( ( fileTargetRegion.min.y - fileDataOrigin.y ) / compressionBatch ) * compressionBatch +
+				fileDataOrigin.y;
 
 			// Compute how many batches are needed to cover the size of the target region
-			const int numScanlineBatches = ( fileTargetRegion.max.y - scanlineBatchOffset + scanlineBatch - 1 ) / scanlineBatch;
+			const int numScanlineBatches =
+				( fileTargetRegion.max.y - scanlineBatchOffset + scanlineBatch - 1 ) / scanlineBatch;
 
 			if( spec.deep )
 			{
@@ -1152,14 +1141,12 @@ class File
 						const int yEnd = std::min( y + scanlineBatch, fileTargetRegion.max.y );
 
 						const Box2i batchRect(
-							Imath::V2i( fileTargetRegion.min.x, y ),
-							Imath::V2i( fileTargetRegion.max.x, yEnd )
+							Imath::V2i( fileTargetRegion.min.x, y ), Imath::V2i( fileTargetRegion.max.x, yEnd )
 						);
 
 						processFileRegionScanline(
-							spec, tileBatchOrigin, batchRect, buffer,
-							view.tileBatchSize, tileChannelPointers, tileDataWindows,
-							deepRectsData.size() ? &deepRectsData[i] : nullptr,
+							spec, tileBatchOrigin, batchRect, buffer, view.tileBatchSize, tileChannelPointers,
+							tileDataWindows, deepRectsData.size() ? &deepRectsData[i] : nullptr,
 							deepRects.size() ? &deepRects[i] : nullptr, tileOffsetPointers
 						);
 					}
@@ -1184,8 +1171,8 @@ class File
 			processFileRegionTiled(
 				spec, tileBatchOrigin, BufferAlgo::intersection( fileTileRegion, fileDataWindow ), buffer,
 				view.tileBatchSize, tileChannelPointers, tileDataWindows,
-				deepRectsData.size() ? &deepRectsData[0] : nullptr,
-				deepRects.size() ? &deepRects[0] : nullptr, tileOffsetPointers
+				deepRectsData.size() ? &deepRectsData[0] : nullptr, deepRects.size() ? &deepRects[0] : nullptr,
+				tileOffsetPointers
 			);
 		}
 		else
@@ -1213,13 +1200,19 @@ class File
 					{
 						// For a tiled image, each tile can be it's own batch of processing, so we
 						// get good parallelism.
-						const V2i fileTile = fileTileRegion.min + V2i( i % fileTileCounts.x, i / fileTileCounts.x ) * tileSize;
-						const Box2i batchRect = BufferAlgo::intersection( fileDataWindow, Imath::Box2i( Imath::V2i( fileTile.x, fileTile.y ), Imath::V2i( fileTile.x + tileSize.x, fileTile.y + tileSize.y ) ) );
+						const V2i fileTile =
+							fileTileRegion.min + V2i( i % fileTileCounts.x, i / fileTileCounts.x ) * tileSize;
+						const Box2i batchRect = BufferAlgo::intersection(
+							fileDataWindow,
+							Imath::Box2i(
+								Imath::V2i( fileTile.x, fileTile.y ),
+								Imath::V2i( fileTile.x + tileSize.x, fileTile.y + tileSize.y )
+							)
+						);
 
 						processFileRegionTiled(
-							spec, tileBatchOrigin, batchRect, buffer,
-							view.tileBatchSize, tileChannelPointers, tileDataWindows,
-							deepRectsData.size() ? &deepRectsData[i] : nullptr,
+							spec, tileBatchOrigin, batchRect, buffer, view.tileBatchSize, tileChannelPointers,
+							tileDataWindows, deepRectsData.size() ? &deepRectsData[i] : nullptr,
 							deepRects.size() ? &deepRects[i] : nullptr, tileOffsetPointers
 						);
 					}
@@ -1247,7 +1240,8 @@ class File
 							// reasonable.
 							for( int c = 0; c < spec.nchannels; c++ )
 							{
-								resultChannels->members()[c * tileBatchNumTiles + i] = const_cast<IECore::FloatVectorData *>( ImagePlug::emptyTile() );
+								resultChannels->members()[c * tileBatchNumTiles + i] =
+									const_cast<IECore::FloatVectorData *>( ImagePlug::emptyTile() );
 								tileChannelPointers[c * tileBatchNumTiles + i] = nullptr;
 							}
 							continue;
@@ -1277,9 +1271,8 @@ class File
 					for( int i = range.begin(); i < range.end(); i++ )
 					{
 						blitDeepOIIORectToTileBatch(
-							spec.nchannels, deepRectsData[i], deepRects[i],
-							view.tileBatchSize, tileBatchOrigin, tileChannelPointers,
-							tileOffsetPointers
+							spec.nchannels, deepRectsData[i], deepRects[i], view.tileBatchSize, tileBatchOrigin,
+							tileChannelPointers, tileOffsetPointers
 						);
 					}
 				},
@@ -1298,7 +1291,10 @@ class File
 	// Given a channelName and tileOrigin, return the information necessary to look up the data for this tile.
 	// The tileBatchOrigin is used to find a tileBatch, and then the tileBatchSubIndex tells you the index
 	// within that tile to use
-	void findTile( const Context *c, const std::string &channelName, const Imath::V2i &tileOrigin, V3i &batchOrigin, int &batchSubIndex ) const
+	void findTile(
+		const Context *c, const std::string &channelName, const Imath::V2i &tileOrigin, V3i &batchOrigin,
+		int &batchSubIndex
+	) const
 	{
 		const View &view = lookupView( c );
 		if( !channelName.size() )
@@ -1317,14 +1313,15 @@ class File
 			}
 			ChannelMapEntry channelMapEntry = findIt->second;
 			batchOrigin = tileBatchOrigin( view, channelMapEntry.subImage, tileOrigin );
-			batchSubIndex = tileBatchSubIndex( view, channelMapEntry.channelIndex, tileOrigin - V2i( batchOrigin.x, batchOrigin.y ) );
+			batchSubIndex = tileBatchSubIndex(
+				view, channelMapEntry.channelIndex, tileOrigin - V2i( batchOrigin.x, batchOrigin.y )
+			);
 		}
 	}
 
 	void processFileRegionScanline(
 		const ImageSpec &spec, const V3i &tileBatchOrigin, const Box2i &regionRect, std::vector<float> &buffer,
-		const V2i &tileBatchSize, std::vector<float *> &tileChannelPointers,
-		const std::vector<Box2i> &tileDataWindows,
+		const V2i &tileBatchSize, std::vector<float *> &tileChannelPointers, const std::vector<Box2i> &tileDataWindows,
 		OIIO::DeepData *deepRectData, Box2i *deepRect, std::vector<int *> &tileOffsetPointers
 	)
 	{
@@ -1332,14 +1329,12 @@ class File
 
 		if( !spec.deep )
 		{
-			podVectorResizeUninitialized<float>(
-				buffer, spec.nchannels * regionRect.size().x * regionRect.size().y
-			);
+			podVectorResizeUninitialized<float>( buffer, spec.nchannels * regionRect.size().x * regionRect.size().y );
 
 			// Tell OIIO to do the actual read/decompress to the temp buffer
 			if( !m_imageInput->read_scanlines(
-					tileBatchOrigin.z, 0,
-					regionRect.min.y, regionRect.max.y, 0, 0, spec.nchannels, TypeDesc::FLOAT, &buffer[0]
+					tileBatchOrigin.z, 0, regionRect.min.y, regionRect.max.y, 0, 0, spec.nchannels, TypeDesc::FLOAT,
+					&buffer[0]
 				) )
 			{
 				handleOIIOError( "Failed to read scanlines", gafferRegionRect );
@@ -1347,8 +1342,7 @@ class File
 
 			// Copy the data from the temp buffer to whatever tiles it belongs in
 			blitOIIORectToTileBatch(
-				spec.nchannels, &buffer[0], gafferRegionRect,
-				tileBatchSize, tileBatchOrigin, tileChannelPointers,
+				spec.nchannels, &buffer[0], gafferRegionRect, tileBatchSize, tileBatchOrigin, tileChannelPointers,
 				tileDataWindows
 			);
 		}
@@ -1358,8 +1352,7 @@ class File
 			// just the sample counts, so this read will pull in all the data, and we need
 			// to remember it for later.
 			if( !m_imageInput->read_native_deep_scanlines(
-					tileBatchOrigin.z, 0,
-					regionRect.min.y, regionRect.max.y, 0, 0, spec.nchannels, *deepRectData
+					tileBatchOrigin.z, 0, regionRect.min.y, regionRect.max.y, 0, 0, spec.nchannels, *deepRectData
 				) )
 			{
 				handleOIIOError( "Failed to read deep scanlines", gafferRegionRect );
@@ -1371,16 +1364,14 @@ class File
 
 			// Set the sample counts from this chunk of data
 			blitOIIOSampleCountsToTileBatch(
-				*deepRectData, gafferRegionRect,
-				tileBatchSize, tileBatchOrigin, tileOffsetPointers
+				*deepRectData, gafferRegionRect, tileBatchSize, tileBatchOrigin, tileOffsetPointers
 			);
 		}
 	}
 
 	void processFileRegionTiled(
 		const ImageSpec &spec, const V3i &tileBatchOrigin, const Box2i &regionRect, std::vector<float> &buffer,
-		const V2i &tileBatchSize, std::vector<float *> &tileChannelPointers,
-		const std::vector<Box2i> &tileDataWindows,
+		const V2i &tileBatchSize, std::vector<float *> &tileChannelPointers, const std::vector<Box2i> &tileDataWindows,
 		OIIO::DeepData *deepRectData, Box2i *deepRect, std::vector<int *> &tileOffsetPointers
 	)
 	{
@@ -1388,15 +1379,12 @@ class File
 
 		if( !spec.deep )
 		{
-			podVectorResizeUninitialized<float>(
-				buffer, spec.nchannels * regionRect.size().x * regionRect.size().y
-			);
+			podVectorResizeUninitialized<float>( buffer, spec.nchannels * regionRect.size().x * regionRect.size().y );
 
 			// Tell OIIO to do the actual read/decompress to the temp buffer
 			if( !m_imageInput->read_tiles(
-					tileBatchOrigin.z, 0,
-					regionRect.min.x, regionRect.max.x, regionRect.min.y, regionRect.max.y,
-					0, 1, 0, spec.nchannels, TypeDesc::FLOAT, &buffer[0]
+					tileBatchOrigin.z, 0, regionRect.min.x, regionRect.max.x, regionRect.min.y, regionRect.max.y, 0, 1,
+					0, spec.nchannels, TypeDesc::FLOAT, &buffer[0]
 				) )
 			{
 				handleOIIOError( "Failed to read tiles", gafferRegionRect );
@@ -1404,8 +1392,7 @@ class File
 
 			// Copy the data from the temp buffer to whatever tiles it belongs in
 			blitOIIORectToTileBatch(
-				spec.nchannels, &buffer[0], gafferRegionRect,
-				tileBatchSize, tileBatchOrigin, tileChannelPointers,
+				spec.nchannels, &buffer[0], gafferRegionRect, tileBatchSize, tileBatchOrigin, tileChannelPointers,
 				tileDataWindows
 			);
 		}
@@ -1415,9 +1402,8 @@ class File
 			// just the sample counts, so this read will pull in all the data, and we need
 			// to remember it for later.
 			if( !m_imageInput->read_native_deep_tiles(
-					tileBatchOrigin.z, 0,
-					regionRect.min.x, regionRect.max.x, regionRect.min.y, regionRect.max.y,
-					0, 1, 0, spec.nchannels, *deepRectData
+					tileBatchOrigin.z, 0, regionRect.min.x, regionRect.max.x, regionRect.min.y, regionRect.max.y, 0, 1,
+					0, spec.nchannels, *deepRectData
 				) )
 			{
 				handleOIIOError( "Failed to read deep tiles", gafferRegionRect );
@@ -1429,47 +1415,32 @@ class File
 
 			// Set the sample counts from this chunk of data
 			blitOIIOSampleCountsToTileBatch(
-				*deepRectData, gafferRegionRect,
-				tileBatchSize, tileBatchOrigin, tileOffsetPointers
+				*deepRectData, gafferRegionRect, tileBatchSize, tileBatchOrigin, tileOffsetPointers
 			);
 		}
 	}
 
-	const ImageSpec &imageSpec( const Context *c ) const
-	{
-		return lookupView( c ).imageSpec;
-	}
+	const ImageSpec &imageSpec( const Context *c ) const { return lookupView( c ).imageSpec; }
 
-	std::string formatName() const
-	{
-		return m_imageInput->format_name();
-	}
+	std::string formatName() const { return m_imageInput->format_name(); }
 
-	const std::string &filePath() const
-	{
-		return m_filePath;
-	}
+	const std::string &filePath() const { return m_filePath; }
 
-	ConstStringVectorDataPtr channelNamesData( const Context *c )
-	{
-		return lookupView( c ).channelNamesData;
-	}
+	ConstStringVectorDataPtr channelNamesData( const Context *c ) { return lookupView( c ).channelNamesData; }
 
-	ConstStringVectorDataPtr viewNamesData()
-	{
-		return m_viewNamesData;
-	}
+	ConstStringVectorDataPtr viewNamesData() { return m_viewNamesData; }
 
-	private:
+private:
 
 	struct View
 	{
-		View( const ImageSpec &spec, int firstSubImage ) : imageSpec( spec ),
-														   tiled( !( spec.tile_width == 0 && spec.tile_height == 0 ) ),
-														   tileBatchSize( computeTileBatchSize( spec, tiled ) ),
-														   channelNamesData( new StringVectorData() ),
-														   channelNames( channelNamesData->writable() ),
-														   firstSubImage( firstSubImage )
+		View( const ImageSpec &spec, int firstSubImage )
+			: imageSpec( spec ),
+			  tiled( !( spec.tile_width == 0 && spec.tile_height == 0 ) ),
+			  tileBatchSize( computeTileBatchSize( spec, tiled ) ),
+			  channelNamesData( new StringVectorData() ),
+			  channelNames( channelNamesData->writable() ),
+			  firstSubImage( firstSubImage )
 		{
 		}
 
@@ -1481,7 +1452,7 @@ class File
 		std::map<std::string, ChannelMapEntry> channelMap;
 		int firstSubImage;
 
-		private:
+	private:
 
 		static V2i computeTileBatchSize( const ImageSpec &spec, bool tiled )
 		{
@@ -1489,8 +1460,7 @@ class File
 			{
 				// Set up a tile batch that is one tile high, and wide enough to hold everything
 				// from the beginning of a scanline to the end
-				return V2i( 0, 1 ) +
-					ImagePlug::tileIndex( V2i( spec.x + spec.width + ImagePlug::tileSize() - 1, 0 ) ) -
+				return V2i( 0, 1 ) + ImagePlug::tileIndex( V2i( spec.x + spec.width + ImagePlug::tileSize() - 1, 0 ) ) -
 					ImagePlug::tileIndex( V2i( spec.x, 0 ) );
 			}
 
@@ -1514,7 +1484,8 @@ class File
 		if( view.tiled )
 		{
 			// For tiled images, we find which batch we are in by rounding down by the size of a tile batch
-			o = coordinateDivide( ImagePlug::tileIndex( tileOrigin ), view.tileBatchSize ) * view.tileBatchSize * ImagePlug::tileSize();
+			o = coordinateDivide( ImagePlug::tileIndex( tileOrigin ), view.tileBatchSize ) * view.tileBatchSize *
+				ImagePlug::tileSize();
 		}
 		else
 		{
@@ -1554,7 +1525,9 @@ class File
 			}
 		}
 
-		throw IECore::Exception( "OpenImageIOReader : Error in downstream node - incorrect request for invalid view \"" + viewName + "\"" );
+		throw IECore::Exception(
+			"OpenImageIOReader : Error in downstream node - incorrect request for invalid view \"" + viewName + "\""
+		);
 	}
 
 	void handleOIIOError( const std::string &description, const Box2i &bound )
@@ -1574,11 +1547,8 @@ class File
 
 		throw IECore::Exception(
 			fmt::format(
-				"OpenImageIOReader : {} : {},{} to {},{}. Error : {}",
-				description,
-				bound.min.x, bound.min.y,
-				bound.max.x, bound.max.y,
-				error
+				"OpenImageIOReader : {} : {},{} to {},{}. Error : {}", description, bound.min.x, bound.min.y,
+				bound.max.x, bound.max.y, error
 			)
 		);
 	}
@@ -1600,7 +1570,10 @@ struct CacheEntry
 };
 
 
-CacheEntry fileCacheGetter( const std::pair<std::string, ImageReader::ChannelInterpretation> &fileNameAndChannelInterpretation, size_t &cost, const IECore::Canceller *canceller )
+CacheEntry fileCacheGetter(
+	const std::pair<std::string, ImageReader::ChannelInterpretation> &fileNameAndChannelInterpretation, size_t &cost,
+	const IECore::Canceller *canceller
+)
 {
 	cost = 1;
 
@@ -1611,14 +1584,18 @@ CacheEntry fileCacheGetter( const std::pair<std::string, ImageReader::ChannelInt
 	std::unique_ptr<ImageInput> imageInput( ImageInput::create( fileName ) );
 	if( !imageInput )
 	{
-		result.error.reset( new std::string( "OpenImageIOReader : Could not create ImageInput : " + OIIO::geterror() ) );
+		result.error.reset(
+			new std::string( "OpenImageIOReader : Could not create ImageInput : " + OIIO::geterror() )
+		);
 		return result;
 	}
 
 	ImageSpec firstPartSpec;
 	if( !imageInput->open( fileName, firstPartSpec ) )
 	{
-		result.error.reset( new std::string( "OpenImageIOReader : Could not open ImageInput : " + imageInput->geterror() ) );
+		result.error.reset(
+			new std::string( "OpenImageIOReader : Could not open ImageInput : " + imageInput->geterror() )
+		);
 		return result;
 	}
 
@@ -1648,16 +1625,14 @@ boost::container::flat_set<ustring> g_metadataBlacklist = {
 	//   in Gaffer.
 	// - The OIIO ImageOutput classes react to them, causing ImageWriter to
 	//   write out channels with the wrong name.
-	ustring( "name" ),
-	ustring( "oiio:subimagename" ),
+	ustring( "name" ), ustring( "oiio:subimagename" ),
 	// This attribute is used by OIIO to say how many subimages there are. This
 	// isn't very meaningful in Gaffer where we deal in layers and channel
 	// names.
 	ustring( "oiio:subimages" ),
 	// We handle the view metadata by loading as multi-view images, so we don't
 	// need to load it as metadata
-	ustring( "view" ),
-	ustring( "multiView" )
+	ustring( "view" ), ustring( "multiView" )
 };
 
 } // namespace
@@ -1670,30 +1645,29 @@ GAFFER_NODE_DEFINE_TYPE( OpenImageIOReader );
 
 size_t OpenImageIOReader::g_firstPlugIndex = 0;
 
-OpenImageIOReader::OpenImageIOReader( const std::string &name )
-	: ImageNode( name )
+OpenImageIOReader::OpenImageIOReader( const std::string &name ) : ImageNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
-	addChild(
-		new StringPlug(
-			"fileName", Plug::In, "",
-			/* flags */ Plug::Default,
-			/* substitutions */ IECore::StringAlgo::AllSubstitutions & ~IECore::StringAlgo::FrameSubstitutions
-		)
-	);
+	addChild( new StringPlug(
+		"fileName", Plug::In, "",
+		/* flags */ Plug::Default,
+		/* substitutions */ IECore::StringAlgo::AllSubstitutions & ~IECore::StringAlgo::FrameSubstitutions
+	) );
 	addChild( new IntPlug( "refreshCount" ) );
 	addChild( new IntPlug( "missingFrameMode", Plug::In, Error, /* min */ Error, /* max */ Hold ) );
 	addChild( new IntVectorDataPlug( "availableFrames", Plug::Out, new IntVectorData ) );
 	addChild( new BoolPlug( "fileValid", Plug::Out ) );
-	addChild( new IntPlug( "channelInterpretation", Plug::In, (int)ImageReader::ChannelInterpretation::Default, /* min */ (int)ImageReader::ChannelInterpretation::Legacy, /* max */ (int)ImageReader::ChannelInterpretation::Specification ) );
+	addChild( new IntPlug(
+		"channelInterpretation", Plug::In, (int)ImageReader::ChannelInterpretation::Default,
+		/* min */ (int)ImageReader::ChannelInterpretation::Legacy,
+		/* max */ (int)ImageReader::ChannelInterpretation::Specification
+	) );
 	addChild( new ObjectVectorPlug( "__tileBatch", Plug::Out, new ObjectVector ) );
 
 	plugSetSignal().connect( boost::bind( &OpenImageIOReader::plugSet, this, ::_1 ) );
 }
 
-OpenImageIOReader::~OpenImageIOReader()
-{
-}
+OpenImageIOReader::~OpenImageIOReader() {}
 
 Gaffer::StringPlug *OpenImageIOReader::fileNamePlug()
 {
@@ -1813,7 +1787,8 @@ void OpenImageIOReader::affects( const Gaffer::Plug *input, AffectedPlugsContain
 		outputs.push_back( fileValidPlug() );
 	}
 
-	if( input == fileNamePlug() || input == refreshCountPlug() || input == missingFrameModePlug() || input == channelInterpretationPlug() )
+	if( input == fileNamePlug() || input == refreshCountPlug() || input == missingFrameModePlug() ||
+		input == channelInterpretationPlug() )
 	{
 		outputs.push_back( tileBatchPlug() );
 		for( ValuePlug::Iterator it( outPlug() ); !it.done(); ++it )
@@ -1869,7 +1844,8 @@ void OpenImageIOReader::compute( ValuePlug *output, const Context *context ) con
 			return;
 		}
 
-		ImageReader::ChannelInterpretation channelNaming = (ImageReader::ChannelInterpretation)channelInterpretationPlug()->getValue();
+		ImageReader::ChannelInterpretation channelNaming =
+			(ImageReader::ChannelInterpretation)channelInterpretationPlug()->getValue();
 
 		const std::string resolvedFileName = context->substitute( fileName );
 
@@ -1919,12 +1895,12 @@ void OpenImageIOReader::compute( ValuePlug *output, const Context *context ) con
 
 		if( !file )
 		{
-			throw IECore::Exception( "OpenImageIOReader - trying to evaluate tileBatchPlug() with invalid file, this should never happen." );
+			throw IECore::Exception(
+				"OpenImageIOReader - trying to evaluate tileBatchPlug() with invalid file, this should never happen."
+			);
 		}
 
-		static_cast<ObjectVectorPlug *>( output )->setValue(
-			file->readTileBatch( context, tileBatchOrigin )
-		);
+		static_cast<ObjectVectorPlug *>( output )->setValue( file->readTileBatch( context, tileBatchOrigin ) );
 	}
 	else
 	{
@@ -1964,7 +1940,9 @@ void OpenImageIOReader::hashFileName( const Gaffer::Context *context, IECore::Mu
 	}
 }
 
-void OpenImageIOReader::hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void OpenImageIOReader::hashViewNames(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageNode::hashViewNames( parent, context, h );
 	hashFileName( context, h );
@@ -1973,7 +1951,9 @@ void OpenImageIOReader::hashViewNames( const GafferImage::ImagePlug *parent, con
 	channelInterpretationPlug()->hash( h ); // Affects whether "main" is interpreted as "default"
 }
 
-IECore::ConstStringVectorDataPtr OpenImageIOReader::computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr OpenImageIOReader::computeViewNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	FilePtr file = std::static_pointer_cast<File>( retrieveFile( context ) );
 	if( !file )
@@ -1983,7 +1963,9 @@ IECore::ConstStringVectorDataPtr OpenImageIOReader::computeViewNames( const Gaff
 	return file->viewNamesData();
 }
 
-void OpenImageIOReader::hashFormat( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void OpenImageIOReader::hashFormat(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageNode::hashFormat( output, context, h );
 	hashFileName( context, h );
@@ -2015,7 +1997,9 @@ GafferImage::Format OpenImageIOReader::computeFormat( const Gaffer::Context *con
 	);
 }
 
-void OpenImageIOReader::hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void OpenImageIOReader::hashDataWindow(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageNode::hashDataWindow( output, context, h );
 	hashFileName( context, h );
@@ -2038,7 +2022,9 @@ Imath::Box2i OpenImageIOReader::computeDataWindow( const Gaffer::Context *contex
 	return flopDisplayWindow( dataWindow, spec );
 }
 
-void OpenImageIOReader::hashMetadata( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void OpenImageIOReader::hashMetadata(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageNode::hashMetadata( output, context, h );
 	hashFileName( context, h );
@@ -2048,7 +2034,9 @@ void OpenImageIOReader::hashMetadata( const GafferImage::ImagePlug *output, cons
 	h.append( context->get<std::string>( ImagePlug::viewNameContextName, ImagePlug::defaultViewName ) );
 }
 
-IECore::ConstCompoundDataPtr OpenImageIOReader::computeMetadata( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstCompoundDataPtr OpenImageIOReader::computeMetadata(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	CompoundDataPtr result = new CompoundData;
 
@@ -2110,7 +2098,9 @@ IECore::ConstCompoundDataPtr OpenImageIOReader::computeMetadata( const Gaffer::C
 	return result;
 }
 
-void OpenImageIOReader::hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void OpenImageIOReader::hashChannelNames(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageNode::hashChannelNames( output, context, h );
 	hashFileName( context, h );
@@ -2120,7 +2110,9 @@ void OpenImageIOReader::hashChannelNames( const GafferImage::ImagePlug *output, 
 	h.append( context->get<std::string>( ImagePlug::viewNameContextName, ImagePlug::defaultViewName ) );
 }
 
-IECore::ConstStringVectorDataPtr OpenImageIOReader::computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr OpenImageIOReader::computeChannelNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	FilePtr file = std::static_pointer_cast<File>( retrieveFile( context ) );
 	if( !file )
@@ -2130,7 +2122,9 @@ IECore::ConstStringVectorDataPtr OpenImageIOReader::computeChannelNames( const G
 	return file->channelNamesData( context );
 }
 
-void OpenImageIOReader::hashDeep( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void OpenImageIOReader::hashDeep(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageNode::hashDeep( output, context, h );
 	hashFileName( context, h );
@@ -2149,7 +2143,9 @@ bool OpenImageIOReader::computeDeep( const Gaffer::Context *context, const Image
 	return file->imageSpec( context ).deep;
 }
 
-void OpenImageIOReader::hashSampleOffsets( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void OpenImageIOReader::hashSampleOffsets(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageNode::hashSampleOffsets( output, context, h );
 
@@ -2165,7 +2161,9 @@ void OpenImageIOReader::hashSampleOffsets( const GafferImage::ImagePlug *output,
 	}
 }
 
-IECore::ConstIntVectorDataPtr OpenImageIOReader::computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstIntVectorDataPtr OpenImageIOReader::computeSampleOffsets(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	ImagePlug::GlobalScope c( context );
 	FilePtr file = std::static_pointer_cast<File>( retrieveFile( context ) );
@@ -2184,8 +2182,8 @@ IECore::ConstIntVectorDataPtr OpenImageIOReader::computeSampleOffsets( const Ima
 			throw IECore::Exception(
 				fmt::format(
 					"OpenImageIOReader : Invalid tile ({},{}) -> ({},{}) not within data window ({},{}) -> ({},{}).",
-					tileBound.min.x, tileBound.min.y, tileBound.max.x, tileBound.max.y,
-					dataWindow.min.x, dataWindow.min.y, dataWindow.max.x, dataWindow.max.y
+					tileBound.min.x, tileBound.min.y, tileBound.max.x, tileBound.max.y, dataWindow.min.x,
+					dataWindow.min.y, dataWindow.max.x, dataWindow.max.y
 				)
 			);
 		}
@@ -2199,12 +2197,15 @@ IECore::ConstIntVectorDataPtr OpenImageIOReader::computeSampleOffsets( const Ima
 
 		ConstObjectVectorPtr tileBatch = tileBatchPlug()->getValue();
 
-		ConstObjectPtr curTileSampleOffsets = IECore::runTimeCast<const ObjectVector>( tileBatch->members()[1] )->members()[subIndex];
+		ConstObjectPtr curTileSampleOffsets =
+			IECore::runTimeCast<const ObjectVector>( tileBatch->members()[1] )->members()[subIndex];
 		return IECore::runTimeCast<const IntVectorData>( curTileSampleOffsets );
 	}
 }
 
-void OpenImageIOReader::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void OpenImageIOReader::hashChannelData(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageNode::hashChannelData( output, context, h );
 	h.append( context->get<V2i>( ImagePlug::tileOriginContextName ) );
@@ -2220,7 +2221,10 @@ void OpenImageIOReader::hashChannelData( const GafferImage::ImagePlug *output, c
 	}
 }
 
-IECore::ConstFloatVectorDataPtr OpenImageIOReader::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr OpenImageIOReader::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	ImagePlug::GlobalScope c( context );
 	FilePtr file = std::static_pointer_cast<File>( retrieveFile( context ) );
@@ -2237,8 +2241,8 @@ IECore::ConstFloatVectorDataPtr OpenImageIOReader::computeChannelData( const std
 		throw IECore::Exception(
 			fmt::format(
 				"OpenImageIOReader : Invalid tile ({},{}) -> ({},{}) not within data window ({},{}) -> ({},{}).",
-				tileBound.min.x, tileBound.min.y, tileBound.max.x, tileBound.max.y,
-				dataWindow.min.x, dataWindow.min.y, dataWindow.max.x, dataWindow.max.y
+				tileBound.min.x, tileBound.min.y, tileBound.max.x, tileBound.max.y, dataWindow.min.x, dataWindow.min.y,
+				dataWindow.max.x, dataWindow.max.y
 			)
 		);
 	}
@@ -2250,10 +2254,8 @@ IECore::ConstFloatVectorDataPtr OpenImageIOReader::computeChannelData( const std
 	c.set( g_tileBatchOriginContextName, &tileBatchOrigin );
 
 	ConstObjectVectorPtr tileBatch = tileBatchPlug()->getValue();
-	ConstObjectPtr curTileChannel = IECore::runTimeCast<const ObjectVector>(
-										tileBatch->members()[0]
-	)
-										->members()[subIndex];
+	ConstObjectPtr curTileChannel =
+		IECore::runTimeCast<const ObjectVector>( tileBatch->members()[0] )->members()[subIndex];
 
 	return IECore::runTimeCast<const FloatVectorData>( curTileChannel );
 }
@@ -2285,7 +2287,8 @@ std::shared_ptr<void> OpenImageIOReader::retrieveFile( const Context *context, b
 		// going to return black pixels
 		mode = Hold;
 	}
-	ImageReader::ChannelInterpretation channelNaming = (ImageReader::ChannelInterpretation)channelInterpretationPlug()->getValue();
+	ImageReader::ChannelInterpretation channelNaming =
+		(ImageReader::ChannelInterpretation)channelInterpretationPlug()->getValue();
 
 	const std::string resolvedFileName = context->substitute( fileName );
 
@@ -2305,7 +2308,8 @@ std::shared_ptr<void> OpenImageIOReader::retrieveFile( const Context *context, b
 			const std::vector<int> &frames = frameData->readable();
 			if( frames.size() )
 			{
-				std::vector<int>::const_iterator fIt = std::lower_bound( frames.begin(), frames.end(), (int)context->getFrame() );
+				std::vector<int>::const_iterator fIt =
+					std::lower_bound( frames.begin(), frames.end(), (int)context->getFrame() );
 
 				// decrement to get the previous frame, unless
 				// this is the first frame, in which case we

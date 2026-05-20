@@ -40,11 +40,6 @@ using namespace Gaffer;
 
 GAFFER_NODE_DEFINE_TYPE( BoxIn )
 
-BoxIn::BoxIn( const std::string &name )
-	: BoxIO( Plug::In, name )
-{
-}
+BoxIn::BoxIn( const std::string &name ) : BoxIO( Plug::In, name ) {}
 
-BoxIn::~BoxIn()
-{
-}
+BoxIn::~BoxIn() {}

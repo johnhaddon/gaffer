@@ -105,7 +105,7 @@ struct MappingData : public IECore::Data
 		return it->second;
 	}
 
-	private:
+private:
 
 	StringVectorDataPtr m_outRenderPassNames;
 
@@ -136,10 +136,9 @@ bool enabled( const BoolPlug *enabledPlug, const Gaffer::Context *context )
 class ShuffleRenderPasses::ProcessedScope : public Context::EditableScope
 {
 
-	public:
+public:
 
-	ProcessedScope( const Context *context, const ShuffleRenderPasses *processor )
-		: EditableScope( context )
+	ProcessedScope( const Context *context, const ShuffleRenderPasses *processor ) : EditableScope( context )
 	{
 		ContextAlgo::GlobalScope globalScope( context, processor->inPlug() );
 		if( processor->enabledPlug()->getValue() )
@@ -148,7 +147,7 @@ class ShuffleRenderPasses::ProcessedScope : public Context::EditableScope
 		}
 	}
 
-	private:
+private:
 
 	IECore::ConstRefCountedPtr m_storage;
 };
@@ -162,8 +161,7 @@ const std::string g_renderPassContextName = "renderPass";
 
 size_t ShuffleRenderPasses::g_firstPlugIndex = 0;
 
-ShuffleRenderPasses::ShuffleRenderPasses( const std::string &name )
-	: ContextProcessor( name )
+ShuffleRenderPasses::ShuffleRenderPasses( const std::string &name ) : ContextProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ShufflesPlug( "shuffles" ) );
@@ -173,9 +171,7 @@ ShuffleRenderPasses::ShuffleRenderPasses( const std::string &name )
 	setup( new ScenePlug() );
 }
 
-ShuffleRenderPasses::~ShuffleRenderPasses()
-{
-}
+ShuffleRenderPasses::~ShuffleRenderPasses() {}
 
 GafferScene::ScenePlug *ShuffleRenderPasses::inPlug()
 {
@@ -288,9 +284,7 @@ void ShuffleRenderPasses::compute( ValuePlug *output, const Context *context ) c
 	}
 	else if( output == outPlug()->globalsPlug() && enabled( enabledPlug(), context ) )
 	{
-		static_cast<CompoundObjectPlug *>( output )->setValue(
-			computeGlobals( context, outPlug() )
-		);
+		static_cast<CompoundObjectPlug *>( output )->setValue( computeGlobals( context, outPlug() ) );
 		return;
 	}
 
@@ -302,7 +296,9 @@ bool ShuffleRenderPasses::affectsContext( const Gaffer::Plug *input ) const
 	return input == sourceNamePlug();
 }
 
-void ShuffleRenderPasses::processContext( Gaffer::Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const
+void ShuffleRenderPasses::processContext(
+	Gaffer::Context::EditableScope &context, IECore::ConstRefCountedPtr &storage
+) const
 {
 	const auto currentRenderPass = context.context()->get<string>( g_renderPassContextName, "" );
 	if( currentRenderPass != "" )
@@ -317,7 +313,9 @@ void ShuffleRenderPasses::processContext( Gaffer::Context::EditableScope &contex
 	}
 }
 
-void ShuffleRenderPasses::hashGlobals( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void ShuffleRenderPasses::hashGlobals(
+	const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	ComputeNode::hash( outPlug()->globalsPlug(), context, h );
 	ProcessedScope processedScope( context, this );
@@ -325,11 +323,14 @@ void ShuffleRenderPasses::hashGlobals( const Gaffer::Context *context, const Sce
 	shufflesPlug()->hash( h );
 }
 
-IECore::ConstCompoundObjectPtr ShuffleRenderPasses::computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstCompoundObjectPtr ShuffleRenderPasses::computeGlobals(
+	const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ProcessedScope processedScope( context, this );
 	IECore::ConstCompoundObjectPtr inputGlobals = inPlug()->globalsPlug()->getValue();
-	if( shufflesPlug()->children().empty() || inputGlobals->members().empty() || !inputGlobals->members().count( g_renderPassNamesOptionName ) )
+	if( shufflesPlug()->children().empty() || inputGlobals->members().empty() ||
+		!inputGlobals->members().count( g_renderPassNamesOptionName ) )
 	{
 		return inputGlobals;
 	}
@@ -338,7 +339,8 @@ IECore::ConstCompoundObjectPtr ShuffleRenderPasses::computeGlobals( const Gaffer
 	result->members() = inputGlobals->members();
 
 	auto mapping = boost::static_pointer_cast<const MappingData>( mappingPlug()->getValue() );
-	result->members()[g_renderPassNamesOptionName] = const_cast<IECore::StringVectorData *>( mapping->outRenderPassNames() );
+	result->members()[g_renderPassNamesOptionName] =
+		const_cast<IECore::StringVectorData *>( mapping->outRenderPassNames() );
 
 	return result;
 }

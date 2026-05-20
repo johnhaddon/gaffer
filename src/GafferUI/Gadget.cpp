@@ -103,13 +103,17 @@ struct Gadget::MemberSignals : boost::noncopyable
 };
 
 Gadget::Gadget( const std::string &name )
-	: GraphComponent( name ), m_style( nullptr ), m_visible( true ), m_enabled( true ), m_highlighted( false ), m_layoutDirty( false ), m_toolTip( "" )
+	: GraphComponent( name ),
+	  m_style( nullptr ),
+	  m_visible( true ),
+	  m_enabled( true ),
+	  m_highlighted( false ),
+	  m_layoutDirty( false ),
+	  m_toolTip( "" )
 {
 }
 
-Gadget::~Gadget()
-{
-}
+Gadget::~Gadget() {}
 
 bool Gadget::acceptsChild( const Gaffer::GraphComponent *potentialChild ) const
 {
@@ -129,7 +133,9 @@ void Gadget::setStyle( ConstStylePtr style )
 		m_style = style;
 		if( m_style )
 		{
-			m_styleChangedConnection = const_cast<Style *>( style.get() )->changedSignal().connect( boost::bind( &Gadget::styleChanged, this ) );
+			m_styleChangedConnection = const_cast<Style *>( style.get() )
+										   ->changedSignal()
+										   .connect( boost::bind( &Gadget::styleChanged, this ) );
 		}
 		// Style affects the bounding box of text,
 		// so we need Layout rather than just Render.
@@ -312,13 +318,9 @@ void Gadget::dirty( DirtyType dirtyType )
 	}
 }
 
-void Gadget::updateLayout() const
-{
-}
+void Gadget::updateLayout() const {}
 
-void Gadget::renderLayer( Layer layer, const Style *style, RenderReason reason ) const
-{
-}
+void Gadget::renderLayer( Layer layer, const Style *style, RenderReason reason ) const {}
 
 unsigned Gadget::layerMask() const
 {

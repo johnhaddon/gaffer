@@ -65,8 +65,7 @@ GAFFER_NODE_DEFINE_TYPE( ScaleTool );
 
 ScaleTool::ToolDescription<ScaleTool, SceneView> ScaleTool::g_toolDescription;
 
-ScaleTool::ScaleTool( SceneView *view, const std::string &name )
-	: TransformTool( view, name )
+ScaleTool::ScaleTool( SceneView *view, const std::string &name ) : TransformTool( view, name )
 {
 	static Style::Axes axes[] = { Style::X, Style::Y, Style::Z, Style::XY, Style::XZ, Style::YZ, Style::XYZ };
 	static const char *handleNames[] = { "x", "y", "z", "xy", "xz", "yz", "xyz" };
@@ -83,9 +82,7 @@ ScaleTool::ScaleTool( SceneView *view, const std::string &name )
 	}
 }
 
-ScaleTool::~ScaleTool()
-{
-}
+ScaleTool::~ScaleTool() {}
 
 bool ScaleTool::affectsHandles( const Gaffer::Plug *input ) const
 {
@@ -99,9 +96,7 @@ bool ScaleTool::affectsHandles( const Gaffer::Plug *input ) const
 
 void ScaleTool::updateHandles( float rasterScale )
 {
-	handles()->setTransform(
-		this->selection().back().orientedTransform( Local )
-	);
+	handles()->setTransform( this->selection().back().orientedTransform( Local ) );
 
 	for( ScaleHandle::Iterator it( handles() ); !it.done(); ++it )
 	{
@@ -160,10 +155,7 @@ bool ScaleTool::dragEnd()
 // ScaleTool::Scale
 //////////////////////////////////////////////////////////////////////////
 
-ScaleTool::Scale::Scale( const Selection &selection )
-	: m_selection( selection )
-{
-}
+ScaleTool::Scale::Scale( const Selection &selection ) : m_selection( selection ) {}
 
 bool ScaleTool::Scale::canApply( const Imath::V3i &axisMask ) const
 {

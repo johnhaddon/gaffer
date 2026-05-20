@@ -161,7 +161,10 @@ tuple objectAndIntersectionAt( SceneGadget &g, IECore::LineSegment3f &l )
 	return boost::python::make_tuple( result, hitPos );
 }
 
-size_t objectsAt( SceneGadget &g, const Imath::V3f &corner0InGadgetSpace, const Imath::V3f &corner1InGadgetSpace, IECore::PathMatcher &paths )
+size_t objectsAt(
+	SceneGadget &g, const Imath::V3f &corner0InGadgetSpace, const Imath::V3f &corner1InGadgetSpace,
+	IECore::PathMatcher &paths
+)
 {
 	ScopedGILRelease gilRelease;
 	return g.objectsAt( corner0InGadgetSpace, corner1InGadgetSpace, paths );
@@ -190,7 +193,10 @@ Imath::Box3f bound( SceneGadget &g, bool selected, const IECore::PathMatcher *om
 	return g.bound( selected, omitted );
 }
 
-void snapshotToFile( SceneGadget &g, const std::filesystem::path &fileName, const Imath::Box2f &resolutionGate, const IECore::CompoundData *metadata )
+void snapshotToFile(
+	SceneGadget &g, const std::filesystem::path &fileName, const Imath::Box2f &resolutionGate,
+	const IECore::CompoundData *metadata
+)
 {
 	ScopedGILRelease gilRelease;
 	g.snapshotToFile( fileName, resolutionGate, metadata );
@@ -206,7 +212,10 @@ void GafferSceneUIModule::bindSceneGadget()
 				  .def( "setScene", &setScene )
 				  .def( "getScene", &getScene )
 				  .def( "setContext", &setContext )
-				  .def( "getContext", ( Gaffer::Context * (SceneGadget::*)() ) & SceneGadget::getContext, return_value_policy<CastToIntrusivePtr>() )
+				  .def(
+					  "getContext", ( Gaffer::Context * (SceneGadget::*)() ) & SceneGadget::getContext,
+					  return_value_policy<CastToIntrusivePtr>()
+				  )
 				  .def( "setVisibleSet", &setVisibleSet )
 				  .def( "getVisibleSet", &SceneGadget::getVisibleSet, return_value_policy<copy_const_reference>() )
 				  .def( "setMinimumExpansionDepth", &setMinimumExpansionDepth )
@@ -233,8 +242,7 @@ void GafferSceneUIModule::bindSceneGadget()
 				  .def( "selectionBound", &selectionBound )
 				  .def( "bound", &bound, ( arg( "selected" ), arg( "omitted" ) = object() ) )
 				  .def(
-					  "snapshotToFile",
-					  &snapshotToFile,
+					  "snapshotToFile", &snapshotToFile,
 					  ( arg( "fileName" ), arg( "resolutionGate" ) = Imath::Box2f(), arg( "metadata" ) = object() )
 				  );
 
@@ -243,5 +251,8 @@ void GafferSceneUIModule::bindSceneGadget()
 		.value( "Running", SceneGadget::Running )
 		.value( "Complete", SceneGadget::Complete );
 
-	SignalClass<SceneGadget::SceneGadgetSignal, DefaultSignalCaller<SceneGadget::SceneGadgetSignal>, SceneGadgetSlotCaller>( "ImageGadgetSignal" );
+	SignalClass<
+		SceneGadget::SceneGadgetSignal, DefaultSignalCaller<SceneGadget::SceneGadgetSignal>, SceneGadgetSlotCaller>(
+		"ImageGadgetSignal"
+	);
 }

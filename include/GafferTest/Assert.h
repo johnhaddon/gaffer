@@ -46,9 +46,7 @@ namespace GafferTest
 #define GAFFERTEST_ASSERT( x ) \
 	if( !( x ) ) \
 	{ \
-		throw IECore::Exception( \
-			fmt::format( "Failed assertion \"{}\" : {} line {}", #x, __FILE__, __LINE__ ) \
-		); \
+		throw IECore::Exception( fmt::format( "Failed assertion \"{}\" : {} line {}", #x, __FILE__, __LINE__ ) ); \
 	}
 
 #define GAFFERTEST_ASSERTEQUAL( x, y ) \

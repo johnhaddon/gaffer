@@ -43,7 +43,10 @@ using namespace Imath;
 using namespace Gaffer;
 using namespace GafferImage;
 
-DeepPixelAccessor::DeepPixelAccessor( const GafferImage::ImagePlug *plug, const std::string &channelName, const Imath::Box2i &sampleWindow, Sampler::BoundingMode boundingMode )
+DeepPixelAccessor::DeepPixelAccessor(
+	const GafferImage::ImagePlug *plug, const std::string &channelName, const Imath::Box2i &sampleWindow,
+	Sampler::BoundingMode boundingMode
+)
 	: m_plug( plug ),
 	  m_channelName( channelName ),
 	  m_boundingMode( boundingMode )
@@ -105,7 +108,8 @@ DeepPixelAccessor::DeepPixelAccessor( const GafferImage::ImagePlug *plug, const 
 	}
 	m_offsetsCache.resize( m_cacheWidth * cacheHeight, nullptr );
 
-	m_cacheOriginIndex = ( m_cacheWindow.min.x >> ImagePlug::tileSizeLog2() ) + m_cacheWidth * ( m_cacheWindow.min.y >> ImagePlug::tileSizeLog2() );
+	m_cacheOriginIndex = ( m_cacheWindow.min.x >> ImagePlug::tileSizeLog2() ) +
+		m_cacheWidth * ( m_cacheWindow.min.y >> ImagePlug::tileSizeLog2() );
 }
 
 DeepPixelAccessor::DeepPixelAccessor( const DeepPixelAccessor &source, const std::string &channelName )

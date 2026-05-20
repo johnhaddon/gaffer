@@ -58,12 +58,15 @@ namespace Gaffer
 class GAFFER_API FileSystemPath : public Path
 {
 
-	public:
+public:
 
 	explicit FileSystemPath( PathFilterPtr filter = nullptr, bool includeSequences = false );
 	FileSystemPath( const std::string &path, PathFilterPtr filter = nullptr, bool includeSequences = false );
 	FileSystemPath( const std::filesystem::path &path, PathFilterPtr filter = nullptr, bool includeSequences = false );
-	FileSystemPath( const Names &names, const IECore::InternedString &root = "/", PathFilterPtr filter = nullptr, bool includeSequences = false );
+	FileSystemPath(
+		const Names &names, const IECore::InternedString &root = "/", PathFilterPtr filter = nullptr,
+		bool includeSequences = false
+	);
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::FileSystemPath, FileSystemPathTypeId, Path );
 
@@ -71,7 +74,9 @@ class GAFFER_API FileSystemPath : public Path
 
 	bool isValid( const IECore::Canceller *canceller = nullptr ) const override;
 	bool isLeaf( const IECore::Canceller *canceller = nullptr ) const override;
-	void propertyNames( std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr ) const override;
+	void propertyNames(
+		std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr
+	) const override;
 	/// Supported properties :
 	///
 	/// "fileSystem:owner" -> StringData
@@ -79,7 +84,9 @@ class GAFFER_API FileSystemPath : public Path
 	/// "fileSystem:modificationTime" -> DateTimeData, in UTC time
 	/// "fileSystem:size" -> UInt64Data, in bytes
 	/// "fileSystem:frameRange" -> StringData
-	IECore::ConstRunTimeTypedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override;
+	IECore::ConstRunTimeTypedPtr property(
+		const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr
+	) const override;
 	PathPtr copy() const override;
 
 	// Returns true if this FileSystemPath includes FileSequences
@@ -98,13 +105,16 @@ class GAFFER_API FileSystemPath : public Path
 
 	std::filesystem::path standardPath() const;
 
-	static PathFilterPtr createStandardFilter( const std::vector<std::string> &extensions = std::vector<std::string>(), const std::string &extensionsLabel = "", bool includeSequenceFilter = false );
+	static PathFilterPtr createStandardFilter(
+		const std::vector<std::string> &extensions = std::vector<std::string>(),
+		const std::string &extensionsLabel = "", bool includeSequenceFilter = false
+	);
 
-	protected:
+protected:
 
 	void doChildren( std::vector<PathPtr> &children, const IECore::Canceller *canceller ) const override;
 
-	private:
+private:
 
 #ifdef _MSC_VER
 

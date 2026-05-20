@@ -113,7 +113,9 @@ bool ParallelAlgo::canCallOnUIThread()
 	return handlers->size();
 }
 
-GAFFER_API std::unique_ptr<BackgroundTask> ParallelAlgo::callOnBackgroundThread( const Plug *subject, BackgroundFunction function )
+GAFFER_API std::unique_ptr<BackgroundTask> ParallelAlgo::callOnBackgroundThread(
+	const Plug *subject, BackgroundFunction function
+)
 {
 	ContextPtr backgroundContext = new Context( *Context::current() );
 	Monitor::MonitorSet backgroundMonitors = Monitor::current();

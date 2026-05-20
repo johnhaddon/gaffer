@@ -76,16 +76,12 @@ float divRoundDown( int a, int b )
 	// PRMan performs the multiplication by resolution, the resolution is also an integer less
 	// than 16 million. )
 
-	return nextafterf(
-		float( a ) / float( b ),
-		-std::numeric_limits<float>::infinity()
-	);
+	return nextafterf( float( a ) / float( b ), -std::numeric_limits<float>::infinity() );
 }
 
 } // namespace
 
-Camera::Camera( const std::string &name, const IECoreScene::Camera *camera, Session *session )
-	: m_session( session )
+Camera::Camera( const std::string &name, const IECoreScene::Camera *camera, Session *session ) : m_session( session )
 {
 	// Parameters
 
@@ -111,7 +107,9 @@ Camera::Camera( const std::string &name, const IECoreScene::Camera *camera, Sess
 		{
 			projectionParamList.SetFloat( Loader::strings().k_focalDistance, camera->getFocusDistance() );
 			projectionParamList.SetFloat( Loader::strings().k_fStop, camera->getFStop() );
-			projectionParamList.SetFloat( Loader::strings().k_focalLength, camera->getFocalLength() * camera->getFocalLengthWorldScale() );
+			projectionParamList.SetFloat(
+				Loader::strings().k_focalLength, camera->getFocalLength() * camera->getFocalLengthWorldScale()
+			);
 		}
 	}
 	else if( projection == "orthographic" )
@@ -132,8 +130,7 @@ Camera::Camera( const std::string &name, const IECoreScene::Camera *camera, Sess
 		if( boost::starts_with( parameterName.c_str(), "ri:" ) )
 		{
 			const RtUString parameterNameU( parameterName.c_str() + 3 );
-			if(
-				parameterNameU == Loader::strings().k_apertureAngle ||
+			if( parameterNameU == Loader::strings().k_apertureAngle ||
 				parameterNameU == Loader::strings().k_apertureDensity ||
 				parameterNameU == Loader::strings().k_apertureNSides ||
 				parameterNameU == Loader::strings().k_apertureRoundness ||
@@ -142,28 +139,29 @@ Camera::Camera( const std::string &name, const IECoreScene::Camera *camera, Sess
 				parameterNameU == Loader::strings().k_shutterOpenTime ||
 				parameterNameU == Loader::strings().k_shutteropening ||
 				parameterNameU == Loader::strings().k_stereoplanedepths ||
-				parameterNameU == Loader::strings().k_stereoplaneoffsets
-			)
+				parameterNameU == Loader::strings().k_stereoplaneoffsets )
 			{
 				// Presumably for the usual historical reasons, some parameters
 				// are considered to be features of the camera. We derived this
 				// list from `$RMANTREE/lib/defaults/PRManCamera.args`.
-				ParamListAlgo::convertParameter( RtUString( parameterName.c_str() + 3 ), parameterValue.get(), cameraParamList );
+				ParamListAlgo::convertParameter(
+					RtUString( parameterName.c_str() + 3 ), parameterValue.get(), cameraParamList
+				);
 			}
 			else
 			{
 				// And some are considered to be features of the projection plugin.
-				ParamListAlgo::convertParameter( RtUString( parameterName.c_str() + 3 ), parameterValue.get(), projectionParamList );
+				ParamListAlgo::convertParameter(
+					RtUString( parameterName.c_str() + 3 ), parameterValue.get(), projectionParamList
+				);
 			}
 		}
 	}
 
-	riley::ShadingNode projectionShader = {
-		/* type = */ riley::ShadingNode::Type::k_Projection,
-		/* name = */ projectionShaderName,
-		/* handle = */ g_projectionHandle,
-		/* params = */ projectionParamList
-	};
+	riley::ShadingNode projectionShader = { /* type = */ riley::ShadingNode::Type::k_Projection,
+											/* name = */ projectionShaderName,
+											/* handle = */ g_projectionHandle,
+											/* params = */ projectionParamList };
 
 	// Options. We specify things like format and crop on `IECoreScene::Camera`
 	// objects, but RenderMan wants them to be specified as options. We figure
@@ -176,22 +174,16 @@ Camera::Camera( const std::string &name, const IECoreScene::Camera *camera, Sess
 	options.SetFloat( Loader::strings().k_Ri_FormatPixelAspectRatio, camera->getPixelAspectRatio() );
 
 	Imath::Box2i renderRegion = camera->renderRegion();
-	float renderManCropWindow[4] = {
-		divRoundDown( renderRegion.min.x, resolution.x ),
-		divRoundDown( renderRegion.max.x, resolution.x ),
-		divRoundDown( resolution.y - renderRegion.min.y, resolution.y ),
-		divRoundDown( resolution.y - renderRegion.max.y, resolution.y )
-	};
+	float renderManCropWindow[4] = { divRoundDown( renderRegion.min.x, resolution.x ),
+									 divRoundDown( renderRegion.max.x, resolution.x ),
+									 divRoundDown( resolution.y - renderRegion.min.y, resolution.y ),
+									 divRoundDown( resolution.y - renderRegion.max.y, resolution.y ) };
 	options.SetFloatArray( Loader::strings().k_Ri_CropWindow, renderManCropWindow, 4 );
 
 	// Camera
 
 	m_cameraId = m_session->createCamera(
-		RtUString( name.c_str() ),
-		projectionShader,
-		IdentityTransform(),
-		cameraParamList,
-		options
+		RtUString( name.c_str() ), projectionShader, IdentityTransform(), cameraParamList, options
 	);
 }
 
@@ -206,7 +198,10 @@ Camera::~Camera()
 	}
 }
 
-void Camera::transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times )
+void Camera::transform(
+	const IECoreScenePreview::Renderer::TransformSamples &samples,
+	const IECoreScenePreview::Renderer::SampleTimes &times
+)
 {
 	IECoreScenePreview::Renderer::TransformSamples processedSamples = samples;
 	for( auto &m : processedSamples )
@@ -216,12 +211,7 @@ void Camera::transform( const IECoreScenePreview::Renderer::TransformSamples &sa
 
 	AnimatedTransform transform( processedSamples, times );
 
-	const auto result = m_session->riley->ModifyCamera(
-		m_cameraId,
-		nullptr,
-		&transform,
-		nullptr
-	);
+	const auto result = m_session->riley->ModifyCamera( m_cameraId, nullptr, &transform, nullptr );
 
 	if( result != riley::CameraResult::k_Success )
 	{
@@ -238,10 +228,6 @@ void Camera::link( const IECore::InternedString &type, const IECoreScenePreview:
 {
 }
 
-void Camera::assignID( uint32_t id )
-{
-}
+void Camera::assignID( uint32_t id ) {}
 
-void Camera::assignInstanceID( uint32_t id )
-{
-}
+void Camera::assignInstanceID( uint32_t id ) {}

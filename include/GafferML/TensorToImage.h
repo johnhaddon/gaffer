@@ -47,7 +47,7 @@ namespace GafferML
 class GAFFERML_API TensorToImage : public GafferImage::FlatImageSource
 {
 
-	public:
+public:
 
 	explicit TensorToImage( const std::string &name = defaultName<TensorToImage>() );
 	~TensorToImage() override;
@@ -65,22 +65,43 @@ class GAFFERML_API TensorToImage : public GafferImage::FlatImageSource
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
-	void hashMetadata( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	IECore::ConstCompoundDataPtr computeMetadata( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
+	void hashMetadata(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstCompoundDataPtr computeMetadata(
+		const Gaffer::Context *context, const GafferImage::ImagePlug *parent
+	) const override;
 
-	void hashFormat( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	GafferImage::Format computeFormat( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
+	void hashFormat(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	GafferImage::Format computeFormat(
+		const Gaffer::Context *context, const GafferImage::ImagePlug *parent
+	) const override;
 
-	void hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	Imath::Box2i computeDataWindow( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
+	void hashDataWindow(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	Imath::Box2i computeDataWindow(
+		const Gaffer::Context *context, const GafferImage::ImagePlug *parent
+	) const override;
 
-	void hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
+	void hashChannelNames(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstStringVectorDataPtr computeChannelNames(
+		const Gaffer::Context *context, const GafferImage::ImagePlug *parent
+	) const override;
 
-	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
+	void hashChannelData(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData(
+		const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+		const GafferImage::ImagePlug *parent
+	) const override;
 
 	static size_t g_firstPlugIndex;
 };

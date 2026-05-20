@@ -53,7 +53,8 @@ namespace
 
 struct ColorProcessorData : public IECore::Data
 {
-	using ColorProcessorFunction = std::function<void( IECore::FloatVectorData *r, IECore::FloatVectorData *g, IECore::FloatVectorData *b )>;
+	using ColorProcessorFunction =
+		std::function<void( IECore::FloatVectorData *r, IECore::FloatVectorData *g, IECore::FloatVectorData *b )>;
 	ColorProcessorFunction colorProcessor;
 };
 
@@ -67,29 +68,16 @@ GAFFER_NODE_DEFINE_TYPE( ColorProcessor );
 
 size_t ColorProcessor::g_firstPlugIndex = 0;
 
-ColorProcessor::ColorProcessor( const std::string &name )
-	: ImageProcessor( name )
+ColorProcessor::ColorProcessor( const std::string &name ) : ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
 	addChild( new StringPlug( "channels", Plug::In, "[RGB]" ) );
 	addChild( new BoolPlug( "processUnpremultiplied", Plug::In, false ) );
 
-	addChild(
-		new ObjectPlug(
-			"__colorProcessor",
-			Gaffer::Plug::Out,
-			NullObject::defaultNullObject()
-		)
-	);
+	addChild( new ObjectPlug( "__colorProcessor", Gaffer::Plug::Out, NullObject::defaultNullObject() ) );
 
-	addChild(
-		new ObjectPlug(
-			"__colorData",
-			Gaffer::Plug::Out,
-			new ObjectVector
-		)
-	);
+	addChild( new ObjectPlug( "__colorData", Gaffer::Plug::Out, new ObjectVector ) );
 
 	// We don't ever want to change the these, so we make pass-through connections.
 	outPlug()->formatPlug()->setInput( inPlug()->formatPlug() );
@@ -101,9 +89,7 @@ ColorProcessor::ColorProcessor( const std::string &name )
 	outPlug()->viewNamesPlug()->setInput( inPlug()->viewNamesPlug() );
 }
 
-ColorProcessor::~ColorProcessor()
-{
-}
+ColorProcessor::~ColorProcessor() {}
 
 Gaffer::StringPlug *ColorProcessor::channelsPlug()
 {
@@ -154,27 +140,21 @@ void ColorProcessor::affects( const Gaffer::Plug *input, AffectedPlugsContainer 
 		outputs.push_back( colorProcessorPlug() );
 	}
 
-	if(
-		input == inPlug()->channelDataPlug() ||
-		input == inPlug()->channelNamesPlug() ||
-		input == processUnpremultipliedPlug() ||
-		input == colorProcessorPlug()
-	)
+	if( input == inPlug()->channelDataPlug() || input == inPlug()->channelNamesPlug() ||
+		input == processUnpremultipliedPlug() || input == colorProcessorPlug() )
 	{
 		outputs.push_back( colorDataPlug() );
 	}
 
-	if(
-		input == colorProcessorPlug() ||
-		input == channelsPlug() ||
-		input == colorDataPlug()
-	)
+	if( input == colorProcessorPlug() || input == channelsPlug() || input == colorDataPlug() )
 	{
 		outputs.push_back( outPlug()->channelDataPlug() );
 	}
 }
 
-void ColorProcessor::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ColorProcessor::hash(
+	const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hash( output, context, h );
 
@@ -237,7 +217,8 @@ void ColorProcessor::compute( Gaffer::ValuePlug *output, const Gaffer::Context *
 			ImagePlug::GlobalScope globalScope( context );
 			channelNamesData = inPlug()->channelNamesPlug()->getValue();
 			unpremult = processUnpremultipliedPlug()->getValue();
-			colorProcessorData = boost::static_pointer_cast<const ColorProcessorData>( colorProcessorPlug()->getValue() );
+			colorProcessorData =
+				boost::static_pointer_cast<const ColorProcessorData>( colorProcessorPlug()->getValue() );
 		}
 		const vector<string> &channelNames = channelNamesData->readable();
 
@@ -351,7 +332,9 @@ Gaffer::ValuePlug::CachePolicy ColorProcessor::computeCachePolicy( const Gaffer:
 	return ImageProcessor::computeCachePolicy( output );
 }
 
-void ColorProcessor::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ColorProcessor::hashChannelData(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	std::string channels;
 	ConstColorProcessorDataPtr colorProcessorData;
@@ -371,10 +354,7 @@ void ColorProcessor::hashChannelData( const GafferImage::ImagePlug *output, cons
 	const std::string &channel = context->get<std::string>( ImagePlug::channelNameContextName );
 	const std::string &baseName = ImageAlgo::baseName( channel );
 
-	if(
-		( baseName != "R" && baseName != "G" && baseName != "B" ) ||
-		!StringAlgo::matchMultiple( channel, channels )
-	)
+	if( ( baseName != "R" && baseName != "G" && baseName != "B" ) || !StringAlgo::matchMultiple( channel, channels ) )
 	{
 		// Auxiliary channel, or not in channel mask. Pass through.
 		h = inPlug()->channelDataPlug()->hash();
@@ -391,7 +371,10 @@ void ColorProcessor::hashChannelData( const GafferImage::ImagePlug *output, cons
 	}
 }
 
-IECore::ConstFloatVectorDataPtr ColorProcessor::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr ColorProcessor::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	std::string channels;
 	ConstColorProcessorDataPtr colorProcessorData;
@@ -410,10 +393,7 @@ IECore::ConstFloatVectorDataPtr ColorProcessor::computeChannelData( const std::s
 	const std::string &channel = context->get<std::string>( ImagePlug::channelNameContextName );
 	const std::string &baseName = ImageAlgo::baseName( channel );
 
-	if(
-		( baseName != "R" && baseName != "G" && baseName != "B" ) ||
-		!StringAlgo::matchMultiple( channel, channels )
-	)
+	if( ( baseName != "R" && baseName != "G" && baseName != "B" ) || !StringAlgo::matchMultiple( channel, channels ) )
 	{
 		// Auxiliary channel, or not in channel mask. Pass through.
 		return inPlug()->channelDataPlug()->getValue();

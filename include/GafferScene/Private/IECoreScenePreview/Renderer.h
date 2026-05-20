@@ -75,7 +75,7 @@ namespace IECoreScenePreview
 class GAFFERSCENE_API Renderer : public IECore::RefCounted
 {
 
-	public:
+public:
 
 	enum GAFFERSCENE_API RenderType
 	{
@@ -97,7 +97,10 @@ class GAFFERSCENE_API Renderer : public IECore::RefCounted
 	/// passed to this handler. Message contexts can be left blank if no applicable information is available.
 	/// The renderer must scope the supplied handler before calling out to other code that makes use of static
 	/// IECore::msg logging.
-	static Ptr create( const IECore::InternedString &type, RenderType renderType = Batch, const std::string &fileName = "", const IECore::MessageHandlerPtr &messageHandler = IECore::MessageHandlerPtr() );
+	static Ptr create(
+		const IECore::InternedString &type, RenderType renderType = Batch, const std::string &fileName = "",
+		const IECore::MessageHandlerPtr &messageHandler = IECore::MessageHandlerPtr()
+	);
 
 	/// Returns the name of this renderer, for instance "OpenGL" or "Arnold".
 	virtual IECore::InternedString name() const = 0;
@@ -124,11 +127,11 @@ class GAFFERSCENE_API Renderer : public IECore::RefCounted
 	class GAFFERSCENE_API AttributesInterface : public IECore::RefCounted
 	{
 
-		public:
+	public:
 
 		IE_CORE_DECLAREMEMBERPTR( AttributesInterface );
 
-		protected:
+	protected:
 
 		~AttributesInterface() override;
 	};
@@ -196,7 +199,7 @@ class GAFFERSCENE_API Renderer : public IECore::RefCounted
 	class GAFFERSCENE_API ObjectInterface : public IECore::RefCounted
 	{
 
-		public:
+	public:
 
 		IE_CORE_DECLAREMEMBERPTR( ObjectInterface )
 
@@ -228,7 +231,7 @@ class GAFFERSCENE_API Renderer : public IECore::RefCounted
 
 		virtual void assignInstanceID( uint32_t id ) = 0;
 
-		protected:
+	protected:
 
 		~ObjectInterface() override;
 	};
@@ -280,24 +283,39 @@ class GAFFERSCENE_API Renderer : public IECore::RefCounted
 	/// times passed to motionBegin() to specify motion blur. Defaults to 0,0 if unspecified.
 	///
 	/// May return a nullptr if the camera definition is not supported by the renderer.
-	virtual ObjectInterfacePtr camera( const std::string &name, const CameraSamples &samples, const SampleTimes &times, const AttributesInterface *attributes = nullptr ) = 0;
+	virtual ObjectInterfacePtr camera(
+		const std::string &name, const CameraSamples &samples, const SampleTimes &times,
+		const AttributesInterface *attributes = nullptr
+	) = 0;
 	/// Convenience wrapper for the above when there is only a single sample.
-	ObjectInterfacePtr camera( const std::string &name, const IECoreScene::Camera *camera, const AttributesInterface *attributes = nullptr );
+	ObjectInterfacePtr camera(
+		const std::string &name, const IECoreScene::Camera *camera, const AttributesInterface *attributes = nullptr
+	);
 
 	/// Adds a named light with the initially supplied set of attributes, which are expected
 	/// to provide at least a light shader. Object samples may be non-empty to specify arbitrary geometry
 	/// for a geometric area light, or empty to indicate that the light shader specifies its own
 	/// geometry internally (or is non-geometric in nature).
 	/// May return a nullptr if the light definition is not supported by the renderer.
-	virtual ObjectInterfacePtr light( const std::string &name, const ObjectSamples &objectSamples, const SampleTimes &times, const AttributesInterface *attributes ) = 0;
+	virtual ObjectInterfacePtr light(
+		const std::string &name, const ObjectSamples &objectSamples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) = 0;
 	/// Convenience wrapper for the above when there is only a single sample.
-	ObjectInterfacePtr light( const std::string &name, const IECore::Object *object, const AttributesInterface *attributes );
+	ObjectInterfacePtr light(
+		const std::string &name, const IECore::Object *object, const AttributesInterface *attributes
+	);
 
 	/// Adds a named light filter with the initially supplied set of attributes, which are expected
 	/// to provide at least a light filter shader.
 	/// May return a nullptr if the light filter definition is not supported by the renderer.
-	virtual ObjectInterfacePtr lightFilter( const std::string &name, const ObjectSamples &objectSamples, const SampleTimes &times, const AttributesInterface *attributes ) = 0;
-	ObjectInterfacePtr lightFilter( const std::string &name, const IECore::Object *object, const AttributesInterface *attributes );
+	virtual ObjectInterfacePtr lightFilter(
+		const std::string &name, const ObjectSamples &objectSamples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) = 0;
+	ObjectInterfacePtr lightFilter(
+		const std::string &name, const IECore::Object *object, const AttributesInterface *attributes
+	);
 
 	/// Adds a named object to the render with the initally supplied set of attributes.
 	/// The attributes may subsequently be edited in interactive mode using
@@ -306,9 +324,14 @@ class GAFFERSCENE_API Renderer : public IECore::RefCounted
 	/// \todo Rejig class hierarchy so we can have something less generic than
 	/// Object here, but still pass CoordinateSystems. Or should
 	/// coordinate systems have their own dedicated calls?
-	virtual ObjectInterfacePtr object( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) = 0;
+	virtual ObjectInterfacePtr object(
+		const std::string &name, const ObjectSamples &samples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) = 0;
 	/// Convenience overload for when there is only a single object sample.
-	ObjectInterfacePtr object( const std::string &name, const IECore::Object *object, const AttributesInterface *attributes );
+	ObjectInterfacePtr object(
+		const std::string &name, const IECore::Object *object, const AttributesInterface *attributes
+	);
 
 	/// Performs the render - should be called after the
 	/// entire scene has been specified using the methods
@@ -323,13 +346,15 @@ class GAFFERSCENE_API Renderer : public IECore::RefCounted
 	virtual void pause() = 0;
 
 	/// Performs an arbitrary renderer-specific action.
-	virtual IECore::DataPtr command( const IECore::InternedString name, const IECore::CompoundDataMap &parameters = IECore::CompoundDataMap() );
+	virtual IECore::DataPtr command(
+		const IECore::InternedString name, const IECore::CompoundDataMap &parameters = IECore::CompoundDataMap()
+	);
 
 	using Creator = std::function<Ptr( RenderType, const std::string &, const IECore::MessageHandlerPtr & )>;
 	static void registerType( const IECore::InternedString &typeName, Creator creator );
 	static void deregisterType( const IECore::InternedString &typeName );
 
-	protected:
+protected:
 
 	Renderer();
 	~Renderer() override;
@@ -341,14 +366,13 @@ class GAFFERSCENE_API Renderer : public IECore::RefCounted
 	{
 
 		/// \todo Take the type name from RunTimeTyped::staticTypeId().
-		TypeDescription( const IECore::InternedString &typeName )
-		{
-			registerType( typeName, creator );
-		}
+		TypeDescription( const IECore::InternedString &typeName ) { registerType( typeName, creator ); }
 
-		private:
+	private:
 
-		static Ptr creator( RenderType renderType, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler )
+		static Ptr creator(
+			RenderType renderType, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler
+		)
 		{
 			return new T( renderType, fileName, messageHandler );
 		}

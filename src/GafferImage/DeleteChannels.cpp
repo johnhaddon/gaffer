@@ -49,8 +49,7 @@ GAFFER_NODE_DEFINE_TYPE( DeleteChannels );
 
 size_t DeleteChannels::g_firstPlugIndex = 0;
 
-DeleteChannels::DeleteChannels( const std::string &name )
-	: ImageProcessor( name )
+DeleteChannels::DeleteChannels( const std::string &name ) : ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -69,9 +68,7 @@ DeleteChannels::DeleteChannels( const std::string &name )
 	outPlug()->channelDataPlug()->setInput( inPlug()->channelDataPlug() );
 }
 
-DeleteChannels::~DeleteChannels()
-{
-}
+DeleteChannels::~DeleteChannels() {}
 
 Gaffer::IntPlug *DeleteChannels::modePlug()
 {
@@ -97,17 +94,15 @@ void DeleteChannels::affects( const Gaffer::Plug *input, AffectedPlugsContainer 
 {
 	ImageProcessor::affects( input, outputs );
 
-	if(
-		input == inPlug()->channelNamesPlug() ||
-		input == modePlug() ||
-		input == channelsPlug()
-	)
+	if( input == inPlug()->channelNamesPlug() || input == modePlug() || input == channelsPlug() )
 	{
 		outputs.push_back( outPlug()->channelNamesPlug() );
 	}
 }
 
-void DeleteChannels::hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeleteChannels::hashChannelNames(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashChannelNames( output, context, h );
 
@@ -116,7 +111,9 @@ void DeleteChannels::hashChannelNames( const GafferImage::ImagePlug *output, con
 	channelsPlug()->hash( h );
 }
 
-IECore::ConstStringVectorDataPtr DeleteChannels::computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr DeleteChannels::computeChannelNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	const Mode mode = static_cast<Mode>( modePlug()->getValue() );
 	const string channels = channelsPlug()->getValue();

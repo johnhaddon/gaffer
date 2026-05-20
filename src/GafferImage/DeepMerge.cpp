@@ -53,8 +53,7 @@ GAFFER_NODE_DEFINE_TYPE( DeepMerge );
 
 size_t DeepMerge::g_firstPlugIndex = 0;
 
-DeepMerge::DeepMerge( const std::string &name )
-	: ImageProcessor( name, 2 )
+DeepMerge::DeepMerge( const std::string &name ) : ImageProcessor( name, 2 )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -66,9 +65,7 @@ DeepMerge::DeepMerge( const std::string &name )
 	outPlug()->metadataPlug()->setInput( inPlug()->metadataPlug() );
 }
 
-DeepMerge::~DeepMerge()
-{
-}
+DeepMerge::~DeepMerge() {}
 
 Gaffer::IntVectorDataPlug *DeepMerge::offsetsCachePlug()
 {
@@ -109,8 +106,7 @@ void DeepMerge::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outp
 				outputs.push_back( outPlug()->dataWindowPlug() );
 			}
 
-			if( input == inputImage->dataWindowPlug() ||
-				input == inputImage->sampleOffsetsPlug() )
+			if( input == inputImage->dataWindowPlug() || input == inputImage->sampleOffsetsPlug() )
 			{
 				outputs.push_back( offsetsCachePlug() );
 			}
@@ -269,7 +265,9 @@ void DeepMerge::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 	static_cast<IntVectorDataPlug *>( output )->setValue( resultData );
 }
 
-void DeepMerge::hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepMerge::hashDataWindow(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashDataWindow( output, context, h );
 
@@ -297,7 +295,9 @@ Imath::Box2i DeepMerge::computeDataWindow( const Gaffer::Context *context, const
 	return dataWindow;
 }
 
-void DeepMerge::hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepMerge::hashChannelNames(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashChannelNames( output, context, h );
 
@@ -310,7 +310,9 @@ void DeepMerge::hashChannelNames( const GafferImage::ImagePlug *output, const Ga
 	}
 }
 
-IECore::ConstStringVectorDataPtr DeepMerge::computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr DeepMerge::computeChannelNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	IECore::StringVectorDataPtr outChannelStrVectorData( new IECore::StringVectorData() );
 	std::vector<std::string> &outChannels( outChannelStrVectorData->writable() );
@@ -339,7 +341,9 @@ IECore::ConstStringVectorDataPtr DeepMerge::computeChannelNames( const Gaffer::C
 	return inPlug()->channelNamesPlug()->defaultValue();
 }
 
-void DeepMerge::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepMerge::hashChannelData(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashChannelData( output, context, h );
 
@@ -375,7 +379,10 @@ void DeepMerge::hashChannelData( const GafferImage::ImagePlug *output, const Gaf
 	}
 }
 
-IECore::ConstFloatVectorDataPtr DeepMerge::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr DeepMerge::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	ImagePlug::ChannelDataScope reusedScope( context );
 	FloatVectorDataPtr resultData = new FloatVectorData;
@@ -462,14 +469,18 @@ IECore::ConstFloatVectorDataPtr DeepMerge::computeChannelData( const std::string
 	return resultData;
 }
 
-void DeepMerge::hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepMerge::hashSampleOffsets(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashSampleOffsets( parent, context, h );
 
 	offsetsCachePlug()->hash( h );
 }
 
-IECore::ConstIntVectorDataPtr DeepMerge::computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstIntVectorDataPtr DeepMerge::computeSampleOffsets(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	IntVectorDataPtr resultData = new IntVectorData;
 	vector<int> &result = resultData->writable();

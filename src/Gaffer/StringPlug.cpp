@@ -49,19 +49,15 @@ using namespace Gaffer;
 GAFFER_PLUG_DEFINE_TYPE( StringPlug );
 
 StringPlug::StringPlug(
-	const std::string &name,
-	Direction direction,
-	const std::string &defaultValue,
-	unsigned flags,
+	const std::string &name, Direction direction, const std::string &defaultValue, unsigned flags,
 	unsigned substitutions
 )
-	: ValuePlug( name, direction, new StringData( defaultValue ), flags ), m_substitutions( substitutions )
+	: ValuePlug( name, direction, new StringData( defaultValue ), flags ),
+	  m_substitutions( substitutions )
 {
 }
 
-StringPlug::~StringPlug()
-{
-}
+StringPlug::~StringPlug() {}
 
 unsigned StringPlug::substitutions() const
 {
@@ -111,10 +107,7 @@ std::string StringPlug::getValue() const
 	ConstObjectPtr owner;
 	const StringData *s = getObjectValue<StringData>( owner );
 
-	const bool performSubstitutions =
-		m_substitutions &&
-		direction() == In &&
-		Process::current() &&
+	const bool performSubstitutions = m_substitutions && direction() == In && Process::current() &&
 		IECore::StringAlgo::hasSubstitutions( s->readable() );
 
 	return performSubstitutions ? Context::current()->substitute( s->readable(), m_substitutions ) : s->readable();
@@ -139,9 +132,7 @@ void StringPlug::setFrom( const ValuePlug *other )
 
 IECore::MurmurHash StringPlug::hash() const
 {
-	const bool performSubstitutions =
-		m_substitutions &&
-		direction() == In;
+	const bool performSubstitutions = m_substitutions && direction() == In;
 
 	if( performSubstitutions )
 	{

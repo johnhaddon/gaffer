@@ -46,16 +46,13 @@ namespace Gaffer
 class GAFFER_API OptionalValuePlug : public Gaffer::ValuePlug
 {
 
-	public:
+public:
 
 	GAFFER_PLUG_DECLARE_TYPE( Gaffer::OptionalValuePlug, OptionalValuePlugTypeId, Gaffer::ValuePlug );
 
 	OptionalValuePlug(
-		IECore::InternedString name,
-		const Gaffer::ValuePlugPtr &valuePlug,
-		bool enabledPlugDefaultValue = false,
-		Direction direction = In,
-		unsigned flags = Default
+		IECore::InternedString name, const Gaffer::ValuePlugPtr &valuePlug, bool enabledPlugDefaultValue = false,
+		Direction direction = In, unsigned flags = Default
 	);
 
 	Gaffer::BoolPlug *enabledPlug();

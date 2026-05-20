@@ -48,18 +48,11 @@ static IECore::InternedString g_coordinateSystemsSetName( "__coordinateSystems" 
 
 GAFFER_NODE_DEFINE_TYPE( CoordinateSystem );
 
-CoordinateSystem::CoordinateSystem( const std::string &name )
-	: ObjectSource( name, "coordinateSystem" )
-{
-}
+CoordinateSystem::CoordinateSystem( const std::string &name ) : ObjectSource( name, "coordinateSystem" ) {}
 
-CoordinateSystem::~CoordinateSystem()
-{
-}
+CoordinateSystem::~CoordinateSystem() {}
 
-void CoordinateSystem::hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const
-{
-}
+void CoordinateSystem::hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const {}
 
 IECore::ConstObjectPtr CoordinateSystem::computeSource( const Context *context ) const
 {

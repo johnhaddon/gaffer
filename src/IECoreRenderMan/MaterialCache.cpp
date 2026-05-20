@@ -52,12 +52,12 @@ const RtUString g_shadowSubset( "shadowSubset" );
 
 } // namespace
 
-MaterialCache::MaterialCache( Session *session )
-	: m_session( session )
-{
-}
+MaterialCache::MaterialCache( Session *session ) : m_session( session ) {}
 
-ConstMaterialPtr MaterialCache::getMaterial( const IECoreScene::ShaderNetwork *network, IECore::InternedString attributeName, const IECore::CompoundObject *attributes )
+ConstMaterialPtr MaterialCache::getMaterial(
+	const IECoreScene::ShaderNetwork *network, IECore::InternedString attributeName,
+	const IECore::CompoundObject *attributes
+)
 {
 	IECore::MurmurHash hash = network->Object::hash();
 	IECore::MurmurHash adaptorHash;
@@ -77,13 +77,18 @@ ConstMaterialPtr MaterialCache::getMaterial( const IECoreScene::ShaderNetwork *n
 		}
 
 		std::vector<riley::ShadingNode> nodes = ShaderNetworkAlgo::convert( network );
-		riley::MaterialId id = m_session->riley->CreateMaterial( riley::UserId(), { (uint32_t)nodes.size(), nodes.data() }, RtParamList() );
+		riley::MaterialId id = m_session->riley->CreateMaterial(
+			riley::UserId(), { (uint32_t)nodes.size(), nodes.data() }, RtParamList()
+		);
 		a->second = new Material( id, m_session );
 	}
 	return a->second;
 }
 
-ConstDisplacementPtr MaterialCache::getDisplacement( const IECoreScene::ShaderNetwork *network, IECore::InternedString attributeName, const IECore::CompoundObject *attributes )
+ConstDisplacementPtr MaterialCache::getDisplacement(
+	const IECoreScene::ShaderNetwork *network, IECore::InternedString attributeName,
+	const IECore::CompoundObject *attributes
+)
 {
 	IECore::MurmurHash hash = network->Object::hash();
 	IECore::MurmurHash adaptorHash;
@@ -103,13 +108,17 @@ ConstDisplacementPtr MaterialCache::getDisplacement( const IECoreScene::ShaderNe
 		}
 
 		std::vector<riley::ShadingNode> nodes = ShaderNetworkAlgo::convert( network );
-		riley::DisplacementId id = m_session->riley->CreateDisplacement( riley::UserId(), { (uint32_t)nodes.size(), nodes.data() }, RtParamList() );
+		riley::DisplacementId id = m_session->riley->CreateDisplacement(
+			riley::UserId(), { (uint32_t)nodes.size(), nodes.data() }, RtParamList()
+		);
 		a->second = new Displacement( id, m_session );
 	}
 	return a->second;
 }
 
-ConstLightShaderPtr MaterialCache::getLightShader( const IECoreScene::ShaderNetwork *network, const IECoreScene::ShaderNetwork *lightFilter, RtUString shadowSubset )
+ConstLightShaderPtr MaterialCache::getLightShader(
+	const IECoreScene::ShaderNetwork *network, const IECoreScene::ShaderNetwork *lightFilter, RtUString shadowSubset
+)
 {
 	auto convert = [&] {
 		std::vector<riley::ShadingNode> nodes = ShaderNetworkAlgo::convert( network );
@@ -122,7 +131,9 @@ ConstLightShaderPtr MaterialCache::getLightShader( const IECoreScene::ShaderNetw
 		{
 			filterNodes = ShaderNetworkAlgo::convert( lightFilter );
 		}
-		riley::LightShaderId id = m_session->createLightShader( { (uint32_t)nodes.size(), nodes.data() }, { (uint32_t)filterNodes.size(), filterNodes.data() } );
+		riley::LightShaderId id = m_session->createLightShader(
+			{ (uint32_t)nodes.size(), nodes.data() }, { (uint32_t)filterNodes.size(), filterNodes.data() }
+		);
 		return new LightShader( id, m_session );
 	};
 

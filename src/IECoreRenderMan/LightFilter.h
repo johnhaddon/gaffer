@@ -50,7 +50,7 @@ namespace IECoreRenderMan
 class LightFilter : public IECoreScenePreview::Renderer::ObjectInterface
 {
 
-	public:
+public:
 
 	LightFilter( const std::string &name, const Attributes *attributes, Session *session, LightLinker *lightLinker );
 	~LightFilter() override;
@@ -58,9 +58,14 @@ class LightFilter : public IECoreScenePreview::Renderer::ObjectInterface
 	// ObjectInterface overrides
 	// =========================
 
-	void transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times ) override;
+	void transform(
+		const IECoreScenePreview::Renderer::TransformSamples &samples,
+		const IECoreScenePreview::Renderer::SampleTimes &times
+	) override;
 	bool attributes( const IECoreScenePreview::Renderer::AttributesInterface *attributes ) override;
-	void link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects ) override;
+	void link(
+		const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects
+	) override;
 	void assignID( uint32_t id ) override;
 	void assignInstanceID( uint32_t id ) override;
 
@@ -82,7 +87,7 @@ class LightFilter : public IECoreScenePreview::Renderer::ObjectInterface
 	SetMemberships &setMemberships() { return m_setMemberships; }
 	const SetMemberships &setMemberships() const { return m_setMemberships; }
 
-	private:
+private:
 
 	Session *m_session;
 

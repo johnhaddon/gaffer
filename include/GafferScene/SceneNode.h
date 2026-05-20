@@ -50,7 +50,7 @@ namespace GafferScene
 class GAFFERSCENE_API SceneNode : public Gaffer::ComputeNode
 {
 
-	public:
+public:
 
 	explicit SceneNode( const std::string &name = defaultName<SceneNode>() );
 	~SceneNode() override;
@@ -69,7 +69,7 @@ class GAFFERSCENE_API SceneNode : public Gaffer::ComputeNode
 	/// Implemented so that enabledPlug() affects outPlug().
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
 	using ScenePath = ScenePlug::ScenePath;
 
@@ -91,37 +91,70 @@ class GAFFERSCENE_API SceneNode : public Gaffer::ComputeNode
 	///
 	///    * Make an input connection into the corresponding plug, so that the hash and compute methods
 	///      are never called for it.
-	virtual void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const;
-	virtual void hashTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const;
-	virtual void hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const;
-	virtual void hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const;
-	virtual void hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const;
+	virtual void hashBound(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+	) const;
+	virtual void hashTransform(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+	) const;
+	virtual void hashAttributes(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+	) const;
+	virtual void hashObject(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+	) const;
+	virtual void hashChildNames(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+	) const;
 	virtual void hashGlobals( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const;
 	virtual void hashSetNames( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const;
-	virtual void hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const;
+	virtual void hashSet(
+		const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent,
+		IECore::MurmurHash &h
+	) const;
 
 	/// Implemented to call the compute*() methods below whenever output is part of a ScenePlug and the node is enabled.
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
 	/// Compute methods for the individual children of outPlug() - these must be implemented by derived classes, or
 	/// an input connection must be made to the plug, so that the method is not called.
-	virtual Imath::Box3f computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const;
-	virtual Imath::M44f computeTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const;
-	virtual IECore::ConstCompoundObjectPtr computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const;
-	virtual IECore::ConstObjectPtr computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const;
-	virtual IECore::ConstInternedStringVectorDataPtr computeChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const;
-	virtual IECore::ConstCompoundObjectPtr computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const;
-	virtual IECore::ConstInternedStringVectorDataPtr computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const;
+	virtual Imath::Box3f computeBound(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+	) const;
+	virtual Imath::M44f computeTransform(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+	) const;
+	virtual IECore::ConstCompoundObjectPtr computeAttributes(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+	) const;
+	virtual IECore::ConstObjectPtr computeObject(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+	) const;
+	virtual IECore::ConstInternedStringVectorDataPtr computeChildNames(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+	) const;
+	virtual IECore::ConstCompoundObjectPtr computeGlobals(
+		const Gaffer::Context *context, const ScenePlug *parent
+	) const;
+	virtual IECore::ConstInternedStringVectorDataPtr computeSetNames(
+		const Gaffer::Context *context, const ScenePlug *parent
+	) const;
 	/// Implementations of computeSet() must return an empty PathMatcherData when the setName would not be present
 	/// in the result of computeSetNames(), and the corresponding hashSet() method also needs to take this into
 	/// account. The rationale for this is that it frees other nodes from checking that a set exists before accessing
 	/// it, and that makes computation quicker, as we don't need to access setNamesPlug() at all in many common cases.
-	virtual IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const;
+	virtual IECore::ConstPathMatcherDataPtr computeSet(
+		const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent
+	) const;
 
 	/// \deprecated Use `ScenePlug::childBounds()` instead.
-	Imath::Box3f unionOfTransformedChildBounds( const ScenePath &path, const ScenePlug *out, const IECore::InternedStringVectorData *childNames = nullptr ) const;
+	Imath::Box3f unionOfTransformedChildBounds(
+		const ScenePath &path, const ScenePlug *out, const IECore::InternedStringVectorData *childNames = nullptr
+	) const;
 	/// \deprecated Use `ScenePlug::childBoundsHash()` instead.
-	IECore::MurmurHash hashOfTransformedChildBounds( const ScenePath &path, const ScenePlug *out, const IECore::InternedStringVectorData *childNames = nullptr ) const;
+	IECore::MurmurHash hashOfTransformedChildBounds(
+		const ScenePath &path, const ScenePlug *out, const IECore::InternedStringVectorData *childNames = nullptr
+	) const;
 
 	Gaffer::ValuePlug::CachePolicy hashCachePolicy( const Gaffer::ValuePlug *output ) const override;
 	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
@@ -131,7 +164,7 @@ class GAFFERSCENE_API SceneNode : public Gaffer::ComputeNode
 	/// base classes, so there should be little need to call this.
 	bool enabled( const Gaffer::Context *context ) const;
 
-	private:
+private:
 
 	void plugInputChanged( Gaffer::Plug *plug );
 
@@ -139,7 +172,9 @@ class GAFFERSCENE_API SceneNode : public Gaffer::ComputeNode
 	bool computeExists( const Gaffer::Context *context, const ScenePlug *parent ) const;
 
 	void hashSortedChildNames( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const;
-	IECore::ConstInternedStringVectorDataPtr computeSortedChildNames( const Gaffer::Context *context, const ScenePlug *parent ) const;
+	IECore::ConstInternedStringVectorDataPtr computeSortedChildNames(
+		const Gaffer::Context *context, const ScenePlug *parent
+	) const;
 
 	void hashChildBounds( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const;
 	Imath::Box3f computeChildBounds( const Gaffer::Context *context, const ScenePlug *parent ) const;

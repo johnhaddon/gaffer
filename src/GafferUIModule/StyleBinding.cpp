@@ -58,10 +58,7 @@ namespace
 
 struct UnarySlotCaller
 {
-	void operator () ( boost::python::object slot, StylePtr s )
-	{
-		slot( s );
-	}
+	void operator () ( boost::python::object slot, StylePtr s ) { slot( s ); }
 };
 
 IECoreGL::FontPtr getFont( StandardStyle &s, Style::TextType textType )

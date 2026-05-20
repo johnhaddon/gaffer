@@ -49,17 +49,14 @@ const std::string g_passNamesOptionName = "option:renderPass:names";
 
 size_t DeleteRenderPasses::g_firstPlugIndex = 0;
 
-DeleteRenderPasses::DeleteRenderPasses( const std::string &name )
-	: GlobalsProcessor( name )
+DeleteRenderPasses::DeleteRenderPasses( const std::string &name ) : GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new IntPlug( "mode", Plug::In, Delete, Delete, Keep ) );
 	addChild( new StringPlug( "names" ) );
 }
 
-DeleteRenderPasses::~DeleteRenderPasses()
-{
-}
+DeleteRenderPasses::~DeleteRenderPasses() {}
 
 Gaffer::IntPlug *DeleteRenderPasses::modePlug()
 {
@@ -97,7 +94,9 @@ void DeleteRenderPasses::hashProcessedGlobals( const Gaffer::Context *context, I
 	namesPlug()->hash( h );
 }
 
-IECore::ConstCompoundObjectPtr DeleteRenderPasses::computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const
+IECore::ConstCompoundObjectPtr DeleteRenderPasses::computeProcessedGlobals(
+	const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals
+) const
 {
 	if( !inputGlobals->members().count( g_passNamesOptionName ) )
 	{
@@ -117,8 +116,7 @@ IECore::ConstCompoundObjectPtr DeleteRenderPasses::computeProcessedGlobals( cons
 	auto copy = result->member<IECore::StringVectorData>( g_passNamesOptionName )->copy();
 	copy->writable().erase(
 		std::remove_if(
-			copy->writable().begin(),
-			copy->writable().end(),
+			copy->writable().begin(), copy->writable().end(),
 			[names, mode]( const auto &elem ) {
 				return IECore::StringAlgo::matchMultiple( elem, names ) == ( mode == Delete );
 			}

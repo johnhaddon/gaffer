@@ -92,7 +92,10 @@ void tieModeToBools( const Animation::TieMode mode, bool &tieSlope, bool &tieSca
 	}
 }
 
-void evaluateCurve( const Animation::CurvePlug *const curvePlug, const float tStart, const float tEnd, const double unitPerPx, const ViewportGadget *const viewportGadget, std::vector<Imath::V2f> &vertices )
+void evaluateCurve(
+	const Animation::CurvePlug *const curvePlug, const float tStart, const float tEnd, const double unitPerPx,
+	const ViewportGadget *const viewportGadget, std::vector<Imath::V2f> &vertices
+)
 {
 	// NOTE : When evaluating the extrapolated portions of a curve, evaluation starts at the extrapolation key
 	//        to ensure any stipple pattern extends from the extrapolation key, so tEnd may be less than tStart.
@@ -195,10 +198,9 @@ void computeGrid( const ViewportGadget *viewportGadget, float fps, AxisDefinitio
 	float yStride = 1;
 
 	// \todo the box's size() is unrealiable because it considers the box empty for the inverted coords we seem to have here
-	V2f pxPerUnit = V2f(
-		resolution.x / std::abs( viewportBoundsFrames.min.x - viewportBoundsFrames.max.x ),
-		resolution.y / std::abs( viewportBounds.min.y - viewportBounds.max.y )
-	);
+	V2f pxPerUnit =
+		V2f( resolution.x / std::abs( viewportBoundsFrames.min.x - viewportBoundsFrames.max.x ),
+			 resolution.y / std::abs( viewportBounds.min.y - viewportBounds.max.y ) );
 
 	// Compute the stride to use for the time dimension.
 	if( pxPerUnit.x < labelMinSize.x )
@@ -309,7 +311,7 @@ struct AnimationGadget::SelectionSet : public Gaffer::Set
 	void clear( const Gaffer::Animation::CurvePlug *curve );
 	bool empty() const;
 
-	private:
+private:
 
 	friend class AnimationGadget;
 
@@ -318,8 +320,14 @@ struct AnimationGadget::SelectionSet : public Gaffer::Set
 	struct MemberCompare
 	{
 		using result_type = bool;
-		bool operator () ( const Gaffer::Set::Member *const lhs, const Gaffer::Animation::KeyPtr &rhs ) const { return lhs < rhs.get(); }
-		bool operator () ( const Gaffer::Animation::KeyPtr &lhs, const Gaffer::Set::Member *const rhs ) const { return lhs.get() < rhs; }
+		bool operator () ( const Gaffer::Set::Member *const lhs, const Gaffer::Animation::KeyPtr &rhs ) const
+		{
+			return lhs < rhs.get();
+		}
+		bool operator () ( const Gaffer::Animation::KeyPtr &lhs, const Gaffer::Set::Member *const rhs ) const
+		{
+			return lhs.get() < rhs;
+		}
 	};
 
 	using KeyContainer = boost::multi_index::multi_index_container<
@@ -335,8 +343,7 @@ struct AnimationGadget::SelectionSet : public Gaffer::Set
 		unsigned int m_count;
 	};
 
-	using CurveConnectionMap = std::map<
-		const Gaffer::Animation::CurvePlug *, ConnectionData>;
+	using CurveConnectionMap = std::map<const Gaffer::Animation::CurvePlug *, ConnectionData>;
 
 	KeyContainer m_keys;
 	CurveConnectionMap m_connections;
@@ -348,10 +355,7 @@ struct AnimationGadget::SelectionSet : public Gaffer::Set
 // AnimationGadget::SelectionSet implementation
 //////////////////////////////////////////////////////////////////////////
 
-AnimationGadget::SelectionSet::SelectionSet()
-	: m_keys(), m_connections()
-{
-}
+AnimationGadget::SelectionSet::SelectionSet() : m_keys(), m_connections() {}
 
 AnimationGadget::SelectionSet::~SelectionSet()
 {
@@ -410,7 +414,9 @@ bool AnimationGadget::SelectionSet::remove( const Gaffer::Animation::KeyPtr key 
 	return removeInternal( key->parent(), key );
 }
 
-bool AnimationGadget::SelectionSet::removeInternal( const Gaffer::Animation::CurvePlug *const curve, const Gaffer::Animation::KeyPtr key )
+bool AnimationGadget::SelectionSet::removeInternal(
+	const Gaffer::Animation::CurvePlug *const curve, const Gaffer::Animation::KeyPtr key
+)
 {
 	KeyContainer::iterator it = m_keys.find( key );
 	const bool result = ( it != m_keys.end() );
@@ -480,7 +486,8 @@ bool AnimationGadget::SelectionSet::empty() const
 }
 
 AnimationGadget::SelectionSet::ConnectionData::ConnectionData( const Signals::Connection connection )
-	: m_connection( connection ), m_count( 0u )
+	: m_connection( connection ),
+	  m_count( 0u )
 {
 }
 
@@ -491,7 +498,32 @@ AnimationGadget::SelectionSet::ConnectionData::ConnectionData( const Signals::Co
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( AnimationGadget );
 
 AnimationGadget::AnimationGadget()
-	: m_context( nullptr ), m_visiblePlugs( new StandardSet() ), m_editablePlugs( new StandardSet() ), m_selectedKeys( new AnimationGadget::SelectionSet() ), m_originalKeyValues(), m_dragTangentKey( nullptr ), m_dragTangentDirection( Animation::Direction::In ), m_dragTangentOriginalScale( 0.0 ), m_dragStartPosition( 0 ), m_lastDragPosition( 0 ), m_dragMode( DragMode::None ), m_moveAxis( MoveAxis::Both ), m_vertices(), m_snappingClosestKey( nullptr ), m_highlightedKey( nullptr ), m_highlightedCurve( nullptr ), m_highlightedTangentKey( nullptr ), m_highlightedTangentDirection( Animation::Direction::In ), m_mergeGroupId( 0 ), m_keyPreview( false ), m_keyPreviewLocation( 0 ), m_xMargin( 60 ), m_yMargin( 20 ), m_textScale( 10 ), m_labelPadding( 5 ), m_frameIndicatorPreviewFrame( std::nullopt )
+	: m_context( nullptr ),
+	  m_visiblePlugs( new StandardSet() ),
+	  m_editablePlugs( new StandardSet() ),
+	  m_selectedKeys( new AnimationGadget::SelectionSet() ),
+	  m_originalKeyValues(),
+	  m_dragTangentKey( nullptr ),
+	  m_dragTangentDirection( Animation::Direction::In ),
+	  m_dragTangentOriginalScale( 0.0 ),
+	  m_dragStartPosition( 0 ),
+	  m_lastDragPosition( 0 ),
+	  m_dragMode( DragMode::None ),
+	  m_moveAxis( MoveAxis::Both ),
+	  m_vertices(),
+	  m_snappingClosestKey( nullptr ),
+	  m_highlightedKey( nullptr ),
+	  m_highlightedCurve( nullptr ),
+	  m_highlightedTangentKey( nullptr ),
+	  m_highlightedTangentDirection( Animation::Direction::In ),
+	  m_mergeGroupId( 0 ),
+	  m_keyPreview( false ),
+	  m_keyPreviewLocation( 0 ),
+	  m_xMargin( 60 ),
+	  m_yMargin( 20 ),
+	  m_textScale( 10 ),
+	  m_labelPadding( 5 ),
+	  m_frameIndicatorPreviewFrame( std::nullopt )
 {
 	buttonPressSignal().connect( boost::bind( &AnimationGadget::buttonPress, this, ::_1, ::_2 ) );
 	buttonReleaseSignal().connect( boost::bind( &AnimationGadget::buttonRelease, this, ::_1, ::_2 ) );
@@ -506,13 +538,23 @@ AnimationGadget::AnimationGadget()
 	dragEndSignal().connect( boost::bind( &AnimationGadget::dragEnd, this, ::_1, ::_2 ) );
 	leaveSignal().connect( boost::bind( &AnimationGadget::leave, this ) );
 
-	m_editablePlugs->memberAcceptanceSignal().connect( boost::bind( &AnimationGadget::plugSetAcceptor, this, ::_1, ::_2 ) );
-	m_editablePlugs->memberAddedSignal().connect( boost::bind( &AnimationGadget::editablePlugAdded, this, ::_1, ::_2 ) );
-	m_editablePlugs->memberRemovedSignal().connect( boost::bind( &AnimationGadget::editablePlugRemoved, this, ::_1, ::_2 ) );
+	m_editablePlugs->memberAcceptanceSignal().connect(
+		boost::bind( &AnimationGadget::plugSetAcceptor, this, ::_1, ::_2 )
+	);
+	m_editablePlugs->memberAddedSignal().connect(
+		boost::bind( &AnimationGadget::editablePlugAdded, this, ::_1, ::_2 )
+	);
+	m_editablePlugs->memberRemovedSignal().connect(
+		boost::bind( &AnimationGadget::editablePlugRemoved, this, ::_1, ::_2 )
+	);
 
-	m_visiblePlugs->memberAcceptanceSignal().connect( boost::bind( &AnimationGadget::plugSetAcceptor, this, ::_1, ::_2 ) );
+	m_visiblePlugs->memberAcceptanceSignal().connect(
+		boost::bind( &AnimationGadget::plugSetAcceptor, this, ::_1, ::_2 )
+	);
 	m_visiblePlugs->memberAddedSignal().connect( boost::bind( &AnimationGadget::visiblePlugAdded, this, ::_1, ::_2 ) );
-	m_visiblePlugs->memberRemovedSignal().connect( boost::bind( &AnimationGadget::visiblePlugRemoved, this, ::_1, ::_2 ) );
+	m_visiblePlugs->memberRemovedSignal().connect(
+		boost::bind( &AnimationGadget::visiblePlugRemoved, this, ::_1, ::_2 )
+	);
 }
 
 AnimationGadget::~AnimationGadget()
@@ -551,18 +593,26 @@ void AnimationGadget::renderLayer( Layer layer, const Style *style, RenderReason
 			// drawing base grid
 			for( const auto &x : xAxis.main )
 			{
-				style->renderLine( IECore::LineSegment3f( V3f( x.first, 0, 0 ), V3f( x.first, resolution.y, 0 ) ), x.second == 0.0f ? 3.0 : 2.0, &axesColor );
+				style->renderLine(
+					IECore::LineSegment3f( V3f( x.first, 0, 0 ), V3f( x.first, resolution.y, 0 ) ),
+					x.second == 0.0f ? 3.0 : 2.0, &axesColor
+				);
 			}
 
 			for( const auto &y : yAxis.main )
 			{
-				style->renderLine( IECore::LineSegment3f( V3f( 0, y.first, 0 ), V3f( resolution.x, y.first, 0 ) ), y.second == 0.0f ? 3.0 : 2.0, &axesColor );
+				style->renderLine(
+					IECore::LineSegment3f( V3f( 0, y.first, 0 ), V3f( resolution.x, y.first, 0 ) ),
+					y.second == 0.0f ? 3.0 : 2.0, &axesColor
+				);
 			}
 
 			// drawing sub grid for frames
 			for( float x : xAxis.secondary )
 			{
-				style->renderLine( IECore::LineSegment3f( V3f( x, 0, 0 ), V3f( x, resolution.y, 0 ) ), 1.0, &axesColor );
+				style->renderLine(
+					IECore::LineSegment3f( V3f( x, 0, 0 ), V3f( x, resolution.y, 0 ) ), 1.0, &axesColor
+				);
 			}
 
 			break;
@@ -602,10 +652,14 @@ void AnimationGadget::renderLayer( Layer layer, const Style *style, RenderReason
 
 				for( Animation::Key &key : *curvePlug )
 				{
-					bool isHighlighted = ( &key == m_highlightedKey.get() ) || ( selecting && b.intersects( V2f( key.getTime(), key.getValue() ) ) );
+					bool isHighlighted = ( &key == m_highlightedKey.get() ) ||
+						( selecting && b.intersects( V2f( key.getTime(), key.getValue() ) ) );
 					bool isSelected = m_selectedKeys->contains( &key );
 					V2f keyPosition = viewportGadget->worldToRasterSpace( V3f( key.getTime(), key.getValue(), 0 ) );
-					style->renderAnimationKey( keyPosition, isSelected || isHighlighted ? Style::HighlightedState : Style::NormalState, isHighlighted ? 3.0 : 2.0, &black );
+					style->renderAnimationKey(
+						keyPosition, isSelected || isHighlighted ? Style::HighlightedState : Style::NormalState,
+						isHighlighted ? 3.0 : 2.0, &black
+					);
 
 					// draw the tangents
 					//
@@ -620,29 +674,48 @@ void AnimationGadget::renderLayer( Layer layer, const Style *style, RenderReason
 
 						bool tieSlopeOut, tieScaleOut;
 						tieModeToBools( previousKey->getTieMode(), tieSlopeOut, tieScaleOut );
-						const bool isOutHighlighted = ( m_highlightedTangentKey == previousKey ) && ( ( m_highlightedTangentDirection == Animation::Direction::Out ) || tieSlopeOut || tieScaleOut );
+						const bool isOutHighlighted = ( m_highlightedTangentKey == previousKey ) &&
+							( ( m_highlightedTangentDirection == Animation::Direction::Out ) || tieSlopeOut ||
+							  tieScaleOut );
 
-						if( ( isSelected || previousKeySelected || isOutHighlighted ) && ( !out.slopeIsConstrained() || !out.scaleIsConstrained() ) )
+						if( ( isSelected || previousKeySelected || isOutHighlighted ) &&
+							( !out.slopeIsConstrained() || !out.scaleIsConstrained() ) )
 						{
 							const V2d outPosKey = out.getPosition();
-							const V2f outPosRas = viewportGadget->worldToRasterSpace( V3f( outPosKey.x, outPosKey.y, 0 ) );
+							const V2f outPosRas =
+								viewportGadget->worldToRasterSpace( V3f( outPosKey.x, outPosKey.y, 0 ) );
 							const double outSize = isOutHighlighted ? 4.0 : 2.0;
 							const Box2f outBox( outPosRas - V2f( outSize ), outPosRas + V2f( outSize ) );
-							style->renderLine( IECore::LineSegment3f( V3f( outPosRas.x, outPosRas.y, 0 ), V3f( previousKeyPosition.x, previousKeyPosition.y, 0 ) ), tieSlopeOut ? 2.0 : 1.0, &color4 );
+							style->renderLine(
+								IECore::LineSegment3f(
+									V3f( outPosRas.x, outPosRas.y, 0 ),
+									V3f( previousKeyPosition.x, previousKeyPosition.y, 0 )
+								),
+								tieSlopeOut ? 2.0 : 1.0, &color4
+							);
 							( tieScaleOut ) ? style->renderSolidRectangle( outBox ) : style->renderRectangle( outBox );
 						}
 
 						bool tieSlopeIn, tieScaleIn;
 						tieModeToBools( key.getTieMode(), tieSlopeIn, tieScaleIn );
-						const bool isInHighlighted = ( ( m_highlightedTangentKey == &key ) && ( ( m_highlightedTangentDirection == Animation::Direction::In ) || tieSlopeIn || tieScaleIn ) );
+						const bool isInHighlighted =
+							( ( m_highlightedTangentKey == &key ) &&
+							  ( ( m_highlightedTangentDirection == Animation::Direction::In ) || tieSlopeIn ||
+								tieScaleIn ) );
 
-						if( ( isSelected || previousKeySelected || isInHighlighted ) && ( !in.slopeIsConstrained() || !in.scaleIsConstrained() ) )
+						if( ( isSelected || previousKeySelected || isInHighlighted ) &&
+							( !in.slopeIsConstrained() || !in.scaleIsConstrained() ) )
 						{
 							const V2d inPosKey = in.getPosition();
 							const V2f inPosRas = viewportGadget->worldToRasterSpace( V3f( inPosKey.x, inPosKey.y, 0 ) );
 							const double inSize = isInHighlighted ? 4.0 : 2.0;
 							const Box2f inBox( inPosRas - V2f( inSize ), inPosRas + V2f( inSize ) );
-							style->renderLine( IECore::LineSegment3f( V3f( inPosRas.x, inPosRas.y, 0 ), V3f( keyPosition.x, keyPosition.y, 0 ) ), tieSlopeIn ? 2.0 : 1.0, &color4 );
+							style->renderLine(
+								IECore::LineSegment3f(
+									V3f( inPosRas.x, inPosRas.y, 0 ), V3f( keyPosition.x, keyPosition.y, 0 )
+								),
+								tieSlopeIn ? 2.0 : 1.0, &color4
+							);
 							( tieScaleIn ) ? style->renderSolidRectangle( inBox ) : style->renderRectangle( inBox );
 						}
 					}
@@ -670,7 +743,9 @@ void AnimationGadget::renderLayer( Layer layer, const Style *style, RenderReason
 			Imath::Color4f axesColor( 60.0 / 255, 60.0 / 255, 60.0 / 255, 1.0 );
 			IECoreGL::glColor( axesColor ); // \todo: maybe renderSolidRectangle() should accept a userColor
 			style->renderSolidRectangle( Box2f( V2f( 0 ), V2f( m_xMargin, resolution.y - m_yMargin ) ) );
-			style->renderSolidRectangle( Box2f( V2f( 0, resolution.y - m_yMargin ), V2f( resolution.x, resolution.y ) ) );
+			style->renderSolidRectangle(
+				Box2f( V2f( 0, resolution.y - m_yMargin ), V2f( resolution.x, resolution.y ) )
+			);
 
 			// \todo: pull matrix stack operations out of the loops.
 			for( const auto &x : xAxis.main )
@@ -705,7 +780,10 @@ void AnimationGadget::renderLayer( Layer layer, const Style *style, RenderReason
 				const std::string label = fmt::format( "{:.3f}", y.second );
 				Box3f labelBound = style->textBound( Style::BodyText, label );
 
-				glTranslatef( ( m_xMargin - m_labelPadding ) - labelBound.size().x * m_textScale, y.first + labelBound.center().y * m_textScale, 0.0f );
+				glTranslatef(
+					( m_xMargin - m_labelPadding ) - labelBound.size().x * m_textScale,
+					y.first + labelBound.center().y * m_textScale, 0.0f
+				);
 				glScalef( m_textScale, -m_textScale, m_textScale );
 
 				style->renderText( Style::BodyText, label );
@@ -720,8 +798,12 @@ void AnimationGadget::renderLayer( Layer layer, const Style *style, RenderReason
 			if( m_dragMode == DragMode::Selecting )
 			{
 				Box2f b;
-				b.extendBy( viewportGadget->gadgetToRasterSpace( V3f( m_dragStartPosition.x, m_dragStartPosition.y, 0 ), this ) );
-				b.extendBy( viewportGadget->gadgetToRasterSpace( V3f( m_lastDragPosition.x, m_lastDragPosition.y, 0 ), this ) );
+				b.extendBy(
+					viewportGadget->gadgetToRasterSpace( V3f( m_dragStartPosition.x, m_dragStartPosition.y, 0 ), this )
+				);
+				b.extendBy(
+					viewportGadget->gadgetToRasterSpace( V3f( m_lastDragPosition.x, m_lastDragPosition.y, 0 ), this )
+				);
 				style->renderSelectionBox( b );
 			}
 
@@ -741,10 +823,7 @@ void AnimationGadget::renderLayer( Layer layer, const Style *style, RenderReason
 
 unsigned AnimationGadget::layerMask() const
 {
-	return AnimationLayer::Grid |
-		AnimationLayer::Curves |
-		AnimationLayer::Keys |
-		AnimationLayer::Axes |
+	return AnimationLayer::Grid | AnimationLayer::Curves | AnimationLayer::Keys | AnimationLayer::Axes |
 		AnimationLayer::Overlay;
 }
 
@@ -791,14 +870,14 @@ std::string AnimationGadget::getToolTip( const IECore::LineSegment3f &line ) con
 		os.precision( 4 );
 		os << "**" << drivenPlugName( keyTangent.first->parent() ) << "**"
 		   << "  \nDirection : " << Gaffer::Animation::toString( tangent.direction() )
-		   << "  \nSlope\t : " << tangent.getSlope()
-		   << "  \nScale\t : " << tangent.getScale();
+		   << "  \nSlope\t : " << tangent.getSlope() << "  \nScale\t : " << tangent.getScale();
 		return os.str();
 	}
 	else if( const Animation::ConstKeyPtr key = keyAt( line ) )
 	{
-		const Gaffer::ScriptNode *const scriptNode =
-			IECore::assertedStaticCast<const Gaffer::ScriptNode>( key->parent()->ancestor( (IECore::TypeId)Gaffer::ScriptNodeTypeId ) );
+		const Gaffer::ScriptNode *const scriptNode = IECore::assertedStaticCast<const Gaffer::ScriptNode>(
+			key->parent()->ancestor( (IECore::TypeId)Gaffer::ScriptNodeTypeId )
+		);
 
 		std::ostringstream os;
 		os.precision( 4 );
@@ -813,8 +892,10 @@ std::string AnimationGadget::getToolTip( const IECore::LineSegment3f &line ) con
 	{
 		std::ostringstream os;
 		os << "**" << drivenPlugName( curvePlug.get() ) << "**"
-		   << "  \nExtrapolation In : " << Animation::toString( curvePlug->getExtrapolation( Animation::Direction::In ) )
-		   << "  \nExtrapolation Out : " << Animation::toString( curvePlug->getExtrapolation( Animation::Direction::Out ) );
+		   << "  \nExtrapolation In : "
+		   << Animation::toString( curvePlug->getExtrapolation( Animation::Direction::In ) )
+		   << "  \nExtrapolation Out : "
+		   << Animation::toString( curvePlug->getExtrapolation( Animation::Direction::Out ) );
 		return os.str();
 	}
 
@@ -863,7 +944,8 @@ void AnimationGadget::removeKeyframes()
 	ScriptNode *scriptNode = IECore::runTimeCast<Animation::CurvePlug>( first )->ancestor<ScriptNode>();
 	UndoScope undoEnabled( scriptNode, UndoScope::Enabled, undoMergeGroup() );
 
-	for( SelectionSet::KeyContainer::iterator it = m_selectedKeys->m_keys.begin(), itEnd = m_selectedKeys->m_keys.end(); it != itEnd; )
+	for( SelectionSet::KeyContainer::iterator it = m_selectedKeys->m_keys.begin(), itEnd = m_selectedKeys->m_keys.end();
+		 it != itEnd; )
 	{
 		// NOTE : SelectionSet ensures unparented keys are removed from selection so parent should be valid.
 		//        The removal of the unparented key from the selection will invalidate our iterator so pre increment it.
@@ -886,7 +968,8 @@ void AnimationGadget::removeInactiveKeyframes()
 	ScriptNode *scriptNode = IECore::runTimeCast<Animation::CurvePlug>( first )->ancestor<ScriptNode>();
 	UndoScope undoEnabled( scriptNode, UndoScope::Enabled, undoMergeGroup() );
 
-	for( Gaffer::StandardSet::Iterator it = m_editablePlugs->begin(), itEnd = m_editablePlugs->end(); it != itEnd; ++it )
+	for( Gaffer::StandardSet::Iterator it = m_editablePlugs->begin(), itEnd = m_editablePlugs->end(); it != itEnd;
+		 ++it )
 	{
 		IECore::assertedStaticCast<Animation::CurvePlug>( &( *it ) )->removeInactiveKeys();
 	}
@@ -910,11 +993,13 @@ void AnimationGadget::moveKeyframes( const V2f currentDragPosition )
 	{
 		// Update offset to make sure that the closest key ends up on an integer frame
 		float originalTime = m_originalKeyValues[m_snappingClosestKey.get()].first;
-		globalOffset.x = snapTimeToFrame( m_context->getFramesPerSecond(), originalTime + globalOffset.x ) - originalTime;
+		globalOffset.x =
+			snapTimeToFrame( m_context->getFramesPerSecond(), originalTime + globalOffset.x ) - originalTime;
 	}
 
 	// move selected keys
-	for( SelectionSet::KeyContainer::iterator it = m_selectedKeys->m_keys.begin(), itEnd = m_selectedKeys->m_keys.end(); it != itEnd; ++it )
+	for( SelectionSet::KeyContainer::iterator it = m_selectedKeys->m_keys.begin(), itEnd = m_selectedKeys->m_keys.end();
+		 it != itEnd; ++it )
 	{
 		Animation::KeyPtr key = *it;
 
@@ -984,12 +1069,15 @@ void AnimationGadget::moveTangent( const Imath::V2f currentDragOffset )
 			const Imath::V2d tp = tangent.getPosition();
 			const ViewportGadget *const viewportGadget = ancestor<ViewportGadget>();
 			const Imath::V2f tpr = viewportGadget->worldToRasterSpace( V3f( tp.x, tp.y, 0 ) );
-			const Imath::V2f kpr = viewportGadget->worldToRasterSpace( V3f( tangent.key().getTime(), tangent.key().getValue(), 0 ) );
-			const Imath::V2f dpr = viewportGadget->worldToRasterSpace( V3f( currentDragOffset.x, currentDragOffset.y, 0.0 ) );
+			const Imath::V2f kpr =
+				viewportGadget->worldToRasterSpace( V3f( tangent.key().getTime(), tangent.key().getValue(), 0 ) );
+			const Imath::V2f dpr =
+				viewportGadget->worldToRasterSpace( V3f( currentDragOffset.x, currentDragOffset.y, 0.0 ) );
 			const Imath::V2f tvr = ( tpr - kpr ).normalized();
 
 			Imath::V3f dp;
-			viewportGadget->rasterToWorldSpace( kpr + ( tvr * ( ( dpr - kpr ) ^ tvr ) ) ).intersect( Plane3f( V3f( 0.0, 0.0, 1.0 ), 0.0 ), dp );
+			viewportGadget->rasterToWorldSpace( kpr + ( tvr * ( ( dpr - kpr ) ^ tvr ) ) )
+				.intersect( Plane3f( V3f( 0.0, 0.0, 1.0 ), 0.0 ), dp );
 			tangent.setScaleFromPosition( Imath::V2d( dp.x, dp.y ) );
 			break;
 		}
@@ -998,7 +1086,8 @@ void AnimationGadget::moveTangent( const Imath::V2f currentDragOffset )
 			tangent.setScale( m_dragTangentOriginalScale );
 			break;
 		case MoveAxis::Both :
-			( tangent.scaleIsConstrained() ) ? tangent.setSlopeFromPosition( currentDragOffset ) : tangent.setPosition( currentDragOffset );
+			( tangent.scaleIsConstrained() ) ? tangent.setSlopeFromPosition( currentDragOffset ) :
+											   tangent.setPosition( currentDragOffset );
 			break;
 		case MoveAxis::Undefined :
 		default :
@@ -1012,7 +1101,8 @@ void AnimationGadget::frame()
 	Box3f b;
 
 	// try to frame to selected keys
-	for( SelectionSet::KeyContainer::iterator it = m_selectedKeys->m_keys.begin(), itEnd = m_selectedKeys->m_keys.end(); it != itEnd; ++it )
+	for( SelectionSet::KeyContainer::iterator it = m_selectedKeys->m_keys.begin(), itEnd = m_selectedKeys->m_keys.end();
+		 it != itEnd; ++it )
 	{
 		b.extendBy( V3f( ( *it )->getTime(), ( *it )->getValue(), 0 ) );
 	}
@@ -1189,10 +1279,8 @@ IECore::RunTimeTypedPtr AnimationGadget::dragBegin( GadgetPtr gadget, const Drag
 				m_highlightedTangentKey = m_dragTangentKey;
 				m_highlightedTangentDirection = m_dragTangentDirection;
 				m_dragMode = DragMode::MoveTangent;
-				if(
-					( event.modifiers & DragDropEvent::Control ) &&
-					( ( event.modifiers & DragDropEvent::Shift ) == DragDropEvent::None )
-				)
+				if( ( event.modifiers & DragDropEvent::Control ) &&
+					( ( event.modifiers & DragDropEvent::Shift ) == DragDropEvent::None ) )
 				{
 					m_moveAxis = MoveAxis::Y;
 				}
@@ -1222,7 +1310,9 @@ IECore::RunTimeTypedPtr AnimationGadget::dragBegin( GadgetPtr gadget, const Drag
 				removeInactiveKeyframes();
 				m_dragMode = DragMode::Moving;
 			}
-			else if( ( onTimeAxis( event.line ) && !onValueAxis( event.line ) ) || frameIndicatorUnderMouse( event.line ) )
+			else if(
+				( onTimeAxis( event.line ) && !onValueAxis( event.line ) ) || frameIndicatorUnderMouse( event.line )
+			)
 			{
 				m_dragMode = DragMode::MoveFrame;
 				m_frameIndicatorPreviewFrame = std::nullopt;
@@ -1258,7 +1348,9 @@ IECore::RunTimeTypedPtr AnimationGadget::dragBegin( GadgetPtr gadget, const Drag
 		m_snappingClosestKey = nullptr;
 
 		// Store current positions so that updating during drag can be done without many small incremental updates.
-		for( SelectionSet::KeyContainer::iterator it = m_selectedKeys->m_keys.begin(), itEnd = m_selectedKeys->m_keys.end(); it != itEnd; ++it )
+		for( SelectionSet::KeyContainer::iterator it = m_selectedKeys->m_keys.begin(),
+												  itEnd = m_selectedKeys->m_keys.end();
+			 it != itEnd; ++it )
 		{
 			m_originalKeyValues[( *it ).get()] = std::make_pair( ( *it )->getTime(), ( *it )->getValue() );
 		}
@@ -1361,7 +1453,9 @@ bool AnimationGadget::dragMove( GadgetPtr gadget, const DragDropEvent &event )
 			else
 			{
 				auto leftIt = std::prev( rightIt );
-				m_snappingClosestKey = std::abs( i.x - ( *leftIt )->getTime() ) < std::abs( i.x - ( *rightIt )->getTime() ) ? *leftIt : *rightIt;
+				m_snappingClosestKey =
+					std::abs( i.x - ( *leftIt )->getTime() ) < std::abs( i.x - ( *rightIt )->getTime() ) ? *leftIt :
+																										   *rightIt;
 			}
 		}
 
@@ -1435,7 +1529,9 @@ bool AnimationGadget::dragEnd( GadgetPtr gadget, const DragDropEvent &event )
 	}
 
 	ViewportGadget *viewportGadget = ancestor<ViewportGadget>();
-	viewportGadget->setDragTracking( ViewportGadget::DragTracking::XDragTracking | ViewportGadget::DragTracking::YDragTracking );
+	viewportGadget->setDragTracking(
+		ViewportGadget::DragTracking::XDragTracking | ViewportGadget::DragTracking::YDragTracking
+	);
 
 	m_dragMode = DragMode::None;
 	m_moveAxis = MoveAxis::Both;
@@ -1565,7 +1661,9 @@ Animation::ConstKeyPtr AnimationGadget::keyAt( const IECore::LineSegment3f &posi
 				keys.emplace_back( &key );
 				selector->loadName( name++ );
 				V2f keyPosition = viewportGadget->worldToRasterSpace( V3f( key.getTime(), key.getValue(), 0 ) );
-				style->renderAnimationKey( keyPosition, Style::NormalState, 4.0 ); // slightly bigger for easier selection
+				style->renderAnimationKey(
+					keyPosition, Style::NormalState, 4.0
+				); // slightly bigger for easier selection
 			}
 		}
 	}
@@ -1578,7 +1676,9 @@ Animation::ConstKeyPtr AnimationGadget::keyAt( const IECore::LineSegment3f &posi
 	return keys[selection[0].name - 1];
 }
 
-std::pair<Gaffer::Animation::KeyPtr, Gaffer::Animation::Direction> AnimationGadget::tangentAt( const IECore::LineSegment3f &position )
+std::pair<Gaffer::Animation::KeyPtr, Gaffer::Animation::Direction> AnimationGadget::tangentAt(
+	const IECore::LineSegment3f &position
+)
 {
 	const std::pair<Animation::ConstKeyPtr, Animation::Direction> result =
 		static_cast<const AnimationGadget *>( this )->tangentAt( position );
@@ -1587,7 +1687,9 @@ std::pair<Gaffer::Animation::KeyPtr, Gaffer::Animation::Direction> AnimationGadg
 	);
 }
 
-std::pair<Gaffer::Animation::ConstKeyPtr, Gaffer::Animation::Direction> AnimationGadget::tangentAt( const IECore::LineSegment3f &position ) const
+std::pair<Gaffer::Animation::ConstKeyPtr, Gaffer::Animation::Direction> AnimationGadget::tangentAt(
+	const IECore::LineSegment3f &position
+) const
 {
 	std::pair<Animation::ConstKeyPtr, Animation::Direction> result( nullptr, Animation::Direction::In );
 
@@ -1622,22 +1724,28 @@ std::pair<Gaffer::Animation::ConstKeyPtr, Gaffer::Animation::Direction> Animatio
 					const Animation::Tangent &in = key.tangentIn();
 					const Animation::Tangent &out = previousKey->tangentOut();
 
-					if( ( isSelected || previousKeySelected ) && ( !out.slopeIsConstrained() || !out.scaleIsConstrained() ) )
+					if( ( isSelected || previousKeySelected ) &&
+						( !out.slopeIsConstrained() || !out.scaleIsConstrained() ) )
 					{
 						const V2d outPosKey = out.getPosition();
 						const V2f outPosRas = viewportGadget->worldToRasterSpace( V3f( outPosKey.x, outPosKey.y, 0 ) );
 						selector->loadName( name );
-						style->renderSolidRectangle( Box2f( outPosRas - V2f( 4.0 ), outPosRas + V2f( 4.0 ) ) ); // slightly bigger for easier selection
+						style->renderSolidRectangle(
+							Box2f( outPosRas - V2f( 4.0 ), outPosRas + V2f( 4.0 ) )
+						); // slightly bigger for easier selection
 					}
 
 					++name;
 
-					if( ( isSelected || previousKeySelected ) && ( !in.slopeIsConstrained() || !in.scaleIsConstrained() ) )
+					if( ( isSelected || previousKeySelected ) &&
+						( !in.slopeIsConstrained() || !in.scaleIsConstrained() ) )
 					{
 						const V2d inPosKey = in.getPosition();
 						const V2f inPosRas = viewportGadget->worldToRasterSpace( V3f( inPosKey.x, inPosKey.y, 0 ) );
 						selector->loadName( name );
-						style->renderSolidRectangle( Box2f( inPosRas - V2f( 4.0 ), inPosRas + V2f( 4.0 ) ) ); // slightly bigger for easier selection
+						style->renderSolidRectangle(
+							Box2f( inPosRas - V2f( 4.0 ), inPosRas + V2f( 4.0 ) )
+						); // slightly bigger for easier selection
 					}
 
 					++name;
@@ -1708,7 +1816,9 @@ bool AnimationGadget::frameIndicatorUnderMouse( const IECore::LineSegment3f &pos
 
 		selector->loadName( name );
 
-		renderFrameIndicator( static_cast<int>( m_context->getFrame() ), style, /* preview = */ false, /* lineWidth = */ 4.0 );
+		renderFrameIndicator(
+			static_cast<int>( m_context->getFrame() ), style, /* preview = */ false, /* lineWidth = */ 4.0
+		);
 	}
 
 	return !hits.empty();
@@ -1787,11 +1897,17 @@ void AnimationGadget::renderCurve( const Animation::CurvePlug *curvePlug, const 
 		{
 			case Gaffer::Animation::Extrapolation::Constant :
 			case Gaffer::Animation::Extrapolation::Linear :
-				m_vertices.push_back( viewportGadget->worldToRasterSpace( V3f( keyIn->getTime(), keyIn->getValue(), 0 ) ) );
-				m_vertices.push_back( viewportGadget->worldToRasterSpace( V3f( tmin, curvePlug->evaluate( tmin ), 0 ) ) );
+				m_vertices.push_back(
+					viewportGadget->worldToRasterSpace( V3f( keyIn->getTime(), keyIn->getValue(), 0 ) )
+				);
+				m_vertices.push_back(
+					viewportGadget->worldToRasterSpace( V3f( tmin, curvePlug->evaluate( tmin ), 0 ) )
+				);
 				break;
 			default :
-				evaluateCurve( curvePlug, std::min( tmax, keyIn->getTime() ), tmin, unitPerPx, viewportGadget, m_vertices );
+				evaluateCurve(
+					curvePlug, std::min( tmax, keyIn->getTime() ), tmin, unitPerPx, viewportGadget, m_vertices
+				);
 				break;
 		}
 		style->renderAnimationCurve( m_vertices, /* inKeyRange = */ false, styleState, &color3 );
@@ -1822,7 +1938,10 @@ void AnimationGadget::renderCurve( const Animation::CurvePlug *curvePlug, const 
 					m_vertices.push_back( keyPosition );
 					break;
 				default :
-					evaluateCurve( curvePlug, std::max( tmin, previousKey->getTime() ), std::min( tmax, key.getTime() ), unitPerPx, viewportGadget, m_vertices );
+					evaluateCurve(
+						curvePlug, std::max( tmin, previousKey->getTime() ), std::min( tmax, key.getTime() ), unitPerPx,
+						viewportGadget, m_vertices
+					);
 					break;
 			}
 		}
@@ -1843,11 +1962,17 @@ void AnimationGadget::renderCurve( const Animation::CurvePlug *curvePlug, const 
 		{
 			case Gaffer::Animation::Extrapolation::Constant :
 			case Gaffer::Animation::Extrapolation::Linear :
-				m_vertices.push_back( viewportGadget->worldToRasterSpace( V3f( keyOut->getTime(), keyOut->getValue(), 0 ) ) );
-				m_vertices.push_back( viewportGadget->worldToRasterSpace( V3f( tmax, curvePlug->evaluate( tmax ), 0 ) ) );
+				m_vertices.push_back(
+					viewportGadget->worldToRasterSpace( V3f( keyOut->getTime(), keyOut->getValue(), 0 ) )
+				);
+				m_vertices.push_back(
+					viewportGadget->worldToRasterSpace( V3f( tmax, curvePlug->evaluate( tmax ), 0 ) )
+				);
 				break;
 			default :
-				evaluateCurve( curvePlug, std::max( tmin, keyOut->getTime() ), tmax, unitPerPx, viewportGadget, m_vertices );
+				evaluateCurve(
+					curvePlug, std::max( tmin, keyOut->getTime() ), tmax, unitPerPx, viewportGadget, m_vertices
+				);
 				break;
 		}
 		style->renderAnimationCurve( m_vertices, /* inKeyRange = */ false, styleState, &color3 );
@@ -1860,20 +1985,35 @@ void AnimationGadget::renderFrameIndicator( int frame, const Style *style, bool 
 	Imath::V2i resolution = viewportGadget->getViewport();
 	ViewportGadget::RasterScope rasterScope( viewportGadget );
 
-	const Imath::Color4f frameIndicatorColor = preview ? Imath::Color4f( 120 / 255.0f, 120 / 255.0f, 120 / 255.0f, 1.0f ) : Imath::Color4f( 240 / 255.0, 220 / 255.0, 40 / 255.0, 1.0f );
+	const Imath::Color4f frameIndicatorColor = preview ?
+		Imath::Color4f( 120 / 255.0f, 120 / 255.0f, 120 / 255.0f, 1.0f ) :
+		Imath::Color4f( 240 / 255.0, 220 / 255.0, 40 / 255.0, 1.0f );
 
-	int currentFrameRasterPosition = viewportGadget->worldToRasterSpace( V3f( frameToTime<float>( m_context->getFramesPerSecond(), frame ), 0, 0 ) ).x;
-	style->renderLine( IECore::LineSegment3f( V3f( currentFrameRasterPosition, 0, 0 ), V3f( currentFrameRasterPosition, resolution.y, 0 ) ), lineWidth, &frameIndicatorColor );
+	int currentFrameRasterPosition =
+		viewportGadget->worldToRasterSpace( V3f( frameToTime<float>( m_context->getFramesPerSecond(), frame ), 0, 0 ) )
+			.x;
+	style->renderLine(
+		IECore::LineSegment3f(
+			V3f( currentFrameRasterPosition, 0, 0 ), V3f( currentFrameRasterPosition, resolution.y, 0 )
+		),
+		lineWidth, &frameIndicatorColor
+	);
 
 	if( !preview )
 	{
 		Imath::Color4f frameLabelColor( 60.0 / 255, 60.0 / 255, 60.0 / 255, 1.0 );
 
 		Box3f frameLabelBound = style->textBound( Style::BodyText, std::to_string( frame ) );
-		style->renderSolidRectangle( Box2f( V2f( currentFrameRasterPosition, resolution.y - m_yMargin ), V2f( currentFrameRasterPosition + frameLabelBound.size().x * m_textScale + 2 * m_labelPadding, resolution.y - m_yMargin - frameLabelBound.size().y * m_textScale - 2 * m_labelPadding ) ) );
+		style->renderSolidRectangle( Box2f(
+			V2f( currentFrameRasterPosition, resolution.y - m_yMargin ),
+			V2f( currentFrameRasterPosition + frameLabelBound.size().x * m_textScale + 2 * m_labelPadding,
+				 resolution.y - m_yMargin - frameLabelBound.size().y * m_textScale - 2 * m_labelPadding )
+		) );
 
 		glPushMatrix();
-		glTranslatef( currentFrameRasterPosition + m_labelPadding, resolution.y - m_yMargin - m_labelPadding, 0 ); // \todo
+		glTranslatef(
+			currentFrameRasterPosition + m_labelPadding, resolution.y - m_yMargin - m_labelPadding, 0
+		); // \todo
 		glScalef( m_textScale, -m_textScale, m_textScale );
 		style->renderText( Style::BodyText, std::to_string( frame ), Style::NormalState, &frameLabelColor );
 		glPopMatrix();

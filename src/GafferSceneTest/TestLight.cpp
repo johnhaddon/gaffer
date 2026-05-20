@@ -47,11 +47,6 @@ using namespace GafferSceneTest;
 
 GAFFER_NODE_DEFINE_TYPE( TestLight )
 
-TestLight::TestLight( const std::string &name )
-	: Light( name, new TestShader() )
-{
-}
+TestLight::TestLight( const std::string &name ) : Light( name, new TestShader() ) {}
 
-TestLight::~TestLight()
-{
-}
+TestLight::~TestLight() {}

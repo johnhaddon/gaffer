@@ -154,16 +154,20 @@ void addBarndoor( IECoreGL::GroupPtr result, BarndoorLocation location, float co
 class BarndoorVisualiser final : public LightFilterVisualiser
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( BarndoorVisualiser )
 
 	BarndoorVisualiser();
 	~BarndoorVisualiser() override;
 
-	Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
+	Visualisations visualise(
+		const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork,
+		const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes,
+		IECoreGL::ConstStatePtr &state
+	) const override;
 
-	protected:
+protected:
 
 	static LightFilterVisualiser::LightFilterVisualiserDescription<BarndoorVisualiser> g_visualiserDescription;
 };
@@ -171,17 +175,19 @@ class BarndoorVisualiser final : public LightFilterVisualiser
 IE_CORE_DECLAREPTR( BarndoorVisualiser )
 
 // register the new visualiser
-LightFilterVisualiser::LightFilterVisualiserDescription<BarndoorVisualiser> BarndoorVisualiser::g_visualiserDescription( "ai:lightFilter", "barndoor" );
+LightFilterVisualiser::LightFilterVisualiserDescription<BarndoorVisualiser> BarndoorVisualiser::g_visualiserDescription(
+	"ai:lightFilter", "barndoor"
+);
 
-BarndoorVisualiser::BarndoorVisualiser()
-{
-}
+BarndoorVisualiser::BarndoorVisualiser() {}
 
-BarndoorVisualiser::~BarndoorVisualiser()
-{
-}
+BarndoorVisualiser::~BarndoorVisualiser() {}
 
-Visualisations BarndoorVisualiser::visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const
+Visualisations BarndoorVisualiser::visualise(
+	const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork,
+	const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes,
+	IECoreGL::ConstStatePtr &state
+) const
 {
 	if( !lightShaderNetwork )
 	{
@@ -214,23 +220,19 @@ Visualisations BarndoorVisualiser::visualise( const IECore::InternedString &attr
 	{
 		IECore::CompoundObjectPtr parameters = new CompoundObject;
 
-		result->getState()->add(
-			new IECoreGL::ShaderStateComponent(
-				ShaderLoader::defaultShaderLoader(),
-				TextureLoader::defaultTextureLoader(),
-				"",
-				"",
-				barndoorFragSource(),
-				parameters
-			)
-		);
+		result->getState()->add( new IECoreGL::ShaderStateComponent(
+			ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "", barndoorFragSource(),
+			parameters
+		) );
 
 		float innerAngle;
 		float coneAngle;
 		float radius;
 		float lensRadius;
 
-		StandardLightVisualiser::spotlightParameters( "ai:light", lightShaderNetwork, innerAngle, coneAngle, radius, lensRadius );
+		StandardLightVisualiser::spotlightParameters(
+			"ai:light", lightShaderNetwork, innerAngle, coneAngle, radius, lensRadius
+		);
 
 		const float halfAngle = 0.5 * M_PI * coneAngle / 180.0;
 		const float baseRadius = sin( halfAngle ) + lensRadius;

@@ -50,7 +50,7 @@ namespace GafferScene
 struct GAFFERSCENE_API CameraQuery : Gaffer::ComputeNode
 {
 
-	public:
+public:
 
 	enum class CameraMode
 	{
@@ -90,10 +90,7 @@ struct GAFFERSCENE_API CameraQuery : Gaffer::ComputeNode
 	/// The returned StringPlug is parented to queriesPlug() and may be edited
 	/// subsequently to modify the parameter name. Corresponding children are added
 	/// to outPlug() to provide the output from the query.
-	Gaffer::StringPlug *addQuery(
-		const Gaffer::ValuePlug *plug,
-		const std::string &parameter = ""
-	);
+	Gaffer::StringPlug *addQuery( const Gaffer::ValuePlug *plug, const std::string &parameter = "" );
 	/// Removes a query. Throws an Exception if the query or corresponding children
 	/// of `outPlug()` can not be deleted.
 	void removeQuery( Gaffer::StringPlug *plug );
@@ -113,12 +110,12 @@ struct GAFFERSCENE_API CameraQuery : Gaffer::ComputeNode
 	const Gaffer::StringPlug *queryPlug( const Gaffer::ValuePlug *outputPlug ) const;
 	const Gaffer::ValuePlug *outPlug( const Gaffer::ValuePlug *outputPlug ) const;
 
-	protected:
+protected:
 
 	void hash( Gaffer::ValuePlug const *output, Gaffer::Context const *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, Gaffer::Context const *context ) const override;
 
-	private:
+private:
 
 	Gaffer::AtomicCompoundDataPlug *internalParametersPlug();
 	const Gaffer::AtomicCompoundDataPlug *internalParametersPlug() const;

@@ -507,12 +507,8 @@ std::string const g_orientationShaderFragSource(
 //-----------------------------------------------------------------------------
 
 void drawStrokedText(
-	const ViewportGadget *viewportGadget,
-	const std::string &text,
-	const float size,
-	const V2f &rasterPosition,
-	const Style *style,
-	const Style::State state
+	const ViewportGadget *viewportGadget, const std::string &text, const float size, const V2f &rasterPosition,
+	const Style *style, const Style::State state
 )
 {
 	ViewportGadget::RasterScope raster( viewportGadget );
@@ -544,7 +540,9 @@ void drawStrokedText(
 
 std::string primitiveVariableFromDataName( const std::string &dataName )
 {
-	const std::string name = boost::starts_with( dataName, g_primitiveVariablePrefix ) ? dataName.c_str() + g_primitiveVariablePrefixSize : "";
+	const std::string name = boost::starts_with( dataName, g_primitiveVariablePrefix ) ?
+		dataName.c_str() + g_primitiveVariablePrefixSize :
+		"";
 
 	return name;
 }
@@ -587,24 +585,26 @@ class UniformPLocator : public PrimitiveVariableProcessor
 	/// Peforming this operation as a node allows us to use Gaffer's usual plug caching to store the result
 	/// of the computation, rather than using a separate cache just for this.
 
-	public:
+public:
 
-	UniformPLocator( const std::string &name = defaultName<UniformPLocator>() ) : PrimitiveVariableProcessor( name, IECore::PathMatcher::NoMatch )
+	UniformPLocator( const std::string &name = defaultName<UniformPLocator>() )
+		: PrimitiveVariableProcessor( name, IECore::PathMatcher::NoMatch )
 	{
 		namesPlug()->setValue( "P" );
 	}
 
-	~UniformPLocator() override
-	{
-	}
+	~UniformPLocator() override {}
 
 	GAFFER_NODE_DECLARE_TYPE( UniformPLocator, UniformPLocatorTypeId, PrimitiveVariableProcessor );
 
-	protected:
+protected:
 
-	void processPrimitiveVariable( const ScenePath &path, const Context *context, ConstPrimitivePtr inputGeometry, PrimitiveVariable &inputVariable ) const override
+	void processPrimitiveVariable(
+		const ScenePath &path, const Context *context, ConstPrimitivePtr inputGeometry, PrimitiveVariable &inputVariable
+	) const override
 	{
-		if( inputGeometry->typeId() != MeshPrimitive::staticTypeId() && inputGeometry->typeId() != CurvesPrimitive::staticTypeId() )
+		if( inputGeometry->typeId() != MeshPrimitive::staticTypeId() &&
+			inputGeometry->typeId() != CurvesPrimitive::staticTypeId() )
 		{
 			return;
 		}
@@ -644,14 +644,7 @@ class UniformPLocator : public PrimitiveVariableProcessor
 
 				if( numFaceVerts == 3 )
 				{
-					resultP.push_back(
-						(
-							p[verts[pI]] +
-							p[verts[pI + 1]] +
-							p[verts[pI + 2]]
-						) *
-						( 1.f / 3.f )
-					);
+					resultP.push_back( ( p[verts[pI]] + p[verts[pI + 1]] + p[verts[pI + 2]] ) * ( 1.f / 3.f ) );
 				}
 				else
 				{
@@ -713,28 +706,24 @@ enum class VisualiserShaderType
 class VisualiserGadget : public Gadget
 {
 
-	public:
+public:
 
-	explicit VisualiserGadget( const VisualiserTool &tool, const std::string &name = defaultName<VisualiserGadget>() ) : Gadget( name ),
-																														 m_tool( &tool ),
-																														 m_vertexLabelStorageCapacity( 0 ),
-																														 m_cursorVertexValue()
+	explicit VisualiserGadget( const VisualiserTool &tool, const std::string &name = defaultName<VisualiserGadget>() )
+		: Gadget( name ),
+		  m_tool( &tool ),
+		  m_vertexLabelStorageCapacity( 0 ),
+		  m_cursorVertexValue()
 	{
 	}
 
-	void resetTool()
-	{
-		m_tool = nullptr;
-	}
+	void resetTool() { m_tool = nullptr; }
 
-	protected:
+protected:
 
 	void renderLayer( Gadget::Layer layer, const Style *style, Gadget::RenderReason reason ) const override
 	{
-		if(
-			( layer != Gadget::Layer::MidFront && layer != Gadget::Layer::Front ) ||
-			Gadget::isSelectionRender( reason )
-		)
+		if( ( layer != Gadget::Layer::MidFront && layer != Gadget::Layer::Front ) ||
+			Gadget::isSelectionRender( reason ) )
 		{
 			return;
 		}
@@ -775,20 +764,21 @@ class VisualiserGadget : public Gadget
 
 	unsigned layerMask() const override
 	{
-		return m_tool ? static_cast<unsigned>( Gadget::Layer::MidFront | Gadget::Layer::Front ) : static_cast<unsigned>( 0 );
+		return m_tool ? static_cast<unsigned>( Gadget::Layer::MidFront | Gadget::Layer::Front ) :
+						static_cast<unsigned>( 0 );
 	}
 
-	private:
+private:
 
 	friend VisualiserTool;
 
-	void buildShader( IECoreGL::ConstShaderPtr &shader, const std::string &vertSource, const std::string &fragSource ) const
+	void buildShader(
+		IECoreGL::ConstShaderPtr &shader, const std::string &vertSource, const std::string &fragSource
+	) const
 	{
 		if( !shader )
 		{
-			shader = IECoreGL::ShaderLoader::defaultShaderLoader()->create(
-				vertSource, std::string(), fragSource
-			);
+			shader = IECoreGL::ShaderLoader::defaultShaderLoader()->create( vertSource, std::string(), fragSource );
 			if( shader )
 			{
 				const GLuint program = shader->program();
@@ -809,12 +799,9 @@ class VisualiserGadget : public Gadget
 	{
 		// Get the name of the primitive variable to visualise
 		const std::string name = primitiveVariableFromDataName( m_tool->dataNamePlug()->getValue() );
-		if(
-			name.empty() ||
-			( mode != VisualiserTool::Mode::Auto &&
-			  mode != VisualiserTool::Mode::Color &&
-			  mode != VisualiserTool::Mode::ColorAutoRange )
-		)
+		if( name.empty() ||
+			( mode != VisualiserTool::Mode::Auto && mode != VisualiserTool::Mode::Color &&
+			  mode != VisualiserTool::Mode::ColorAutoRange ) )
 		{
 			return;
 		}
@@ -1051,7 +1038,8 @@ class VisualiserGadget : public Gadget
 					stride = 2;
 					offset = true;
 					uniforms.valueMin = valueRange ? V3f( valueMin.x, valueMin.y, 0.f ) : V3f( 0.f );
-					uniforms.valueRange = valueRange ? V3f( valueRange.value().x, valueRange.value().y, 0.f ) : V3f( 1.f, 1.f, 0.f );
+					uniforms.valueRange =
+						valueRange ? V3f( valueRange.value().x, valueRange.value().y, 0.f ) : V3f( 1.f, 1.f, 0.f );
 					break;
 				case Color3fVectorDataTypeId :
 					stride = 3;
@@ -1091,22 +1079,14 @@ class VisualiserGadget : public Gadget
 			glBindBuffer( GL_ARRAY_BUFFER, vBuffer->buffer() );
 			glVertexAttribPointer( ATTRIB_GLSL_LOCATION_VSX, 1, type, GL_FALSE, stride * sizeof( GLfloat ), nullptr );
 			glVertexAttribPointer(
-				ATTRIB_GLSL_LOCATION_VSY,
-				1,
-				type,
-				GL_FALSE,
-				stride * sizeof( GLfloat ),
+				ATTRIB_GLSL_LOCATION_VSY, 1, type, GL_FALSE, stride * sizeof( GLfloat ),
 				(void const *)( ( offset ? 1 : 0 ) * sizeof( GLfloat ) )
 			);
 			if( enableVSZ )
 			{
 				glEnableVertexAttribArray( ATTRIB_GLSL_LOCATION_VSZ );
 				glVertexAttribPointer(
-					ATTRIB_GLSL_LOCATION_VSZ,
-					1,
-					type,
-					GL_FALSE,
-					stride * sizeof( GLfloat ),
+					ATTRIB_GLSL_LOCATION_VSZ, 1, type, GL_FALSE, stride * sizeof( GLfloat ),
 					(void const *)( ( offset ? 2 : 0 ) * sizeof( GLfloat ) )
 				);
 			}
@@ -1165,20 +1145,17 @@ class VisualiserGadget : public Gadget
 			return;
 		}
 
-		if(
-			mode != VisualiserTool::Mode::Auto &&
-			mode != VisualiserTool::Mode::Color &&
-			mode != VisualiserTool::Mode::ColorAutoRange
-		)
+		if( mode != VisualiserTool::Mode::Auto && mode != VisualiserTool::Mode::Color &&
+			mode != VisualiserTool::Mode::ColorAutoRange )
 		{
 			return;
 		}
 
 		const VisualiserTool::CursorValue value = m_tool->cursorValue();
 
-		if(
-			mode == VisualiserTool::Mode::Auto && ( std::holds_alternative<int>( value ) || std::holds_alternative<V3f>( value ) || std::holds_alternative<Quatf>( value ) )
-		)
+		if( mode == VisualiserTool::Mode::Auto &&
+			( std::holds_alternative<int>( value ) || std::holds_alternative<V3f>( value ) ||
+			  std::holds_alternative<Quatf>( value ) ) )
 		{
 			return;
 		}
@@ -1196,11 +1173,7 @@ class VisualiserGadget : public Gadget
 				//        "up" the screen rather than "down", so invert y to ensure text is not upside down.
 
 				drawStrokedText(
-					viewportGadget,
-					text,
-					m_tool->sizePlug()->getValue(),
-					cursorPos.value(),
-					style,
+					viewportGadget, text, m_tool->sizePlug()->getValue(), cursorPos.value(), style,
 					Style::State::NormalState
 				);
 			}
@@ -1208,7 +1181,9 @@ class VisualiserGadget : public Gadget
 	}
 
 	/// See comment for `renderColorVisualiser()` for requirements for handling `mode`.
-	void renderVertexLabelValue( const ViewportGadget *viewportGadget, const Style *style, VisualiserTool::Mode mode ) const
+	void renderVertexLabelValue(
+		const ViewportGadget *viewportGadget, const Style *style, VisualiserTool::Mode mode
+	) const
 	{
 		if( mode != VisualiserTool::Mode::Auto && mode != VisualiserTool::Mode::VertexLabel )
 		{
@@ -1310,9 +1285,7 @@ class VisualiserGadget : public Gadget
 
 		const Imath::Box2i viewport( Imath::V2i( 0 ), viewportGadget->getViewport() );
 		const float cursorRadius2 =
-			cursorRasterPos && viewport.intersects( cursorRasterPos.value() ) ?
-			g_cursorRadius2 :
-			0.f;
+			cursorRasterPos && viewport.intersects( cursorRasterPos.value() ) ? g_cursorRadius2 : 0.f;
 
 		const std::string dataName = m_tool->dataNamePlug()->getValue();
 		const std::string primitiveVariableName = primitiveVariableFromDataName( dataName );
@@ -1355,9 +1328,7 @@ class VisualiserGadget : public Gadget
 			if( dataName != g_vertexIndexDataName && dataName != g_uniformIndexDataName )
 			{
 				labelData = primitive->expandedVariableData<Data>(
-					primitiveVariableName,
-					IECoreScene::PrimitiveVariable::Vertex,
-					false /* throwIfInvalid */
+					primitiveVariableName, IECoreScene::PrimitiveVariable::Vertex, false /* throwIfInvalid */
 				);
 
 				if( labelData )
@@ -1367,18 +1338,14 @@ class VisualiserGadget : public Gadget
 
 				else
 				{
-					if(
-						primitive->typeId() != MeshPrimitive::staticTypeId() &&
-						primitive->typeId() != CurvesPrimitive::staticTypeId()
-					)
+					if( primitive->typeId() != MeshPrimitive::staticTypeId() &&
+						primitive->typeId() != CurvesPrimitive::staticTypeId() )
 					{
 						continue;
 					}
 
 					labelData = primitive->expandedVariableData<Data>(
-						primitiveVariableName,
-						PrimitiveVariable::Uniform,
-						false /* throwIfInvalid */
+						primitiveVariableName, PrimitiveVariable::Uniform, false /* throwIfInvalid */
 					);
 
 					if( !labelData )
@@ -1389,13 +1356,9 @@ class VisualiserGadget : public Gadget
 					labelDataInterpolation = PrimitiveVariable::Interpolation::Uniform;
 				}
 
-				if(
-					mode == VisualiserTool::Mode::Auto &&
-					primitive->typeId() == MeshPrimitive::staticTypeId() &&
-					labelData->typeId() != IntVectorDataTypeId &&
-					labelData->typeId() != V3fVectorDataTypeId &&
-					labelData->typeId() != QuatfVectorDataTypeId
-				)
+				if( mode == VisualiserTool::Mode::Auto && primitive->typeId() == MeshPrimitive::staticTypeId() &&
+					labelData->typeId() != IntVectorDataTypeId && labelData->typeId() != V3fVectorDataTypeId &&
+					labelData->typeId() != QuatfVectorDataTypeId )
 				{
 					// Will be handled by `renderColorVisualiser()` instead.
 					// If the data type is V3f or Quatf data, we continue right
@@ -1404,20 +1367,16 @@ class VisualiserGadget : public Gadget
 					continue;
 				}
 
-				if(
-					labelData->typeId() != IntVectorDataTypeId &&
-					labelData->typeId() != FloatVectorDataTypeId &&
-					labelData->typeId() != V2fVectorDataTypeId &&
-					labelData->typeId() != V3fVectorDataTypeId &&
-					labelData->typeId() != Color3fVectorDataTypeId &&
-					labelData->typeId() != QuatfVectorDataTypeId
-				)
+				if( labelData->typeId() != IntVectorDataTypeId && labelData->typeId() != FloatVectorDataTypeId &&
+					labelData->typeId() != V2fVectorDataTypeId && labelData->typeId() != V3fVectorDataTypeId &&
+					labelData->typeId() != Color3fVectorDataTypeId && labelData->typeId() != QuatfVectorDataTypeId )
 				{
 					continue;
 				}
 			}
 
-			if( dataName == g_uniformIndexDataName || labelDataInterpolation == PrimitiveVariable::Interpolation::Uniform )
+			if( dataName == g_uniformIndexDataName ||
+				labelDataInterpolation == PrimitiveVariable::Interpolation::Uniform )
 			{
 				try
 				{
@@ -1434,9 +1393,8 @@ class VisualiserGadget : public Gadget
 				}
 			}
 
-			if(
-				mode == VisualiserTool::Mode::Auto && labelData && ( labelData->typeId() == V3fVectorDataTypeId || labelData->typeId() == QuatfVectorDataTypeId )
-			)
+			if( mode == VisualiserTool::Mode::Auto && labelData &&
+				( labelData->typeId() == V3fVectorDataTypeId || labelData->typeId() == QuatfVectorDataTypeId ) )
 			{
 				cursorVertexValueTextScale = 1.f;
 			}
@@ -1474,9 +1432,7 @@ class VisualiserGadget : public Gadget
 			//        vertex interpolation.
 
 			ConstV3fVectorDataPtr pData = primitive->expandedVariableData<IECore::V3fVectorData>(
-				g_pName,
-				labelDataInterpolation,
-				false /* throwIfInvalid */
+				g_pName, labelDataInterpolation, false /* throwIfInvalid */
 			);
 
 			if( !pData )
@@ -1495,24 +1451,16 @@ class VisualiserGadget : public Gadget
 			// Upload opengl uniform block data
 
 			glBindBufferBase( GL_UNIFORM_BUFFER, g_uniformBlockBindingIndex, m_vertexLabelUniformBuffer->buffer() );
-			glBufferData(
-				GL_UNIFORM_BUFFER,
-				sizeof( UniformBlockVertexLabelShader ),
-				&uniforms,
-				GL_DYNAMIC_DRAW
-			);
+			glBufferData( GL_UNIFORM_BUFFER, sizeof( UniformBlockVertexLabelShader ), &uniforms, GL_DYNAMIC_DRAW );
 
 			// Ensure storage buffer capacity
 
 			glBindBufferBase(
-				GL_SHADER_STORAGE_BUFFER,
-				g_storageBlockBindingIndex,
-				m_vertexLabelStorageBuffer->buffer()
+				GL_SHADER_STORAGE_BUFFER, g_storageBlockBindingIndex, m_vertexLabelStorageBuffer->buffer()
 			);
 
 			const std::size_t storageCapacity =
-				( pData->readable().size() / static_cast<std::size_t>( 32 ) ) +
-				static_cast<std::size_t>( 1 );
+				( pData->readable().size() / static_cast<std::size_t>( 32 ) ) + static_cast<std::size_t>( 1 );
 			const std::size_t storageSize = sizeof( std::uint32_t ) * storageCapacity;
 
 			if( m_vertexLabelStorageCapacity < storageCapacity )
@@ -1528,13 +1476,7 @@ class VisualiserGadget : public Gadget
 
 			const GLuint zeroValue = 0u;
 			glClearBufferSubData(
-				GL_SHADER_STORAGE_BUFFER,
-				GL_R32UI,
-				0,
-				storageSize,
-				GL_RED_INTEGER,
-				GL_UNSIGNED_INT,
-				&zeroValue
+				GL_SHADER_STORAGE_BUFFER, GL_R32UI, 0, storageSize, GL_RED_INTEGER, GL_UNSIGNED_INT, &zeroValue
 			);
 
 			// Set opengl state
@@ -1572,14 +1514,7 @@ class VisualiserGadget : public Gadget
 			// Draw points and ouput visibility to storage buffer
 
 			glBindBuffer( GL_ARRAY_BUFFER, pBuffer->buffer() );
-			glVertexAttribPointer(
-				ATTRIB_GLSL_LOCATION_PS,
-				3,
-				GL_FLOAT,
-				GL_FALSE,
-				0,
-				nullptr
-			);
+			glVertexAttribPointer( ATTRIB_GLSL_LOCATION_PS, 3, GL_FLOAT, GL_FALSE, 0, nullptr );
 			glDrawArrays( GL_POINTS, 0, static_cast<GLsizei>( pData->readable().size() ) );
 
 			// Restore opengl state
@@ -1611,12 +1546,7 @@ class VisualiserGadget : public Gadget
 			// Map storage buffer
 
 			auto vBuffer = static_cast<const std::uint32_t *>(
-				glMapBufferRange(
-					GL_SHADER_STORAGE_BUFFER,
-					0,
-					storageSize,
-					GL_MAP_READ_BIT
-				)
+				glMapBufferRange( GL_SHADER_STORAGE_BUFFER, 0, storageSize, GL_MAP_READ_BIT )
 			);
 			glBindBuffer( GL_SHADER_STORAGE_BUFFER, storageBinding );
 
@@ -1696,9 +1626,9 @@ class VisualiserGadget : public Gadget
 								}
 							}
 
-							if(
-								mode == VisualiserTool::Mode::Auto && labelData && ( labelData->typeId() == V3fVectorDataTypeId || labelData->typeId() == QuatfVectorDataTypeId )
-							)
+							if( mode == VisualiserTool::Mode::Auto && labelData &&
+								( labelData->typeId() == V3fVectorDataTypeId ||
+								  labelData->typeId() == QuatfVectorDataTypeId ) )
 							{
 								// Do everything except drawing the per-vertex value. That will
 								// be handled by `renderVectorVisualiser()` instead.
@@ -1712,15 +1642,12 @@ class VisualiserGadget : public Gadget
 								const std::string text = std::visit( stringFromValue, vertexValue );
 
 								drawStrokedText(
-									viewportGadget,
-									text,
-									size,
-									V2f(
-										rasterPos.value().x - style->textBound( GafferUI::Style::LabelText, text ).size().x * 0.5f * scale.x,
-										rasterPos.value().y
-									),
-									style,
-									Style::State::NormalState
+									viewportGadget, text, size,
+									V2f( rasterPos.value().x -
+											 style->textBound( GafferUI::Style::LabelText, text ).size().x * 0.5f *
+												 scale.x,
+										 rasterPos.value().y ),
+									style, Style::State::NormalState
 								);
 							}
 						}
@@ -1746,15 +1673,12 @@ class VisualiserGadget : public Gadget
 			std::string const text = std::visit( stringFromValue, cursorVertexValue );
 
 			drawStrokedText(
-				viewportGadget,
-				text,
-				scale.x * cursorVertexValueTextScale,
-				V2f(
-					cursorVertexRasterPos.value().x - style->textBound( GafferUI::Style::LabelText, text ).size().x * 0.5f * cursorVertexValueTextScale * scale.x,
-					cursorVertexRasterPos.value().y
-				),
-				style,
-				Style::State::NormalState
+				viewportGadget, text, scale.x * cursorVertexValueTextScale,
+				V2f( cursorVertexRasterPos.value().x -
+						 style->textBound( GafferUI::Style::LabelText, text ).size().x * 0.5f *
+							 cursorVertexValueTextScale * scale.x,
+					 cursorVertexRasterPos.value().y ),
+				style, Style::State::NormalState
 			);
 		}
 
@@ -2260,10 +2184,7 @@ class VisualiserGadget : public Gadget
 		glUseProgram( shaderProgram );
 	}
 
-	VisualiserTool::CursorValue cursorVertexValue() const
-	{
-		return m_cursorVertexValue;
-	}
+	VisualiserTool::CursorValue cursorVertexValue() const { return m_cursorVertexValue; }
 
 	const VisualiserTool *m_tool;
 	mutable IECoreGL::ConstShaderPtr m_colorShader;
@@ -2314,19 +2235,20 @@ Tool::ToolDescription<VisualiserTool, SceneView> VisualiserTool::m_toolDescripti
 
 size_t VisualiserTool::g_firstPlugIndex = 0;
 
-VisualiserTool::VisualiserTool( SceneView *view, const std::string &name ) : SelectionTool( view, name ),
-																			 m_preRenderConnection(),
-																			 m_buttonPressConnection(),
-																			 m_dragBeginConnection(),
-																			 m_gadget( new VisualiserGadget( *this ) ),
-																			 m_selection(),
-																			 m_cursorPos(),
-																			 m_cursorValue(),
-																			 m_gadgetDirty( true ),
-																			 m_selectionDirty( true ),
-																			 m_priorityPathsDirty( true ),
-																			 m_valueAtButtonPress(),
-																			 m_initiatedDrag( false )
+VisualiserTool::VisualiserTool( SceneView *view, const std::string &name )
+	: SelectionTool( view, name ),
+	  m_preRenderConnection(),
+	  m_buttonPressConnection(),
+	  m_dragBeginConnection(),
+	  m_gadget( new VisualiserGadget( *this ) ),
+	  m_selection(),
+	  m_cursorPos(),
+	  m_cursorValue(),
+	  m_gadgetDirty( true ),
+	  m_selectionDirty( true ),
+	  m_priorityPathsDirty( true ),
+	  m_valueAtButtonPress(),
+	  m_initiatedDrag( false )
 {
 	view->viewportGadget()->addChild( m_gadget );
 	// We want to draw the visualiser gadget before other gadgets
@@ -2391,25 +2313,18 @@ VisualiserTool::VisualiserTool( SceneView *view, const std::string &name ) : Sel
 	//        edge of viewport when cursor leaves viewport's screen space. It also means that we do
 	//        not have to work out the cursor line and whether its valid when tool is made active.
 
-	sceneGadget()->enterSignal().connect(
-		boost::bind( &VisualiserTool::enter, this, boost::placeholders::_2 )
-	);
-	sceneGadget()->leaveSignal().connect(
-		boost::bind( &VisualiserTool::leave, this, boost::placeholders::_2 )
-	);
+	sceneGadget()->enterSignal().connect( boost::bind( &VisualiserTool::enter, this, boost::placeholders::_2 ) );
+	sceneGadget()->leaveSignal().connect( boost::bind( &VisualiserTool::leave, this, boost::placeholders::_2 ) );
 	sceneGadget()->mouseMoveSignal().connect(
 		boost::bind( &VisualiserTool::mouseMove, this, boost::placeholders::_2 )
 	);
 
-	plugDirtiedSignal().connect(
-		boost::bind( &VisualiserTool::plugDirtied, this, boost::placeholders::_1 )
-	);
-	plugSetSignal().connect(
-		boost::bind( &VisualiserTool::plugSet, this, boost::placeholders::_1 )
-	);
+	plugDirtiedSignal().connect( boost::bind( &VisualiserTool::plugDirtied, this, boost::placeholders::_1 ) );
+	plugSetSignal().connect( boost::bind( &VisualiserTool::plugSet, this, boost::placeholders::_1 ) );
 
 	view->contextChangedSignal().connect( boost::bind( &VisualiserTool::contextChanged, this ) );
-	ScriptNodeAlgo::selectedPathsChangedSignal( view->scriptNode() ).connect( boost::bind( &VisualiserTool::selectedPathsChanged, this ) );
+	ScriptNodeAlgo::selectedPathsChangedSignal( view->scriptNode() )
+		.connect( boost::bind( &VisualiserTool::selectedPathsChanged, this ) );
 }
 
 VisualiserTool::~VisualiserTool()
@@ -2546,9 +2461,8 @@ void VisualiserTool::connectOnActive()
 		boost::bind( &VisualiserTool::dragBegin, this, boost::placeholders::_2 )
 	);
 
-	m_preRenderConnection = view()->viewportGadget()->preRenderSignal().connect(
-		boost::bind( &VisualiserTool::preRender, this )
-	);
+	m_preRenderConnection =
+		view()->viewportGadget()->preRenderSignal().connect( boost::bind( &VisualiserTool::preRender, this ) );
 
 	// NOTE : redraw necessary to ensure value display updated.
 
@@ -2647,7 +2561,9 @@ bool VisualiserTool::keyPress( const KeyEvent &event )
 		}
 		else if( event.modifiers == KeyEvent::Modifiers::Shift )
 		{
-			vectorScalePlug()->setValue( std::max( vectorScalePlug()->getValue() - g_vectorScaleInc, g_vectorScaleMin ) );
+			vectorScalePlug()->setValue(
+				std::max( vectorScalePlug()->getValue() - g_vectorScaleInc, g_vectorScaleMin )
+			);
 		}
 	}
 
@@ -2742,27 +2658,17 @@ bool VisualiserTool::dragEnd( const DragDropEvent &event )
 
 void VisualiserTool::plugDirtied( const Plug *plug )
 {
-	if(
-		plug == activePlug() ||
-		plug == internalScenePlug()->objectPlug() ||
-		plug == internalScenePlug()->transformPlug() ||
-		plug == internalSceneUniformPPlug()->objectPlug() ||
-		plug == internalSceneUniformPPlug()->transformPlug()
-	)
+	if( plug == activePlug() || plug == internalScenePlug()->objectPlug() ||
+		plug == internalScenePlug()->transformPlug() || plug == internalSceneUniformPPlug()->objectPlug() ||
+		plug == internalSceneUniformPPlug()->transformPlug() )
 	{
 		m_selectionDirty = true;
 		m_gadgetDirty = true;
 		m_priorityPathsDirty = true;
 	}
 	else if(
-		plug == dataNamePlug() ||
-		plug == opacityPlug() ||
-		plug == valueMinPlug() ||
-		plug == valueMaxPlug() ||
-		plug == sizePlug() ||
-		plug == modePlug() ||
-		plug == vectorScalePlug() ||
-		plug == vectorColorPlug()
+		plug == dataNamePlug() || plug == opacityPlug() || plug == valueMinPlug() || plug == valueMaxPlug() ||
+		plug == sizePlug() || plug == modePlug() || plug == vectorScalePlug() || plug == vectorColorPlug()
 	)
 	{
 		m_gadgetDirty = true;
@@ -2983,13 +2889,10 @@ void VisualiserTool::updateCursorValue()
 
 	// Check current object is included in selection
 
-	const std::vector<Selection>::const_iterator sIt = std::find_if(
-		m_selection.begin(),
-		m_selection.end(),
-		[&path]( const Selection &item ) -> bool {
+	const std::vector<Selection>::const_iterator sIt =
+		std::find_if( m_selection.begin(), m_selection.end(), [&path]( const Selection &item ) -> bool {
 			return item.path() == path;
-		}
-	);
+		} );
 	if( sIt == m_selection.end() )
 	{
 		return;
@@ -3102,13 +3005,7 @@ void VisualiserTool::makeGadgetFirst()
 
 	GraphComponent::ChildContainer newChildren( oldChildren );
 
-	auto it = std::find_if(
-		newChildren.begin(),
-		newChildren.end(),
-		[this]( const auto &c ) {
-			return c == m_gadget;
-		}
-	);
+	auto it = std::find_if( newChildren.begin(), newChildren.end(), [this]( const auto &c ) { return c == m_gadget; } );
 	if( it != newChildren.end() && it != newChildren.begin() )
 	{
 		// `std::swap` would likely be more efficient, but losing the
@@ -3120,11 +3017,12 @@ void VisualiserTool::makeGadgetFirst()
 }
 
 VisualiserTool::Selection::Selection(
-	const ScenePlug &scene,
-	const ScenePlug &uniformPScene,
-	const ScenePlug::ScenePath &path,
-	const Context &context
-) : m_scene( &scene ), m_uniformPScene( &uniformPScene ), m_path( path ), m_context( &context )
+	const ScenePlug &scene, const ScenePlug &uniformPScene, const ScenePlug::ScenePath &path, const Context &context
+)
+	: m_scene( &scene ),
+	  m_uniformPScene( &uniformPScene ),
+	  m_path( path ),
+	  m_context( &context )
 {
 }
 

@@ -36,6 +36,4 @@
 
 #include "boost/python.hpp"
 
-BOOST_PYTHON_MODULE( _GafferOSLUI )
-{
-}
+BOOST_PYTHON_MODULE( _GafferOSLUI ) {}

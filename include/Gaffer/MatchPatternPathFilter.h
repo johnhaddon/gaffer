@@ -48,13 +48,16 @@ namespace Gaffer
 class GAFFER_API MatchPatternPathFilter : public Gaffer::PathFilter
 {
 
-	public:
+public:
 
 	/// The filter passes through any path whose name matches
 	/// one or more of the patterns (using StringAlgo match()).
 	/// If leafOnly is true then directories will always be passed
 	/// through.
-	explicit MatchPatternPathFilter( const std::vector<IECore::StringAlgo::MatchPattern> &patterns, IECore::InternedString propertyName = "name", bool leafOnly = true, IECore::CompoundDataPtr userData = nullptr );
+	explicit MatchPatternPathFilter(
+		const std::vector<IECore::StringAlgo::MatchPattern> &patterns, IECore::InternedString propertyName = "name",
+		bool leafOnly = true, IECore::CompoundDataPtr userData = nullptr
+	);
 	~MatchPatternPathFilter() override;
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::MatchPatternPathFilter, MatchPatternPathFilterTypeId, PathFilter );
@@ -71,11 +74,11 @@ class GAFFER_API MatchPatternPathFilter : public Gaffer::PathFilter
 	void setInverted( bool inverted );
 	bool getInverted() const;
 
-	protected:
+protected:
 
 	void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const override;
 
-	private:
+private:
 
 	bool invert( bool b ) const;
 	bool remove( PathPtr path ) const;

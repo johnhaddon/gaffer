@@ -48,18 +48,24 @@ using namespace IECorePython;
 using namespace Gaffer;
 using namespace GafferBindings;
 
-void NodeSerialiser::moduleDependencies( const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation ) const
+void NodeSerialiser::moduleDependencies(
+	const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation
+) const
 {
 	Serialiser::moduleDependencies( graphComponent, modules, serialisation );
 }
 
-std::string NodeSerialiser::postHierarchy( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const
+std::string NodeSerialiser::postHierarchy(
+	const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+) const
 {
 	return Serialiser::postHierarchy( graphComponent, identifier, serialisation ) +
 		metadataSerialisation( static_cast<const Gaffer::Node *>( graphComponent ), identifier, serialisation );
 }
 
-bool NodeSerialiser::childNeedsSerialisation( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const
+bool NodeSerialiser::childNeedsSerialisation(
+	const Gaffer::GraphComponent *child, const Serialisation &serialisation
+) const
 {
 	if( const Plug *childPlug = IECore::runTimeCast<const Plug>( child ) )
 	{
@@ -80,7 +86,9 @@ bool NodeSerialiser::childNeedsSerialisation( const Gaffer::GraphComponent *chil
 	}
 }
 
-bool NodeSerialiser::childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const
+bool NodeSerialiser::childNeedsConstruction(
+	const Gaffer::GraphComponent *child, const Serialisation &serialisation
+) const
 {
 	if( const Plug *childPlug = IECore::runTimeCast<const Plug>( child ) )
 	{

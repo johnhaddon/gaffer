@@ -51,14 +51,19 @@ static IECore::InternedString g_namePropertyName( "name" );
 
 IE_CORE_DEFINERUNTIMETYPED( MatchPatternPathFilter );
 
-MatchPatternPathFilter::MatchPatternPathFilter( const std::vector<IECore::StringAlgo::MatchPattern> &patterns, IECore::InternedString propertyName, bool leafOnly, IECore::CompoundDataPtr userData )
-	: PathFilter( userData ), m_patterns( patterns ), m_propertyName( propertyName ), m_leafOnly( leafOnly ), m_inverted( false )
+MatchPatternPathFilter::MatchPatternPathFilter(
+	const std::vector<IECore::StringAlgo::MatchPattern> &patterns, IECore::InternedString propertyName, bool leafOnly,
+	IECore::CompoundDataPtr userData
+)
+	: PathFilter( userData ),
+	  m_patterns( patterns ),
+	  m_propertyName( propertyName ),
+	  m_leafOnly( leafOnly ),
+	  m_inverted( false )
 {
 }
 
-MatchPatternPathFilter::~MatchPatternPathFilter()
-{
-}
+MatchPatternPathFilter::~MatchPatternPathFilter() {}
 
 void MatchPatternPathFilter::setMatchPatterns( const std::vector<IECore::StringAlgo::MatchPattern> &patterns )
 {
@@ -108,11 +113,7 @@ bool MatchPatternPathFilter::getInverted() const
 void MatchPatternPathFilter::doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const
 {
 	paths.erase(
-		std::remove_if(
-			paths.begin(),
-			paths.end(),
-			boost::bind( &MatchPatternPathFilter::remove, this, ::_1 )
-		),
+		std::remove_if( paths.begin(), paths.end(), boost::bind( &MatchPatternPathFilter::remove, this, ::_1 ) ),
 		paths.end()
 	);
 }
@@ -152,7 +153,9 @@ bool MatchPatternPathFilter::remove( PathPtr path ) const
 			propertyValue = &propertyData->readable();
 		}
 
-		for( std::vector<IECore::StringAlgo::MatchPattern>::const_iterator it = m_patterns.begin(), eIt = m_patterns.end(); it != eIt; ++it )
+		for( std::vector<IECore::StringAlgo::MatchPattern>::const_iterator it = m_patterns.begin(),
+																		   eIt = m_patterns.end();
+			 it != eIt; ++it )
 		{
 			if( IECore::StringAlgo::match( propertyValue->c_str(), *it ) )
 			{

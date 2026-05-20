@@ -104,8 +104,14 @@ GAFFERSCENE_API std::string renderManifestFilePath( const IECore::CompoundObject
 /// Sets `times` to a list of times to sample the transform or deformation of a
 /// location at, based on the render options and location attributes. Returns `true`
 /// if `times` was altered and `false` if it was already set correctly.
-GAFFERSCENE_API bool transformMotionTimes( const RenderOptions &renderOptions, const IECore::CompoundObject *attributes, IECoreScenePreview::Renderer::SampleTimes &times );
-GAFFERSCENE_API bool deformationMotionTimes( const RenderOptions &renderOptions, const IECore::CompoundObject *attributes, IECoreScenePreview::Renderer::SampleTimes &times );
+GAFFERSCENE_API bool transformMotionTimes(
+	const RenderOptions &renderOptions, const IECore::CompoundObject *attributes,
+	IECoreScenePreview::Renderer::SampleTimes &times
+);
+GAFFERSCENE_API bool deformationMotionTimes(
+	const RenderOptions &renderOptions, const IECore::CompoundObject *attributes,
+	IECoreScenePreview::Renderer::SampleTimes &times
+);
 
 struct GAFFERSCENE_API SampledTransform
 {
@@ -125,7 +131,10 @@ struct GAFFERSCENE_API SampledTransform
 /// Note that if all samples are identical, a single sample will be returned. Therefore the returned
 /// `sampleTimes` may differ from the `samplesTimes` passed in. It is the _returned_ `sampleTimes` that
 /// should be passed to the Renderer.
-GAFFERSCENE_API std::optional<SampledTransform> transformSamples( const Gaffer::M44fPlug *transformPlug, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, IECore::MurmurHash *hash = nullptr );
+GAFFERSCENE_API std::optional<SampledTransform> transformSamples(
+	const Gaffer::M44fPlug *transformPlug, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes,
+	IECore::MurmurHash *hash = nullptr
+);
 
 struct SampledObject
 {
@@ -144,16 +153,24 @@ struct SampledObject
 /// sample from the current frame, no matter the values in `sampleTimes`. Therefore the returned `sampleTimes`
 /// may differ from the `sampleTimes` passed in. It is the _returned_ `sampleTimes` that should be passed to
 /// the Renderer.
-GAFFERSCENE_API std::optional<SampledObject> objectSamples( const Gaffer::ObjectPlug *objectPlug, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, IECore::MurmurHash *hash = nullptr );
+GAFFERSCENE_API std::optional<SampledObject> objectSamples(
+	const Gaffer::ObjectPlug *objectPlug, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes,
+	IECore::MurmurHash *hash = nullptr
+);
 
-GAFFERSCENE_API void outputOutputs( const ScenePlug *scene, const RenderOptions &renderOptions, IECoreScenePreview::Renderer *renderer );
-GAFFERSCENE_API void outputOutputs( const ScenePlug *scene, const RenderOptions &renderOptions, const IECore::CompoundObject *previousGlobals, IECoreScenePreview::Renderer *renderer );
+GAFFERSCENE_API void outputOutputs(
+	const ScenePlug *scene, const RenderOptions &renderOptions, IECoreScenePreview::Renderer *renderer
+);
+GAFFERSCENE_API void outputOutputs(
+	const ScenePlug *scene, const RenderOptions &renderOptions, const IECore::CompoundObject *previousGlobals,
+	IECoreScenePreview::Renderer *renderer
+);
 
 /// Utility class to handle all the set computations needed for a render.
 class GAFFERSCENE_API RenderSets : boost::noncopyable
 {
 
-	public:
+public:
 
 	RenderSets();
 	RenderSets( const ScenePlug *scene );
@@ -179,7 +196,7 @@ class GAFFERSCENE_API RenderSets : boost::noncopyable
 
 	void attributes( IECore::CompoundObject::ObjectMap &attributes, const ScenePlug::ScenePath &path ) const;
 
-	private:
+private:
 
 	IECore::ConstInternedStringVectorDataPtr setsAttribute( const std::vector<IECore::InternedString> &path ) const;
 
@@ -206,7 +223,7 @@ class GAFFERSCENE_API RenderSets : boost::noncopyable
 class GAFFERSCENE_API LightLinks : boost::noncopyable
 {
 
-	public:
+public:
 
 	LightLinks( const IECoreScenePreview::Renderer *renderer );
 
@@ -219,8 +236,12 @@ class GAFFERSCENE_API LightLinks : boost::noncopyable
 	void addLight( const std::string &path, const IECoreScenePreview::Renderer::ObjectInterfacePtr &light );
 	void removeLight( const std::string &path );
 
-	void addLightFilter( const IECoreScenePreview::Renderer::ObjectInterfacePtr &lightFilter, const IECore::CompoundObject *attributes );
-	void updateLightFilter( const IECoreScenePreview::Renderer::ObjectInterfacePtr &lightFilter, const IECore::CompoundObject *attributes );
+	void addLightFilter(
+		const IECoreScenePreview::Renderer::ObjectInterfacePtr &lightFilter, const IECore::CompoundObject *attributes
+	);
+	void updateLightFilter(
+		const IECoreScenePreview::Renderer::ObjectInterfacePtr &lightFilter, const IECore::CompoundObject *attributes
+	);
 	void removeLightFilter( const IECoreScenePreview::Renderer::ObjectInterfacePtr &lightFilter );
 
 	/// Output functions
@@ -238,7 +259,10 @@ class GAFFERSCENE_API LightLinks : boost::noncopyable
 	/// > LightLinks to store some state in RenderController's scene graphs.
 	/// > The alternative would be to register all objects with LightLinks,
 	/// > but then we would have duplicate storage structures for the entire scene.
-	void outputLightLinks( const ScenePlug *scene, const IECore::CompoundObject *attributes, IECoreScenePreview::Renderer::ObjectInterface *object, IECore::MurmurHash *hash = nullptr ) const;
+	void outputLightLinks(
+		const ScenePlug *scene, const IECore::CompoundObject *attributes,
+		IECoreScenePreview::Renderer::ObjectInterface *object, IECore::MurmurHash *hash = nullptr
+	) const;
 	/// Outputs all light filter links at once.
 	void outputLightFilterLinks( const ScenePlug *scene );
 
@@ -262,13 +286,21 @@ class GAFFERSCENE_API LightLinks : boost::noncopyable
 	/// and `outputLightFilterLinks()` have been made.
 	void clean();
 
-	private:
+private:
 
-	void addFilterLink( const IECoreScenePreview::Renderer::ObjectInterfacePtr &lightFilter, const std::string &filteredLightsExpression );
-	void removeFilterLink( const IECoreScenePreview::Renderer::ObjectInterfacePtr &lightFilter, const std::string &filteredLightsExpression );
+	void addFilterLink(
+		const IECoreScenePreview::Renderer::ObjectInterfacePtr &lightFilter, const std::string &filteredLightsExpression
+	);
+	void removeFilterLink(
+		const IECoreScenePreview::Renderer::ObjectInterfacePtr &lightFilter, const std::string &filteredLightsExpression
+	);
 	std::string filteredLightsExpression( const IECore::CompoundObject *attributes ) const;
-	IECoreScenePreview::Renderer::ConstObjectSetPtr linkedLights( const std::string &linkedLightsExpression, const ScenePlug *scene ) const;
-	void outputLightFilterLinks( const std::string &lightName, IECoreScenePreview::Renderer::ObjectInterface *light ) const;
+	IECoreScenePreview::Renderer::ConstObjectSetPtr linkedLights(
+		const std::string &linkedLightsExpression, const ScenePlug *scene
+	) const;
+	void outputLightFilterLinks(
+		const std::string &lightName, IECoreScenePreview::Renderer::ObjectInterface *light
+	) const;
 	void clearLightLinks();
 
 	/// \todo Remove. This just provides temporary backwards compatibility for
@@ -319,13 +351,26 @@ class GAFFERSCENE_API LightLinks : boost::noncopyable
 	std::atomic_bool m_lightFilterLinksDirty;
 };
 
-GAFFERSCENE_API void outputCameras( const ScenePlug *scene, const RenderOptions &renderOptions, const RenderSets &renderSets, IECoreScenePreview::Renderer *renderer );
-GAFFERSCENE_API void outputLightFilters( const ScenePlug *scene, const RenderOptions &renderOptions, const RenderSets &renderSets, LightLinks *lightLinks, IECoreScenePreview::Renderer *renderer );
-GAFFERSCENE_API void outputLights( const ScenePlug *scene, const RenderOptions &renderOptions, const RenderSets &renderSets, LightLinks *lightLinks, IECoreScenePreview::Renderer *renderer );
+GAFFERSCENE_API void outputCameras(
+	const ScenePlug *scene, const RenderOptions &renderOptions, const RenderSets &renderSets,
+	IECoreScenePreview::Renderer *renderer
+);
+GAFFERSCENE_API void outputLightFilters(
+	const ScenePlug *scene, const RenderOptions &renderOptions, const RenderSets &renderSets, LightLinks *lightLinks,
+	IECoreScenePreview::Renderer *renderer
+);
+GAFFERSCENE_API void outputLights(
+	const ScenePlug *scene, const RenderOptions &renderOptions, const RenderSets &renderSets, LightLinks *lightLinks,
+	IECoreScenePreview::Renderer *renderer
+);
 
 // If a renderManifest is given, the paths of all objects rendered will be added to it, and renderer->assignID() will
 // be called to assign the generated ids to every object.
-GAFFERSCENE_API void outputObjects( const ScenePlug *scene, const RenderOptions &renderOptions, const RenderSets &renderSets, const LightLinks *lightLinks, IECoreScenePreview::Renderer *renderer, const ScenePlug::ScenePath &root = ScenePlug::ScenePath(), RenderManifest *renderManifest = nullptr );
+GAFFERSCENE_API void outputObjects(
+	const ScenePlug *scene, const RenderOptions &renderOptions, const RenderSets &renderSets,
+	const LightLinks *lightLinks, IECoreScenePreview::Renderer *renderer,
+	const ScenePlug::ScenePath &root = ScenePlug::ScenePath(), RenderManifest *renderManifest = nullptr
+);
 
 } // namespace RendererAlgo
 

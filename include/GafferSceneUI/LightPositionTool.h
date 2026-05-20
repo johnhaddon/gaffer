@@ -55,7 +55,7 @@ IE_CORE_FORWARDDECLARE( SceneView );
 class GAFFERSCENEUI_API LightPositionTool : public GafferSceneUI::TransformTool
 {
 
-	public:
+public:
 
 	LightPositionTool( SceneView *view, const std::string &name = defaultName<LightPositionTool>() );
 	~LightPositionTool() override;
@@ -73,9 +73,7 @@ class GAFFERSCENEUI_API LightPositionTool : public GafferSceneUI::TransformTool
 	// from `viewpoint` to `highlightTarget` about `normal`, `targetDistance` from `highlightTarget`.
 	// All coordinates are in world space.
 	void positionHighlight(
-		const Imath::V3f &highlightTarget,
-		const Imath::V3f &viewpoint,
-		const Imath::V3f &normal,
+		const Imath::V3f &highlightTarget, const Imath::V3f &viewpoint, const Imath::V3f &normal,
 		const float targetDistance
 	);
 
@@ -92,12 +90,12 @@ class GAFFERSCENEUI_API LightPositionTool : public GafferSceneUI::TransformTool
 		Last = Diffuse
 	};
 
-	protected:
+protected:
 
 	bool affectsHandles( const Gaffer::Plug *input ) const override;
 	void updateHandles( float rasterScale ) override;
 
-	private:
+private:
 
 	struct TranslationRotation
 	{
@@ -109,9 +107,12 @@ class GAFFERSCENEUI_API LightPositionTool : public GafferSceneUI::TransformTool
 		void applyTranslation( const Imath::V3f &translation );
 		void applyRotation( const Imath::Eulerf &rotation, const bool maintainRoll );
 
-		private:
+	private:
 
-		Imath::V3f updatedRotateValue( const Gaffer::V3fPlug *rotatePlug, const Imath::Eulerf &rotation, const bool maintainRoll, Imath::V3f *currentValue = nullptr ) const;
+		Imath::V3f updatedRotateValue(
+			const Gaffer::V3fPlug *rotatePlug, const Imath::Eulerf &rotation, const bool maintainRoll,
+			Imath::V3f *currentValue = nullptr
+		) const;
 
 		const Selection &m_selection;
 		Imath::M44f m_gadgetToTranslationXform;
@@ -145,9 +146,7 @@ class GAFFERSCENEUI_API LightPositionTool : public GafferSceneUI::TransformTool
 	bool placeTarget( const IECore::LineSegment3f &eventLine );
 
 	void translateAndOrient(
-		const Selection &s,
-		const Imath::M44f &localTransform,
-		const Imath::V3f &newPosition,
+		const Selection &s, const Imath::M44f &localTransform, const Imath::V3f &newPosition,
 		const Imath::M44f &newOrientation
 	) const;
 

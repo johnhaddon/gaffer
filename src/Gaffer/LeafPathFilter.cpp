@@ -45,24 +45,14 @@ using namespace Gaffer;
 
 IE_CORE_DEFINERUNTIMETYPED( LeafPathFilter );
 
-LeafPathFilter::LeafPathFilter( IECore::CompoundDataPtr userData )
-	: PathFilter( userData )
-{
-}
+LeafPathFilter::LeafPathFilter( IECore::CompoundDataPtr userData ) : PathFilter( userData ) {}
 
-LeafPathFilter::~LeafPathFilter()
-{
-}
+LeafPathFilter::~LeafPathFilter() {}
 
 void LeafPathFilter::doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const
 {
 	paths.erase(
-		std::remove_if(
-			paths.begin(),
-			paths.end(),
-			boost::bind( &LeafPathFilter::remove, this, ::_1 )
-		),
-		paths.end()
+		std::remove_if( paths.begin(), paths.end(), boost::bind( &LeafPathFilter::remove, this, ::_1 ) ), paths.end()
 	);
 }
 

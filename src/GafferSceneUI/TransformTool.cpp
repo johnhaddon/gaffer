@@ -144,14 +144,11 @@ GraphComponent *editTargetOrNull( const TransformTool::Selection &selection )
 class HandlesGadget : public Gadget
 {
 
-	public:
+public:
 
-	HandlesGadget( const std::string &name = "HandlesGadget" )
-		: Gadget( name )
-	{
-	}
+	HandlesGadget( const std::string &name = "HandlesGadget" ) : Gadget( name ) {}
 
-	protected:
+protected:
 
 	Imath::Box3f renderBound() const override
 	{
@@ -188,10 +185,7 @@ class HandlesGadget : public Gadget
 		glEnable( GL_DEPTH_TEST );
 	}
 
-	unsigned layerMask() const override
-	{
-		return (unsigned)Layer::MidFront;
-	}
+	unsigned layerMask() const override { return (unsigned)Layer::MidFront; }
 };
 
 } // namespace
@@ -205,18 +199,18 @@ class HandlesGadget : public Gadget
 /// of better informing user outweighs the (hopefully less frequent) times
 /// that the message is out of date.
 
-TransformTool::Selection::Selection()
-	: m_editable( false )
-{
-}
+TransformTool::Selection::Selection() : m_editable( false ) {}
 
 TransformTool::Selection::Selection(
-	const GafferScene::ConstScenePlugPtr scene,
-	const GafferScene::ScenePlug::ScenePath &path,
-	const Gaffer::ConstContextPtr &context,
-	const Gaffer::EditScopePtr &editScope
+	const GafferScene::ConstScenePlugPtr scene, const GafferScene::ScenePlug::ScenePath &path,
+	const Gaffer::ConstContextPtr &context, const Gaffer::EditScopePtr &editScope
 )
-	: m_scene( scene ), m_path( path ), m_context( context ), m_editable( false ), m_editScope( editScope ), m_aimConstraint( false )
+	: m_scene( scene ),
+	  m_path( path ),
+	  m_context( context ),
+	  m_editable( false ),
+	  m_editScope( editScope ),
+	  m_aimConstraint( false )
 {
 	Context::Scope scopedContext( context.get() );
 	if( path.empty() )
@@ -303,10 +297,8 @@ void TransformTool::Selection::initFromSceneNode( const GafferScene::SceneAlgo::
 
 	if( auto constraint = runTimeCast<const AimConstraint>( node ) )
 	{
-		if(
-			history->scene == constraint->outPlug() &&
-			( constraint->filterPlug()->match( constraint->inPlug() ) & PathMatcher::ExactMatch )
-		)
+		if( history->scene == constraint->outPlug() &&
+			( constraint->filterPlug()->match( constraint->inPlug() ) & PathMatcher::ExactMatch ) )
 		{
 			m_aimConstraint = true;
 			return;
@@ -326,7 +318,8 @@ void TransformTool::Selection::initFromSceneNode( const GafferScene::SceneAlgo::
 	}
 	else if( const Group *group = runTimeCast<const Group>( node ) )
 	{
-		const ScenePlug::ScenePath &path = history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
+		const ScenePlug::ScenePath &path =
+			history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
 		if( history->scene == group->outPlug() && path.size() == 1 )
 		{
 			transformPlug = const_cast<TransformPlug *>( group->transformPlug() );
@@ -335,13 +328,12 @@ void TransformTool::Selection::initFromSceneNode( const GafferScene::SceneAlgo::
 	}
 	else if( const GafferScene::Transform *transform = runTimeCast<const GafferScene::Transform>( node ) )
 	{
-		if(
-			history->scene == transform->outPlug() &&
-			( transform->filterPlug()->match( transform->inPlug() ) & PathMatcher::ExactMatch )
-		)
+		if( history->scene == transform->outPlug() &&
+			( transform->filterPlug()->match( transform->inPlug() ) & PathMatcher::ExactMatch ) )
 		{
 			transformPlug = const_cast<TransformPlug *>( transform->transformPlug() );
-			ScenePlug::ScenePath spacePath = history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
+			ScenePlug::ScenePath spacePath =
+				history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
 			switch( (GafferScene::Transform::Space)transform->spacePlug()->getValue() )
 			{
 				case GafferScene::Transform::Local :
@@ -363,7 +355,8 @@ void TransformTool::Selection::initFromSceneNode( const GafferScene::SceneAlgo::
 	}
 	else if( const GafferScene::SceneReader *sceneReader = runTimeCast<const GafferScene::SceneReader>( node ) )
 	{
-		const ScenePlug::ScenePath &path = history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
+		const ScenePlug::ScenePath &path =
+			history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
 		if( history->scene == sceneReader->outPlug() && path.size() == 1 )
 		{
 			transformPlug = const_cast<TransformPlug *>( sceneReader->transformPlug() );
@@ -412,7 +405,8 @@ void TransformTool::Selection::initFromSceneNode( const GafferScene::SceneAlgo::
 		{
 			if( Gaffer::MetadataAlgo::getChildNodesAreReadOnly( node ) )
 			{
-				m_warning = "Transform is locked as it is inside \"" + displayName( node ) + "\" which disallows edits to its children";
+				m_warning = "Transform is locked as it is inside \"" + displayName( node ) +
+					"\" which disallows edits to its children";
 				return;
 			}
 		}
@@ -440,7 +434,8 @@ void TransformTool::Selection::initFromEditScope( const GafferScene::SceneAlgo::
 		return;
 	}
 
-	if( const GraphComponent *readOnlyComponent = EditScopeAlgo::transformEditReadOnlyReason( m_editScope.get(), m_upstreamPath ) )
+	if( const GraphComponent *readOnlyComponent =
+			EditScopeAlgo::transformEditReadOnlyReason( m_editScope.get(), m_upstreamPath ) )
 	{
 		m_warning = "\"" + displayName( readOnlyComponent ) + "\" is locked";
 		return;
@@ -448,14 +443,18 @@ void TransformTool::Selection::initFromEditScope( const GafferScene::SceneAlgo::
 
 	m_editable = true;
 
-	m_transformEdit = EditScopeAlgo::acquireTransformEdit( m_editScope.get(), m_upstreamPath, /* createIfNeccesary = */ false );
+	m_transformEdit =
+		EditScopeAlgo::acquireTransformEdit( m_editScope.get(), m_upstreamPath, /* createIfNeccesary = */ false );
 
 	ScenePlug::ScenePath spacePath = m_upstreamPath;
 	spacePath.pop_back();
 	m_transformSpace = m_upstreamScene->fullTransform( spacePath );
 }
 
-void TransformTool::Selection::initWalk( const GafferScene::SceneAlgo::History *history, bool &editScopeFound, const GafferScene::SceneAlgo::History *editScopeOutHistory )
+void TransformTool::Selection::initWalk(
+	const GafferScene::SceneAlgo::History *history, bool &editScopeFound,
+	const GafferScene::SceneAlgo::History *editScopeOutHistory
+)
 {
 	// Walk the history looking for a suitable node to edit.
 	// Transform tools only support editing the last node to author the targets
@@ -482,7 +481,8 @@ void TransformTool::Selection::initWalk( const GafferScene::SceneAlgo::History *
 			{
 				// We don't allow editing if the user hasn't requested a specific scope
 				// and the upstream edit is inside an EditScope.
-				m_warning = "Source is in an EditScope. Change scope to " + displayName( upstreamEditScope ) + " to edit";
+				m_warning =
+					"Source is in an EditScope. Change scope to " + displayName( upstreamEditScope ) + " to edit";
 				m_editable = false;
 			}
 		}
@@ -504,7 +504,8 @@ void TransformTool::Selection::initWalk( const GafferScene::SceneAlgo::History *
 				// downstream of the requested scope.
 				editScopeFound = true;
 
-				m_warning = "The target EditScope \"" + displayName( m_editScope.get() ) + "\" is overridden downstream by \"" + displayName( m_upstreamScene->node() ) + "\"";
+				m_warning = "The target EditScope \"" + displayName( m_editScope.get() ) +
+					"\" is overridden downstream by \"" + displayName( m_upstreamScene->node() ) + "\"";
 				m_editable = false;
 			}
 			else if( history->scene == editScope->outPlug() )
@@ -527,7 +528,8 @@ void TransformTool::Selection::initWalk( const GafferScene::SceneAlgo::History *
 				else
 				{
 					// This can happen if the viewed node is inside the chosen EditScope
-					m_warning = "The output of the target EditScope \"" + displayName( m_editScope.get() ) + "\" is not in the scene history";
+					m_warning = "The output of the target EditScope \"" + displayName( m_editScope.get() ) +
+						"\" is not in the scene history";
 					m_editable = false;
 				}
 			}
@@ -607,7 +609,9 @@ const std::string &TransformTool::Selection::warning() const
 	return m_warning;
 }
 
-std::optional<TransformTool::Selection::TransformEdit> TransformTool::Selection::acquireTransformEdit( bool createIfNecessary ) const
+std::optional<TransformTool::Selection::TransformEdit> TransformTool::Selection::acquireTransformEdit(
+	bool createIfNecessary
+) const
 {
 	throwIfNotEditable();
 	if( !m_transformEdit && createIfNecessary )
@@ -669,7 +673,9 @@ void TransformTool::Selection::throwIfNotEditable() const
 	}
 }
 
-Imath::M44f TransformTool::Selection::transform( Imath::V3f &translate, Imath::V3f &rotate, Imath::V3f &scale, Imath::V3f &pivot ) const
+Imath::M44f TransformTool::Selection::transform(
+	Imath::V3f &translate, Imath::V3f &rotate, Imath::V3f &scale, Imath::V3f &pivot
+) const
 {
 	throwIfNotEditable();
 
@@ -867,15 +873,14 @@ TransformTool::TransformTool( SceneView *view, const std::string &name )
 	view->plugDirtiedSignal().connect( boost::bind( &TransformTool::plugDirtied, this, ::_1 ) );
 	view->contextChangedSignal().connect( boost::bind( &TransformTool::contextChanged, this ) );
 
-	ScriptNodeAlgo::selectedPathsChangedSignal( view->scriptNode() ).connect( boost::bind( &TransformTool::selectedPathsChanged, this ) );
+	ScriptNodeAlgo::selectedPathsChangedSignal( view->scriptNode() )
+		.connect( boost::bind( &TransformTool::selectedPathsChanged, this ) );
 
 	Metadata::plugValueChangedSignal().connect( boost::bind( &TransformTool::metadataChanged, this, ::_3 ) );
 	Metadata::nodeValueChangedSignal().connect( boost::bind( &TransformTool::metadataChanged, this, ::_2 ) );
 }
 
-TransformTool::~TransformTool()
-{
-}
+TransformTool::~TransformTool() {}
 
 const std::vector<TransformTool::Selection> &TransformTool::selection() const
 {
@@ -978,10 +983,7 @@ void TransformTool::plugDirtied( const Gaffer::Plug *plug )
 	// belonging to the TransformTool are dirtied, but
 	// _also_ when plugs belonging to the View are dirtied.
 
-	if(
-		plug == activePlug() ||
-		plug == scenePlug()->childNamesPlug() ||
-		plug == scenePlug()->transformPlug() ||
+	if( plug == activePlug() || plug == scenePlug()->childNamesPlug() || plug == scenePlug()->transformPlug() ||
 		// The `ancestor()` check protects us from accessing an
 		// already-destructed View in the case that the View is
 		// destroyed before the Tool.
@@ -989,8 +991,7 @@ void TransformTool::plugDirtied( const Gaffer::Plug *plug )
 		/// this, perhaps with Tools being owned by Views so that
 		/// the validity of `Tool::m_view` can be managed. Also
 		/// see comments in `__toolPlugSet()` in Viewer.py.
-		( plug->ancestor<View>() && plug == view()->editScopePlug() )
-	)
+		( plug->ancestor<View>() && plug == view()->editScopePlug() ) )
 	{
 		m_selectionDirty = true;
 		if( !m_dragging )
@@ -1006,9 +1007,7 @@ void TransformTool::plugDirtied( const Gaffer::Plug *plug )
 	else if( plug == sizePlug() )
 	{
 		m_handlesDirty = true;
-		view()->viewportGadget()->renderRequestSignal()(
-			view()->viewportGadget()
-		);
+		view()->viewportGadget()->renderRequestSignal()( view()->viewportGadget() );
 	}
 
 	if( affectsHandles( plug ) )
@@ -1020,7 +1019,8 @@ void TransformTool::plugDirtied( const Gaffer::Plug *plug )
 	{
 		if( activePlug()->getValue() )
 		{
-			m_preRenderConnection = view()->viewportGadget()->preRenderSignal().connect( boost::bind( &TransformTool::preRender, this ) );
+			m_preRenderConnection =
+				view()->viewportGadget()->preRenderSignal().connect( boost::bind( &TransformTool::preRender, this ) );
 		}
 		else
 		{
@@ -1055,9 +1055,7 @@ void TransformTool::metadataChanged( IECore::InternedString key )
 	if( !m_handlesDirty )
 	{
 		m_handlesDirty = true;
-		view()->viewportGadget()->renderRequestSignal()(
-			view()->viewportGadget()
-		);
+		view()->viewportGadget()->renderRequestSignal()( view()->viewportGadget() );
 	}
 }
 
@@ -1131,47 +1129,36 @@ void TransformTool::updateSelection() const
 	// Sort by `editTarget()`, ensuring `lastSelectedPath` comes first
 	// in its group (so it survives deduplication).
 
-	std::sort(
-		m_selection.begin(), m_selection.end(),
-		[&lastSelectedPath]( const Selection &a, const Selection &b ) {
-			const auto ta = editTargetOrNull( a );
-			const auto tb = editTargetOrNull( b );
-			if( ta < tb )
-			{
-				return true;
-			}
-			else if( tb < ta )
-			{
-				return false;
-			}
-			return ( a.path() != lastSelectedPath ) < ( b.path() != lastSelectedPath );
+	std::sort( m_selection.begin(), m_selection.end(), [&lastSelectedPath]( const Selection &a, const Selection &b ) {
+		const auto ta = editTargetOrNull( a );
+		const auto tb = editTargetOrNull( b );
+		if( ta < tb )
+		{
+			return true;
 		}
-	);
+		else if( tb < ta )
+		{
+			return false;
+		}
+		return ( a.path() != lastSelectedPath ) < ( b.path() != lastSelectedPath );
+	} );
 
 	// Deduplicate by `editTarget()`, being careful to avoid removing
 	// items in EditScopes where the plug hasn't been created yet.
 
-	auto last = std::unique(
-		m_selection.begin(), m_selection.end(),
-		[]( const Selection &a, const Selection &b ) {
-			const auto ta = editTargetOrNull( a );
-			const auto tb = editTargetOrNull( b );
-			return ta && tb &&
-				ta != a.editScope() &&
-				tb != b.editScope() &&
-				ta == tb;
-		}
-	);
+	auto last = std::unique( m_selection.begin(), m_selection.end(), []( const Selection &a, const Selection &b ) {
+		const auto ta = editTargetOrNull( a );
+		const auto tb = editTargetOrNull( b );
+		return ta && tb && ta != a.editScope() && tb != b.editScope() && ta == tb;
+	} );
 	m_selection.erase( last, m_selection.end() );
 
 	// Move `lastSelectedPath` to the end
 
-	auto lastSelectedIt = std::find_if(
-		m_selection.begin(), m_selection.end(),
-		[&lastSelectedPath]( const Selection &x ) {
+	auto lastSelectedIt =
+		std::find_if( m_selection.begin(), m_selection.end(), [&lastSelectedPath]( const Selection &x ) {
 			return x.path() == lastSelectedPath;
-		}
-	);
+		} );
 
 	if( lastSelectedIt != m_selection.end() )
 	{
@@ -1184,7 +1171,9 @@ void TransformTool::updateSelection() const
 		// uniquefication process. But we could conceivably get here if an extension has
 		// edited "ui:scene:selectedPaths" directly instead of using ScriptNodeAlgo,
 		// in which case we emit a warning instead of crashing.
-		IECore::msg( IECore::Msg::Warning, "TransformTool::updateSelection", "Last selected path not included in selection" );
+		IECore::msg(
+			IECore::Msg::Warning, "TransformTool::updateSelection", "Last selected path not included in selection"
+		);
 	}
 }
 

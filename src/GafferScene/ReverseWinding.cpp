@@ -45,26 +45,25 @@ using namespace GafferScene;
 
 GAFFER_NODE_DEFINE_TYPE( ReverseWinding );
 
-ReverseWinding::ReverseWinding( const std::string &name )
-	: ObjectProcessor( name )
-{
-}
+ReverseWinding::ReverseWinding( const std::string &name ) : ObjectProcessor( name ) {}
 
-ReverseWinding::~ReverseWinding()
-{
-}
+ReverseWinding::~ReverseWinding() {}
 
 bool ReverseWinding::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
 	return ObjectProcessor::affectsProcessedObject( input );
 }
 
-void ReverseWinding::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ReverseWinding::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ObjectProcessor::hashProcessedObject( path, context, h );
 }
 
-IECore::ConstObjectPtr ReverseWinding::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr ReverseWinding::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	const MeshPrimitive *mesh = runTimeCast<const MeshPrimitive>( inputObject );
 	if( !mesh )

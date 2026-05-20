@@ -71,7 +71,7 @@ namespace GafferUI
 class GAFFERUI_API ContextTracker final : public IECore::RefCounted, public Gaffer::Signals::Trackable
 {
 
-	public:
+public:
 
 	/// Constructs an instance that will track the graph upstream of the
 	/// target `node`, taking into account what connections are active in
@@ -156,7 +156,7 @@ class GAFFERUI_API ContextTracker final : public IECore::RefCounted, public Gaff
 	/// in `context( node )`. If the node is not tracked, returns `false`.
 	bool isEnabled( const Gaffer::DependencyNode *node ) const;
 
-	private:
+private:
 
 	void updateNode( const Gaffer::NodePtr &node );
 	void plugDirtied( const Gaffer::Plug *plug );
@@ -206,15 +206,17 @@ class GAFFERUI_API ContextTracker final : public IECore::RefCounted, public Gaff
 	};
 
 	/// \todo Use `std::unordered_map` when the VFX platform gods give us C++20.
-	using NodeContexts = boost::unordered_map<Gaffer::ConstNodePtr, NodeData, TransparentPtrHash<const Gaffer::Node>, std::equal_to<>>;
+	using NodeContexts =
+		boost::unordered_map<Gaffer::ConstNodePtr, NodeData, TransparentPtrHash<const Gaffer::Node>, std::equal_to<>>;
 	NodeContexts m_nodeContexts;
-	using PlugContexts = boost::unordered_map<Gaffer::ConstPlugPtr, Gaffer::ConstContextPtr, TransparentPtrHash<const Gaffer::Plug>, std::equal_to<>>;
+	using PlugContexts = boost::unordered_map<
+		Gaffer::ConstPlugPtr, Gaffer::ConstContextPtr, TransparentPtrHash<const Gaffer::Plug>, std::equal_to<>>;
 	// Stores plug-specific contexts, which take precedence over `m_nodeContexts`.
 	PlugContexts m_plugContexts;
 
 	static void visit(
-		std::deque<std::pair<const Gaffer::Plug *, Gaffer::ConstContextPtr>> &toVisit,
-		NodeContexts &nodeContexts, PlugContexts &plugContexts, const IECore::Canceller *canceller
+		std::deque<std::pair<const Gaffer::Plug *, Gaffer::ConstContextPtr>> &toVisit, NodeContexts &nodeContexts,
+		PlugContexts &plugContexts, const IECore::Canceller *canceller
 	);
 
 	// The context returned for plugs and nodes that we haven't tracked.

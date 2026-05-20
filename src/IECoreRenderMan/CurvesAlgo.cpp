@@ -47,7 +47,9 @@ using namespace IECoreRenderMan;
 namespace
 {
 
-void convertCurvesTopology( const IECoreScene::CurvesPrimitive *curves, RtPrimVarList &primVars, const std::string &messageContext )
+void convertCurvesTopology(
+	const IECoreScene::CurvesPrimitive *curves, RtPrimVarList &primVars, const std::string &messageContext
+)
 {
 	if( curves->basis().standardBasis() == StandardCubicBasis::Unknown )
 	{
@@ -78,11 +80,19 @@ void convertCurvesTopology( const IECoreScene::CurvesPrimitive *curves, RtPrimVa
 		}
 	}
 
-	primVars.SetString( Loader::strings().k_Ri_wrap, curves->periodic() ? Loader::strings().k_periodic : Loader::strings().k_nonperiodic );
-	primVars.SetIntegerDetail( Loader::strings().k_Ri_nvertices, curves->verticesPerCurve()->readable().data(), RtDetailType::k_uniform );
+	primVars.SetString(
+		Loader::strings().k_Ri_wrap, curves->periodic() ? Loader::strings().k_periodic : Loader::strings().k_nonperiodic
+	);
+	primVars.SetIntegerDetail(
+		Loader::strings().k_Ri_nvertices, curves->verticesPerCurve()->readable().data(), RtDetailType::k_uniform
+	);
 }
 
-RtUString convertCurves( const IECoreScenePreview::Renderer::Samples<const IECoreScene::CurvesPrimitive *> &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext )
+RtUString convertCurves(
+	const IECoreScenePreview::Renderer::Samples<const IECoreScene::CurvesPrimitive *> &samples,
+	const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars,
+	const std::string &messageContext
+)
 {
 	if( CurvesAlgo::isPinned( samples[0] ) )
 	{
@@ -93,10 +103,16 @@ RtUString convertCurves( const IECoreScenePreview::Renderer::Samples<const IECor
 			processedSamples.push_back( sample->copy() );
 			CurvesAlgo::convertPinnedToNonPeriodic( processedSamples.back().get() );
 		}
-		return convertCurves( IECoreScenePreview::Renderer::staticSamplesCast<const IECoreScene::CurvesPrimitive *>( processedSamples ), sampleTimes, primVars, messageContext );
+		return convertCurves(
+			IECoreScenePreview::Renderer::staticSamplesCast<const IECoreScene::CurvesPrimitive *>( processedSamples ),
+			sampleTimes, primVars, messageContext
+		);
 	}
 
-	GeometryAlgo::convertPrimitive( IECoreScenePreview::Renderer::staticSamplesCast<const IECoreScene::Primitive *>( samples ), sampleTimes, primVars, messageContext );
+	GeometryAlgo::convertPrimitive(
+		IECoreScenePreview::Renderer::staticSamplesCast<const IECoreScene::Primitive *>( samples ), sampleTimes,
+		primVars, messageContext
+	);
 	convertCurvesTopology( samples[0], primVars, messageContext );
 	return Loader::strings().k_Ri_Curves;
 }

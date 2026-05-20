@@ -128,12 +128,9 @@ std::tuple<bool, Imath::V2f, Imath::V2f> effectiveWipePlane( const ImageGadget *
 class ImageSelectionTool::DragOverlay : public GafferUI::Gadget
 {
 
-	public:
+public:
 
-	DragOverlay()
-		: Gadget()
-	{
-	}
+	DragOverlay() : Gadget() {}
 
 	Imath::Box3f bound() const override
 	{
@@ -151,10 +148,7 @@ class ImageSelectionTool::DragOverlay : public GafferUI::Gadget
 		dirty( DirtyType::Render );
 	}
 
-	const V3f &getStartPosition() const
-	{
-		return m_startPosition;
-	}
+	const V3f &getStartPosition() const { return m_startPosition; }
 
 	void setEndPosition( const V3f &p )
 	{
@@ -166,12 +160,9 @@ class ImageSelectionTool::DragOverlay : public GafferUI::Gadget
 		dirty( DirtyType::Render );
 	}
 
-	const V3f &getEndPosition() const
-	{
-		return m_endPosition;
-	}
+	const V3f &getEndPosition() const { return m_endPosition; }
 
-	protected:
+protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
 	{
@@ -192,10 +183,7 @@ class ImageSelectionTool::DragOverlay : public GafferUI::Gadget
 		style->renderSelectionBox( b );
 	}
 
-	unsigned layerMask() const override
-	{
-		return (unsigned)Layer::MidFront;
-	}
+	unsigned layerMask() const override { return (unsigned)Layer::MidFront; }
 
 	Imath::Box3f renderBound() const override
 	{
@@ -205,7 +193,7 @@ class ImageSelectionTool::DragOverlay : public GafferUI::Gadget
 		return b;
 	}
 
-	private:
+private:
 
 	Imath::V3f m_startPosition;
 	Imath::V3f m_endPosition;
@@ -221,7 +209,8 @@ size_t ImageSelectionTool::g_firstPlugIndex = 0;
 ImageSelectionTool::ToolDescription<ImageSelectionTool, ImageView> ImageSelectionTool::g_imageToolDescription;
 
 ImageSelectionTool::ImageSelectionTool( View *view, const std::string &name )
-	: Tool( view, name ), m_manifestDirty( true )
+	: Tool( view, name ),
+	  m_manifestDirty( true )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "selectMode", Plug::In, "standard" ) );
@@ -243,16 +232,15 @@ ImageSelectionTool::ImageSelectionTool( View *view, const std::string &name )
 	ig->mouseMoveSignal().connect( boost::bind( &ImageSelectionTool::mouseMove, this, ::_2 ) );
 	ig->leaveSignal().connect( boost::bind( &ImageSelectionTool::leave, this, ::_2 ) );
 
-	m_selectedPathsChangedConnection = ScriptNodeAlgo::selectedPathsChangedSignal( view->scriptNode() ).connect( boost::bind( &ImageSelectionTool::selectedPathsChanged, this ) );
+	m_selectedPathsChangedConnection = ScriptNodeAlgo::selectedPathsChangedSignal( view->scriptNode() )
+										   .connect( boost::bind( &ImageSelectionTool::selectedPathsChanged, this ) );
 
 	m_manifestError = "";
 	m_infoStatus = "";
 	statusChangedSignal()( *this );
 }
 
-ImageSelectionTool::~ImageSelectionTool()
-{
-}
+ImageSelectionTool::~ImageSelectionTool() {}
 
 std::string ImageSelectionTool::status() const
 {
@@ -381,7 +369,8 @@ void ImageSelectionTool::updateRenderManifest()
 
 		if( scenePlug )
 		{
-			const InteractiveRender *interactiveRenderNode = IECore::runTimeCast<const InteractiveRender>( scenePlug->node() );
+			const InteractiveRender *interactiveRenderNode =
+				IECore::runTimeCast<const InteractiveRender>( scenePlug->node() );
 			if( interactiveRenderNode )
 			{
 				m_renderManifest = interactiveRenderNode->renderManifest();
@@ -559,7 +548,8 @@ std::unordered_set<uint32_t> ImageSelectionTool::rectIDs( const Imath::Box2i &re
 		// structured bindings until C++20
 		sampler.visitPixels(
 			validRect,
-			[&result, &prevIntValue, &wipeEnabled = wipeEnabled, &wipePosition = wipePosition, &wipeDirection = wipeDirection, &instance]( float value, int x, int y ) {
+			[&result, &prevIntValue, &wipeEnabled = wipeEnabled, &wipePosition = wipePosition,
+			 &wipeDirection = wipeDirection, &instance]( float value, int x, int y ) {
 				if( wipeEnabled && ( Imath::V2f( x, y ) + Imath::V2f( 0.5f ) - wipePosition ).dot( wipeDirection ) > 0 )
 				{
 					return;
@@ -601,9 +591,7 @@ void ImageSelectionTool::selectedPathsChanged()
 
 	imageGadget()->setSelectedIDs( m_selectedIDs );
 
-	view()->viewportGadget()->renderRequestSignal()(
-		view()->viewportGadget()
-	);
+	view()->viewportGadget()->renderRequestSignal()( view()->viewportGadget() );
 }
 
 void ImageSelectionTool::updateSelectedIDs()
@@ -624,9 +612,7 @@ void ImageSelectionTool::updateSelectedIDs()
 		imageGadget()->setSelectedIDs( m_selectedIDs );
 	}
 
-	view()->viewportGadget()->renderRequestSignal()(
-		view()->viewportGadget()
-	);
+	view()->viewportGadget()->renderRequestSignal()( view()->viewportGadget() );
 
 
 	if( instanceSelection )
@@ -785,7 +771,8 @@ IECore::RunTimeTypedPtr ImageSelectionTool::dragBegin( GafferUI::Gadget *gadget,
 	m_acceptedButtonPress = false;
 
 	bool instanceSelection = selectModePlug()->getValue() == "instance";
-	std::optional<uint32_t> curID = pixelID( V2i( floor( event.line.p1.x ), floor( event.line.p1.y ) ), instanceSelection );
+	std::optional<uint32_t> curID =
+		pixelID( V2i( floor( event.line.p1.x ), floor( event.line.p1.y ) ), instanceSelection );
 	if( !curID.has_value() )
 	{
 		// drag to select
@@ -861,8 +848,18 @@ bool ImageSelectionTool::dragEnd( const GafferUI::DragDropEvent &event )
 	ImageGadget *ig = imageGadget();
 	// TODO - it's a bit ugly that imageGadget::pixelAt can't directly take a 2D position.
 	// All it does is divide x by pixelAspect, would it be better to do that manually?
-	Imath::V2f startPixel = ig->pixelAt( IECore::LineSegment3f( V3f( dragOverlay()->getStartPosition().x, dragOverlay()->getStartPosition().y, 0 ), dragOverlay()->getStartPosition() ) );
-	Imath::V2f endPixel = ig->pixelAt( IECore::LineSegment3f( V3f( dragOverlay()->getEndPosition().x, dragOverlay()->getEndPosition().y, 0 ), dragOverlay()->getEndPosition() ) );
+	Imath::V2f startPixel = ig->pixelAt(
+		IECore::LineSegment3f(
+			V3f( dragOverlay()->getStartPosition().x, dragOverlay()->getStartPosition().y, 0 ),
+			dragOverlay()->getStartPosition()
+		)
+	);
+	Imath::V2f endPixel = ig->pixelAt(
+		IECore::LineSegment3f(
+			V3f( dragOverlay()->getEndPosition().x, dragOverlay()->getEndPosition().y, 0 ),
+			dragOverlay()->getEndPosition()
+		)
+	);
 
 	Imath::Box2i region;
 	region.extendBy( startPixel );
@@ -876,7 +873,9 @@ bool ImageSelectionTool::dragEnd( const GafferUI::DragDropEvent &event )
 		if( event.modifiers & DragDropEvent::Control )
 		{
 			m_selectedIDs.erase(
-				std::remove_if( m_selectedIDs.begin(), m_selectedIDs.end(), [&idsSet]( uint32_t id ) { return idsSet.count( id ); } ),
+				std::remove_if(
+					m_selectedIDs.begin(), m_selectedIDs.end(), [&idsSet]( uint32_t id ) { return idsSet.count( id ); }
+				),
 				m_selectedIDs.end()
 			);
 		}
@@ -892,10 +891,7 @@ bool ImageSelectionTool::dragEnd( const GafferUI::DragDropEvent &event )
 
 			if( existingIDs )
 			{
-				m_selectedIDs.erase(
-					std::unique( m_selectedIDs.begin(), m_selectedIDs.end() ),
-					m_selectedIDs.end()
-				);
+				m_selectedIDs.erase( std::unique( m_selectedIDs.begin(), m_selectedIDs.end() ), m_selectedIDs.end() );
 			}
 		}
 

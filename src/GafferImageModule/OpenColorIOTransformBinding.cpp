@@ -117,11 +117,9 @@ void GafferImageModule::bindOpenColorIOTransform()
 	GafferBindings::PlugClass<OpenColorIOConfigPlug>()
 		.def(
 			boost::python::init<const std::string &, Gaffer::Plug::Direction, unsigned>(
-				(
-					boost::python::arg_( "name" ) = Gaffer::GraphComponent::defaultName<OpenColorIOConfigPlug>(),
-					boost::python::arg_( "direction" ) = Gaffer::Plug::In,
-					boost::python::arg_( "flags" ) = Gaffer::Plug::Default
-				)
+				( boost::python::arg_( "name" ) = Gaffer::GraphComponent::defaultName<OpenColorIOConfigPlug>(),
+				  boost::python::arg_( "direction" ) = Gaffer::Plug::In,
+				  boost::python::arg_( "flags" ) = Gaffer::Plug::Default )
 			)
 		)
 		.def(

@@ -77,7 +77,11 @@ const std::string g_componentNames( "rgbaxyz" );
 using ShaderMap = std::unordered_map<IECore::InternedString, AtNode *>;
 
 template<typename NodeCreator>
-AtNode *convertWalk( const ShaderNetwork::Parameter &outputParameter, const IECoreScene::ShaderNetwork *shaderNetwork, const std::string &name, const NodeCreator &nodeCreator, vector<AtNode *> &nodes, ShaderMap &converted, std::vector<IECoreArnold::ShaderNetworkAlgo::NodeParameter> &nodeParameters )
+AtNode *convertWalk(
+	const ShaderNetwork::Parameter &outputParameter, const IECoreScene::ShaderNetwork *shaderNetwork,
+	const std::string &name, const NodeCreator &nodeCreator, vector<AtNode *> &nodes, ShaderMap &converted,
+	std::vector<IECoreArnold::ShaderNetworkAlgo::NodeParameter> &nodeParameters
+)
 {
 	// Reuse previously created node if we can. OSL shaders
 	// can have multiple outputs, but each Arnold shader node
@@ -109,10 +113,7 @@ AtNode *convertWalk( const ShaderNetwork::Parameter &outputParameter, const IECo
 	}
 	else
 	{
-		node = nodeCreator(
-			AtString( shader->getName().c_str() ),
-			AtString( nodeName.c_str() )
-		);
+		node = nodeCreator( AtString( shader->getName().c_str() ), AtString( nodeName.c_str() ) );
 		if( node && AiNodeEntryGetNameAtString( AiNodeGetNodeEntry( node ) ) == g_oslArnoldString )
 		{
 			// Need to set the `code` parameter on `osl` shaders _before_ we try to set
@@ -130,7 +131,8 @@ AtNode *convertWalk( const ShaderNetwork::Parameter &outputParameter, const IECo
 
 	if( !node )
 	{
-		msg( Msg::Warning, "IECoreArnold::ShaderNetworkAlgo", fmt::format( "Couldn't load shader \"{}\"", shader->getName() ) );
+		msg( Msg::Warning, "IECoreArnold::ShaderNetworkAlgo",
+			 fmt::format( "Couldn't load shader \"{}\"", shader->getName() ) );
 		return node;
 	}
 
@@ -150,7 +152,8 @@ AtNode *convertWalk( const ShaderNetwork::Parameter &outputParameter, const IECo
 
 		const AtString arnoldParameterName( parameterName.c_str() );
 
-		if( AiParamGetType( AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( node ), arnoldParameterName ) ) == AI_TYPE_NODE )
+		if( AiParamGetType( AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( node ), arnoldParameterName ) ) ==
+			AI_TYPE_NODE )
 		{
 			if( auto stringValue = runTimeCast<StringData>( namedParameter.second ) )
 			{
@@ -166,7 +169,8 @@ AtNode *convertWalk( const ShaderNetwork::Parameter &outputParameter, const IECo
 
 	for( const auto &connection : shaderNetwork->inputConnections( outputParameter.shader ) )
 	{
-		AtNode *sourceNode = convertWalk( connection.source, shaderNetwork, name, nodeCreator, nodes, converted, nodeParameters );
+		AtNode *sourceNode =
+			convertWalk( connection.source, shaderNetwork, name, nodeCreator, nodes, converted, nodeParameters );
 		if( !sourceNode )
 		{
 			continue;
@@ -182,7 +186,9 @@ AtNode *convertWalk( const ShaderNetwork::Parameter &outputParameter, const IECo
 			parameterName = connection.destination.name.string();
 		}
 
-		if( parameterName == "color" && ( shader->getName() == "quad_light" || shader->getName() == "skydome_light" || shader->getName() == "mesh_light" ) )
+		if( parameterName == "color" &&
+			( shader->getName() == "quad_light" || shader->getName() == "skydome_light" ||
+			  shader->getName() == "mesh_light" ) )
 		{
 			// In general, Arnold should be able to form a connection onto a parameter even if the
 			// parameter already has a value.  Something weird happens with the "color" parameter
@@ -193,11 +199,8 @@ AtNode *convertWalk( const ShaderNetwork::Parameter &outputParameter, const IECo
 		}
 
 		const AtString parameterNameArnold( parameterName.c_str() );
-		const uint8_t paramType = AiParamGetType(
-			AiNodeEntryLookUpParameter(
-				AiNodeGetNodeEntry( node ), parameterNameArnold
-			)
-		);
+		const uint8_t paramType =
+			AiParamGetType( AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( node ), parameterNameArnold ) );
 
 		if( paramType == AI_TYPE_NODE )
 		{
@@ -246,11 +249,8 @@ AtNode *convertWalk( const ShaderNetwork::Parameter &outputParameter, const IECo
 AtString g_name( "name" );
 AtString g_lightBlockerNodeEntryName( "light_blocker" );
 
-const std::vector<AtString> g_protectedLightParameters = {
-	AtString( "matrix" ),
-	AtString( "filters" ),
-	AtString( "mesh" )
-};
+const std::vector<AtString> g_protectedLightParameters = { AtString( "matrix" ), AtString( "filters" ),
+														   AtString( "mesh" ) };
 
 const std::vector<AtString> g_protectedLightFilterParameters = {
 	AtString( "geometry_matrix" ),
@@ -276,26 +276,16 @@ void resetNode( AtNode *node )
 			continue;
 		}
 
-		if(
-			isLight &&
-			std::find(
-				g_protectedLightParameters.begin(),
-				g_protectedLightParameters.end(),
-				name
-			) != g_protectedLightParameters.end()
-		)
+		if( isLight &&
+			std::find( g_protectedLightParameters.begin(), g_protectedLightParameters.end(), name ) !=
+				g_protectedLightParameters.end() )
 		{
 			continue;
 		}
 
-		if(
-			isLightFilter &&
-			std::find(
-				g_protectedLightFilterParameters.begin(),
-				g_protectedLightFilterParameters.end(),
-				name
-			) != g_protectedLightFilterParameters.end()
-		)
+		if( isLightFilter &&
+			std::find( g_protectedLightFilterParameters.begin(), g_protectedLightFilterParameters.end(), name ) !=
+				g_protectedLightFilterParameters.end() )
 		{
 			continue;
 		}
@@ -380,7 +370,10 @@ ShaderNetworkPtr preprocessedNetwork( const IECoreScene::ShaderNetwork *shaderNe
 			float width = parameterValue<float>( newShader.get(), "width", 2.f );
 			float height = parameterValue<float>( newShader.get(), "height", 2.f );
 
-			newShader->parameters()["vertices"] = new V3fVectorData( { V3f( -width / 2, -height / 2, 0 ), V3f( -width / 2, height / 2, 0 ), V3f( width / 2, height / 2, 0 ), V3f( width / 2, -height / 2, 0 ) } );
+			newShader->parameters()["vertices"] = new V3fVectorData(
+				{ V3f( -width / 2, -height / 2, 0 ), V3f( -width / 2, height / 2, 0 ), V3f( width / 2, height / 2, 0 ),
+				  V3f( width / 2, -height / 2, 0 ) }
+			);
 
 			newShader->parameters().erase( "width" );
 			newShader->parameters().erase( "height" );
@@ -402,7 +395,9 @@ namespace ShaderNetworkAlgo
 {
 
 NodeParameter::NodeParameter( AtNode *node, AtString parameterName, AtString parameterValue )
-	: m_node( node ), m_parameterName( parameterName ), m_parameterValue( parameterValue )
+	: m_node( node ),
+	  m_parameterName( parameterName ),
+	  m_parameterValue( parameterValue )
 {
 }
 
@@ -421,15 +416,18 @@ void NodeParameter::updateParameter() const
 		else
 		{
 			AiNodeResetParameter( m_node, m_parameterName );
-			msg(
-				Msg::Warning, "NodeParameter",
-				fmt::format( "{}.{} : Node \"{}\" not found", AiNodeGetName( m_node ), m_parameterName, m_parameterValue )
-			);
+			msg( Msg::Warning, "NodeParameter",
+				 fmt::format(
+					 "{}.{} : Node \"{}\" not found", AiNodeGetName( m_node ), m_parameterName, m_parameterValue
+				 ) );
 		}
 	}
 }
 
-std::vector<AtNode *> convert( const IECoreScene::ShaderNetwork *shaderNetwork, AtUniverse *universe, const std::string &name, std::vector<NodeParameter> &nodeParameters, const AtNode *parentNode )
+std::vector<AtNode *> convert(
+	const IECoreScene::ShaderNetwork *shaderNetwork, AtUniverse *universe, const std::string &name,
+	std::vector<NodeParameter> &nodeParameters, const AtNode *parentNode
+)
 {
 	ConstShaderNetworkPtr network = preprocessedNetwork( shaderNetwork );
 
@@ -454,18 +452,25 @@ std::vector<AtNode *> convert( const IECoreScene::ShaderNetwork *shaderNetwork, 
 	return result;
 }
 
-std::vector<AtNode *> convert( const IECoreScene::ShaderNetwork *shaderNetwork, AtUniverse *universe, const std::string &name, const AtNode *parentNode )
+std::vector<AtNode *> convert(
+	const IECoreScene::ShaderNetwork *shaderNetwork, AtUniverse *universe, const std::string &name,
+	const AtNode *parentNode
+)
 {
 	std::vector<NodeParameter> nodeParameters;
 	auto result = convert( shaderNetwork, universe, name, nodeParameters, parentNode );
 	if( nodeParameters.size() )
 	{
-		msg( Msg::Warning, "IECoreArnold::ShaderNetworkAlgo", fmt::format( "{} NodeParameter{} ignored", nodeParameters.size(), nodeParameters.size() > 1 ? "s" : "" ) );
+		msg( Msg::Warning, "IECoreArnold::ShaderNetworkAlgo",
+			 fmt::format( "{} NodeParameter{} ignored", nodeParameters.size(), nodeParameters.size() > 1 ? "s" : "" ) );
 	}
 	return result;
 }
 
-bool update( std::vector<AtNode *> &nodes, std::vector<NodeParameter> &nodeParameters, const IECoreScene::ShaderNetwork *shaderNetwork )
+bool update(
+	std::vector<AtNode *> &nodes, std::vector<NodeParameter> &nodeParameters,
+	const IECoreScene::ShaderNetwork *shaderNetwork
+)
 {
 	if( !nodes.size() )
 	{
@@ -486,7 +491,8 @@ bool update( std::vector<AtNode *> &nodes, std::vector<NodeParameter> &nodeParam
 	std::unordered_set<AtNode *> reusedNodes;
 	nodes.clear();
 
-	auto nodeCreator = [universe, parentNode, &originalNodes, &reusedNodes]( const AtString &nodeType, const AtString &nodeName ) {
+	auto nodeCreator = [universe, parentNode, &originalNodes,
+						&reusedNodes]( const AtString &nodeType, const AtString &nodeName ) {
 		auto it = originalNodes.find( nodeName );
 		if( it != originalNodes.end() )
 		{
@@ -528,7 +534,8 @@ bool update( std::vector<AtNode *> &nodes, const IECoreScene::ShaderNetwork *sha
 	const bool result = update( nodes, nodeParameters, shaderNetwork );
 	if( nodeParameters.size() )
 	{
-		msg( Msg::Warning, "IECoreArnold::ShaderNetworkAlgo", fmt::format( "{} NodeParameter{} ignored", nodeParameters.size(), nodeParameters.size() > 1 ? "s" : "" ) );
+		msg( Msg::Warning, "IECoreArnold::ShaderNetworkAlgo",
+			 fmt::format( "{} NodeParameter{} ignored", nodeParameters.size(), nodeParameters.size() > 1 ? "s" : "" ) );
 	}
 	return result;
 }
@@ -603,9 +610,13 @@ Color3f blackbody( float kelvins )
 }
 
 template<typename T>
-void transferUSDParameter( ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, InternedString usdName, Shader *shader, InternedString name, const T &defaultValue )
+void transferUSDParameter(
+	ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, InternedString usdName,
+	Shader *shader, InternedString name, const T &defaultValue
+)
 {
-	shader->parameters()[name] = new typename DataTraits<T>::DataType( parameterValue( usdShader, usdName, defaultValue ) );
+	shader->parameters()[name] =
+		new typename DataTraits<T>::DataType( parameterValue( usdShader, usdName, defaultValue ) );
 
 	if( ShaderNetwork::Parameter input = network->input( { shaderHandle, usdName } ) )
 	{
@@ -709,7 +720,9 @@ const InternedString g_wrapTParameter( "wrapT" );
 
 const string g_arnoldNamespace( "arnold:" );
 
-void transferUSDLightParameters( ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, Shader *shader )
+void transferUSDLightParameters(
+	ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, Shader *shader
+)
 {
 	Color3f color = parameterValue( usdShader, g_colorParameter, Color3f( 1 ) );
 	if( parameterValue( usdShader, g_enableColorTemperatureParameter, false ) )
@@ -724,8 +737,12 @@ void transferUSDLightParameters( ShaderNetwork *network, InternedString shaderHa
 	transferUSDParameter( network, shaderHandle, usdShader, g_normalizeParameter, shader, g_normalizeParameter, false );
 	transferUSDParameter( network, shaderHandle, usdShader, g_specularParameter, shader, g_specularParameter, 1.0f );
 
-	transferUSDParameter( network, shaderHandle, usdShader, g_shadowEnableParameter, shader, g_castShadowsParameter, true );
-	transferUSDParameter( network, shaderHandle, usdShader, g_shadowColorParameter, shader, g_shadowColorArnoldParameter, Color3f( 0 ) );
+	transferUSDParameter(
+		network, shaderHandle, usdShader, g_shadowEnableParameter, shader, g_castShadowsParameter, true
+	);
+	transferUSDParameter(
+		network, shaderHandle, usdShader, g_shadowColorParameter, shader, g_shadowColorArnoldParameter, Color3f( 0 )
+	);
 
 	for( const auto &[name, value] : usdShader->parameters() )
 	{
@@ -736,7 +753,9 @@ void transferUSDLightParameters( ShaderNetwork *network, InternedString shaderHa
 	}
 }
 
-void transferUSDShapingParameters( ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, Shader *shader )
+void transferUSDShapingParameters(
+	ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, Shader *shader
+)
 {
 	if( auto dFile = usdShader->parametersData()->member<StringData>( g_shapingIesFileParameter ) )
 	{
@@ -762,20 +781,24 @@ void transferUSDShapingParameters( ShaderNetwork *network, InternedString shader
 		const float softness = parameterValue( usdShader, g_shapingConeSoftnessParameter, 0.0f );
 		shader->parameters()[g_penumbraAngleParameter] = new FloatData( d->readable() * 2.0f * softness );
 		// Same here.
-		shader->parameters()[g_cosinePowerParameter] = new FloatData( parameterValue( usdShader, g_shapingSoftnessParameter, 0.0f ) );
+		shader->parameters()[g_cosinePowerParameter] =
+			new FloatData( parameterValue( usdShader, g_shapingSoftnessParameter, 0.0f ) );
 	}
 }
 
 // Should be called after `transferUSDLightParameters()`, as it needs to examine
 // the transferred `color` parameter.
-void transferUSDTextureFile( ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, const Shader *shader )
+void transferUSDTextureFile(
+	ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, const Shader *shader
+)
 {
 	const string textureFile = parameterValue( usdShader, g_textureFileParameter, string() );
 	if( !textureFile.empty() )
 	{
 		ShaderPtr imageShader = new Shader( "image" );
 		imageShader->parameters()[g_filenameParameter] = new StringData( textureFile );
-		const InternedString imageHandle = network->addShader( shaderHandle.string() + "Image", std::move( imageShader ) );
+		const InternedString imageHandle =
+			network->addShader( shaderHandle.string() + "Image", std::move( imageShader ) );
 
 		const Color3f color = parameterValue( shader, g_colorParameter, Color3f( 1 ) );
 		if( color != Color3f( 1 ) )
@@ -783,7 +806,8 @@ void transferUSDTextureFile( ShaderNetwork *network, InternedString shaderHandle
 			// Multiply image with color
 			ShaderPtr multiplyShader = new Shader( "multiply" );
 			multiplyShader->parameters()[g_input2Parameter] = new Color3fData( color );
-			const InternedString multiplyHandle = network->addShader( shaderHandle.string() + "Multiply", std::move( multiplyShader ) );
+			const InternedString multiplyHandle =
+				network->addShader( shaderHandle.string() + "Multiply", std::move( multiplyShader ) );
 			network->addConnection( ShaderNetwork::Connection( multiplyHandle, { shaderHandle, g_colorParameter } ) );
 			network->addConnection( ShaderNetwork::Connection( imageHandle, { multiplyHandle, g_input1Parameter } ) );
 		}
@@ -831,7 +855,8 @@ void replaceUSDShader( ShaderNetwork *network, InternedString handle, ShaderPtr 
 	vector<ShaderNetwork::Connection> outputConnections( range.begin(), range.end() );
 	for( auto &c : outputConnections )
 	{
-		if( c.source.name != g_rParameter && c.source.name != g_gParameter && c.source.name != g_bParameter && c.source.name != g_aParameter )
+		if( c.source.name != g_rParameter && c.source.name != g_gParameter && c.source.name != g_bParameter &&
+			c.source.name != g_aParameter )
 		{
 			network->removeConnection( c );
 			c.source.name = InternedString();
@@ -850,12 +875,18 @@ void convertUSDUVTextures( ShaderNetwork *network )
 		}
 
 		ShaderPtr imageShader = new Shader( "image", "ai:shader" );
-		transferUSDParameter( network, handle, shader.get(), g_fileParameter, imageShader.get(), g_filenameParameter, string() );
-		transferUSDParameter( network, handle, shader.get(), g_sourceColorSpaceParameter, imageShader.get(), g_colorSpaceParameter, string( "auto" ) );
+		transferUSDParameter(
+			network, handle, shader.get(), g_fileParameter, imageShader.get(), g_filenameParameter, string()
+		);
+		transferUSDParameter(
+			network, handle, shader.get(), g_sourceColorSpaceParameter, imageShader.get(), g_colorSpaceParameter,
+			string( "auto" )
+		);
 		imageShader->parameters()[g_ignoreMissingTexturesParameter] = new BoolData( true );
 
 		using NamePair = pair<InternedString, InternedString>;
-		for( const auto &[usdName, name] : { NamePair( g_wrapSParameter, g_sWrapParameter ), NamePair( g_wrapTParameter, g_tWrapParameter ) } )
+		for( const auto &[usdName, name] :
+			 { NamePair( g_wrapSParameter, g_sWrapParameter ), NamePair( g_wrapTParameter, g_tWrapParameter ) } )
 		{
 			string mode = parameterValue( shader.get(), usdName, string( "useMetadata" ) );
 			if( mode == "useMetadata" )
@@ -869,9 +900,16 @@ void convertUSDUVTextures( ShaderNetwork *network )
 			imageShader->parameters()[name] = new StringData( mode );
 		}
 
-		transferUSDParameter( network, handle, shader.get(), g_fallbackParameter, imageShader.get(), g_missingTextureColorParameter, Color4f( 0, 0, 0, 1 ) );
-		transferUSDParameter( network, handle, shader.get(), g_scaleParameter, imageShader.get(), g_multiplyParameter, Color3f( 1 ) );
-		transferUSDParameter( network, handle, shader.get(), g_biasParameter, imageShader.get(), g_offsetParameter, Color3f( 0 ) );
+		transferUSDParameter(
+			network, handle, shader.get(), g_fallbackParameter, imageShader.get(), g_missingTextureColorParameter,
+			Color4f( 0, 0, 0, 1 )
+		);
+		transferUSDParameter(
+			network, handle, shader.get(), g_scaleParameter, imageShader.get(), g_multiplyParameter, Color3f( 1 )
+		);
+		transferUSDParameter(
+			network, handle, shader.get(), g_biasParameter, imageShader.get(), g_offsetParameter, Color3f( 0 )
+		);
 
 		// Arnold gives up on proper texturing filtering if the `image.uvcoords`
 		// input is used. So do what we can to avoid that, by converting a
@@ -888,7 +926,9 @@ void convertUSDUVTextures( ShaderNetwork *network )
 			}
 			else
 			{
-				transferUSDParameter( network, handle, shader.get(), g_stParameter, imageShader.get(), g_uvCoordsParameter, V2f( 0 ) );
+				transferUSDParameter(
+					network, handle, shader.get(), g_stParameter, imageShader.get(), g_uvCoordsParameter, V2f( 0 )
+				);
 			}
 		}
 
@@ -913,18 +953,33 @@ void IECoreArnold::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 
 			// Easy stuff with a one-to-one correspondence between `UsdPreviewSurface` and `standard_surface`.
 
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_diffuseColorParameter, newShader.get(), g_baseColorParameter, Color3f( 0.18 ) );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_roughnessParameter, newShader.get(), g_specularRoughnessParameter, 0.5f );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_clearcoatParameter, newShader.get(), g_coatParameter, 0.0f );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_clearcoatRoughnessParameter, newShader.get(), g_coatRoughnessParameter, 0.01f );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_iorParameter, newShader.get(), g_specularIORParameter, 1.5f );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_diffuseColorParameter, newShader.get(), g_baseColorParameter,
+				Color3f( 0.18 )
+			);
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_roughnessParameter, newShader.get(),
+				g_specularRoughnessParameter, 0.5f
+			);
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_clearcoatParameter, newShader.get(), g_coatParameter, 0.0f
+			);
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_clearcoatRoughnessParameter, newShader.get(),
+				g_coatRoughnessParameter, 0.01f
+			);
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_iorParameter, newShader.get(), g_specularIORParameter, 1.5f
+			);
 
 			// Emission. UsdPreviewSurface only has `emissiveColor`, which we transfer to `emission_color`. But then
 			// we need to turn on Arnold's `emission` to that the `emission_color` is actually used.
 
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_emissiveColorParameter, newShader.get(), g_emissionColorParameter, Color3f( 0 ) );
-			const bool hasEmission =
-				shaderNetwork->input( { handle, g_emissionColorParameter } ) ||
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_emissiveColorParameter, newShader.get(),
+				g_emissionColorParameter, Color3f( 0 )
+			);
+			const bool hasEmission = shaderNetwork->input( { handle, g_emissionColorParameter } ) ||
 				parameterValue( newShader.get(), g_emissionColorParameter, Color3f( 0 ) ) != Color3f( 0 );
 			;
 			newShader->parameters()[g_emissionParameter] = new FloatData( hasEmission ? 1.0f : 0.0f );
@@ -938,11 +993,17 @@ void IECoreArnold::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 				// always white. But Arnold's is a tint applied uniformly
 				// everywhere, so we use a fallback value of `1.0` rather than
 				// the `0.0` from the USD spec.
-				transferUSDParameter( shaderNetwork, handle, shader.get(), g_specularColorParameter, newShader.get(), g_specularColorArnoldParameter, Color3f( 1.0f ) );
+				transferUSDParameter(
+					shaderNetwork, handle, shader.get(), g_specularColorParameter, newShader.get(),
+					g_specularColorArnoldParameter, Color3f( 1.0f )
+				);
 			}
 			else
 			{
-				transferUSDParameter( shaderNetwork, handle, shader.get(), g_metallicParameter, newShader.get(), g_metalnessParameter, 0.0f );
+				transferUSDParameter(
+					shaderNetwork, handle, shader.get(), g_metallicParameter, newShader.get(), g_metalnessParameter,
+					0.0f
+				);
 			}
 
 			removeInput( shaderNetwork, { handle, g_metallicParameter } );
@@ -961,16 +1022,32 @@ void IECoreArnold::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 					ShaderPtr compareShader = new Shader( "compare" );
 					compareShader->parameters()[g_input2Parameter] = new FloatData( opacityThreshold );
 					compareShader->parameters()[g_testParameter] = new StringData( ">" );
-					const InternedString compareHandle = shaderNetwork->addShader( handle.string() + "OpacityCompare", std::move( compareShader ) );
-					shaderNetwork->addConnection( ShaderNetwork::Connection( opacityInput, { compareHandle, g_input1Parameter } ) );
+					const InternedString compareHandle =
+						shaderNetwork->addShader( handle.string() + "OpacityCompare", std::move( compareShader ) );
+					shaderNetwork->addConnection(
+						ShaderNetwork::Connection( opacityInput, { compareHandle, g_input1Parameter } )
+					);
 					ShaderPtr multiplyShader = new Shader( "multiply" );
-					const InternedString multiplyHandle = shaderNetwork->addShader( handle.string() + "OpacityMultiply", std::move( multiplyShader ) );
-					shaderNetwork->addConnection( ShaderNetwork::Connection( opacityInput, { multiplyHandle, g_input1Parameter } ) );
-					shaderNetwork->addConnection( ShaderNetwork::Connection( compareHandle, { multiplyHandle, g_input2RParameter } ) );
-					shaderNetwork->addConnection( ShaderNetwork::Connection( compareHandle, { multiplyHandle, g_input2GParameter } ) );
-					shaderNetwork->addConnection( ShaderNetwork::Connection( compareHandle, { multiplyHandle, g_input2BParameter } ) );
-					shaderNetwork->removeConnection( ShaderNetwork::Connection( opacityInput, { handle, g_opacityParameter } ) );
-					shaderNetwork->addConnection( ShaderNetwork::Connection( multiplyHandle, { handle, g_opacityParameter } ) );
+					const InternedString multiplyHandle =
+						shaderNetwork->addShader( handle.string() + "OpacityMultiply", std::move( multiplyShader ) );
+					shaderNetwork->addConnection(
+						ShaderNetwork::Connection( opacityInput, { multiplyHandle, g_input1Parameter } )
+					);
+					shaderNetwork->addConnection(
+						ShaderNetwork::Connection( compareHandle, { multiplyHandle, g_input2RParameter } )
+					);
+					shaderNetwork->addConnection(
+						ShaderNetwork::Connection( compareHandle, { multiplyHandle, g_input2GParameter } )
+					);
+					shaderNetwork->addConnection(
+						ShaderNetwork::Connection( compareHandle, { multiplyHandle, g_input2BParameter } )
+					);
+					shaderNetwork->removeConnection(
+						ShaderNetwork::Connection( opacityInput, { handle, g_opacityParameter } )
+					);
+					shaderNetwork->addConnection(
+						ShaderNetwork::Connection( multiplyHandle, { handle, g_opacityParameter } )
+					);
 				}
 			}
 			else
@@ -986,16 +1063,25 @@ void IECoreArnold::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 			{
 				ShaderPtr normalShader = new Shader( "normal_map" );
 				normalShader->parameters()[g_colorToSignedParameter] = new BoolData( false );
-				const InternedString normalHandle = shaderNetwork->addShader( handle.string() + "Normal", std::move( normalShader ) );
-				shaderNetwork->addConnection( ShaderNetwork::Connection( normalInput, { normalHandle, g_inputParameter } ) );
-				shaderNetwork->removeConnection( ShaderNetwork::Connection( normalInput, { handle, g_normalParameter } ) );
-				shaderNetwork->addConnection( ShaderNetwork::Connection( normalHandle, { handle, g_normalParameter } ) );
+				const InternedString normalHandle =
+					shaderNetwork->addShader( handle.string() + "Normal", std::move( normalShader ) );
+				shaderNetwork->addConnection(
+					ShaderNetwork::Connection( normalInput, { normalHandle, g_inputParameter } )
+				);
+				shaderNetwork->removeConnection(
+					ShaderNetwork::Connection( normalInput, { handle, g_normalParameter } )
+				);
+				shaderNetwork->addConnection(
+					ShaderNetwork::Connection( normalHandle, { handle, g_normalParameter } )
+				);
 			}
 		}
 		else if( shader->getName() == "UsdTransform2d" )
 		{
 			newShader = new Shader( "matrix_multiply_vector" );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_inParameter, newShader.get(), g_inputParameter, Color3f( 0 ) );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_inParameter, newShader.get(), g_inputParameter, Color3f( 0 )
+			);
 			const V2f t = parameterValue( shader.get(), g_translationParameter, V2f( 0 ) );
 			const float r = parameterValue( shader.get(), g_rotationParameter, 0.0f );
 			const V2f s = parameterValue( shader.get(), g_scaleParameter, V2f( 1 ) );
@@ -1008,8 +1094,12 @@ void IECoreArnold::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 		else if( shader->getName() == "UsdPrimvarReader_float" )
 		{
 			newShader = new Shader( "user_data_float" );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_varnameParameter, newShader.get(), g_attributeParameter, string() );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_fallbackParameter, newShader.get(), g_defaultParameter, 0.0f );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_varnameParameter, newShader.get(), g_attributeParameter, string()
+			);
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_fallbackParameter, newShader.get(), g_defaultParameter, 0.0f
+			);
 		}
 		else if( shader->getName() == "UsdPrimvarReader_float2" )
 		{
@@ -1024,47 +1114,70 @@ void IECoreArnold::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 			else
 			{
 				newShader = new Shader( "user_data_rgb" );
-				transferUSDParameter( shaderNetwork, handle, shader.get(), g_varnameParameter, newShader.get(), g_attributeParameter, string() );
-				transferUSDParameter( shaderNetwork, handle, shader.get(), g_fallbackParameter, newShader.get(), g_defaultParameter, V2f( 0 ) );
+				transferUSDParameter(
+					shaderNetwork, handle, shader.get(), g_varnameParameter, newShader.get(), g_attributeParameter,
+					string()
+				);
+				transferUSDParameter(
+					shaderNetwork, handle, shader.get(), g_fallbackParameter, newShader.get(), g_defaultParameter,
+					V2f( 0 )
+				);
 				convertVecToColor<V2f, Color3f>( newShader.get(), g_defaultParameter );
 			}
 		}
 		else if(
-			shader->getName() == "UsdPrimvarReader_float3" ||
-			shader->getName() == "UsdPrimvarReader_normal" ||
-			shader->getName() == "UsdPrimvarReader_point" ||
-			shader->getName() == "UsdPrimvarReader_vector"
+			shader->getName() == "UsdPrimvarReader_float3" || shader->getName() == "UsdPrimvarReader_normal" ||
+			shader->getName() == "UsdPrimvarReader_point" || shader->getName() == "UsdPrimvarReader_vector"
 		)
 		{
 			newShader = new Shader( "user_data_rgb" );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_varnameParameter, newShader.get(), g_attributeParameter, string() );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_fallbackParameter, newShader.get(), g_defaultParameter, V3f( 0 ) );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_varnameParameter, newShader.get(), g_attributeParameter, string()
+			);
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_fallbackParameter, newShader.get(), g_defaultParameter, V3f( 0 )
+			);
 			convertVecToColor<V3f, Color3f>( newShader.get(), g_defaultParameter );
 		}
 		else if( shader->getName() == "UsdPrimvarReader_float4" )
 		{
 			newShader = new Shader( "user_data_rgba" );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_varnameParameter, newShader.get(), g_attributeParameter, string() );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_fallbackParameter, newShader.get(), g_defaultParameter, Color4f( 0 ) );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_varnameParameter, newShader.get(), g_attributeParameter, string()
+			);
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_fallbackParameter, newShader.get(), g_defaultParameter,
+				Color4f( 0 )
+			);
 		}
 		else if( shader->getName() == "UsdPrimvarReader_int" )
 		{
 			newShader = new Shader( "user_data_int" );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_varnameParameter, newShader.get(), g_attributeParameter, string() );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_fallbackParameter, newShader.get(), g_defaultParameter, 0 );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_varnameParameter, newShader.get(), g_attributeParameter, string()
+			);
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_fallbackParameter, newShader.get(), g_defaultParameter, 0
+			);
 		}
 		else if( shader->getName() == "UsdPrimvarReader_string" )
 		{
 			newShader = new Shader( "user_data_string" );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_varnameParameter, newShader.get(), g_attributeParameter, string() );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_fallbackParameter, newShader.get(), g_defaultParameter, string() );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_varnameParameter, newShader.get(), g_attributeParameter, string()
+			);
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_fallbackParameter, newShader.get(), g_defaultParameter, string()
+			);
 		}
 		else if( shader->getName() == "SphereLight" )
 		{
 			newShader = new Shader( "point_light", "ai:light" );
 			transferUSDLightParameters( shaderNetwork, handle, shader.get(), newShader.get() );
 			transferUSDShapingParameters( shaderNetwork, handle, shader.get(), newShader.get() );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_radiusParameter, newShader.get(), g_radiusParameter, 0.5f );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_radiusParameter, newShader.get(), g_radiusParameter, 0.5f
+			);
 			if( parameterValue( shader.get(), g_treatAsPointParameter, false ) )
 			{
 				newShader->parameters()[g_radiusParameter] = new FloatData( 0.0 );
@@ -1076,14 +1189,18 @@ void IECoreArnold::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 			newShader = new Shader( "disk_light", "ai:light" );
 			transferUSDLightParameters( shaderNetwork, handle, shader.get(), newShader.get() );
 			transferUSDShapingParameters( shaderNetwork, handle, shader.get(), newShader.get() );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_radiusParameter, newShader.get(), g_radiusParameter, 0.5f );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_radiusParameter, newShader.get(), g_radiusParameter, 0.5f
+			);
 		}
 		else if( shader->getName() == "CylinderLight" )
 		{
 			newShader = new Shader( "cylinder_light", "ai:light" );
 			transferUSDLightParameters( shaderNetwork, handle, shader.get(), newShader.get() );
 			transferUSDShapingParameters( shaderNetwork, handle, shader.get(), newShader.get() );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_radiusParameter, newShader.get(), g_radiusParameter, 0.5f );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_radiusParameter, newShader.get(), g_radiusParameter, 0.5f
+			);
 			const float length = parameterValue( shader.get(), g_lengthParameter, 1.0f );
 			// From USD schema : "The cylinder is centered at the origin and has its major axis on the X axis"
 			newShader->parameters()[g_topParameter] = new V3fData( V3f( length / 2, 0, 0 ) );
@@ -1101,7 +1218,9 @@ void IECoreArnold::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 			newShader = new Shader( "distant_light", "ai:light" );
 			transferUSDLightParameters( shaderNetwork, handle, shader.get(), newShader.get() );
 			transferUSDShapingParameters( shaderNetwork, handle, shader.get(), newShader.get() );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_angleParameter, newShader.get(), g_angleParameter, 0.53f );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_angleParameter, newShader.get(), g_angleParameter, 0.53f
+			);
 		}
 		else if( shader->getName() == "DomeLight" )
 		{
@@ -1115,7 +1234,10 @@ void IECoreArnold::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 			}
 			else if( format != "angular" && format != "latlong" )
 			{
-				IECore::msg( IECore::Msg::Warning, "convertUSDShaders", fmt::format( "Unsupported value \"{}\" for DomeLight.format", format ) );
+				IECore::msg(
+					IECore::Msg::Warning, "convertUSDShaders",
+					fmt::format( "Unsupported value \"{}\" for DomeLight.format", format )
+				);
 				format = "latlong";
 			}
 			newShader->parameters()[g_formatParameter] = new StringData( format );
@@ -1126,7 +1248,10 @@ void IECoreArnold::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 			transferUSDLightParameters( shaderNetwork, handle, shader.get(), newShader.get() );
 			const float width = parameterValue( shader.get(), g_widthParameter, 1.0f );
 			const float height = parameterValue( shader.get(), g_heightParameter, 1.0f );
-			newShader->parameters()[g_verticesParameter] = new V3fVectorData( { V3f( width / 2, -height / 2, 0 ), V3f( -width / 2, -height / 2, 0 ), V3f( -width / 2, height / 2, 0 ), V3f( width / 2, height / 2, 0 ) } );
+			newShader->parameters()[g_verticesParameter] = new V3fVectorData(
+				{ V3f( width / 2, -height / 2, 0 ), V3f( -width / 2, -height / 2, 0 ), V3f( -width / 2, height / 2, 0 ),
+				  V3f( width / 2, height / 2, 0 ) }
+			);
 			transferUSDTextureFile( shaderNetwork, handle, shader.get(), newShader.get() );
 		}
 
@@ -1146,7 +1271,9 @@ void IECoreArnold::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 namespace IECoreArnold::ShaderNetworkAlgo
 {
 
-void registerSubstitution( const std::string &name, SubstitutionHashFunction hashFunction, SubstitutionFunction substitutionFunction )
+void registerSubstitution(
+	const std::string &name, SubstitutionHashFunction hashFunction, SubstitutionFunction substitutionFunction
+)
 {
 	IECoreScene::ShaderNetworkAlgo::registerRenderAdaptor( name, hashFunction, substitutionFunction );
 }
@@ -1156,12 +1283,17 @@ void deregisterSubstitution( const std::string &name )
 	IECoreScene::ShaderNetworkAlgo::deregisterRenderAdaptor( name );
 }
 
-void hashSubstitutions( const IECoreScene::ShaderNetwork *shaderNetwork, InternedString attributeName, const IECore::CompoundObject *attributes, IECore::MurmurHash &hash )
+void hashSubstitutions(
+	const IECoreScene::ShaderNetwork *shaderNetwork, InternedString attributeName,
+	const IECore::CompoundObject *attributes, IECore::MurmurHash &hash
+)
 {
 	IECoreScene::ShaderNetworkAlgo::hashRenderAdaptors( shaderNetwork, attributeName, attributes, hash );
 }
 
-void applySubstitutions( IECoreScene::ShaderNetwork *shaderNetwork, InternedString attributeName, const IECore::CompoundObject *attributes )
+void applySubstitutions(
+	IECoreScene::ShaderNetwork *shaderNetwork, InternedString attributeName, const IECore::CompoundObject *attributes
+)
 {
 	IECoreScene::ShaderNetworkAlgo::applyRenderAdaptors( shaderNetwork, attributeName, attributes );
 }

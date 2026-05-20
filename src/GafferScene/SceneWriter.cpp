@@ -99,7 +99,14 @@ struct LocationData
 
 		if( m_path.size() )
 		{
-			M44dDataPtr td = new IECore::M44dData( Imath::M44d( m_transform[0][0], m_transform[0][1], m_transform[0][2], m_transform[0][3], m_transform[1][0], m_transform[1][1], m_transform[1][2], m_transform[1][3], m_transform[2][0], m_transform[2][1], m_transform[2][2], m_transform[2][3], m_transform[3][0], m_transform[3][1], m_transform[3][2], m_transform[3][3] ) );
+			M44dDataPtr td = new IECore::M44dData(
+				Imath::M44d(
+					m_transform[0][0], m_transform[0][1], m_transform[0][2], m_transform[0][3], m_transform[1][0],
+					m_transform[1][1], m_transform[1][2], m_transform[1][3], m_transform[2][0], m_transform[2][1],
+					m_transform[2][2], m_transform[2][3], m_transform[3][0], m_transform[3][1], m_transform[3][2],
+					m_transform[3][3]
+				)
+			);
 			scene->writeTransform( td.get(), time );
 		}
 
@@ -122,7 +129,7 @@ struct LocationData
 		}
 	}
 
-	private:
+private:
 
 	ScenePlug::ScenePath m_path;
 	ConstCompoundObjectPtr m_attributes;
@@ -139,8 +146,7 @@ GAFFER_NODE_DEFINE_TYPE( SceneWriter );
 
 size_t SceneWriter::g_firstPlugIndex = 0;
 
-SceneWriter::SceneWriter( const std::string &name )
-	: TaskNode( name )
+SceneWriter::SceneWriter( const std::string &name ) : TaskNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "in", Plug::In ) );
@@ -149,9 +155,7 @@ SceneWriter::SceneWriter( const std::string &name )
 	outPlug()->setInput( inPlug() );
 }
 
-SceneWriter::~SceneWriter()
-{
-}
+SceneWriter::~SceneWriter() {}
 
 ScenePlug *SceneWriter::inPlug()
 {
@@ -245,9 +249,7 @@ void SceneWriter::executeSequence( const std::vector<float> &frames ) const
 			// Write to output serially, because SceneInterfaces are not
 			// thread-safe for writing.
 
-			[&]( const LocationData &locationData ) {
-				locationData.write( output.get(), scope.context()->getTime() );
-			}
+			[&]( const LocationData &locationData ) { locationData.write( output.get(), scope.context()->getTime() ); }
 
 		);
 

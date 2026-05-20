@@ -53,9 +53,7 @@ ContextVariableTweaks::ContextVariableTweaks( const std::string &name ) : Contex
 	addChild( new TweaksPlug( "tweaks" ) );
 }
 
-ContextVariableTweaks::~ContextVariableTweaks()
-{
-}
+ContextVariableTweaks::~ContextVariableTweaks() {}
 
 Gaffer::BoolPlug *ContextVariableTweaks::ignoreMissingPlug()
 {

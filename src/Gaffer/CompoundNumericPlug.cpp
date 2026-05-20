@@ -44,21 +44,18 @@ const IECore::RunTimeTyped::TypeDescription<CompoundNumericPlug<T>> CompoundNume
 
 template<typename T>
 CompoundNumericPlug<T>::CompoundNumericPlug(
-	const std::string &name,
-	Direction direction,
-	T defaultValue,
-	T minValue,
-	T maxValue,
-	unsigned flags,
+	const std::string &name, Direction direction, T defaultValue, T minValue, T maxValue, unsigned flags,
 	IECore::GeometricData::Interpretation interpretation
 )
-	: ValuePlug( name, direction, flags ), m_interpretation( interpretation )
+	: ValuePlug( name, direction, flags ),
+	  m_interpretation( interpretation )
 {
 	const char **n = childNames();
 	unsigned childFlags = flags & ~Dynamic;
 	for( unsigned i = 0; i < T::dimensions(); i++ )
 	{
-		typename ChildType::Ptr p = new ChildType( *n++, direction, defaultValue[i], minValue[i], maxValue[i], childFlags );
+		typename ChildType::Ptr p =
+			new ChildType( *n++, direction, defaultValue[i], minValue[i], maxValue[i], childFlags );
 		addChild( p );
 	}
 }
@@ -77,7 +74,9 @@ bool CompoundNumericPlug<T>::acceptsChild( const GraphComponent *potentialChild 
 template<class T>
 PlugPtr CompoundNumericPlug<T>::createCounterpart( const std::string &name, Direction direction ) const
 {
-	return new CompoundNumericPlug<T>( name, direction, defaultValue(), minValue(), maxValue(), getFlags(), interpretation() );
+	return new CompoundNumericPlug<T>(
+		name, direction, defaultValue(), minValue(), maxValue(), getFlags(), interpretation()
+	);
 }
 
 template<typename T>

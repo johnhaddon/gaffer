@@ -49,10 +49,7 @@ const IECore::RunTimeTyped::TypeDescription<TypedObjectPlug<T>> TypedObjectPlug<
 
 template<class T>
 TypedObjectPlug<T>::TypedObjectPlug(
-	const std::string &name,
-	Direction direction,
-	ConstValuePtr defaultValue,
-	unsigned flags
+	const std::string &name, Direction direction, ConstValuePtr defaultValue, unsigned flags
 )
 	: ValuePlug( name, direction, defaultValue->copy(), flags )
 {

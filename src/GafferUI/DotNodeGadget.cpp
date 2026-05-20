@@ -61,10 +61,11 @@ using namespace GafferUI;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DotNodeGadget );
 
-DotNodeGadget::NodeGadgetTypeDescription<DotNodeGadget> DotNodeGadget::g_nodeGadgetTypeDescription( Gaffer::Dot::staticTypeId() );
+DotNodeGadget::NodeGadgetTypeDescription<DotNodeGadget> DotNodeGadget::g_nodeGadgetTypeDescription(
+	Gaffer::Dot::staticTypeId()
+);
 
-DotNodeGadget::DotNodeGadget( Gaffer::NodePtr node )
-	: StandardNodeGadget( node )
+DotNodeGadget::DotNodeGadget( Gaffer::NodePtr node ) : StandardNodeGadget( node )
 {
 	if( !runTimeCast<Dot>( node ) )
 	{
@@ -87,9 +88,7 @@ DotNodeGadget::DotNodeGadget( Gaffer::NodePtr node )
 	// update there.
 }
 
-DotNodeGadget::~DotNodeGadget()
-{
-}
+DotNodeGadget::~DotNodeGadget() {}
 
 Box3f DotNodeGadget::bound() const
 {
@@ -169,7 +168,8 @@ void DotNodeGadget::updateUpstreamNameChangedConnection()
 	m_upstreamNameChangedConnection.disconnect();
 	if( Node *n = upstreamNode() )
 	{
-		m_upstreamNameChangedConnection = n->nameChangedSignal().connect( boost::bind( &DotNodeGadget::nodeNameChanged, this, ::_1 ) );
+		m_upstreamNameChangedConnection =
+			n->nameChangedSignal().connect( boost::bind( &DotNodeGadget::nodeNameChanged, this, ::_1 ) );
 	}
 }
 
@@ -221,18 +221,12 @@ void DotNodeGadget::updateLabel()
 	if( labelEdge == TopEdge )
 	{
 		const Imath::Box3f labelBound = style()->textBound( Style::LabelText, m_label );
-		m_labelPosition = V2f(
-			-labelBound.size().x / 2.0,
-			thisBound.max.y + 1.0
-		);
+		m_labelPosition = V2f( -labelBound.size().x / 2.0, thisBound.max.y + 1.0 );
 	}
 	else
 	{
 		const Imath::Box3f characterBound = style()->characterBound( Style::LabelText );
-		m_labelPosition = V2f(
-			thisBound.max.x,
-			thisBound.center().y - characterBound.size().y / 2.0
-		);
+		m_labelPosition = V2f( thisBound.max.x, thisBound.center().y - characterBound.size().y / 2.0 );
 	}
 
 	dirty( DirtyType::Render );

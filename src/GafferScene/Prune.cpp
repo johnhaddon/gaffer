@@ -47,8 +47,7 @@ GAFFER_NODE_DEFINE_TYPE( Prune );
 
 size_t Prune::g_firstPlugIndex = 0;
 
-Prune::Prune( const std::string &name )
-	: FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
+Prune::Prune( const std::string &name ) : FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new BoolPlug( "adjustBounds", Plug::In, false ) );
@@ -66,9 +65,7 @@ Prune::Prune( const std::string &name )
 	outPlug()->setNamesPlug()->setInput( inPlug()->setNamesPlug() );
 }
 
-Prune::~Prune()
-{
-}
+Prune::~Prune() {}
 
 Gaffer::BoolPlug *Prune::adjustBoundsPlug()
 {
@@ -84,34 +81,26 @@ void Prune::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs 
 {
 	FilteredSceneProcessor::affects( input, outputs );
 
-	if(
-		input == adjustBoundsPlug() ||
-		input == filterPlug() ||
-		input == outPlug()->childBoundsPlug() ||
-		input == inPlug()->boundPlug()
-	)
+	if( input == adjustBoundsPlug() || input == filterPlug() || input == outPlug()->childBoundsPlug() ||
+		input == inPlug()->boundPlug() )
 	{
 		outputs.push_back( outPlug()->boundPlug() );
 	}
 
-	if(
-		input == filterPlug() ||
-		input == inPlug()->childNamesPlug()
-	)
+	if( input == filterPlug() || input == inPlug()->childNamesPlug() )
 	{
 		outputs.push_back( outPlug()->childNamesPlug() );
 	}
 
-	if(
-		input == inPlug()->setPlug() ||
-		input == filterPlug()
-	)
+	if( input == inPlug()->setPlug() || input == filterPlug() )
 	{
 		outputs.push_back( outPlug()->setPlug() );
 	}
 }
 
-void Prune::hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Prune::hashBound(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	if( adjustBoundsPlug()->getValue() )
 	{
@@ -162,7 +151,9 @@ Imath::Box3f Prune::computeBound( const ScenePath &path, const Gaffer::Context *
 	return inPlug()->boundPlug()->getValue();
 }
 
-void Prune::hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Prune::hashChildNames(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	const IECore::PathMatcher::Result m = filterValue( context );
 
@@ -182,7 +173,8 @@ void Prune::hashChildNames( const ScenePath &path, const Gaffer::Context *contex
 
 		ScenePath childPath = path;
 		childPath.push_back( InternedString() ); // for the child name
-		for( vector<InternedString>::const_iterator it = inputChildNames.begin(), eIt = inputChildNames.end(); it != eIt; ++it )
+		for( vector<InternedString>::const_iterator it = inputChildNames.begin(), eIt = inputChildNames.end();
+			 it != eIt; ++it )
 		{
 			childPath[path.size()] = *it;
 			sceneScope.set( ScenePlug::scenePathContextName, &childPath );
@@ -196,7 +188,9 @@ void Prune::hashChildNames( const ScenePath &path, const Gaffer::Context *contex
 	}
 }
 
-IECore::ConstInternedStringVectorDataPtr Prune::computeChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstInternedStringVectorDataPtr Prune::computeChildNames(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	const IECore::PathMatcher::Result m = filterValue( context );
 
@@ -217,7 +211,8 @@ IECore::ConstInternedStringVectorDataPtr Prune::computeChildNames( const ScenePa
 
 		ScenePath childPath = path;
 		childPath.push_back( InternedString() ); // for the child name
-		for( vector<InternedString>::const_iterator it = inputChildNames.begin(), eIt = inputChildNames.end(); it != eIt; ++it )
+		for( vector<InternedString>::const_iterator it = inputChildNames.begin(), eIt = inputChildNames.end();
+			 it != eIt; ++it )
 		{
 			childPath[path.size()] = *it;
 			sceneScope.set( ScenePlug::scenePathContextName, &childPath );
@@ -236,7 +231,10 @@ IECore::ConstInternedStringVectorDataPtr Prune::computeChildNames( const ScenePa
 	}
 }
 
-void Prune::hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Prune::hashSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent,
+	IECore::MurmurHash &h
+) const
 {
 	FilteredSceneProcessor::hashSet( setName, context, parent, h );
 	inPlug()->setPlug()->hash( h );
@@ -262,7 +260,9 @@ void Prune::hashSet( const IECore::InternedString &setName, const Gaffer::Contex
 	filterPlug()->hash( h );
 }
 
-IECore::ConstPathMatcherDataPtr Prune::computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstPathMatcherDataPtr Prune::computeSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ConstPathMatcherDataPtr inputSetData = inPlug()->setPlug()->getValue();
 	const PathMatcher &inputSet = inputSetData->readable();

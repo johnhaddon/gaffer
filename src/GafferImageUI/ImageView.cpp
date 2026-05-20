@@ -116,10 +116,9 @@ const float g_wipeHandleThickness = 14.0f;
 class ImageView::WipeHandle : public GafferUI::Gadget
 {
 
-	public:
+public:
 
-	WipeHandle()
-		: Gadget(), m_pos( 0 ), m_dir( 1, 0 ), m_editable( true ), m_dragHandle( HandleSelect::None )
+	WipeHandle() : Gadget(), m_pos( 0 ), m_dir( 1, 0 ), m_editable( true ), m_dragHandle( HandleSelect::None )
 	{
 		mouseMoveSignal().connect( boost::bind( &WipeHandle::mouseMove, this, ::_2 ) );
 		buttonPressSignal().connect( boost::bind( &WipeHandle::buttonPress, this, ::_2 ) );
@@ -137,15 +136,9 @@ class ImageView::WipeHandle : public GafferUI::Gadget
 		return Box3f();
 	}
 
-	void setPosition( const Imath::V2f &p )
-	{
-		setWipeInternal( p, m_dir );
-	}
+	void setPosition( const Imath::V2f &p ) { setWipeInternal( p, m_dir ); }
 
-	const Imath::V2f &getPosition() const
-	{
-		return m_pos;
-	}
+	const Imath::V2f &getPosition() const { return m_pos; }
 
 	void setDirection( const Imath::V2f &d )
 	{
@@ -155,22 +148,13 @@ class ImageView::WipeHandle : public GafferUI::Gadget
 		}
 	}
 
-	const Imath::V2f &getDirection() const
-	{
-		return m_dir;
-	}
+	const Imath::V2f &getDirection() const { return m_dir; }
 
-	void setEditable( bool editable )
-	{
-		m_editable = editable;
-	}
+	void setEditable( bool editable ) { m_editable = editable; }
 
-	bool getEditable() const
-	{
-		return m_editable;
-	}
+	bool getEditable() const { return m_editable; }
 
-	protected:
+protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
 	{
@@ -202,10 +186,7 @@ class ImageView::WipeHandle : public GafferUI::Gadget
 		}
 	}
 
-	unsigned layerMask() const override
-	{
-		return (unsigned)Layer::Front;
-	}
+	unsigned layerMask() const override { return (unsigned)Layer::Front; }
 
 	Imath::Box3f renderBound() const override
 	{
@@ -214,17 +195,18 @@ class ImageView::WipeHandle : public GafferUI::Gadget
 		return b;
 	}
 
-	private:
+private:
 
-	void renderHandle( const Style *style, float rotateHandleSize, float thickness, float offset, const Color4f &color ) const
+	void renderHandle(
+		const Style *style, float rotateHandleSize, float thickness, float offset, const Color4f &color
+	) const
 	{
 		const ViewportGadget *viewport = ancestor<ViewportGadget>();
 		const V2i &viewportSize = viewport->getViewport();
 
 		Box2f rasterViewport( V2f( 0 ), V2f( viewportSize.x, viewportSize.y ) );
 		Box3f worldViewport3d(
-			viewport->rasterToWorldSpace( rasterViewport.min ).p0,
-			viewport->rasterToWorldSpace( rasterViewport.max ).p0
+			viewport->rasterToWorldSpace( rasterViewport.min ).p0, viewport->rasterToWorldSpace( rasterViewport.max ).p0
 		);
 		float size = ( worldViewport3d.max - worldViewport3d.min ).length();
 		V2f worldViewportCenter( worldViewport3d.center().x, worldViewport3d.center().y );
@@ -234,7 +216,10 @@ class ImageView::WipeHandle : public GafferUI::Gadget
 		V2f closestPoint = worldViewportCenter + m_dir * m_dir.dot( m_pos - worldViewportCenter );
 
 		V2f perp( m_dir.y, -m_dir.x );
-		line2D( style, closestPoint + perp * size + m_dir * offset, closestPoint - perp * size + m_dir * offset, thickness, color );
+		line2D(
+			style, closestPoint + perp * size + m_dir * offset, closestPoint - perp * size + m_dir * offset, thickness,
+			color
+		);
 
 		// Draw the arc
 		const int segments = 32;
@@ -330,10 +315,9 @@ class ImageView::WipeHandle : public GafferUI::Gadget
 		m_dragStart = eventPosition( event );
 		m_dragStartPos = m_pos;
 		V2f startCursorDir = ( m_dragStart - m_pos ).normalized();
-		m_dragStartAlignment = V2f(
-			startCursorDir.x * m_dir.x + startCursorDir.y * m_dir.y,
-			startCursorDir.x * m_dir.y - startCursorDir.y * m_dir.x
-		);
+		m_dragStartAlignment =
+			V2f( startCursorDir.x * m_dir.x + startCursorDir.y * m_dir.y,
+				 startCursorDir.x * m_dir.y - startCursorDir.y * m_dir.x );
 		return IECore::NullObject::defaultNullObject();
 	}
 
@@ -374,10 +358,9 @@ class ImageView::WipeHandle : public GafferUI::Gadget
 		{
 			V2f disp = p - m_pos;
 
-			disp = V2f(
-				disp.x * m_dragStartAlignment.x - disp.y * m_dragStartAlignment.y,
-				disp.x * m_dragStartAlignment.y + disp.y * m_dragStartAlignment.x
-			);
+			disp =
+				V2f( disp.x * m_dragStartAlignment.x - disp.y * m_dragStartAlignment.y,
+					 disp.x * m_dragStartAlignment.y + disp.y * m_dragStartAlignment.x );
 
 			if( disp != V2f( 0 ) )
 			{
@@ -386,10 +369,7 @@ class ImageView::WipeHandle : public GafferUI::Gadget
 		}
 	}
 
-	void leave()
-	{
-		Pointer::setCurrent( "" );
-	}
+	void leave() { Pointer::setCurrent( "" ); }
 
 	enum class HandleSelect
 	{
@@ -439,7 +419,9 @@ class ImageView::WipeHandle : public GafferUI::Gadget
 
 GAFFER_NODE_DEFINE_TYPE( ImageView );
 
-GAFFERIMAGEUI_API ImageView::ViewDescription<ImageView> ImageView::g_viewDescription( GafferImage::ImagePlug::staticTypeId() );
+GAFFERIMAGEUI_API ImageView::ViewDescription<ImageView> ImageView::g_viewDescription(
+	GafferImage::ImagePlug::staticTypeId()
+);
 
 ImageView::ImageView( Gaffer::ScriptNodePtr scriptNode )
 	: View( defaultName<ImageView>(), scriptNode, new GafferImage::ImagePlug() ),
@@ -462,7 +444,9 @@ ImageView::ImageView( Gaffer::ScriptNodePtr scriptNode )
 	compareParent->addChild( new BoolPlug( "matchDisplayWindows", Plug::In ) );
 	compareParent->addChild( new BoolPlug( "wipe", Plug::In, true, Plug::Default & ~Plug::AcceptsInputs ) );
 	compareParent->addChild( new ImagePlug( "image", Plug::In ) );
-	compareParent->addChild( new StringPlug( "catalogueOutput", Plug::In, "output:1", Plug::Default & ~Plug::AcceptsInputs ) );
+	compareParent->addChild(
+		new StringPlug( "catalogueOutput", Plug::In, "output:1", Plug::Default & ~Plug::AcceptsInputs )
+	);
 
 	StringVectorDataPtr channelsDefaultData = new StringVectorData;
 	channelsDefaultData->writable() = { "R", "G", "B", "A" };
@@ -486,7 +470,9 @@ ImageView::ImageView( Gaffer::ScriptNodePtr scriptNode )
 	comparisonSwitch->selectorPlug()->setValue( "${imageView:__useComparisonImage}" );
 	comparisonSwitch->inPlugs()->getChild<NameValuePlug>( 0 )->valuePlug()->setInput( preprocessorInput );
 	comparisonSwitch->inPlugs()->getChild<NameValuePlug>( 1 )->namePlug()->setValue( "True" );
-	comparisonSwitch->inPlugs()->getChild<NameValuePlug>( 1 )->valuePlug()->setInput( comparisonDeleteContext->outPlug() );
+	comparisonSwitch->inPlugs()->getChild<NameValuePlug>( 1 )->valuePlug()->setInput(
+		comparisonDeleteContext->outPlug()
+	);
 
 	SelectViewPtr selectView = new SelectView( "_selectView" );
 	preprocessor->addChild( selectView );
@@ -524,9 +510,15 @@ ImageView::ImageView( Gaffer::ScriptNodePtr scriptNode )
 	addChild( m_comparisonSelect );
 	m_comparisonSelect->setup( compareImagePlug() );
 	m_comparisonSelect->inPlug()->setInput( preprocessedInPlug<ImagePlug>() );
-	m_comparisonSelect->variablesPlug()->addChild( new NameValuePlug( "catalogue:imageName", new StringData( "output:1" ), true ) );
-	m_comparisonSelect->variablesPlug()->getChild<NameValuePlug>( 0 )->valuePlug<StringPlug>()->setInput( compareCatalogueOutputPlug() );
-	m_comparisonSelect->variablesPlug()->addChild( new NameValuePlug( "imageView:__useComparisonImage", new StringData( "True" ), true ) );
+	m_comparisonSelect->variablesPlug()->addChild(
+		new NameValuePlug( "catalogue:imageName", new StringData( "output:1" ), true )
+	);
+	m_comparisonSelect->variablesPlug()->getChild<NameValuePlug>( 0 )->valuePlug<StringPlug>()->setInput(
+		compareCatalogueOutputPlug()
+	);
+	m_comparisonSelect->variablesPlug()->addChild(
+		new NameValuePlug( "imageView:__useComparisonImage", new StringData( "True" ), true )
+	);
 
 	m_imageGadgets[1]->setImage( IECore::runTimeCast<GafferImage::ImagePlug>( m_comparisonSelect->outPlug() ) );
 	m_imageGadgets[1]->setContext( context() );
@@ -577,7 +569,8 @@ void ImageView::insertConverter( Gaffer::NodePtr converter )
 	preprocessor->setChild( "__converter", converter );
 	converterInput->setInput( newPreprocessorInput );
 
-	for( Plug::OutputContainer::const_iterator it = outputsToRestore.begin(), eIt = outputsToRestore.end(); it != eIt; ++it )
+	for( Plug::OutputContainer::const_iterator it = outputsToRestore.begin(), eIt = outputsToRestore.end(); it != eIt;
+		 ++it )
 	{
 		( *it )->setInput( converterOutput );
 	}
@@ -750,7 +743,9 @@ void ImageView::plugSet( Gaffer::Plug *plug )
 
 		setWipeActive( compareMode != "" && compareWipePlug()->getValue() );
 
-		getChild( "displayTransform" )->getChild<BoolPlug>( "absolute" )->setValue( m == ImageGadget::BlendMode::Difference );
+		getChild( "displayTransform" )
+			->getChild<BoolPlug>( "absolute" )
+			->setValue( m == ImageGadget::BlendMode::Difference );
 	}
 	else if( plug == compareWipePlug() )
 	{
@@ -758,7 +753,9 @@ void ImageView::plugSet( Gaffer::Plug *plug )
 	}
 	else if( plug == compareCatalogueOutputPlug() )
 	{
-		m_comparisonSelect->variablesPlug()->getChild<NameValuePlug>( 0 )->enabledPlug()->setValue( compareCatalogueOutputPlug()->getValue() != "" );
+		m_comparisonSelect->variablesPlug()->getChild<NameValuePlug>( 0 )->enabledPlug()->setValue(
+			compareCatalogueOutputPlug()->getValue() != ""
+		);
 	}
 	else if( plug == getChild( "displayTransform" )->getChild( "soloChannel" ) )
 	{
@@ -816,12 +813,10 @@ bool ImageView::keyPress( const GafferUI::KeyEvent &event )
 		V2i viewport = viewportGadget()->getViewport();
 		V3f halfViewportSize( viewport.x / 2, viewport.y / 2, 0 );
 		V3f imageCenter = m_imageGadgets[0]->bound().center();
-		viewportGadget()->frame(
-			Box3f(
-				V3f( imageCenter.x - halfViewportSize.x, imageCenter.y - halfViewportSize.y, 0 ),
-				V3f( imageCenter.x + halfViewportSize.x, imageCenter.y + halfViewportSize.y, 0 )
-			)
-		);
+		viewportGadget()->frame( Box3f(
+			V3f( imageCenter.x - halfViewportSize.x, imageCenter.y - halfViewportSize.y, 0 ),
+			V3f( imageCenter.x + halfViewportSize.x, imageCenter.y + halfViewportSize.y, 0 )
+		) );
 		return true;
 	}
 	else if( event.key == "Escape" )
@@ -862,11 +857,17 @@ void ImageView::preRender()
 
 	if( m_wipeHandle->getVisible() && m_imageGadgets[0]->getBlendMode() == ImageGadget::BlendMode::Replace )
 	{
-		V2f scale1( 1.0f / ( comparisonScale.x * pixelAspectFromImageGadget( m_imageGadgets[1].get() ) ), 1.0f / comparisonScale.y );
+		V2f scale1(
+			1.0f / ( comparisonScale.x * pixelAspectFromImageGadget( m_imageGadgets[1].get() ) ),
+			1.0f / comparisonScale.y
+		);
 		m_imageGadgets[1]->setWipeEnabled( true );
-		m_imageGadgets[1]->setWipePosition( ( m_wipeHandle->getPosition() - V2f( comparisonTranslate.x, comparisonTranslate.y ) ) * scale1 );
+		m_imageGadgets[1]->setWipePosition(
+			( m_wipeHandle->getPosition() - V2f( comparisonTranslate.x, comparisonTranslate.y ) ) * scale1
+		);
 		m_imageGadgets[1]->setWipeAngle(
-			atan2f( -m_wipeHandle->getDirection()[1] * scale1.x, -m_wipeHandle->getDirection()[0] * scale1.y ) * 180.0f / M_PI
+			atan2f( -m_wipeHandle->getDirection()[1] * scale1.x, -m_wipeHandle->getDirection()[0] * scale1.y ) *
+			180.0f / M_PI
 		);
 	}
 	else

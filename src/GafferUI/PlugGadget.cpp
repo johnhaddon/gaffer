@@ -48,15 +48,12 @@ using namespace Gaffer;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( PlugGadget );
 
-PlugGadget::PlugGadget( Gaffer::PlugPtr plug )
-	: ContainerGadget( defaultName<PlugGadget>() ), m_plug( nullptr )
+PlugGadget::PlugGadget( Gaffer::PlugPtr plug ) : ContainerGadget( defaultName<PlugGadget>() ), m_plug( nullptr )
 {
 	setPlug( plug );
 }
 
-PlugGadget::~PlugGadget()
-{
-}
+PlugGadget::~PlugGadget() {}
 
 void PlugGadget::setPlug( Gaffer::PlugPtr plug )
 {
@@ -70,7 +67,8 @@ void PlugGadget::setPlug( Gaffer::PlugPtr plug )
 	Node *node = m_plug->node();
 
 	m_plugDirtiedConnection = node->plugDirtiedSignal().connect( boost::bind( &PlugGadget::plugDirtied, this, ::_1 ) );
-	m_plugInputChangedConnection = node->plugInputChangedSignal().connect( boost::bind( &PlugGadget::plugInputChanged, this, ::_1 ) );
+	m_plugInputChangedConnection =
+		node->plugInputChangedSignal().connect( boost::bind( &PlugGadget::plugInputChanged, this, ::_1 ) );
 
 	m_context = node->scriptNode()->context();
 	updateContextConnection();
@@ -94,9 +92,7 @@ Gaffer::Context *PlugGadget::getContext()
 	return m_context.get();
 }
 
-void PlugGadget::updateFromPlug()
-{
-}
+void PlugGadget::updateFromPlug() {}
 
 void PlugGadget::plugDirtied( Gaffer::Plug *plug )
 {
@@ -133,7 +129,8 @@ void PlugGadget::updateContextConnection()
 
 	if( context )
 	{
-		m_contextChangedConnection = context->changedSignal().connect( boost::bind( &PlugGadget::contextChanged, this, ::_1, ::_2 ) );
+		m_contextChangedConnection =
+			context->changedSignal().connect( boost::bind( &PlugGadget::contextChanged, this, ::_1, ::_2 ) );
 	}
 	else
 	{

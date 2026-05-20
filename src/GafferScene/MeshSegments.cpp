@@ -54,7 +54,10 @@ namespace
 // to think about, but they could be something else with a face-varying index ( like UVs ) - this function
 // just requires that the indices are clustered into contiguous "faces", where the size of each face is
 // given by verticesPerFace, and that the number of things pointed to by the indices is numIndexed.
-void segmentIndices( const std::vector<int> &verticesPerFace, const std::vector<int> &indices, int numIndexed, std::vector<int> &uniformSegments )
+void segmentIndices(
+	const std::vector<int> &verticesPerFace, const std::vector<int> &indices, int numIndexed,
+	std::vector<int> &uniformSegments
+)
 {
 	// The core of this function is the segments vector, which has an element for each vertex.
 	// Each vertex must store the index of a vertex with a lower index than itself inside the same
@@ -166,8 +169,7 @@ size_t MeshSegments::g_firstPlugIndex = 0;
 
 GAFFER_NODE_DEFINE_TYPE( MeshSegments );
 
-MeshSegments::MeshSegments( const std::string &name )
-	: ObjectProcessor( name )
+MeshSegments::MeshSegments( const std::string &name ) : ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -175,9 +177,7 @@ MeshSegments::MeshSegments( const std::string &name )
 	addChild( new StringPlug( "segment", Plug::In, "segment" ) );
 }
 
-MeshSegments::~MeshSegments()
-{
-}
+MeshSegments::~MeshSegments() {}
 
 Gaffer::StringPlug *MeshSegments::connectivityPlug()
 {
@@ -201,12 +201,12 @@ const Gaffer::StringPlug *MeshSegments::segmentPlug() const
 
 bool MeshSegments::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return ObjectProcessor::affectsProcessedObject( input ) ||
-		input == connectivityPlug() ||
-		input == segmentPlug();
+	return ObjectProcessor::affectsProcessedObject( input ) || input == connectivityPlug() || input == segmentPlug();
 }
 
-void MeshSegments::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void MeshSegments::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ObjectProcessor::hashProcessedObject( path, context, h );
 
@@ -214,7 +214,9 @@ void MeshSegments::hashProcessedObject( const ScenePath &path, const Gaffer::Con
 	segmentPlug()->hash( h );
 }
 
-IECore::ConstObjectPtr MeshSegments::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr MeshSegments::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	const std::string segmentPrimVar = segmentPlug()->getValue();
 	const std::string connectivityPrimVar = connectivityPlug()->getValue();
@@ -232,8 +234,7 @@ IECore::ConstObjectPtr MeshSegments::computeProcessedObject( const ScenePath &pa
 		uniformSegmentsData = new IntVectorData();
 		segmentIndices(
 			verticesPerFace, mesh->vertexIds()->readable(),
-			mesh->variableSize( PrimitiveVariable::Interpolation::Vertex ),
-			uniformSegmentsData->writable()
+			mesh->variableSize( PrimitiveVariable::Interpolation::Vertex ), uniformSegmentsData->writable()
 		);
 	}
 	else
@@ -244,17 +245,20 @@ IECore::ConstObjectPtr MeshSegments::computeProcessedObject( const ScenePath &pa
 			throw IECore::Exception( "No primitive variable named \"" + connectivityPrimVar + "\"" );
 		}
 
-		if( it->second.interpolation == PrimitiveVariable::Interpolation::Vertex || it->second.interpolation == PrimitiveVariable::Interpolation::Varying )
+		if( it->second.interpolation == PrimitiveVariable::Interpolation::Vertex ||
+			it->second.interpolation == PrimitiveVariable::Interpolation::Varying )
 		{
 			if( it->second.indices )
 			{
-				throw IECore::Exception( "Vertex primitive variable " + connectivityPrimVar + " has indices.  Indices are not supported on vertex primitive variables." );
+				throw IECore::Exception(
+					"Vertex primitive variable " + connectivityPrimVar +
+					" has indices.  Indices are not supported on vertex primitive variables."
+				);
 			}
 			uniformSegmentsData = new IntVectorData();
 			segmentIndices(
 				verticesPerFace, mesh->vertexIds()->readable(),
-				mesh->variableSize( PrimitiveVariable::Interpolation::Vertex ),
-				uniformSegmentsData->writable()
+				mesh->variableSize( PrimitiveVariable::Interpolation::Vertex ), uniformSegmentsData->writable()
 			);
 		}
 		else if( it->second.interpolation == PrimitiveVariable::Interpolation::FaceVarying )
@@ -262,12 +266,14 @@ IECore::ConstObjectPtr MeshSegments::computeProcessedObject( const ScenePath &pa
 			if( !it->second.indices )
 			{
 				// \todo : suggest using PrimitiveVariableWeld, once this node exists." );
-				throw IECore::Exception( "FaceVarying primitive variable " + connectivityPrimVar + " must be indexed in order to use as connectivity." );
+				throw IECore::Exception(
+					"FaceVarying primitive variable " + connectivityPrimVar +
+					" must be indexed in order to use as connectivity."
+				);
 			}
 			uniformSegmentsData = new IntVectorData();
 			segmentIndices(
-				verticesPerFace, it->second.indices->readable(),
-				IECore::size( it->second.data.get() ),
+				verticesPerFace, it->second.indices->readable(), IECore::size( it->second.data.get() ),
 				uniformSegmentsData->writable()
 			);
 		}
@@ -275,7 +281,10 @@ IECore::ConstObjectPtr MeshSegments::computeProcessedObject( const ScenePath &pa
 		{
 			if( !it->second.indices )
 			{
-				throw IECore::Exception( "Uniform primitive variable " + connectivityPrimVar + " must be indexed in order to use as connectivity." );
+				throw IECore::Exception(
+					"Uniform primitive variable " + connectivityPrimVar +
+					" must be indexed in order to use as connectivity."
+				);
 			}
 			uniformSegmentsData = it->second.indices;
 		}

@@ -147,7 +147,8 @@ boost::python::object info( boost::python::object o )
 	}
 
 	boost::python::dict result;
-	for( std::vector<IECore::InternedString>::const_iterator it = propertyNames.begin(), eIt = propertyNames.end(); it != eIt; ++it )
+	for( std::vector<IECore::InternedString>::const_iterator it = propertyNames.begin(), eIt = propertyNames.end();
+		 it != eIt; ++it )
 	{
 		IECore::ConstRunTimeTypedPtr a;
 		if( infoImplementedInPython )
@@ -179,14 +180,21 @@ Gaffer::PlugPtr cancellationSubject( const T &p )
 } // namespace Detail
 
 template<typename T, typename TWrapper>
-PathClass<T, TWrapper>::PathClass( const char *docString )
-	: IECorePython::RunTimeTypedClass<T, TWrapper>( docString )
+PathClass<T, TWrapper>::PathClass( const char *docString ) : IECorePython::RunTimeTypedClass<T, TWrapper>( docString )
 {
 	this->def( "isValid", &Detail::isValid<T>, boost::python::arg( "canceller" ) = boost::python::object() );
 	this->def( "isLeaf", &Detail::isLeaf<T>, boost::python::arg( "canceller" ) = boost::python::object() );
-	this->def( "propertyNames", &Detail::propertyNames<T>, boost::python::arg( "canceller" ) = boost::python::object() );
-	this->def( "property", &Detail::property<T>, ( boost::python::arg( "name" ), boost::python::arg( "canceller" ) = boost::python::object() ) );
-	this->def( "contextProperty", &Detail::contextProperty<T>, ( boost::python::arg( "name" ), boost::python::arg( "canceller" ) = boost::python::object() ) );
+	this->def(
+		"propertyNames", &Detail::propertyNames<T>, boost::python::arg( "canceller" ) = boost::python::object()
+	);
+	this->def(
+		"property", &Detail::property<T>,
+		( boost::python::arg( "name" ), boost::python::arg( "canceller" ) = boost::python::object() )
+	);
+	this->def(
+		"contextProperty", &Detail::contextProperty<T>,
+		( boost::python::arg( "name" ), boost::python::arg( "canceller" ) = boost::python::object() )
+	);
 	this->def( "cancellationSubject", &Detail::cancellationSubject<T> );
 	// Backwards compatibility with deprecated Path.info()
 	// method from original python implementation.

@@ -47,8 +47,7 @@ GAFFER_NODE_DEFINE_TYPE( ArnoldColorManager );
 
 size_t ArnoldColorManager::g_firstPlugIndex = 0;
 
-ArnoldColorManager::ArnoldColorManager( const std::string &name )
-	: GlobalsProcessor( name )
+ArnoldColorManager::ArnoldColorManager( const std::string &name ) : GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new Plug( "parameters" ) );
@@ -59,9 +58,7 @@ ArnoldColorManager::ArnoldColorManager( const std::string &name )
 	shaderNode()->parametersPlug()->setInput( parametersPlug() );
 }
 
-ArnoldColorManager::~ArnoldColorManager()
-{
-}
+ArnoldColorManager::~ArnoldColorManager() {}
 
 Gaffer::Plug *ArnoldColorManager::parametersPlug()
 {
@@ -114,7 +111,9 @@ void ArnoldColorManager::hashProcessedGlobals( const Gaffer::Context *context, I
 	h.append( shaderInPlug()->attributesHash() );
 }
 
-IECore::ConstCompoundObjectPtr ArnoldColorManager::computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const
+IECore::ConstCompoundObjectPtr ArnoldColorManager::computeProcessedGlobals(
+	const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals
+) const
 {
 	ConstCompoundObjectPtr attributes = shaderInPlug()->attributes();
 	if( attributes->members().empty() )

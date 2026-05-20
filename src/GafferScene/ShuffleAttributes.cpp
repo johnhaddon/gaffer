@@ -44,16 +44,13 @@ GAFFER_NODE_DEFINE_TYPE( ShuffleAttributes );
 
 size_t ShuffleAttributes::g_firstPlugIndex = 0;
 
-ShuffleAttributes::ShuffleAttributes( const std::string &name )
-	: AttributeProcessor( name )
+ShuffleAttributes::ShuffleAttributes( const std::string &name ) : AttributeProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ShufflesPlug( "shuffles" ) );
 }
 
-ShuffleAttributes::~ShuffleAttributes()
-{
-}
+ShuffleAttributes::~ShuffleAttributes() {}
 
 Gaffer::ShufflesPlug *ShuffleAttributes::shufflesPlug()
 {
@@ -81,7 +78,9 @@ void ShuffleAttributes::hashProcessedAttributes( const Gaffer::Context *context,
 	shufflesPlug()->hash( h );
 }
 
-IECore::ConstCompoundObjectPtr ShuffleAttributes::computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const
+IECore::ConstCompoundObjectPtr ShuffleAttributes::computeProcessedAttributes(
+	const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes
+) const
 {
 	if( shufflesPlug()->children().empty() || inputAttributes->members().empty() )
 	{

@@ -56,8 +56,7 @@ namespace ShadingEngineAlgo
 /// will use the default frame of 1. This is to allow use in cancel-unaware
 /// code paths.
 GAFFEROSL_API IECore::CompoundDataPtr shadeUVTexture(
-	const IECoreScene::ShaderNetwork *shaderNetwork,
-	const Imath::V2i &resolution,
+	const IECoreScene::ShaderNetwork *shaderNetwork, const Imath::V2i &resolution,
 	IECoreScene::ShaderNetwork::Parameter output = IECoreScene::ShaderNetwork::Parameter()
 );
 

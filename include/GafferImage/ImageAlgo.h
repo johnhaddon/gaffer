@@ -139,17 +139,19 @@ template<class TileFunctor>
 void parallelProcessTiles(
 	const ImagePlug *imagePlug,
 	TileFunctor &&functor, // Signature : void functor( const ImagePlug *imagePlug, const V2i &tileOrigin )
-	const Imath::Box2i &window = Imath::Box2i(), // Uses dataWindow if not specified ( requires a valid view in the context )
+	const Imath::Box2i &window =
+		Imath::Box2i(), // Uses dataWindow if not specified ( requires a valid view in the context )
 	TileOrder tileOrder = Unordered
 );
 
 // Call the functor in parallel, once per tile per channel
 template<class TileFunctor>
 void parallelProcessTiles(
-	const ImagePlug *imagePlug,
-	const std::vector<std::string> &channelNames,
-	TileFunctor &&functor, // Signature : void functor( const ImagePlug *imagePlug, const string &channelName, const V2i &tileOrigin )
-	const Imath::Box2i &window = Imath::Box2i(), // Uses dataWindow if not specified ( requires a valid view in the context )
+	const ImagePlug *imagePlug, const std::vector<std::string> &channelNames,
+	TileFunctor &&
+		functor, // Signature : void functor( const ImagePlug *imagePlug, const string &channelName, const V2i &tileOrigin )
+	const Imath::Box2i &window =
+		Imath::Box2i(), // Uses dataWindow if not specified ( requires a valid view in the context )
 	TileOrder tileOrder = Unordered
 );
 
@@ -159,8 +161,10 @@ template<class TileFunctor, class GatherFunctor>
 void parallelGatherTiles(
 	const ImagePlug *image,
 	const TileFunctor &tileFunctor, // Signature : T tileFunctor( const ImagePlug *imagePlug, const V2i &tileOrigin )
-	GatherFunctor &&gatherFunctor, // Signature : void gatherFunctor( const ImagePlug *imagePlug, const V2i &tileOrigin, T &tileFunctorResult )
-	const Imath::Box2i &window = Imath::Box2i(), // Uses dataWindow if not specified ( requires a valid view in the context )
+	GatherFunctor &&
+		gatherFunctor, // Signature : void gatherFunctor( const ImagePlug *imagePlug, const V2i &tileOrigin, T &tileFunctorResult )
+	const Imath::Box2i &window =
+		Imath::Box2i(), // Uses dataWindow if not specified ( requires a valid view in the context )
 	TileOrder tileOrder = Unordered
 );
 
@@ -168,11 +172,13 @@ void parallelGatherTiles(
 // results in series to GatherFunctor.
 template<class TileFunctor, class GatherFunctor>
 void parallelGatherTiles(
-	const ImagePlug *image,
-	const std::vector<std::string> &channelNames,
-	const TileFunctor &tileFunctor, // Signature : T tileFunctor( const ImagePlug *imagePlug, const string &channelName, const V2i &tileOrigin )
-	GatherFunctor &&gatherFunctor, // Signature : void gatherFunctor( const ImagePlug *imagePlug, const string &channelName, const V2i &tileOrigin, T &tileFunctorResult )
-	const Imath::Box2i &window = Imath::Box2i(), // Uses dataWindow if not specified ( requires a valid view in the context )
+	const ImagePlug *image, const std::vector<std::string> &channelNames,
+	const TileFunctor &
+		tileFunctor, // Signature : T tileFunctor( const ImagePlug *imagePlug, const string &channelName, const V2i &tileOrigin )
+	GatherFunctor &&
+		gatherFunctor, // Signature : void gatherFunctor( const ImagePlug *imagePlug, const string &channelName, const V2i &tileOrigin, T &tileFunctorResult )
+	const Imath::Box2i &window =
+		Imath::Box2i(), // Uses dataWindow if not specified ( requires a valid view in the context )
 	TileOrder tileOrder = Unordered
 );
 
@@ -189,7 +195,9 @@ void parallelGatherTiles(
 /// Y axis pointing downwards rather than Gaffer's internal representation where
 /// the origin is in the bottom left of the display window with the Y axis
 /// ascending towards the top of the display window.
-GAFFERIMAGE_API IECoreImage::ImagePrimitivePtr image( const ImagePlug *imagePlug, const std::string *viewName = nullptr );
+GAFFERIMAGE_API IECoreImage::ImagePrimitivePtr image(
+	const ImagePlug *imagePlug, const std::string *viewName = nullptr
+);
 
 /// Return a hash that will vary if any aspect of the return from image( ... ) varies
 GAFFERIMAGE_API IECore::MurmurHash imageHash( const ImagePlug *imagePlug, const std::string *viewName = nullptr );
@@ -198,13 +206,18 @@ GAFFERIMAGE_API IECore::MurmurHash imageHash( const ImagePlug *imagePlug, const 
 /// and tile.  Among other things, this makes it possible to efficiently test
 /// from Python whether two ImagePlugs have identical pixel data.  Unlike the
 /// image() method above, it works on deep images.
-GAFFERIMAGE_API IECore::ConstCompoundObjectPtr tiles( const ImagePlug *imagePlug, const std::string *viewName = nullptr );
+GAFFERIMAGE_API IECore::ConstCompoundObjectPtr tiles(
+	const ImagePlug *imagePlug, const std::string *viewName = nullptr
+);
 
 /// Deep Utils
 /// ==============================
 
 /// If the provided sample offsets do not match, raise an exception that indicates where the mismatch occured.
-GAFFERIMAGE_API void throwIfSampleOffsetsMismatch( const IECore::IntVectorData *sampleOffsetsA, const IECore::IntVectorData *sampleOffsetsB, const Imath::V2i &tileOrigin, const std::string &message );
+GAFFERIMAGE_API void throwIfSampleOffsetsMismatch(
+	const IECore::IntVectorData *sampleOffsetsA, const IECore::IntVectorData *sampleOffsetsB,
+	const Imath::V2i &tileOrigin, const std::string &message
+);
 
 
 /// Multi-View Utils

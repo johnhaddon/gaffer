@@ -74,7 +74,7 @@ IE_CORE_FORWARDDECLARE( Plug )
 class GAFFER_API Path : public IECore::RunTimeTyped
 {
 
-	public:
+public:
 
 	using Names = std::vector<IECore::InternedString>;
 
@@ -102,17 +102,23 @@ class GAFFER_API Path : public IECore::RunTimeTyped
 
 	/// Fills the vector with the names of all the properties queryable via property().
 	/// Derived class implementations must call the base class implementation first.
-	virtual void propertyNames( std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr ) const;
+	virtual void propertyNames(
+		std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr
+	) const;
 	/// Queries a property, whose name must have first been retrieved via propertyNames().
 	/// Derived class implementations should fall back to the base class implementation for
 	/// any unrecognised names. Returns null for unknown properties. May return null for invalid paths.
-	virtual IECore::ConstRunTimeTypedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const;
+	virtual IECore::ConstRunTimeTypedPtr property(
+		const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr
+	) const;
 	/// As above but for properties of type Context, since Context does not yet derive from
 	/// RunTimeTyped.
 	/// \todo Refactor Context so that EditableScope doesn't use a full reference-counted Context internally, and
 	/// then make long-lived contexts derive from RunTimeTyped. We don't want to derive from RunTimeTyped
 	/// now due to concerns about potential overhead in EditableScopes.
-	virtual ConstContextPtr contextProperty( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const;
+	virtual ConstContextPtr contextProperty(
+		const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr
+	) const;
 
 	/// Returns the parent of this path, or None if the path
 	/// has no parent (is the root).
@@ -197,7 +203,7 @@ class GAFFER_API Path : public IECore::RunTimeTyped
 	/// made.
 	virtual const Plug *cancellationSubject() const;
 
-	protected:
+protected:
 
 	/// The subclass specific part of children(). This must be implemented
 	/// by subclasses to return a list of children - filtering will be applied
@@ -223,7 +229,7 @@ class GAFFER_API Path : public IECore::RunTimeTyped
 	/// otherwise.
 	bool havePathChangedSignal() const;
 
-	private:
+private:
 
 	virtual void rootAndNames( const std::string &s, IECore::InternedString &root, Names &names ) const;
 

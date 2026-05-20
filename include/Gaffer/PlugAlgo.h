@@ -92,7 +92,8 @@ GAFFER_API std::tuple<const Plug *, ConstContextPtr> contextSensitiveSource( con
 /// =====================================
 
 /// Creates an appropriate plug to hold the specified data.
-GAFFER_API ValuePlugPtr createPlugFromData( const std::string &name, Plug::Direction direction, unsigned flags, const IECore::Data *value );
+GAFFER_API ValuePlugPtr
+createPlugFromData( const std::string &name, Plug::Direction direction, unsigned flags, const IECore::Data *value );
 
 /// Returns a Data value from a plug.
 GAFFER_API IECore::DataPtr getValueAsData( const ValuePlug *plug );
@@ -136,11 +137,16 @@ GAFFER_API bool canPromote( const Plug *plug, const Plug *parent = nullptr );
 /// The `excludeMetadata` argument provides a secondary mechaniscm for the caller
 /// to explicitly exclude other metadata from promotion.
 /// \undoable
-GAFFER_API Plug *promote( Plug *plug, Plug *parent = nullptr, const IECore::StringAlgo::MatchPattern &excludeMetadata = "layout:*" );
+GAFFER_API Plug *promote(
+	Plug *plug, Plug *parent = nullptr, const IECore::StringAlgo::MatchPattern &excludeMetadata = "layout:*"
+);
 /// As `promote` but by providing the name argument, you can skip an additional
 /// renaming step after promoting.
 /// \undoable
-GAFFER_API Plug *promoteWithName( Plug *plug, const IECore::InternedString &name, Plug *parent = nullptr, const IECore::StringAlgo::MatchPattern &excludeMetadata = "layout:*" );
+GAFFER_API Plug *promoteWithName(
+	Plug *plug, const IECore::InternedString &name, Plug *parent = nullptr,
+	const IECore::StringAlgo::MatchPattern &excludeMetadata = "layout:*"
+);
 /// Returns true if the plug appears to have been promoted.
 GAFFER_API bool isPromoted( const Plug *plug );
 /// Unpromotes a previously promoted plug, removing the

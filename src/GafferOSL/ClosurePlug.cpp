@@ -58,9 +58,7 @@ ClosurePlug::ClosurePlug( const std::string &name, Direction direction, unsigned
 {
 }
 
-ClosurePlug::~ClosurePlug()
-{
-}
+ClosurePlug::~ClosurePlug() {}
 
 bool ClosurePlug::acceptsChild( const GraphComponent *potentialChild ) const
 {
@@ -108,7 +106,5 @@ bool ClosurePlug::acceptsInput( const Gaffer::Plug *input ) const
 	}
 
 	const Node *node = input->node();
-	return runTimeCast<const SubGraph>( node ) ||
-		runTimeCast<const Switch>( node ) ||
-		runTimeCast<const Dot>( node );
+	return runTimeCast<const SubGraph>( node ) || runTimeCast<const Switch>( node ) || runTimeCast<const Dot>( node );
 }

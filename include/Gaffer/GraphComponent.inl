@@ -102,7 +102,8 @@ inline const T *GraphComponent::descendant( const std::string &relativePath ) co
 	{
 		const GraphComponent *child = nullptr;
 		IECore::InternedString internedName( *tIt );
-		for( ChildContainer::const_iterator it = result->m_children.begin(), eIt = result->m_children.end(); it != eIt; it++ )
+		for( ChildContainer::const_iterator it = result->m_children.begin(), eIt = result->m_children.end(); it != eIt;
+			 it++ )
 		{
 			if( ( *it )->m_name == internedName )
 			{

@@ -89,12 +89,11 @@ void appendLeafPlugs( const Gaffer::Plug *p, DependencyNode::AffectedPlugsContai
 class RowsMap : public IECore::Data
 {
 
-	public:
+public:
 
 	using Selector = std::variant<const vector<InternedString> *, string>;
 
-	RowsMap( const Spreadsheet::RowsPlug *rows )
-		: m_enabledRowNames( new StringVectorData )
+	RowsMap( const Spreadsheet::RowsPlug *rows ) : m_enabledRowNames( new StringVectorData )
 	{
 		vector<string> &enabledRowNames = m_enabledRowNames->writable();
 
@@ -207,12 +206,9 @@ class RowsMap : public IECore::Data
 		return result;
 	}
 
-	const StringVectorData *enabledRowNames() const
-	{
-		return m_enabledRowNames.get();
-	}
+	const StringVectorData *enabledRowNames() const { return m_enabledRowNames.get(); }
 
-	private:
+private:
 
 	// Rows without wildcards. We can look these up
 	// directly.
@@ -278,10 +274,12 @@ const InternedString g_firstMatch( "firstMatch" );
 class RowsMapScope : boost::noncopyable, public Context::SubstitutionProvider
 {
 
-	public:
+public:
 
 	RowsMapScope( const Context *context, const StringPlug *selectorPlug )
-		: SubstitutionProvider( context ), m_context( context ), m_selectorPlug( selectorPlug )
+		: SubstitutionProvider( context ),
+		  m_context( context ),
+		  m_selectorPlug( selectorPlug )
 	{
 		if( !mightContainSubstitutions( selectorPlug->source<StringPlug>() ) )
 		{
@@ -334,10 +332,7 @@ class RowsMapScope : boost::noncopyable, public Context::SubstitutionProvider
 	// Methods used by `StringAlgo::substitute()`. We use
 	// these to parse variable references in `selector`.
 
-	int frame() const override
-	{
-		return SubstitutionProvider::frame();
-	}
+	int frame() const override { return SubstitutionProvider::frame(); }
 
 	const std::string &variable( const boost::string_view &name, bool &recurse ) const override
 	{
@@ -349,7 +344,7 @@ class RowsMapScope : boost::noncopyable, public Context::SubstitutionProvider
 		return SubstitutionProvider::variable( name, recurse );
 	}
 
-	private:
+private:
 
 	static bool mightContainSubstitutions( const StringPlug *plug )
 	{
@@ -395,7 +390,10 @@ struct MetadataRegistration
 {
 	MetadataRegistration()
 	{
-		Metadata::registerValue( Spreadsheet::RowsPlug::staticTypeId(), "spreadsheet:columnsNeedSerialisation:promotable", new BoolData( false ) );
+		Metadata::registerValue(
+			Spreadsheet::RowsPlug::staticTypeId(), "spreadsheet:columnsNeedSerialisation:promotable",
+			new BoolData( false )
+		);
 	}
 };
 
@@ -415,10 +413,9 @@ GAFFER_PLUG_DEFINE_TYPE( Spreadsheet::RowsPlug );
 class Spreadsheet::RowsPlug::RowNameMap
 {
 
-	public:
+public:
 
-	RowNameMap( Spreadsheet::RowsPlug *rowsPlug )
-		: m_rowsPlug( rowsPlug )
+	RowNameMap( Spreadsheet::RowsPlug *rowsPlug ) : m_rowsPlug( rowsPlug )
 	{
 		rowsPlug->childAddedSignal().connect( boost::bind( &RowNameMap::childAdded, this, ::_2 ) );
 		rowsPlug->childRemovedSignal().connect( boost::bind( &RowNameMap::childRemoved, this, ::_2 ) );
@@ -471,7 +468,7 @@ class Spreadsheet::RowsPlug::RowNameMap
 		}
 	}
 
-	private:
+private:
 
 	string rowName( const RowPlug *row )
 	{
@@ -506,7 +503,8 @@ class Spreadsheet::RowsPlug::RowNameMap
 		if( auto node = m_rowsPlug->node() )
 		{
 			m_plugSetConnection = node->plugSetSignal().connect( boost::bind( &RowNameMap::plugSet, this, ::_1 ) );
-			m_plugInputChangedConnection = node->plugInputChangedSignal().connect( boost::bind( &RowNameMap::plugInputChanged, this, ::_1 ) );
+			m_plugInputChangedConnection =
+				node->plugInputChangedSignal().connect( boost::bind( &RowNameMap::plugInputChanged, this, ::_1 ) );
 			// While we had no parent, we couldn't track
 			// value or input changes, so we must manually
 			// update all the names.
@@ -519,15 +517,9 @@ class Spreadsheet::RowsPlug::RowNameMap
 		}
 	}
 
-	void plugSet( Plug *plug )
-	{
-		updateRowName( plug );
-	}
+	void plugSet( Plug *plug ) { updateRowName( plug ); }
 
-	void plugInputChanged( Plug *plug )
-	{
-		updateRowName( plug );
-	}
+	void plugInputChanged( Plug *plug ) { updateRowName( plug ); }
 
 	void updateRowName( Plug *plug )
 	{
@@ -537,12 +529,9 @@ class Spreadsheet::RowsPlug::RowNameMap
 			{
 				auto it = m_map.find( row );
 				assert( it != m_map.end() );
-				m_map.get<1>().modify_key(
-					m_map.project<1>( it ),
-					[row, this]( string &name ) {
-						name = this->rowName( row );
-					}
-				);
+				m_map.get<1>().modify_key( m_map.project<1>( it ), [row, this]( string &name ) {
+					name = this->rowName( row );
+				} );
 			}
 		}
 	}
@@ -562,12 +551,7 @@ class Spreadsheet::RowsPlug::RowNameMap
 
 		for( const auto &it : iterators )
 		{
-			index.modify_key(
-				it,
-				[it, this]( string &name ) {
-					name = this->rowName( it->plug );
-				}
-			);
+			index.modify_key( it, [it, this]( string &name ) { name = this->rowName( it->plug ); } );
 		}
 	}
 
@@ -585,24 +569,21 @@ class Spreadsheet::RowsPlug::RowNameMap
 	using Map = multi_index::multi_index_container<
 		Row,
 		multi_index::indexed_by<
-			multi_index::hashed_unique<
-				multi_index::key<&Row::plug>>,
-			multi_index::hashed_non_unique<
-				multi_index::key<&Row::name>>>>;
+			multi_index::hashed_unique<multi_index::key<&Row::plug>>,
+			multi_index::hashed_non_unique<multi_index::key<&Row::name>>>>;
 
 	Map m_map;
 };
 
 Spreadsheet::RowsPlug::RowsPlug( const std::string &name, Direction direction, unsigned flags )
-	: ValuePlug( name, direction, flags ), m_rowNameMap( new RowNameMap( this ) )
+	: ValuePlug( name, direction, flags ),
+	  m_rowNameMap( new RowNameMap( this ) )
 {
 	RowPlugPtr defaultRow = new RowPlug( "default" );
 	addChild( defaultRow );
 }
 
-Spreadsheet::RowsPlug::~RowsPlug()
-{
-}
+Spreadsheet::RowsPlug::~RowsPlug() {}
 
 Spreadsheet::RowPlug *Spreadsheet::RowsPlug::defaultRow()
 {
@@ -673,9 +654,8 @@ Spreadsheet::RowPlug *Spreadsheet::RowsPlug::addRow()
 	RowPlugPtr newRow = new RowPlug( "row" + boost::lexical_cast<std::string>( children().size() ), direction() );
 	for( auto &defaultCell : CellPlug::Range( *defaultRow()->cellsPlug() ) )
 	{
-		CellPlugPtr newCell = boost::static_pointer_cast<CellPlug>(
-			defaultCell->createCounterpart( defaultCell->getName(), Plug::In )
-		);
+		CellPlugPtr newCell =
+			boost::static_pointer_cast<CellPlug>( defaultCell->createCounterpart( defaultCell->getName(), Plug::In ) );
 		newCell->setFrom( defaultCell.get() );
 		newRow->cellsPlug()->addChild( newCell );
 	}
@@ -695,16 +675,12 @@ void Spreadsheet::RowsPlug::removeRow( Spreadsheet::RowPlugPtr row )
 {
 	if( row->parent() != this )
 	{
-		throw Exception(
-			fmt::format( "Row \"{}\" is not a child of \"{}\".", row->fullName(), fullName() )
-		);
+		throw Exception( fmt::format( "Row \"{}\" is not a child of \"{}\".", row->fullName(), fullName() ) );
 	}
 
 	if( row == getChild( 0 ) )
 	{
-		throw Exception(
-			fmt::format( "Cannot remove default row from \"{}\".", fullName() )
-		);
+		throw Exception( fmt::format( "Cannot remove default row from \"{}\".", fullName() ) );
 	}
 
 	removeChild( row );
@@ -825,7 +801,9 @@ Gaffer::PlugPtr Spreadsheet::RowPlug::createCounterpart( const std::string &name
 
 GAFFER_PLUG_DEFINE_TYPE( Spreadsheet::CellPlug );
 
-Spreadsheet::CellPlug::CellPlug( const std::string &name, const Gaffer::Plug *value, bool adoptEnabledPlug, Plug::Direction direction )
+Spreadsheet::CellPlug::CellPlug(
+	const std::string &name, const Gaffer::Plug *value, bool adoptEnabledPlug, Plug::Direction direction
+)
 	: ValuePlug( name, direction )
 {
 	if( adoptEnabledPlug )
@@ -880,8 +858,7 @@ Gaffer::PlugPtr Spreadsheet::CellPlug::createCounterpart( const std::string &nam
 size_t Spreadsheet::g_firstPlugIndex = 0;
 GAFFER_NODE_DEFINE_TYPE( Spreadsheet );
 
-Spreadsheet::Spreadsheet( const std::string &name )
-	: ComputeNode( name )
+Spreadsheet::Spreadsheet( const std::string &name ) : ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -895,9 +872,7 @@ Spreadsheet::Spreadsheet( const std::string &name )
 	addChild( new ObjectPlug( "__rowsMap", Plug::Out, IECore::NullObject::defaultNullObject() ) );
 }
 
-Spreadsheet::~Spreadsheet()
-{
-}
+Spreadsheet::~Spreadsheet() {}
 
 BoolPlug *Spreadsheet::enabledPlug()
 {
@@ -985,20 +960,13 @@ void Spreadsheet::affects( const Plug *input, DependencyNode::AffectedPlugsConta
 
 	if( const auto *row = input->parent<RowPlug>() )
 	{
-		if(
-			input == row->namePlug() ||
-			input == row->enabledPlug()
-		)
+		if( input == row->namePlug() || input == row->enabledPlug() )
 		{
 			outputs.push_back( rowsMapPlug() );
 		}
 	}
 
-	if(
-		input == enabledPlug() ||
-		input == selectorPlug() ||
-		input == rowsMapPlug()
-	)
+	if( input == enabledPlug() || input == selectorPlug() || input == rowsMapPlug() )
 	{
 		outputs.push_back( activeRowIndexPlug() );
 	}
@@ -1022,9 +990,7 @@ void Spreadsheet::affects( const Plug *input, DependencyNode::AffectedPlugsConta
 			}
 			else
 			{
-				outputs.push_back(
-					out->descendant<Plug>( input->relativeName( cell->valuePlug() ) )
-				);
+				outputs.push_back( out->descendant<Plug>( input->relativeName( cell->valuePlug() ) ) );
 			}
 		}
 	}
@@ -1097,9 +1063,7 @@ void Spreadsheet::compute( ValuePlug *output, const Context *context ) const
 {
 	if( output == rowsMapPlug() )
 	{
-		static_cast<ObjectPlug *>( output )->setValue(
-			new RowsMap( rowsPlug() )
-		);
+		static_cast<ObjectPlug *>( output )->setValue( new RowsMap( rowsPlug() ) );
 		return;
 	}
 	else if( output == activeRowIndexPlug() )

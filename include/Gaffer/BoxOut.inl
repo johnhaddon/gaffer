@@ -42,17 +42,13 @@ namespace Gaffer
 template<typename T>
 T *BoxOut::passThroughPlug()
 {
-	return IECore::runTimeCast<T>(
-		passThroughPlugInternal()
-	);
+	return IECore::runTimeCast<T>( passThroughPlugInternal() );
 }
 
 template<typename T>
 const T *BoxOut::passThroughPlug() const
 {
-	return IECore::runTimeCast<const T>(
-		passThroughPlugInternal()
-	);
+	return IECore::runTimeCast<const T>( passThroughPlugInternal() );
 }
 
 } // namespace Gaffer

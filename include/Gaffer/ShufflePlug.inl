@@ -65,7 +65,9 @@ T ShufflesPlug::shuffle( const T &sourceContainer, bool ignoreMissingSource ) co
 }
 
 template<typename T>
-T ShufflesPlug::shuffleWithExtraSources( const T &sourceContainer, const T &extraSources, bool ignoreMissingSource ) const
+T ShufflesPlug::shuffleWithExtraSources(
+	const T &sourceContainer, const T &extraSources, bool ignoreMissingSource
+) const
 {
 	return shuffleInternal( sourceContainer, &extraSources, ignoreMissingSource );
 }
@@ -169,9 +171,7 @@ T ShufflesPlug::shuffleInternal( const T &sourceContainer, const T *extraSources
 			Gaffer::Context::EditableScope scope( Gaffer::Context::current() );
 
 			NameContainer moveNames;
-			for( typename T::const_iterator
-					 sIt = sourceContainer.begin(),
-					 sItEnd = sourceContainer.end();
+			for( typename T::const_iterator sIt = sourceContainer.begin(), sItEnd = sourceContainer.end();
 				 sIt != sItEnd; ++sIt )
 			{
 				// NOTE : Quick way to get a string from a key that could be std::string or IECore::InternedString
@@ -194,7 +194,9 @@ T ShufflesPlug::shuffleInternal( const T &sourceContainer, const T *extraSources
 								fmt::format(
 									"ShufflesPlug::shuffle : Destination plug \"{}\" shuffles from \"{}\" to \"{}\", "
 									"cannot write from multiple sources to destination \"{}\"",
-									plug->destinationPlug()->relativeName( plug->node() ? plug->node()->parent() : nullptr ),
+									plug->destinationPlug()->relativeName(
+										plug->node() ? plug->node()->parent() : nullptr
+									),
 									srcPattern, dstPattern, dstName
 								)
 							);

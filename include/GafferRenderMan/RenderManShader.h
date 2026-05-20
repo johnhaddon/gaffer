@@ -47,12 +47,14 @@ namespace GafferRenderMan
 class GAFFERRENDERMAN_API RenderManShader : public GafferScene::Shader
 {
 
-	public:
+public:
 
 	RenderManShader( const std::string &name = defaultName<RenderManShader>() );
 	~RenderManShader() override;
 
-	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferRenderMan::RenderManShader, RenderManShaderTypeId, GafferScene::Shader );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION(
+		GafferRenderMan::RenderManShader, RenderManShaderTypeId, GafferScene::Shader
+	);
 
 	void loadShader( const std::string &shaderName, bool keepExistingValues = false ) override;
 };

@@ -57,7 +57,7 @@ namespace GafferBindings
 template<typename T, typename TWrapper = T>
 class NodeClass : public GraphComponentClass<T, TWrapper>
 {
-	public:
+public:
 
 	NodeClass( const char *docString = nullptr );
 	NodeClass( const char *docString, boost::python::no_init_t );
@@ -66,13 +66,12 @@ class NodeClass : public GraphComponentClass<T, TWrapper>
 template<typename T>
 class NodeWrapper : public GraphComponentWrapper<T>
 {
-	public:
+public:
 
 	using WrappedType = T;
 
 	template<typename... Args>
-	NodeWrapper( PyObject *self, Args &&...args )
-		: GraphComponentWrapper<T>( self, std::forward<Args>( args )... )
+	NodeWrapper( PyObject *self, Args &&...args ) : GraphComponentWrapper<T>( self, std::forward<Args>( args )... )
 	{
 	}
 
@@ -87,8 +86,7 @@ class NodeWrapper : public GraphComponentWrapper<T>
 
 		if(
 			// We're a Node, so we cannot be a plug.
-			typeId == (IECore::TypeId)Gaffer::PlugTypeId ||
-			typeId == (IECore::TypeId)Gaffer::ValuePlugTypeId
+			typeId == (IECore::TypeId)Gaffer::PlugTypeId || typeId == (IECore::TypeId)Gaffer::ValuePlugTypeId
 		)
 		{
 			return false;
@@ -102,10 +100,8 @@ class NodeWrapper : public GraphComponentWrapper<T>
 			typeId == (IECore::TypeId)Gaffer::SwitchTypeId ||
 			// ScriptNode, DependencyNode, ComputeNode and EditScope also
 			// appear on performance critical code paths.
-			typeId == (IECore::TypeId)Gaffer::ScriptNodeTypeId ||
-			typeId == (IECore::TypeId)Gaffer::ComputeNodeTypeId ||
-			typeId == (IECore::TypeId)Gaffer::DependencyNodeTypeId ||
-			typeId == (IECore::TypeId)Gaffer::EditScopeTypeId
+			typeId == (IECore::TypeId)Gaffer::ScriptNodeTypeId || typeId == (IECore::TypeId)Gaffer::ComputeNodeTypeId ||
+			typeId == (IECore::TypeId)Gaffer::DependencyNodeTypeId || typeId == (IECore::TypeId)Gaffer::EditScopeTypeId
 		)
 		{
 			// The types above are implemented in C++, so there is no need
@@ -127,7 +123,10 @@ class NodeWrapper : public GraphComponentWrapper<T>
 				boost::python::object f = this->methodOverride( "acceptsInput" );
 				if( f )
 				{
-					return f( Gaffer::PlugPtr( const_cast<Gaffer::Plug *>( plug ) ), Gaffer::PlugPtr( const_cast<Gaffer::Plug *>( inputPlug ) ) );
+					return f(
+						Gaffer::PlugPtr( const_cast<Gaffer::Plug *>( plug ) ),
+						Gaffer::PlugPtr( const_cast<Gaffer::Plug *>( inputPlug ) )
+					);
 				}
 			}
 			catch( const boost::python::error_already_set & )
@@ -142,19 +141,27 @@ class NodeWrapper : public GraphComponentWrapper<T>
 class GAFFERBINDINGS_API NodeSerialiser : public Serialisation::Serialiser
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( NodeSerialiser )
 
-	void moduleDependencies( const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation ) const override;
+	void moduleDependencies(
+		const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation
+	) const override;
 	/// Implemented to serialise per-instance metadata.
-	std::string postHierarchy( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override;
+	std::string postHierarchy(
+		const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+	) const override;
 	/// Implemented so that only plugs are serialised - child nodes are expected to
 	/// be a part of the implementation of the node rather than something the user
 	/// has created themselves.
-	bool childNeedsSerialisation( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override;
+	bool childNeedsSerialisation(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override;
 	/// Implemented so that dynamic plugs are constructed appropriately.
-	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override;
+	bool childNeedsConstruction(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override;
 };
 
 } // namespace GafferBindings

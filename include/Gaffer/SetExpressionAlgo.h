@@ -61,9 +61,13 @@ struct SetProvider
 	virtual ~SetProvider() {};
 };
 
-GAFFER_API IECore::PathMatcher evaluateSetExpression( const std::string &setExpression, const SetProvider &setProvider );
+GAFFER_API IECore::PathMatcher evaluateSetExpression(
+	const std::string &setExpression, const SetProvider &setProvider
+);
 
-GAFFER_API void setExpressionHash( const std::string &setExpression, const SetProvider &setProvider, IECore::MurmurHash &h );
+GAFFER_API void setExpressionHash(
+	const std::string &setExpression, const SetProvider &setProvider, IECore::MurmurHash &h
+);
 GAFFER_API IECore::MurmurHash setExpressionHash( const std::string &setExpression, const SetProvider &setProvider );
 
 /// Editing

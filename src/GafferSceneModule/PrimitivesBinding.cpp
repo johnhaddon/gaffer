@@ -74,9 +74,13 @@ namespace
 class LightSerialiser : public GafferBindings::NodeSerialiser
 {
 
-	std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, GafferBindings::Serialisation &serialisation ) const override
+	std::string postConstructor(
+		const Gaffer::GraphComponent *graphComponent, const std::string &identifier,
+		GafferBindings::Serialisation &serialisation
+	) const override
 	{
-		std::string defaultPC = GafferBindings::NodeSerialiser::postConstructor( graphComponent, identifier, serialisation );
+		std::string defaultPC =
+			GafferBindings::NodeSerialiser::postConstructor( graphComponent, identifier, serialisation );
 		const GafferScene::Light *light = static_cast<const GafferScene::Light *>( graphComponent );
 
 		// \todo - Remove this once old scripts have been converted
@@ -112,9 +116,13 @@ namespace GafferSceneModule
 class LightFilterSerialiser : public GafferBindings::NodeSerialiser
 {
 
-	std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, GafferBindings::Serialisation &serialisation ) const override
+	std::string postConstructor(
+		const Gaffer::GraphComponent *graphComponent, const std::string &identifier,
+		GafferBindings::Serialisation &serialisation
+	) const override
 	{
-		std::string defaultPostConstructor = GafferBindings::NodeSerialiser::postConstructor( graphComponent, identifier, serialisation );
+		std::string defaultPostConstructor =
+			GafferBindings::NodeSerialiser::postConstructor( graphComponent, identifier, serialisation );
 
 		const GafferScene::LightFilter *lightFilter = static_cast<const GafferScene::LightFilter *>( graphComponent );
 		const std::string shaderName = lightFilter->shaderNode()->namePlug()->getValue();
@@ -154,11 +162,17 @@ void GafferSceneModule::bindPrimitives()
 	GafferBindings::DependencyNodeClass<ExternalProcedural>();
 	GafferBindings::DependencyNodeClass<Grid>();
 	GafferBindings::DependencyNodeClass<Light>( nullptr, no_init )
-		.def( "loadShader", &loadShaderWrapper<Light>, ( boost::python::arg( "shaderName" ), boost::python::arg( "keepExistingValues" ) = false ) );
+		.def(
+			"loadShader", &loadShaderWrapper<Light>,
+			( boost::python::arg( "shaderName" ), boost::python::arg( "keepExistingValues" ) = false )
+		);
 	GafferBindings::Serialisation::registerSerialiser( Light::staticTypeId(), new LightSerialiser() );
 
 	NodeClass<LightFilter>( nullptr, no_init )
-		.def( "loadShader", &loadShaderWrapper<LightFilter>, ( boost::python::arg( "shaderName" ), boost::python::arg( "keepExistingValues" ) = false ) );
+		.def(
+			"loadShader", &loadShaderWrapper<LightFilter>,
+			( boost::python::arg( "shaderName" ), boost::python::arg( "keepExistingValues" ) = false )
+		);
 
 	GafferBindings::Serialisation::registerSerialiser( LightFilter::staticTypeId(), new LightFilterSerialiser() );
 
@@ -167,8 +181,6 @@ void GafferSceneModule::bindPrimitives()
 	{
 		scope s = GafferBindings::DependencyNodeClass<Sphere>();
 
-		enum_<Sphere::Type>( "Type" )
-			.value( "Primitive", Sphere::Primitive )
-			.value( "Mesh", Sphere::Mesh );
+		enum_<Sphere::Type>( "Type" ).value( "Primitive", Sphere::Primitive ).value( "Mesh", Sphere::Mesh );
 	}
 }

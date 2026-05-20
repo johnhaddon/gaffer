@@ -42,9 +42,7 @@ namespace GafferScene
 template<typename PlugType>
 PlugType *AttributeQuery::defaultPlug()
 {
-	return const_cast<PlugType *>(
-		static_cast<const AttributeQuery *>( this )->defaultPlug<PlugType>()
-	);
+	return const_cast<PlugType *>( static_cast<const AttributeQuery *>( this )->defaultPlug<PlugType>() );
 }
 
 template<typename PlugType>
@@ -56,9 +54,7 @@ const PlugType *AttributeQuery::defaultPlug() const
 template<typename PlugType>
 PlugType *AttributeQuery::valuePlug()
 {
-	return const_cast<PlugType *>(
-		static_cast<const AttributeQuery *>( this )->valuePlug<PlugType>()
-	);
+	return const_cast<PlugType *>( static_cast<const AttributeQuery *>( this )->valuePlug<PlugType>() );
 }
 
 template<typename PlugType>

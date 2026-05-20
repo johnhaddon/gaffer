@@ -81,27 +81,18 @@ ImageShape imageShape( const Tensor *tensor, bool interleavedChannels )
 		if( shape[d] != 1 )
 		{
 			throw IECore::Exception(
-				fmt::format(
-					"Expected {} dimensional tensor to have size 1 in dimension {}",
-					shape.size(), d
-				)
+				fmt::format( "Expected {} dimensional tensor to have size 1 in dimension {}", shape.size(), d )
 			);
 		}
 	}
 
 	if( interleavedChannels )
 	{
-		return {
-			Box2i( V2i( 0 ), V2i( (int)shape[i + 1], (int)shape[i] ) ),
-			(size_t)shape[i + 2]
-		};
+		return { Box2i( V2i( 0 ), V2i( (int)shape[i + 1], (int)shape[i] ) ), (size_t)shape[i + 2] };
 	}
 	else
 	{
-		return {
-			Box2i( V2i( 0 ), V2i( (int)shape[i + 2], (int)shape[i + 1] ) ),
-			(size_t)shape[i]
-		};
+		return { Box2i( V2i( 0 ), V2i( (int)shape[i + 2], (int)shape[i + 1] ) ), (size_t)shape[i] };
 	}
 }
 
@@ -135,8 +126,7 @@ GAFFER_NODE_DEFINE_TYPE( TensorToImage );
 
 size_t TensorToImage::g_firstPlugIndex = 0;
 
-TensorToImage::TensorToImage( const std::string &name )
-	: FlatImageSource( name )
+TensorToImage::TensorToImage( const std::string &name ) : FlatImageSource( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new TensorPlug( "tensor" ) );
@@ -144,9 +134,7 @@ TensorToImage::TensorToImage( const std::string &name )
 	addChild( new BoolPlug( "interleavedChannels" ) );
 }
 
-TensorToImage::~TensorToImage()
-{
-}
+TensorToImage::~TensorToImage() {}
 
 TensorPlug *TensorToImage::tensorPlug()
 {
@@ -203,28 +191,38 @@ void TensorToImage::affects( const Gaffer::Plug *input, AffectedPlugsContainer &
 	}
 }
 
-void TensorToImage::hashMetadata( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void TensorToImage::hashMetadata(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = outPlug()->metadataPlug()->defaultHash();
 }
 
-IECore::ConstCompoundDataPtr TensorToImage::computeMetadata( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const
+IECore::ConstCompoundDataPtr TensorToImage::computeMetadata(
+	const Gaffer::Context *context, const GafferImage::ImagePlug *parent
+) const
 {
 	return outPlug()->metadataPlug()->defaultValue();
 }
 
-void TensorToImage::hashFormat( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void TensorToImage::hashFormat(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageSource::hashFormat( parent, context, h );
 	outPlug()->dataWindowPlug()->hash( h );
 }
 
-GafferImage::Format TensorToImage::computeFormat( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const
+GafferImage::Format TensorToImage::computeFormat(
+	const Gaffer::Context *context, const GafferImage::ImagePlug *parent
+) const
 {
 	return Format( outPlug()->dataWindowPlug()->getValue() );
 }
 
-void TensorToImage::hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void TensorToImage::hashDataWindow(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageSource::hashDataWindow( parent, context, h );
 	tensorPlug()->hash( h );
@@ -237,13 +235,17 @@ Imath::Box2i TensorToImage::computeDataWindow( const Gaffer::Context *context, c
 	return imageShape( tensor.get(), interleavedChannelsPlug()->getValue() ).dataWindow;
 }
 
-void TensorToImage::hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void TensorToImage::hashChannelNames(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageSource::hashChannelNames( parent, context, h );
 	channelsPlug()->hash( h );
 }
 
-IECore::ConstStringVectorDataPtr TensorToImage::computeChannelNames( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr TensorToImage::computeChannelNames(
+	const Gaffer::Context *context, const GafferImage::ImagePlug *parent
+) const
 {
 	ConstStringVectorDataPtr channels = channelsPlug()->getValue()->copy();
 	// `channels` might be in a non-standard order, to facilitate unpacking from
@@ -252,27 +254,22 @@ IECore::ConstStringVectorDataPtr TensorToImage::computeChannelNames( const Gaffe
 	// and remove duplicates.
 	StringVectorDataPtr result = new StringVectorData( ImageAlgo::sortedChannelNames( channels->readable() ) );
 	result->writable().erase(
-		std::unique(
-			result->writable().begin(),
-			result->writable().end()
-		),
-		result->writable().end()
+		std::unique( result->writable().begin(), result->writable().end() ), result->writable().end()
 	);
 	// Remove empty channel names since they wouldn't be valid in the output.
 	result->writable().erase(
 		std::remove_if(
-			result->writable().begin(),
-			result->writable().end(),
-			[]( const string &channelName ) {
-				return channelName.empty();
-			}
+			result->writable().begin(), result->writable().end(),
+			[]( const string &channelName ) { return channelName.empty(); }
 		),
 		result->writable().end()
 	);
 	return result;
 }
 
-void TensorToImage::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void TensorToImage::hashChannelData(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageSource::hashChannelData( parent, context, h );
 	{
@@ -286,7 +283,10 @@ void TensorToImage::hashChannelData( const GafferImage::ImagePlug *parent, const
 	h.append( context->get<V2i>( ImagePlug::tileOriginContextName ) );
 }
 
-IECore::ConstFloatVectorDataPtr TensorToImage::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr TensorToImage::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	ConstTensorPtr tensorData;
 	ConstStringVectorDataPtr channelsData;
@@ -313,43 +313,40 @@ IECore::ConstFloatVectorDataPtr TensorToImage::computeChannelData( const std::st
 
 	FloatVectorDataPtr outData;
 
-	dispatchTensorData(
-		tensorData->value(),
-		[&]( const auto *sourceData ) {
-			outData = new FloatVectorData;
-			vector<float> &out = outData->writable();
+	dispatchTensorData( tensorData->value(), [&]( const auto *sourceData ) {
+		outData = new FloatVectorData;
+		vector<float> &out = outData->writable();
 
-			const Box2i dataWindow = imageShape.dataWindow;
-			const Box2i tileBound( tileOrigin, tileOrigin + V2i( ImagePlug::tileSize() ) );
-			const Box2i validTileBound = BufferAlgo::intersection( dataWindow, tileBound );
-			out.resize( ImagePlug::tileSize() * ImagePlug::tileSize() );
+		const Box2i dataWindow = imageShape.dataWindow;
+		const Box2i tileBound( tileOrigin, tileOrigin + V2i( ImagePlug::tileSize() ) );
+		const Box2i validTileBound = BufferAlgo::intersection( dataWindow, tileBound );
+		out.resize( ImagePlug::tileSize() * ImagePlug::tileSize() );
 
-			size_t sourceStride;
-			if( interleavedChannels )
+		size_t sourceStride;
+		if( interleavedChannels )
+		{
+			sourceData += channelIndex;
+			sourceStride = imageShape.numChannels;
+		}
+		else
+		{
+			sourceData += dataWindow.size().x * dataWindow.size().y * channelIndex;
+			sourceStride = 1;
+		}
+		float *dstData = out.data();
+
+		for( V2i p = validTileBound.min; p.y < validTileBound.max.y; ++p.y )
+		{
+			size_t srcIndex = BufferAlgo::index( V2i( p.x, dataWindow.max.y - p.y - 1 ), dataWindow ) * sourceStride;
+			size_t dstIndex = BufferAlgo::index( p, tileBound );
+
+			for( int x = validTileBound.min.x; x < validTileBound.max.x; ++x )
 			{
-				sourceData += channelIndex;
-				sourceStride = imageShape.numChannels;
-			}
-			else
-			{
-				sourceData += dataWindow.size().x * dataWindow.size().y * channelIndex;
-				sourceStride = 1;
-			}
-			float *dstData = out.data();
-
-			for( V2i p = validTileBound.min; p.y < validTileBound.max.y; ++p.y )
-			{
-				size_t srcIndex = BufferAlgo::index( V2i( p.x, dataWindow.max.y - p.y - 1 ), dataWindow ) * sourceStride;
-				size_t dstIndex = BufferAlgo::index( p, tileBound );
-
-				for( int x = validTileBound.min.x; x < validTileBound.max.x; ++x )
-				{
-					dstData[dstIndex++] = static_cast<float>( sourceData[srcIndex] );
-					srcIndex += sourceStride;
-				}
+				dstData[dstIndex++] = static_cast<float>( sourceData[srcIndex] );
+				srcIndex += sourceStride;
 			}
 		}
-	);
+	} );
 
 	return outData;
 }

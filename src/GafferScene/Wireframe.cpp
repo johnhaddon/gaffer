@@ -66,27 +66,39 @@ namespace
 struct MakeWireframe
 {
 
-	CurvesPrimitivePtr operator () ( const V2fVectorData *data, const MeshPrimitive *mesh, const string &name, const PrimitiveVariable &primitiveVariable, const IECore::Canceller *canceller )
+	CurvesPrimitivePtr operator () (
+		const V2fVectorData *data, const MeshPrimitive *mesh, const string &name,
+		const PrimitiveVariable &primitiveVariable, const IECore::Canceller *canceller
+	)
 	{
 		return makeWireframe<V2fVectorData>( data, mesh, name, primitiveVariable, canceller );
 	}
 
-	CurvesPrimitivePtr operator () ( const V3fVectorData *data, const MeshPrimitive *mesh, const string &name, const PrimitiveVariable &primitiveVariable, const IECore::Canceller *canceller )
+	CurvesPrimitivePtr operator () (
+		const V3fVectorData *data, const MeshPrimitive *mesh, const string &name,
+		const PrimitiveVariable &primitiveVariable, const IECore::Canceller *canceller
+	)
 	{
 		return makeWireframe<V3fVectorData>( data, mesh, name, primitiveVariable, canceller );
 	}
 
-	CurvesPrimitivePtr operator () ( const Data *data, const MeshPrimitive *mesh, const string &name, const PrimitiveVariable &primitiveVariable, const IECore::Canceller *canceller )
+	CurvesPrimitivePtr operator () (
+		const Data *data, const MeshPrimitive *mesh, const string &name, const PrimitiveVariable &primitiveVariable,
+		const IECore::Canceller *canceller
+	)
 	{
 		throw IECore::Exception(
 			fmt::format( "PrimitiveVariable \"{}\" has unsupported type \"{}\"", name, data->typeName() )
 		);
 	}
 
-	private:
+private:
 
 	template<typename T>
-	CurvesPrimitivePtr makeWireframe( const T *data, const MeshPrimitive *mesh, const string &name, const PrimitiveVariable &primitiveVariable, const IECore::Canceller *canceller )
+	CurvesPrimitivePtr makeWireframe(
+		const T *data, const MeshPrimitive *mesh, const string &name, const PrimitiveVariable &primitiveVariable,
+		const IECore::Canceller *canceller
+	)
 	{
 		using Vec = typename T::ValueType::value_type;
 		using DataView = PrimitiveVariable::IndexedView<Vec>;
@@ -106,7 +118,9 @@ struct MakeWireframe
 				break;
 			default :
 				throw IECore::Exception(
-					fmt::format( "Primitive variable \"{}\" must have Vertex, Varying or FaceVarying interpolation", name )
+					fmt::format(
+						"Primitive variable \"{}\" must have Vertex, Varying or FaceVarying interpolation", name
+					)
 				);
 		}
 
@@ -176,19 +190,15 @@ struct MakeWireframe
 		return result;
 	}
 
-	V3f v3f( const Imath::V3f &v )
-	{
-		return v;
-	}
+	V3f v3f( const Imath::V3f &v ) { return v; }
 
-	V3f v3f( const Imath::V2f &v )
-	{
-		return V3f( v.x, v.y, 0.0f );
-	}
+	V3f v3f( const Imath::V2f &v ) { return V3f( v.x, v.y, 0.0f ); }
 };
 
 /// \todo Perhaps this could go in IECoreScene::MeshAlgo
-CurvesPrimitivePtr wireframe( const MeshPrimitive *mesh, const std::string &position, const IECore::Canceller *canceller )
+CurvesPrimitivePtr wireframe(
+	const MeshPrimitive *mesh, const std::string &position, const IECore::Canceller *canceller
+)
 {
 	auto it = mesh->variables.find( position );
 	if( it == mesh->variables.end() )
@@ -196,7 +206,8 @@ CurvesPrimitivePtr wireframe( const MeshPrimitive *mesh, const std::string &posi
 		throw IECore::Exception( fmt::format( "MeshPrimitive has no primitive variable named \"{}\"", position ) );
 	}
 
-	CurvesPrimitivePtr result = dispatch( it->second.data.get(), MakeWireframe(), mesh, it->first, it->second, canceller );
+	CurvesPrimitivePtr result =
+		dispatch( it->second.data.get(), MakeWireframe(), mesh, it->first, it->second, canceller );
 	return result;
 }
 
@@ -210,17 +221,14 @@ GAFFER_NODE_DEFINE_TYPE( Wireframe );
 
 size_t Wireframe::g_firstPlugIndex = 0;
 
-Wireframe::Wireframe( const std::string &name )
-	: Deformer( name )
+Wireframe::Wireframe( const std::string &name ) : Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "position", Plug::In, "P" ) );
 	addChild( new FloatPlug( "width", Plug::In, 1.0f, 0.0f ) );
 }
 
-Wireframe::~Wireframe()
-{
-}
+Wireframe::~Wireframe() {}
 
 Gaffer::StringPlug *Wireframe::positionPlug()
 {
@@ -244,19 +252,21 @@ const Gaffer::FloatPlug *Wireframe::widthPlug() const
 
 bool Wireframe::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return Deformer::affectsProcessedObject( input ) ||
-		input == positionPlug() ||
-		input == widthPlug();
+	return Deformer::affectsProcessedObject( input ) || input == positionPlug() || input == widthPlug();
 }
 
-void Wireframe::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Wireframe::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	Deformer::hashProcessedObject( path, context, h );
 	positionPlug()->hash( h );
 	widthPlug()->hash( h );
 }
 
-IECore::ConstObjectPtr Wireframe::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr Wireframe::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	const MeshPrimitive *mesh = runTimeCast<const MeshPrimitive>( inputObject );
 	if( !mesh )
@@ -273,7 +283,8 @@ IECore::ConstObjectPtr Wireframe::computeProcessedObject( const ScenePath &path,
 			result->variables.insert( pv );
 		}
 	}
-	result->variables["width"] = PrimitiveVariable( PrimitiveVariable::Constant, new FloatData( widthPlug()->getValue() ) );
+	result->variables["width"] =
+		PrimitiveVariable( PrimitiveVariable::Constant, new FloatData( widthPlug()->getValue() ) );
 
 	return result;
 }

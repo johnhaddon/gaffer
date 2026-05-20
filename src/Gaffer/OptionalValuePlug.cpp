@@ -42,7 +42,10 @@ using namespace Gaffer;
 
 GAFFER_PLUG_DEFINE_TYPE( OptionalValuePlug );
 
-OptionalValuePlug::OptionalValuePlug( IECore::InternedString name, const Gaffer::ValuePlugPtr &valuePlug, bool enabledPlugDefaultValue, Direction direction, unsigned flags )
+OptionalValuePlug::OptionalValuePlug(
+	IECore::InternedString name, const Gaffer::ValuePlugPtr &valuePlug, bool enabledPlugDefaultValue,
+	Direction direction, unsigned flags
+)
 	: ValuePlug( name, direction, flags )
 {
 	addChild( new BoolPlug( "enabled", direction, enabledPlugDefaultValue ) );
@@ -66,10 +69,7 @@ bool OptionalValuePlug::acceptsChild( const Gaffer::GraphComponent *potentialChi
 
 PlugPtr OptionalValuePlug::createCounterpart( const std::string &name, Direction direction ) const
 {
-	ValuePlugPtr valueCounterpart = boost::static_pointer_cast<ValuePlug>(
-		valuePlug()->createCounterpart( "value", direction )
-	);
-	return new OptionalValuePlug(
-		name, valueCounterpart, enabledPlug()->defaultValue(), direction, getFlags()
-	);
+	ValuePlugPtr valueCounterpart =
+		boost::static_pointer_cast<ValuePlug>( valuePlug()->createCounterpart( "value", direction ) );
+	return new OptionalValuePlug( name, valueCounterpart, enabledPlug()->defaultValue(), direction, getFlags() );
 }

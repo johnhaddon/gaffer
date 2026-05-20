@@ -207,20 +207,13 @@ namespace
 class ScopedDirectory : boost::noncopyable
 {
 
-	public:
+public:
 
-	ScopedDirectory( const std::filesystem::path &p )
-		: m_path( p )
-	{
-		std::filesystem::create_directories( m_path );
-	}
+	ScopedDirectory( const std::filesystem::path &p ) : m_path( p ) { std::filesystem::create_directories( m_path ); }
 
-	~ScopedDirectory()
-	{
-		std::filesystem::remove_all( m_path );
-	}
+	~ScopedDirectory() { std::filesystem::remove_all( m_path ); }
 
-	private:
+private:
 
 	std::filesystem::path m_path;
 };
@@ -354,8 +347,7 @@ GAFFER_NODE_DEFINE_TYPE( OSLCode );
 
 size_t OSLCode::g_firstPlugIndex;
 
-OSLCode::OSLCode( const std::string &name )
-	: OSLShader( name )
+OSLCode::OSLCode( const std::string &name ) : OSLShader( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -371,9 +363,7 @@ OSLCode::OSLCode( const std::string &name )
 	outPlug()->childRemovedSignal().connect( boost::bind( &OSLCode::outputRemoved, this ) );
 }
 
-OSLCode::~OSLCode()
-{
-}
+OSLCode::~OSLCode() {}
 
 Gaffer::StringPlug *OSLCode::codePlug()
 {
@@ -401,18 +391,12 @@ std::string OSLCode::source( const std::string shaderName ) const
 	return generate( this, shaderNameCopy );
 }
 
-void OSLCode::loadShader( const std::string &shaderName, bool keepExistingValues )
-{
-}
+void OSLCode::loadShader( const std::string &shaderName, bool keepExistingValues ) {}
 
 void OSLCode::affects( const Plug *input, AffectedPlugsContainer &outputs ) const
 {
 	OSLShader::affects( input, outputs );
-	if(
-		parametersPlug()->isAncestorOf( input ) ||
-		outPlug()->isAncestorOf( input ) ||
-		input == codePlug()
-	)
+	if( parametersPlug()->isAncestorOf( input ) || outPlug()->isAncestorOf( input ) || input == codePlug() )
 	{
 		outputs.push_back( shaderNamePlug() );
 	}
@@ -473,7 +457,9 @@ void OSLCode::outputAdded()
 		// OSLShaderUI registers a dynamic metadata entry which depends on whether or
 		// not the plug has children, so we must notify the world that the value will
 		// have changed.
-		Metadata::plugValueChangedSignal( this )( outPlug(), "nodule:type", Metadata::ValueChangedReason::StaticRegistration );
+		Metadata::plugValueChangedSignal( this )(
+			outPlug(), "nodule:type", Metadata::ValueChangedReason::StaticRegistration
+		);
 	}
 }
 
@@ -484,6 +470,8 @@ void OSLCode::outputRemoved()
 		// OSLShaderUI registers a dynamic metadata entry which depends on whether or
 		// not the plug has children, so we must notify the world that the value will
 		// have changed.
-		Metadata::plugValueChangedSignal( this )( outPlug(), "nodule:type", Metadata::ValueChangedReason::StaticRegistration );
+		Metadata::plugValueChangedSignal( this )(
+			outPlug(), "nodule:type", Metadata::ValueChangedReason::StaticRegistration
+		);
 	}
 }

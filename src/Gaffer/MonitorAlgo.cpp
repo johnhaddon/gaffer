@@ -65,10 +65,7 @@ struct InvalidMetric
 
 	using ResultType = size_t;
 
-	ResultType operator () ( const PerformanceMonitor::Statistics &s ) const
-	{
-		return 0;
-	}
+	ResultType operator () ( const PerformanceMonitor::Statistics &s ) const { return 0; }
 
 	const std::string description = "invalid";
 	const std::string annotation = "invalid";
@@ -80,10 +77,7 @@ struct HashCountMetric
 
 	using ResultType = size_t;
 
-	ResultType operator () ( const PerformanceMonitor::Statistics &s ) const
-	{
-		return s.hashCount;
-	}
+	ResultType operator () ( const PerformanceMonitor::Statistics &s ) const { return s.hashCount; }
 
 	const std::string description = "number of hash processes";
 	const std::string annotation = "performanceMonitor:hashCount";
@@ -95,10 +89,7 @@ struct ComputeCountMetric
 
 	using ResultType = size_t;
 
-	ResultType operator () ( const PerformanceMonitor::Statistics &s ) const
-	{
-		return s.computeCount;
-	}
+	ResultType operator () ( const PerformanceMonitor::Statistics &s ) const { return s.computeCount; }
 
 	const std::string description = "number of compute processes";
 	const std::string annotation = "performanceMonitor:computeCount";
@@ -110,10 +101,7 @@ struct HashDurationMetric
 
 	using ResultType = boost::chrono::duration<double>;
 
-	ResultType operator () ( const PerformanceMonitor::Statistics &s ) const
-	{
-		return s.hashDuration;
-	}
+	ResultType operator () ( const PerformanceMonitor::Statistics &s ) const { return s.hashDuration; }
 
 	const std::string description = "time spent in hash processes";
 	const std::string annotation = "performanceMonitor:hashDuration";
@@ -125,10 +113,7 @@ struct ComputeDurationMetric
 
 	using ResultType = boost::chrono::duration<double>;
 
-	ResultType operator () ( const PerformanceMonitor::Statistics &s ) const
-	{
-		return s.computeDuration;
-	}
+	ResultType operator () ( const PerformanceMonitor::Statistics &s ) const { return s.computeDuration; }
 
 	const std::string description = "time spent in compute processes";
 	const std::string annotation = "performanceMonitor:computeDuration";
@@ -197,7 +182,9 @@ struct HashesPerComputeMetric
 
 // Utility for invoking a templated functor with a particular metric.
 template<typename F>
-std::invoke_result_t<F, const HashCountMetric &> dispatchMetric( const F &f, MonitorAlgo::PerformanceMetric performanceMetric )
+std::invoke_result_t<F, const HashCountMetric &> dispatchMetric(
+	const F &f, MonitorAlgo::PerformanceMetric performanceMetric
+)
 {
 	switch( performanceMetric )
 	{
@@ -236,8 +223,7 @@ struct AnnotationRegistrations
 			dispatchMetric(
 				[]( auto metric ) {
 					MetadataAlgo::addAnnotationTemplate(
-						metric.annotation,
-						MetadataAlgo::Annotation( "" ),
+						metric.annotation, MetadataAlgo::Annotation( "" ),
 						/* user = */ false
 					);
 				},
@@ -246,8 +232,7 @@ struct AnnotationRegistrations
 		}
 
 		MetadataAlgo::addAnnotationTemplate(
-			g_contextAnnotationName,
-			MetadataAlgo::Annotation( "" ),
+			g_contextAnnotationName, MetadataAlgo::Annotation( "" ),
 			/* user = */ false
 		);
 	}
@@ -268,7 +253,8 @@ struct PlugAndStatistics
 {
 
 	PlugAndStatistics( const PerformanceMonitor::StatisticsMap::value_type &v )
-		: plug( v.first.get() ), statistics( v.second )
+		: plug( v.first.get() ),
+		  statistics( v.second )
 	{
 	}
 
@@ -308,7 +294,8 @@ struct FormatStatistics
 {
 
 	FormatStatistics( const PerformanceMonitor::StatisticsMap &statistics, size_t maxLines )
-		: statistics( statistics ), maxLines( maxLines )
+		: statistics( statistics ),
+		  maxLines( maxLines )
 	{
 	}
 
@@ -409,7 +396,9 @@ struct Annotate
 {
 
 	Annotate( Node &root, const PerformanceMonitor::StatisticsMap &statistics, bool persistent )
-		: m_root( root ), m_statistics( statistics ), m_persistent( persistent )
+		: m_root( root ),
+		  m_statistics( statistics ),
+		  m_persistent( persistent )
 	{
 	}
 
@@ -421,7 +410,7 @@ struct Annotate
 		walk<Metric>( m_root, metric );
 	}
 
-	private:
+private:
 
 	Node &m_root;
 	const PerformanceMonitor::StatisticsMap &m_statistics;
@@ -471,11 +460,9 @@ struct Annotate
 			}
 
 			MetadataAlgo::addAnnotation(
-				&cs.first,
-				metric.annotation,
+				&cs.first, metric.annotation,
 				MetadataAlgo::Annotation(
-					metric.annotationPrefix + boost::lexical_cast<std::string>( value ),
-					heat( value, maxChildValue )
+					metric.annotationPrefix + boost::lexical_cast<std::string>( value ), heat( value, maxChildValue )
 				),
 				m_persistent
 			);
@@ -487,7 +474,9 @@ struct Annotate
 	}
 };
 
-ContextMonitor::Statistics annotateContextWalk( Node &node, const ContextMonitor::StatisticsMap &statistics, bool persistent )
+ContextMonitor::Statistics annotateContextWalk(
+	Node &node, const ContextMonitor::StatisticsMap &statistics, bool persistent
+)
 {
 
 	using ChildStatistics = std::pair<Node &, ContextMonitor::Statistics>;
@@ -541,10 +530,8 @@ ContextMonitor::Statistics annotateContextWalk( Node &node, const ContextMonitor
 		}
 
 		MetadataAlgo::addAnnotation(
-			&cs.first,
-			g_contextAnnotationName,
-			MetadataAlgo::Annotation( text, heat( cs.second.numUniqueContexts(), maxUniqueContexts ) ),
-			persistent
+			&cs.first, g_contextAnnotationName,
+			MetadataAlgo::Annotation( text, heat( cs.second.numUniqueContexts(), maxUniqueContexts ) ), persistent
 		);
 
 		result += cs.second;
@@ -626,9 +613,7 @@ void removePerformanceAnnotations( Node &root )
 	for( int m = Gaffer::MonitorAlgo::First; m <= Gaffer::MonitorAlgo::Last; ++m )
 	{
 		dispatchMetric(
-			[&root]( auto metric ) {
-				MetadataAlgo::removeAnnotation( &root, metric.annotation );
-			},
+			[&root]( auto metric ) { MetadataAlgo::removeAnnotation( &root, metric.annotation ); },
 			static_cast<Gaffer::MonitorAlgo::PerformanceMetric>( m )
 		);
 	}

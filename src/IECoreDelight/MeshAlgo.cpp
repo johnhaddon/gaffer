@@ -113,7 +113,10 @@ void convertCornersAndCreases( const IECoreScene::MeshPrimitive *mesh, NSIContex
 	}
 }
 
-bool convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::MeshPrimitive *> &meshes, const IECoreScenePreview::Renderer::SampleTimes &times, NSIContext_t context, const char *handle )
+bool convert(
+	const IECoreScenePreview::Renderer::Samples<const IECoreScene::MeshPrimitive *> &meshes,
+	const IECoreScenePreview::Renderer::SampleTimes &times, NSIContext_t context, const char *handle
+)
 {
 	NSICreate( context, handle, "mesh", 0, nullptr );
 
@@ -122,8 +125,7 @@ bool convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::Mes
 
 	IECoreScenePreview::Renderer::Samples<ParameterList> animatedParameters;
 	NodeAlgo::primitiveVariableParameterLists(
-		IECoreScenePreview::Renderer::staticSamplesCast<const Primitive *>( meshes ),
-		parameters, animatedParameters,
+		IECoreScenePreview::Renderer::staticSamplesCast<const Primitive *>( meshes ), parameters, animatedParameters,
 		meshes.front()->vertexIds()
 	);
 
@@ -133,7 +135,9 @@ bool convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::Mes
 	{
 		for( size_t i = 0, e = animatedParameters.size(); i < e; ++i )
 		{
-			NSISetAttributeAtTime( context, handle, times[i], animatedParameters[i].size(), animatedParameters[i].data() );
+			NSISetAttributeAtTime(
+				context, handle, times[i], animatedParameters[i].size(), animatedParameters[i].data()
+			);
 		}
 	}
 

@@ -52,10 +52,7 @@ ObjectProcessor::ObjectProcessor( const std::string &name, IECore::PathMatcher::
 	init();
 }
 
-ObjectProcessor::ObjectProcessor( const std::string &name )
-	: ObjectProcessor( name, IECore::PathMatcher::NoMatch )
-{
-}
+ObjectProcessor::ObjectProcessor( const std::string &name ) : ObjectProcessor( name, IECore::PathMatcher::NoMatch ) {}
 
 ObjectProcessor::ObjectProcessor( const std::string &name, size_t minInputs, size_t maxInputs )
 	: FilteredSceneProcessor( name, minInputs, maxInputs )
@@ -78,9 +75,7 @@ void ObjectProcessor::init()
 	outPlug()->setPlug()->setInput( inPlug()->setPlug() );
 }
 
-ObjectProcessor::~ObjectProcessor()
-{
-}
+ObjectProcessor::~ObjectProcessor() {}
 
 Gaffer::ObjectPlug *ObjectProcessor::processedObjectPlug()
 {
@@ -106,7 +101,9 @@ void ObjectProcessor::affects( const Gaffer::Plug *input, AffectedPlugsContainer
 	}
 }
 
-void ObjectProcessor::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ObjectProcessor::hash(
+	const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	if( output == processedObjectPlug() )
 	{
@@ -150,7 +147,9 @@ bool ObjectProcessor::affectsProcessedObject( const Gaffer::Plug *input ) const
 	return input == filterPlug() || input == inPlug()->objectPlug();
 }
 
-void ObjectProcessor::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ObjectProcessor::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FilteredSceneProcessor::hash( processedObjectPlug(), context, h );
 	inPlug()->objectPlug()->hash( h );
@@ -161,7 +160,9 @@ Gaffer::ValuePlug::CachePolicy ObjectProcessor::processedObjectComputeCachePolic
 	return ValuePlug::CachePolicy::Default;
 }
 
-void ObjectProcessor::hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void ObjectProcessor::hashObject(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	if( filterValue( context ) & IECore::PathMatcher::ExactMatch )
 	{
@@ -174,7 +175,9 @@ void ObjectProcessor::hashObject( const ScenePath &path, const Gaffer::Context *
 	}
 }
 
-IECore::ConstObjectPtr ObjectProcessor::computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstObjectPtr ObjectProcessor::computeObject(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( filterValue( context ) & IECore::PathMatcher::ExactMatch )
 	{

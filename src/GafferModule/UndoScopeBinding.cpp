@@ -87,13 +87,9 @@ void GafferModule::bindUndoScope()
 	cls.def(
 		"__init__",
 		make_constructor(
-			construct,
-			default_call_policies(),
-			(
-				boost::python::arg_( "script" ),
-				boost::python::arg_( "state" ) = UndoScope::Enabled,
-				boost::python::arg_( "mergeGroup" ) = ""
-			)
+			construct, default_call_policies(),
+			( boost::python::arg_( "script" ), boost::python::arg_( "state" ) = UndoScope::Enabled,
+			  boost::python::arg_( "mergeGroup" ) = "" )
 		)
 	);
 }

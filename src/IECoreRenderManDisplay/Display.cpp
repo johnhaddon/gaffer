@@ -71,7 +71,10 @@ extern "C"
 		V2i imageDataOrigin;
 	};
 
-	PtDspyError DspyImageOpen( PtDspyImageHandle *imageHandle, const char *driverName, const char *fileName, int width, int height, int paramcount, const UserParameter *parameters, int formatCount, PtDspyDevFormat *format, PtFlagStuff *flags )
+	PtDspyError DspyImageOpen(
+		PtDspyImageHandle *imageHandle, const char *driverName, const char *fileName, int width, int height,
+		int paramcount, const UserParameter *parameters, int formatCount, PtDspyDevFormat *format, PtFlagStuff *flags
+	)
 	{
 		*imageHandle = nullptr;
 
@@ -94,11 +97,14 @@ extern "C"
 
 			vector<string> tokens;
 			StringAlgo::tokenize( format[i].name, '.', tokens );
-			if( tokens.size() == 2 && std::all_of( tokens[0].begin(), tokens[0].end(), []( unsigned char c ) { return std::isdigit( c ); } ) )
+			if( tokens.size() == 2 &&
+				std::all_of( tokens[0].begin(), tokens[0].end(), []( unsigned char c ) { return std::isdigit( c ); } ) )
 			{
 				tokens.erase( tokens.begin() );
 			}
-			else if( tokens.size() > 1 && std::all_of( tokens[1].begin(), tokens[1].end(), []( unsigned char c ) { return std::isdigit( c ); } ) )
+			else if( tokens.size() > 1 && std::all_of( tokens[1].begin(), tokens[1].end(), []( unsigned char c ) {
+						 return std::isdigit( c );
+					 } ) )
 			{
 				tokens.erase( tokens.begin() + 1 );
 			}
@@ -159,27 +165,32 @@ extern "C"
 
 		for( int p = 0; p < paramcount; p++ )
 		{
-			if( !strcmp( parameters[p].name, "OriginalSize" ) && parameters[p].vtype == (char)'i' && parameters[p].vcount == (char)2 && parameters[p].nbytes == (int)( parameters[p].vcount * sizeof( int ) ) )
+			if( !strcmp( parameters[p].name, "OriginalSize" ) && parameters[p].vtype == (char)'i' &&
+				parameters[p].vcount == (char)2 &&
+				parameters[p].nbytes == (int)( parameters[p].vcount * sizeof( int ) ) )
 			{
 				const auto originalSize = static_cast<const int *>( parameters[p].value );
 				displayWindow.max = V2i( originalSize[0] - 1, originalSize[1] - 1 );
 			}
-			else if( !strcmp( parameters[p].name, "origin" ) && parameters[p].vtype == (char)'i' && parameters[p].vcount == (char)2 && parameters[p].nbytes == (int)( parameters[p].vcount * sizeof( int ) ) )
+			else if(
+				!strcmp( parameters[p].name, "origin" ) && parameters[p].vtype == (char)'i' &&
+				parameters[p].vcount == (char)2 && parameters[p].nbytes == (int)( parameters[p].vcount * sizeof( int ) )
+			)
 			{
 				const auto origin = static_cast<const int *>( parameters[p].value );
 				dataWindow.min += V2i( origin[0], origin[1] );
 				dataWindow.max += V2i( origin[0], origin[1] );
 				imageDataOrigin = dataWindow.min;
 			}
-			else if( !strcmp( parameters[p].name, "CropWindow" ) && parameters[p].vtype == (char)'i' && parameters[p].vcount == (char)4 && parameters[p].nbytes == (int)( parameters[p].vcount * sizeof( int ) ) )
+			else if(
+				!strcmp( parameters[p].name, "CropWindow" ) && parameters[p].vtype == (char)'i' &&
+				parameters[p].vcount == (char)4 && parameters[p].nbytes == (int)( parameters[p].vcount * sizeof( int ) )
+			)
 			{
 				// RIS specifies crop windows via `OriginalSize` and `origin` as handled above.
 				// But the XPU version of the `quicklyNoiseless` driver sends `CropWindow` instead.
 				const auto cropWindow = static_cast<const int *>( parameters[p].value );
-				dataWindow = Box2i(
-					V2i( cropWindow[0], cropWindow[1] ),
-					V2i( cropWindow[2], cropWindow[3] )
-				);
+				dataWindow = Box2i( V2i( cropWindow[0], cropWindow[1] ), V2i( cropWindow[2], cropWindow[3] ) );
 				imageDataOrigin = V2i( 0 );
 			}
 			else
@@ -266,8 +277,11 @@ extern "C"
 
 		try
 		{
-			const StringData *driverType = image->parameters->member<StringData>( "driverType", true /* throw if missing */ );
-			image->driver = IECoreImage::DisplayDriver::create( driverType->readable(), displayWindow, dataWindow, channels, image->parameters );
+			const StringData *driverType =
+				image->parameters->member<StringData>( "driverType", true /* throw if missing */ );
+			image->driver = IECoreImage::DisplayDriver::create(
+				driverType->readable(), displayWindow, dataWindow, channels, image->parameters
+			);
 			image->imageDataOrigin = imageDataOrigin;
 		}
 		catch( std::exception &e )
@@ -313,7 +327,9 @@ extern "C"
 		return PkDspyErrorUnsupported;
 	}
 
-	PtDspyError DspyImageActiveRegion( PtDspyImageHandle imageHandle, int xMin, int xMaxPlusOne, int yMin, int yMaxPlusOne )
+	PtDspyError DspyImageActiveRegion(
+		PtDspyImageHandle imageHandle, int xMin, int xMaxPlusOne, int yMin, int yMaxPlusOne
+	)
 	{
 		Image *image = static_cast<Image *>( imageHandle );
 		// I have no idea why, but before `DspyImageActiveRegion*()` has been called, the arguments
@@ -327,8 +343,8 @@ extern "C"
 			IECoreImage::DisplayDriverPtr oldDriver = image->driver;
 			const Box2i newDataWindow( V2i( xMin, yMin ), V2i( xMaxPlusOne - 1, yMaxPlusOne - 1 ) );
 			image->driver = IECoreImage::DisplayDriver::create(
-				image->parameters->member<StringData>( "driverType" )->readable(),
-				oldDriver->displayWindow(), newDataWindow, oldDriver->channelNames(), image->parameters
+				image->parameters->member<StringData>( "driverType" )->readable(), oldDriver->displayWindow(),
+				newDataWindow, oldDriver->channelNames(), image->parameters
 			);
 
 			// Close old driver. We do this after creating the new one so that Gaffer's Catalogue
@@ -343,12 +359,17 @@ extern "C"
 		}
 	}
 
-	PtDspyError DspyImageData( PtDspyImageHandle imageHandle, int xMin, int xMaxPlusOne, int yMin, int yMaxPlusOne, int entrySize, const unsigned char *data )
+	PtDspyError DspyImageData(
+		PtDspyImageHandle imageHandle, int xMin, int xMaxPlusOne, int yMin, int yMaxPlusOne, int entrySize,
+		const unsigned char *data
+	)
 	{
 		const Image *image = static_cast<Image *>( imageHandle );
 
 		// Convert coordinates from cropped image to original image coordinates.
-		Box2i box( image->imageDataOrigin + V2i( xMin, yMin ), image->imageDataOrigin + V2i( xMaxPlusOne - 1, yMaxPlusOne - 1 ) );
+		Box2i box(
+			image->imageDataOrigin + V2i( xMin, yMin ), image->imageDataOrigin + V2i( xMaxPlusOne - 1, yMaxPlusOne - 1 )
+		);
 		int channels = image->driver->channelNames().size();
 		int blockSize = ( xMaxPlusOne - xMin ) * ( yMaxPlusOne - yMin );
 		int bufferSize = channels * blockSize;
@@ -466,7 +487,9 @@ DataPtr typedParameterData( const pxrcore::ParamList &paramList, const pxrcore::
 }
 
 template<>
-DataPtr typedParameterData<string>( const pxrcore::ParamList &paramList, const pxrcore::ParamList::ParamInfo &paramInfo )
+DataPtr typedParameterData<string>(
+	const pxrcore::ParamList &paramList, const pxrcore::ParamList::ParamInfo &paramInfo
+)
 {
 	unsigned paramId;
 	paramList.GetParamId( paramInfo.name, paramId );
@@ -491,7 +514,8 @@ struct IEDisplay : public display::Display
 {
 
 	IEDisplay( const pxrcore::ParamList &paramList, const pxrcore::ParamList &metadata )
-		: m_parameters( new CompoundData() ), m_driverOutOfDate( true )
+		: m_parameters( new CompoundData() ),
+		  m_driverOutOfDate( true )
 	{
 		// Convert parameter list into the form needed by `IECoreImage::DisplayDriver::create()`.
 		pxrcore::ParamList::ParamInfo paramInfo;
@@ -505,7 +529,8 @@ struct IEDisplay : public display::Display
 			switch( paramInfo.type )
 			{
 				case pxrcore::DataType::k_string : {
-					m_parameters->writable()[paramInfo.name.CStr()] = typedParameterData<string>( paramList, paramInfo );
+					m_parameters->writable()[paramInfo.name.CStr()] =
+						typedParameterData<string>( paramList, paramInfo );
 					break;
 				}
 				case pxrcore::DataType::k_float :
@@ -515,27 +540,26 @@ struct IEDisplay : public display::Display
 					m_parameters->writable()[paramInfo.name.CStr()] = typedParameterData<int>( paramList, paramInfo );
 					break;
 				case pxrcore::DataType::k_color :
-					m_parameters->writable()[paramInfo.name.CStr()] = typedParameterData<Imath::Color3f>( paramList, paramInfo );
+					m_parameters->writable()[paramInfo.name.CStr()] =
+						typedParameterData<Imath::Color3f>( paramList, paramInfo );
 					break;
 				default :
-					msg( Msg::Warning, "IEDisplay", fmt::format( "Ignoring parameter \"{}\" because it has an unsupported type ({})", paramInfo.name.CStr(), (int)paramInfo.type ) );
+					msg( Msg::Warning, "IEDisplay",
+						 fmt::format(
+							 "Ignoring parameter \"{}\" because it has an unsupported type ({})", paramInfo.name.CStr(),
+							 (int)paramInfo.type
+						 ) );
 					break;
 			}
 		}
 	}
 
-	uint64_t GetRequirements() const override
-	{
-		return k_reqFrameBuffer;
-	}
+	uint64_t GetRequirements() const override { return k_reqFrameBuffer; }
 
 	bool Rebind(
-		const uint32_t width, const uint32_t height, const char *srfaddrhandle,
-		const void *srfaddr, const size_t srfsizebytes,
-		const size_t *offsets,
-		const size_t *sampleoffsets,
-		const display::RenderOutput *outputs, const size_t noutputs,
-		const pxrcore::ParamList &params
+		const uint32_t width, const uint32_t height, const char *srfaddrhandle, const void *srfaddr,
+		const size_t srfsizebytes, const size_t *offsets, const size_t *sampleoffsets,
+		const display::RenderOutput *outputs, const size_t noutputs, const pxrcore::ParamList &params
 	) override
 	{
 		// Store the channel names, channel pointers, and buffer width, so that we will know how intepret
@@ -587,7 +611,8 @@ struct IEDisplay : public display::Display
 				}
 			}
 
-			const float *channelPointer = reinterpret_cast<const float *>( static_cast<const std::byte *>( srfaddr ) + offsets[outputIndex] );
+			const float *channelPointer =
+				reinterpret_cast<const float *>( static_cast<const std::byte *>( srfaddr ) + offsets[outputIndex] );
 			for( size_t element = 0; element < output.nelems; ++element )
 			{
 				m_channelPointers.push_back( channelPointer );
@@ -599,8 +624,8 @@ struct IEDisplay : public display::Display
 	}
 
 	void Notify(
-		const uint32_t iteration, const uint32_t totaliterations,
-		const NotifyFlags flags, const pxrcore::ParamList &metadata
+		const uint32_t iteration, const uint32_t totaliterations, const NotifyFlags flags,
+		const pxrcore::ParamList &metadata
 	) override
 	{
 		try
@@ -620,7 +645,10 @@ struct IEDisplay : public display::Display
 
 			if( !( origSize && origin && cropWindow ) )
 			{
-				IECore::msg( IECore::Msg::Error, "IEDisplay", "A built-in RenderMan param was not provided to IEDisplay - this suggests the RenderMan API has changed, and IEDisplay needs updating" );
+				IECore::msg(
+					IECore::Msg::Error, "IEDisplay",
+					"A built-in RenderMan param was not provided to IEDisplay - this suggests the RenderMan API has changed, and IEDisplay needs updating"
+				);
 				return;
 			}
 
@@ -640,9 +668,12 @@ struct IEDisplay : public display::Display
 				// catalogue image.
 				IECoreImage::DisplayDriverPtr oldDriver = m_driver;
 
-				const StringData *driverType = m_parameters->member<StringData>( "driverType", /* throwIfMissing = */ true );
+				const StringData *driverType =
+					m_parameters->member<StringData>( "driverType", /* throwIfMissing = */ true );
 
-				m_driver = IECoreImage::DisplayDriver::create( driverType->readable(), displayWindow, m_dataWindow, m_channelNames, m_parameters );
+				m_driver = IECoreImage::DisplayDriver::create(
+					driverType->readable(), displayWindow, m_dataWindow, m_channelNames, m_parameters
+				);
 
 				if( oldDriver )
 				{
@@ -701,7 +732,7 @@ struct IEDisplay : public display::Display
 		}
 	}
 
-	private:
+private:
 
 	CompoundDataPtr m_parameters;
 	Box2i m_dataWindow;
@@ -721,7 +752,9 @@ extern "C"
 
 	DISPLAYEXPORTVERSION
 
-	DISPLAYEXPORT display::Display *CreateDisplay( const pxrcore::UString &name, const pxrcore::ParamList &paramList, const pxrcore::ParamList &metadata )
+	DISPLAYEXPORT display::Display *CreateDisplay(
+		const pxrcore::UString &name, const pxrcore::ParamList &paramList, const pxrcore::ParamList &metadata
+	)
 	{
 		return new IEDisplay( paramList, metadata );
 	}

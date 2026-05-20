@@ -65,7 +65,9 @@ using namespace GafferUI;
 namespace
 {
 
-void titleAndDescriptionFromPlugs( const StringPlug *titlePlug, const StringPlug *descriptionPlug, std::string &title, std::string &description )
+void titleAndDescriptionFromPlugs(
+	const StringPlug *titlePlug, const StringPlug *descriptionPlug, std::string &title, std::string &description
+)
 {
 	const auto script = titlePlug->ancestor<ScriptNode>();
 	const Context *context = script ? script->context() : nullptr;
@@ -146,10 +148,16 @@ Box2f g_defaultBound( V2f( -10 ), V2f( 10 ) );
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( BackdropNodeGadget );
 
-BackdropNodeGadget::NodeGadgetTypeDescription<BackdropNodeGadget> BackdropNodeGadget::g_nodeGadgetTypeDescription( Gaffer::Backdrop::staticTypeId() );
+BackdropNodeGadget::NodeGadgetTypeDescription<BackdropNodeGadget> BackdropNodeGadget::g_nodeGadgetTypeDescription(
+	Gaffer::Backdrop::staticTypeId()
+);
 
 BackdropNodeGadget::BackdropNodeGadget( Gaffer::NodePtr node )
-	: NodeGadget( node ), m_hovered( false ), m_horizontalDragEdge( 0 ), m_verticalDragEdge( 0 ), m_mergeGroupId( 0 )
+	: NodeGadget( node ),
+	  m_hovered( false ),
+	  m_horizontalDragEdge( 0 ),
+	  m_verticalDragEdge( 0 ),
+	  m_mergeGroupId( 0 )
 {
 	if( !runTimeCast<Backdrop>( node ) )
 	{
@@ -159,9 +167,7 @@ BackdropNodeGadget::BackdropNodeGadget( Gaffer::NodePtr node )
 	node->plugDirtiedSignal().connect( boost::bind( &BackdropNodeGadget::plugDirtied, this, ::_1 ) );
 	if( auto *script = node->scriptNode() )
 	{
-		script->context()->changedSignal().connect(
-			boost::bind( &BackdropNodeGadget::contextChanged, this )
-		);
+		script->context()->changedSignal().connect( boost::bind( &BackdropNodeGadget::contextChanged, this ) );
 	}
 
 	mouseMoveSignal().connect( boost::bind( &BackdropNodeGadget::mouseMove, this, ::_1, ::_2 ) );
@@ -172,14 +178,13 @@ BackdropNodeGadget::BackdropNodeGadget( Gaffer::NodePtr node )
 	dragEndSignal().connect( boost::bind( &BackdropNodeGadget::dragEnd, this, ::_1, ::_2 ) );
 	leaveSignal().connect( boost::bind( &BackdropNodeGadget::leave, this, ::_1, ::_2 ) );
 
-	Metadata::nodeValueChangedSignal( node.get() ).connect( boost::bind( &BackdropNodeGadget::nodeMetadataChanged, this, ::_2 ) );
+	Metadata::nodeValueChangedSignal( node.get() )
+		.connect( boost::bind( &BackdropNodeGadget::nodeMetadataChanged, this, ::_2 ) );
 
 	updateUserColor();
 }
 
-BackdropNodeGadget::~BackdropNodeGadget()
-{
-}
+BackdropNodeGadget::~BackdropNodeGadget() {}
 
 std::string BackdropNodeGadget::getToolTip( const IECore::LineSegment3f &line ) const
 {
@@ -257,12 +262,7 @@ void BackdropNodeGadget::frame( const std::vector<Gaffer::Node *> &nodes )
 
 	V2f s( b.size().x / 2.0f, b.size().y / 2.0f );
 
-	setBound(
-		Box2f(
-			V2f( -s ) - V2f( g_margin ),
-			V2f( s ) + V2f( g_margin + 2.0f * g_margin )
-		)
-	);
+	setBound( Box2f( V2f( -s ) - V2f( g_margin ), V2f( s ) + V2f( g_margin + 2.0f * g_margin ) ) );
 }
 
 void BackdropNodeGadget::framed( std::vector<Gaffer::Node *> &nodes ) const
@@ -286,7 +286,9 @@ void BackdropNodeGadget::framed( std::vector<Gaffer::Node *> &nodes ) const
 		if( const NodeGadget *nodeGadget = graphGadget->nodeGadget( it->get() ) )
 		{
 			const Box3f nodeBound3 = nodeGadget->transformedBound( graphGadget );
-			const Box2f nodeBound2( V2f( nodeBound3.min.x, nodeBound3.min.y ), V2f( nodeBound3.max.x, nodeBound3.max.y ) );
+			const Box2f nodeBound2(
+				V2f( nodeBound3.min.x, nodeBound3.min.y ), V2f( nodeBound3.max.x, nodeBound3.max.y )
+			);
 			if( boxContains( bound2, nodeBound2 ) )
 			{
 				nodes.push_back( it->get() );
@@ -364,8 +366,7 @@ void BackdropNodeGadget::renderLayer( Layer layer, const Style *style, RenderRea
 		// normal drawing mode
 
 		style->renderBackdrop(
-			bound,
-			getHighlighted() ? Style::HighlightedState : Style::NormalState,
+			bound, getHighlighted() ? Style::HighlightedState : Style::NormalState,
 			m_userColor ? &m_userColor.value() : nullptr
 		);
 
@@ -434,18 +435,12 @@ void BackdropNodeGadget::contextChanged()
 void BackdropNodeGadget::plugDirtied( const Gaffer::Plug *plug )
 {
 	const Backdrop *backdrop = static_cast<const Backdrop *>( node() );
-	if(
-		plug == backdrop->titlePlug() ||
-		plug == backdrop->scalePlug() ||
-		plug == backdrop->descriptionPlug() ||
-		plug == backdrop->depthPlug()
-	)
+	if( plug == backdrop->titlePlug() || plug == backdrop->scalePlug() || plug == backdrop->descriptionPlug() ||
+		plug == backdrop->depthPlug() )
 	{
 		dirty( DirtyType::Render );
 	}
-	else if(
-		plug == acquireBoundPlug( /* createIfMissing = */ false )
-	)
+	else if( plug == acquireBoundPlug( /* createIfMissing = */ false ) )
 	{
 		dirty( DirtyType::Bound );
 	}
@@ -608,12 +603,7 @@ Gaffer::Box2fPlug *BackdropNodeGadget::acquireBoundPlug( bool createIfMissing )
 		return existingPlug;
 	}
 
-	Box2fPlugPtr newPlug = new Box2fPlug(
-		g_boundPlugName,
-		Plug::In,
-		g_defaultBound,
-		Plug::Default | Plug::Dynamic
-	);
+	Box2fPlugPtr newPlug = new Box2fPlug( g_boundPlugName, Plug::In, g_defaultBound, Plug::Default | Plug::Dynamic );
 	node()->addChild( newPlug );
 	return newPlug.get();
 }

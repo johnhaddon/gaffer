@@ -56,9 +56,11 @@ namespace
 class Transform2DPlugSerialiser : public ValuePlugSerialiser
 {
 
-	public:
+public:
 
-	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsConstruction(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override
 	{
 		// The children will be created by the constructor
 		return false;
@@ -116,15 +118,10 @@ void GafferModule::bindTransform2DPlug()
 	PlugClass<Transform2DPlug>()
 		.def(
 			init<const std::string &, Gaffer::Plug::Direction, const V2f &, float, const V2f &, const V2f &, unsigned>(
-				(
-					arg( "name" ) = Gaffer::GraphComponent::defaultName<Transform2DPlug>(),
-					arg( "direction" ) = Gaffer::Plug::In,
-					arg( "defaultTranslate" ) = V2f( 0 ),
-					arg( "defaultRotate" ) = 0.0f,
-					arg( "defaultScale" ) = V2f( 1 ),
-					arg( "defaultPivot" ) = V2f( 0 ),
-					arg( "flags" ) = Gaffer::Plug::Default
-				)
+				( arg( "name" ) = Gaffer::GraphComponent::defaultName<Transform2DPlug>(),
+				  arg( "direction" ) = Gaffer::Plug::In, arg( "defaultTranslate" ) = V2f( 0 ),
+				  arg( "defaultRotate" ) = 0.0f, arg( "defaultScale" ) = V2f( 1 ), arg( "defaultPivot" ) = V2f( 0 ),
+				  arg( "flags" ) = Gaffer::Plug::Default )
 			)
 		)
 		.def( "matrix", &Transform2DPlug::matrix )

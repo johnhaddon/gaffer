@@ -62,21 +62,21 @@ IECore::InternedString g_noduleTypeKey( "nodule:type" );
 class ShaderPlugAdder : public PlugAdder
 {
 
-	public:
+public:
 
-	ShaderPlugAdder( GraphComponentPtr plugsParent )
-		: m_plugsParent( plugsParent )
+	ShaderPlugAdder( GraphComponentPtr plugsParent ) : m_plugsParent( plugsParent )
 	{
 		plugsParent->childAddedSignal().connect( boost::bind( &ShaderPlugAdder::childAdded, this ) );
 		plugsParent->childRemovedSignal().connect( boost::bind( &ShaderPlugAdder::childRemoved, this ) );
-		Metadata::plugValueChangedSignal( plugsParent->ancestor<Node>() ).connect( boost::bind( &ShaderPlugAdder::plugMetadataChanged, this, ::_1, ::_2 ) );
+		Metadata::plugValueChangedSignal( plugsParent->ancestor<Node>() )
+			.connect( boost::bind( &ShaderPlugAdder::plugMetadataChanged, this, ::_1, ::_2 ) );
 
 		buttonReleaseSignal().connect( boost::bind( &ShaderPlugAdder::buttonRelease, this, ::_2 ) );
 
 		updateVisibility();
 	}
 
-	protected:
+protected:
 
 	bool canCreateConnection( const Plug *endpoint ) const override
 	{
@@ -104,7 +104,7 @@ class ShaderPlugAdder : public PlugAdder
 		}
 	}
 
-	private:
+private:
 
 	bool buttonRelease( const ButtonEvent &event )
 	{
@@ -157,20 +157,11 @@ class ShaderPlugAdder : public PlugAdder
 		return result;
 	}
 
-	void updateVisibility()
-	{
-		setVisible( !showablePlugs().empty() );
-	}
+	void updateVisibility() { setVisible( !showablePlugs().empty() ); }
 
-	void childAdded()
-	{
-		updateVisibility();
-	}
+	void childAdded() { updateVisibility(); }
 
-	void childRemoved()
-	{
-		updateVisibility();
-	}
+	void childRemoved() { updateVisibility(); }
 
 	void plugMetadataChanged( const Gaffer::Plug *plug, IECore::InternedString key )
 	{
@@ -189,17 +180,11 @@ class ShaderPlugAdder : public PlugAdder
 struct Registration
 {
 
-	Registration()
-	{
-		NoduleLayout::registerCustomGadget( "GafferSceneUI.ShaderUI.PlugAdder", &create );
-	}
+	Registration() { NoduleLayout::registerCustomGadget( "GafferSceneUI.ShaderUI.PlugAdder", &create ); }
 
-	private:
+private:
 
-	static GadgetPtr create( GraphComponentPtr parent )
-	{
-		return new ShaderPlugAdder( parent );
-	}
+	static GadgetPtr create( GraphComponentPtr parent ) { return new ShaderPlugAdder( parent ); }
 };
 
 Registration g_registration;

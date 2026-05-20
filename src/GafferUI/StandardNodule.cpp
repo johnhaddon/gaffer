@@ -69,7 +69,9 @@ static IECore::InternedString g_colorKey( "nodule:color" );
 static IECore::InternedString g_labelKey( "noduleLayout:label" );
 
 StandardNodule::StandardNodule( Gaffer::PlugPtr plug )
-	: Nodule( plug ), m_labelVisible( false ), m_draggingConnection( false )
+	: Nodule( plug ),
+	  m_labelVisible( false ),
+	  m_draggingConnection( false )
 {
 	enterSignal().connect( boost::bind( &StandardNodule::enter, this, ::_1, ::_2 ) );
 	leaveSignal().connect( boost::bind( &StandardNodule::leave, this, ::_1, ::_2 ) );
@@ -82,14 +84,13 @@ StandardNodule::StandardNodule( Gaffer::PlugPtr plug )
 
 	dropSignal().connect( boost::bind( &StandardNodule::drop, this, ::_1, ::_2 ) );
 
-	Metadata::plugValueChangedSignal( plug->node() ).connect( boost::bind( &StandardNodule::plugMetadataChanged, this, ::_1, ::_2 ) );
+	Metadata::plugValueChangedSignal( plug->node() )
+		.connect( boost::bind( &StandardNodule::plugMetadataChanged, this, ::_1, ::_2 ) );
 
 	updateUserColor();
 }
 
-StandardNodule::~StandardNodule()
-{
-}
+StandardNodule::~StandardNodule() {}
 
 void StandardNodule::setLabelVisible( bool labelVisible )
 {

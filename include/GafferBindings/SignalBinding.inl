@@ -58,10 +58,7 @@ template<typename Result, typename... Args, typename Combiner, typename Caller>
 struct Slot<Gaffer::Signals::Signal<Result( Args... ), Combiner>, Caller>
 {
 
-	Slot( boost::python::object slot )
-		: m_slot( boost::python::borrowed( slot.ptr() ) )
-	{
-	}
+	Slot( boost::python::object slot ) : m_slot( boost::python::borrowed( slot.ptr() ) ) {}
 
 	~Slot()
 	{
@@ -181,8 +178,14 @@ template<typename Signal, typename SignalCaller, typename SlotCaller>
 SignalClass<Signal, SignalCaller, SlotCaller>::SignalClass( const char *className, const char *docString )
 	: boost::python::class_<Signal, boost::noncopyable>( className, docString )
 {
-	this->def( "connect", &Detail::connect<Signal, SlotCaller>, ( boost::python::arg( "slot" ), boost::python::arg( "scoped" ) = false ) );
-	this->def( "connectFront", &Detail::connectFront<Signal, SlotCaller>, ( boost::python::arg( "slot" ), boost::python::arg( "scoped" ) = false ) );
+	this->def(
+		"connect", &Detail::connect<Signal, SlotCaller>,
+		( boost::python::arg( "slot" ), boost::python::arg( "scoped" ) = false )
+	);
+	this->def(
+		"connectFront", &Detail::connectFront<Signal, SlotCaller>,
+		( boost::python::arg( "slot" ), boost::python::arg( "scoped" ) = false )
+	);
 	this->def( "disconnectAllSlots", &Signal::disconnectAllSlots );
 	this->def( "numSlots", &Signal::numSlots );
 	this->def( "empty", &Signal::empty );

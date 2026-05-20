@@ -71,7 +71,9 @@ PlugPtr activeInPlug( Switch &s, const Plug *plug )
 class SwitchSerialiser : public NodeSerialiser
 {
 
-	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsConstruction(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override
 	{
 		const Switch *sw = child->parent<Switch>();
 		if( child == sw->inPlugs() || child == sw->outPlug() )
@@ -82,7 +84,9 @@ class SwitchSerialiser : public NodeSerialiser
 		return NodeSerialiser::childNeedsConstruction( child, serialisation );
 	}
 
-	std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
+	std::string postConstructor(
+		const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+	) const override
 	{
 		std::string result = NodeSerialiser::postConstructor( graphComponent, identifier, serialisation );
 
@@ -123,8 +127,7 @@ void GafferModule::bindSwitch()
 		.def( "setup", &setup<Switch> )
 		.def( "activeInPlug", &activeInPlug, ( arg( "plug" ) = object() ) );
 
-	DependencyNodeClass<NameSwitch>()
-		.def( "setup", &setup<NameSwitch> );
+	DependencyNodeClass<NameSwitch>().def( "setup", &setup<NameSwitch> );
 
 	Serialisation::registerSerialiser( Switch::staticTypeId(), new SwitchSerialiser );
 }

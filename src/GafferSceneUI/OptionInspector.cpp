@@ -72,15 +72,15 @@ struct HistoryCacheKey
 {
 	HistoryCacheKey() {};
 	HistoryCacheKey( const ValuePlug *plug )
-		: plug( plug ), contextHash( Context::current()->hash() ), dirtyCount( plug->dirtyCount() )
+		: plug( plug ),
+		  contextHash( Context::current()->hash() ),
+		  dirtyCount( plug->dirtyCount() )
 	{
 	}
 
 	bool operator == ( const HistoryCacheKey &rhs ) const
 	{
-		return plug == rhs.plug &&
-			contextHash == rhs.contextHash &&
-			dirtyCount == rhs.dirtyCount;
+		return plug == rhs.plug && contextHash == rhs.contextHash && dirtyCount == rhs.dirtyCount;
 	}
 
 	const ValuePlug *plug;
@@ -104,9 +104,7 @@ HistoryCache g_historyCache(
 	[]( const HistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) {
 		assert( canceller == Context::current()->canceller() );
 		cost = 1;
-		return SceneAlgo::history(
-			key.plug
-		);
+		return SceneAlgo::history( key.plug );
 	},
 	// Max cost
 	1000,
@@ -116,9 +114,7 @@ HistoryCache g_historyCache(
 		// owners. Destroying plugs can trigger dirty propagation, so as a
 		// precaution we destroy the history on the UI thread, where this would
 		// be OK.
-		ParallelAlgo::callOnUIThread(
-			[history]() {}
-		);
+		ParallelAlgo::callOnUIThread( [history]() {} );
 	}
 
 );
@@ -127,7 +123,8 @@ struct OptionHistoryCacheKey : public HistoryCacheKey
 {
 	OptionHistoryCacheKey() {};
 	OptionHistoryCacheKey( const ScenePlug *plug, IECore::InternedString option )
-		: HistoryCacheKey( plug->globalsPlug() ), option( option )
+		: HistoryCacheKey( plug->globalsPlug() ),
+		  option( option )
 	{
 	}
 
@@ -151,7 +148,8 @@ using OptionHistoryCache = IECorePreview::LRUCache<OptionHistoryCacheKey, SceneA
 
 OptionHistoryCache g_optionHistoryCache(
 	// Getter
-	[]( const OptionHistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) -> SceneAlgo::History::ConstPtr {
+	[]( const OptionHistoryCacheKey &key, size_t &cost,
+		const IECore::Canceller *canceller ) -> SceneAlgo::History::ConstPtr {
 		assert( canceller == Context::current()->canceller() );
 		cost = 1;
 		SceneAlgo::History::ConstPtr globalsHistory = g_historyCache.get( key, canceller );
@@ -162,9 +160,7 @@ OptionHistoryCache g_optionHistoryCache(
 	// Removal callback
 	[]( const OptionHistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
 		// See comment in g_historyCache
-		ParallelAlgo::callOnUIThread(
-			[history]() {}
-		);
+		ParallelAlgo::callOnUIThread( [history]() {} );
 	}
 
 );
@@ -174,9 +170,7 @@ OptionHistoryCache g_optionHistoryCache(
 IE_CORE_DEFINERUNTIMETYPED( OptionInspector )
 
 OptionInspector::OptionInspector(
-	const GafferScene::ScenePlugPtr &scene,
-	const Gaffer::PlugPtr &editScope,
-	IECore::InternedString option
+	const GafferScene::ScenePlugPtr &scene, const Gaffer::PlugPtr &editScope, IECore::InternedString option
 )
 	: Inspector( { scene->globalsPlug() }, "option", option.string(), editScope ),
 	  m_scene( scene ),
@@ -186,7 +180,9 @@ OptionInspector::OptionInspector(
 
 GafferScene::SceneAlgo::History::ConstPtr OptionInspector::history() const
 {
-	return g_optionHistoryCache.get( OptionHistoryCacheKey( m_scene.get(), m_option ), Context::current()->canceller() );
+	return g_optionHistoryCache.get(
+		OptionHistoryCacheKey( m_scene.get(), m_option ), Context::current()->canceller()
+	);
 }
 
 IECore::ConstObjectPtr OptionInspector::value( const GafferScene::SceneAlgo::History *history ) const
@@ -199,7 +195,9 @@ IECore::ConstObjectPtr OptionInspector::value( const GafferScene::SceneAlgo::His
 	return nullptr;
 }
 
-IECore::ConstObjectPtr OptionInspector::fallbackValue( const GafferScene::SceneAlgo::History *history, std::string &description ) const
+IECore::ConstObjectPtr OptionInspector::fallbackValue(
+	const GafferScene::SceneAlgo::History *history, std::string &description
+) const
 {
 	if( const auto defaultValue = Gaffer::Metadata::value( g_optionPrefix + m_option.string(), g_defaultValue ) )
 	{
@@ -210,7 +208,9 @@ IECore::ConstObjectPtr OptionInspector::fallbackValue( const GafferScene::SceneA
 	return nullptr;
 }
 
-Gaffer::ValuePlugPtr OptionInspector::source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const
+Gaffer::ValuePlugPtr OptionInspector::source(
+	const GafferScene::SceneAlgo::History *history, std::string &editWarning
+) const
 {
 	auto sceneNode = runTimeCast<SceneNode>( history->scene->node() );
 	if( !sceneNode || history->scene != sceneNode->outPlug() )
@@ -224,10 +224,8 @@ Gaffer::ValuePlugPtr OptionInspector::source( const GafferScene::SceneAlgo::Hist
 	{
 		for( const auto &plug : NameValuePlug::Range( *options->optionsPlug() ) )
 		{
-			if(
-				plug->namePlug()->getValue() == m_option.string() &&
-				( !plug->enabledPlug() || plug->enabledPlug()->getValue() )
-			)
+			if( plug->namePlug()->getValue() == m_option.string() &&
+				( !plug->enabledPlug() || plug->enabledPlug()->getValue() ) )
 			{
 				return plug;
 			}
@@ -240,10 +238,8 @@ Gaffer::ValuePlugPtr OptionInspector::source( const GafferScene::SceneAlgo::Hist
 		{
 			if( tweak->namePlug()->getValue() == m_option.string() && tweak->enabledPlug()->getValue() )
 			{
-				if(
-					tweak->modePlug()->getValue() == TweakPlug::CreateIfMissing &&
-					globals->members().count( g_optionPrefix + m_option.string() )
-				)
+				if( tweak->modePlug()->getValue() == TweakPlug::CreateIfMissing &&
+					globals->members().count( g_optionPrefix + m_option.string() ) )
 				{
 					// This `CreateIfMissing` tweak has not modified the scene as the
 					// option already exists upstream.
@@ -258,18 +254,17 @@ Gaffer::ValuePlugPtr OptionInspector::source( const GafferScene::SceneAlgo::Hist
 	return nullptr;
 }
 
-Inspector::AcquireEditFunctionOrFailure OptionInspector::acquireEditFunction( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history ) const
+Inspector::AcquireEditFunctionOrFailure OptionInspector::acquireEditFunction(
+	Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history
+) const
 {
 	// If our history's context contains a non-empty `renderPass` variable,
 	// we'll want to make a specific edit for that render pass.
 	const std::string renderPass = history->context->get<std::string>( g_renderPassContextName, g_emptyString );
 	if( !renderPass.empty() )
 	{
-		const GraphComponent *readOnlyReason = EditScopeAlgo::renderPassOptionEditReadOnlyReason(
-			editScope,
-			renderPass,
-			m_option
-		);
+		const GraphComponent *readOnlyReason =
+			EditScopeAlgo::renderPassOptionEditReadOnlyReason( editScope, renderPass, m_option );
 
 		if( readOnlyReason )
 		{
@@ -277,32 +272,23 @@ Inspector::AcquireEditFunctionOrFailure OptionInspector::acquireEditFunction( Ga
 			// as we can't add an edit. Other cases where we already _have_
 			// an edit will have been found by `source()`.
 			return fmt::format(
-				"{} is locked.",
-				readOnlyReason->relativeName( readOnlyReason->ancestor<ScriptNode>() )
+				"{} is locked.", readOnlyReason->relativeName( readOnlyReason->ancestor<ScriptNode>() )
 			);
 		}
 		else
 		{
-			return [editScope = EditScopePtr( editScope ),
-					renderPass,
-					option = m_option,
+			return [editScope = EditScopePtr( editScope ), renderPass, option = m_option,
 					context = history->context]( bool createIfNecessary ) {
 				Context::Scope scope( context.get() );
 				return EditScopeAlgo::acquireRenderPassOptionEdit(
-					editScope.get(),
-					renderPass,
-					option,
-					createIfNecessary
+					editScope.get(), renderPass, option, createIfNecessary
 				);
 			};
 		}
 	}
 	else
 	{
-		const GraphComponent *readOnlyReason = EditScopeAlgo::optionEditReadOnlyReason(
-			editScope,
-			m_option
-		);
+		const GraphComponent *readOnlyReason = EditScopeAlgo::optionEditReadOnlyReason( editScope, m_option );
 
 		if( readOnlyReason )
 		{
@@ -310,21 +296,15 @@ Inspector::AcquireEditFunctionOrFailure OptionInspector::acquireEditFunction( Ga
 			// as we can't add an edit. Other cases where we already _have_
 			// an edit will have been found by `source()`.
 			return fmt::format(
-				"{} is locked.",
-				readOnlyReason->relativeName( readOnlyReason->ancestor<ScriptNode>() )
+				"{} is locked.", readOnlyReason->relativeName( readOnlyReason->ancestor<ScriptNode>() )
 			);
 		}
 		else
 		{
-			return [editScope = EditScopePtr( editScope ),
-					option = m_option,
+			return [editScope = EditScopePtr( editScope ), option = m_option,
 					context = history->context]( bool createIfNecessary ) {
 				Context::Scope scope( context.get() );
-				return EditScopeAlgo::acquireOptionEdit(
-					editScope.get(),
-					option,
-					createIfNecessary
-				);
+				return EditScopeAlgo::acquireOptionEdit( editScope.get(), option, createIfNecessary );
 			};
 		}
 	}

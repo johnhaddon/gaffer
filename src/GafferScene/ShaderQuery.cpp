@@ -59,9 +59,7 @@ const size_t g_valuePlugIndex = 1;
 /// \todo: Can the next function be move to somewhere to be shared with `AttributeQuery`?
 
 const Gaffer::ValuePlug *correspondingPlug(
-	const Gaffer::ValuePlug *parent,
-	const Gaffer::ValuePlug *child,
-	const Gaffer::ValuePlug *other
+	const Gaffer::ValuePlug *parent, const Gaffer::ValuePlug *child, const Gaffer::ValuePlug *other
 )
 {
 	boost::container::small_vector<const Gaffer::ValuePlug *, 4> path;
@@ -150,16 +148,18 @@ ShaderQuery::ShaderQuery( const std::string &name ) : Gaffer::ComputeNode( name 
 	/// numeric indices separately (see `keyedByIndex()` in `Serialisation.cpp`).
 	///
 	/// The same applies to OptionQuery, PrimitiveVariableQuery and ContextQuery.
-	addChild( new ArrayPlug( "queries", Plug::Direction::In, nullptr, 1, std::numeric_limits<size_t>::max(), Plug::Flags::Default, false ) );
-	addChild( new ArrayPlug( "out", Plug::Direction::Out, nullptr, 1, std::numeric_limits<size_t>::max(), Plug::Flags::Default, false ) );
+	addChild( new ArrayPlug(
+		"queries", Plug::Direction::In, nullptr, 1, std::numeric_limits<size_t>::max(), Plug::Flags::Default, false
+	) );
+	addChild( new ArrayPlug(
+		"out", Plug::Direction::Out, nullptr, 1, std::numeric_limits<size_t>::max(), Plug::Flags::Default, false
+	) );
 
 	AttributeQueryPtr attributeQuery = new AttributeQuery( "__attributeQuery" );
 	addChild( attributeQuery );
 
 	ObjectPlugPtr intermediateObjectPlug = new ObjectPlug(
-		"__intermediateObjectPlug",
-		Plug::In,
-		IECore::NullObject::defaultNullObject(),
+		"__intermediateObjectPlug", Plug::In, IECore::NullObject::defaultNullObject(),
 		Plug::Default & ~Plug::Serialisable
 	);
 	addChild( intermediateObjectPlug );
@@ -173,9 +173,7 @@ ShaderQuery::ShaderQuery( const std::string &name ) : Gaffer::ComputeNode( name 
 	intermediateObjectPlug->setInput( attributeQuery->valuePlug() );
 }
 
-ShaderQuery::~ShaderQuery()
-{
-}
+ShaderQuery::~ShaderQuery() {}
 
 ScenePlug *ShaderQuery::scenePlug()
 {
@@ -257,27 +255,15 @@ const ObjectPlug *ShaderQuery::intermediateObjectPlug() const
 	return getChild<ObjectPlug>( g_firstPlugIndex + 7 );
 }
 
-Gaffer::NameValuePlug *ShaderQuery::addQuery(
-	const Gaffer::ValuePlug *plug,
-	const std::string &parameter
-)
+Gaffer::NameValuePlug *ShaderQuery::addQuery( const Gaffer::ValuePlug *plug, const std::string &parameter )
 {
 	NameValuePlugPtr childQueryPlug = new NameValuePlug(
-		"",
-		plug->createCounterpart( "query0", Gaffer::Plug::Direction::In ),
-		"query0",
-		Gaffer::Plug::Flags::Default
+		"", plug->createCounterpart( "query0", Gaffer::Plug::Direction::In ), "query0", Gaffer::Plug::Flags::Default
 	);
 	childQueryPlug->namePlug()->setValue( parameter );
 
 	ValuePlugPtr newOutPlug = new ValuePlug( "out0", Gaffer::Plug::Direction::Out );
-	newOutPlug->addChild(
-		new BoolPlug(
-			"exists",
-			Gaffer::Plug::Direction::Out,
-			false
-		)
-	);
+	newOutPlug->addChild( new BoolPlug( "exists", Gaffer::Plug::Direction::Out, false ) );
 	newOutPlug->addChild( plug->createCounterpart( "value", Gaffer::Plug::Direction::Out ) );
 
 	outPlug()->addChild( newOutPlug );
@@ -299,9 +285,7 @@ void ShaderQuery::affects( const Gaffer::Plug *input, AffectedPlugsContainer &ou
 {
 	ComputeNode::affects( input, outputs );
 
-	if(
-		input == intermediateObjectPlug()
-	)
+	if( input == intermediateObjectPlug() )
 	{
 		addChildPlugsToAffectedOutputs( outPlug(), outputs );
 	}
@@ -324,13 +308,10 @@ void ShaderQuery::affects( const Gaffer::Plug *input, AffectedPlugsContainer &ou
 		}
 		else if( childQueryPlug->valuePlug() == input || childQueryPlug->valuePlug()->isAncestorOf( input ) )
 		{
-			outputs.push_back(
-				correspondingPlug(
-					static_cast<const ValuePlug *>( childQueryPlug->valuePlug<ValuePlug>() ),
-					runTimeCast<const ValuePlug>( input ),
-					vPlug
-				)
-			);
+			outputs.push_back( correspondingPlug(
+				static_cast<const ValuePlug *>( childQueryPlug->valuePlug<ValuePlug>() ),
+				runTimeCast<const ValuePlug>( input ), vPlug
+			) );
 		}
 	}
 }
@@ -351,8 +332,7 @@ void ShaderQuery::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *
 		}
 
 		else if(
-			oPlug->getChild( g_valuePlugIndex )->isAncestorOf( output ) ||
-			output == oPlug->getChild( g_valuePlugIndex )
+			oPlug->getChild( g_valuePlugIndex )->isAncestorOf( output ) || output == oPlug->getChild( g_valuePlugIndex )
 		)
 		{
 			const NameValuePlug *childQueryPlug = queryPlug( output );
@@ -360,8 +340,7 @@ void ShaderQuery::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *
 			intermediateObjectPlug()->hash( h );
 
 			correspondingPlug(
-				valuePlugFromQuery( childQueryPlug ),
-				output,
+				valuePlugFromQuery( childQueryPlug ), output,
 				static_cast<const ValuePlug *>( childQueryPlug->valuePlug() )
 			)
 				->hash( h );
@@ -390,8 +369,7 @@ void ShaderQuery::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 		}
 
 		else if(
-			oPlug->getChild( g_valuePlugIndex )->isAncestorOf( output ) ||
-			output == oPlug->getChild( g_valuePlugIndex )
+			oPlug->getChild( g_valuePlugIndex )->isAncestorOf( output ) || output == oPlug->getChild( g_valuePlugIndex )
 		)
 		{
 			const NameValuePlug *childQueryPlug = queryPlug( output );
@@ -412,11 +390,7 @@ void ShaderQuery::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 
 			output->setFrom(
 				static_cast<const Gaffer::ValuePlug *>(
-					correspondingPlug(
-						vPlug,
-						output,
-						static_cast<const ValuePlug *>( childQueryPlug->valuePlug() )
-					)
+					correspondingPlug( vPlug, output, static_cast<const ValuePlug *>( childQueryPlug->valuePlug() ) )
 				)
 			);
 

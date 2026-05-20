@@ -54,7 +54,7 @@ template<typename T>
 class GAFFER_API CompoundNumericPlug : public ValuePlug
 {
 
-	public:
+public:
 
 	using ValueType = T;
 	using ChildType = NumericPlug<typename T::BaseType>;
@@ -62,12 +62,9 @@ class GAFFER_API CompoundNumericPlug : public ValuePlug
 	GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( CompoundNumericPlug<T>, ValuePlug );
 
 	explicit CompoundNumericPlug(
-		const std::string &name = defaultName<CompoundNumericPlug>(),
-		Direction direction = In,
-		T defaultValue = T( 0 ),
+		const std::string &name = defaultName<CompoundNumericPlug>(), Direction direction = In, T defaultValue = T( 0 ),
 		T minValue = T( std::numeric_limits<typename T::BaseType>::lowest() ),
-		T maxValue = T( std::numeric_limits<typename T::BaseType>::max() ),
-		unsigned flags = Default,
+		T maxValue = T( std::numeric_limits<typename T::BaseType>::max() ), unsigned flags = Default,
 		IECore::GeometricData::Interpretation interpretation = IECore::GeometricData::None
 	);
 	~CompoundNumericPlug() override;
@@ -119,7 +116,7 @@ class GAFFER_API CompoundNumericPlug : public ValuePlug
 	void ungang();
 	//@}
 
-	private:
+private:
 
 	static const char **childNames();
 	const IECore::GeometricData::Interpretation m_interpretation;

@@ -48,8 +48,7 @@ GAFFER_NODE_DEFINE_TYPE( DeepSampleCounts );
 
 size_t DeepSampleCounts::g_firstPlugIndex = 0;
 
-DeepSampleCounts::DeepSampleCounts( const std::string &name )
-	: ImageProcessor( name )
+DeepSampleCounts::DeepSampleCounts( const std::string &name ) : ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -59,9 +58,7 @@ DeepSampleCounts::DeepSampleCounts( const std::string &name )
 	outPlug()->dataWindowPlug()->setInput( inPlug()->dataWindowPlug() );
 }
 
-DeepSampleCounts::~DeepSampleCounts()
-{
-}
+DeepSampleCounts::~DeepSampleCounts() {}
 
 void DeepSampleCounts::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const
 {
@@ -77,7 +74,9 @@ void DeepSampleCounts::affects( const Gaffer::Plug *input, AffectedPlugsContaine
 	}
 }
 
-void DeepSampleCounts::hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepSampleCounts::hashDeep(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashDeep( parent, context, h );
 }
@@ -87,17 +86,23 @@ bool DeepSampleCounts::computeDeep( const Gaffer::Context *context, const ImageP
 	return false;
 }
 
-void DeepSampleCounts::hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepSampleCounts::hashChannelNames(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashChannelNames( parent, context, h );
 }
 
-IECore::ConstStringVectorDataPtr DeepSampleCounts::computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr DeepSampleCounts::computeChannelNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	return new StringVectorData( std::vector<std::string>( 1, "R" ) );
 }
 
-void DeepSampleCounts::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepSampleCounts::hashChannelData(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashChannelData( parent, context, h );
 
@@ -108,7 +113,10 @@ void DeepSampleCounts::hashChannelData( const GafferImage::ImagePlug *parent, co
 	inPlug()->deepPlug()->hash( h );
 }
 
-IECore::ConstFloatVectorDataPtr DeepSampleCounts::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr DeepSampleCounts::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	ImagePlug::ChannelDataScope scope( context );
 	scope.remove( ImagePlug::tileOriginContextName );
@@ -136,12 +144,16 @@ IECore::ConstFloatVectorDataPtr DeepSampleCounts::computeChannelData( const std:
 	return resultData;
 }
 
-void DeepSampleCounts::hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepSampleCounts::hashSampleOffsets(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = ImagePlug::flatTileSampleOffsets()->Object::hash();
 }
 
-IECore::ConstIntVectorDataPtr DeepSampleCounts::computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstIntVectorDataPtr DeepSampleCounts::computeSampleOffsets(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	return ImagePlug::flatTileSampleOffsets();
 }

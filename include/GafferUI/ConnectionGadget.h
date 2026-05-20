@@ -64,7 +64,7 @@ IE_CORE_FORWARDDECLARE( ConnectionGadget )
 class GAFFERUI_API ConnectionGadget : public ConnectionCreator
 {
 
-	public:
+public:
 
 	~ConnectionGadget() override;
 
@@ -107,9 +107,11 @@ class GAFFERUI_API ConnectionGadget : public ConnectionCreator
 	/// Registers a function which will return a Nodule instance for destination plugs with
 	/// specific names on a specific type of node. Nodules registered in this way will take
 	/// precedence over those registered above.
-	static void registerConnectionGadget( const IECore::TypeId nodeType, const std::string &dstPlugPathRegex, ConnectionGadgetCreator creator );
+	static void registerConnectionGadget(
+		const IECore::TypeId nodeType, const std::string &dstPlugPathRegex, ConnectionGadgetCreator creator
+	);
 
-	protected:
+protected:
 
 	ConnectionGadget( GafferUI::NodulePtr srcNodule, GafferUI::NodulePtr dstNodule );
 
@@ -117,8 +119,14 @@ class GAFFERUI_API ConnectionGadget : public ConnectionCreator
 	template<class T>
 	struct ConnectionGadgetTypeDescription
 	{
-		ConnectionGadgetTypeDescription( IECore::TypeId dstPlugType ) { ConnectionGadget::registerConnectionGadget( dstPlugType, &creator ); };
-		static ConnectionGadgetPtr creator( NodulePtr srcNodule, NodulePtr dstNodule ) { return new T( srcNodule, dstNodule ); };
+		ConnectionGadgetTypeDescription( IECore::TypeId dstPlugType )
+		{
+			ConnectionGadget::registerConnectionGadget( dstPlugType, &creator );
+		};
+		static ConnectionGadgetPtr creator( NodulePtr srcNodule, NodulePtr dstNodule )
+		{
+			return new T( srcNodule, dstNodule );
+		};
 	};
 
 	/// May be overridden to update the UI state to reflect changes in the ContextTracker.
@@ -130,7 +138,7 @@ class GAFFERUI_API ConnectionGadget : public ConnectionCreator
 
 	bool m_active;
 
-	private:
+private:
 
 	NodulePtr m_srcNodule;
 	NodulePtr m_dstNodule;

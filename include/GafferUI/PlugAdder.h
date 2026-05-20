@@ -45,7 +45,7 @@ namespace GafferUI
 class GAFFERUI_API PlugAdder : public ConnectionCreator
 {
 
-	public:
+public:
 
 	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::PlugAdder, PlugAdderTypeId, ConnectionCreator );
 
@@ -60,14 +60,16 @@ class GAFFERUI_API PlugAdder : public ConnectionCreator
 	/// When emitted, shows a menu containing the specified plugs, and returns
 	/// the chosen plug. Implemented as a signal so the menu can be implemented
 	/// externally in Python code.
-	using PlugMenuSignal = Gaffer::Signals::Signal<Gaffer::Plug *( const std::string &title, const std::vector<Gaffer::Plug *> & )>;
+	using PlugMenuSignal =
+		Gaffer::Signals::Signal<Gaffer::Plug *( const std::string &title, const std::vector<Gaffer::Plug *> & )>;
 	static PlugMenuSignal &plugMenuSignal();
 
 	/// A simpler menu that just shows a list of strings.  Should the previous form be deprecated?
-	using MenuSignal = Gaffer::Signals::Signal<std::string( const std::string &title, const std::vector<std::string> & )>;
+	using MenuSignal =
+		Gaffer::Signals::Signal<std::string( const std::string &title, const std::vector<std::string> & )>;
 	static MenuSignal &menuSignal();
 
-	protected:
+protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
 	unsigned layerMask() const override;
@@ -75,7 +77,7 @@ class GAFFERUI_API PlugAdder : public ConnectionCreator
 
 	void applyEdgeMetadata( Gaffer::Plug *plug, bool opposite = false ) const;
 
-	private:
+private:
 
 	bool couldCreateConnection() const;
 

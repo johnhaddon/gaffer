@@ -53,17 +53,16 @@ GAFFER_NODE_DEFINE_TYPE( MergeCurves );
 
 size_t MergeCurves::g_firstPlugIndex = 0;
 
-MergeCurves::MergeCurves( const std::string &name )
-	: MergeObjects( name, "/mergedCurves" )
+MergeCurves::MergeCurves( const std::string &name ) : MergeObjects( name, "/mergedCurves" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 }
 
-MergeCurves::~MergeCurves()
-{
-}
+MergeCurves::~MergeCurves() {}
 
-IECore::ConstObjectPtr MergeCurves::computeMergedObject( const std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f>> &sources, const Gaffer::Context *context ) const
+IECore::ConstObjectPtr MergeCurves::computeMergedObject(
+	const std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f>> &sources, const Gaffer::Context *context
+) const
 {
 	std::vector<std::pair<const IECoreScene::Primitive *, Imath::M44f>> curves;
 

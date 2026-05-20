@@ -50,17 +50,15 @@ struct RawConstructorDispatcher
 
 	using ResultType = typename boost::binary_traits<F>::result_type;
 
-	RawConstructorDispatcher( F f )
-		: m_f( f )
-	{
-	}
+	RawConstructorDispatcher( F f ) : m_f( f ) {}
 
 	PyObject *operator () ( PyObject *args, PyObject *keywords )
 	{
 		ResultType t = m_f(
 
 			boost::python::tuple( boost::python::detail::borrowed_reference( args ) ),
-			keywords ? boost::python::dict( boost::python::detail::borrowed_reference( keywords ) ) : boost::python::dict()
+			keywords ? boost::python::dict( boost::python::detail::borrowed_reference( keywords ) ) :
+					   boost::python::dict()
 
 		);
 
@@ -70,7 +68,7 @@ struct RawConstructorDispatcher
 		return boost::python::detail::none();
 	}
 
-	private:
+private:
 
 	F m_f;
 };
@@ -87,9 +85,7 @@ boost::python::object rawConstructor( F f )
 
 		boost::python::objects::py_function(
 
-			Detail::RawConstructorDispatcher<F>( f ),
-			boost::mpl::vector1<PyObject *>(),
-			1,
+			Detail::RawConstructorDispatcher<F>( f ), boost::mpl::vector1<PyObject *>(), 1,
 			( std::numeric_limits<unsigned>::max )()
 
 		),

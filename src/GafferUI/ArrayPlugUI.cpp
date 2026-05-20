@@ -54,14 +54,11 @@ namespace
 class ArrayPlugAdder : public PlugAdder
 {
 
-	public:
+public:
 
-	ArrayPlugAdder( ArrayPlugPtr plug )
-		: m_plug( plug )
-	{
-	}
+	ArrayPlugAdder( ArrayPlugPtr plug ) : m_plug( plug ) {}
 
-	protected:
+protected:
 
 	bool canCreateConnection( const Plug *endpoint ) const override
 	{
@@ -106,7 +103,7 @@ class ArrayPlugAdder : public PlugAdder
 		}
 	}
 
-	private:
+private:
 
 	ArrayPlugPtr m_plug;
 };
@@ -133,7 +130,7 @@ struct Registration
 		);
 	}
 
-	private:
+private:
 
 	static GadgetPtr create( GraphComponentPtr parent )
 	{

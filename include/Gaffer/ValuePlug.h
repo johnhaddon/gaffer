@@ -54,10 +54,12 @@ IE_CORE_FORWARDDECLARE( DependencyNode )
 class GAFFER_API ValuePlug : public Plug
 {
 
-	public:
+public:
 
 	/// Constructs a ValuePlug which can be used as a parent for other ValuePlugs.
-	explicit ValuePlug( const std::string &name = defaultName<ValuePlug>(), Direction direction = In, unsigned flags = Default );
+	explicit ValuePlug(
+		const std::string &name = defaultName<ValuePlug>(), Direction direction = In, unsigned flags = Default
+	);
 	~ValuePlug() override;
 
 	GAFFER_PLUG_DECLARE_TYPE( Gaffer::ValuePlug, ValuePlugTypeId, Plug );
@@ -190,17 +192,14 @@ class GAFFER_API ValuePlug : public Plug
 	/// as part of a "poor man's hash" where computing the full upstream
 	/// hash might be prohibitively expensive
 	/// (see `Encapsulate::hashObject()` for example).
-	uint64_t dirtyCount() const
-	{
-		return m_dirtyCount;
-	}
+	uint64_t dirtyCount() const { return m_dirtyCount; }
 
 	/// Process type tags.  In the future, it might make more sense to
 	/// use an id registry here, rather than strings.
 	static const IECore::InternedString &hashProcessType();
 	static const IECore::InternedString &computeProcessType();
 
-	protected:
+protected:
 
 	/// This constructor must be used by all derived classes which wish
 	/// to store their own values - without calling it defaultObjectValue()
@@ -248,13 +247,15 @@ class GAFFER_API ValuePlug : public Plug
 	/// Reimplemented for cache management.
 	void dirty() override;
 
-	private:
+private:
 
 	class HashProcess;
 	class ComputeProcess;
 	class SetValueAction;
 
-	const IECore::Object *getValueInternal( IECore::ConstObjectPtr &owner, const IECore::MurmurHash *precomputedHash = nullptr ) const;
+	const IECore::Object *getValueInternal(
+		IECore::ConstObjectPtr &owner, const IECore::MurmurHash *precomputedHash = nullptr
+	) const;
 	void setValueInternal( IECore::ConstObjectPtr value, bool propagateDirtiness );
 	void childAddedOrRemoved();
 	// Emits the appropriate Node::plugSetSignal() for this plug and all its

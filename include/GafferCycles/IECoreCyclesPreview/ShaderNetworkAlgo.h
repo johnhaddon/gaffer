@@ -59,14 +59,14 @@ IECORECYCLES_API ccl::ShaderOutput *output( ccl::ShaderNode *node, IECore::Inter
 
 
 IECORECYCLES_API std::unique_ptr<ccl::ShaderGraph> convertGraph(
-	const IECoreScene::ShaderNetwork *surfaceShader,
-	const IECoreScene::ShaderNetwork *displacementShader,
-	const IECoreScene::ShaderNetwork *volumeShader,
-	ccl::Scene *scene,
-	const std::string &namePrefix = ""
+	const IECoreScene::ShaderNetwork *surfaceShader, const IECoreScene::ShaderNetwork *displacementShader,
+	const IECoreScene::ShaderNetwork *volumeShader, ccl::Scene *scene, const std::string &namePrefix = ""
 );
 
-IECORECYCLES_API void convertAOV( const IECoreScene::ShaderNetwork *shaderNetwork, ccl::ShaderGraph *graph, ccl::Scene *scene, const std::string &namePrefix = "" );
+IECORECYCLES_API void convertAOV(
+	const IECoreScene::ShaderNetwork *shaderNetwork, ccl::ShaderGraph *graph, ccl::Scene *scene,
+	const std::string &namePrefix = ""
+);
 IECORECYCLES_API void setSingleSided( ccl::ShaderGraph *graph );
 IECORECYCLES_API bool hasOSL( const ccl::Shader *cshader );
 

@@ -176,46 +176,52 @@ void GafferUIModule::bindGadget()
 {
 	using Wrapper = GadgetWrapper<Gadget>;
 
-	scope s = GadgetClass<Gadget, Wrapper>()
-				  .def( init<>() )
-				  .def( init<const std::string &>() )
-				  .def( "setStyle", &Gadget::setStyle )
-				  .def( "getStyle", &getStyle )
-				  .def( "style", &style )
-				  .def( "setVisible", &setVisible )
-				  .def( "getVisible", &Gadget::getVisible )
-				  .def( "visible", &Gadget::visible, ( arg_( "relativeTo" ) = object() ) )
-				  .def( "visibilityChangedSignal", &Gadget::visibilityChangedSignal, return_internal_reference<1>() )
-				  .def( "setEnabled", &setEnabled )
-				  .def( "getEnabled", &Gadget::getEnabled )
-				  .def( "enabled", &Gadget::enabled, ( arg_( "relativeTo" ) = object() ) )
-				  .def( "getHighlighted", &Gadget::getHighlighted )
-				  .def( "getTransform", &Gadget::getTransform, return_value_policy<copy_const_reference>() )
-				  .def( "setTransform", &Gadget::setTransform )
-				  .def( "fullTransform", &Gadget::fullTransform, fullTransformOverloads() )
-				  .def( "transformedBound", ( Imath::Box3f ( Gadget::* )() const ) & Gadget::transformedBound )
-				  .def( "transformedBound", ( Imath::Box3f ( Gadget::* )( const Gadget * ) const ) & Gadget::transformedBound )
-				  .def( "setToolTip", &Gadget::setToolTip )
-				  .def( "buttonPressSignal", &Gadget::buttonPressSignal, return_internal_reference<1>() )
-				  .def( "buttonReleaseSignal", &Gadget::buttonReleaseSignal, return_internal_reference<1>() )
-				  .def( "buttonDoubleClickSignal", &Gadget::buttonDoubleClickSignal, return_internal_reference<1>() )
-				  .def( "wheelSignal", &Gadget::wheelSignal, return_internal_reference<1>() )
-				  .def( "enterSignal", &Gadget::enterSignal, return_internal_reference<1>() )
-				  .def( "leaveSignal", &Gadget::leaveSignal, return_internal_reference<1>() )
-				  .def( "mouseMoveSignal", &Gadget::mouseMoveSignal, return_internal_reference<1>() )
-				  .def( "dragBeginSignal", &Gadget::dragBeginSignal, return_internal_reference<1>() )
-				  .def( "dragMoveSignal", &Gadget::dragMoveSignal, return_internal_reference<1>() )
-				  .def( "dragEnterSignal", &Gadget::dragEnterSignal, return_internal_reference<1>() )
-				  .def( "dragLeaveSignal", &Gadget::dragLeaveSignal, return_internal_reference<1>() )
-				  .def( "dropSignal", &Gadget::dropSignal, return_internal_reference<1>() )
-				  .def( "dragEndSignal", &Gadget::dragEndSignal, return_internal_reference<1>() )
-				  .def( "keyPressSignal", &Gadget::keyPressSignal, return_internal_reference<1>() )
-				  .def( "keyReleaseSignal", &Gadget::keyReleaseSignal, return_internal_reference<1>() )
-				  .def( "idleSignal", &Gadget::idleSignal, return_value_policy<reference_existing_object>() )
-				  .staticmethod( "idleSignal" )
-				  .def( "_idleSignalAccessedSignal", &Gadget::idleSignalAccessedSignal, return_value_policy<reference_existing_object>() )
-				  .staticmethod( "_idleSignalAccessedSignal" )
-				  .def( "_dirty", &Gadget::dirty );
+	scope s =
+		GadgetClass<Gadget, Wrapper>()
+			.def( init<>() )
+			.def( init<const std::string &>() )
+			.def( "setStyle", &Gadget::setStyle )
+			.def( "getStyle", &getStyle )
+			.def( "style", &style )
+			.def( "setVisible", &setVisible )
+			.def( "getVisible", &Gadget::getVisible )
+			.def( "visible", &Gadget::visible, ( arg_( "relativeTo" ) = object() ) )
+			.def( "visibilityChangedSignal", &Gadget::visibilityChangedSignal, return_internal_reference<1>() )
+			.def( "setEnabled", &setEnabled )
+			.def( "getEnabled", &Gadget::getEnabled )
+			.def( "enabled", &Gadget::enabled, ( arg_( "relativeTo" ) = object() ) )
+			.def( "getHighlighted", &Gadget::getHighlighted )
+			.def( "getTransform", &Gadget::getTransform, return_value_policy<copy_const_reference>() )
+			.def( "setTransform", &Gadget::setTransform )
+			.def( "fullTransform", &Gadget::fullTransform, fullTransformOverloads() )
+			.def( "transformedBound", ( Imath::Box3f ( Gadget::* )() const ) & Gadget::transformedBound )
+			.def(
+				"transformedBound", ( Imath::Box3f ( Gadget::* )( const Gadget * ) const ) & Gadget::transformedBound
+			)
+			.def( "setToolTip", &Gadget::setToolTip )
+			.def( "buttonPressSignal", &Gadget::buttonPressSignal, return_internal_reference<1>() )
+			.def( "buttonReleaseSignal", &Gadget::buttonReleaseSignal, return_internal_reference<1>() )
+			.def( "buttonDoubleClickSignal", &Gadget::buttonDoubleClickSignal, return_internal_reference<1>() )
+			.def( "wheelSignal", &Gadget::wheelSignal, return_internal_reference<1>() )
+			.def( "enterSignal", &Gadget::enterSignal, return_internal_reference<1>() )
+			.def( "leaveSignal", &Gadget::leaveSignal, return_internal_reference<1>() )
+			.def( "mouseMoveSignal", &Gadget::mouseMoveSignal, return_internal_reference<1>() )
+			.def( "dragBeginSignal", &Gadget::dragBeginSignal, return_internal_reference<1>() )
+			.def( "dragMoveSignal", &Gadget::dragMoveSignal, return_internal_reference<1>() )
+			.def( "dragEnterSignal", &Gadget::dragEnterSignal, return_internal_reference<1>() )
+			.def( "dragLeaveSignal", &Gadget::dragLeaveSignal, return_internal_reference<1>() )
+			.def( "dropSignal", &Gadget::dropSignal, return_internal_reference<1>() )
+			.def( "dragEndSignal", &Gadget::dragEndSignal, return_internal_reference<1>() )
+			.def( "keyPressSignal", &Gadget::keyPressSignal, return_internal_reference<1>() )
+			.def( "keyReleaseSignal", &Gadget::keyReleaseSignal, return_internal_reference<1>() )
+			.def( "idleSignal", &Gadget::idleSignal, return_value_policy<reference_existing_object>() )
+			.staticmethod( "idleSignal" )
+			.def(
+				"_idleSignalAccessedSignal", &Gadget::idleSignalAccessedSignal,
+				return_value_policy<reference_existing_object>()
+			)
+			.staticmethod( "_idleSignalAccessedSignal" )
+			.def( "_dirty", &Gadget::dirty );
 
 	enum_<Gadget::Layer>( "Layer" )
 		.value( "Back", Gadget::Layer::Back )
@@ -235,11 +241,19 @@ void GafferUIModule::bindGadget()
 		.value( "Select", Gadget::RenderReason::Select )
 		.value( "DragSelect", Gadget::RenderReason::DragSelect );
 
-	SignalClass<Gadget::VisibilityChangedSignal, DefaultSignalCaller<Gadget::VisibilityChangedSignal>, VisibilityChangedSlotCaller>( "VisibilityChangedSignal" );
+	SignalClass<
+		Gadget::VisibilityChangedSignal, DefaultSignalCaller<Gadget::VisibilityChangedSignal>,
+		VisibilityChangedSlotCaller>( "VisibilityChangedSignal" );
 	SignalClass<Gadget::ButtonSignal, DefaultSignalCaller<Gadget::ButtonSignal>, ButtonSlotCaller>( "ButtonSignal" );
 	SignalClass<Gadget::KeySignal, DefaultSignalCaller<Gadget::KeySignal>, KeySlotCaller>( "KeySignal" );
-	SignalClass<Gadget::DragBeginSignal, DefaultSignalCaller<Gadget::DragBeginSignal>, DragBeginSlotCaller>( "DragBeginSignal" );
-	SignalClass<Gadget::DragDropSignal, DefaultSignalCaller<Gadget::DragDropSignal>, DragDropSlotCaller>( "DragDropSignal" );
-	SignalClass<Gadget::EnterLeaveSignal, DefaultSignalCaller<Gadget::EnterLeaveSignal>, EnterLeaveSlotCaller>( "EnterLeaveSignal" );
+	SignalClass<Gadget::DragBeginSignal, DefaultSignalCaller<Gadget::DragBeginSignal>, DragBeginSlotCaller>(
+		"DragBeginSignal"
+	);
+	SignalClass<Gadget::DragDropSignal, DefaultSignalCaller<Gadget::DragDropSignal>, DragDropSlotCaller>(
+		"DragDropSignal"
+	);
+	SignalClass<Gadget::EnterLeaveSignal, DefaultSignalCaller<Gadget::EnterLeaveSignal>, EnterLeaveSlotCaller>(
+		"EnterLeaveSignal"
+	);
 	SignalClass<Gadget::IdleSignal>( "IdleSignal" );
 }

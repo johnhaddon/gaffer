@@ -56,9 +56,7 @@ DataWindowQuery::DataWindowQuery( const std::string &name ) : ComputeNode( name 
 	addChild( new V2iPlug( "size", Plug::Direction::Out ) );
 }
 
-DataWindowQuery::~DataWindowQuery()
-{
-}
+DataWindowQuery::~DataWindowQuery() {}
 
 ImagePlug *DataWindowQuery::inPlug()
 {
@@ -113,11 +111,7 @@ const V2iPlug *DataWindowQuery::sizePlug() const
 void DataWindowQuery::affects( const Plug *input, AffectedPlugsContainer &outputs ) const
 {
 	ComputeNode::affects( input, outputs );
-	if(
-		input == viewPlug() ||
-		input == inPlug()->viewNamesPlug() ||
-		input == inPlug()->dataWindowPlug()
-	)
+	if( input == viewPlug() || input == inPlug()->viewNamesPlug() || input == inPlug()->dataWindowPlug() )
 	{
 		for( int i = 0; i < 2; ++i )
 		{
@@ -161,20 +155,28 @@ void DataWindowQuery::compute( ValuePlug *output, const Context *context ) const
 
 	if( parent == dataWindowPlug()->minPlug() )
 	{
-		static_cast<IntPlug *>( output )->setValue( output == parent->getChild( 0 ) ? dataWindow.min[0] : dataWindow.min[1] );
+		static_cast<IntPlug *>( output )->setValue(
+			output == parent->getChild( 0 ) ? dataWindow.min[0] : dataWindow.min[1]
+		);
 	}
 	else if( parent == dataWindowPlug()->maxPlug() )
 	{
-		static_cast<IntPlug *>( output )->setValue( output == parent->getChild( 0 ) ? dataWindow.max[0] : dataWindow.max[1] );
+		static_cast<IntPlug *>( output )->setValue(
+			output == parent->getChild( 0 ) ? dataWindow.max[0] : dataWindow.max[1]
+		);
 	}
 	else if( parent == centerPlug() )
 	{
 		Box2f floatWindow( dataWindow.min, dataWindow.max );
-		static_cast<FloatPlug *>( output )->setValue( output == parent->getChild( 0 ) ? floatWindow.center()[0] : floatWindow.center()[1] );
+		static_cast<FloatPlug *>( output )->setValue(
+			output == parent->getChild( 0 ) ? floatWindow.center()[0] : floatWindow.center()[1]
+		);
 	}
 	else if( parent == sizePlug() )
 	{
-		static_cast<IntPlug *>( output )->setValue( output == parent->getChild( 0 ) ? dataWindow.size()[0] : dataWindow.size()[1] );
+		static_cast<IntPlug *>( output )->setValue(
+			output == parent->getChild( 0 ) ? dataWindow.size()[0] : dataWindow.size()[1]
+		);
 	}
 	else
 	{

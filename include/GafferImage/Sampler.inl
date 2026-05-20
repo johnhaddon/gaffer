@@ -83,20 +83,15 @@ inline float Sampler::sample( float x, float y )
 	float yf = OIIO::floorfrac( y - 0.5, &yi );
 
 	constexpr int tileLowMask = ImagePlug::tileSize() - 1;
-	if(
-		( xi & tileLowMask ) != tileLowMask &&
-		( yi & tileLowMask ) != tileLowMask &&
-		xi >= m_dataWindow.min.x && xi < m_dataWindow.max.x - 1 &&
-		yi >= m_dataWindow.min.y && yi < m_dataWindow.max.y - 1
-	)
+	if( ( xi & tileLowMask ) != tileLowMask && ( yi & tileLowMask ) != tileLowMask && xi >= m_dataWindow.min.x &&
+		xi < m_dataWindow.max.x - 1 && yi >= m_dataWindow.min.y && yi < m_dataWindow.max.y - 1 )
 	{
 		const float *tileData;
 		int tilePixelIndex;
 		cachedData( Imath::V2i( xi, yi ), tileData, tilePixelIndex );
 		return OIIO::bilerp(
-			tileData[tilePixelIndex], tileData[tilePixelIndex + 1],
-			tileData[tilePixelIndex + ImagePlug::tileSize()], tileData[tilePixelIndex + ImagePlug::tileSize() + 1],
-			xf, yf
+			tileData[tilePixelIndex], tileData[tilePixelIndex + 1], tileData[tilePixelIndex + ImagePlug::tileSize()],
+			tileData[tilePixelIndex + ImagePlug::tileSize() + 1], xf, yf
 		);
 	}
 	// Note that if we care about performance in the case of accessing outside the data window, we
@@ -304,7 +299,8 @@ inline void Sampler::cachedData( Imath::V2i p, const float *&tileData, int &tile
 	// Get the smart pointer to the tile we want.
 
 	constexpr int lowMask = ( 1 << ImagePlug::tileSizeLog2() ) - 1;
-	int cacheIndex = ( p.x >> ImagePlug::tileSizeLog2() ) + m_cacheWidth * ( p.y >> ImagePlug::tileSizeLog2() ) - m_cacheOriginIndex;
+	int cacheIndex =
+		( p.x >> ImagePlug::tileSizeLog2() ) + m_cacheWidth * ( p.y >> ImagePlug::tileSizeLog2() ) - m_cacheOriginIndex;
 
 	tilePixelIndex = ( p.x & lowMask ) + ( ( p.y & lowMask ) << ImagePlug::tileSizeLog2() );
 

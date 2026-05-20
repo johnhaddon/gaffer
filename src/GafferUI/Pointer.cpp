@@ -81,7 +81,8 @@ Registry &registry()
 } // namespace
 
 Pointer::Pointer( const std::string &fileName, const Imath::V2i &hotspot )
-	: m_fileName( fileName ), m_hotspot( hotspot )
+	: m_fileName( fileName ),
+	  m_hotspot( hotspot )
 {
 }
 
@@ -101,11 +102,8 @@ void Pointer::setCurrent( ConstPointerPtr pointer )
 	{
 		return;
 	}
-	if(
-		pointer && g_current &&
-		pointer->fileName() == g_current->fileName() &&
-		pointer->hotspot() == g_current->hotspot()
-	)
+	if( pointer && g_current && pointer->fileName() == g_current->fileName() &&
+		pointer->hotspot() == g_current->hotspot() )
 	{
 		return;
 	}

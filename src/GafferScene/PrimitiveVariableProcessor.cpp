@@ -50,7 +50,9 @@ GAFFER_NODE_DEFINE_TYPE( PrimitiveVariableProcessor );
 
 size_t PrimitiveVariableProcessor::g_firstPlugIndex = 0;
 
-PrimitiveVariableProcessor::PrimitiveVariableProcessor( const std::string &name, IECore::PathMatcher::Result filterDefault )
+PrimitiveVariableProcessor::PrimitiveVariableProcessor(
+	const std::string &name, IECore::PathMatcher::Result filterDefault
+)
 	: SceneElementProcessor( name, filterDefault )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
@@ -63,9 +65,7 @@ PrimitiveVariableProcessor::PrimitiveVariableProcessor( const std::string &name,
 	outPlug()->boundPlug()->setInput( inPlug()->boundPlug() );
 }
 
-PrimitiveVariableProcessor::~PrimitiveVariableProcessor()
-{
-}
+PrimitiveVariableProcessor::~PrimitiveVariableProcessor() {}
 
 Gaffer::StringPlug *PrimitiveVariableProcessor::namesPlug()
 {
@@ -114,13 +114,17 @@ bool PrimitiveVariableProcessor::processesObject() const
 	}
 }
 
-void PrimitiveVariableProcessor::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void PrimitiveVariableProcessor::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	namesPlug()->hash( h );
 	invertNamesPlug()->hash( h );
 }
 
-IECore::ConstObjectPtr PrimitiveVariableProcessor::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::ConstObjectPtr inputObject ) const
+IECore::ConstObjectPtr PrimitiveVariableProcessor::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::ConstObjectPtr inputObject
+) const
 {
 	ConstPrimitivePtr inputGeometry = runTimeCast<const Primitive>( inputObject );
 	if( !inputGeometry )
@@ -133,7 +137,8 @@ IECore::ConstObjectPtr PrimitiveVariableProcessor::computeProcessedObject( const
 	bool invert = invertNamesPlug()->getValue();
 	IECoreScene::PrimitivePtr result = inputGeometry->copy();
 	IECoreScene::PrimitiveVariableMap::iterator next;
-	for( IECoreScene::PrimitiveVariableMap::iterator it = result->variables.begin(); it != result->variables.end(); it = next )
+	for( IECoreScene::PrimitiveVariableMap::iterator it = result->variables.begin(); it != result->variables.end();
+		 it = next )
 	{
 		next = it;
 		next++;

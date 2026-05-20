@@ -49,8 +49,7 @@ GAFFER_NODE_DEFINE_TYPE( CurveSampler );
 
 size_t CurveSampler::g_firstPlugIndex = 0;
 
-CurveSampler::CurveSampler( const std::string &name )
-	: PrimitiveSampler( name )
+CurveSampler::CurveSampler( const std::string &name ) : PrimitiveSampler( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -58,9 +57,7 @@ CurveSampler::CurveSampler( const std::string &name )
 	addChild( new StringPlug( "v", Plug::In, "" ) );
 }
 
-CurveSampler::~CurveSampler()
-{
-}
+CurveSampler::~CurveSampler() {}
 
 Gaffer::StringPlug *CurveSampler::curveIndexPlug()
 {
@@ -84,9 +81,7 @@ const Gaffer::StringPlug *CurveSampler::vPlug() const
 
 bool CurveSampler::affectsSamplingFunction( const Gaffer::Plug *input ) const
 {
-	return PrimitiveSampler::affectsSamplingFunction( input ) ||
-		input == curveIndexPlug() ||
-		input == vPlug();
+	return PrimitiveSampler::affectsSamplingFunction( input ) || input == curveIndexPlug() || input == vPlug();
 }
 
 void CurveSampler::hashSamplingFunction( IECore::MurmurHash &h ) const
@@ -96,7 +91,9 @@ void CurveSampler::hashSamplingFunction( IECore::MurmurHash &h ) const
 	vPlug()->hash( h );
 }
 
-PrimitiveSampler::SamplingFunction CurveSampler::computeSamplingFunction( const IECoreScene::Primitive *destinationPrimitive, IECoreScene::PrimitiveVariable::Interpolation &interpolation ) const
+PrimitiveSampler::SamplingFunction CurveSampler::computeSamplingFunction(
+	const IECoreScene::Primitive *destinationPrimitive, IECoreScene::PrimitiveVariable::Interpolation &interpolation
+) const
 {
 	const std::string curveIndex = curveIndexPlug()->getValue();
 	const std::string v = vPlug()->getValue();
@@ -127,7 +124,9 @@ PrimitiveSampler::SamplingFunction CurveSampler::computeSamplingFunction( const 
 		{
 			if( interpolation != it->second.interpolation )
 			{
-				throw IECore::Exception( "Primitive variables \"" + curveIndex + "\" and \"" + v + "\" have different interpolation" );
+				throw IECore::Exception(
+					"Primitive variables \"" + curveIndex + "\" and \"" + v + "\" have different interpolation"
+				);
 			}
 		}
 		else
@@ -136,17 +135,18 @@ PrimitiveSampler::SamplingFunction CurveSampler::computeSamplingFunction( const 
 		}
 	}
 
-	return [curveIndexView, vView]( const PrimitiveEvaluator &evaluator, size_t index, const M44f &transform, PrimitiveEvaluator::Result &result ) {
-		auto curvesEvaluator = runTimeCast<const CurvesPrimitiveEvaluator>( &evaluator );
-		if( !curvesEvaluator )
-		{
-			return false;
-		}
+	return
+		[curveIndexView, vView](
+			const PrimitiveEvaluator &evaluator, size_t index, const M44f &transform, PrimitiveEvaluator::Result &result
+		) {
+			auto curvesEvaluator = runTimeCast<const CurvesPrimitiveEvaluator>( &evaluator );
+			if( !curvesEvaluator )
+			{
+				return false;
+			}
 
-		return curvesEvaluator->pointAtV(
-			curveIndexView ? ( *curveIndexView )[index] : 0,
-			vView ? ( *vView )[index] : 0.0f,
-			&result
-		);
-	};
+			return curvesEvaluator->pointAtV(
+				curveIndexView ? ( *curveIndexView )[index] : 0, vView ? ( *vView )[index] : 0.0f, &result
+			);
+		};
 }

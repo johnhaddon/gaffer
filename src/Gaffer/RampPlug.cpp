@@ -47,9 +47,13 @@ const IECore::RunTimeTyped::TypeDescription<RampPlug<T>> RampPlug<T>::g_typeDesc
 
 template<typename T>
 RampPlug<T>::RampPlug( const std::string &name, Direction direction, const ValueType &defaultValue, unsigned flags )
-	: ValuePlug( name, direction, flags ), m_defaultValue( defaultValue )
+	: ValuePlug( name, direction, flags ),
+	  m_defaultValue( defaultValue )
 {
-	addChild( new IntPlug( "interpolation", direction, (int)IECore::RampInterpolation::CatmullRom, (int)IECore::RampInterpolation::Linear, (int)IECore::RampInterpolation::Constant ) );
+	addChild( new IntPlug(
+		"interpolation", direction, (int)IECore::RampInterpolation::CatmullRom, (int)IECore::RampInterpolation::Linear,
+		(int)IECore::RampInterpolation::Constant
+	) );
 
 	setToDefault();
 }
@@ -134,13 +138,8 @@ void RampPlug<T>::resetDefault()
 	const T newDefault = getValue();
 	const T oldDefault = m_defaultValue;
 	Action::enact(
-		this,
-		[this, newDefault]() {
-			this->m_defaultValue = newDefault;
-		},
-		[this, oldDefault]() {
-			this->m_defaultValue = oldDefault;
-		}
+		this, [this, newDefault]() { this->m_defaultValue = newDefault; },
+		[this, oldDefault]() { this->m_defaultValue = oldDefault; }
 	);
 }
 

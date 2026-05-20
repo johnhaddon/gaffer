@@ -73,9 +73,7 @@ FreezeTransform::FreezeTransform( const std::string &name )
 	outPlug()->setPlug()->setInput( inPlug()->setPlug() );
 }
 
-FreezeTransform::~FreezeTransform()
-{
-}
+FreezeTransform::~FreezeTransform() {}
 
 Gaffer::M44fPlug *FreezeTransform::transformPlug()
 {
@@ -101,51 +99,36 @@ void FreezeTransform::affects( const Gaffer::Plug *input, AffectedPlugsContainer
 {
 	FilteredSceneProcessor::affects( input, outputs );
 
-	if(
-		input == inPlug()->transformPlug() ||
-		input == outPlug()->transformPlug()
-	)
+	if( input == inPlug()->transformPlug() || input == outPlug()->transformPlug() )
 	{
 		outputs.push_back( transformPlug() );
 	}
 
-	if(
-		input == filterPlug() ||
-		input == outPlug()->childBoundsPlug() ||
-		input == inPlug()->boundPlug() ||
-		input == transformPlug()
-	)
+	if( input == filterPlug() || input == outPlug()->childBoundsPlug() || input == inPlug()->boundPlug() ||
+		input == transformPlug() )
 	{
 		outputs.push_back( outPlug()->boundPlug() );
 	}
 
-	if(
-		input == filterPlug() ||
-		input == inPlug()->transformPlug()
-	)
+	if( input == filterPlug() || input == inPlug()->transformPlug() )
 	{
 		outputs.push_back( outPlug()->transformPlug() );
 	}
 
-	if(
-		input == inPlug()->objectPlug() ||
-		input == transformPlug()
-	)
+	if( input == inPlug()->objectPlug() || input == transformPlug() )
 	{
 		outputs.push_back( processedObjectPlug() );
 	}
 
-	if(
-		input == filterPlug() ||
-		input == inPlug()->objectPlug() ||
-		input == processedObjectPlug()
-	)
+	if( input == filterPlug() || input == inPlug()->objectPlug() || input == processedObjectPlug() )
 	{
 		outputs.push_back( outPlug()->objectPlug() );
 	}
 }
 
-void FreezeTransform::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void FreezeTransform::hash(
+	const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FilteredSceneProcessor::hash( output, context, h );
 
@@ -211,7 +194,9 @@ Gaffer::ValuePlug::CachePolicy FreezeTransform::computeCachePolicy( const Gaffer
 	}
 }
 
-void FreezeTransform::hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void FreezeTransform::hashBound(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	const unsigned m = filterValue( context );
 	if( m & ( IECore::PathMatcher::AncestorMatch | IECore::PathMatcher::ExactMatch ) )
@@ -237,7 +222,9 @@ void FreezeTransform::hashBound( const ScenePath &path, const Gaffer::Context *c
 	}
 }
 
-Imath::Box3f FreezeTransform::computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::Box3f FreezeTransform::computeBound(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	const unsigned m = filterValue( context );
 	if( m & ( IECore::PathMatcher::AncestorMatch | IECore::PathMatcher::ExactMatch ) )
@@ -254,7 +241,9 @@ Imath::Box3f FreezeTransform::computeBound( const ScenePath &path, const Gaffer:
 	}
 }
 
-void FreezeTransform::hashTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void FreezeTransform::hashTransform(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	const unsigned m = filterValue( context );
 	if( m & IECore::PathMatcher::ExactMatch )
@@ -267,7 +256,9 @@ void FreezeTransform::hashTransform( const ScenePath &path, const Gaffer::Contex
 	}
 }
 
-Imath::M44f FreezeTransform::computeTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::M44f FreezeTransform::computeTransform(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	const unsigned m = filterValue( context );
 	if( m & IECore::PathMatcher::ExactMatch )
@@ -280,7 +271,9 @@ Imath::M44f FreezeTransform::computeTransform( const ScenePath &path, const Gaff
 	}
 }
 
-void FreezeTransform::hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void FreezeTransform::hashObject(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	if( filterValue( context ) & ( IECore::PathMatcher::AncestorMatch | IECore::PathMatcher::ExactMatch ) )
 	{
@@ -293,7 +286,9 @@ void FreezeTransform::hashObject( const ScenePath &path, const Gaffer::Context *
 	}
 }
 
-IECore::ConstObjectPtr FreezeTransform::computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstObjectPtr FreezeTransform::computeObject(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( filterValue( context ) & ( IECore::PathMatcher::AncestorMatch | IECore::PathMatcher::ExactMatch ) )
 	{

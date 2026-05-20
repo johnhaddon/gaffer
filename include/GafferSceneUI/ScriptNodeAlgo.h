@@ -84,10 +84,15 @@ GAFFERSCENEUI_API ChangedSignal &visibleSetChangedSignal( Gaffer::ScriptNode *sc
 /// =====================
 
 /// Appends paths to the current expansion, optionally adding all ancestor paths too.
-GAFFERSCENEUI_API void expandInVisibleSet( Gaffer::ScriptNode *script, const IECore::PathMatcher &paths, bool expandAncestors = true );
+GAFFERSCENEUI_API void expandInVisibleSet(
+	Gaffer::ScriptNode *script, const IECore::PathMatcher &paths, bool expandAncestors = true
+);
 /// Appends descendant paths to the current expansion up to a specified maximum depth.
 /// Returns a new PathMatcher containing the new leafs of this expansion.
-GAFFERSCENEUI_API IECore::PathMatcher expandDescendantsInVisibleSet( Gaffer::ScriptNode *script, const IECore::PathMatcher &paths, const GafferScene::ScenePlug *scene, int depth = std::numeric_limits<int>::max() );
+GAFFERSCENEUI_API IECore::PathMatcher expandDescendantsInVisibleSet(
+	Gaffer::ScriptNode *script, const IECore::PathMatcher &paths, const GafferScene::ScenePlug *scene,
+	int depth = std::numeric_limits<int>::max()
+);
 
 /// Path Selection
 /// ==============
@@ -107,7 +112,9 @@ GAFFERSCENEUI_API IECore::PathMatcher getSelectedPaths( const Gaffer::ScriptNode
 /// >
 /// > Note : An empty path is considered to mean that there is no last selected path, _not_
 /// > that the scene root is selected.
-GAFFERSCENEUI_API void setLastSelectedPath( Gaffer::ScriptNode *script, const std::vector<IECore::InternedString> &path );
+GAFFERSCENEUI_API void setLastSelectedPath(
+	Gaffer::ScriptNode *script, const std::vector<IECore::InternedString> &path
+);
 GAFFERSCENEUI_API std::vector<IECore::InternedString> getLastSelectedPath( const Gaffer::ScriptNode *script );
 
 /// Returns a signal emitted when either the selected paths or last selected path change for `script`.
@@ -117,7 +124,9 @@ GAFFERSCENEUI_API ChangedSignal &selectedPathsChangedSignal( Gaffer::ScriptNode 
 /// =============
 
 /// Acquires a plug used to specify the current render pass for the script.
-GAFFERSCENEUI_API Gaffer::NameValuePlug *acquireRenderPassPlug( Gaffer::ScriptNode *script, bool createIfMissing = true );
+GAFFERSCENEUI_API Gaffer::NameValuePlug *acquireRenderPassPlug(
+	Gaffer::ScriptNode *script, bool createIfMissing = true
+);
 /// Sets the current render pass for the script.
 GAFFERSCENEUI_API void setCurrentRenderPass( Gaffer::ScriptNode *script, std::string renderPass );
 /// Returns the current render pass for the script.
@@ -131,9 +140,14 @@ GAFFERSCENEUI_API std::string getCurrentRenderPass( const Gaffer::ScriptNode *sc
 /// recalled later.
 
 /// Stores a VisibleSet as a named bookmark for the script.
-GAFFERSCENEUI_API void addVisibleSetBookmark( Gaffer::ScriptNode *script, const std::string &name, const GafferScene::VisibleSet &visibleSet, bool persistent = true );
+GAFFERSCENEUI_API void addVisibleSetBookmark(
+	Gaffer::ScriptNode *script, const std::string &name, const GafferScene::VisibleSet &visibleSet,
+	bool persistent = true
+);
 /// Returns the VisibleSet previously bookmarked as `name`.
-GAFFERSCENEUI_API GafferScene::VisibleSet getVisibleSetBookmark( const Gaffer::ScriptNode *script, const std::string &name );
+GAFFERSCENEUI_API GafferScene::VisibleSet getVisibleSetBookmark(
+	const Gaffer::ScriptNode *script, const std::string &name
+);
 /// Removes the bookmark previously stored as `name`.
 GAFFERSCENEUI_API void removeVisibleSetBookmark( Gaffer::ScriptNode *script, const std::string &name );
 /// Returns the names of all VisibleSet bookmarks stored on `script`.

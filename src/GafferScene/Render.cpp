@@ -72,8 +72,7 @@ const InternedString g_sceneTranslationOnlyContextName( "scene:render:sceneTrans
 struct RenderScope : public Context::EditableScope
 {
 
-	RenderScope( const Context *context )
-		: EditableScope( context ), m_sceneTranslationOnly( false )
+	RenderScope( const Context *context ) : EditableScope( context ), m_sceneTranslationOnly( false )
 	{
 		if( const bool *d = context->getIfExists<bool>( g_sceneTranslationOnlyContextName ) )
 		{
@@ -83,12 +82,9 @@ struct RenderScope : public Context::EditableScope
 		}
 	}
 
-	bool sceneTranslationOnly() const
-	{
-		return m_sceneTranslationOnly;
-	}
+	bool sceneTranslationOnly() const { return m_sceneTranslationOnly; }
 
-	private:
+private:
 
 	bool m_sceneTranslationOnly;
 };
@@ -102,8 +98,7 @@ static IECore::InternedString g_defaultRendererOptionName( "render:defaultRender
 
 GAFFER_NODE_DEFINE_TYPE( Render );
 
-Render::Render( const std::string &name )
-	: TaskNode( name )
+Render::Render( const std::string &name ) : TaskNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "in" ) );
@@ -144,7 +139,9 @@ Render::Render( const std::string &name )
 	setChild( "__querySwitch", querySwitch );
 	querySwitch->setup( rendererPlug() );
 	/// \todo Cast shouldn't be necessary - OptionQuery should provide a non-const accessor.
-	querySwitch->inPlugs()->getChild<Plug>( 0 )->setInput( const_cast<ValuePlug *>( optionQuery->valuePlugFromQuery( rendererQuery ) ) );
+	querySwitch->inPlugs()->getChild<Plug>( 0 )->setInput(
+		const_cast<ValuePlug *>( optionQuery->valuePlugFromQuery( rendererQuery ) )
+	);
 	querySwitch->inPlugs()->getChild<Plug>( 1 )->setInput( rendererPlug() );
 	querySwitch->indexPlug()->setValue( 1 );
 	querySwitch->enabledPlug()->setInput( rendererPlug() );
@@ -152,9 +149,7 @@ Render::Render( const std::string &name )
 	resolvedRendererPlug()->setInput( querySwitch->outPlug() );
 }
 
-Render::~Render()
-{
-}
+Render::~Render() {}
 
 ScenePlug *Render::inPlug()
 {
@@ -393,41 +388,45 @@ void Render::executeInternal( bool flushCaches ) const
 		}
 
 		GafferScene::Private::RendererAlgo::outputCameras( adaptedInPlug(), renderOptions, renderSets, renderer.get() );
-		GafferScene::Private::RendererAlgo::outputLights( adaptedInPlug(), renderOptions, renderSets, &lightLinks, renderer.get() );
-		GafferScene::Private::RendererAlgo::outputLightFilters( adaptedInPlug(), renderOptions, renderSets, &lightLinks, renderer.get() );
+		GafferScene::Private::RendererAlgo::outputLights(
+			adaptedInPlug(), renderOptions, renderSets, &lightLinks, renderer.get()
+		);
+		GafferScene::Private::RendererAlgo::outputLightFilters(
+			adaptedInPlug(), renderOptions, renderSets, &lightLinks, renderer.get()
+		);
 		lightLinks.outputLightFilterLinks( adaptedInPlug() );
 
 
 		if( GafferScene::Private::RendererAlgo::hasIDOutput( renderOptions.globals.get() ) )
 		{
 			GafferScene::RenderManifest renderManifest;
-			GafferScene::Private::RendererAlgo::outputObjects( adaptedInPlug(), renderOptions, renderSets, &lightLinks, renderer.get(), ScenePlug::ScenePath(), &renderManifest );
-
-			const std::string renderManifestFilePath = GafferScene::Private::RendererAlgo::renderManifestFilePath(
-				renderOptions.globals.get()
+			GafferScene::Private::RendererAlgo::outputObjects(
+				adaptedInPlug(), renderOptions, renderSets, &lightLinks, renderer.get(), ScenePlug::ScenePath(),
+				&renderManifest
 			);
+
+			const std::string renderManifestFilePath =
+				GafferScene::Private::RendererAlgo::renderManifestFilePath( renderOptions.globals.get() );
 			if( renderManifestFilePath.size() )
 			{
 				// Make sure the directory exists to write the exr manifest to.
-				std::filesystem::create_directories(
-					std::filesystem::path( renderManifestFilePath ).parent_path()
-				);
+				std::filesystem::create_directories( std::filesystem::path( renderManifestFilePath ).parent_path() );
 
 				renderManifest.writeEXRManifest( renderManifestFilePath );
 			}
 		}
 		else
 		{
-			GafferScene::Private::RendererAlgo::outputObjects( adaptedInPlug(), renderOptions, renderSets, &lightLinks, renderer.get() );
-
-			const std::string renderManifestFilePath = GafferScene::Private::RendererAlgo::renderManifestFilePath(
-				renderOptions.globals.get()
+			GafferScene::Private::RendererAlgo::outputObjects(
+				adaptedInPlug(), renderOptions, renderSets, &lightLinks, renderer.get()
 			);
+
+			const std::string renderManifestFilePath =
+				GafferScene::Private::RendererAlgo::renderManifestFilePath( renderOptions.globals.get() );
 			if( renderManifestFilePath.size() )
 			{
 				IECore::msg(
-					IECore::Msg::Warning,
-					"Render::execute",
+					IECore::Msg::Warning, "Render::execute",
 					"Found render:manifestFilePath option, but the render manifest is not enabled "
 					"because there is no ID output"
 				);

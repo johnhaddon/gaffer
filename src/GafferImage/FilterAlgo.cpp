@@ -62,43 +62,30 @@ namespace
 class SmoothGaussian2D : public OIIO::Filter2D
 {
 
-	public:
+public:
 
 	SmoothGaussian2D( float width, float height )
-		: Filter2D( width, height ), m_radiusInverse( 2.0f / width, 2.0f / height )
+		: Filter2D( width, height ),
+		  m_radiusInverse( 2.0f / width, 2.0f / height )
 	{
 	}
 
-	~SmoothGaussian2D() override
-	{
-	}
+	~SmoothGaussian2D() override {}
 
 	float operator () ( float x, float y ) const override
 	{
 		return gauss1d( x * m_radiusInverse.x ) * gauss1d( y * m_radiusInverse.y );
 	}
 
-	bool separable() const override
-	{
-		return true;
-	}
+	bool separable() const override { return true; }
 
-	float xfilt( float x ) const override
-	{
-		return gauss1d( x * m_radiusInverse.x );
-	}
+	float xfilt( float x ) const override { return gauss1d( x * m_radiusInverse.x ); }
 
-	float yfilt( float y ) const override
-	{
-		return gauss1d( y * m_radiusInverse.y );
-	}
+	float yfilt( float y ) const override { return gauss1d( y * m_radiusInverse.y ); }
 
-	OIIO::string_view name() const override
-	{
-		return "smoothGaussian";
-	}
+	OIIO::string_view name() const override { return "smoothGaussian"; }
 
-	private:
+private:
 
 	static float gauss1d( float x )
 	{
@@ -116,7 +103,7 @@ class SmoothGaussian2D : public OIIO::Filter2D
 
 class FilterCubicSimple2D : public OIIO::Filter2D
 {
-	public:
+public:
 
 	FilterCubicSimple2D( float width, float height )
 		: Filter2D( width, height ),
@@ -125,36 +112,22 @@ class FilterCubicSimple2D : public OIIO::Filter2D
 	{
 	}
 
-	~FilterCubicSimple2D( void ) override
-	{
-	}
+	~FilterCubicSimple2D( void ) override {}
 
 	float operator () ( float x, float y ) const override
 	{
 		return cubicSimple( x * m_wrad_inv ) * cubicSimple( y * m_hrad_inv );
 	}
 
-	bool separable() const override
-	{
-		return true;
-	}
+	bool separable() const override { return true; }
 
-	float xfilt( float x ) const override
-	{
-		return cubicSimple( x * m_wrad_inv );
-	}
+	float xfilt( float x ) const override { return cubicSimple( x * m_wrad_inv ); }
 
-	float yfilt( float y ) const override
-	{
-		return cubicSimple( y * m_hrad_inv );
-	}
+	float yfilt( float y ) const override { return cubicSimple( y * m_hrad_inv ); }
 
-	OIIO::string_view name() const override
-	{
-		return "cubic";
-	}
+	OIIO::string_view name() const override { return "cubic"; }
 
-	protected:
+protected:
 
 	static float cubicSimple( float x )
 	{
@@ -317,7 +290,9 @@ const OIIO::Filter2D *GafferImage::FilterAlgo::acquireFilter( const std::string 
 	}
 }
 
-float GafferImage::FilterAlgo::sampleParallelogram( Sampler &sampler, const V2f &p, const V2f &dpdx, const V2f &dpdy, const OIIO::Filter2D *filter )
+float GafferImage::FilterAlgo::sampleParallelogram(
+	Sampler &sampler, const V2f &p, const V2f &dpdx, const V2f &dpdy, const OIIO::Filter2D *filter
+)
 {
 	V2f dpdxCorrected = dpdx;
 	V2f dpdyCorrected = dpdy;
@@ -380,7 +355,9 @@ float GafferImage::FilterAlgo::sampleParallelogram( Sampler &sampler, const V2f 
 	return v;
 }
 
-float GafferImage::FilterAlgo::sampleBox( Sampler &sampler, const V2f &p, float dx, float dy, const OIIO::Filter2D *filter, std::vector<float> &scratchMemory )
+float GafferImage::FilterAlgo::sampleBox(
+	Sampler &sampler, const V2f &p, float dx, float dy, const OIIO::Filter2D *filter, std::vector<float> &scratchMemory
+)
 {
 	float xscale = 1.0f / dx;
 	float yscale = 1.0f / dy;
@@ -419,8 +396,7 @@ float GafferImage::FilterAlgo::sampleBox( Sampler &sampler, const V2f &p, float 
 			visitBounds.max.y = y + 1;
 			float yFilterWeight = filter->yfilt( ( y + 0.5f - p.y ) * yscale );
 			sampler.visitPixels(
-				visitBounds,
-				[&totalW, &v, &pixelBounds, &scratchMemory, &yFilterWeight]( float value, int x, int y ) {
+				visitBounds, [&totalW, &v, &pixelBounds, &scratchMemory, &yFilterWeight]( float value, int x, int y ) {
 					float w = scratchMemory[x - pixelBounds.min.x] * yFilterWeight;
 
 					// \todo : I can't think of any way to keep this around cleanly for testing, since

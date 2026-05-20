@@ -187,7 +187,8 @@ void transferOutputs( Gaffer::Plug *srcPlug, Gaffer::Plug *dstPlug )
 {
 	// Transfer outputs
 
-	for( Plug::OutputContainer::const_iterator oIt = srcPlug->outputs().begin(), oeIt = srcPlug->outputs().end(); oIt != oeIt; )
+	for( Plug::OutputContainer::const_iterator oIt = srcPlug->outputs().begin(), oeIt = srcPlug->outputs().end();
+		 oIt != oeIt; )
 	{
 		Plug *outputPlug = *oIt;
 		++oIt; // increment now because the setInput() call invalidates our iterator.
@@ -217,12 +218,12 @@ const InternedString g_childNodesAreReadOnlyName( "childNodesAreReadOnly" );
 class Reference::PlugEdits : public Signals::Trackable
 {
 
-	public:
+public:
 
-	PlugEdits( Reference *reference )
-		: m_reference( reference )
+	PlugEdits( Reference *reference ) : m_reference( reference )
 	{
-		m_connection = Metadata::plugValueChangedSignal( reference ).connect( boost::bind( &PlugEdits::plugValueChanged, this, ::_1, ::_2, ::_3 ) );
+		m_connection = Metadata::plugValueChangedSignal( reference )
+						   .connect( boost::bind( &PlugEdits::plugValueChanged, this, ::_1, ::_2, ::_3 ) );
 		m_reference->childRemovedSignal().connect( boost::bind( &PlugEdits::childRemoved, this, ::_1, ::_2 ) );
 	}
 
@@ -280,16 +281,12 @@ class Reference::PlugEdits : public Signals::Trackable
 	// Used to allow PlugEdits to track reference loading.
 	struct LoadingScope : boost::noncopyable
 	{
-		LoadingScope( PlugEdits *plugEdits )
-			: m_plugEdits( plugEdits ), m_blockedConnection( plugEdits->m_connection )
+		LoadingScope( PlugEdits *plugEdits ) : m_plugEdits( plugEdits ), m_blockedConnection( plugEdits->m_connection )
 		{
 		}
-		~LoadingScope()
-		{
-			m_plugEdits->loadingFinished();
-		}
+		~LoadingScope() { m_plugEdits->loadingFinished(); }
 
-		private:
+	private:
 
 		PlugEdits *m_plugEdits;
 		// Changes made during loading aren't user edits and mustn't be
@@ -297,7 +294,7 @@ class Reference::PlugEdits : public Signals::Trackable
 		Signals::BlockedConnection m_blockedConnection;
 	};
 
-	private:
+private:
 
 	Reference *m_reference;
 	Signals::ScopedConnection m_connection;
@@ -350,16 +347,15 @@ class Reference::PlugEdits : public Signals::Trackable
 
 	void plugValueChanged( const Gaffer::Plug *plug, IECore::InternedString key, Metadata::ValueChangedReason reason )
 	{
-		if(
-			reason == Metadata::ValueChangedReason::StaticRegistration ||
-			reason == Metadata::ValueChangedReason::StaticDeregistration
-		)
+		if( reason == Metadata::ValueChangedReason::StaticRegistration ||
+			reason == Metadata::ValueChangedReason::StaticDeregistration )
 		{
 			return;
 		}
 
 		ScriptNode *scriptNode = m_reference->ancestor<ScriptNode>();
-		if( scriptNode && ( scriptNode->currentActionStage() == Action::Undo || scriptNode->currentActionStage() == Action::Redo ) )
+		if( scriptNode &&
+			( scriptNode->currentActionStage() == Action::Undo || scriptNode->currentActionStage() == Action::Redo ) )
 		{
 			// Our edit tracking code below utilises the undo system, so we don't need
 			// to do anything for an Undo or Redo - our action from the original Do will
@@ -381,8 +377,7 @@ class Reference::PlugEdits : public Signals::Trackable
 		}
 
 		Action::enact(
-			m_reference,
-			[edit, key]() { edit->metadataEdits.insert( key ); },
+			m_reference, [edit, key]() { edit->metadataEdits.insert( key ); },
 			[edit, key]() { edit->metadataEdits.erase( key ); }
 		);
 	}
@@ -413,10 +408,8 @@ class Reference::PlugEdits : public Signals::Trackable
 			}
 
 			const IECore::TypeId plugType = plug->typeId();
-			if(
-				plugType != (IECore::TypeId)SpreadsheetRowsPlugTypeId &&
-				plugType != (IECore::TypeId)CompoundDataPlugTypeId
-			)
+			if( plugType != (IECore::TypeId)SpreadsheetRowsPlugTypeId &&
+				plugType != (IECore::TypeId)CompoundDataPlugTypeId )
 			{
 				// We only support child edits for RowsPlugs and
 				// CompoundDataPlugs at present. It would be trivial
@@ -443,7 +436,9 @@ class Reference::PlugEdits : public Signals::Trackable
 		{
 			for( const InternedString &key : edit->metadataEdits )
 			{
-				Gaffer::Metadata::registerValue( dstPlug, key, Gaffer::Metadata::value<IECore::Data>( srcPlug, key ), /* persistent =*/true );
+				Gaffer::Metadata::registerValue(
+					dstPlug, key, Gaffer::Metadata::value<IECore::Data>( srcPlug, key ), /* persistent =*/true
+				);
 			}
 		}
 
@@ -508,14 +503,9 @@ class Reference::PlugEdits : public Signals::Trackable
 
 GAFFER_NODE_DEFINE_TYPE( Reference );
 
-Reference::Reference( const std::string &name )
-	: SubGraph( name ), m_plugEdits( new PlugEdits( this ) )
-{
-}
+Reference::Reference( const std::string &name ) : SubGraph( name ), m_plugEdits( new PlugEdits( this ) ) {}
 
-Reference::~Reference()
-{
-}
+Reference::~Reference() {}
 
 void Reference::load( const std::filesystem::path &fileName )
 {
@@ -535,8 +525,7 @@ void Reference::load( const std::filesystem::path &fileName )
 	}
 
 	Action::enact(
-		this,
-		boost::bind( &Reference::loadInternal, ReferencePtr( this ), fileName ),
+		this, boost::bind( &Reference::loadInternal, ReferencePtr( this ), fileName ),
 		boost::bind( &Reference::loadInternal, ReferencePtr( this ), m_fileName )
 	);
 }
@@ -604,8 +593,12 @@ void Reference::loadInternal( const std::filesystem::path &fileName )
 
 	// Set up a container to catch all the children added during loading.
 	StandardSetPtr newChildren = new StandardSet;
-	childAddedSignal().connect( boost::bind( (bool ( StandardSet::* )( IECore::RunTimeTypedPtr ))&StandardSet::add, newChildren.get(), ::_2 ) );
-	userPlug()->childAddedSignal().connect( boost::bind( (bool ( StandardSet::* )( IECore::RunTimeTypedPtr ))&StandardSet::add, newChildren.get(), ::_2 ) );
+	childAddedSignal().connect(
+		boost::bind( (bool ( StandardSet::* )( IECore::RunTimeTypedPtr ))&StandardSet::add, newChildren.get(), ::_2 )
+	);
+	userPlug()->childAddedSignal().connect(
+		boost::bind( (bool ( StandardSet::* )( IECore::RunTimeTypedPtr ))&StandardSet::add, newChildren.get(), ::_2 )
+	);
 
 	// load the reference. we use continueOnError=true to get everything possible
 	// loaded, but if any errors do occur we throw an exception at the end of this
@@ -641,11 +634,8 @@ void Reference::loadInternal( const std::filesystem::path &fileName )
 			/// for serialisation requirements at the point of serialisation.
 			plug->setFlags( Plug::Dynamic, false );
 
-			if(
-				runTimeCast<const RampffPlug>( plug ) ||
-				runTimeCast<const RampfColor3fPlug>( plug ) ||
-				runTimeCast<const RampfColor4fPlug>( plug )
-			)
+			if( runTimeCast<const RampffPlug>( plug ) || runTimeCast<const RampfColor3fPlug>( plug ) ||
+				runTimeCast<const RampfColor4fPlug>( plug ) )
 			{
 				// Avoid recursion as it makes it impossible to serialise
 				// the `x/y` children of ramp points. See RampPlugSerialiser
@@ -662,7 +652,8 @@ void Reference::loadInternal( const std::filesystem::path &fileName )
 
 	// Transfer connections, values and metadata from the old plugs onto the corresponding new ones.
 
-	for( std::map<std::string, Plug *>::const_iterator it = previousPlugs.begin(), eIt = previousPlugs.end(); it != eIt; ++it )
+	for( std::map<std::string, Plug *>::const_iterator it = previousPlugs.begin(), eIt = previousPlugs.end(); it != eIt;
+		 ++it )
 	{
 		Plug *oldPlug = it->second;
 		Plug *newPlug = descendant<Plug>( it->first );
@@ -679,11 +670,9 @@ void Reference::loadInternal( const std::filesystem::path &fileName )
 			}
 			catch( const std::exception &e )
 			{
-				msg(
-					Msg::Warning,
-					fmt::format( "Loading \"{}\" onto \"{}\"", fileName.generic_string(), getName().c_str() ),
-					e.what()
-				);
+				msg( Msg::Warning,
+					 fmt::format( "Loading \"{}\" onto \"{}\"", fileName.generic_string(), getName().c_str() ),
+					 e.what() );
 			}
 		}
 

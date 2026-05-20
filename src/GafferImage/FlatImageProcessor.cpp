@@ -44,19 +44,14 @@ using namespace GafferImage;
 
 GAFFER_NODE_DEFINE_TYPE( FlatImageProcessor );
 
-FlatImageProcessor::FlatImageProcessor( const std::string &name )
-	: ImageProcessor( name )
-{
-}
+FlatImageProcessor::FlatImageProcessor( const std::string &name ) : ImageProcessor( name ) {}
 
 FlatImageProcessor::FlatImageProcessor( const std::string &name, size_t minInputs, size_t maxInputs )
 	: ImageProcessor( name, minInputs, maxInputs )
 {
 }
 
-FlatImageProcessor::~FlatImageProcessor()
-{
-}
+FlatImageProcessor::~FlatImageProcessor() {}
 
 Gaffer::ValuePlug::CachePolicy FlatImageProcessor::computeCachePolicy( const Gaffer::ValuePlug *output ) const
 {
@@ -74,17 +69,15 @@ void FlatImageProcessor::affects( const Gaffer::Plug *input, AffectedPlugsContai
 	ImageProcessor::affects( input, outputs );
 
 	auto imagePlug = input->parent<ImagePlug>();
-	if(
-		imagePlug &&
-		( imagePlug == inPlug() || imagePlug->parent() == inPlugs() ) &&
-		input == imagePlug->deepPlug()
-	)
+	if( imagePlug && ( imagePlug == inPlug() || imagePlug->parent() == inPlugs() ) && input == imagePlug->deepPlug() )
 	{
 		outputs.push_back( outPlug()->deepPlug() );
 	}
 }
 
-void FlatImageProcessor::hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void FlatImageProcessor::hashDeep(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashDeep( parent, context, h );
 	if( inPlugs() )
@@ -120,10 +113,7 @@ bool FlatImageProcessor::computeDeep( const Gaffer::Context *context, const Imag
 	{
 		for( ImagePlug::Iterator it( inPlugs() ); !it.done(); ++it )
 		{
-			if(
-				ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) &&
-				( *it )->deepPlug()->getValue()
-			)
+			if( ImageAlgo::viewIsValid( context, ( *it )->viewNames()->readable() ) && ( *it )->deepPlug()->getValue() )
 			{
 				badInput = it->get();
 			}
@@ -131,10 +121,7 @@ bool FlatImageProcessor::computeDeep( const Gaffer::Context *context, const Imag
 	}
 	else
 	{
-		if(
-			ImageAlgo::viewIsValid( context, inPlug()->viewNames()->readable() ) &&
-			inPlug()->deepPlug()->getValue()
-		)
+		if( ImageAlgo::viewIsValid( context, inPlug()->viewNames()->readable() ) && inPlug()->deepPlug()->getValue() )
 		{
 			badInput = inPlug();
 		}
@@ -146,12 +133,16 @@ bool FlatImageProcessor::computeDeep( const Gaffer::Context *context, const Imag
 	return false;
 }
 
-void FlatImageProcessor::hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void FlatImageProcessor::hashSampleOffsets(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = ImagePlug::flatTileSampleOffsets()->Object::hash();
 }
 
-IECore::ConstIntVectorDataPtr FlatImageProcessor::computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstIntVectorDataPtr FlatImageProcessor::computeSampleOffsets(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	return ImagePlug::flatTileSampleOffsets();
 }

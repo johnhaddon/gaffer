@@ -88,16 +88,15 @@ GAFFER_NODE_DEFINE_TYPE( RenderManOutputFilter );
 size_t RenderManOutputFilter::g_firstPlugIndex = 0;
 
 RenderManOutputFilter::RenderManOutputFilter( const std::string &name, FilterType filterType )
-	: GlobalsProcessor( name ), m_filterType( filterType )
+	: GlobalsProcessor( name ),
+	  m_filterType( filterType )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ShaderPlug( g_shaderPlugNames[(int)filterType] ) );
 	addChild( new IntPlug( "mode", Plug::In, (int)Mode::Replace, (int)Mode::Replace, (int)Mode::InsertLast ) );
 }
 
-RenderManOutputFilter::~RenderManOutputFilter()
-{
-}
+RenderManOutputFilter::~RenderManOutputFilter() {}
 
 GafferScene::ShaderPlug *RenderManOutputFilter::shaderPlug()
 {
@@ -164,7 +163,8 @@ bool RenderManOutputFilter::acceptsInput( const Gaffer::Plug *plug, const Gaffer
 	{
 		if( const auto oslShader = runTimeCast<const GafferOSL::OSLShader>( sourceShader ) )
 		{
-			if( const auto schemaType = runTimeCast<const StringData>( oslShader->shaderMetadata( g_usdSchemaDef_schemaBase ) ) )
+			if( const auto schemaType =
+					runTimeCast<const StringData>( oslShader->shaderMetadata( g_usdSchemaDef_schemaBase ) ) )
 			{
 				return schemaType->readable() == g_schemaBases[(int)m_filterType];
 			}
@@ -190,7 +190,9 @@ void RenderManOutputFilter::hashProcessedGlobals( const Gaffer::Context *context
 	modePlug()->hash( h );
 }
 
-IECore::ConstCompoundObjectPtr RenderManOutputFilter::computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const
+IECore::ConstCompoundObjectPtr RenderManOutputFilter::computeProcessedGlobals(
+	const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals
+) const
 {
 	ConstCompoundObjectPtr attributes = shaderPlug()->attributes();
 	if( attributes->members().empty() )
@@ -236,7 +238,8 @@ IECore::ConstCompoundObjectPtr RenderManOutputFilter::computeProcessedGlobals( c
 		else
 		{
 			// Insert combiner shader.
-			IECoreScene::ShaderPtr combinerShader = new IECoreScene::Shader( g_combinerShaders[(int)m_filterType], g_shaderTypes[(int)m_filterType] );
+			IECoreScene::ShaderPtr combinerShader =
+				new IECoreScene::Shader( g_combinerShaders[(int)m_filterType], g_shaderTypes[(int)m_filterType] );
 			combinerHandle = combinedNetwork->addShader( combinerShader->getName(), std::move( combinerShader ) );
 			combinedNetwork->addConnection( { combinedNetwork->getOutput(), { combinerHandle, g_filter0 } } );
 			combinedNetwork->setOutput( { combinerHandle, g_out } );
@@ -244,7 +247,8 @@ IECore::ConstCompoundObjectPtr RenderManOutputFilter::computeProcessedGlobals( c
 
 		// Insert new shader, and connect it to the combiner appropriately.
 		ShaderNetwork::Parameter insertedOut = ShaderNetworkAlgo::addShaders( combinedNetwork.get(), network );
-		ShaderNetwork::ConnectionRange connectionRange = combinedNetwork->inputConnections( combinedNetwork->getOutput().shader );
+		ShaderNetwork::ConnectionRange connectionRange =
+			combinedNetwork->inputConnections( combinedNetwork->getOutput().shader );
 
 		if( mode == Mode::InsertLast )
 		{
@@ -253,7 +257,9 @@ IECore::ConstCompoundObjectPtr RenderManOutputFilter::computeProcessedGlobals( c
 			{
 				lastIndex = std::max( lastIndex, connectionIndex( connection ) );
 			}
-			combinedNetwork->addConnection( { insertedOut, { combinerHandle, fmt::format( "filter[{}]", lastIndex + 1 ) } } );
+			combinedNetwork->addConnection(
+				{ insertedOut, { combinerHandle, fmt::format( "filter[{}]", lastIndex + 1 ) } }
+			);
 		}
 		else
 		{
@@ -275,7 +281,9 @@ IECore::ConstCompoundObjectPtr RenderManOutputFilter::computeProcessedGlobals( c
 				const int i = connectionIndex( c );
 				if( i != -1 )
 				{
-					combinedNetwork->addConnection( { c.source, { combinerHandle, fmt::format( "filter[{}]", i + 1 ) } } );
+					combinedNetwork->addConnection(
+						{ c.source, { combinerHandle, fmt::format( "filter[{}]", i + 1 ) } }
+					);
 				}
 			}
 		}

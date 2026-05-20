@@ -70,8 +70,7 @@ RotateTool::ToolDescription<RotateTool, SceneView> RotateTool::g_toolDescription
 
 size_t RotateTool::g_firstPlugIndex = 0;
 
-RotateTool::RotateTool( SceneView *view, const std::string &name )
-	: TransformTool( view, name )
+RotateTool::RotateTool( SceneView *view, const std::string &name ) : TransformTool( view, name )
 {
 	static Style::Axes axes[] = {
 		Style::XYZ,
@@ -110,9 +109,7 @@ RotateTool::RotateTool( SceneView *view, const std::string &name )
 	addChild( new IntPlug( "orientation", Plug::In, Parent, Local, World ) );
 }
 
-RotateTool::~RotateTool()
-{
-}
+RotateTool::~RotateTool() {}
 
 Gaffer::IntPlug *RotateTool::orientationPlug()
 {
@@ -140,16 +137,13 @@ bool RotateTool::affectsHandles( const Gaffer::Plug *input ) const
 		return true;
 	}
 
-	return input == orientationPlug() ||
-		input == scenePlug()->transformPlug();
+	return input == orientationPlug() || input == scenePlug()->transformPlug();
 }
 
 void RotateTool::updateHandles( float rasterScale )
 {
 	const Orientation orientation = static_cast<Orientation>( orientationPlug()->getValue() );
-	handles()->setTransform(
-		selection().back().orientedTransform( orientation )
-	);
+	handles()->setTransform( selection().back().orientedTransform( orientation ) );
 
 	for( RotateHandle::Iterator it( handles() ); !it.done(); ++it )
 	{
@@ -321,9 +315,7 @@ bool RotateTool::buttonPress( const GafferUI::ButtonEvent &event )
 		// The local space position of the target is the direction we want the Z axis to point
 		V3f targetZAxis = targetPos * worldParentTransformInverse - V3f( 0.0f ) * localTransform;
 
-		M44f orientationMatrix = rotationMatrixWithUpDir(
-			V3f( 0.0f, 0.0f, -1.0f ), targetZAxis, currentYAxis
-		);
+		M44f orientationMatrix = rotationMatrixWithUpDir( V3f( 0.0f, 0.0f, -1.0f ), targetZAxis, currentYAxis );
 
 		// We now have the desired local space orientation matrix, and we want
 		// to set the rotation to match this.  This means we want the value of
@@ -350,8 +342,7 @@ bool RotateTool::buttonPress( const GafferUI::ButtonEvent &event )
 // RotateTool::Rotation
 //////////////////////////////////////////////////////////////////////////
 
-RotateTool::Rotation::Rotation( const Selection &selection, Orientation orientation )
-	: m_selection( selection )
+RotateTool::Rotation::Rotation( const Selection &selection, Orientation orientation ) : m_selection( selection )
 {
 	const M44f handlesTransform = selection.orientedTransform( orientation );
 	m_gadgetToTransform = handlesTransform * selection.sceneToTransformSpace();
@@ -397,7 +388,9 @@ void RotateTool::Rotation::apply( const Imath::Eulerf &rotation, const bool main
 	}
 }
 
-Imath::V3f RotateTool::Rotation::updatedRotateValue( const Gaffer::V3fPlug *rotatePlug, const Imath::Eulerf &rotation, const bool maintainRoll, Imath::V3f *currentValue ) const
+Imath::V3f RotateTool::Rotation::updatedRotateValue(
+	const Gaffer::V3fPlug *rotatePlug, const Imath::Eulerf &rotation, const bool maintainRoll, Imath::V3f *currentValue
+) const
 {
 	if( !m_originalRotation )
 	{
@@ -433,7 +426,8 @@ Imath::V3f RotateTool::Rotation::updatedRotateValue( const Gaffer::V3fPlug *rota
 		V3f originalUp = V3f( 0.0f, 1.0f, 0.0f ) * originalMatrix;
 		V3f yUpPerpendicular = ( V3f( 0.0f, 1.0f, 0.0f ) - originalAxis * originalAxis.y ).normalized();
 
-		float axisRollAngle = -asin( std::min( 1.0f, std::max( -1.0f, originalAxis.dot( originalUp.cross( yUpPerpendicular ) ) ) ) );
+		float axisRollAngle =
+			-asin( std::min( 1.0f, std::max( -1.0f, originalAxis.dot( originalUp.cross( yUpPerpendicular ) ) ) ) );
 
 		// Apply the roll angle back to
 		M44f axisRoll;

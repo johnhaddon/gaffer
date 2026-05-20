@@ -77,10 +77,7 @@ namespace
 Box2f nodeFrame( const NodeGadget *nodeGadget )
 {
 	const Box3f b = nodeGadget->transformedBound( nullptr );
-	return Box2f(
-		V2f( b.min.x, b.min.y ),
-		V2f( b.max.x, b.max.y )
-	);
+	return Box2f( V2f( b.min.x, b.min.y ), V2f( b.max.x, b.max.y ) );
 }
 
 
@@ -273,20 +270,15 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( AnnotationsGadget );
 
 const std::string AnnotationsGadget::untemplatedAnnotations = "__untemplated__";
 
-AnnotationsGadget::AnnotationsGadget()
-	: Gadget( "AnnotationsGadget" ), m_dirty( true ), m_visibleAnnotations( "*" )
+AnnotationsGadget::AnnotationsGadget() : Gadget( "AnnotationsGadget" ), m_dirty( true ), m_visibleAnnotations( "*" )
 {
 	Metadata::nodeValueChangedSignal().connect(
 		boost::bind( &AnnotationsGadget::nodeMetadataChanged, this, ::_1, ::_2, ::_3 )
 	);
-	visibilityChangedSignal().connect(
-		boost::bind( &AnnotationsGadget::visibilityChanged, this )
-	);
+	visibilityChangedSignal().connect( boost::bind( &AnnotationsGadget::visibilityChanged, this ) );
 }
 
-AnnotationsGadget::~AnnotationsGadget()
-{
-}
+AnnotationsGadget::~AnnotationsGadget() {}
 
 void AnnotationsGadget::setVisibleAnnotations( const IECore::StringAlgo::MatchPattern &patterns )
 {
@@ -309,7 +301,9 @@ const IECore::StringAlgo::MatchPattern &AnnotationsGadget::getVisibleAnnotations
 	return m_visibleAnnotations;
 }
 
-const std::string &AnnotationsGadget::annotationText( const Gaffer::Node *node, IECore::InternedString annotation ) const
+const std::string &AnnotationsGadget::annotationText(
+	const Gaffer::Node *node, IECore::InternedString annotation
+) const
 {
 	const_cast<AnnotationsGadget *>( this )->update();
 	if( const Annotations *nodeAnnotations = annotations( node ) )
@@ -425,11 +419,8 @@ void AnnotationsGadget::nodeMetadataChanged( IECore::TypeId nodeTypeId, IECore::
 		return;
 	}
 
-	if(
-		!MetadataAlgo::bookmarkedAffectedByChange( key ) &&
-		!MetadataAlgo::numericBookmarkAffectedByChange( key ) &&
-		!MetadataAlgo::annotationsAffectedByChange( key )
-	)
+	if( !MetadataAlgo::bookmarkedAffectedByChange( key ) && !MetadataAlgo::numericBookmarkAffectedByChange( key ) &&
+		!MetadataAlgo::annotationsAffectedByChange( key ) )
 	{
 		return;
 	}
@@ -534,9 +525,8 @@ void AnnotationsGadget::update()
 
 	if( dependsOnContext )
 	{
-		m_contextTrackerChangedConnection = m_contextTracker->changedSignal().connect(
-			boost::bind( &AnnotationsGadget::contextTrackerChanged, this )
-		);
+		m_contextTrackerChangedConnection =
+			m_contextTracker->changedSignal().connect( boost::bind( &AnnotationsGadget::contextTrackerChanged, this ) );
 	}
 	else
 	{
@@ -644,29 +634,30 @@ void AnnotationsGadget::schedulePlugValueSubstitutions( const Gaffer::Node *node
 			// `this` again in a nested lambda.
 			AnnotationsGadget *that = this;
 
-			ParallelAlgo::callOnUIThread(
-				[gadget = Ptr( that ), node = ConstNodePtr( node ), renderText = std::move( renderText ), cancelled] {
-					Annotations *annotations = gadget->annotations( node.get() );
-					if( !annotations )
-					{
-						return;
-					}
-
-					gadget->applySubstitutedRenderText( renderText, *annotations );
-					if( cancelled )
-					{
-						// Dirty, so that we relaunch background task on next redraw.
-						annotations->dirty = true;
-						gadget->m_dirty = true;
-					}
-					gadget->dirty( DirtyType::Render );
+			ParallelAlgo::callOnUIThread( [gadget = Ptr( that ), node = ConstNodePtr( node ),
+										   renderText = std::move( renderText ), cancelled] {
+				Annotations *annotations = gadget->annotations( node.get() );
+				if( !annotations )
+				{
+					return;
 				}
-			);
+
+				gadget->applySubstitutedRenderText( renderText, *annotations );
+				if( cancelled )
+				{
+					// Dirty, so that we relaunch background task on next redraw.
+					annotations->dirty = true;
+					gadget->m_dirty = true;
+				}
+				gadget->dirty( DirtyType::Render );
+			} );
 		}
 	);
 }
 
-std::unordered_map<IECore::InternedString, std::string> AnnotationsGadget::substitutedRenderText( const Gaffer::Node *node, const Annotations &annotations )
+std::unordered_map<IECore::InternedString, std::string> AnnotationsGadget::substitutedRenderText(
+	const Gaffer::Node *node, const Annotations &annotations
+)
 {
 	std::unordered_map<InternedString, string> result;
 
@@ -690,7 +681,9 @@ std::unordered_map<IECore::InternedString, std::string> AnnotationsGadget::subst
 	return result;
 }
 
-void AnnotationsGadget::applySubstitutedRenderText( const std::unordered_map<IECore::InternedString, std::string> &renderText, Annotations &annotations )
+void AnnotationsGadget::applySubstitutedRenderText(
+	const std::unordered_map<IECore::InternedString, std::string> &renderText, Annotations &annotations
+)
 {
 	for( auto &annotation : annotations.standardAnnotations )
 	{
@@ -750,22 +743,30 @@ void AnnotationsGadget::renderAnnotations( const Style *style, AnnotationBufferM
 		{
 			if( annotations.bookmarked )
 			{
-				style->renderImage( Box2f( bookmarkIconPos - V2f( 1.0 ), bookmarkIconPos + V2f( 1.0 ) ), bookmarkTexture() );
+				style->renderImage(
+					Box2f( bookmarkIconPos - V2f( 1.0 ), bookmarkIconPos + V2f( 1.0 ) ), bookmarkTexture()
+				);
 			}
 
 			if( annotations.numericBookmark.string().size() )
 			{
 				if( !annotations.bookmarked )
 				{
-					style->renderImage( Box2f( bookmarkIconPos - V2f( 1.0 ), bookmarkIconPos + V2f( 1.0 ) ), numericBookmarkTexture() );
+					style->renderImage(
+						Box2f( bookmarkIconPos - V2f( 1.0 ), bookmarkIconPos + V2f( 1.0 ) ), numericBookmarkTexture()
+					);
 				}
 
 				const Box3f textBounds = style->textBound( Style::LabelText, annotations.numericBookmark.string() );
 
 				const Imath::Color4f textColor( 0.8f );
 				glPushMatrix();
-				IECoreGL::glTranslate( V2f( bookmarkIconPos.x - 0.9 - textBounds.size().x, bookmarkIconPos.y - textBounds.size().y * 0.5 - 0.2 ) );
-				style->renderText( Style::LabelText, annotations.numericBookmark.string(), Style::NormalState, &textColor );
+				IECoreGL::glTranslate( V2f(
+					bookmarkIconPos.x - 0.9 - textBounds.size().x, bookmarkIconPos.y - textBounds.size().y * 0.5 - 0.2
+				) );
+				style->renderText(
+					Style::LabelText, annotations.numericBookmark.string(), Style::NormalState, &textColor
+				);
 				glPopMatrix();
 			}
 		}
@@ -778,17 +779,23 @@ void AnnotationsGadget::renderAnnotations( const Style *style, AnnotationBufferM
 				( *selectionIds )[id] = AnnotationIdentifier( ga.first->node(), a.name );
 			}
 
-			annotationOrigin = style->renderAnnotation( annotationOrigin, a.renderText, Style::NormalState, a.colorData ? &a.color() : nullptr );
+			annotationOrigin = style->renderAnnotation(
+				annotationOrigin, a.renderText, Style::NormalState, a.colorData ? &a.color() : nullptr
+			);
 		}
 	}
 }
 
-std::optional<AnnotationsGadget::AnnotationIdentifier> AnnotationsGadget::annotationAt( const LineSegment3f &lineInGadgetSpace ) const
+std::optional<AnnotationsGadget::AnnotationIdentifier> AnnotationsGadget::annotationAt(
+	const LineSegment3f &lineInGadgetSpace
+) const
 {
 	std::vector<IECoreGL::HitRecord> selection;
 	AnnotationBufferMap annotationBuffer;
 	{
-		ViewportGadget::SelectionScope selectionScope( lineInGadgetSpace, this, selection, IECoreGL::Selector::Mode::IDRender );
+		ViewportGadget::SelectionScope selectionScope(
+			lineInGadgetSpace, this, selection, IECoreGL::Selector::Mode::IDRender
+		);
 
 		const Style *currentStyle = style();
 		currentStyle->bind();

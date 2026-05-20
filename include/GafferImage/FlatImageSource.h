@@ -48,7 +48,7 @@ namespace GafferImage
 class GAFFERIMAGE_API FlatImageSource : public ImageNode
 {
 
-	public:
+public:
 
 	explicit FlatImageSource( const std::string &name = defaultName<FlatImageSource>() );
 
@@ -56,18 +56,28 @@ class GAFFERIMAGE_API FlatImageSource : public ImageNode
 
 	GAFFER_NODE_DECLARE_TYPE( GafferImage::FlatImageSource, FlatImageSourceTypeId, ImageNode );
 
-	protected:
+protected:
 
 	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-	void hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	IECore::ConstStringVectorDataPtr computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashViewNames(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstStringVectorDataPtr computeViewNames(
+		const Gaffer::Context *context, const ImagePlug *parent
+	) const override;
 
-	void hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashDeep(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
 	bool computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	void hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	IECore::ConstIntVectorDataPtr computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashSampleOffsets(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstIntVectorDataPtr computeSampleOffsets(
+		const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent
+	) const override;
 };
 
 IE_CORE_DECLAREPTR( FlatImageSource )

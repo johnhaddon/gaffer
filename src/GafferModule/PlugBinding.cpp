@@ -120,7 +120,12 @@ void GafferModule::bindPlug()
 			.value( "All", Plug::All );
 	}
 
-	c.def( init<const std::string &, Plug::Direction, unsigned>( ( arg( "name" ) = GraphComponent::defaultName<Plug>(), arg( "direction" ) = Plug::In, arg( "flags" ) = Plug::Default ) ) )
+	c.def(
+		 init<const std::string &, Plug::Direction, unsigned>(
+			 ( arg( "name" ) = GraphComponent::defaultName<Plug>(), arg( "direction" ) = Plug::In,
+			   arg( "flags" ) = Plug::Default )
+		 )
+	)
 		.def( "node", &node )
 		.def( "direction", &Plug::direction )
 		.def( "getFlags", ( unsigned ( Plug::* )() const ) & Plug::getFlags )

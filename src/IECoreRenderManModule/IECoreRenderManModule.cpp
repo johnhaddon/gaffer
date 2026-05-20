@@ -57,7 +57,9 @@ int renderManMinorVersion()
 	return _PRMANAPI_VERSION_MINOR_;
 }
 
-ShaderNetworkAlgo::VStructAction evaluateVStructConditionalWrapper( const std::string &expression, object valueFunction, object isConnectedFunction )
+ShaderNetworkAlgo::VStructAction evaluateVStructConditionalWrapper(
+	const std::string &expression, object valueFunction, object isConnectedFunction
+)
 {
 	return ShaderNetworkAlgo::evaluateVStructConditional(
 		expression,

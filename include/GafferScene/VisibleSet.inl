@@ -41,7 +41,9 @@
 namespace
 {
 
-bool allAncestorsMatch( const std::vector<InternedString> &path, const IECore::PathMatcher &pathMatcher, const size_t minimumExpansionDepth )
+bool allAncestorsMatch(
+	const std::vector<InternedString> &path, const IECore::PathMatcher &pathMatcher, const size_t minimumExpansionDepth
+)
 {
 	std::vector<InternedString> parentPath = path;
 	while( parentPath.size() > minimumExpansionDepth + 1 )
@@ -60,7 +62,9 @@ bool allAncestorsMatch( const std::vector<InternedString> &path, const IECore::P
 namespace GafferScene
 {
 
-inline VisibleSet::Visibility VisibleSet::visibility( const std::vector<InternedString> &path, const size_t minimumExpansionDepth ) const
+inline VisibleSet::Visibility VisibleSet::visibility(
+	const std::vector<InternedString> &path, const size_t minimumExpansionDepth
+) const
 {
 
 	const unsigned exclusionsMatch = exclusions.match( path );

@@ -44,13 +44,9 @@ using namespace IECoreScenePreview;
 
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Procedural );
 
-Procedural::Procedural()
-{
-}
+Procedural::Procedural() {}
 
-Procedural::~Procedural()
-{
-}
+Procedural::~Procedural() {}
 
 bool Procedural::isEqualTo( const IECore::Object *other ) const
 {

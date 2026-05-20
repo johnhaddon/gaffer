@@ -44,14 +44,9 @@ using namespace GafferImage;
 
 GAFFER_NODE_DEFINE_TYPE( FlatImageSource );
 
-FlatImageSource::FlatImageSource( const std::string &name )
-	: ImageNode( name )
-{
-}
+FlatImageSource::FlatImageSource( const std::string &name ) : ImageNode( name ) {}
 
-FlatImageSource::~FlatImageSource()
-{
-}
+FlatImageSource::~FlatImageSource() {}
 
 Gaffer::ValuePlug::CachePolicy FlatImageSource::computeCachePolicy( const Gaffer::ValuePlug *output ) const
 {
@@ -64,7 +59,9 @@ Gaffer::ValuePlug::CachePolicy FlatImageSource::computeCachePolicy( const Gaffer
 	return ImageNode::computeCachePolicy( output );
 }
 
-void FlatImageSource::hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void FlatImageSource::hashDeep(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageNode::hashDeep( parent, context, h );
 }
@@ -74,22 +71,30 @@ bool FlatImageSource::computeDeep( const Gaffer::Context *context, const ImagePl
 	return false;
 }
 
-void FlatImageSource::hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void FlatImageSource::hashSampleOffsets(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = ImagePlug::flatTileSampleOffsets()->IECore::Object::hash();
 }
 
-IECore::ConstIntVectorDataPtr FlatImageSource::computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstIntVectorDataPtr FlatImageSource::computeSampleOffsets(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	return ImagePlug::flatTileSampleOffsets();
 }
 
-void FlatImageSource::hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void FlatImageSource::hashViewNames(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageNode::hashViewNames( parent, context, h );
 }
 
-IECore::ConstStringVectorDataPtr FlatImageSource::computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr FlatImageSource::computeViewNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	return ImagePlug::defaultViewNames();
 }

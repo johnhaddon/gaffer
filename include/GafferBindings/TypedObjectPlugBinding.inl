@@ -110,10 +110,7 @@ typename T::ValuePtr defaultValue( typename T::Ptr p, bool copy )
 
 template<typename T>
 typename T::Ptr construct(
-	const char *name,
-	Gaffer::Plug::Direction direction,
-	typename T::ValuePtr defaultValue,
-	unsigned flags
+	const char *name, Gaffer::Plug::Direction direction, typename T::ValuePtr defaultValue, unsigned flags
 )
 {
 	if( !defaultValue )
@@ -144,21 +141,33 @@ typename T::ValueType::Ptr typedObjectPlugDefaultValue()
 } // namespace Detail
 
 template<typename T, typename TWrapper>
-TypedObjectPlugClass<T, TWrapper>::TypedObjectPlugClass( const char *docString )
-	: PlugClass<T, TWrapper>( docString )
+TypedObjectPlugClass<T, TWrapper>::TypedObjectPlugClass( const char *docString ) : PlugClass<T, TWrapper>( docString )
 {
 
-	this->def( "__init__", make_constructor( Detail::construct<T>, boost::python::default_call_policies(), ( boost::python::arg_( "name" ) = Gaffer::GraphComponent::defaultName<T>(), boost::python::arg_( "direction" ) = Gaffer::Plug::In, boost::python::arg_( "defaultValue" ) = Detail::typedObjectPlugDefaultValue<T>(), boost::python::arg_( "flags" ) = Gaffer::Plug::Default ) ) );
+	this->def(
+		"__init__",
+		make_constructor(
+			Detail::construct<T>, boost::python::default_call_policies(),
+			( boost::python::arg_( "name" ) = Gaffer::GraphComponent::defaultName<T>(),
+			  boost::python::arg_( "direction" ) = Gaffer::Plug::In,
+			  boost::python::arg_( "defaultValue" ) = Detail::typedObjectPlugDefaultValue<T>(),
+			  boost::python::arg_( "flags" ) = Gaffer::Plug::Default )
+		)
+	);
 	this->def( "defaultValue", &Detail::defaultValue<T>, ( boost::python::arg_( "_copy" ) = true ) );
-	this->def( "setValue", Detail::setValue<T>, ( boost::python::arg_( "value" ), boost::python::arg_( "_copy" ) = true ) );
-	this->def( "getValue", Detail::getValue<T>, ( boost::python::arg_( "_precomputedHash" ) = boost::python::object(), boost::python::arg_( "_copy" ) = true ) );
+	this->def(
+		"setValue", Detail::setValue<T>, ( boost::python::arg_( "value" ), boost::python::arg_( "_copy" ) = true )
+	);
+	this->def(
+		"getValue", Detail::getValue<T>,
+		( boost::python::arg_( "_precomputedHash" ) = boost::python::object(), boost::python::arg_( "_copy" ) = true )
+	);
 
 	boost::python::scope s = *this;
 
-	PyTypeObject *valueType = boost::python::converter::registry::query(
-								  boost::python::type_info( typeid( typename T::ValueType ) )
-	)
-								  ->get_class_object();
+	PyTypeObject *valueType =
+		boost::python::converter::registry::query( boost::python::type_info( typeid( typename T::ValueType ) ) )
+			->get_class_object();
 
 	s.attr( "ValueType" ) = boost::python::object( boost::python::handle<>( boost::python::borrowed( valueType ) ) );
 }

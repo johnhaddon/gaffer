@@ -74,7 +74,7 @@ const IECore::InternedString g_contributionOffsetsName = "contributionOffsets";
 // Converting this into an alpha value is done in alphaToLinearWeights
 class SampleMerge
 {
-	public:
+public:
 
 	SampleMerge( const vector<int> &inSampleOffsets, const vector<float> *inZ, const vector<float> *inZBack )
 		: zData( new FloatVectorData() ),
@@ -138,12 +138,13 @@ class SampleMerge
 				{
 					const int lastOpen = m_openSamples.back();
 					// Check if we match the last already open sample, starting with Z
-					if( m_inZ[lastOpen] == currentSampleZ && (
-																 // Now check if both ZBacks are valid and match
-																 m_inZBack[lastOpen] == currentSampleZBack ||
-																 // Or if neither ZBack is valid, and they are both treated as point samples
-																 !( m_inZBack[lastOpen] > currentSampleZ || currentSampleZBack > currentSampleZ )
-															 ) )
+					if( m_inZ[lastOpen] == currentSampleZ &&
+						(
+							// Now check if both ZBacks are valid and match
+							m_inZBack[lastOpen] == currentSampleZBack ||
+							// Or if neither ZBack is valid, and they are both treated as point samples
+							!( m_inZBack[lastOpen] > currentSampleZ || currentSampleZBack > currentSampleZ )
+						) )
 					{
 						// We exactly match an existing open sample, we don't need to close anything
 						// ( This check avoids closing an open point sample when receiving another
@@ -156,7 +157,10 @@ class SampleMerge
 					}
 				}
 
-				if( m_openSamples.size() == 0 && ( currentSampleId + 1 == offset || ( m_inZBack[currentSampleId] <= m_inZ[currentSampleId + 1] && m_inZ[currentSampleId] < m_inZBack[currentSampleId + 1] ) ) )
+				if( m_openSamples.size() == 0 &&
+					( currentSampleId + 1 == offset ||
+					  ( m_inZBack[currentSampleId] <= m_inZ[currentSampleId + 1] &&
+						m_inZ[currentSampleId] < m_inZBack[currentSampleId + 1] ) ) )
 				{
 					// There are no open samples, and this sample does not interact with the next sample.
 					// We can take a fast path, knowing that we can directly output this sample without
@@ -205,7 +209,7 @@ class SampleMerge
 	IntVectorDataPtr contributionOffsetsData;
 
 
-	private:
+private:
 
 	void closeOpenSamples( float currentDepth, const float closeUpToZ )
 	{
@@ -281,11 +285,8 @@ class SampleMerge
 // flatten ).
 FloatVectorDataPtr alphaToLinearWeights(
 	std::vector<float> &contributionWeightsBuffer, // Modified in place
-	const std::vector<int> &contributionIds,
-	const std::vector<int> &contributionOffsets,
-	const std::vector<float> &alpha,
-	const std::vector<int> &sampleOffsets,
-	bool flatten
+	const std::vector<int> &contributionIds, const std::vector<int> &contributionOffsets,
+	const std::vector<float> &alpha, const std::vector<int> &sampleOffsets, bool flatten
 )
 {
 	static const float MAX = numeric_limits<float>::max();
@@ -377,7 +378,8 @@ FloatVectorDataPtr alphaToLinearWeights(
 					{
 						// When we find our first opaque sample, no previous samples matter, since an opaque
 						// sample always overpowers everything it is merged with
-						for( unsigned int skippedContrib = contributionStart; skippedContrib < contrib; skippedContrib++ )
+						for( unsigned int skippedContrib = contributionStart; skippedContrib < contrib;
+							 skippedContrib++ )
 						{
 							contributionWeightsBuffer[skippedContrib] = 0.0f;
 						}
@@ -440,7 +442,8 @@ FloatVectorDataPtr alphaToLinearWeights(
 			}
 			else
 			{
-				sampleWeightMultiplier = ( accumU > 1 || sampleAccumAlpha < accumU * MAX ) ? sampleAccumAlpha / accumU : 1.0f;
+				sampleWeightMultiplier =
+					( accumU > 1 || sampleAccumAlpha < accumU * MAX ) ? sampleAccumAlpha / accumU : 1.0f;
 			}
 
 			// When flattening, we include a multiplier to account for occlusion by previous samples
@@ -490,13 +493,8 @@ FloatVectorDataPtr alphaToLinearWeights(
 // past the occluded threshold, but not 100% hidden, are merged with the last sample, to preserve the
 // flattened appearance of the image
 void pruneSamples(
-	std::vector<float> &contributionWeights,
-	std::vector<int> &contributionIds,
-	std::vector<int> &contributionOffsets,
-	std::vector<float> &alpha,
-	std::vector<float> *z,
-	std::vector<float> *zBack,
-	std::vector<int> &sampleOffsets,
+	std::vector<float> &contributionWeights, std::vector<int> &contributionIds, std::vector<int> &contributionOffsets,
+	std::vector<float> &alpha, std::vector<float> *z, std::vector<float> *zBack, std::vector<int> &sampleOffsets,
 	bool pruneTransparent, bool pruneOccluded, float occludedThreshold
 )
 {
@@ -532,7 +530,8 @@ void pruneSamples(
 			for( int contribution = prevContributionOffset; contribution < contributionOffset; contribution++ )
 			{
 				contributionIds[writeContributionIndex] = contributionIds[contribution];
-				contributionWeights[writeContributionIndex] = contributionWeights[contribution] * contributionWeightMultiplier;
+				contributionWeights[writeContributionIndex] =
+					contributionWeights[contribution] * contributionWeightMultiplier;
 				writeContributionIndex++;
 			}
 
@@ -594,9 +593,7 @@ void pruneSamples(
 // and then feeding the contribution amounts through alphaToLinearWeights.  When we are
 // starting with tidy data, however, we can get to the same end point with a simple accumulate.
 FloatVectorDataPtr tidyAlphaToFlatLinearWeights(
-	std::vector<float> &outputWeights,
-	const std::vector<float> &alpha,
-	const std::vector<int> &sampleOffsets
+	std::vector<float> &outputWeights, const std::vector<float> &alpha, const std::vector<int> &sampleOffsets
 )
 {
 	FloatVectorDataPtr mergedAlphaData = new FloatVectorData;
@@ -638,7 +635,10 @@ IECore::ConstFloatVectorDataPtr sortByIndices( const std::vector<float> &input, 
 }
 
 // Return a FloatVectorData which for each element of indices, contains the element of input with that index.
-IECore::ConstFloatVectorDataPtr sumByIndicesAndWeights( const std::vector<float> &input, const vector<int> &indices, const vector<float> &weights, const vector<int> &offsets )
+IECore::ConstFloatVectorDataPtr sumByIndicesAndWeights(
+	const std::vector<float> &input, const vector<int> &indices, const vector<float> &weights,
+	const vector<int> &offsets
+)
 {
 	FloatVectorDataPtr resultData = new FloatVectorData;
 	vector<float> &result = resultData->writable();
@@ -664,7 +664,9 @@ IECore::ConstFloatVectorDataPtr sumByIndicesAndWeights( const std::vector<float>
 
 // For each range of samples indicated by offsets, multiply the corresponding input sample by the
 // corresponding weight, and sum.  Returns a FloatVectorData with the sum for each range.
-IECore::ConstFloatVectorDataPtr sumByWeights( const std::vector<float> &input, const vector<float> &weights, const vector<int> &offsets )
+IECore::ConstFloatVectorDataPtr sumByWeights(
+	const std::vector<float> &input, const vector<float> &weights, const vector<int> &offsets
+)
 {
 	FloatVectorDataPtr resultData = new FloatVectorData;
 	vector<float> &result = resultData->writable();
@@ -701,7 +703,8 @@ IECore::IntVectorDataPtr computeSampleSorting(
 		const vector<float> &m_zBackSamples;
 
 		CompareDepth( const vector<float> &zSamples, const vector<float> &zBackSamples )
-			: m_zSamples( zSamples ), m_zBackSamples( zBackSamples )
+			: m_zSamples( zSamples ),
+			  m_zBackSamples( zBackSamples )
 		{
 		}
 
@@ -746,7 +749,10 @@ IECore::IntVectorDataPtr computeSampleSorting(
 	return resultData;
 }
 
-void checkState( const std::vector<int> &offsets, const std::vector<float> &zChannel, const std::vector<float> &zBackChannel, bool &isSorted, bool &isTidy )
+void checkState(
+	const std::vector<int> &offsets, const std::vector<float> &zChannel, const std::vector<float> &zBackChannel,
+	bool &isSorted, bool &isTidy
+)
 {
 	isSorted = true;
 	isTidy = true;
@@ -815,8 +821,7 @@ void checkState( const std::vector<int> &offsets, const std::vector<float> &zCha
 
 size_t DeepState::g_firstPlugIndex = 0;
 
-DeepState::DeepState( const std::string &name )
-	: ImageProcessor( name )
+DeepState::DeepState( const std::string &name ) : ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -835,9 +840,7 @@ DeepState::DeepState( const std::string &name )
 	outPlug()->metadataPlug()->setInput( inPlug()->metadataPlug() );
 }
 
-DeepState::~DeepState()
-{
-}
+DeepState::~DeepState() {}
 
 Gaffer::IntPlug *DeepState::deepStatePlug()
 {
@@ -1070,11 +1073,8 @@ void DeepState::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 				ConstFloatVectorDataPtr alphaData = inPlug()->channelDataPlug()->getValue();
 
 				sampleWeights.resize( sampleOffsetsData->readable().back() );
-				FloatVectorDataPtr mergedAlphaData = tidyAlphaToFlatLinearWeights(
-					sampleWeights,
-					alphaData->readable(),
-					sampleOffsetsData->readable()
-				);
+				FloatVectorDataPtr mergedAlphaData =
+					tidyAlphaToFlatLinearWeights( sampleWeights, alphaData->readable(), sampleOffsetsData->readable() );
 
 				result->members()[g_AName] = mergedAlphaData;
 				result->members()[g_contributionWeightsName] = sampleWeightsData;
@@ -1087,7 +1087,10 @@ void DeepState::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 			static_cast<CompoundObjectPlug *>( output )->setValue( result );
 			return;
 		}
-		else if( requestedDeepState == TargetState::Sorted || ( requestedDeepState == TargetState::Tidy && !pruneTransparent && !pruneOccluded ) )
+		else if(
+			requestedDeepState == TargetState::Sorted ||
+			( requestedDeepState == TargetState::Tidy && !pruneTransparent && !pruneOccluded )
+		)
 		{
 			// We're already sorted, nothing needs to be done
 			static_cast<CompoundObjectPlug *>( output )->setValue( result );
@@ -1097,9 +1100,8 @@ void DeepState::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 
 	if( !isSorted )
 	{
-		sampleSortingData = computeSampleSorting(
-			sampleOffsetsData->readable(), zData->readable(), zBackData->readable()
-		);
+		sampleSortingData =
+			computeSampleSorting( sampleOffsetsData->readable(), zData->readable(), zBackData->readable() );
 	}
 
 	if( requestedDeepState == TargetState::Sorted )
@@ -1128,7 +1130,9 @@ void DeepState::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 		}
 
 		// Set up the sample merge data
-		SampleMerge sampleMerge( sampleOffsetsData->readable(), hasZ ? &zData->readable() : nullptr, hasZ ? &zBackData->readable() : nullptr );
+		SampleMerge sampleMerge(
+			sampleOffsetsData->readable(), hasZ ? &zData->readable() : nullptr, hasZ ? &zBackData->readable() : nullptr
+		);
 
 		if( sampleSortingData )
 		{
@@ -1161,11 +1165,8 @@ void DeepState::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 		// Do the math that converts from depth fractions into linear weights
 		FloatVectorDataPtr mergedAlphaData = alphaToLinearWeights(
 			sampleMerge.contributionAmountsData->writable(), // Modified in place
-			sampleMerge.contributionIdsData->readable(),
-			sampleMerge.contributionOffsetsData->readable(),
-			alphaData->readable(),
-			sampleMerge.sampleOffsetsData->readable(),
-			requestedDeepState == TargetState::Flat
+			sampleMerge.contributionIdsData->readable(), sampleMerge.contributionOffsetsData->readable(),
+			alphaData->readable(), sampleMerge.sampleOffsetsData->readable(), requestedDeepState == TargetState::Flat
 		);
 
 		if( requestedDeepState == TargetState::Tidy )
@@ -1174,13 +1175,10 @@ void DeepState::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 			{
 				// Prune transparent or occluded samples
 				pruneSamples(
-					sampleMerge.contributionAmountsData->writable(),
-					sampleMerge.contributionIdsData->writable(),
-					sampleMerge.contributionOffsetsData->writable(),
-					mergedAlphaData->writable(),
+					sampleMerge.contributionAmountsData->writable(), sampleMerge.contributionIdsData->writable(),
+					sampleMerge.contributionOffsetsData->writable(), mergedAlphaData->writable(),
 					hasZ ? &sampleMerge.zData->writable() : nullptr,
-					hasZ ? &sampleMerge.zBackData->writable() : nullptr,
-					sampleMerge.sampleOffsetsData->writable(),
+					hasZ ? &sampleMerge.zBackData->writable() : nullptr, sampleMerge.sampleOffsetsData->writable(),
 					pruneTransparent, pruneOccluded, occludedThreshold
 				);
 			}
@@ -1237,7 +1235,9 @@ void DeepState::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 	static_cast<CompoundObjectPlug *>( output )->setValue( result );
 }
 
-void DeepState::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepState::hashChannelData(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashChannelData( output, context, h );
 
@@ -1290,7 +1290,10 @@ void DeepState::hashChannelData( const GafferImage::ImagePlug *output, const Gaf
 	sampleMappingPlug()->hash( h );
 }
 
-IECore::ConstFloatVectorDataPtr DeepState::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr DeepState::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	bool inDeep;
 	TargetState requestedDeepState;
@@ -1378,7 +1381,8 @@ IECore::ConstFloatVectorDataPtr DeepState::computeChannelData( const std::string
 	if( requestedDeepState == TargetState::Sorted )
 	{
 		// Just reindex, based on the sorted indices
-		ConstIntVectorDataPtr mergedSampleContributionIdsData = sampleMappingData->member<IntVectorData>( g_contributionIdsName, false );
+		ConstIntVectorDataPtr mergedSampleContributionIdsData =
+			sampleMappingData->member<IntVectorData>( g_contributionIdsName, false );
 		if( mergedSampleContributionIdsData )
 		{
 			result = sortByIndices( inData->readable(), mergedSampleContributionIdsData->readable() );
@@ -1407,16 +1411,20 @@ IECore::ConstFloatVectorDataPtr DeepState::computeChannelData( const std::string
 		{
 			// When flattening, we get a weight corresponding to each sample, and we just need to multiply
 			// the input samples by these weights and sum them.
-			ConstFloatVectorDataPtr mergedSampleContributionAmountsData = sampleMappingData->member<FloatVectorData>( g_contributionWeightsName, true );
+			ConstFloatVectorDataPtr mergedSampleContributionAmountsData =
+				sampleMappingData->member<FloatVectorData>( g_contributionWeightsName, true );
 			ConstIntVectorDataPtr sampleOffsetsData = inPlug()->sampleOffsetsPlug()->getValue();
 			assert( (int)inData->readable().size() == sampleOffsetsData->readable().back() );
-			result = sumByWeights( inData->readable(), mergedSampleContributionAmountsData->readable(), sampleOffsetsData->readable() );
+			result = sumByWeights(
+				inData->readable(), mergedSampleContributionAmountsData->readable(), sampleOffsetsData->readable()
+			);
 		}
 		else
 		{
 			// When tidying, we get a set of weights and ids corresponding to each sample, and we must sum
 			// per sample, based on the ids.
-			ConstIntVectorDataPtr mergedSampleContributionIdsData = sampleMappingData->member<IntVectorData>( g_contributionIdsName, false );
+			ConstIntVectorDataPtr mergedSampleContributionIdsData =
+				sampleMappingData->member<IntVectorData>( g_contributionIdsName, false );
 
 			if( !mergedSampleContributionIdsData )
 			{
@@ -1425,9 +1433,14 @@ IECore::ConstFloatVectorDataPtr DeepState::computeChannelData( const std::string
 			}
 			else
 			{
-				ConstFloatVectorDataPtr mergedSampleContributionAmountsData = sampleMappingData->member<FloatVectorData>( g_contributionWeightsName, true );
-				ConstIntVectorDataPtr mergedSampleContributionOffsetsData = sampleMappingData->member<IntVectorData>( g_contributionOffsetsName, true );
-				result = sumByIndicesAndWeights( inData->readable(), mergedSampleContributionIdsData->readable(), mergedSampleContributionAmountsData->readable(), mergedSampleContributionOffsetsData->readable() );
+				ConstFloatVectorDataPtr mergedSampleContributionAmountsData =
+					sampleMappingData->member<FloatVectorData>( g_contributionWeightsName, true );
+				ConstIntVectorDataPtr mergedSampleContributionOffsetsData =
+					sampleMappingData->member<IntVectorData>( g_contributionOffsetsName, true );
+				result = sumByIndicesAndWeights(
+					inData->readable(), mergedSampleContributionIdsData->readable(),
+					mergedSampleContributionAmountsData->readable(), mergedSampleContributionOffsetsData->readable()
+				);
 			}
 		}
 	}
@@ -1435,7 +1448,9 @@ IECore::ConstFloatVectorDataPtr DeepState::computeChannelData( const std::string
 	return result;
 }
 
-void DeepState::hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepState::hashSampleOffsets(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	TargetState requestedDeepState;
 	{
@@ -1460,7 +1475,9 @@ void DeepState::hashSampleOffsets( const GafferImage::ImagePlug *parent, const G
 	sampleMappingPlug()->hash( h );
 }
 
-IECore::ConstIntVectorDataPtr DeepState::computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstIntVectorDataPtr DeepState::computeSampleOffsets(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	ConstStringVectorDataPtr channelNamesData;
 	TargetState requestedDeepState;
@@ -1481,7 +1498,8 @@ IECore::ConstIntVectorDataPtr DeepState::computeSampleOffsets( const Imath::V2i 
 	}
 	else
 	{
-		ConstIntVectorDataPtr remapped = sampleMappingPlug()->getValue()->member<IntVectorData>( g_sampleOffsetsName, false );
+		ConstIntVectorDataPtr remapped =
+			sampleMappingPlug()->getValue()->member<IntVectorData>( g_sampleOffsetsName, false );
 		if( remapped )
 		{
 			return remapped;
@@ -1493,7 +1511,9 @@ IECore::ConstIntVectorDataPtr DeepState::computeSampleOffsets( const Imath::V2i 
 	}
 }
 
-void DeepState::hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepState::hashDeep(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	if( TargetState( deepStatePlug()->getValue() ) == TargetState::Flat )
 	{

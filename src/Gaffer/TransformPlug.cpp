@@ -47,65 +47,35 @@ GAFFER_PLUG_DEFINE_TYPE( TransformPlug );
 size_t TransformPlug::g_firstPlugIndex = 0;
 
 TransformPlug::TransformPlug(
-	const std::string &name, Direction direction,
-	const V3f &defaultTranslate,
-	const V3f &defaultRotate,
-	const V3f &defaultScale,
-	const V3f &defaultPivot,
-	unsigned flags
+	const std::string &name, Direction direction, const V3f &defaultTranslate, const V3f &defaultRotate,
+	const V3f &defaultScale, const V3f &defaultPivot, unsigned flags
 )
 	: ValuePlug( name, direction, flags )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
-	addChild(
-		new V3fPlug(
-			"translate",
-			direction,
-			defaultTranslate,
-			V3f( std::numeric_limits<float>::lowest() ),
-			V3f( std::numeric_limits<float>::max() ),
-			flags
-		)
-	);
+	addChild( new V3fPlug(
+		"translate", direction, defaultTranslate, V3f( std::numeric_limits<float>::lowest() ),
+		V3f( std::numeric_limits<float>::max() ), flags
+	) );
 
-	addChild(
-		new V3fPlug(
-			"rotate",
-			direction,
-			defaultRotate,
-			V3f( std::numeric_limits<float>::lowest() ),
-			V3f( std::numeric_limits<float>::max() ),
-			flags
-		)
-	);
+	addChild( new V3fPlug(
+		"rotate", direction, defaultRotate, V3f( std::numeric_limits<float>::lowest() ),
+		V3f( std::numeric_limits<float>::max() ), flags
+	) );
 
-	addChild(
-		new V3fPlug(
-			"scale",
-			direction,
-			defaultScale,
-			V3f( std::numeric_limits<float>::lowest() ),
-			V3f( std::numeric_limits<float>::max() ),
-			flags
-		)
-	);
+	addChild( new V3fPlug(
+		"scale", direction, defaultScale, V3f( std::numeric_limits<float>::lowest() ),
+		V3f( std::numeric_limits<float>::max() ), flags
+	) );
 
-	addChild(
-		new V3fPlug(
-			"pivot",
-			direction,
-			defaultPivot,
-			V3f( std::numeric_limits<float>::lowest() ),
-			V3f( std::numeric_limits<float>::max() ),
-			flags
-		)
-	);
+	addChild( new V3fPlug(
+		"pivot", direction, defaultPivot, V3f( std::numeric_limits<float>::lowest() ),
+		V3f( std::numeric_limits<float>::max() ), flags
+	) );
 }
 
-TransformPlug::~TransformPlug()
-{
-}
+TransformPlug::~TransformPlug() {}
 
 bool TransformPlug::acceptsChild( const GraphComponent *potentialChild ) const
 {
@@ -115,12 +85,8 @@ bool TransformPlug::acceptsChild( const GraphComponent *potentialChild ) const
 PlugPtr TransformPlug::createCounterpart( const std::string &name, Direction direction ) const
 {
 	return new TransformPlug(
-		name, direction,
-		translatePlug()->defaultValue(),
-		rotatePlug()->defaultValue(),
-		scalePlug()->defaultValue(),
-		pivotPlug()->defaultValue(),
-		getFlags()
+		name, direction, translatePlug()->defaultValue(), rotatePlug()->defaultValue(), scalePlug()->defaultValue(),
+		pivotPlug()->defaultValue(), getFlags()
 	);
 }
 

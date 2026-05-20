@@ -62,7 +62,9 @@ namespace
 class BoxSerialiser : public NodeSerialiser
 {
 
-	bool childNeedsSerialisation( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsSerialisation(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override
 	{
 		if( child->isInstanceOf( Node::staticTypeId() ) )
 		{
@@ -71,7 +73,9 @@ class BoxSerialiser : public NodeSerialiser
 		return NodeSerialiser::childNeedsSerialisation( child, serialisation );
 	}
 
-	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsConstruction(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override
 	{
 		if( child->isInstanceOf( Node::staticTypeId() ) )
 		{
@@ -98,10 +102,13 @@ namespace GafferModule
 class BoxIOSerialiser : public NodeSerialiser
 {
 
-	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsConstruction(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override
 	{
 		const BoxIO *boxIO = child->parent<BoxIO>();
-		if( child == boxIO->inPlugInternal() || child == boxIO->outPlugInternal() || child == boxIO->passThroughPlugInternal() )
+		if( child == boxIO->inPlugInternal() || child == boxIO->outPlugInternal() ||
+			child == boxIO->passThroughPlugInternal() )
 		{
 			// We'll serialise a `setup()` call to construct these.
 			return false;
@@ -109,7 +116,9 @@ class BoxIOSerialiser : public NodeSerialiser
 		return NodeSerialiser::childNeedsConstruction( child, serialisation );
 	}
 
-	std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
+	std::string postConstructor(
+		const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+	) const override
 	{
 		std::string result = NodeSerialiser::postConstructor( graphComponent, identifier, serialisation );
 
@@ -121,7 +130,8 @@ class BoxIOSerialiser : public NodeSerialiser
 		}
 
 		// Only serialise a call to setup() when we need to construct this node
-		if( !Serialisation::acquireSerialiser( graphComponent->parent() )->childNeedsConstruction( graphComponent, serialisation ) )
+		if( !Serialisation::acquireSerialiser( graphComponent->parent() )
+				 ->childNeedsConstruction( graphComponent, serialisation ) )
 		{
 			return result;
 		}
@@ -143,7 +153,9 @@ class BoxIOSerialiser : public NodeSerialiser
 		return result;
 	}
 
-	std::string postScript( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
+	std::string postScript(
+		const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+	) const override
 	{
 		std::string result = NodeSerialiser::postScript( graphComponent, identifier, serialisation );
 
@@ -244,14 +256,11 @@ list registeredProcessors()
 
 void registerProcessor( const std::string &name, object creator )
 {
-	EditScope::registerProcessor(
-		name,
-		[creator]() {
-			IECorePython::ScopedGILLock gilLock;
-			object n = creator();
-			return extract<DependencyNodePtr>( n )();
-		}
-	);
+	EditScope::registerProcessor( name, [creator]() {
+		IECorePython::ScopedGILLock gilLock;
+		object n = creator();
+		return extract<DependencyNodePtr>( n )();
+	} );
 }
 
 } // namespace
@@ -280,7 +289,9 @@ struct ReferenceLoadedSlotCaller
 class ReferenceSerialiser : public NodeSerialiser
 {
 
-	std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
+	std::string postConstructor(
+		const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+	) const override
 	{
 		const Reference *r = static_cast<const Reference *>( graphComponent );
 
@@ -340,7 +351,9 @@ void GafferModule::bindSubGraph()
 		.def( "hasMetadataEdit", &Reference::hasMetadataEdit )
 		.def( "isChildEdit", &Reference::isChildEdit );
 
-	SignalClass<Reference::ReferenceLoadedSignal, DefaultSignalCaller<Reference::ReferenceLoadedSignal>, ReferenceLoadedSlotCaller>( "ReferenceLoadedSignal" );
+	SignalClass<
+		Reference::ReferenceLoadedSignal, DefaultSignalCaller<Reference::ReferenceLoadedSignal>,
+		ReferenceLoadedSlotCaller>( "ReferenceLoadedSignal" );
 
 	Serialisation::registerSerialiser( Reference::staticTypeId(), new ReferenceSerialiser );
 

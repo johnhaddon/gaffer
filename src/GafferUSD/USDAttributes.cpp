@@ -54,8 +54,7 @@ const boost::container::flat_map<IECore::InternedString, IECore::ConstDataPtr> g
 
 } // namespace
 
-USDAttributes::USDAttributes( const std::string &name )
-	: GafferScene::Attributes( name, "usd" )
+USDAttributes::USDAttributes( const std::string &name ) : GafferScene::Attributes( name, "usd" )
 {
 
 	for( auto &p : NameValuePlug::Range( *attributesPlug() ) )
@@ -69,6 +68,4 @@ USDAttributes::USDAttributes( const std::string &name )
 	}
 }
 
-USDAttributes::~USDAttributes()
-{
-}
+USDAttributes::~USDAttributes() {}

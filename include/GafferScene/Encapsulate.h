@@ -44,7 +44,7 @@ namespace GafferScene
 class GAFFERSCENE_API Encapsulate : public FilteredSceneProcessor
 {
 
-	public:
+public:
 
 	explicit Encapsulate( const std::string &name = defaultName<Encapsulate>() );
 	~Encapsulate() override;
@@ -53,18 +53,31 @@ class GAFFERSCENE_API Encapsulate : public FilteredSceneProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
-	void hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-	IECore::ConstObjectPtr computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashObject(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstObjectPtr computeObject(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+	) const override;
 
-	void hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-	IECore::ConstInternedStringVectorDataPtr computeChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashChildNames(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstInternedStringVectorDataPtr computeChildNames(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+	) const override;
 
-	void hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-	IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashSet(
+		const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent,
+		IECore::MurmurHash &h
+	) const override;
+	IECore::ConstPathMatcherDataPtr computeSet(
+		const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent
+	) const override;
 
-	private:
+private:
 
 	IECore::PathMatcher::Result filterValueChecked( const Gaffer::Context *context ) const;
 

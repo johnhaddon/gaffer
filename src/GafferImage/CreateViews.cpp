@@ -60,23 +60,19 @@ GAFFER_NODE_DEFINE_TYPE( CreateViews );
 
 size_t CreateViews::g_firstPlugIndex = 0;
 
-CreateViews::CreateViews( const std::string &name )
-	: ImageNode( name )
+CreateViews::CreateViews( const std::string &name ) : ImageNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
 	ArrayPlugPtr views = new ArrayPlug(
-		"views",
-		Plug::In,
+		"views", Plug::In,
 		new NameValuePlug(
 			/* nameDefault = */ "",
 			/* valuePlug = */ new ImagePlug(),
 			/* defaultEnabled = */ true,
 			/* name = */ "view0"
 		),
-		0,
-		std::numeric_limits<size_t>::max(),
-		Plug::Default,
+		0, std::numeric_limits<size_t>::max(), Plug::Default,
 		/* resizeWhenInputsChange = */ false
 	);
 
@@ -104,9 +100,7 @@ CreateViews::CreateViews( const std::string &name )
 	views->childRemovedSignal().connect( boost::bind( &CreateViews::synchronizeSwitch, this ) );
 }
 
-CreateViews::~CreateViews()
-{
-}
+CreateViews::~CreateViews() {}
 
 Gaffer::ArrayPlug *CreateViews::viewsPlug()
 {
@@ -155,10 +149,9 @@ void CreateViews::affects( const Gaffer::Plug *input, AffectedPlugsContainer &ou
 	ImageNode::affects( input, outputs );
 
 	auto nameValuePlug = input->ancestor<NameValuePlug>();
-	if(
-		nameValuePlug && nameValuePlug->parent() == viewsPlug() &&
-		( input == nameValuePlug->namePlug() || input == nameValuePlug->enabledPlug() || input == nameValuePlug->valuePlug<ImagePlug>()->viewNamesPlug() )
-	)
+	if( nameValuePlug && nameValuePlug->parent() == viewsPlug() &&
+		( input == nameValuePlug->namePlug() || input == nameValuePlug->enabledPlug() ||
+		  input == nameValuePlug->valuePlug<ImagePlug>()->viewNamesPlug() ) )
 	{
 		outputs.push_back( outPlug()->viewNamesPlug() );
 		outputs.push_back( indexPlug() );
@@ -198,7 +191,8 @@ void CreateViews::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 		return;
 	}
 
-	const std::string &currentView = context->get<std::string>( ImagePlug::viewNameContextName, ImagePlug::defaultViewName );
+	const std::string &currentView =
+		context->get<std::string>( ImagePlug::viewNameContextName, ImagePlug::defaultViewName );
 
 	Context::EditableScope s( context );
 	s.remove( ImagePlug::viewNameContextName );
@@ -210,7 +204,8 @@ void CreateViews::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 	{
 		if( !nameValue->enabledPlug() || nameValue->enabledPlug()->getValue() )
 		{
-			if( nameValue->valuePlug<ImagePlug>()->viewNamesPlug()->getValue()->readable() != ImagePlug::defaultViewNames()->readable() )
+			if( nameValue->valuePlug<ImagePlug>()->viewNamesPlug()->getValue()->readable() !=
+				ImagePlug::defaultViewNames()->readable() )
 			{
 				throw IECore::Exception( "CreateViews : Inputs must have just a default view." );
 			}
@@ -246,7 +241,9 @@ void CreateViews::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 	static_cast<IntPlug *>( output )->setValue( result );
 }
 
-void CreateViews::hashViewNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CreateViews::hashViewNames(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageNode::hashViewNames( output, context, h );
 	for( auto &nameValue : NameValuePlug::Range( *viewsPlug() ) )
@@ -259,7 +256,9 @@ void CreateViews::hashViewNames( const GafferImage::ImagePlug *output, const Gaf
 	}
 }
 
-IECore::ConstStringVectorDataPtr CreateViews::computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr CreateViews::computeViewNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	StringVectorDataPtr resultData = new StringVectorData();
 	std::vector<string> &result = resultData->writable();

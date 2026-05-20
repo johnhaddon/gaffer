@@ -69,17 +69,14 @@ using namespace GafferRenderMan;
 
 IE_CORE_DEFINERUNTIMETYPED( RenderManShader );
 
-RenderManShader::RenderManShader( const std::string &name )
-	: GafferScene::Shader( name )
+RenderManShader::RenderManShader( const std::string &name ) : GafferScene::Shader( name )
 {
 	/// \todo It would be better if the Shader base class added this
 	/// output plug, but that means changing ArnoldShader.
 	addChild( new Plug( "out", Plug::Out ) );
 }
 
-RenderManShader::~RenderManShader()
-{
-}
+RenderManShader::~RenderManShader() {}
 
 namespace
 {
@@ -96,27 +93,21 @@ namespace
 {
 
 using ParameterSet = unordered_set<string>;
-const unordered_map<string, ParameterSet> g_omittedParameters = {
-	{
-		"PxrPortalLight",
-		{ // These shouldn't be exposed because we are going to
-		  // derive the values from the dome light and other parameters
-		  // like `intensityMult`.
-		  "domeColorMap", "lightColor", "intensity", "exposure", "portalToDome",
-		  "portalName",
-		  // These shouldn't be exposed because we are going to inherit the
-		  // values from the dome light.
-		  /// \todo We could instead load these as `OptionalValuePlugs` to
-		  /// allow a portal to override a value from the dome.
-		  "colorMapGamma", "colorMapSaturation", "enableTemperature",
-		  "temperature", "specular", "diffuse", "enableShadows",
-		  "shadowColor", "shadowDistance", "shadowFalloff", "shadowFalloffGamma",
-		  "shadowSubset", "shadowExcludeSubset", "traceLightPaths", "thinShadow",
-		  "visibleInRefractionPath", "cheapCaustics", "cheapCausticsExcludeGroup",
-		  "fixedSampleCount", "lightGroup", "importanceMultiplier", "msApprox",
-		  "msApproxBleed", "msApproxContribution" },
-	}
-};
+const unordered_map<string, ParameterSet> g_omittedParameters = { {
+	"PxrPortalLight",
+	{ // These shouldn't be exposed because we are going to
+	  // derive the values from the dome light and other parameters
+	  // like `intensityMult`.
+	  "domeColorMap", "lightColor", "intensity", "exposure", "portalToDome", "portalName",
+	  // These shouldn't be exposed because we are going to inherit the
+	  // values from the dome light.
+	  /// \todo We could instead load these as `OptionalValuePlugs` to
+	  /// allow a portal to override a value from the dome.
+	  "colorMapGamma", "colorMapSaturation", "enableTemperature", "temperature", "specular", "diffuse", "enableShadows",
+	  "shadowColor", "shadowDistance", "shadowFalloff", "shadowFalloffGamma", "shadowSubset", "shadowExcludeSubset",
+	  "traceLightPaths", "thinShadow", "visibleInRefractionPath", "cheapCaustics", "cheapCausticsExcludeGroup",
+	  "fixedSampleCount", "lightGroup", "importanceMultiplier", "msApprox", "msApproxBleed", "msApproxContribution" },
+} };
 
 } // namespace
 
@@ -128,7 +119,10 @@ namespace
 {
 
 template<typename PlugType>
-PlugPtr acquireNumericParameter( const boost::property_tree::ptree &parameter, IECore::InternedString name, Plug::Direction direction, Plug *candidatePlug )
+PlugPtr acquireNumericParameter(
+	const boost::property_tree::ptree &parameter, IECore::InternedString name, Plug::Direction direction,
+	Plug *candidatePlug
+)
 {
 	using ValueType = typename PlugType::ValueType;
 
@@ -137,12 +131,8 @@ PlugPtr acquireNumericParameter( const boost::property_tree::ptree &parameter, I
 	const ValueType maxValue = parameter.get( "<xmlattr>.max", numeric_limits<ValueType>::max() );
 
 	auto existingPlug = runTimeCast<PlugType>( candidatePlug );
-	if(
-		existingPlug &&
-		existingPlug->defaultValue() == defaultValue &&
-		existingPlug->minValue() == minValue &&
-		existingPlug->maxValue() == maxValue
-	)
+	if( existingPlug && existingPlug->defaultValue() == defaultValue && existingPlug->minValue() == minValue &&
+		existingPlug->maxValue() == maxValue )
 	{
 		return existingPlug;
 	}
@@ -171,12 +161,16 @@ T parseCompoundNumericValue( const string &s )
 }
 
 template<typename PlugType>
-PlugPtr acquireCompoundNumericParameter( const boost::property_tree::ptree &parameter, IECore::InternedString name, Plug::Direction direction, IECore::GeometricData::Interpretation interpretation, Plug *candidatePlug )
+PlugPtr acquireCompoundNumericParameter(
+	const boost::property_tree::ptree &parameter, IECore::InternedString name, Plug::Direction direction,
+	IECore::GeometricData::Interpretation interpretation, Plug *candidatePlug
+)
 {
 	using ValueType = typename PlugType::ValueType;
 	using BaseType = typename ValueType::BaseType;
 
-	const ValueType defaultValue = parseCompoundNumericValue<ValueType>( parameter.get( "<xmlattr>.default", "0 0 0" ) );
+	const ValueType defaultValue =
+		parseCompoundNumericValue<ValueType>( parameter.get( "<xmlattr>.default", "0 0 0" ) );
 
 	ValueType minValue( numeric_limits<BaseType>::lowest() );
 	if( auto m = parameter.get_optional<std::string>( "<xmlattr>.min" ) )
@@ -190,13 +184,8 @@ PlugPtr acquireCompoundNumericParameter( const boost::property_tree::ptree &para
 	}
 
 	auto existingPlug = runTimeCast<PlugType>( candidatePlug );
-	if(
-		existingPlug &&
-		existingPlug->defaultValue() == defaultValue &&
-		existingPlug->minValue() == minValue &&
-		existingPlug->maxValue() == maxValue &&
-		existingPlug->interpretation() == interpretation
-	)
+	if( existingPlug && existingPlug->defaultValue() == defaultValue && existingPlug->minValue() == minValue &&
+		existingPlug->maxValue() == maxValue && existingPlug->interpretation() == interpretation )
 	{
 		return existingPlug;
 	}
@@ -204,15 +193,15 @@ PlugPtr acquireCompoundNumericParameter( const boost::property_tree::ptree &para
 	return new PlugType( name, direction, defaultValue, minValue, maxValue, Plug::Default, interpretation );
 }
 
-PlugPtr acquireStringParameter( const boost::property_tree::ptree &parameter, IECore::InternedString name, Plug::Direction direction, Plug *candidatePlug )
+PlugPtr acquireStringParameter(
+	const boost::property_tree::ptree &parameter, IECore::InternedString name, Plug::Direction direction,
+	Plug *candidatePlug
+)
 {
 	const string defaultValue = parameter.get( "<xmlattr>.default", "" );
 
 	auto existingPlug = runTimeCast<StringPlug>( candidatePlug );
-	if(
-		existingPlug &&
-		existingPlug->defaultValue() == defaultValue
-	)
+	if( existingPlug && existingPlug->defaultValue() == defaultValue )
 	{
 		return existingPlug;
 	}
@@ -220,7 +209,10 @@ PlugPtr acquireStringParameter( const boost::property_tree::ptree &parameter, IE
 	return new StringPlug( name, direction, defaultValue );
 }
 
-PlugPtr acquireMatrixParameter( const boost::property_tree::ptree &parameter, IECore::InternedString name, Plug::Direction direction, Plug *candidatePlug )
+PlugPtr acquireMatrixParameter(
+	const boost::property_tree::ptree &parameter, IECore::InternedString name, Plug::Direction direction,
+	Plug *candidatePlug
+)
 {
 	auto existingPlug = runTimeCast<M44fPlug>( candidatePlug );
 	if( existingPlug )
@@ -297,19 +289,24 @@ Gaffer::Plug *loadParameter( const boost::property_tree::ptree &parameter, Plug 
 	}
 	else if( type == "point" )
 	{
-		acquiredPlug = acquireCompoundNumericParameter<V3fPlug>( parameter, name, Plug::In, GeometricData::Point, candidatePlug );
+		acquiredPlug =
+			acquireCompoundNumericParameter<V3fPlug>( parameter, name, Plug::In, GeometricData::Point, candidatePlug );
 	}
 	else if( type == "vector" )
 	{
-		acquiredPlug = acquireCompoundNumericParameter<V3fPlug>( parameter, name, Plug::In, GeometricData::Vector, candidatePlug );
+		acquiredPlug =
+			acquireCompoundNumericParameter<V3fPlug>( parameter, name, Plug::In, GeometricData::Vector, candidatePlug );
 	}
 	else if( type == "normal" )
 	{
-		acquiredPlug = acquireCompoundNumericParameter<V3fPlug>( parameter, name, Plug::In, GeometricData::Normal, candidatePlug );
+		acquiredPlug =
+			acquireCompoundNumericParameter<V3fPlug>( parameter, name, Plug::In, GeometricData::Normal, candidatePlug );
 	}
 	else if( type == "color" )
 	{
-		acquiredPlug = acquireCompoundNumericParameter<Color3fPlug>( parameter, name, Plug::In, GeometricData::None, candidatePlug );
+		acquiredPlug = acquireCompoundNumericParameter<Color3fPlug>(
+			parameter, name, Plug::In, GeometricData::None, candidatePlug
+		);
 	}
 	else if( type == "string" )
 	{
@@ -325,10 +322,8 @@ Gaffer::Plug *loadParameter( const boost::property_tree::ptree &parameter, Plug 
 	}
 	else
 	{
-		msg(
-			IECore::Msg::Warning, "RenderManShader::loadShader",
-			fmt::format( "Parameter \"{}\" has unsupported type \"{}\"", name, type )
-		);
+		msg( IECore::Msg::Warning, "RenderManShader::loadShader",
+			 fmt::format( "Parameter \"{}\" has unsupported type \"{}\"", name, type ) );
 		return nullptr;
 	}
 
@@ -347,7 +342,8 @@ Gaffer::Plug *loadParameter( const boost::property_tree::ptree &parameter, Plug 
 
 PlugPtr findRampPlugFromPositionsParameter(
 	const std::string &positionName, const boost::property_tree::ptree &positionsParameter,
-	const std::map<std::string, const boost::property_tree::ptree *> &parameters, Plug::Direction direction, std::unordered_set<const boost::property_tree::ptree *> &parametersAlreadyProcessed
+	const std::map<std::string, const boost::property_tree::ptree *> &parameters, Plug::Direction direction,
+	std::unordered_set<const boost::property_tree::ptree *> &parametersAlreadyProcessed
 )
 {
 	static const std::string positionsSuffix( "_Knots" );
@@ -361,9 +357,12 @@ PlugPtr findRampPlugFromPositionsParameter(
 		return nullptr;
 	}
 
-	if( !( positionsParameter.get<string>( "<xmlattr>.type" ) == "float" && positionsParameter.get<string>( "<xmlattr>.isDynamicArray", "0" ) == "1" ) )
+	if( !( positionsParameter.get<string>( "<xmlattr>.type" ) == "float" &&
+		   positionsParameter.get<string>( "<xmlattr>.isDynamicArray", "0" ) == "1" ) )
 	{
-		throw IECore::Exception( "Spline _Knots not a float vector: " + positionsParameter.get<string>( "<xmlattr>.name" ) );
+		throw IECore::Exception(
+			"Spline _Knots not a float vector: " + positionsParameter.get<string>( "<xmlattr>.name" )
+		);
 	}
 
 	std::string baseName = positionsName.substr( 0, positionsName.size() - positionsSuffix.size() );
@@ -404,20 +403,22 @@ PlugPtr findRampPlugFromPositionsParameter(
 	const boost::property_tree::ptree *countParameter = nullptr;
 	if( countIt == parameters.end() )
 	{
-		msg(
-			IECore::Msg::Warning, "RenderManShader::loadShader",
-			fmt::format( "Spline has no parameter matching the base name : \"{}\"", countName )
-		);
+		msg( IECore::Msg::Warning, "RenderManShader::loadShader",
+			 fmt::format( "Spline has no parameter matching the base name : \"{}\"", countName ) );
 	}
 	else
 	{
 		countParameter = countIt->second;
 		std::string countParamDefaultText = countIt->second->get( "<xmlattr>.default", "" );
-		if( !( countIt->second->get<string>( "<xmlattr>.type" ) == "int" && boost::lexical_cast<unsigned int>( countParamDefaultText ) == positionsDefault.size() ) )
+		if( !( countIt->second->get<string>( "<xmlattr>.type" ) == "int" &&
+			   boost::lexical_cast<unsigned int>( countParamDefaultText ) == positionsDefault.size() ) )
 		{
 			msg(
 				IECore::Msg::Warning, "RenderManShader::loadShader",
-				fmt::format( "Spline base parameter mismatch for \"{}\": expected \"{}\" got \"{}\". If we need to clip this default value, this will require a Gaffer code update.", countName, positionsDefault.size(), countParamDefaultText )
+				fmt::format(
+					"Spline base parameter mismatch for \"{}\": expected \"{}\" got \"{}\". If we need to clip this default value, this will require a Gaffer code update.",
+					countName, positionsDefault.size(), countParamDefaultText
+				)
 			);
 		}
 	}
@@ -438,14 +439,16 @@ PlugPtr findRampPlugFromPositionsParameter(
 			return nullptr;
 		}
 
-		if( !( valuesIt->second->get<string>( "<xmlattr>.type" ) == "float" && valuesIt->second->get<string>( "<xmlattr>.isDynamicArray", "0" ) == "1" ) )
+		if( !( valuesIt->second->get<string>( "<xmlattr>.type" ) == "float" &&
+			   valuesIt->second->get<string>( "<xmlattr>.isDynamicArray", "0" ) == "1" ) )
 		{
 			throw IECore::Exception( "Spline _Floats not a float vector: " + valuesName );
 		}
 	}
 	else
 	{
-		if( !( valuesIt->second->get<string>( "<xmlattr>.type" ) == "color" && valuesIt->second->get<string>( "<xmlattr>.isDynamicArray", "0" ) == "1" ) )
+		if( !( valuesIt->second->get<string>( "<xmlattr>.type" ) == "color" &&
+			   valuesIt->second->get<string>( "<xmlattr>.isDynamicArray", "0" ) == "1" ) )
 		{
 			throw IECore::Exception( "Spline _Colors not a color vector: " + valuesName );
 		}
@@ -466,7 +469,10 @@ PlugPtr findRampPlugFromPositionsParameter(
 	if( positionsDefault.size() != valuesSize )
 	{
 		throw IECore::Exception(
-			fmt::format( "Sizes of spline knots and values don't match: {}:{} != {}:{}", positionsName, positionsDefault.size(), valuesName, valuesSize )
+			fmt::format(
+				"Sizes of spline knots and values don't match: {}:{} != {}:{}", positionsName, positionsDefault.size(),
+				valuesName, valuesSize
+			)
 		);
 	}
 
@@ -482,9 +488,7 @@ PlugPtr findRampPlugFromPositionsParameter(
 	{
 		if( valueTokens.size() != positionsDefault.size() * 3 )
 		{
-			throw IECore::Exception(
-				fmt::format( "Malformed tokens for color vector default value: {}", valuesName )
-			);
+			throw IECore::Exception( fmt::format( "Malformed tokens for color vector default value: {}", valuesName ) );
 		}
 
 		std::vector<Imath::Color3f> values;
@@ -519,7 +523,10 @@ PlugPtr findRampPlugFromPositionsParameter(
 }
 
 
-void loadParameters( const boost::property_tree::ptree &tree, Plug *parent, const ParameterSet *omit, std::unordered_set<const Plug *> &validPlugs )
+void loadParameters(
+	const boost::property_tree::ptree &tree, Plug *parent, const ParameterSet *omit,
+	std::unordered_set<const Plug *> &validPlugs
+)
 {
 	// In order to assemble together the parameters needed to build a ramp, we need to be able to look up
 	// parameters by name. Build a map of all the parameters that we should be building plugs from
@@ -549,14 +556,14 @@ void loadParameters( const boost::property_tree::ptree &tree, Plug *parent, cons
 		PlugPtr ramp;
 		try
 		{
-			ramp = findRampPlugFromPositionsParameter( param.first, *param.second, parameters, parent->direction(), parametersAlreadyProcessed );
+			ramp = findRampPlugFromPositionsParameter(
+				param.first, *param.second, parameters, parent->direction(), parametersAlreadyProcessed
+			);
 		}
 		catch( std::exception &e )
 		{
-			msg(
-				IECore::Msg::Warning, "RenderManShader::loadShader",
-				fmt::format( "Error while parsing ramp based on \"{}\" : {}", param.first, e.what() )
-			);
+			msg( IECore::Msg::Warning, "RenderManShader::loadShader",
+				 fmt::format( "Error while parsing ramp based on \"{}\" : {}", param.first, e.what() ) );
 		}
 
 		if( ramp )
@@ -601,10 +608,8 @@ void loadParameters( const boost::property_tree::ptree &tree, Plug *parent, cons
 		}
 		catch( std::exception &e )
 		{
-			msg(
-				IECore::Msg::Warning, "RenderManShader::loadShader",
-				fmt::format( "Error while parsing parameter \"{}\" : {}", child.first, e.what() )
-			);
+			msg( IECore::Msg::Warning, "RenderManShader::loadShader",
+				 fmt::format( "Error while parsing parameter \"{}\" : {}", child.first, e.what() ) );
 			continue;
 		}
 	}
@@ -645,7 +650,8 @@ Gaffer::Plug *loadOutput( const boost::property_tree::ptree &output, Plug *paren
 	PlugPtr acquiredPlug;
 	if( tags.find( "color" ) != tags.end() )
 	{
-		acquiredPlug = acquireCompoundNumericParameter<Color3fPlug>( output, name, Plug::Out, GeometricData::None, candidatePlug );
+		acquiredPlug =
+			acquireCompoundNumericParameter<Color3fPlug>( output, name, Plug::Out, GeometricData::None, candidatePlug );
 	}
 	else if( tags.find( "float" ) != tags.end() )
 	{
@@ -653,14 +659,13 @@ Gaffer::Plug *loadOutput( const boost::property_tree::ptree &output, Plug *paren
 	}
 	else if( tags.find( "vector" ) != tags.end() )
 	{
-		acquiredPlug = acquireCompoundNumericParameter<V3fPlug>( output, name, Plug::Out, GeometricData::Vector, candidatePlug );
+		acquiredPlug =
+			acquireCompoundNumericParameter<V3fPlug>( output, name, Plug::Out, GeometricData::Vector, candidatePlug );
 	}
 	else
 	{
-		msg(
-			IECore::Msg::Warning, "RenderManShader::loadShader",
-			fmt::format( "Output \"{}\" has unsupported tags", name )
-		);
+		msg( IECore::Msg::Warning, "RenderManShader::loadShader",
+			 fmt::format( "Output \"{}\" has unsupported tags", name ) );
 		return nullptr;
 	}
 
@@ -674,7 +679,9 @@ Gaffer::Plug *loadOutput( const boost::property_tree::ptree &output, Plug *paren
 
 const InternedString g_bxdfOut( "bxdf_out" );
 
-void loadOutputs( const boost::property_tree::ptree &tree, Plug *parent, const std::string &shaderName, const std::string &shaderType )
+void loadOutputs(
+	const boost::property_tree::ptree &tree, Plug *parent, const std::string &shaderName, const std::string &shaderType
+)
 {
 	// Load all the outputs.
 
@@ -727,9 +734,7 @@ void RenderManShader::loadShader( const std::string &shaderName, bool keepExisti
 	boost::filesystem::path argsFilename = searchPath.find( "Args/" + shaderName + ".args" );
 	if( argsFilename.empty() )
 	{
-		throw IECore::Exception(
-			fmt::format( "Unable to find shader \"{}\" on RMAN_RIXPLUGINPATH", shaderName )
-		);
+		throw IECore::Exception( fmt::format( "Unable to find shader \"{}\" on RMAN_RIXPLUGINPATH", shaderName ) );
 	}
 
 	std::ifstream argsStream( argsFilename.string() );
@@ -763,8 +768,7 @@ void RenderManShader::loadShader( const std::string &shaderName, bool keepExisti
 
 	auto omit = g_omittedParameters.find( shaderName );
 	loadParameters(
-		tree.get_child( "args" ), parametersPlug,
-		omit != g_omittedParameters.end() ? &omit->second : nullptr
+		tree.get_child( "args" ), parametersPlug, omit != g_omittedParameters.end() ? &omit->second : nullptr
 	);
 
 	if( !keepExistingValues )

@@ -55,9 +55,7 @@ void GafferImageModule::bindMultiView()
 
 	{
 		scope s = DependencyNodeClass<DeleteViews>();
-		enum_<DeleteViews::Mode>( "Mode" )
-			.value( "Keep", DeleteViews::Keep )
-			.value( "Delete", DeleteViews::Delete );
+		enum_<DeleteViews::Mode>( "Mode" ).value( "Keep", DeleteViews::Keep ).value( "Delete", DeleteViews::Delete );
 	}
 
 	DependencyNodeClass<CopyViews>();

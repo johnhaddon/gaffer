@@ -52,17 +52,25 @@ namespace IECoreRenderMan
 class Light : public IECoreScenePreview::Renderer::ObjectInterface
 {
 
-	public:
+public:
 
-	Light( const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, MaterialCache *materialCache, LightLinker *lightLinker, Session *session );
+	Light(
+		const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, MaterialCache *materialCache,
+		LightLinker *lightLinker, Session *session
+	);
 	~Light() override;
 
 	// ObjectInterface overrides
 	// =========================
 
-	void transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times ) override;
+	void transform(
+		const IECoreScenePreview::Renderer::TransformSamples &samples,
+		const IECoreScenePreview::Renderer::SampleTimes &times
+	) override;
 	bool attributes( const IECoreScenePreview::Renderer::AttributesInterface *attributes ) override;
-	void link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects ) override;
+	void link(
+		const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects
+	) override;
 	void assignID( uint32_t id ) override;
 	void assignInstanceID( uint32_t id ) override;
 
@@ -72,7 +80,7 @@ class Light : public IECoreScenePreview::Renderer::ObjectInterface
 	void updateLightFilterShader( const IECoreScene::ConstShaderNetworkPtr &lightFilterShader );
 	void updateLinking( RtUString memberships, RtUString shadowSubset );
 
-	private:
+private:
 
 	ConstLightShaderPtr acquireLightShader( const Attributes *attributes ) const;
 

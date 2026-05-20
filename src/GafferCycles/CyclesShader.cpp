@@ -83,15 +83,12 @@ ShaderTweakProxy::ShaderLoaderDescription<CyclesShader> g_cyclesShaderTweakProxy
 
 IE_CORE_DEFINERUNTIMETYPED( CyclesShader );
 
-CyclesShader::CyclesShader( const std::string &name )
-	: GafferScene::Shader( name )
+CyclesShader::CyclesShader( const std::string &name ) : GafferScene::Shader( name )
 {
 	addChild( new Plug( "out", Gaffer::Plug::Out ) );
 }
 
-CyclesShader::~CyclesShader()
-{
-}
+CyclesShader::~CyclesShader() {}
 
 void CyclesShader::loadShader( const std::string &shaderName, bool keepExistingValues )
 {

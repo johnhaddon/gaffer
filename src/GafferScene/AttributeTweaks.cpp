@@ -62,9 +62,7 @@ AttributeTweaks::AttributeTweaks( const std::string &name ) : AttributeProcessor
 	addChild( new TweaksPlug( "tweaks" ) );
 }
 
-AttributeTweaks::~AttributeTweaks()
-{
-}
+AttributeTweaks::~AttributeTweaks() {}
 
 Gaffer::BoolPlug *AttributeTweaks::localisePlug()
 {
@@ -98,10 +96,8 @@ const Gaffer::TweaksPlug *AttributeTweaks::tweaksPlug() const
 
 bool AttributeTweaks::affectsProcessedAttributes( const Gaffer::Plug *input ) const
 {
-	return AttributeProcessor::affectsProcessedAttributes( input ) ||
-		tweaksPlug()->isAncestorOf( input ) ||
-		input == localisePlug() ||
-		input == ignoreMissingPlug() ||
+	return AttributeProcessor::affectsProcessedAttributes( input ) || tweaksPlug()->isAncestorOf( input ) ||
+		input == localisePlug() || input == ignoreMissingPlug() ||
 		( input == inPlug()->globalsPlug() && !localisePlug()->isSetToDefault() );
 }
 
@@ -127,7 +123,9 @@ void AttributeTweaks::hashProcessedAttributes( const Gaffer::Context *context, I
 	tweaksPlug()->hash( h );
 }
 
-IECore::ConstCompoundObjectPtr AttributeTweaks::computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const
+IECore::ConstCompoundObjectPtr AttributeTweaks::computeProcessedAttributes(
+	const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes
+) const
 {
 	const TweaksPlug *tweaksPlug = this->tweaksPlug();
 	if( tweaksPlug->children().empty() )

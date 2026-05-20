@@ -50,12 +50,7 @@ namespace GafferUI
 /// A class to represent events involving keyboard keys.
 struct GAFFERUI_API KeyEvent : public ModifiableEvent
 {
-	explicit KeyEvent(
-		const char *k = "a",
-		Modifiers m = ModifiableEvent::None
-	)
-		: ModifiableEvent( m ), key( k ) {
-		  };
+	explicit KeyEvent( const char *k = "a", Modifiers m = ModifiableEvent::None ) : ModifiableEvent( m ), key( k ) {};
 
 	/// The key pressed.
 	std::string key;

@@ -74,7 +74,10 @@ void warnIfUnsupported( const IECoreScene::SpherePrimitive *sphere )
 	}
 }
 
-ccl::Geometry *convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::SpherePrimitive *> &samples, const IECoreScenePreview::Renderer::SampleTimes &times, size_t primarySampleIndex, ccl::Scene *scene )
+ccl::Geometry *convert(
+	const IECoreScenePreview::Renderer::Samples<const IECoreScene::SpherePrimitive *> &samples,
+	const IECoreScenePreview::Renderer::SampleTimes &times, size_t primarySampleIndex, ccl::Scene *scene
+)
 {
 	auto *sphere = samples[primarySampleIndex];
 	assert( sphere->typeId() == IECoreScene::SpherePrimitive::staticTypeId() );
@@ -90,7 +93,9 @@ ccl::Geometry *convert( const IECoreScenePreview::Renderer::Samples<const IECore
 		{
 			case PrimitiveVariable::Constant :
 			case PrimitiveVariable::Uniform :
-				GeometryAlgo::convertPrimitiveVariable( name, variable, pointcloud->attributes, ccl::ATTR_ELEMENT_OBJECT );
+				GeometryAlgo::convertPrimitiveVariable(
+					name, variable, pointcloud->attributes, ccl::ATTR_ELEMENT_OBJECT
+				);
 			default :
 				// Other interpolation types define values for four corners
 				// of a quadric shape. Not supported by Cycle's point cloud.

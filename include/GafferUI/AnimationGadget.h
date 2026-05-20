@@ -53,7 +53,7 @@ namespace GafferUI
 
 class GAFFERUI_API AnimationGadget : public Gadget
 {
-	public:
+public:
 
 	AnimationGadget();
 	~AnimationGadget() override;
@@ -77,13 +77,13 @@ class GAFFERUI_API AnimationGadget : public Gadget
 
 	std::string getToolTip( const IECore::LineSegment3f &line ) const override;
 
-	protected:
+protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
 	unsigned layerMask() const override;
 	Imath::Box3f renderBound() const override;
 
-	private:
+private:
 
 	struct SelectionSet;
 	IE_CORE_DECLAREPTR( SelectionSet )
@@ -120,8 +120,12 @@ class GAFFERUI_API AnimationGadget : public Gadget
 	// Find elements at certain positions
 	Gaffer::Animation::ConstKeyPtr keyAt( const IECore::LineSegment3f &position ) const;
 	Gaffer::Animation::KeyPtr keyAt( const IECore::LineSegment3f &position );
-	std::pair<Gaffer::Animation::ConstKeyPtr, Gaffer::Animation::Direction> tangentAt( const IECore::LineSegment3f &position ) const;
-	std::pair<Gaffer::Animation::KeyPtr, Gaffer::Animation::Direction> tangentAt( const IECore::LineSegment3f &position );
+	std::pair<Gaffer::Animation::ConstKeyPtr, Gaffer::Animation::Direction> tangentAt(
+		const IECore::LineSegment3f &position
+	) const;
+	std::pair<Gaffer::Animation::KeyPtr, Gaffer::Animation::Direction> tangentAt(
+		const IECore::LineSegment3f &position
+	);
 	Gaffer::Animation::ConstCurvePlugPtr curveAt( const IECore::LineSegment3f &position ) const;
 	Gaffer::Animation::CurvePlugPtr curveAt( const IECore::LineSegment3f &position );
 	bool frameIndicatorUnderMouse( const IECore::LineSegment3f &position ) const;

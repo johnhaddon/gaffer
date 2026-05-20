@@ -44,11 +44,6 @@ using namespace GafferSceneTest;
 
 GAFFER_NODE_DEFINE_TYPE( TestLightFilter );
 
-TestLightFilter::TestLightFilter( const std::string &name )
-	: GafferScene::LightFilter( new Shader(), name )
-{
-}
+TestLightFilter::TestLightFilter( const std::string &name ) : GafferScene::LightFilter( new Shader(), name ) {}
 
-TestLightFilter::~TestLightFilter()
-{
-}
+TestLightFilter::~TestLightFilter() {}

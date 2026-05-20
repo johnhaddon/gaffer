@@ -63,8 +63,7 @@ const IECore::InternedString ScenePlug::scenePathContextName( "scene:path" );
 const IECore::InternedString ScenePlug::setNameContextName( "scene:setName" );
 
 static ContextAlgo::GlobalScope::Registration g_globalScopeRegistration(
-	ScenePlug::staticTypeId(),
-	{ ScenePlug::scenePathContextName, ScenePlug::setNameContextName }
+	ScenePlug::staticTypeId(), { ScenePlug::scenePathContextName, ScenePlug::setNameContextName }
 );
 
 ScenePlug::ScenePlug( const std::string &name, Direction direction, unsigned flags )
@@ -72,109 +71,36 @@ ScenePlug::ScenePlug( const std::string &name, Direction direction, unsigned fla
 {
 	const unsigned childFlags = flags & ~Dynamic;
 
-	addChild(
-		new AtomicBox3fPlug(
-			"bound",
-			direction,
-			Imath::Box3f(),
-			childFlags
-		)
-	);
+	addChild( new AtomicBox3fPlug( "bound", direction, Imath::Box3f(), childFlags ) );
+
+	addChild( new M44fPlug( "transform", direction, Imath::M44f(), childFlags ) );
+
+	addChild( new CompoundObjectPlug( "attributes", direction, new IECore::CompoundObject(), childFlags ) );
+
+	addChild( new ObjectPlug( "object", direction, new IECore::NullObject(), childFlags ) );
 
 	addChild(
-		new M44fPlug(
-			"transform",
-			direction,
-			Imath::M44f(),
-			childFlags
-		)
+		new InternedStringVectorDataPlug( "childNames", direction, new IECore::InternedStringVectorData(), childFlags )
 	);
 
-	addChild(
-		new CompoundObjectPlug(
-			"attributes",
-			direction,
-			new IECore::CompoundObject(),
-			childFlags
-		)
-	);
+	addChild( new CompoundObjectPlug( "globals", direction, new IECore::CompoundObject(), childFlags ) );
 
 	addChild(
-		new ObjectPlug(
-			"object",
-			direction,
-			new IECore::NullObject(),
-			childFlags
-		)
+		new InternedStringVectorDataPlug( "setNames", direction, new IECore::InternedStringVectorData(), childFlags )
 	);
 
-	addChild(
-		new InternedStringVectorDataPlug(
-			"childNames",
-			direction,
-			new IECore::InternedStringVectorData(),
-			childFlags
-		)
-	);
+	addChild( new PathMatcherDataPlug( "set", direction, new IECore::PathMatcherData(), childFlags ) );
 
-	addChild(
-		new CompoundObjectPlug(
-			"globals",
-			direction,
-			new IECore::CompoundObject(),
-			childFlags
-		)
-	);
+	addChild( new BoolPlug( "exists", direction, true, childFlags ) );
 
-	addChild(
-		new InternedStringVectorDataPlug(
-			"setNames",
-			direction,
-			new IECore::InternedStringVectorData(),
-			childFlags
-		)
-	);
+	addChild( new AtomicBox3fPlug( "childBounds", direction, Imath::Box3f(), childFlags ) );
 
-	addChild(
-		new PathMatcherDataPlug(
-			"set",
-			direction,
-			new IECore::PathMatcherData(),
-			childFlags
-		)
-	);
-
-	addChild(
-		new BoolPlug(
-			"exists",
-			direction,
-			true,
-			childFlags
-		)
-	);
-
-	addChild(
-		new AtomicBox3fPlug(
-			"childBounds",
-			direction,
-			Imath::Box3f(),
-			childFlags
-		)
-	);
-
-	addChild(
-		new InternedStringVectorDataPlug(
-			"__sortedChildNames",
-			direction,
-			new IECore::InternedStringVectorData(),
-			childFlags
-		)
-	);
+	addChild( new InternedStringVectorDataPlug(
+		"__sortedChildNames", direction, new IECore::InternedStringVectorData(), childFlags
+	) );
 }
 
-ScenePlug::~ScenePlug()
-{
-}
+ScenePlug::~ScenePlug() {}
 
 bool ScenePlug::acceptsChild( const GraphComponent *potentialChild ) const
 {
@@ -314,22 +240,17 @@ const Gaffer::InternedStringVectorDataPlug *ScenePlug::sortedChildNamesPlug() co
 	return getChild<InternedStringVectorDataPlug>( 10 );
 }
 
-ScenePlug::PathScope::PathScope( const Gaffer::Context *context )
-	: EditableScope( context )
+ScenePlug::PathScope::PathScope( const Gaffer::Context *context ) : EditableScope( context )
 {
 	remove( ScenePlug::setNameContextName );
 }
 
-ScenePlug::PathScope::PathScope( const Gaffer::Context *context, const ScenePath *scenePath )
-	: PathScope( context )
+ScenePlug::PathScope::PathScope( const Gaffer::Context *context, const ScenePath *scenePath ) : PathScope( context )
 {
 	setPath( scenePath );
 }
 
-ScenePlug::PathScope::PathScope( const Gaffer::ThreadState &threadState )
-	: EditableScope( threadState )
-{
-}
+ScenePlug::PathScope::PathScope( const Gaffer::ThreadState &threadState ) : EditableScope( threadState ) {}
 
 ScenePlug::PathScope::PathScope( const Gaffer::ThreadState &threadState, const ScenePath *scenePath )
 	: EditableScope( threadState )
@@ -342,8 +263,7 @@ void ScenePlug::PathScope::setPath( const ScenePath *scenePath )
 	set( scenePathContextName, scenePath );
 }
 
-ScenePlug::SetScope::SetScope( const Gaffer::Context *context )
-	: EditableScope( context )
+ScenePlug::SetScope::SetScope( const Gaffer::Context *context ) : EditableScope( context )
 {
 	remove( Filter::inputSceneContextName );
 	remove( ScenePlug::scenePathContextName );
@@ -357,8 +277,7 @@ ScenePlug::SetScope::SetScope( const Gaffer::Context *context, const IECore::Int
 	setSetName( setName );
 }
 
-ScenePlug::SetScope::SetScope( const Gaffer::ThreadState &threadState )
-	: EditableScope( threadState )
+ScenePlug::SetScope::SetScope( const Gaffer::ThreadState &threadState ) : EditableScope( threadState )
 {
 	remove( Filter::inputSceneContextName );
 	remove( ScenePlug::scenePathContextName );
@@ -377,16 +296,14 @@ void ScenePlug::SetScope::setSetName( const IECore::InternedString *setName )
 	set( setNameContextName, setName );
 }
 
-ScenePlug::GlobalScope::GlobalScope( const Gaffer::Context *context )
-	: EditableScope( context )
+ScenePlug::GlobalScope::GlobalScope( const Gaffer::Context *context ) : EditableScope( context )
 {
 	remove( Filter::inputSceneContextName );
 	remove( scenePathContextName );
 	remove( setNameContextName );
 }
 
-ScenePlug::GlobalScope::GlobalScope( const Gaffer::ThreadState &threadState )
-	: EditableScope( threadState )
+ScenePlug::GlobalScope::GlobalScope( const Gaffer::ThreadState &threadState ) : EditableScope( threadState )
 {
 	remove( Filter::inputSceneContextName );
 	remove( scenePathContextName );
@@ -450,7 +367,8 @@ IECore::CompoundObjectPtr ScenePlug::fullAttributes( const ScenePath &scenePath,
 		pathScope.setPath( &path );
 		IECore::ConstCompoundObjectPtr a = attributesPlug()->getValue();
 		const IECore::CompoundObject::ObjectMap &aMembers = a->members();
-		for( IECore::CompoundObject::ObjectMap::const_iterator it = aMembers.begin(), eIt = aMembers.end(); it != eIt; it++ )
+		for( IECore::CompoundObject::ObjectMap::const_iterator it = aMembers.begin(), eIt = aMembers.end(); it != eIt;
+			 it++ )
 		{
 			resultMembers.insert( *it );
 		}

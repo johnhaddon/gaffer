@@ -43,16 +43,13 @@ GAFFER_NODE_DEFINE_TYPE( CustomOptions );
 
 size_t CustomOptions::g_firstPlugIndex = 0;
 
-CustomOptions::CustomOptions( const std::string &name )
-	: Options( name )
+CustomOptions::CustomOptions( const std::string &name ) : Options( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "prefix" ) );
 }
 
-CustomOptions::~CustomOptions()
-{
-}
+CustomOptions::~CustomOptions() {}
 
 Gaffer::StringPlug *CustomOptions::prefixPlug()
 {

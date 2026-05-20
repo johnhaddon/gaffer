@@ -66,10 +66,7 @@ namespace
 // Rounds min down, and max up, while converting from float to int.
 Box2i box2fToBox2i( const Box2f &b )
 {
-	return Box2i(
-		V2i( floor( b.min.x ), floor( b.min.y ) ),
-		V2i( ceil( b.max.x ), ceil( b.max.y ) )
-	);
+	return Box2i( V2i( floor( b.min.x ), floor( b.min.y ) ), V2i( ceil( b.max.x ), ceil( b.max.y ) ) );
 }
 
 Box2f transform( const Box2f &b, const M33f &m )
@@ -106,10 +103,11 @@ Imath::Box2i samplerWindow( const Imath::V2i &tileOrigin, const Imath::M33f &sam
 class ImageTransform::ChainingScope : boost::noncopyable
 {
 
-	public:
+public:
 
 	ChainingScope( const Gaffer::Context *context, const ImageTransform *imageTransform )
-		: m_chained( context->get<bool>( chainedContextName, false ) ), m_true( true )
+		: m_chained( context->get<bool>( chainedContextName, false ) ),
+		  m_true( true )
 	{
 		if( !m_chained )
 		{
@@ -125,10 +123,7 @@ class ImageTransform::ChainingScope : boost::noncopyable
 		{
 			const bool concatenate = imageTransform->concatenatePlug()->getValue();
 			m_chained = concatenate;
-			if(
-				!imageTransform->inTransformPlug()->getInput() ||
-				!concatenate
-			)
+			if( !imageTransform->inTransformPlug()->getInput() || !concatenate )
 			{
 				// Either we're at the top of a chain, in which case we
 				// want to remove the context variable so it doesn't leak out
@@ -144,14 +139,11 @@ class ImageTransform::ChainingScope : boost::noncopyable
 	// In this case, the operation should be implemented as a pass
 	// through, as the bottom of the chain will do all the work
 	// in a single operation.
-	bool chained() const
-	{
-		return m_chained;
-	}
+	bool chained() const { return m_chained; }
 
 	static InternedString chainedContextName;
 
-	private:
+private:
 
 	// We use `optional` here to avoid the expense of constructing
 	// an EditableScope when we don't need one.
@@ -166,7 +158,7 @@ InternedString ImageTransform::ChainingScope::chainedContextName( "__imageTransf
 class ImageTransform::CleanScope : boost::noncopyable
 {
 
-	public:
+public:
 
 	CleanScope( const Gaffer::Context *context )
 	{
@@ -182,12 +174,9 @@ class ImageTransform::CleanScope : boost::noncopyable
 		}
 	}
 
-	const Context *context() const
-	{
-		return m_context;
-	}
+	const Context *context() const { return m_context; }
 
-	private:
+private:
 
 	const Context *m_context;
 	std::optional<Context::EditableScope> m_scope;
@@ -201,8 +190,7 @@ GAFFER_NODE_DEFINE_TYPE( ImageTransform );
 
 size_t ImageTransform::g_firstPlugIndex = 0;
 
-ImageTransform::ImageTransform( const std::string &name )
-	: FlatImageProcessor( name )
+ImageTransform::ImageTransform( const std::string &name ) : FlatImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -240,9 +228,7 @@ ImageTransform::ImageTransform( const std::string &name )
 	plugInputChangedSignal().connect( boost::bind( &ImageTransform::plugInputChanged, this, ::_1 ) );
 }
 
-ImageTransform::~ImageTransform()
-{
-}
+ImageTransform::~ImageTransform() {}
 
 Gaffer::Transform2DPlug *ImageTransform::transformPlug()
 {
@@ -338,48 +324,28 @@ void ImageTransform::affects( const Gaffer::Plug *input, AffectedPlugsContainer 
 {
 	FlatImageProcessor::affects( input, outputs );
 
-	if(
-		transformPlug()->isAncestorOf( input ) ||
-		input == invertPlug() ||
-		input == inTransformPlug() ||
-		input == concatenatePlug()
-	)
+	if( transformPlug()->isAncestorOf( input ) || input == invertPlug() || input == inTransformPlug() ||
+		input == concatenatePlug() )
 	{
 		outputs.push_back( resampleMatrixPlug() );
 	}
 
-	if(
-		input == inPlug()->dataWindowPlug() ||
-		input == resampledInPlug()->dataWindowPlug() ||
-		transformPlug()->isAncestorOf( input ) ||
-		input == invertPlug() ||
-		input == inTransformPlug() ||
-		input == concatenatePlug()
-	)
+	if( input == inPlug()->dataWindowPlug() || input == resampledInPlug()->dataWindowPlug() ||
+		transformPlug()->isAncestorOf( input ) || input == invertPlug() || input == inTransformPlug() ||
+		input == concatenatePlug() )
 	{
 		outputs.push_back( outPlug()->dataWindowPlug() );
 	}
 
-	if(
-		input == inPlug()->channelDataPlug() ||
-		input == inPlug()->dataWindowPlug() ||
-		input == resampledInPlug()->channelDataPlug() ||
-		transformPlug()->isAncestorOf( input ) ||
-		input == invertPlug() ||
-		input == inTransformPlug() ||
-		input == concatenatePlug()
-	)
+	if( input == inPlug()->channelDataPlug() || input == inPlug()->dataWindowPlug() ||
+		input == resampledInPlug()->channelDataPlug() || transformPlug()->isAncestorOf( input ) ||
+		input == invertPlug() || input == inTransformPlug() || input == concatenatePlug() )
 	{
 		outputs.push_back( outPlug()->channelDataPlug() );
 	}
 
-	if(
-		transformPlug()->isAncestorOf( input ) ||
-		input == invertPlug() ||
-		input == inTransformPlug() ||
-		input == enabledPlug() ||
-		input == concatenatePlug()
-	)
+	if( transformPlug()->isAncestorOf( input ) || input == invertPlug() || input == inTransformPlug() ||
+		input == enabledPlug() || input == concatenatePlug() )
 	{
 		outputs.push_back( outTransformPlug() );
 	}
@@ -450,7 +416,9 @@ void ImageTransform::compute( ValuePlug *output, const Context *context ) const
 	FlatImageProcessor::compute( output, context );
 }
 
-void ImageTransform::hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ImageTransform::hashDeep(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	// We need the CleanScope here because `hash/computeChannelData()` both use a Sampler,
 	// and the Sampler constructor pulls on the deep plug.
@@ -466,7 +434,9 @@ bool ImageTransform::computeDeep( const Gaffer::Context *context, const ImagePlu
 	return FlatImageProcessor::computeDeep( cleanScope.context(), parent );
 }
 
-void ImageTransform::hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ImageTransform::hashDataWindow(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ChainingScope chainingScope( context, this );
 	if( chainingScope.chained() )
@@ -514,7 +484,9 @@ Imath::Box2i ImageTransform::computeDataWindow( const Gaffer::Context *context, 
 	}
 }
 
-void ImageTransform::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ImageTransform::hashChannelData(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ChainingScope chainingScope( context, this );
 	if( chainingScope.chained() )
@@ -537,8 +509,7 @@ void ImageTransform::hashChannelData( const GafferImage::ImagePlug *parent, cons
 		const M33f samplerMatrix = matrix.inverse() * resampleMatrix;
 
 		Sampler sampler(
-			resampledInPlug(),
-			context->get<std::string>( ImagePlug::channelNameContextName ),
+			resampledInPlug(), context->get<std::string>( ImagePlug::channelNameContextName ),
 			samplerWindow( context->get<V2i>( ImagePlug::tileOriginContextName ), samplerMatrix )
 		);
 		sampler.hash( h );
@@ -547,7 +518,10 @@ void ImageTransform::hashChannelData( const GafferImage::ImagePlug *parent, cons
 	}
 }
 
-IECore::ConstFloatVectorDataPtr ImageTransform::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr ImageTransform::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	ChainingScope chainingScope( context, this );
 	if( chainingScope.chained() )
@@ -567,11 +541,7 @@ IECore::ConstFloatVectorDataPtr ImageTransform::computeChannelData( const std::s
 
 		const M33f samplerMatrix = matrix.inverse() * resampleMatrix;
 
-		Sampler sampler(
-			resampledInPlug(),
-			channelName,
-			samplerWindow( tileOrigin, samplerMatrix )
-		);
+		Sampler sampler( resampledInPlug(), channelName, samplerWindow( tileOrigin, samplerMatrix ) );
 
 		FloatVectorDataPtr resultData = new FloatVectorData;
 		resultData->writable().resize( ImagePlug::tileSize() * ImagePlug::tileSize() );
@@ -640,7 +610,5 @@ void ImageTransform::plugInputChanged( Gaffer::Plug *plug )
 		upstreamImageTransform = runTimeCast<ImageTransform>( plug->source()->node() );
 	}
 
-	inTransformPlug()->setInput(
-		upstreamImageTransform ? upstreamImageTransform->outTransformPlug() : nullptr
-	);
+	inTransformPlug()->setInput( upstreamImageTransform ? upstreamImageTransform->outTransformPlug() : nullptr );
 }

@@ -46,8 +46,7 @@ GAFFER_NODE_DEFINE_TYPE( Transform );
 
 size_t Transform::g_firstPlugIndex = 0;
 
-Transform::Transform( const std::string &name )
-	: SceneElementProcessor( name, IECore::PathMatcher::NoMatch )
+Transform::Transform( const std::string &name ) : SceneElementProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new IntPlug( "space", Plug::In, Local, Local, ResetWorld ) );
@@ -58,9 +57,7 @@ Transform::Transform( const std::string &name )
 	outPlug()->objectPlug()->setInput( inPlug()->objectPlug() );
 }
 
-Transform::~Transform()
-{
-}
+Transform::~Transform() {}
 
 Gaffer::IntPlug *Transform::spacePlug()
 {
@@ -98,7 +95,9 @@ bool Transform::processesTransform() const
 	return true;
 }
 
-void Transform::hashProcessedTransform( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Transform::hashProcessedTransform(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	const Space space = static_cast<Space>( spacePlug()->getValue() );
 	h.append( space );
@@ -122,7 +121,9 @@ void Transform::hashProcessedTransform( const ScenePath &path, const Gaffer::Con
 	}
 }
 
-Imath::M44f Transform::computeProcessedTransform( const ScenePath &path, const Gaffer::Context *context, const Imath::M44f &inputTransform ) const
+Imath::M44f Transform::computeProcessedTransform(
+	const ScenePath &path, const Gaffer::Context *context, const Imath::M44f &inputTransform
+) const
 {
 	const Space space = static_cast<Space>( spacePlug()->getValue() );
 	const Imath::M44f matrix = transformPlug()->matrix();
@@ -192,7 +193,9 @@ IECore::MurmurHash Transform::fullParentTransformHash( const ScenePath &path ) c
 	return inPlug()->fullTransformHash( parentPath );
 }
 
-Imath::M44f Transform::relativeParentTransform( const ScenePath &path, const Gaffer::Context *context, bool &matchingAncestorFound ) const
+Imath::M44f Transform::relativeParentTransform(
+	const ScenePath &path, const Gaffer::Context *context, bool &matchingAncestorFound
+) const
 {
 	ScenePlug::PathScope pathScope( context );
 

@@ -46,17 +46,14 @@ GAFFER_NODE_DEFINE_TYPE( ImageMetadata );
 
 size_t ImageMetadata::g_firstPlugIndex = 0;
 
-ImageMetadata::ImageMetadata( const std::string &name )
-	: MetadataProcessor( name )
+ImageMetadata::ImageMetadata( const std::string &name ) : MetadataProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new CompoundDataPlug( "metadata" ) );
 	addChild( new AtomicCompoundDataPlug( "extraMetadata", Plug::In, new CompoundData() ) );
 }
 
-ImageMetadata::~ImageMetadata()
-{
-}
+ImageMetadata::~ImageMetadata() {}
 
 Gaffer::CompoundDataPlug *ImageMetadata::metadataPlug()
 {
@@ -82,10 +79,7 @@ void ImageMetadata::affects( const Gaffer::Plug *input, AffectedPlugsContainer &
 {
 	MetadataProcessor::affects( input, outputs );
 
-	if(
-		metadataPlug()->isAncestorOf( input ) ||
-		input == extraMetadataPlug()
-	)
+	if( metadataPlug()->isAncestorOf( input ) || input == extraMetadataPlug() )
 	{
 		outputs.push_back( outPlug()->metadataPlug() );
 	}
@@ -97,7 +91,9 @@ void ImageMetadata::hashProcessedMetadata( const Gaffer::Context *context, IECor
 	extraMetadataPlug()->hash( h );
 }
 
-IECore::ConstCompoundDataPtr ImageMetadata::computeProcessedMetadata( const Gaffer::Context *context, const IECore::CompoundData *inputMetadata ) const
+IECore::ConstCompoundDataPtr ImageMetadata::computeProcessedMetadata(
+	const Gaffer::Context *context, const IECore::CompoundData *inputMetadata
+) const
 {
 	const CompoundDataPlug *p = metadataPlug();
 	IECore::ConstCompoundDataPtr extraMetadata = extraMetadataPlug()->getValue();

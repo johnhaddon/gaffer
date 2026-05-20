@@ -40,14 +40,9 @@ using namespace GafferCycles;
 
 IE_CORE_DEFINERUNTIMETYPED( CyclesBackground );
 
-CyclesBackground::CyclesBackground( const std::string &name )
-	: GlobalShader( name )
-{
-}
+CyclesBackground::CyclesBackground( const std::string &name ) : GlobalShader( name ) {}
 
-CyclesBackground::~CyclesBackground()
-{
-}
+CyclesBackground::~CyclesBackground() {}
 
 bool CyclesBackground::affectsOptionName( const Gaffer::Plug *input ) const
 {

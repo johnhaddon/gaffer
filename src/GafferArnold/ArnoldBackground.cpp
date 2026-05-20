@@ -40,14 +40,9 @@ using namespace GafferArnold;
 
 GAFFER_NODE_DEFINE_TYPE( ArnoldBackground );
 
-ArnoldBackground::ArnoldBackground( const std::string &name )
-	: GlobalShader( name )
-{
-}
+ArnoldBackground::ArnoldBackground( const std::string &name ) : GlobalShader( name ) {}
 
-ArnoldBackground::~ArnoldBackground()
-{
-}
+ArnoldBackground::~ArnoldBackground() {}
 
 bool ArnoldBackground::affectsOptionName( const Gaffer::Plug *input ) const
 {

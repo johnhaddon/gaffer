@@ -41,24 +41,15 @@ using namespace GafferUI;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ConnectionCreator );
 
-ConnectionCreator::ConnectionCreator( const std::string &name )
-	: Gadget( name )
-{
-}
+ConnectionCreator::ConnectionCreator( const std::string &name ) : Gadget( name ) {}
 
-ConnectionCreator::~ConnectionCreator()
-{
-}
+ConnectionCreator::~ConnectionCreator() {}
 
 bool ConnectionCreator::canCreateConnection( const Gaffer::Plug *endpoint ) const
 {
 	return false;
 }
 
-void ConnectionCreator::updateDragEndPoint( const Imath::V3f position, const Imath::V3f &tangent )
-{
-}
+void ConnectionCreator::updateDragEndPoint( const Imath::V3f position, const Imath::V3f &tangent ) {}
 
-void ConnectionCreator::createConnection( Gaffer::Plug *plug )
-{
-}
+void ConnectionCreator::createConnection( Gaffer::Plug *plug ) {}

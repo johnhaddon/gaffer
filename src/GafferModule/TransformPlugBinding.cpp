@@ -56,9 +56,11 @@ namespace
 class TransformPlugSerialiser : public ValuePlugSerialiser
 {
 
-	public:
+public:
 
-	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsConstruction(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override
 	{
 		// The children will be created by the constructor
 		return false;
@@ -112,16 +114,13 @@ void GafferModule::bindTransformPlug()
 {
 	PlugClass<TransformPlug>()
 		.def(
-			init<const std::string &, Gaffer::Plug::Direction, const V3f &, const V3f &, const V3f &, const V3f &, unsigned>(
-				(
-					arg( "name" ) = Gaffer::GraphComponent::defaultName<TransformPlug>(),
-					arg( "direction" ) = Gaffer::Plug::In,
-					arg( "defaultTranslate" ) = Imath::V3f( 0 ),
-					arg( "defaultRotate" ) = Imath::V3f( 0 ),
-					arg( "defaultScale" ) = Imath::V3f( 1 ),
-					arg( "defaultPivot" ) = Imath::V3f( 0 ),
-					arg( "flags" ) = Gaffer::Plug::Default
-				)
+			init<
+				const std::string &, Gaffer::Plug::Direction, const V3f &, const V3f &, const V3f &, const V3f &,
+				unsigned>(
+				( arg( "name" ) = Gaffer::GraphComponent::defaultName<TransformPlug>(),
+				  arg( "direction" ) = Gaffer::Plug::In, arg( "defaultTranslate" ) = Imath::V3f( 0 ),
+				  arg( "defaultRotate" ) = Imath::V3f( 0 ), arg( "defaultScale" ) = Imath::V3f( 1 ),
+				  arg( "defaultPivot" ) = Imath::V3f( 0 ), arg( "flags" ) = Gaffer::Plug::Default )
 			)
 		)
 		.def( "matrix", &TransformPlug::matrix )

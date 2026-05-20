@@ -51,17 +51,14 @@ static InternedString g_sectionName( "noduleLayout:section" );
 
 size_t Dot::g_firstPlugIndex = 0;
 
-Dot::Dot( const std::string &name )
-	: DependencyNode( name )
+Dot::Dot( const std::string &name ) : DependencyNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new IntPlug( "labelType", Plug::In, None, None, Custom ) );
 	addChild( new StringPlug( "label" ) );
 }
 
-Dot::~Dot()
-{
-}
+Dot::~Dot() {}
 
 void Dot::setup( const Plug *plug )
 {
@@ -118,13 +115,9 @@ void Dot::setup( const Plug *plug )
 			oppositeSection = "bottom";
 		}
 
+		Metadata::registerValue( plug->direction() == Plug::In ? in.get() : out.get(), g_sectionName, sectionData );
 		Metadata::registerValue(
-			plug->direction() == Plug::In ? in.get() : out.get(),
-			g_sectionName, sectionData
-		);
-		Metadata::registerValue(
-			plug->direction() == Plug::In ? out.get() : in.get(),
-			g_sectionName, new StringData( oppositeSection )
+			plug->direction() == Plug::In ? out.get() : in.get(), g_sectionName, new StringData( oppositeSection )
 		);
 	}
 

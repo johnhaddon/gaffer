@@ -56,9 +56,11 @@ class Shader;
 class GAFFERSCENE_API ShaderPlug : public Gaffer::Plug
 {
 
-	public:
+public:
 
-	explicit ShaderPlug( const std::string &name = defaultName<ShaderPlug>(), Direction direction = In, unsigned flags = Default );
+	explicit ShaderPlug(
+		const std::string &name = defaultName<ShaderPlug>(), Direction direction = In, unsigned flags = Default
+	);
 	~ShaderPlug() override;
 
 	GAFFER_PLUG_DECLARE_TYPE( GafferScene::ShaderPlug, ShaderPlugTypeId, Plug );
@@ -79,7 +81,7 @@ class GAFFERSCENE_API ShaderPlug : public Gaffer::Plug
 	const Gaffer::ValuePlug *parameterSource( const IECoreScene::ShaderNetwork::Parameter &parameter ) const;
 	Gaffer::ValuePlug *parameterSource( const IECoreScene::ShaderNetwork::Parameter &parameter );
 
-	private:
+private:
 
 	struct ShaderContext;
 	const Gaffer::Plug *shaderOutPlug( ShaderContext &shaderContext ) const;

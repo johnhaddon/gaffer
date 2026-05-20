@@ -49,8 +49,7 @@ GAFFER_NODE_DEFINE_TYPE( GafferScene::DeleteObject );
 
 size_t DeleteObject::g_firstPlugIndex = 0;
 
-DeleteObject::DeleteObject( const std::string &name )
-	: FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
+DeleteObject::DeleteObject( const std::string &name ) : FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new BoolPlug( "adjustBounds", Plug::In, false ) );
@@ -66,9 +65,7 @@ DeleteObject::DeleteObject( const std::string &name )
 	outPlug()->transformPlug()->setInput( inPlug()->transformPlug() );
 }
 
-DeleteObject::~DeleteObject()
-{
-}
+DeleteObject::~DeleteObject() {}
 
 Gaffer::BoolPlug *DeleteObject::adjustBoundsPlug()
 {
@@ -84,27 +81,21 @@ void DeleteObject::affects( const Gaffer::Plug *input, AffectedPlugsContainer &o
 {
 	FilteredSceneProcessor::affects( input, outputs );
 
-	if(
-		input == filterPlug() ||
-		input == inPlug()->objectPlug()
-	)
+	if( input == filterPlug() || input == inPlug()->objectPlug() )
 	{
 		outputs.push_back( outPlug()->objectPlug() );
 	}
 
-	if(
-		input == filterPlug() ||
-		input == adjustBoundsPlug() ||
-		input == inPlug()->boundPlug() ||
-		input == inPlug()->objectPlug() ||
-		input == outPlug()->childBoundsPlug()
-	)
+	if( input == filterPlug() || input == adjustBoundsPlug() || input == inPlug()->boundPlug() ||
+		input == inPlug()->objectPlug() || input == outPlug()->childBoundsPlug() )
 	{
 		outputs.push_back( outPlug()->boundPlug() );
 	}
 }
 
-void DeleteObject::hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void DeleteObject::hashObject(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	if( filterValue( context ) & IECore::PathMatcher::ExactMatch )
 	{
@@ -116,7 +107,9 @@ void DeleteObject::hashObject( const ScenePath &path, const Gaffer::Context *con
 	}
 }
 
-IECore::ConstObjectPtr DeleteObject::computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstObjectPtr DeleteObject::computeObject(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( filterValue( context ) & IECore::PathMatcher::ExactMatch )
 	{
@@ -128,7 +121,9 @@ IECore::ConstObjectPtr DeleteObject::computeObject( const ScenePath &path, const
 	}
 }
 
-void DeleteObject::hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void DeleteObject::hashBound(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	if( adjustBoundsPlug()->getValue() )
 	{
@@ -147,7 +142,9 @@ void DeleteObject::hashBound( const ScenePath &path, const Gaffer::Context *cont
 	h = inPlug()->boundPlug()->hash();
 }
 
-Imath::Box3f DeleteObject::computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::Box3f DeleteObject::computeBound(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( adjustBoundsPlug()->getValue() )
 	{

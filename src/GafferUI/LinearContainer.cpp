@@ -49,8 +49,14 @@ using namespace GafferUI;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( LinearContainer );
 
-LinearContainer::LinearContainer( const std::string &name, Orientation orientation, Alignment alignment, float spacing, Direction direction )
-	: ContainerGadget( name ), m_orientation( orientation ), m_alignment( alignment ), m_spacing( spacing ), m_direction( direction )
+LinearContainer::LinearContainer(
+	const std::string &name, Orientation orientation, Alignment alignment, float spacing, Direction direction
+)
+	: ContainerGadget( name ),
+	  m_orientation( orientation ),
+	  m_alignment( alignment ),
+	  m_spacing( spacing ),
+	  m_direction( direction )
 {
 	// We already initialised these values above, but that didn't perform any range checking,
 	// so we set them here as well. The reason we initialize them at all is so that the set
@@ -62,9 +68,7 @@ LinearContainer::LinearContainer( const std::string &name, Orientation orientati
 	setDirection( direction );
 }
 
-LinearContainer::~LinearContainer()
-{
-}
+LinearContainer::~LinearContainer() {}
 
 void LinearContainer::setOrientation( Orientation orientation )
 {

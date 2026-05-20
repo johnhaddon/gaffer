@@ -58,8 +58,7 @@ GAFFER_NODE_DEFINE_TYPE( LevelSetOffset );
 
 size_t LevelSetOffset::g_firstPlugIndex = 0;
 
-LevelSetOffset::LevelSetOffset( const std::string &name )
-	: Deformer( name )
+LevelSetOffset::LevelSetOffset( const std::string &name ) : Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -67,9 +66,7 @@ LevelSetOffset::LevelSetOffset( const std::string &name )
 	addChild( new FloatPlug( "offset", Plug::In, 0.5 ) );
 }
 
-LevelSetOffset::~LevelSetOffset()
-{
-}
+LevelSetOffset::~LevelSetOffset() {}
 
 Gaffer::StringPlug *LevelSetOffset::gridPlug()
 {
@@ -93,12 +90,12 @@ const Gaffer::FloatPlug *LevelSetOffset::offsetPlug() const
 
 bool LevelSetOffset::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return Deformer::affectsProcessedObject( input ) ||
-		input == gridPlug() ||
-		input == offsetPlug();
+	return Deformer::affectsProcessedObject( input ) || input == gridPlug() || input == offsetPlug();
 }
 
-void LevelSetOffset::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void LevelSetOffset::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	Deformer::hashProcessedObject( path, context, h );
 
@@ -106,7 +103,9 @@ void LevelSetOffset::hashProcessedObject( const ScenePath &path, const Gaffer::C
 	offsetPlug()->hash( h );
 }
 
-IECore::ConstObjectPtr LevelSetOffset::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr LevelSetOffset::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	const VDBObject *vdbObject = runTimeCast<const VDBObject>( inputObject );
 	if( !vdbObject )
@@ -130,19 +129,26 @@ IECore::ConstObjectPtr LevelSetOffset::computeProcessedObject( const ScenePath &
 	{
 		openvdb::FloatGrid::Ptr newFloatGrid = openvdb::GridBase::grid<openvdb::FloatGrid>( floatGrid->deepCopyGrid() );
 		newGrid = newFloatGrid;
-		openvdb::tools::LevelSetFilter<openvdb::FloatGrid, openvdb::FloatGrid, Interrupter> filter( *newFloatGrid, &interrupter );
+		openvdb::tools::LevelSetFilter<openvdb::FloatGrid, openvdb::FloatGrid, Interrupter> filter(
+			*newFloatGrid, &interrupter
+		);
 		filter.offset( offsetPlug()->getValue() );
 	}
 	else if( openvdb::DoubleGrid::ConstPtr doubleGrid = openvdb::GridBase::constGrid<openvdb::DoubleGrid>( newGrid ) )
 	{
-		openvdb::DoubleGrid::Ptr newDoubleGrid = openvdb::GridBase::grid<openvdb::DoubleGrid>( doubleGrid->deepCopyGrid() );
+		openvdb::DoubleGrid::Ptr newDoubleGrid =
+			openvdb::GridBase::grid<openvdb::DoubleGrid>( doubleGrid->deepCopyGrid() );
 		newGrid = newDoubleGrid;
-		openvdb::tools::LevelSetFilter<openvdb::DoubleGrid, openvdb::DoubleGrid, Interrupter> filter( *newDoubleGrid, &interrupter );
+		openvdb::tools::LevelSetFilter<openvdb::DoubleGrid, openvdb::DoubleGrid, Interrupter> filter(
+			*newDoubleGrid, &interrupter
+		);
 		filter.offset( offsetPlug()->getValue() );
 	}
 	else
 	{
-		throw IECore::Exception( fmt::format( "Unable to Offset LevelSet grid: '{}' with type: {}", gridName, newGrid->type() ) );
+		throw IECore::Exception(
+			fmt::format( "Unable to Offset LevelSet grid: '{}' with type: {}", gridName, newGrid->type() )
+		);
 	}
 
 	// If the interrupter has stopped the VDB operation, throw
@@ -163,11 +169,12 @@ Gaffer::ValuePlug::CachePolicy LevelSetOffset::processedObjectComputeCachePolicy
 
 bool LevelSetOffset::affectsProcessedObjectBound( const Gaffer::Plug *input ) const
 {
-	return input == inPlug()->boundPlug() ||
-		input == offsetPlug();
+	return input == inPlug()->boundPlug() || input == offsetPlug();
 }
 
-void LevelSetOffset::hashProcessedObjectBound( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void LevelSetOffset::hashProcessedObjectBound(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	inPlug()->boundPlug()->hash( h );
 	offsetPlug()->hash( h );

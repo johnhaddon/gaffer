@@ -65,8 +65,7 @@ using NamedSelectMode = std::pair<std::string, SelectionTool::SelectFunction>;
 using SelectModeMap = boost::multi_index::multi_index_container<
 	NamedSelectMode,
 	boost::multi_index::indexed_by<
-		boost::multi_index::ordered_unique<
-			boost::multi_index::key<&NamedSelectMode::first>>,
+		boost::multi_index::ordered_unique<boost::multi_index::key<&NamedSelectMode::first>>,
 		boost::multi_index::sequenced<>>>;
 
 const std::string g_standardSelectModeName = "/Standard";
@@ -82,18 +81,14 @@ SelectModeMap &selectModes()
 	{
 		g_selectModes->insert(
 			{ g_standardSelectModeName,
-			  []( const ScenePlug *scene, const ScenePlug::ScenePath &path ) {
-				  return path;
-			  } }
+			  []( const ScenePlug *scene, const ScenePlug::ScenePath &path ) { return path; } }
 		);
 	}
 	return *g_selectModes;
 }
 
 const GafferScene::ScenePlug::ScenePath modifyPath(
-	const std::string &modeName,
-	const ScenePlug *scene,
-	const GafferScene::ScenePlug::ScenePath &path
+	const std::string &modeName, const ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &path
 )
 {
 	if( path.empty() || modeName.empty() )
@@ -119,12 +114,9 @@ const GafferScene::ScenePlug::ScenePath modifyPath(
 class SelectionTool::DragOverlay : public GafferUI::Gadget
 {
 
-	public:
+public:
 
-	DragOverlay()
-		: Gadget()
-	{
-	}
+	DragOverlay() : Gadget() {}
 
 	Imath::Box3f bound() const override
 	{
@@ -142,10 +134,7 @@ class SelectionTool::DragOverlay : public GafferUI::Gadget
 		dirty( DirtyType::Render );
 	}
 
-	const V3f &getStartPosition() const
-	{
-		return m_startPosition;
-	}
+	const V3f &getStartPosition() const { return m_startPosition; }
 
 	void setEndPosition( const V3f &p )
 	{
@@ -157,12 +146,9 @@ class SelectionTool::DragOverlay : public GafferUI::Gadget
 		dirty( DirtyType::Render );
 	}
 
-	const V3f &getEndPosition() const
-	{
-		return m_endPosition;
-	}
+	const V3f &getEndPosition() const { return m_endPosition; }
 
-	protected:
+protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
 	{
@@ -183,10 +169,7 @@ class SelectionTool::DragOverlay : public GafferUI::Gadget
 		style->renderSelectionBox( b );
 	}
 
-	unsigned layerMask() const override
-	{
-		return (unsigned)Layer::MidFront;
-	}
+	unsigned layerMask() const override { return (unsigned)Layer::MidFront; }
 
 	Imath::Box3f renderBound() const override
 	{
@@ -196,7 +179,7 @@ class SelectionTool::DragOverlay : public GafferUI::Gadget
 		return b;
 	}
 
-	private:
+private:
 
 	Imath::V3f m_startPosition;
 	Imath::V3f m_endPosition;
@@ -213,8 +196,7 @@ static IECore::InternedString g_dragOverlayName( "__selectionToolDragOverlay" );
 
 size_t SelectionTool::g_firstPlugIndex = 0;
 
-SelectionTool::SelectionTool( SceneView *view, const std::string &name )
-	: Tool( view, name )
+SelectionTool::SelectionTool( SceneView *view, const std::string &name ) : Tool( view, name )
 {
 	SceneGadget *sg = sceneGadget();
 
@@ -232,9 +214,7 @@ SelectionTool::SelectionTool( SceneView *view, const std::string &name )
 	addChild( new StringPlug( "selectMode", Plug::Direction::In, g_standardSelectModeName ) );
 }
 
-SelectionTool::~SelectionTool()
-{
-}
+SelectionTool::~SelectionTool() {}
 
 StringPlug *SelectionTool::selectModePlug()
 {
@@ -325,11 +305,7 @@ bool SelectionTool::buttonPress( const GafferUI::ButtonEvent &event )
 
 	{
 		Context::Scope scopedContext( sg->getContext() );
-		objectUnderMouse = modifyPath(
-			selectModePlug()->getValue(),
-			sceneGadget()->getScene(),
-			objectUnderMouse
-		);
+		objectUnderMouse = modifyPath( selectModePlug()->getValue(), sceneGadget()->getScene(), objectUnderMouse );
 	}
 
 	PathMatcher selection = sg->getSelection();

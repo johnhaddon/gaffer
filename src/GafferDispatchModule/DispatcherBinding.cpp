@@ -63,16 +63,11 @@ namespace
 
 class DispatcherWrapper : public NodeWrapper<Dispatcher>
 {
-	public:
+public:
 
-	DispatcherWrapper( PyObject *self, const std::string &name )
-		: NodeWrapper<Dispatcher>( self, name )
-	{
-	}
+	DispatcherWrapper( PyObject *self, const std::string &name ) : NodeWrapper<Dispatcher>( self, name ) {}
 
-	~DispatcherWrapper() override
-	{
-	}
+	~DispatcherWrapper() override {}
 
 	void doDispatch( const TaskBatch *batch ) const override
 	{
@@ -176,30 +171,22 @@ class DispatcherWrapper : public NodeWrapper<Dispatcher>
 	static boost::python::list taskBatchGetPreTasks( const Dispatcher::TaskBatchPtr &batch )
 	{
 		boost::python::list result;
-		for( std::vector<TaskBatchPtr>::const_iterator it = batch->preTasks().begin(); it != batch->preTasks().end(); ++it )
+		for( std::vector<TaskBatchPtr>::const_iterator it = batch->preTasks().begin(); it != batch->preTasks().end();
+			 ++it )
 		{
 			result.append( *it );
 		}
 		return result;
 	}
 
-	static const char *taskBatchName( Dispatcher::TaskBatch &batch )
-	{
-		return batch.name().c_str();
-	}
+	static const char *taskBatchName( Dispatcher::TaskBatch &batch ) { return batch.name().c_str(); }
 
-	static CompoundDataPtr taskBatchGetBlindData( Dispatcher::TaskBatch &batch )
-	{
-		return batch.blindData();
-	}
+	static CompoundDataPtr taskBatchGetBlindData( Dispatcher::TaskBatch &batch ) { return batch.blindData(); }
 };
 
 struct DispatcherHelper
 {
-	DispatcherHelper( object fn, object setupPlugsFn )
-		: m_fn( fn ), m_setupFn( setupPlugsFn )
-	{
-	}
+	DispatcherHelper( object fn, object setupPlugsFn ) : m_fn( fn ), m_setupFn( setupPlugsFn ) {}
 
 	DispatcherPtr operator () ()
 	{
@@ -232,7 +219,7 @@ struct DispatcherHelper
 		}
 	}
 
-	private:
+private:
 
 	object m_fn;
 	object m_setupFn;
@@ -314,27 +301,38 @@ struct PostDispatchSlotCaller
 
 void GafferDispatchModule::bindDispatcher()
 {
-	scope s = NodeClass<Dispatcher, DispatcherWrapper>()
-				  .def( "jobDirectory", &Dispatcher::jobDirectory )
-				  .def( "frameRange", &frameRange )
-				  .def( "create", &Dispatcher::create )
-				  .staticmethod( "create" )
-				  .def( "getDefaultDispatcherType", &Dispatcher::getDefaultDispatcherType, return_value_policy<copy_const_reference>() )
-				  .staticmethod( "getDefaultDispatcherType" )
-				  .def( "setDefaultDispatcherType", &Dispatcher::setDefaultDispatcherType )
-				  .staticmethod( "setDefaultDispatcherType" )
-				  .def( "registerDispatcher", &registerDispatcher, ( arg( "dispatcherType" ), arg( "creator" ), arg( "setupPlugsFn" ) = 0 ) )
-				  .staticmethod( "registerDispatcher" )
-				  .def( "registeredDispatchers", &registeredDispatchersWrapper )
-				  .staticmethod( "registeredDispatchers" )
-				  .def( "deregisterDispatcher", &Dispatcher::deregisterDispatcher, ( arg( "dispatcherType" ) ) )
-				  .staticmethod( "deregisterDispatcher" )
-				  .def( "preDispatchSignal", &Dispatcher::preDispatchSignal, return_value_policy<reference_existing_object>() )
-				  .staticmethod( "preDispatchSignal" )
-				  .def( "dispatchSignal", &Dispatcher::dispatchSignal, return_value_policy<reference_existing_object>() )
-				  .staticmethod( "dispatchSignal" )
-				  .def( "postDispatchSignal", &Dispatcher::postDispatchSignal, return_value_policy<reference_existing_object>() )
-				  .staticmethod( "postDispatchSignal" );
+	scope s =
+		NodeClass<Dispatcher, DispatcherWrapper>()
+			.def( "jobDirectory", &Dispatcher::jobDirectory )
+			.def( "frameRange", &frameRange )
+			.def( "create", &Dispatcher::create )
+			.staticmethod( "create" )
+			.def(
+				"getDefaultDispatcherType", &Dispatcher::getDefaultDispatcherType,
+				return_value_policy<copy_const_reference>()
+			)
+			.staticmethod( "getDefaultDispatcherType" )
+			.def( "setDefaultDispatcherType", &Dispatcher::setDefaultDispatcherType )
+			.staticmethod( "setDefaultDispatcherType" )
+			.def(
+				"registerDispatcher", &registerDispatcher,
+				( arg( "dispatcherType" ), arg( "creator" ), arg( "setupPlugsFn" ) = 0 )
+			)
+			.staticmethod( "registerDispatcher" )
+			.def( "registeredDispatchers", &registeredDispatchersWrapper )
+			.staticmethod( "registeredDispatchers" )
+			.def( "deregisterDispatcher", &Dispatcher::deregisterDispatcher, ( arg( "dispatcherType" ) ) )
+			.staticmethod( "deregisterDispatcher" )
+			.def(
+				"preDispatchSignal", &Dispatcher::preDispatchSignal, return_value_policy<reference_existing_object>()
+			)
+			.staticmethod( "preDispatchSignal" )
+			.def( "dispatchSignal", &Dispatcher::dispatchSignal, return_value_policy<reference_existing_object>() )
+			.staticmethod( "dispatchSignal" )
+			.def(
+				"postDispatchSignal", &Dispatcher::postDispatchSignal, return_value_policy<reference_existing_object>()
+			)
+			.staticmethod( "postDispatchSignal" );
 
 	enum_<Dispatcher::FramesMode>( "FramesMode" )
 		.value( "CurrentFrame", Dispatcher::CurrentFrame )
@@ -351,7 +349,15 @@ void GafferDispatchModule::bindDispatcher()
 		.def( "name", &DispatcherWrapper::taskBatchName )
 		.def( "blindData", &DispatcherWrapper::taskBatchGetBlindData );
 
-	SignalClass<Dispatcher::PreDispatchSignal, DefaultSignalCaller<Dispatcher::PreDispatchSignal>, PreDispatchSlotCaller>( "PreDispatchSignal" );
-	SignalClass<Dispatcher::DispatchSignal, DefaultSignalCaller<Dispatcher::DispatchSignal>, DispatchSlotCaller>( "DispatchSignal" );
-	SignalClass<Dispatcher::PostDispatchSignal, DefaultSignalCaller<Dispatcher::PostDispatchSignal>, PostDispatchSlotCaller>( "PostDispatchSignal" );
+	SignalClass<
+		Dispatcher::PreDispatchSignal, DefaultSignalCaller<Dispatcher::PreDispatchSignal>, PreDispatchSlotCaller>(
+		"PreDispatchSignal"
+	);
+	SignalClass<Dispatcher::DispatchSignal, DefaultSignalCaller<Dispatcher::DispatchSignal>, DispatchSlotCaller>(
+		"DispatchSignal"
+	);
+	SignalClass<
+		Dispatcher::PostDispatchSignal, DefaultSignalCaller<Dispatcher::PostDispatchSignal>, PostDispatchSlotCaller>(
+		"PostDispatchSignal"
+	);
 }

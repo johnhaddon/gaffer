@@ -55,8 +55,7 @@ GAFFER_NODE_DEFINE_TYPE( Constant );
 
 size_t Constant::g_firstPlugIndex = 0;
 
-Constant::Constant( const std::string &name )
-	: FlatImageSource( name )
+Constant::Constant( const std::string &name ) : FlatImageSource( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new FormatPlug( "format" ) );
@@ -64,9 +63,7 @@ Constant::Constant( const std::string &name )
 	addChild( new StringPlug( "layer" ) );
 }
 
-Constant::~Constant()
-{
-}
+Constant::~Constant() {}
 
 GafferImage::FormatPlug *Constant::formatPlug()
 {
@@ -119,7 +116,9 @@ void Constant::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outpu
 	}
 }
 
-void Constant::hashFormat( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Constant::hashFormat(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageSource::hashFormat( output, context, h );
 	h.append( formatPlug()->hash() );
@@ -130,7 +129,9 @@ GafferImage::Format Constant::computeFormat( const Gaffer::Context *context, con
 	return formatPlug()->getValue();
 }
 
-void Constant::hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Constant::hashDataWindow(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageSource::hashDataWindow( output, context, h );
 	h.append( formatPlug()->hash() );
@@ -146,13 +147,17 @@ IECore::ConstCompoundDataPtr Constant::computeMetadata( const Gaffer::Context *c
 	return outPlug()->metadataPlug()->defaultValue();
 }
 
-void Constant::hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Constant::hashChannelNames(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageSource::hashChannelNames( output, context, h );
 	layerPlug()->hash( h );
 }
 
-IECore::ConstStringVectorDataPtr Constant::computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr Constant::computeChannelNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	std::string channelNamePrefix = layerPlug()->getValue();
 	if( !channelNamePrefix.empty() )
@@ -171,7 +176,9 @@ IECore::ConstStringVectorDataPtr Constant::computeChannelNames( const Gaffer::Co
 	return resultData;
 }
 
-void Constant::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Constant::hashChannelData(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageSource::hashChannelData( output, context, h );
 	// Don't bother hashing the format or tile origin here as we couldn't care less about the
@@ -179,17 +186,24 @@ void Constant::hashChannelData( const GafferImage::ImagePlug *output, const Gaff
 	const int channelIndex = ImageAlgo::colorIndex( context->get<std::string>( ImagePlug::channelNameContextName ) );
 	if( channelIndex == -1 )
 	{
-		throw IECore::Exception( "Constant : Invalid channel: " + context->get<std::string>( ImagePlug::channelNameContextName ) );
+		throw IECore::Exception(
+			"Constant : Invalid channel: " + context->get<std::string>( ImagePlug::channelNameContextName )
+		);
 	}
 	colorPlug()->getChild( channelIndex )->hash( h );
 }
 
-IECore::ConstFloatVectorDataPtr Constant::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr Constant::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	const int channelIndex = ImageAlgo::colorIndex( context->get<std::string>( ImagePlug::channelNameContextName ) );
 	if( channelIndex == -1 )
 	{
-		throw IECore::Exception( "Constant : Invalid channel: " + context->get<std::string>( ImagePlug::channelNameContextName ) );
+		throw IECore::Exception(
+			"Constant : Invalid channel: " + context->get<std::string>( ImagePlug::channelNameContextName )
+		);
 	}
 	const float value = colorPlug()->getChild( channelIndex )->getValue();
 

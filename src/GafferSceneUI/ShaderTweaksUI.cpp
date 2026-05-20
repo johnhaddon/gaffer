@@ -63,22 +63,24 @@ IECore::InternedString g_noduleTypeKey( "nodule:type" );
 class TweakPlugAdder : public PlugAdder
 {
 
-	public:
+public:
 
-	TweakPlugAdder( PlugPtr plugsParent )
-		: m_plugsParent( plugsParent )
+	TweakPlugAdder( PlugPtr plugsParent ) : m_plugsParent( plugsParent )
 	{
 		plugsParent->node()->plugSetSignal().connect( boost::bind( &TweakPlugAdder::plugSet, this, ::_1 ) );
-		plugsParent->node()->plugInputChangedSignal().connect( boost::bind( &TweakPlugAdder::plugInputChanged, this, ::_1 ) );
+		plugsParent->node()->plugInputChangedSignal().connect(
+			boost::bind( &TweakPlugAdder::plugInputChanged, this, ::_1 )
+		);
 		plugsParent->childAddedSignal().connect( boost::bind( &TweakPlugAdder::childAdded, this ) );
 		plugsParent->childRemovedSignal().connect( boost::bind( &TweakPlugAdder::childRemoved, this ) );
-		Metadata::plugValueChangedSignal( plugsParent->node() ).connect( boost::bind( &TweakPlugAdder::plugMetadataChanged, this, ::_1, ::_2 ) );
+		Metadata::plugValueChangedSignal( plugsParent->node() )
+			.connect( boost::bind( &TweakPlugAdder::plugMetadataChanged, this, ::_1, ::_2 ) );
 		buttonReleaseSignal().connect( boost::bind( &TweakPlugAdder::buttonRelease, this, ::_2 ) );
 
 		updateVisibility();
 	}
 
-	protected:
+protected:
 
 	bool canCreateConnection( const Plug *endpoint ) const override
 	{
@@ -99,7 +101,7 @@ class TweakPlugAdder : public PlugAdder
 		static_cast<TweakPlug *>( plug )->valuePlug()->setInput( endpoint );
 	}
 
-	private:
+private:
 
 	bool buttonRelease( const ButtonEvent &event )
 	{
@@ -164,10 +166,7 @@ class TweakPlugAdder : public PlugAdder
 		return result;
 	}
 
-	void updateVisibility()
-	{
-		setVisible( !showablePlugs().empty() );
-	}
+	void updateVisibility() { setVisible( !showablePlugs().empty() ); }
 
 	void plugSet( const Gaffer::Plug *plug )
 	{
@@ -191,15 +190,9 @@ class TweakPlugAdder : public PlugAdder
 		}
 	}
 
-	void childAdded()
-	{
-		updateVisibility();
-	}
+	void childAdded() { updateVisibility(); }
 
-	void childRemoved()
-	{
-		updateVisibility();
-	}
+	void childRemoved() { updateVisibility(); }
 
 	void plugMetadataChanged( const Gaffer::Plug *plug, IECore::InternedString key )
 	{
@@ -218,12 +211,9 @@ class TweakPlugAdder : public PlugAdder
 struct Registration
 {
 
-	Registration()
-	{
-		NoduleLayout::registerCustomGadget( "GafferSceneUI.ShaderTweaksUI.PlugAdder", &create );
-	}
+	Registration() { NoduleLayout::registerCustomGadget( "GafferSceneUI.ShaderTweaksUI.PlugAdder", &create ); }
 
-	private:
+private:
 
 	static GadgetPtr create( GraphComponentPtr parent )
 	{

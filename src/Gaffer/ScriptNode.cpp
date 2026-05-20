@@ -92,33 +92,25 @@ template class Container<GraphComponent, ScriptNode>;
 class ScriptNode::CompoundAction : public Gaffer::Action
 {
 
-	public:
+public:
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::ScriptNode::CompoundAction, CompoundActionTypeId, Gaffer::Action );
 
 	CompoundAction( ScriptNode *subject, const std::string &mergeGroup )
-		: m_subject( subject ), m_mergeGroup( mergeGroup )
+		: m_subject( subject ),
+		  m_mergeGroup( mergeGroup )
 	{
 	}
 
-	void addAction( ActionPtr action )
-	{
-		m_actions.push_back( action );
-	}
+	void addAction( ActionPtr action ) { m_actions.push_back( action ); }
 
-	size_t numActions() const
-	{
-		return m_actions.size();
-	}
+	size_t numActions() const { return m_actions.size(); }
 
-	protected:
+protected:
 
 	friend class ScriptNode;
 
-	GraphComponent *subject() const override
-	{
-		return m_subject;
-	}
+	GraphComponent *subject() const override { return m_subject; }
 
 	void doAction() override
 	{
@@ -133,7 +125,8 @@ class ScriptNode::CompoundAction : public Gaffer::Action
 
 	void undoAction() override
 	{
-		for( std::vector<ActionPtr>::const_reverse_iterator it = m_actions.rbegin(), eIt = m_actions.rend(); it != eIt; ++it )
+		for( std::vector<ActionPtr>::const_reverse_iterator it = m_actions.rbegin(), eIt = m_actions.rend(); it != eIt;
+			 ++it )
 		{
 			( *it )->undoAction();
 			m_subject->actionSignal()( m_subject, it->get(), Action::Undo );
@@ -188,14 +181,16 @@ class ScriptNode::CompoundAction : public Gaffer::Action
 		}
 		else
 		{
-			for( std::vector<ActionPtr>::const_iterator it = compoundAction->m_actions.begin(), eIt = compoundAction->m_actions.end(); it != eIt; ++it )
+			for( std::vector<ActionPtr>::const_iterator it = compoundAction->m_actions.begin(),
+														eIt = compoundAction->m_actions.end();
+				 it != eIt; ++it )
 			{
 				m_actions.push_back( *it );
 			}
 		}
 	}
 
-	private:
+private:
 
 	// this can't be a smart pointer because then we'd get
 	// a reference cycle between us and the script.
@@ -251,7 +246,7 @@ const IECore::InternedString g_framesPerSecond( "framesPerSecond" );
 class ScriptNode::FocusSet : public Gaffer::Set
 {
 
-	public:
+public:
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::ScriptNode::FocusSet, ScriptNodeFocusSetTypeId, Gaffer::Set );
 
@@ -271,44 +266,28 @@ class ScriptNode::FocusSet : public Gaffer::Set
 
 			if( node )
 			{
-				m_nodeParentChangedConnection = node->parentChangedSignal().connect(
-					boost::bind( &FocusSet::parentChanged, this, ::_1, ::_2 )
-				);
+				m_nodeParentChangedConnection =
+					node->parentChangedSignal().connect( boost::bind( &FocusSet::parentChanged, this, ::_1, ::_2 ) );
 				memberAddedSignal()( this, node );
 			}
 		}
 	}
 
-	Node *getNode() const
-	{
-		return m_node.get();
-	}
+	Node *getNode() const { return m_node.get(); }
 
 	/// @name Set interface
 	////////////////////////////////////////////////////////////////////
 	//@{
-	bool contains( const Member *object ) const override
-	{
-		return m_node && m_node.get() == object;
-	}
+	bool contains( const Member *object ) const override { return m_node && m_node.get() == object; }
 
-	Member *member( size_t index ) override
-	{
-		return m_node.get();
-	}
+	Member *member( size_t index ) override { return m_node.get(); }
 
-	const Member *member( size_t index ) const override
-	{
-		return m_node.get();
-	}
+	const Member *member( size_t index ) const override { return m_node.get(); }
 
-	size_t size() const override
-	{
-		return m_node ? 1 : 0;
-	}
+	size_t size() const override { return m_node ? 1 : 0; }
 	//@}
 
-	private:
+private:
 
 	void parentChanged( GraphComponent *member, GraphComponent *oldParent )
 	{
@@ -378,9 +357,7 @@ ScriptNode::ScriptNode( const std::string &name )
 	m_context->changedSignal().connect( boost::bind( &ScriptNode::contextChanged, this, ::_1, ::_2 ) );
 }
 
-ScriptNode::~ScriptNode()
-{
-}
+ScriptNode::~ScriptNode() {}
 
 StringPlug *ScriptNode::fileNamePlug()
 {
@@ -726,7 +703,9 @@ void ScriptNode::paste( Node *parent, bool continueOnError )
 		parent = parent ? parent : this;
 		// set up something to catch all the newly created nodes
 		StandardSetPtr newNodes = new StandardSet;
-		parent->childAddedSignal().connect( boost::bind( (bool ( StandardSet::* )( IECore::RunTimeTypedPtr ))&StandardSet::add, newNodes.get(), ::_2 ) );
+		parent->childAddedSignal().connect(
+			boost::bind( (bool ( StandardSet::* )( IECore::RunTimeTypedPtr ))&StandardSet::add, newNodes.get(), ::_2 )
+		);
 
 		// do the paste
 		execute( s->readable(), parent, continueOnError );
@@ -769,11 +748,12 @@ void ScriptNode::deleteNodes( Node *parent, const Set *filter, bool reconnect )
 					}
 					catch( const std::exception &e )
 					{
-						msg(
-							IECore::Msg::Warning,
-							fmt::format( "correspondingInput error while deleting - cannot reconnect \"{}\"", it->get()->fullName() ),
-							e.what()
-						);
+						msg( IECore::Msg::Warning,
+							 fmt::format(
+								 "correspondingInput error while deleting - cannot reconnect \"{}\"",
+								 it->get()->fullName()
+							 ),
+							 e.what() );
 					}
 
 					if( !inPlug )
@@ -884,7 +864,9 @@ bool ScriptNode::importFile( const std::filesystem::path &fileName, Node *parent
 	bool result = script->load( continueOnError );
 
 	StandardSetPtr nodeSet = new StandardSet();
-	nodeSet->add( Node::Iterator( script.get() ), Node::Iterator( script->children().end(), script->children().end() ) );
+	nodeSet->add(
+		Node::Iterator( script.get() ), Node::Iterator( script->children().end(), script->children().end() )
+	);
 	const std::string nodeSerialisation = script->serialise( script.get(), nodeSet.get() );
 
 	result |= execute( nodeSerialisation, parent, continueOnError );
@@ -909,7 +891,9 @@ std::string ScriptNode::serialiseInternal( const Node *parent, const Set *filter
 	return g_serialiseFunction( parent ? parent : this, filter );
 }
 
-bool ScriptNode::executeInternal( const std::string &serialisation, Node *parent, bool continueOnError, const std::string &context )
+bool ScriptNode::executeInternal(
+	const std::string &serialisation, Node *parent, bool continueOnError, const std::string &context
+)
 {
 	if( !g_executeFunction )
 	{
@@ -996,8 +980,7 @@ void ScriptNode::plugSet( Plug *plug )
 		context()->set( g_scriptName, fileName.stem().string() );
 
 		MetadataAlgo::setReadOnly(
-			this,
-			std::filesystem::exists( fileName ) && 0 != access( fileName.c_str(), W_OK ),
+			this, std::filesystem::exists( fileName ) && 0 != access( fileName.c_str(), W_OK ),
 			/* persistent = */ false
 		);
 	}

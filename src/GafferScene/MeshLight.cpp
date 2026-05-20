@@ -73,7 +73,8 @@ MeshLight::MeshLight( const std::string &name, const ShaderPtr &shader )
 
 	PlugPtr parametersPlug = shader->parametersPlug()->createCounterpart( "parameters", Plug::In );
 	addChild( parametersPlug );
-	for( Plug::Iterator srcIt( parametersPlug.get() ), dstIt( shader->parametersPlug() ); !srcIt.done(); ++srcIt, ++dstIt )
+	for( Plug::Iterator srcIt( parametersPlug.get() ), dstIt( shader->parametersPlug() ); !srcIt.done();
+		 ++srcIt, ++dstIt )
 	{
 		( *dstIt )->setInput( *srcIt );
 	}
@@ -127,9 +128,7 @@ MeshLight::MeshLight( const std::string &name, const ShaderPtr &shader )
 	outPlug()->setFlags( Plug::Serialisable, false );
 }
 
-MeshLight::~MeshLight()
-{
-}
+MeshLight::~MeshLight() {}
 
 CustomAttributes *MeshLight::customAttributes()
 {

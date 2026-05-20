@@ -146,28 +146,24 @@ int dayNumber( const int day, const int month, const int year )
 /// Returns the position of the sun on a unit sphere.
 /// Based on the implementation in https://github.com/prman-pixar/RenderManForBlender
 V3f sunPosition(
-	const float hour,
-	const int day,
-	const int month,
-	const int year,
-	const int timeZone,
-	const float longitude,
+	const float hour, const int day, const int month, const int year, const int timeZone, const float longitude,
 	const float latitude
 )
 {
 	const int dayNumber = ::dayNumber( day, month, year );
 
 	const float dayAngle = 2.f * M_PI * ( dayNumber - 81.f + ( hour - timeZone ) / 24.f ) / 365.f;
-	const float timeCorrection =
-		4.f * ( longitude - 15.f * timeZone ) +
-		9.87f * sin( 2.f * dayAngle ) -
-		7.53f * cos( dayAngle ) -
-		1.5f * sin( dayAngle );
+	const float timeCorrection = 4.f * ( longitude - 15.f * timeZone ) + 9.87f * sin( 2.f * dayAngle ) -
+		7.53f * cos( dayAngle ) - 1.5f * sin( dayAngle );
 	const float hourAngle = degreesToRadians( 15.f ) * ( hour + timeCorrection / 60.f - 12.f );
 	const float declination = asin( sin( degreesToRadians( 23.45f ) ) * sin( dayAngle ) );
 	const float latRadians = degreesToRadians( latitude );
-	const float elevation = asin( sin( declination ) * sin( latRadians ) + cos( declination ) * cos( latRadians ) * cos( hourAngle ) );
-	float azimuth = acos( ( sin( declination ) * cos( latRadians ) - cos( declination ) * sin( latRadians ) * cos( hourAngle ) ) / cos( elevation ) );
+	const float elevation =
+		asin( sin( declination ) * sin( latRadians ) + cos( declination ) * cos( latRadians ) * cos( hourAngle ) );
+	float azimuth = acos(
+		( sin( declination ) * cos( latRadians ) - cos( declination ) * sin( latRadians ) * cos( hourAngle ) ) /
+		cos( elevation )
+	);
 
 	if( hourAngle > 0.f )
 	{
@@ -175,9 +171,7 @@ V3f sunPosition(
 	}
 
 	return V3f(
-		cos( elevation ) * sin( azimuth ),
-		std::max( sin( elevation ), 0.f ),
-		-cos( elevation ) * cos( azimuth )
+		cos( elevation ) * sin( azimuth ), std::max( sin( elevation ), 0.f ), -cos( elevation ) * cos( azimuth )
 	);
 }
 
@@ -297,7 +291,9 @@ IECoreGL::ConstRenderablePtr sunSurface( const float radius )
 	return result;
 }
 
-IECoreGL::ConstRenderablePtr spotLightRound( const float angle, const float height = 1.f, const float lineWidthScale = 1.f, const bool muted = false )
+IECoreGL::ConstRenderablePtr spotLightRound(
+	const float angle, const float height = 1.f, const float lineWidthScale = 1.f, const bool muted = false
+)
 {
 	IECoreGL::GroupPtr result = new IECoreGL::Group();
 	addWireframeCurveState( result.get(), lineWidthScale );
@@ -317,24 +313,30 @@ IECoreGL::ConstRenderablePtr spotLightRound( const float angle, const float heig
 
 	IntVectorDataPtr vertsPerCurve = new IntVectorData( { 2, 2, 2, 2 } );
 	V3fVectorDataPtr p = new V3fVectorData(
-		{ V3f( 0, 0.f, 0.f ), V3f( baseRadius, 0.f, -baseDistance ),
-		  V3f( 0.f, 0, 0.f ), V3f( 0.f, baseRadius, -baseDistance ),
-		  V3f( -0, 0.f, 0.f ), V3f( -baseRadius, 0.f, -baseDistance ),
+		{ V3f( 0, 0.f, 0.f ), V3f( baseRadius, 0.f, -baseDistance ), V3f( 0.f, 0, 0.f ),
+		  V3f( 0.f, baseRadius, -baseDistance ), V3f( -0, 0.f, 0.f ), V3f( -baseRadius, 0.f, -baseDistance ),
 		  V3f( 0.f, -0, 0.f ), V3f( 0.f, -baseRadius, -baseDistance ) }
 	);
 
-	IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurve );
+	IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive(
+		IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurve
+	);
 	curves->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, p ) );
 
-	const Color3fDataPtr color = new Color3fData( lineWidthScale < 1.0f ? Color3f( 0.627f, 0.580f, 0.352f ) : lightWireframeColor( muted ) );
-	curves->addPrimitiveVariable( "Cs", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, color ) );
+	const Color3fDataPtr color =
+		new Color3fData( lineWidthScale < 1.0f ? Color3f( 0.627f, 0.580f, 0.352f ) : lightWireframeColor( muted ) );
+	curves->addPrimitiveVariable(
+		"Cs", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, color )
+	);
 
 	result->addChild( curves );
 
 	return result;
 }
 
-IECoreGL::ConstRenderablePtr spotLightSquare( const float angle, const float height = 1.f, const float lineWidthScale = 1.f, const bool muted = false )
+IECoreGL::ConstRenderablePtr spotLightSquare(
+	const float angle, const float height = 1.f, const float lineWidthScale = 1.f, const bool muted = false
+)
 {
 	IECoreGL::GroupPtr result = new IECoreGL::Group();
 	addWireframeCurveState( result.get(), lineWidthScale );
@@ -346,7 +348,9 @@ IECoreGL::ConstRenderablePtr spotLightSquare( const float angle, const float hei
 
 	IECoreGL::GroupPtr frustumBaseGroup = new IECoreGL::Group();
 	frustumBaseGroup->addChild(
-		boost::const_pointer_cast<IECoreGL::Renderable>( roundedQuadWireframe( V2f( halfWidth * 2.f ), V2f( 0.f ), lineWidthScale, muted ) )
+		boost::const_pointer_cast<IECoreGL::Renderable>(
+			roundedQuadWireframe( V2f( halfWidth * 2.f ), V2f( 0.f ), lineWidthScale, muted )
+		)
 	);
 	frustumBaseGroup->setTransform( M44f().translate( V3f( 0.f, 0.f, -baseDistance ) ) );
 
@@ -354,17 +358,22 @@ IECoreGL::ConstRenderablePtr spotLightSquare( const float angle, const float hei
 
 	IntVectorDataPtr vertsPerCurve = new IntVectorData( { 2, 2, 2, 2 } );
 	V3fVectorDataPtr p = new V3fVectorData(
-		{ V3f( 0, 0.f, 0.f ), V3f( halfWidth, halfWidth, -baseDistance ),
-		  V3f( 0.f, 0, 0.f ), V3f( -halfWidth, halfWidth, -baseDistance ),
-		  V3f( -0, 0.f, 0.f ), V3f( -halfWidth, -halfWidth, -baseDistance ),
-		  V3f( 0.f, -0, 0.f ), V3f( halfWidth, -halfWidth, -baseDistance ) }
+		{ V3f( 0, 0.f, 0.f ), V3f( halfWidth, halfWidth, -baseDistance ), V3f( 0.f, 0, 0.f ),
+		  V3f( -halfWidth, halfWidth, -baseDistance ), V3f( -0, 0.f, 0.f ),
+		  V3f( -halfWidth, -halfWidth, -baseDistance ), V3f( 0.f, -0, 0.f ),
+		  V3f( halfWidth, -halfWidth, -baseDistance ) }
 	);
 
-	IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurve );
+	IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive(
+		IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurve
+	);
 	curves->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, p ) );
 
-	const Color3fDataPtr color = new Color3fData( lineWidthScale < 1.0f ? Color3f( 0.627f, 0.580f, 0.352f ) : lightWireframeColor( muted ) );
-	curves->addPrimitiveVariable( "Cs", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, color ) );
+	const Color3fDataPtr color =
+		new Color3fData( lineWidthScale < 1.0f ? Color3f( 0.627f, 0.580f, 0.352f ) : lightWireframeColor( muted ) );
+	curves->addPrimitiveVariable(
+		"Cs", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, color )
+	);
 
 	result->addChild( curves );
 
@@ -397,33 +406,36 @@ const InternedString g_zoneParameter( "zone" );
 class RenderManLightVisualiser : public LightVisualiser
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( RenderManLightVisualiser )
 
 	RenderManLightVisualiser();
 	~RenderManLightVisualiser() override;
 
-	Visualisations visualise( const InternedString &attributeName, const ShaderNetwork *shaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
+	Visualisations visualise(
+		const InternedString &attributeName, const ShaderNetwork *shaderNetwork, const CompoundObject *attributes,
+		IECoreGL::ConstStatePtr &state
+	) const override;
 
-	private:
+private:
 
 	static LightVisualiser::LightVisualiserDescription<RenderManLightVisualiser> g_description;
 };
 
 IE_CORE_DECLAREPTR( RenderManLightVisualiser )
 
-IECoreGLPreview::LightVisualiser::LightVisualiserDescription<RenderManLightVisualiser> RenderManLightVisualiser::g_description( "ri:light", "*" );
+IECoreGLPreview::LightVisualiser::LightVisualiserDescription<RenderManLightVisualiser> RenderManLightVisualiser::
+	g_description( "ri:light", "*" );
 
-RenderManLightVisualiser::RenderManLightVisualiser()
-{
-}
+RenderManLightVisualiser::RenderManLightVisualiser() {}
 
-RenderManLightVisualiser::~RenderManLightVisualiser()
-{
-}
+RenderManLightVisualiser::~RenderManLightVisualiser() {}
 
-Visualisations RenderManLightVisualiser::visualise( const InternedString &attributeName, const ShaderNetwork *shaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const
+Visualisations RenderManLightVisualiser::visualise(
+	const InternedString &attributeName, const ShaderNetwork *shaderNetwork, const CompoundObject *attributes,
+	IECoreGL::ConstStatePtr &state
+) const
 {
 	const Shader *lightShader = shaderNetwork->outputShader();
 
@@ -437,12 +449,14 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 	// RenderMan uses a vector for the gamma, we treat it as a color
 	const Color3f gamma = parameterOrDefault( lightParameters, g_colorMapGammaParameter, V3f( 1.f ) );
 
-	const std::string visualiserDrawingMode = parameterOrDefault( attributes, g_glLightDrawingModeString, std::string( "texture" ) );
+	const std::string visualiserDrawingMode =
+		parameterOrDefault( attributes, g_glLightDrawingModeString, std::string( "texture" ) );
 
 	const bool drawShaded = visualiserDrawingMode != "wireframe";
 	const bool drawTextured = visualiserDrawingMode == "texture";
 
-	const int maxTextureResolution = parameterOrDefault( attributes, g_glVisualiserMaxTextureResolutionString, std::numeric_limits<int>::max() );
+	const int maxTextureResolution =
+		parameterOrDefault( attributes, g_glVisualiserMaxTextureResolutionString, std::numeric_limits<int>::max() );
 	const bool muted = parameterOrDefault( attributes, g_lightMuteString, false );
 
 	const float coneAngle = parameterOrDefault( lightParameters, g_coneAngleParameter, 90.f );
@@ -465,22 +479,30 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 
 		IECoreGL::GroupPtr wireframeGroup = new IECoreGL::Group;
 		wireframeGroup->setTransform( orientation );
-		wireframeGroup->addChild( boost::const_pointer_cast<IECoreGL::Renderable>( cylinderWireframe( 0.5f, 1.f, 1.f, muted ) ) );
+		wireframeGroup->addChild(
+			boost::const_pointer_cast<IECoreGL::Renderable>( cylinderWireframe( 0.5f, 1.f, 1.f, muted ) )
+		);
 		result.push_back( Visualisation::createGeometry( wireframeGroup ) );
 
 		IECoreGL::GroupPtr surfaceGroup = new IECoreGL::Group;
 		surfaceGroup->setTransform( orientation );
 		if( drawShaded )
 		{
-			surfaceGroup->addChild( boost::const_pointer_cast<IECoreGL::Renderable>( cylinderSurface( 0.5f, 1.f, color ) ) );
+			surfaceGroup->addChild(
+				boost::const_pointer_cast<IECoreGL::Renderable>( cylinderSurface( 0.5f, 1.f, color ) )
+			);
 			result.push_back( Visualisation::createGeometry( surfaceGroup, Visualisation::ColorSpace::Scene ) );
 		}
 		else
 		{
 			surfaceGroup->addChild( boost::const_pointer_cast<IECoreGL::Renderable>( colorIndicator( color ) ) );
-			result.push_back( Visualisation::createOrnament( surfaceGroup,
-															 false, // affectsFramingBound
-															 Visualisation::ColorSpace::Scene ) );
+			result.push_back(
+				Visualisation::createOrnament(
+					surfaceGroup,
+					false, // affectsFramingBound
+					Visualisation::ColorSpace::Scene
+				)
+			);
 		}
 
 		if( coneAngle < 90.f )
@@ -493,8 +515,7 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 			);
 			result.push_back(
 				Visualisation::createFrustum(
-					spotLightSquare( coneAngle, 10.f, 0.5f, muted ),
-					Visualisation::Scale::Visualiser
+					spotLightSquare( coneAngle, 10.f, 0.5f, muted ), Visualisation::Scale::Visualiser
 				)
 			);
 		}
@@ -506,7 +527,10 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 		{
 			result.push_back(
 				Visualisation::createGeometry(
-					diskSurface( 0.5f, /* textureData = */ nullptr, color, /* saturation = */ 1.f, /* gamma = */ Color3f( 1.f ), maxTextureResolution, Color3f( 1.f ) ),
+					diskSurface(
+						0.5f, /* textureData = */ nullptr, color, /* saturation = */ 1.f, /* gamma = */ Color3f( 1.f ),
+						maxTextureResolution, Color3f( 1.f )
+					),
 					Visualisation::ColorSpace::Scene
 				)
 			);
@@ -522,14 +546,17 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 			);
 		}
 
-		result.push_back(
-			Visualisation::createGeometry( diskWireframe( 0.5f, 1.f, muted ) )
-		);
+		result.push_back( Visualisation::createGeometry( diskWireframe( 0.5f, 1.f, muted ) ) );
 
 		const float focus = parameterOrDefault( lightParameters, g_emissionFocusParameter, 0.f );
-		addAreaSpread( pow( 0.707f, focus ), ornamentWireframeVertsPerCurve->writable(), ornamentWireframePoints->writable() );
+		addAreaSpread(
+			pow( 0.707f, focus ), ornamentWireframeVertsPerCurve->writable(), ornamentWireframePoints->writable()
+		);
 
-		addRay( V3f( 0.f ), V3f( 0.f, 0.f, -1.f ), ornamentWireframeVertsPerCurve->writable(), ornamentWireframePoints->writable() );
+		addRay(
+			V3f( 0.f ), V3f( 0.f, 0.f, -1.f ), ornamentWireframeVertsPerCurve->writable(),
+			ornamentWireframePoints->writable()
+		);
 
 		if( coneAngle < 90.f )
 		{
@@ -541,8 +568,7 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 			);
 			result.push_back(
 				Visualisation::createFrustum(
-					spotLightRound( coneAngle, 10.f, 0.5f, muted ),
-					Visualisation::Scale::Visualiser
+					spotLightRound( coneAngle, 10.f, 0.5f, muted ), Visualisation::Scale::Visualiser
 				)
 			);
 		}
@@ -551,27 +577,37 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 	else if( lightShader->getName() == "PxrDistantLight" )
 	{
 		result.push_back( Visualisation::createOrnament( distantRays( muted ), /* affectsFramingBouds = */ true ) );
-		result.push_back( Visualisation::createOrnament( colorIndicator( color ), /* affectsFramingBounds = */ false, Visualisation::ColorSpace::Scene ) );
+		result.push_back(
+			Visualisation::createOrnament(
+				colorIndicator( color ), /* affectsFramingBounds = */ false, Visualisation::ColorSpace::Scene
+			)
+		);
 	}
 
 	else if( lightShader->getName() == "PxrDomeLight" )
 	{
 		if( drawShaded )
 		{
-			const std::string lightColorMap = drawTextured ? parameterOrDefault( lightParameters, g_lightColorMapParameter, std::string() ) : "";
+			const std::string lightColorMap =
+				drawTextured ? parameterOrDefault( lightParameters, g_lightColorMapParameter, std::string() ) : "";
 			ConstDataPtr textureData = lightColorMap.empty() ? nullptr : new StringData( lightColorMap );
 
 			result.push_back(
 				Visualisation::createOrnament(
-					environmentSphereSurface( textureData, color, saturation, gamma, maxTextureResolution, Color3f( 1.f ) ),
+					environmentSphereSurface(
+						textureData, color, saturation, gamma, maxTextureResolution, Color3f( 1.f )
+					),
 					true, // affectsFramingBound
 					Visualisation::ColorSpace::Scene
 				)
 			);
 		}
-		result.push_back( Visualisation::createOrnament( sphereWireframe( 1.05f, Vec3<bool>( true ), 1.0f, V3f( 0.0f ), muted ),
-														 true // affectsFramingBound
-		) );
+		result.push_back(
+			Visualisation::createOrnament(
+				sphereWireframe( 1.05f, Vec3<bool>( true ), 1.0f, V3f( 0.0f ), muted ),
+				true // affectsFramingBound
+			)
+		);
 	}
 
 	else if( lightShader->getName() == "PxrEnvDayLight" )
@@ -589,7 +625,9 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 			// for a muddled color when selected if the tint is set to the light color. Instead we
 			// set the tint to `1.0` and set the color on the group.
 			addConstantShader( compassGroup.get(), Color3f( 1.f ) );
-			compassGroup->getState()->add( new IECoreGL::Color( lightWireframeColor4( muted ) ), /* override = */ true );
+			compassGroup->getState()->add(
+				new IECoreGL::Color( lightWireframeColor4( muted ) ), /* override = */ true
+			);
 
 			static IECoreGL::FontPtr compassFont = IECoreGL::FontLoader::defaultFontLoader()->load( "VeraBd.ttf" );
 			IECoreGL::GroupPtr compassLabelGroup = new IECoreGL::Group();
@@ -598,38 +636,34 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 			compassLabelGroup->addChild( boost::const_pointer_cast<IECoreGL::MeshPrimitive>( nLabel ) );
 			compassLabelGroup->setTransform(
 				M44f().translate( V3f( -nLabel->bound().center().x, 2.4f, 0.f ) ) *
-				M44f().rotate( V3f( -M_PI_2, 0.f, 0.f ) ) *
-				M44f().scale( V3f( compassScale * .25f ) )
+				M44f().rotate( V3f( -M_PI_2, 0.f, 0.f ) ) * M44f().scale( V3f( compassScale * .25f ) )
 			);
 			compassGroup->addChild( compassLabelGroup );
 
 			compassGroup->addChild(
-				boost::const_pointer_cast<IECoreGL::Renderable>(
-					triangle(
-						V3f( compassScale * -0.1f, 0.f, 0.f ),
-						V3f( compassScale * 0.1f, 0.f, 0.f ),
-						V3f( 0.f, 0.f, -compassScale * 0.5f ),
-						false // Wireframe
-					)
-				)
+				boost::const_pointer_cast<IECoreGL::Renderable>( triangle(
+					V3f( compassScale * -0.1f, 0.f, 0.f ), V3f( compassScale * 0.1f, 0.f, 0.f ),
+					V3f( 0.f, 0.f, -compassScale * 0.5f ),
+					false // Wireframe
+				) )
 			);
 			compassGroup->addChild(
-				boost::const_pointer_cast<IECoreGL::Renderable>(
-					triangle(
-						V3f( compassScale * 0.1f, 0.f, 0.f ),
-						V3f( compassScale * -0.1f, 0.f, 0.f ),
-						V3f( 0.f, 0.f, compassScale * 0.5f ),
-						true // Wireframe
-					)
-				)
+				boost::const_pointer_cast<IECoreGL::Renderable>( triangle(
+					V3f( compassScale * 0.1f, 0.f, 0.f ), V3f( compassScale * -0.1f, 0.f, 0.f ),
+					V3f( 0.f, 0.f, compassScale * 0.5f ),
+					true // Wireframe
+				) )
 			);
 
-			result.push_back( Visualisation::createOrnament( compassGroup, /* affectsFramingBounds = */ true, Visualisation::ColorSpace::Display ) );
+			result.push_back(
+				Visualisation::createOrnament(
+					compassGroup, /* affectsFramingBounds = */ true, Visualisation::ColorSpace::Display
+				)
+			);
 
 			sunPosition = ::sunPosition(
 				parameterOrDefault( lightParameters, g_hourParameter, 14.633333f ),
-				parameterOrDefault( lightParameters, g_dayParameter, 20 ),
-				monthParameter,
+				parameterOrDefault( lightParameters, g_dayParameter, 20 ), monthParameter,
 				parameterOrDefault( lightParameters, g_yearParameter, 2014 ),
 				parameterOrDefault( lightParameters, g_zoneParameter, -8 ),
 				parameterOrDefault( lightParameters, g_longitudeParameter, -122.3318f ),
@@ -638,7 +672,8 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 		}
 		else
 		{
-			sunPosition = parameterOrDefault( lightParameters, g_sunDirectionParameter, V3f( 0.f, 1.f, 0.f ) ).normalized();
+			sunPosition =
+				parameterOrDefault( lightParameters, g_sunDirectionParameter, V3f( 0.f, 1.f, 0.f ) ).normalized();
 		}
 
 		IECoreGL::GroupPtr raysGroup = new IECoreGL::Group();
@@ -647,7 +682,11 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 		alignZAxisWithTargetDir( rayTransform, sunPosition, V3f( 0.f, 1.f, 0.f ) );
 		rayTransform.translate( V3f( 0.f, 0.f, compassScale - 1.f ) );
 		raysGroup->setTransform( rayTransform );
-		result.push_back( Visualisation::createOrnament( raysGroup, /* affectsFramingBounds = */ true, Visualisation::ColorSpace::Display ) );
+		result.push_back(
+			Visualisation::createOrnament(
+				raysGroup, /* affectsFramingBounds = */ true, Visualisation::ColorSpace::Display
+			)
+		);
 
 		IECoreGL::GroupPtr tintIndicatorGroup = new IECoreGL::Group();
 		tintIndicatorGroup->addChild(
@@ -655,7 +694,9 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 				colorIndicator( parameterOrDefault( lightParameters, g_sunTintParameter, Color3f( 1.f ) ) )
 			)
 		);
-		tintIndicatorGroup->setTransform( M44f().scale( V3f( drawShaded ? compassScale : 1.f ) ) * M44f().translate( sunPosition * compassScale ) );
+		tintIndicatorGroup->setTransform(
+			M44f().scale( V3f( drawShaded ? compassScale : 1.f ) ) * M44f().translate( sunPosition * compassScale )
+		);
 		result.push_back(
 			Visualisation::createOrnament(
 				tintIndicatorGroup,
@@ -669,14 +710,20 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 		// for a muddled color when selected if the tint is set to the light color. Instead we
 		// set the tint to `1.0` and set the color on the group.
 		addConstantShader( sunIndicatorGroup.get(), Color3f( 1.f ), 1 );
-		sunIndicatorGroup->getState()->add( new IECoreGL::Color( lightWireframeColor4( muted ) ), /* override = */ true );
+		sunIndicatorGroup->getState()->add(
+			new IECoreGL::Color( lightWireframeColor4( muted ) ), /* override = */ true
+		);
 		if( drawShaded )
 		{
-			sunIndicatorGroup->addChild( boost::const_pointer_cast<IECoreGL::Renderable>( sunSurface( compassScale ) ) );
+			sunIndicatorGroup->addChild(
+				boost::const_pointer_cast<IECoreGL::Renderable>( sunSurface( compassScale ) )
+			);
 		}
 		else
 		{
-			sunIndicatorGroup->addChild( boost::const_pointer_cast<IECoreGL::Renderable>( sunWireframe( compassScale ) ) );
+			sunIndicatorGroup->addChild(
+				boost::const_pointer_cast<IECoreGL::Renderable>( sunWireframe( compassScale ) )
+			);
 		}
 		sunIndicatorGroup->setTransform( M44f().translate( sunPosition * compassScale ) );
 		result.push_back(
@@ -703,19 +750,26 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 	else if( lightShader->getName() == "PxrPortalLight" )
 	{
 		result.push_back( Visualisation::createGeometry( quadPortal( V2f( 1.f ), /* hatchingScale = */ 1.f, muted ) ) );
-		addRay( V3f( 0.f ), V3f( 0.f, 0.f, -1.f ), ornamentWireframeVertsPerCurve->writable(), ornamentWireframePoints->writable() );
+		addRay(
+			V3f( 0.f ), V3f( 0.f, 0.f, -1.f ), ornamentWireframeVertsPerCurve->writable(),
+			ornamentWireframePoints->writable()
+		);
 	}
 
 	else if( lightShader->getName() == "PxrRectLight" )
 	{
 		if( drawShaded )
 		{
-			const std::string lightColorMap = drawTextured ? parameterOrDefault( lightParameters, g_lightColorMapParameter, std::string() ) : "";
+			const std::string lightColorMap =
+				drawTextured ? parameterOrDefault( lightParameters, g_lightColorMapParameter, std::string() ) : "";
 			ConstDataPtr textureData = lightColorMap.empty() ? nullptr : new StringData( lightColorMap );
 
 			result.push_back(
 				Visualisation::createGeometry(
-					roundedQuadSurface( V2f( 1.f ), V2f( 0.f ), textureData, color, saturation, gamma, maxTextureResolution, Color3f( 1.f ), M33f().scale( V2f( -1.f, -1.f ) ) ),
+					roundedQuadSurface(
+						V2f( 1.f ), V2f( 0.f ), textureData, color, saturation, gamma, maxTextureResolution,
+						Color3f( 1.f ), M33f().scale( V2f( -1.f, -1.f ) )
+					),
 					Visualisation::ColorSpace::Scene
 				)
 			);
@@ -723,15 +777,21 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 		else
 		{
 			result.push_back(
-				Visualisation::createOrnament( colorIndicator( color ), /* affectsFramingBound */ true, Visualisation::ColorSpace::Scene )
+				Visualisation::createOrnament(
+					colorIndicator( color ), /* affectsFramingBound */ true, Visualisation::ColorSpace::Scene
+				)
 			);
 		}
 		result.push_back( Visualisation::createGeometry( roundedQuadWireframe( V2f( 1.f ), V2f( 0.f ), 1.f, muted ) ) );
 
 		const float focus = parameterOrDefault( lightParameters, g_emissionFocusParameter, 0.f );
-		addAreaSpread( pow( 0.707f, focus ), ornamentWireframeVertsPerCurve->writable(), ornamentWireframePoints->writable() );
+		addAreaSpread(
+			pow( 0.707f, focus ), ornamentWireframeVertsPerCurve->writable(), ornamentWireframePoints->writable()
+		);
 
-		addRay( V3f( 0 ), V3f( 0, 0, -1 ), ornamentWireframeVertsPerCurve->writable(), ornamentWireframePoints->writable() );
+		addRay(
+			V3f( 0 ), V3f( 0, 0, -1 ), ornamentWireframeVertsPerCurve->writable(), ornamentWireframePoints->writable()
+		);
 
 		if( coneAngle < 90.f )
 		{
@@ -743,8 +803,7 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 			);
 			result.push_back(
 				Visualisation::createFrustum(
-					spotLightSquare( coneAngle, 10.f, 0.5f, muted ),
-					Visualisation::Scale::Visualiser
+					spotLightSquare( coneAngle, 10.f, 0.5f, muted ), Visualisation::Scale::Visualiser
 				)
 			);
 		}
@@ -754,12 +813,16 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 	{
 		if( drawShaded )
 		{
-			result.push_back( Visualisation::createGeometry( pointSurface( 0.5f, color ), Visualisation::ColorSpace::Scene ) );
+			result.push_back(
+				Visualisation::createGeometry( pointSurface( 0.5f, color ), Visualisation::ColorSpace::Scene )
+			);
 		}
 		else
 		{
 			result.push_back(
-				Visualisation::createOrnament( colorIndicator( color ), /* affectsFramingBounds = */ false, Visualisation::ColorSpace::Scene )
+				Visualisation::createOrnament(
+					colorIndicator( color ), /* affectsFramingBounds = */ false, Visualisation::ColorSpace::Scene
+				)
 			);
 		}
 
@@ -777,8 +840,7 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 			);
 			result.push_back(
 				Visualisation::createFrustum(
-					spotLightRound( coneAngle, 10.f, 0.5f, muted ),
-					Visualisation::Scale::Visualiser
+					spotLightRound( coneAngle, 10.f, 0.5f, muted ), Visualisation::Scale::Visualiser
 				)
 			);
 		}
@@ -791,11 +853,7 @@ Visualisations RenderManLightVisualiser::visualise( const InternedString &attrib
 		);
 		curves->addPrimitiveVariable( "P", PrimitiveVariable( PrimitiveVariable::Vertex, ornamentWireframePoints ) );
 		curves->addPrimitiveVariable(
-			"Cs",
-			PrimitiveVariable(
-				PrimitiveVariable::Constant,
-				new Color3fData( lightWireframeColor( muted ) )
-			)
+			"Cs", PrimitiveVariable( PrimitiveVariable::Constant, new Color3fData( lightWireframeColor( muted ) ) )
 		);
 		result.push_back( Visualisation::createOrnament( curves, /* affectsFramingBound = */ false ) );
 	}

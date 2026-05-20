@@ -47,14 +47,9 @@ using namespace GafferRenderMan;
 
 IE_CORE_DEFINERUNTIMETYPED( RenderManIntegrator );
 
-RenderManIntegrator::RenderManIntegrator( const std::string &name )
-	: GlobalShader( name )
-{
-}
+RenderManIntegrator::RenderManIntegrator( const std::string &name ) : GlobalShader( name ) {}
 
-RenderManIntegrator::~RenderManIntegrator()
-{
-}
+RenderManIntegrator::~RenderManIntegrator() {}
 
 bool RenderManIntegrator::acceptsInput( const Gaffer::Plug *plug, const Gaffer::Plug *inputPlug ) const
 {

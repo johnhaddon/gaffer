@@ -50,7 +50,7 @@ namespace Gaffer
 class GAFFER_API Animation : public ComputeNode
 {
 
-	public:
+public:
 
 	explicit Animation( const std::string &name = defaultName<Animation>() );
 	~Animation() override;
@@ -133,7 +133,7 @@ class GAFFER_API Animation : public ComputeNode
 	// Defines a tangent
 	class GAFFER_API Tangent : private boost::noncopyable
 	{
-		public:
+	public:
 
 		~Tangent();
 
@@ -206,7 +206,7 @@ class GAFFER_API Animation : public ComputeNode
 		/// The position cannot be set if there is no adjacent key in the direction of the tangent.
 		void setPosition( const Imath::V2d &position, bool relative = false );
 
-		private:
+	private:
 
 		friend class CurvePlug;
 		friend class Key;
@@ -233,9 +233,14 @@ class GAFFER_API Animation : public ComputeNode
 	class GAFFER_API Key : public IECore::RunTimeTyped
 	{
 
-		public:
+	public:
 
-		explicit Key( float time = 0.0f, float value = 0.0f, Interpolation interpolation = Animation::defaultInterpolation(), double inSlope = Animation::defaultSlope(), double inScale = Animation::defaultScale(), double outSlope = Animation::defaultSlope(), double outScale = Animation::defaultScale(), TieMode tieMode = Animation::defaultTieMode() );
+		explicit Key(
+			float time = 0.0f, float value = 0.0f, Interpolation interpolation = Animation::defaultInterpolation(),
+			double inSlope = Animation::defaultSlope(), double inScale = Animation::defaultScale(),
+			double outSlope = Animation::defaultSlope(), double outScale = Animation::defaultScale(),
+			TieMode tieMode = Animation::defaultTieMode()
+		);
 		~Key() override;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::Animation::Key, AnimationKeyTypeId, IECore::RunTimeTyped )
@@ -293,7 +298,7 @@ class GAFFER_API Animation : public ComputeNode
 		/// Get parent curve (const access).
 		const CurvePlug *parent() const;
 
-		private:
+	private:
 
 		friend class CurvePlug;
 		friend class Tangent;
@@ -305,14 +310,13 @@ class GAFFER_API Animation : public ComputeNode
 
 		void throwIfStateNotAsExpected( const CurvePlug *, bool, float ) const;
 
-		using Hook = boost::intrusive::avl_set_member_hook<
-			boost::intrusive::link_mode<
+		using Hook = boost::intrusive::avl_set_member_hook<boost::intrusive::link_mode<
 #ifndef NDEBUG
-				boost::intrusive::safe_link
+			boost::intrusive::safe_link
 #else
-				boost::intrusive::normal_link
+			boost::intrusive::normal_link
 #endif
-				>>;
+			>>;
 
 		struct Dispose
 		{
@@ -347,15 +351,19 @@ class GAFFER_API Animation : public ComputeNode
 	class GAFFER_API CurvePlug : public ValuePlug
 	{
 
-		public:
+	public:
 
 		GAFFER_PLUG_DECLARE_TYPE( Gaffer::Animation::CurvePlug, AnimationCurvePlugTypeId, Gaffer::ValuePlug );
 
-		explicit CurvePlug( const std::string &name = defaultName<CurvePlug>(), Plug::Direction direction = Plug::In, unsigned flags = Plug::Default );
+		explicit CurvePlug(
+			const std::string &name = defaultName<CurvePlug>(), Plug::Direction direction = Plug::In,
+			unsigned flags = Plug::Default
+		);
 		~CurvePlug() override;
 
 		using CurvePlugKeySignal = Signals::Signal<void( CurvePlug *, Key * ), Signals::CatchingCombiner<void>>;
-		using CurvePlugDirectionSignal = Signals::Signal<void( CurvePlug *, Animation::Direction ), Signals::CatchingCombiner<void>>;
+		using CurvePlugDirectionSignal =
+			Signals::Signal<void( CurvePlug *, Animation::Direction ), Signals::CatchingCombiner<void>>;
 
 		CurvePlugKeySignal &keyAddedSignal();
 		CurvePlugKeySignal &keyRemovedSignal();
@@ -464,7 +472,7 @@ class GAFFER_API Animation : public ComputeNode
 		FloatPlug *outPlug();
 		const FloatPlug *outPlug() const;
 
-		private:
+	private:
 
 		friend class Key;
 		friend class Tangent;
@@ -538,13 +546,13 @@ class GAFFER_API Animation : public ComputeNode
 
 	void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
 	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
 	void compute( ValuePlug *output, const Context *context ) const override;
 	ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-	private:
+private:
 
 	static CurvePlug *inputCurve( ValuePlug *plug );
 	static const CurvePlug *inputCurve( const ValuePlug *plug );
@@ -560,64 +568,35 @@ class Animation::KeyIterator
 	friend class boost::iterator_core_access;
 	friend class Animation::CurvePlug;
 
-	KeyIterator( const Animation::CurvePlug::Keys::iterator it )
-		: m_it( it )
-	{
-	}
+	KeyIterator( const Animation::CurvePlug::Keys::iterator it ) : m_it( it ) {}
 
-	void increment()
-	{
-		++m_it;
-	}
+	void increment() { ++m_it; }
 
-	void decrement()
-	{
-		--m_it;
-	}
+	void decrement() { --m_it; }
 
-	bool equal( const KeyIterator &other ) const
-	{
-		return m_it == other.m_it;
-	}
+	bool equal( const KeyIterator &other ) const { return m_it == other.m_it; }
 
-	Animation::Key &dereference() const
-	{
-		return *( m_it );
-	}
+	Animation::Key &dereference() const { return *( m_it ); }
 
 	Animation::CurvePlug::Keys::iterator m_it;
 };
 
 class Animation::ConstKeyIterator
-	: public boost::iterator_facade<Animation::ConstKeyIterator, const Animation::Key, boost::bidirectional_traversal_tag>
+	: public boost::iterator_facade<
+		  Animation::ConstKeyIterator, const Animation::Key, boost::bidirectional_traversal_tag>
 {
 	friend class boost::iterator_core_access;
 	friend class Animation::CurvePlug;
 
-	ConstKeyIterator( const Animation::CurvePlug::Keys::const_iterator it )
-		: m_it( it )
-	{
-	}
+	ConstKeyIterator( const Animation::CurvePlug::Keys::const_iterator it ) : m_it( it ) {}
 
-	void increment()
-	{
-		++m_it;
-	}
+	void increment() { ++m_it; }
 
-	void decrement()
-	{
-		--m_it;
-	}
+	void decrement() { --m_it; }
 
-	bool equal( const ConstKeyIterator &other ) const
-	{
-		return m_it == other.m_it;
-	}
+	bool equal( const ConstKeyIterator &other ) const { return m_it == other.m_it; }
 
-	const Animation::Key &dereference() const
-	{
-		return *( m_it );
-	}
+	const Animation::Key &dereference() const { return *( m_it ); }
 
 	Animation::CurvePlug::Keys::const_iterator m_it;
 };

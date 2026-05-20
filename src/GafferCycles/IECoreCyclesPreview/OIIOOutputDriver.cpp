@@ -57,7 +57,10 @@ IECORE_POP_DEFAULT_VISIBILITY
 namespace
 {
 
-int interleave( float *tileData, const int width, const int height, const int numChannels, const int numOutputChannels, const int outChannelOffset, float *interleavedData )
+int interleave(
+	float *tileData, const int width, const int height, const int numChannels, const int numOutputChannels,
+	const int outChannelOffset, float *interleavedData
+)
 {
 	int offset = outChannelOffset;
 	for( int c = 0; c < numChannels; c++ )
@@ -84,8 +87,12 @@ void applyCryptomatteMetadata( OIIO::ImageSpec &spec, std::string name, IECore::
 	std::string prefix = "cryptomatte/" + identifier.substr( 0, 7 ) + "/";
 	spec.attribute( prefix + "name", cryptomatte->member<IECore::StringData>( prefix + "name", true )->readable() );
 	spec.attribute( prefix + "hash", cryptomatte->member<IECore::StringData>( prefix + "hash", true )->readable() );
-	spec.attribute( prefix + "conversion", cryptomatte->member<IECore::StringData>( prefix + "conversion", true )->readable() );
-	spec.attribute( prefix + "manifest", cryptomatte->member<IECore::StringData>( prefix + "manifest", true )->readable() );
+	spec.attribute(
+		prefix + "conversion", cryptomatte->member<IECore::StringData>( prefix + "conversion", true )->readable()
+	);
+	spec.attribute(
+		prefix + "manifest", cryptomatte->member<IECore::StringData>( prefix + "manifest", true )->readable()
+	);
 }
 
 std::array<IECore::InternedString, 4> g_channels = { { "R", "G", "B", "A" } };
@@ -96,8 +103,11 @@ const std::string g_headerPrefix( "header:" );
 namespace IECoreCycles
 {
 
-OIIOOutputDriver::OIIOOutputDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const IECore::CompoundDataMap &layers )
-	: m_displayWindow( displayWindow ), m_dataWindow( dataWindow )
+OIIOOutputDriver::OIIOOutputDriver(
+	const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const IECore::CompoundDataMap &layers
+)
+	: m_displayWindow( displayWindow ),
+	  m_dataWindow( dataWindow )
 {
 	const ccl::NodeEnum &typeEnum = *ccl::Pass::get_type_enum();
 	std::vector<std::string> channelNames;
@@ -178,9 +188,7 @@ OIIOOutputDriver::OIIOOutputDriver( const Imath::Box2i &displayWindow, const Ima
 	}
 }
 
-OIIOOutputDriver::~OIIOOutputDriver()
-{
-}
+OIIOOutputDriver::~OIIOOutputDriver() {}
 
 void OIIOOutputDriver::write_render_tile( const Tile &tile )
 {
@@ -247,7 +255,9 @@ void OIIOOutputDriver::write_render_tile( const Tile &tile )
 				IECoreImage::OpenImageIOAlgo::DataView dataView( parameterValue.get() );
 				if( dataView.data )
 				{
-					spec.attribute( parameterName.string().substr( g_headerPrefix.size() ), dataView.type, dataView.data );
+					spec.attribute(
+						parameterName.string().substr( g_headerPrefix.size() ), dataView.type, dataView.data
+					);
 				}
 			}
 		}
@@ -268,10 +278,13 @@ void OIIOOutputDriver::write_render_tile( const Tile &tile )
 			{
 				if( !tile.get_pass_pixels( ccl::string_printf( "%s%02d", layer.name.c_str(), i ), 4, &pixels[0] ) )
 				{
-					IECore::msg( IECore::Msg::Error, "OIIOOutputDriver:write_render_tile", "Failed to read render pass pixels." );
+					IECore::msg(
+						IECore::Msg::Error, "OIIOOutputDriver:write_render_tile", "Failed to read render pass pixels."
+					);
 					return;
 				}
-				outChannelOffset = interleave( &pixels[0], w, h, 4, layer.numChannels, outChannelOffset, &interleavedData[0] );
+				outChannelOffset =
+					interleave( &pixels[0], w, h, 4, layer.numChannels, outChannelOffset, &interleavedData[0] );
 			}
 
 			imageData = &interleavedData[0];
@@ -281,7 +294,9 @@ void OIIOOutputDriver::write_render_tile( const Tile &tile )
 			pixels.resize( w * h * layer.numChannels );
 			if( !tile.get_pass_pixels( layer.name, layer.numChannels, &pixels[0] ) )
 			{
-				IECore::msg( IECore::Msg::Error, "OIIOOutputDriver:write_render_tile", "Failed to read render pass pixels." );
+				IECore::msg(
+					IECore::Msg::Error, "OIIOOutputDriver:write_render_tile", "Failed to read render pass pixels."
+				);
 				return;
 			}
 

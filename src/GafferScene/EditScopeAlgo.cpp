@@ -150,7 +150,8 @@ bool GafferScene::EditScopeAlgo::getPruned( Gaffer::EditScope *scope, const Scen
 
 const GraphComponent *GafferScene::EditScopeAlgo::prunedReadOnlyReason( const EditScope *scope )
 {
-	if( const Node *processor = const_cast<EditScope *>( scope )->acquireProcessor( "PruningEdits", /* createIfNecessary = */ false ) )
+	if( const Node *processor =
+			const_cast<EditScope *>( scope )->acquireProcessor( "PruningEdits", /* createIfNecessary = */ false ) )
 	{
 		return MetadataAlgo::readOnlyReason( processor->getChild<StringVectorDataPlug>( "paths" ) );
 	}
@@ -168,7 +169,9 @@ const InternedString g_visibilityAttribute( "scene:visible" );
 
 } // namespace
 
-void GafferScene::EditScopeAlgo::setVisibility( Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, bool visible )
+void GafferScene::EditScopeAlgo::setVisibility(
+	Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, bool visible
+)
 {
 	TweakPlug *edit = acquireAttributeEdit( scope, path, g_visibilityAttribute, /* createIfNecessary = */ true );
 	edit->enabledPlug()->setValue( true );
@@ -184,7 +187,9 @@ void GafferScene::EditScopeAlgo::setVisibility( Gaffer::EditScope *scope, const 
 	}
 }
 
-const GraphComponent *GafferScene::EditScopeAlgo::visibilityReadOnlyReason( const EditScope *scope, const ScenePlug::ScenePath &path )
+const GraphComponent *GafferScene::EditScopeAlgo::visibilityReadOnlyReason(
+	const EditScope *scope, const ScenePlug::ScenePath &path
+)
 {
 	return attributeEditReadOnlyReason( scope, path, g_visibilityAttribute );
 }
@@ -226,7 +231,8 @@ SceneProcessorPtr transformProcessor()
 		plug->setInput( spreadsheet->outPlug()->getChild<Plug>( name ) );
 	}
 
-	auto rowsPlug = static_cast<Spreadsheet::RowsPlug *>( PlugAlgo::promoteWithName( spreadsheet->rowsPlug(), "edits" ) );
+	auto rowsPlug =
+		static_cast<Spreadsheet::RowsPlug *>( PlugAlgo::promoteWithName( spreadsheet->rowsPlug(), "edits" ) );
 	Metadata::registerValue( rowsPlug, "spreadsheet:defaultRowVisible", new BoolData( false ) );
 	Metadata::registerValue( rowsPlug->defaultRow(), "spreadsheet:rowNameWidth", new IntData( 300 ) );
 	for( auto &cell : Spreadsheet::CellPlug::Range( *rowsPlug->defaultRow()->cellsPlug() ) )
@@ -260,12 +266,13 @@ void GafferScene::EditScopeAlgo::removeTransformEdit( Gaffer::EditScope *scope, 
 }
 
 EditScopeAlgo::TransformEdit::TransformEdit(
-	const Gaffer::V3fPlugPtr &translate,
-	const Gaffer::V3fPlugPtr &rotate,
-	const Gaffer::V3fPlugPtr &scale,
+	const Gaffer::V3fPlugPtr &translate, const Gaffer::V3fPlugPtr &rotate, const Gaffer::V3fPlugPtr &scale,
 	const Gaffer::V3fPlugPtr &pivot
 )
-	: translate( translate ), rotate( rotate ), scale( scale ), pivot( pivot )
+	: translate( translate ),
+	  rotate( rotate ),
+	  scale( scale ),
+	  pivot( pivot )
 {
 }
 
@@ -282,10 +289,7 @@ Imath::M44f EditScopeAlgo::TransformEdit::matrix() const
 
 bool EditScopeAlgo::TransformEdit::operator == ( const TransformEdit &rhs ) const
 {
-	return translate == rhs.translate &&
-		rotate == rhs.rotate &&
-		scale == rhs.scale &&
-		pivot == rhs.pivot;
+	return translate == rhs.translate && rotate == rhs.rotate && scale == rhs.scale && pivot == rhs.pivot;
 }
 
 bool EditScopeAlgo::TransformEdit::operator != ( const TransformEdit &rhs ) const
@@ -293,7 +297,9 @@ bool EditScopeAlgo::TransformEdit::operator != ( const TransformEdit &rhs ) cons
 	return !( *this == rhs );
 }
 
-std::optional<GafferScene::EditScopeAlgo::TransformEdit> GafferScene::EditScopeAlgo::acquireTransformEdit( Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, bool createIfNecessary )
+std::optional<GafferScene::EditScopeAlgo::TransformEdit> GafferScene::EditScopeAlgo::acquireTransformEdit(
+	Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, bool createIfNecessary
+)
 {
 	string pathString;
 	ScenePlug::pathToString( path, pathString );
@@ -316,17 +322,19 @@ std::optional<GafferScene::EditScopeAlgo::TransformEdit> GafferScene::EditScopeA
 		row->namePlug()->setValue( pathString );
 	}
 
-	return TransformEdit{
-		row->cellsPlug()->getChild<Spreadsheet::CellPlug>( g_translate )->valuePlug<V3fPlug>(),
-		row->cellsPlug()->getChild<Spreadsheet::CellPlug>( g_rotate )->valuePlug<V3fPlug>(),
-		row->cellsPlug()->getChild<Spreadsheet::CellPlug>( g_scale )->valuePlug<V3fPlug>(),
-		row->cellsPlug()->getChild<Spreadsheet::CellPlug>( g_pivot )->valuePlug<V3fPlug>()
-	};
+	return TransformEdit{ row->cellsPlug()->getChild<Spreadsheet::CellPlug>( g_translate )->valuePlug<V3fPlug>(),
+						  row->cellsPlug()->getChild<Spreadsheet::CellPlug>( g_rotate )->valuePlug<V3fPlug>(),
+						  row->cellsPlug()->getChild<Spreadsheet::CellPlug>( g_scale )->valuePlug<V3fPlug>(),
+						  row->cellsPlug()->getChild<Spreadsheet::CellPlug>( g_pivot )->valuePlug<V3fPlug>() };
 }
 
-const GraphComponent *GafferScene::EditScopeAlgo::transformEditReadOnlyReason( const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path )
+const GraphComponent *GafferScene::EditScopeAlgo::transformEditReadOnlyReason(
+	const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path
+)
 {
-	auto *processor = const_cast<EditScope *>( scope )->acquireProcessor<SceneProcessor>( "TransformEdits", /* createIfNecessary = */ false );
+	auto *processor = const_cast<EditScope *>( scope )->acquireProcessor<SceneProcessor>(
+		"TransformEdits", /* createIfNecessary = */ false
+	);
 	if( !processor )
 	{
 		return MetadataAlgo::readOnlyReason( scope );
@@ -387,7 +395,8 @@ SceneProcessorPtr shaderParameterProcessor( const std::string &attribute, const 
 	shaderTweaks->localisePlug()->setValue( true );
 	shaderTweaks->ignoreMissingPlug()->setValue( true );
 
-	auto rowsPlug = static_cast<Spreadsheet::RowsPlug *>( PlugAlgo::promoteWithName( spreadsheet->rowsPlug(), "edits" ) );
+	auto rowsPlug =
+		static_cast<Spreadsheet::RowsPlug *>( PlugAlgo::promoteWithName( spreadsheet->rowsPlug(), "edits" ) );
 	Metadata::registerValue( rowsPlug, "spreadsheet:defaultRowVisible", new BoolData( false ) );
 	Metadata::registerValue( rowsPlug->defaultRow(), "spreadsheet:rowNameWidth", new IntData( 300 ) );
 
@@ -399,21 +408,15 @@ SceneProcessorPtr shaderParameterProcessor( const std::string &attribute, const 
 /// \todo Create a central renderer/attribute registry that we can
 /// query for this information.
 const boost::container::flat_map<string, string> g_rendererAttributePrefixes = {
-	{ "ai", "Arnold" },
-	{ "dl", "Delight" },
-	{ "gl", "OpenGL" },
-	{ "osl", "OSL" },
-	{ "cycles", "Cycles" }
+	{ "ai", "Arnold" }, { "dl", "Delight" }, { "gl", "OpenGL" }, { "osl", "OSL" }, { "cycles", "Cycles" }
 };
 
 /// \todo Create a registration method for populating overrides.
 using ProcessorOverrideMap = std::unordered_map<std::string, std::string>;
-const ProcessorOverrideMap g_processorNameOverrides = {
-	{ "ai:lightFilter:filter", "ArnoldLightBlockerFilterEdits" },
-	{ "ai:lightFilter:barndoor", "ArnoldBarndoorFilterEdits" },
-	{ "ai:lightFilter:light_decay", "ArnoldLightDecayFilterEdits" },
-	{ "ai:lightFilter:gobo", "ArnoldGoboFilterEdits" }
-};
+const ProcessorOverrideMap g_processorNameOverrides = { { "ai:lightFilter:filter", "ArnoldLightBlockerFilterEdits" },
+														{ "ai:lightFilter:barndoor", "ArnoldBarndoorFilterEdits" },
+														{ "ai:lightFilter:light_decay", "ArnoldLightDecayFilterEdits" },
+														{ "ai:lightFilter:gobo", "ArnoldGoboFilterEdits" } };
 
 string parameterProcessorName( const std::string &attribute )
 {
@@ -452,12 +455,9 @@ SceneProcessor *acquireParameterProcessor( EditScope *editScope, const std::stri
 	if( inserted.second )
 	{
 		const string name = parameterProcessorName( attribute );
-		EditScope::registerProcessor(
-			name,
-			[attribute, name]() {
-				return ::shaderParameterProcessor( attribute, name );
-			}
-		);
+		EditScope::registerProcessor( name, [attribute, name]() {
+			return ::shaderParameterProcessor( attribute, name );
+		} );
 		inserted.first->second = name;
 	}
 
@@ -490,7 +490,10 @@ ConstObjectPtr attributeValue( const ScenePlug *scene, const ScenePlug::ScenePat
 	return result;
 }
 
-ConstDataPtr parameterValue( const ScenePlug *scene, const ScenePlug::ScenePath &path, const std::string &attribute, const IECoreScene::ShaderNetwork::Parameter &parameter )
+ConstDataPtr parameterValue(
+	const ScenePlug *scene, const ScenePlug::ScenePath &path, const std::string &attribute,
+	const IECoreScene::ShaderNetwork::Parameter &parameter
+)
 {
 	auto attributeShader = attributeValue( scene, path, attribute );
 
@@ -531,12 +534,20 @@ ConstDataPtr parameterValue( const ScenePlug *scene, const ScenePlug::ScenePath 
 
 } // namespace
 
-bool GafferScene::EditScopeAlgo::hasParameterEdit( const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute, const IECoreScene::ShaderNetwork::Parameter &parameter )
+bool GafferScene::EditScopeAlgo::hasParameterEdit(
+	const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute,
+	const IECoreScene::ShaderNetwork::Parameter &parameter
+)
 {
-	return acquireParameterEdit( const_cast<EditScope *>( scope ), path, attribute, parameter, /* createIfNecessary = */ false );
+	return acquireParameterEdit(
+		const_cast<EditScope *>( scope ), path, attribute, parameter, /* createIfNecessary = */ false
+	);
 }
 
-TweakPlug *GafferScene::EditScopeAlgo::acquireParameterEdit( Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute, const IECoreScene::ShaderNetwork::Parameter &parameter, bool createIfNecessary )
+TweakPlug *GafferScene::EditScopeAlgo::acquireParameterEdit(
+	Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute,
+	const IECoreScene::ShaderNetwork::Parameter &parameter, bool createIfNecessary
+)
 {
 	string pathString;
 	ScenePlug::pathToString( path, pathString );
@@ -623,7 +634,10 @@ TweakPlug *GafferScene::EditScopeAlgo::acquireParameterEdit( Gaffer::EditScope *
 	return row->cellsPlug()->getChild<Spreadsheet::CellPlug>( columnIndex )->valuePlug<TweakPlug>();
 }
 
-void GafferScene::EditScopeAlgo::removeParameterEdit( Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute, const IECoreScene::ShaderNetwork::Parameter &parameter )
+void GafferScene::EditScopeAlgo::removeParameterEdit(
+	Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute,
+	const IECoreScene::ShaderNetwork::Parameter &parameter
+)
 {
 	TweakPlug *edit = acquireParameterEdit( scope, path, attribute, parameter, /* createIfNecessary = */ false );
 	if( !edit )
@@ -636,9 +650,13 @@ void GafferScene::EditScopeAlgo::removeParameterEdit( Gaffer::EditScope *scope, 
 	edit->enabledPlug()->setValue( false );
 }
 
-const GraphComponent *GafferScene::EditScopeAlgo::parameterEditReadOnlyReason( const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute, const IECoreScene::ShaderNetwork::Parameter &parameter )
+const GraphComponent *GafferScene::EditScopeAlgo::parameterEditReadOnlyReason(
+	const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute,
+	const IECoreScene::ShaderNetwork::Parameter &parameter
+)
 {
-	auto *processor = acquireParameterProcessor( const_cast<EditScope *>( scope ), attribute, /* createIfNecessary = */ false );
+	auto *processor =
+		acquireParameterProcessor( const_cast<EditScope *>( scope ), attribute, /* createIfNecessary = */ false );
 	if( !processor )
 	{
 		return MetadataAlgo::readOnlyReason( scope );
@@ -713,9 +731,8 @@ SceneProcessorPtr attributeProcessor( const std::string &name )
 	attributeTweaks->localisePlug()->setValue( true );
 	attributeTweaks->ignoreMissingPlug()->setValue( true );
 
-	auto rowsPlug = static_cast<Spreadsheet::RowsPlug *>(
-		PlugAlgo::promoteWithName( spreadsheet->rowsPlug(), "edits" )
-	);
+	auto rowsPlug =
+		static_cast<Spreadsheet::RowsPlug *>( PlugAlgo::promoteWithName( spreadsheet->rowsPlug(), "edits" ) );
 	Metadata::registerValue( rowsPlug, "spreadsheet:defaultRowVisible", new BoolData( false ) );
 	Metadata::registerValue( rowsPlug->defaultRow(), "spreadsheet:rowNameWidth", new IntData( 300 ) );
 
@@ -729,12 +746,9 @@ SceneProcessor *acquireAttributeProcessor( EditScope *editScope, bool createIfNe
 	static bool isRegistered = false;
 	if( !isRegistered )
 	{
-		EditScope::registerProcessor(
-			g_attributeProcessorName,
-			[]() {
-				return attributeProcessor( g_attributeProcessorName );
-			}
-		);
+		EditScope::registerProcessor( g_attributeProcessorName, []() {
+			return attributeProcessor( g_attributeProcessorName );
+		} );
 
 		isRegistered = true;
 	}
@@ -745,12 +759,16 @@ SceneProcessor *acquireAttributeProcessor( EditScope *editScope, bool createIfNe
 } // namespace
 
 
-bool GafferScene::EditScopeAlgo::hasAttributeEdit( const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute )
+bool GafferScene::EditScopeAlgo::hasAttributeEdit(
+	const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute
+)
 {
 	return acquireAttributeEdit( const_cast<EditScope *>( scope ), path, attribute, /* createIfNecessary = */ false );
 }
 
-TweakPlug *GafferScene::EditScopeAlgo::acquireAttributeEdit( Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute, bool createIfNecessary )
+TweakPlug *GafferScene::EditScopeAlgo::acquireAttributeEdit(
+	Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute, bool createIfNecessary
+)
 {
 	const std::string pathString = ScenePlug::pathToString( path );
 
@@ -763,9 +781,8 @@ TweakPlug *GafferScene::EditScopeAlgo::acquireAttributeEdit( Gaffer::EditScope *
 	auto ensureAttributeValue = [&] {
 		if( !attributeValue )
 		{
-			attributeValue = runTimeCast<const Data>(
-				::attributeValue( scope->outPlug<ScenePlug>(), path, attribute )
-			);
+			attributeValue =
+				runTimeCast<const Data>( ::attributeValue( scope->outPlug<ScenePlug>(), path, attribute ) );
 			if( !attributeValue )
 			{
 				throw IECore::Exception( fmt::format( "Attribute \"{}\" cannot be tweaked", attribute ) );
@@ -833,7 +850,9 @@ TweakPlug *GafferScene::EditScopeAlgo::acquireAttributeEdit( Gaffer::EditScope *
 	return row->cellsPlug()->getChild<Spreadsheet::CellPlug>( columnIndex )->valuePlug<TweakPlug>();
 }
 
-void GafferScene::EditScopeAlgo::removeAttributeEdit( Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute )
+void GafferScene::EditScopeAlgo::removeAttributeEdit(
+	Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute
+)
 {
 	TweakPlug *edit = acquireAttributeEdit( scope, path, attribute, /* createIfNecessary */ false );
 	if( !edit )
@@ -846,7 +865,9 @@ void GafferScene::EditScopeAlgo::removeAttributeEdit( Gaffer::EditScope *scope, 
 	edit->enabledPlug()->setValue( false );
 }
 
-const Gaffer::GraphComponent *GafferScene::EditScopeAlgo::attributeEditReadOnlyReason( const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute )
+const Gaffer::GraphComponent *GafferScene::EditScopeAlgo::attributeEditReadOnlyReason(
+	const Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &attribute
+)
 {
 	auto *processor = acquireAttributeProcessor( const_cast<EditScope *>( scope ), /*createIfNecessary */ false );
 	if( !processor )
@@ -905,16 +926,24 @@ SceneProcessorPtr setMembershipProcessor()
 	SpreadsheetPtr spreadsheet = new Spreadsheet;
 	result->addChild( spreadsheet );
 	spreadsheet->selectorPlug()->setValue( "${setMembership:set}" );
-	spreadsheet->rowsPlug()->addColumn( new StringVectorDataPlug( "Added", Plug::Direction::In, new StringVectorData() ) );
-	spreadsheet->rowsPlug()->addColumn( new StringVectorDataPlug( "Removed", Plug::Direction::In, new StringVectorData() ) );
+	spreadsheet->rowsPlug()->addColumn(
+		new StringVectorDataPlug( "Added", Plug::Direction::In, new StringVectorData() )
+	);
+	spreadsheet->rowsPlug()->addColumn(
+		new StringVectorDataPlug( "Removed", Plug::Direction::In, new StringVectorData() )
+	);
 
 	PathFilterPtr addPathFilter = new PathFilter;
 	result->addChild( addPathFilter );
-	addPathFilter->pathsPlug()->setInput( spreadsheet->outPlug()->getChild<StringVectorDataPlug>( g_addSetColumnIndex ) );
+	addPathFilter->pathsPlug()->setInput(
+		spreadsheet->outPlug()->getChild<StringVectorDataPlug>( g_addSetColumnIndex )
+	);
 
 	PathFilterPtr removePathFilter = new PathFilter;
 	result->addChild( removePathFilter );
-	removePathFilter->pathsPlug()->setInput( spreadsheet->outPlug()->getChild<StringVectorDataPlug>( g_removeSetColumnIndex ) );
+	removePathFilter->pathsPlug()->setInput(
+		spreadsheet->outPlug()->getChild<StringVectorDataPlug>( g_removeSetColumnIndex )
+	);
 
 	GafferScene::SetPtr addSet = new GafferScene::Set();
 	result->addChild( addSet );
@@ -934,9 +963,8 @@ SceneProcessorPtr setMembershipProcessor()
 	removeSet->enabledPlug()->setInput( result->enabledPlug() );
 	removeSet->setVariablePlug()->setValue( "setMembership:set" );
 
-	auto rowsPlug = static_cast<Spreadsheet::RowsPlug *>(
-		PlugAlgo::promoteWithName( spreadsheet->rowsPlug(), "edits" )
-	);
+	auto rowsPlug =
+		static_cast<Spreadsheet::RowsPlug *>( PlugAlgo::promoteWithName( spreadsheet->rowsPlug(), "edits" ) );
 
 	Metadata::registerValue( rowsPlug, "spreadsheet:defaultRowVisible", new BoolData( false ) );
 	Metadata::registerValue( rowsPlug->defaultRow(), "spreadsheet:rowNameWidth", new IntData( 100 ) );
@@ -955,7 +983,9 @@ EditScope::ProcessorRegistration g_setMembershipProcessorRegistration( "SetMembe
 
 } // namespace
 
-Gaffer::ValuePlug *EditScopeAlgo::acquireSetEdits( Gaffer::EditScope *scope, const std::string &set, bool createIfNecessary )
+Gaffer::ValuePlug *EditScopeAlgo::acquireSetEdits(
+	Gaffer::EditScope *scope, const std::string &set, bool createIfNecessary
+)
 {
 	Node *processor = scope->acquireProcessor( "SetMembershipEdits", createIfNecessary );
 
@@ -977,7 +1007,10 @@ Gaffer::ValuePlug *EditScopeAlgo::acquireSetEdits( Gaffer::EditScope *scope, con
 	return row ? row->cellsPlug() : nullptr;
 }
 
-void EditScopeAlgo::setSetMembership( Gaffer::EditScope *scope, const IECore::PathMatcher &paths, const std::string &set, EditScopeAlgo::SetMembership state )
+void EditScopeAlgo::setSetMembership(
+	Gaffer::EditScope *scope, const IECore::PathMatcher &paths, const std::string &set,
+	EditScopeAlgo::SetMembership state
+)
 {
 	auto cells = EditScopeAlgo::acquireSetEdits( scope, set );
 
@@ -1031,7 +1064,9 @@ void EditScopeAlgo::setSetMembership( Gaffer::EditScope *scope, const IECore::Pa
 	removeStringPlug->setValue( removeResult );
 }
 
-EditScopeAlgo::SetMembership EditScopeAlgo::getSetMembership( Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &set )
+EditScopeAlgo::SetMembership EditScopeAlgo::getSetMembership(
+	Gaffer::EditScope *scope, const ScenePlug::ScenePath &path, const std::string &set
+)
 {
 	auto cells = EditScopeAlgo::acquireSetEdits( scope, set, false );
 	if( !cells )
@@ -1068,9 +1103,12 @@ EditScopeAlgo::SetMembership EditScopeAlgo::getSetMembership( Gaffer::EditScope 
 	return EditScopeAlgo::SetMembership::Unchanged;
 }
 
-const Gaffer::GraphComponent *EditScopeAlgo::setMembershipReadOnlyReason( const Gaffer::EditScope *scope, const std::string &set, EditScopeAlgo::SetMembership state )
+const Gaffer::GraphComponent *EditScopeAlgo::setMembershipReadOnlyReason(
+	const Gaffer::EditScope *scope, const std::string &set, EditScopeAlgo::SetMembership state
+)
 {
-	auto processor = const_cast<EditScope *>( scope )->acquireProcessor( "SetMembershipEdits", /* createIfNecessary */ false );
+	auto processor =
+		const_cast<EditScope *>( scope )->acquireProcessor( "SetMembershipEdits", /* createIfNecessary */ false );
 	if( !processor )
 	{
 		return MetadataAlgo::readOnlyReason( scope );
@@ -1139,12 +1177,9 @@ SceneProcessor *acquireOptionProcessor( EditScope *editScope, bool createIfNeces
 	static bool isRegistered = false;
 	if( !isRegistered )
 	{
-		EditScope::registerProcessor(
-			g_optionProcessorName,
-			[]() {
-				return optionProcessor( g_optionProcessorName );
-			}
-		);
+		EditScope::registerProcessor( g_optionProcessorName, []() {
+			return optionProcessor( g_optionProcessorName );
+		} );
 
 		isRegistered = true;
 	}
@@ -1200,7 +1235,9 @@ bool GafferScene::EditScopeAlgo::hasOptionEdit( const Gaffer::EditScope *scope, 
 	return acquireOptionEdit( const_cast<EditScope *>( scope ), option, /* createIfNecessary = */ false );
 }
 
-TweakPlug *GafferScene::EditScopeAlgo::acquireOptionEdit( Gaffer::EditScope *scope, const std::string &option, bool createIfNecessary )
+TweakPlug *GafferScene::EditScopeAlgo::acquireOptionEdit(
+	Gaffer::EditScope *scope, const std::string &option, bool createIfNecessary
+)
 {
 	// If we need to create an edit, we'll need to do a compute to figure our the option
 	// type and value. But we don't want to do that if we already have an edit. And since the
@@ -1211,9 +1248,7 @@ TweakPlug *GafferScene::EditScopeAlgo::acquireOptionEdit( Gaffer::EditScope *sco
 	auto ensureOptionValue = [&] {
 		if( !optionValue )
 		{
-			optionValue = runTimeCast<const Data>(
-				::optionValue( scope->outPlug<ScenePlug>(), option )
-			);
+			optionValue = runTimeCast<const Data>( ::optionValue( scope->outPlug<ScenePlug>(), option ) );
 			if( !optionValue )
 			{
 				throw IECore::Exception( fmt::format( "Option \"{}\" cannot be tweaked", option ) );
@@ -1271,7 +1306,9 @@ void GafferScene::EditScopeAlgo::removeOptionEdit( Gaffer::EditScope *scope, con
 	edit->parent()->removeChild( edit );
 }
 
-const Gaffer::GraphComponent *GafferScene::EditScopeAlgo::optionEditReadOnlyReason( const Gaffer::EditScope *scope, const std::string &option )
+const Gaffer::GraphComponent *GafferScene::EditScopeAlgo::optionEditReadOnlyReason(
+	const Gaffer::EditScope *scope, const std::string &option
+)
 {
 	auto *processor = acquireOptionProcessor( const_cast<EditScope *>( scope ), /*createIfNecessary */ false );
 	if( !processor )
@@ -1331,9 +1368,8 @@ SceneProcessorPtr renderPassOptionProcessor( const std::string &name )
 	optionTweaks->enabledPlug()->setInput( result->enabledPlug() );
 	optionTweaks->ignoreMissingPlug()->setValue( true );
 
-	auto rowsPlug = static_cast<Spreadsheet::RowsPlug *>(
-		PlugAlgo::promoteWithName( spreadsheet->rowsPlug(), "edits" )
-	);
+	auto rowsPlug =
+		static_cast<Spreadsheet::RowsPlug *>( PlugAlgo::promoteWithName( spreadsheet->rowsPlug(), "edits" ) );
 	Metadata::registerValue( rowsPlug, "spreadsheet:defaultRowVisible", new BoolData( false ) );
 	Metadata::registerValue( rowsPlug->defaultRow(), "spreadsheet:rowNameWidth", new IntData( 150 ) );
 
@@ -1347,12 +1383,9 @@ SceneProcessor *acquireRenderPassOptionProcessor( EditScope *editScope, bool cre
 	static bool isRegistered = false;
 	if( !isRegistered )
 	{
-		EditScope::registerProcessor(
-			g_renderPassOptionProcessorName,
-			[]() {
-				return renderPassOptionProcessor( g_renderPassOptionProcessorName );
-			}
-		);
+		EditScope::registerProcessor( g_renderPassOptionProcessorName, []() {
+			return renderPassOptionProcessor( g_renderPassOptionProcessorName );
+		} );
 
 		isRegistered = true;
 	}
@@ -1362,12 +1395,18 @@ SceneProcessor *acquireRenderPassOptionProcessor( EditScope *editScope, bool cre
 
 } // namespace
 
-bool GafferScene::EditScopeAlgo::hasRenderPassOptionEdit( const Gaffer::EditScope *scope, const std::string &renderPass, const std::string &option )
+bool GafferScene::EditScopeAlgo::hasRenderPassOptionEdit(
+	const Gaffer::EditScope *scope, const std::string &renderPass, const std::string &option
+)
 {
-	return acquireRenderPassOptionEdit( const_cast<EditScope *>( scope ), renderPass, option, /* createIfNecessary = */ false );
+	return acquireRenderPassOptionEdit(
+		const_cast<EditScope *>( scope ), renderPass, option, /* createIfNecessary = */ false
+	);
 }
 
-TweakPlug *GafferScene::EditScopeAlgo::acquireRenderPassOptionEdit( Gaffer::EditScope *scope, const std::string &renderPass, const std::string &option, bool createIfNecessary )
+TweakPlug *GafferScene::EditScopeAlgo::acquireRenderPassOptionEdit(
+	Gaffer::EditScope *scope, const std::string &renderPass, const std::string &option, bool createIfNecessary
+)
 {
 	// If we need to create an edit, we'll need to do a compute to figure our the option
 	// type and value. But we don't want to do that if we already have an edit. And since the
@@ -1378,9 +1417,7 @@ TweakPlug *GafferScene::EditScopeAlgo::acquireRenderPassOptionEdit( Gaffer::Edit
 	auto ensureOptionValue = [&] {
 		if( !optionValue )
 		{
-			optionValue = runTimeCast<const Data>(
-				::optionValue( scope->outPlug<ScenePlug>(), option )
-			);
+			optionValue = runTimeCast<const Data>( ::optionValue( scope->outPlug<ScenePlug>(), option ) );
 			if( !optionValue )
 			{
 				throw IECore::Exception( fmt::format( "Option \"{}\" cannot be tweaked", option ) );
@@ -1447,7 +1484,9 @@ TweakPlug *GafferScene::EditScopeAlgo::acquireRenderPassOptionEdit( Gaffer::Edit
 	return row->cellsPlug()->getChild<Spreadsheet::CellPlug>( columnIndex )->valuePlug<TweakPlug>();
 }
 
-void GafferScene::EditScopeAlgo::removeRenderPassOptionEdit( Gaffer::EditScope *scope, const std::string &renderPass, const std::string &option )
+void GafferScene::EditScopeAlgo::removeRenderPassOptionEdit(
+	Gaffer::EditScope *scope, const std::string &renderPass, const std::string &option
+)
 {
 	TweakPlug *edit = acquireRenderPassOptionEdit( scope, renderPass, option, /* createIfNecessary */ false );
 	if( !edit )
@@ -1460,9 +1499,12 @@ void GafferScene::EditScopeAlgo::removeRenderPassOptionEdit( Gaffer::EditScope *
 	edit->enabledPlug()->setValue( false );
 }
 
-const Gaffer::GraphComponent *GafferScene::EditScopeAlgo::renderPassOptionEditReadOnlyReason( const Gaffer::EditScope *scope, const std::string &renderPass, const std::string &option )
+const Gaffer::GraphComponent *GafferScene::EditScopeAlgo::renderPassOptionEditReadOnlyReason(
+	const Gaffer::EditScope *scope, const std::string &renderPass, const std::string &option
+)
 {
-	auto *processor = acquireRenderPassOptionProcessor( const_cast<EditScope *>( scope ), /*createIfNecessary */ false );
+	auto *processor =
+		acquireRenderPassOptionProcessor( const_cast<EditScope *>( scope ), /*createIfNecessary */ false );
 	if( !processor )
 	{
 		return MetadataAlgo::readOnlyReason( scope );
@@ -1513,13 +1555,17 @@ SceneProcessorPtr renderPassesProcessor()
 	return new RenderPasses( g_renderPassesProcessorName );
 }
 
-EditScope::ProcessorRegistration g_renderPassProcessorRegistration( g_renderPassesProcessorName, renderPassesProcessor );
+EditScope::ProcessorRegistration g_renderPassProcessorRegistration(
+	g_renderPassesProcessorName, renderPassesProcessor
+);
 
 } // namespace
 
 const Gaffer::GraphComponent *GafferScene::EditScopeAlgo::renderPassesReadOnlyReason( const Gaffer::EditScope *scope )
 {
-	if( auto processor = const_cast<EditScope *>( scope )->acquireProcessor<RenderPasses>( g_renderPassesProcessorName, /* createIfNecessary = */ false ) )
+	if( auto processor = const_cast<EditScope *>( scope )->acquireProcessor<RenderPasses>(
+			g_renderPassesProcessorName, /* createIfNecessary = */ false
+		) )
 	{
 		return MetadataAlgo::readOnlyReason( processor->namesPlug() );
 	}
@@ -1527,7 +1573,9 @@ const Gaffer::GraphComponent *GafferScene::EditScopeAlgo::renderPassesReadOnlyRe
 	return MetadataAlgo::readOnlyReason( scope );
 }
 
-bool GafferScene::EditScopeAlgo::renameRenderPass( Gaffer::EditScope *scope, const std::string &oldName, const std::string &newName )
+bool GafferScene::EditScopeAlgo::renameRenderPass(
+	Gaffer::EditScope *scope, const std::string &oldName, const std::string &newName
+)
 {
 	if( const auto nonEditableReason = renameRenderPassNonEditableReason( scope, newName ) )
 	{
@@ -1535,12 +1583,14 @@ bool GafferScene::EditScopeAlgo::renameRenderPass( Gaffer::EditScope *scope, con
 	}
 
 	bool renamed = false;
-	if( auto renderPassesProcessor = scope->acquireProcessor( g_renderPassesProcessorName, /* createIfNecessary = */ false ) )
+	if( auto renderPassesProcessor =
+			scope->acquireProcessor( g_renderPassesProcessorName, /* createIfNecessary = */ false ) )
 	{
 		auto namesPlug = renderPassesProcessor->getChild<StringVectorDataPlug>( "names" );
 		ConstStringVectorDataPtr renderPasses = namesPlug->getValue();
 
-		if( std::find( renderPasses->readable().begin(), renderPasses->readable().end(), oldName ) != renderPasses->readable().end() )
+		if( std::find( renderPasses->readable().begin(), renderPasses->readable().end(), oldName ) !=
+			renderPasses->readable().end() )
 		{
 			auto renderPassesCopy = renderPasses->copy();
 			std::replace( renderPassesCopy->writable().begin(), renderPassesCopy->writable().end(), oldName, newName );
@@ -1549,7 +1599,8 @@ bool GafferScene::EditScopeAlgo::renameRenderPass( Gaffer::EditScope *scope, con
 		}
 	}
 
-	if( auto renderPassOptionEditsProcessor = scope->acquireProcessor( g_renderPassOptionProcessorName, /* createIfNecessary = */ false ) )
+	if( auto renderPassOptionEditsProcessor =
+			scope->acquireProcessor( g_renderPassOptionProcessorName, /* createIfNecessary = */ false ) )
 	{
 		auto *rows = renderPassOptionEditsProcessor->getChild<Spreadsheet::RowsPlug>( "edits" );
 		if( Spreadsheet::RowPlug *row = rows->row( oldName ) )
@@ -1562,24 +1613,37 @@ bool GafferScene::EditScopeAlgo::renameRenderPass( Gaffer::EditScope *scope, con
 	return renamed;
 }
 
-std::optional<std::string> GafferScene::EditScopeAlgo::renameRenderPassNonEditableReason( const Gaffer::EditScope *scope, const std::string &newName )
+std::optional<std::string> GafferScene::EditScopeAlgo::renameRenderPassNonEditableReason(
+	const Gaffer::EditScope *scope, const std::string &newName
+)
 {
-	if( auto renderPassesProcessor = const_cast<EditScope *>( scope )->acquireProcessor( g_renderPassesProcessorName, /* createIfNecessary = */ false ) )
+	if( auto renderPassesProcessor = const_cast<EditScope *>( scope )->acquireProcessor(
+			g_renderPassesProcessorName, /* createIfNecessary = */ false
+		) )
 	{
 		auto namesPlug = renderPassesProcessor->getChild<StringVectorDataPlug>( "names" );
 		ConstStringVectorDataPtr renderPasses = namesPlug->getValue();
-		if( std::find( renderPasses->readable().begin(), renderPasses->readable().end(), newName ) != renderPasses->readable().end() )
+		if( std::find( renderPasses->readable().begin(), renderPasses->readable().end(), newName ) !=
+			renderPasses->readable().end() )
 		{
-			return fmt::format( "A render pass named \"{}\" already exists in {}", newName, renderPassesProcessor->relativeName( scope->parent() ) );
+			return fmt::format(
+				"A render pass named \"{}\" already exists in {}", newName,
+				renderPassesProcessor->relativeName( scope->parent() )
+			);
 		}
 	}
 
-	if( auto renderPassOptionEditsProcessor = const_cast<EditScope *>( scope )->acquireProcessor( g_renderPassOptionProcessorName, /* createIfNecessary = */ false ) )
+	if( auto renderPassOptionEditsProcessor = const_cast<EditScope *>( scope )->acquireProcessor(
+			g_renderPassOptionProcessorName, /* createIfNecessary = */ false
+		) )
 	{
 		auto *rows = renderPassOptionEditsProcessor->getChild<Spreadsheet::RowsPlug>( "edits" );
 		if( rows->row( newName ) )
 		{
-			return fmt::format( "Edits already exist for render pass \"{}\" in {}", newName, renderPassOptionEditsProcessor->relativeName( scope->parent() ) );
+			return fmt::format(
+				"Edits already exist for render pass \"{}\" in {}", newName,
+				renderPassOptionEditsProcessor->relativeName( scope->parent() )
+			);
 		}
 	}
 

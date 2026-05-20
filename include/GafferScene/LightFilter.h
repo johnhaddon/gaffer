@@ -54,7 +54,7 @@ namespace GafferScene
 class GAFFERSCENE_API LightFilter : public ObjectSource
 {
 
-	public:
+public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::LightFilter, LightFilterTypeId, ObjectSource );
 
@@ -70,23 +70,31 @@ class GAFFERSCENE_API LightFilter : public ObjectSource
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
 	explicit LightFilter( GafferScene::ShaderPtr shader, const std::string &name = defaultName<LightFilter>() );
 
 	void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
 
-	void hashAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-	IECore::ConstCompoundObjectPtr computeAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashAttributes(
+		const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstCompoundObjectPtr computeAttributes(
+		const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+	) const override;
 
-	void hashBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-	Imath::Box3f computeBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashBound(
+		const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+	) const override;
+	Imath::Box3f computeBound(
+		const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+	) const override;
 
 	void hashStandardSetNames( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstInternedStringVectorDataPtr computeStandardSetNames() const override;
 
-	private:
+private:
 
 	friend class GafferSceneModule::LightFilterSerialiser;
 

@@ -54,7 +54,9 @@ IECOREDELIGHT_API IECoreScene::ShaderNetworkPtr preprocessedNetwork( const IECor
 const char *lightGeometryType( const IECoreScene::ShaderNetwork *shaderNetwork );
 /// Edits the light geometry, which will have already been created with the right type.
 /// `state` is used to store the current state and avoid unnecessary edits.
-void updateLightGeometry( const IECoreScene::ShaderNetwork *shaderNetwork, NSIContext_t context, const char *handle, IECore::MurmurHash &state );
+void updateLightGeometry(
+	const IECoreScene::ShaderNetwork *shaderNetwork, NSIContext_t context, const char *handle, IECore::MurmurHash &state
+);
 
 /// Converts any UsdPreviewSurface shaders and UsdLuxLights into native 3Delight shaders. This conversion
 /// is performed automatically by `preprocessedNetwork()` and is mainly just exposed for the unit

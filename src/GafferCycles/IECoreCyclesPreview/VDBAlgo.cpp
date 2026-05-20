@@ -60,7 +60,10 @@ using namespace IECoreCycles;
 namespace
 {
 
-ccl::Geometry *convert( const IECoreScenePreview::Renderer::Samples<const IECoreVDB::VDBObject *> &samples, const IECoreScenePreview::Renderer::SampleTimes &times, size_t primarySampleIndex, ccl::Scene *scene )
+ccl::Geometry *convert(
+	const IECoreScenePreview::Renderer::Samples<const IECoreVDB::VDBObject *> &samples,
+	const IECoreScenePreview::Renderer::SampleTimes &times, size_t primarySampleIndex, ccl::Scene *scene
+)
 {
 	return SceneAlgo::createNodeWithLock<ccl::Volume>( scene );
 }

@@ -52,13 +52,23 @@ namespace NodeAlgo
 /// equivalent moving Arnold object. If no motion converter
 /// is available, then returns a standard conversion of the
 /// first sample.
-IECOREARNOLD_API AtNode *convert( const IECoreScenePreview::Renderer::ObjectSamples &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode = nullptr, const std::string &messageContext = "NodeAlgo::convert" );
+IECOREARNOLD_API AtNode *convert(
+	const IECoreScenePreview::Renderer::ObjectSamples &samples, float motionStart, float motionEnd,
+	AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode = nullptr,
+	const std::string &messageContext = "NodeAlgo::convert"
+);
 /// Convenience function for the case of a single sample.
-IECOREARNOLD_API AtNode *convert( const IECore::Object *object, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode = nullptr, const std::string &messageContext = "NodeAlgo::convert" );
+IECOREARNOLD_API AtNode *convert(
+	const IECore::Object *object, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode = nullptr,
+	const std::string &messageContext = "NodeAlgo::convert"
+);
 
 /// Signature of a function which can convert a `IECore::Objects`
 /// into Arnold nodes.
-using Converter = std::function<AtNode *( const IECoreScenePreview::Renderer::ObjectSamples &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parent, const std::string &messageContext )>;
+using Converter = std::function<AtNode *(
+	const IECoreScenePreview::Renderer::ObjectSamples &samples, float motionStart, float motionEnd,
+	AtUniverse *universe, const std::string &nodeName, const AtNode *parent, const std::string &messageContext
+)>;
 
 /// Registers a converter for a specific type.
 /// Use the ConverterDescription utility class in preference to
@@ -71,18 +81,26 @@ template<typename T>
 class ConverterDescription
 {
 
-	public:
+public:
 
 	/// Type-specific conversion functions.
 	using TypedObjectSamples = IECoreScenePreview::Renderer::Samples<const T *>;
-	using TypedConverter = AtNode *(*)( const TypedObjectSamples &, float, float, AtUniverse *, const std::string &, const AtNode *, const std::string & );
+	using TypedConverter = AtNode *(*)( const TypedObjectSamples &, float, float, AtUniverse *, const std::string &,
+										const AtNode *, const std::string & );
 
 	ConverterDescription( TypedConverter converter )
 	{
 		registerConverter(
 			T::staticTypeId(),
-			[converter]( const IECoreScenePreview::Renderer::ObjectSamples &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parent, const std::string &messageContext ) {
-				return converter( IECoreScenePreview::Renderer::staticSamplesCast<const T *>( samples ), motionStart, motionEnd, universe, nodeName, parent, messageContext );
+			[converter](
+				const IECoreScenePreview::Renderer::ObjectSamples &samples, float motionStart, float motionEnd,
+				AtUniverse *universe, const std::string &nodeName, const AtNode *parent,
+				const std::string &messageContext
+			) {
+				return converter(
+					IECoreScenePreview::Renderer::staticSamplesCast<const T *>( samples ), motionStart, motionEnd,
+					universe, nodeName, parent, messageContext
+				);
 			}
 		);
 	}

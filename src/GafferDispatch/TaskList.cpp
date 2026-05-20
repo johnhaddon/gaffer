@@ -46,16 +46,13 @@ GAFFER_NODE_DEFINE_TYPE( TaskList )
 
 size_t TaskList::g_firstPlugIndex;
 
-TaskList::TaskList( const std::string &name )
-	: TaskNode( name )
+TaskList::TaskList( const std::string &name ) : TaskNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new BoolPlug( "sequence" ) );
 }
 
-TaskList::~TaskList()
-{
-}
+TaskList::~TaskList() {}
 
 Gaffer::BoolPlug *TaskList::sequencePlug()
 {
@@ -72,9 +69,7 @@ IECore::MurmurHash TaskList::hash( const Context *context ) const
 	return MurmurHash();
 }
 
-void TaskList::execute() const
-{
-}
+void TaskList::execute() const {}
 
 bool TaskList::requiresSequenceExecution() const
 {

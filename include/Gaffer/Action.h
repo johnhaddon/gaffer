@@ -71,7 +71,7 @@ IE_CORE_FORWARDDECLARE( Action );
 class GAFFER_API Action : public IECore::RunTimeTyped
 {
 
-	public:
+public:
 
 	/// The stages of the the do/undo/redo sequence.
 	enum Stage
@@ -106,9 +106,11 @@ class GAFFER_API Action : public IECore::RunTimeTyped
 	/// > and a concurrent background task. At the time of writing, the only
 	/// > known valid use is in the Metadata system (because computations are
 	/// > not allowed to depend on metadata).
-	static void enact( GraphComponentPtr subject, const Function &doFn, const Function &undoFn, bool cancelBackgroundTasks = true );
+	static void enact(
+		GraphComponentPtr subject, const Function &doFn, const Function &undoFn, bool cancelBackgroundTasks = true
+	);
 
-	protected:
+protected:
 
 	explicit Action( bool cancelBackgroundTasks = true );
 	~Action() override;
@@ -142,7 +144,7 @@ class GAFFER_API Action : public IECore::RunTimeTyped
 	/// implementation before performing their own merging.
 	virtual void merge( const Action *other ) = 0;
 
-	private:
+private:
 
 	friend class ScriptNode;
 

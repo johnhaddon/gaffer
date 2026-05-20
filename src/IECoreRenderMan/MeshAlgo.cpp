@@ -120,10 +120,16 @@ int smoothTriangles( const IECoreScene::MeshPrimitive *mesh, const std::string &
 	}
 }
 
-RtUString convertMeshTopology( const IECoreScene::MeshPrimitive *mesh, RtPrimVarList &primVars, const std::string &messageContext )
+RtUString convertMeshTopology(
+	const IECoreScene::MeshPrimitive *mesh, RtPrimVarList &primVars, const std::string &messageContext
+)
 {
-	primVars.SetIntegerDetail( Loader::strings().k_Ri_nvertices, mesh->verticesPerFace()->readable().data(), RtDetailType::k_uniform );
-	primVars.SetIntegerDetail( Loader::strings().k_Ri_vertices, mesh->vertexIds()->readable().data(), RtDetailType::k_facevarying );
+	primVars.SetIntegerDetail(
+		Loader::strings().k_Ri_nvertices, mesh->verticesPerFace()->readable().data(), RtDetailType::k_uniform
+	);
+	primVars.SetIntegerDetail(
+		Loader::strings().k_Ri_vertices, mesh->vertexIds()->readable().data(), RtDetailType::k_facevarying
+	);
 
 	RtUString geometryType = Loader::strings().k_Ri_PolygonMesh;
 	if( mesh->interpolation() != MeshPrimitive::interpolationLinear.string() )
@@ -139,7 +145,8 @@ RtUString convertMeshTopology( const IECoreScene::MeshPrimitive *mesh, RtPrimVar
 		}
 		else
 		{
-			msg( Msg::Error, messageContext, fmt::format( "Unknown mesh interpolation \"{}\"", mesh->interpolation() ) );
+			msg( Msg::Error, messageContext,
+				 fmt::format( "Unknown mesh interpolation \"{}\"", mesh->interpolation() ) );
 			primVars.SetString( Loader::strings().k_Ri_scheme, Loader::strings().k_catmullclark );
 		}
 
@@ -169,8 +176,13 @@ RtUString convertMeshTopology( const IECoreScene::MeshPrimitive *mesh, RtPrimVar
 			tagArgCounts.push_back( mesh->cornerIds()->readable().size() ); // integer argument count
 			tagArgCounts.push_back( mesh->cornerIds()->readable().size() ); // float argument count
 			tagArgCounts.push_back( 0 ); // string argument count
-			tagIntArgs.insert( tagIntArgs.end(), mesh->cornerIds()->readable().begin(), mesh->cornerIds()->readable().end() );
-			tagFloatArgs.insert( tagFloatArgs.end(), mesh->cornerSharpnesses()->readable().begin(), mesh->cornerSharpnesses()->readable().end() );
+			tagIntArgs.insert(
+				tagIntArgs.end(), mesh->cornerIds()->readable().begin(), mesh->cornerIds()->readable().end()
+			);
+			tagFloatArgs.insert(
+				tagFloatArgs.end(), mesh->cornerSharpnesses()->readable().begin(),
+				mesh->cornerSharpnesses()->readable().end()
+			);
 		}
 
 		// Interpolation rules
@@ -198,9 +210,16 @@ RtUString convertMeshTopology( const IECoreScene::MeshPrimitive *mesh, RtPrimVar
 	return geometryType;
 }
 
-RtUString convertMesh( const IECoreScenePreview::Renderer::Samples<const IECoreScene::MeshPrimitive *> &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext )
+RtUString convertMesh(
+	const IECoreScenePreview::Renderer::Samples<const IECoreScene::MeshPrimitive *> &samples,
+	const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars,
+	const std::string &messageContext
+)
 {
-	GeometryAlgo::convertPrimitive( IECoreScenePreview::Renderer::staticSamplesCast<const IECoreScene::Primitive *>( samples ), sampleTimes, primVars, messageContext );
+	GeometryAlgo::convertPrimitive(
+		IECoreScenePreview::Renderer::staticSamplesCast<const IECoreScene::Primitive *>( samples ), sampleTimes,
+		primVars, messageContext
+	);
 	return convertMeshTopology( samples[0], primVars, messageContext );
 }
 

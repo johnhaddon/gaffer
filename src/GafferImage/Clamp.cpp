@@ -48,8 +48,7 @@ GAFFER_NODE_DEFINE_TYPE( Clamp );
 
 size_t Clamp::g_firstPlugIndex = 0;
 
-Clamp::Clamp( const std::string &name )
-	: ChannelDataProcessor( name, true /* hasUnpremultPlug */ )
+Clamp::Clamp( const std::string &name ) : ChannelDataProcessor( name, true /* hasUnpremultPlug */ )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -64,9 +63,7 @@ Clamp::Clamp( const std::string &name )
 	addChild( new BoolPlug( "maxClampToEnabled", Plug::In, false ) );
 }
 
-Clamp::~Clamp()
-{
-}
+Clamp::~Clamp() {}
 
 Gaffer::Color4fPlug *Clamp::minPlug()
 {
@@ -155,10 +152,7 @@ bool Clamp::enabled() const
 		return false;
 	}
 
-	if(
-		minEnabledPlug()->getValue() == false &&
-		maxEnabledPlug()->getValue() == false
-	)
+	if( minEnabledPlug()->getValue() == false && maxEnabledPlug()->getValue() == false )
 	{
 		return false;
 	}
@@ -171,23 +165,17 @@ void Clamp::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs 
 	ChannelDataProcessor::affects( input, outputs );
 
 	const Plug *inputParent = input->parent<Plug>();
-	if(
-		inputParent == minPlug() ||
-		inputParent == maxPlug() ||
-		inputParent == minClampToPlug() ||
-		inputParent == maxClampToPlug() ||
-		input == inPlug()->channelDataPlug() ||
-		input == minEnabledPlug() ||
-		input == maxEnabledPlug() ||
-		input == minClampToEnabledPlug() ||
-		input == maxClampToEnabledPlug()
-	)
+	if( inputParent == minPlug() || inputParent == maxPlug() || inputParent == minClampToPlug() ||
+		inputParent == maxClampToPlug() || input == inPlug()->channelDataPlug() || input == minEnabledPlug() ||
+		input == maxEnabledPlug() || input == minClampToEnabledPlug() || input == maxClampToEnabledPlug() )
 	{
 		outputs.push_back( outPlug()->channelDataPlug() );
 	}
 }
 
-void Clamp::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Clamp::hashChannelData(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ChannelDataProcessor::hashChannelData( output, context, h );
 
@@ -207,7 +195,9 @@ void Clamp::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer:
 	maxClampToEnabledPlug()->hash( h );
 }
 
-void Clamp::processChannelData( const Gaffer::Context *context, const ImagePlug *parent, const std::string &channelName, FloatVectorDataPtr outData ) const
+void Clamp::processChannelData(
+	const Gaffer::Context *context, const ImagePlug *parent, const std::string &channelName, FloatVectorDataPtr outData
+) const
 {
 	const int channelIndex = std::max( 0, ImageAlgo::colorIndex( channelName ) );
 

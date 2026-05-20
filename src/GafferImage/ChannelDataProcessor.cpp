@@ -48,8 +48,7 @@ GAFFER_NODE_DEFINE_TYPE( ChannelDataProcessor );
 
 size_t ChannelDataProcessor::g_firstPlugIndex = 0;
 
-ChannelDataProcessor::ChannelDataProcessor( const std::string &name, bool hasUnpremultPlug )
-	: ImageProcessor( name )
+ChannelDataProcessor::ChannelDataProcessor( const std::string &name, bool hasUnpremultPlug ) : ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -70,9 +69,7 @@ ChannelDataProcessor::ChannelDataProcessor( const std::string &name, bool hasUnp
 	outPlug()->channelNamesPlug()->setInput( inPlug()->channelNamesPlug() );
 }
 
-ChannelDataProcessor::~ChannelDataProcessor()
-{
-}
+ChannelDataProcessor::~ChannelDataProcessor() {}
 
 Gaffer::StringPlug *ChannelDataProcessor::channelsPlug()
 {
@@ -106,10 +103,7 @@ void ChannelDataProcessor::affects( const Gaffer::Plug *input, AffectedPlugsCont
 {
 	ImageProcessor::affects( input, outputs );
 
-	if(
-		input == inPlug()->channelDataPlug() ||
-		input == channelsPlug()
-	)
+	if( input == inPlug()->channelDataPlug() || input == channelsPlug() )
 	{
 		outputs.push_back( outPlug()->channelDataPlug() );
 	}
@@ -130,7 +124,9 @@ bool ChannelDataProcessor::channelEnabled( const std::string &channel ) const
 	return IECore::StringAlgo::matchMultiple( channel, channelsPlug()->getValue() );
 }
 
-void ChannelDataProcessor::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ChannelDataProcessor::hashChannelData(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashChannelData( output, context, h );
 
@@ -167,7 +163,10 @@ void ChannelDataProcessor::hashChannelData( const GafferImage::ImagePlug *output
 }
 
 
-IECore::ConstFloatVectorDataPtr ChannelDataProcessor::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr ChannelDataProcessor::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	IECore::FloatVectorDataPtr outData = inPlug()->channelData( channelName, tileOrigin )->copy();
 

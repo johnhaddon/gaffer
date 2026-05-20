@@ -48,18 +48,11 @@ static IECore::InternedString g_clippingPlanesSetName( "__clippingPlanes" );
 
 GAFFER_NODE_DEFINE_TYPE( ClippingPlane );
 
-ClippingPlane::ClippingPlane( const std::string &name )
-	: ObjectSource( name, "clippingPlane" )
-{
-}
+ClippingPlane::ClippingPlane( const std::string &name ) : ObjectSource( name, "clippingPlane" ) {}
 
-ClippingPlane::~ClippingPlane()
-{
-}
+ClippingPlane::~ClippingPlane() {}
 
-void ClippingPlane::hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const
-{
-}
+void ClippingPlane::hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const {}
 
 IECore::ConstObjectPtr ClippingPlane::computeSource( const Context *context ) const
 {

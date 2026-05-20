@@ -85,8 +85,7 @@ namespace
 /// to this behaviour. Perhaps this could just be driven by metadata?
 bool keyedByIndex( const GraphComponent *parent )
 {
-	return runTimeCast<const Spreadsheet::RowsPlug>( parent ) ||
-		runTimeCast<const ArrayPlug>( parent );
+	return runTimeCast<const Spreadsheet::RowsPlug>( parent ) || runTimeCast<const ArrayPlug>( parent );
 }
 
 std::string modulePathInternal( const boost::python::object &o )
@@ -142,8 +141,13 @@ std::string modulePathInternal( const boost::python::object &o )
 // Serialisation
 //////////////////////////////////////////////////////////////////////////
 
-Serialisation::Serialisation( const Gaffer::GraphComponent *parent, const std::string &parentName, const Gaffer::Set *filter )
-	: m_parent( parent ), m_parentName( parentName ), m_filter( filter ), m_protectParentNamespace( Context::current()->get<bool>( "serialiser:protectParentNamespace", true ) )
+Serialisation::Serialisation(
+	const Gaffer::GraphComponent *parent, const std::string &parentName, const Gaffer::Set *filter
+)
+	: m_parent( parent ),
+	  m_parentName( parentName ),
+	  m_filter( filter ),
+	  m_protectParentNamespace( Context::current()->get<bool>( "serialiser:protectParentNamespace", true ) )
 {
 	IECorePython::ScopedGILLock gilLock;
 	walk( parent, parentName, acquireSerialiser( parent ), Context::current()->canceller() );
@@ -174,10 +178,8 @@ std::string Serialisation::result() const
 		result += "import " + *it + "\n";
 	}
 
-	if(
-		runTimeCast<const Node>( m_parent ) &&
-		Context::current()->get<bool>( "serialiser:includeVersionMetadata", true )
-	)
+	if( runTimeCast<const Node>( m_parent ) &&
+		Context::current()->get<bool>( "serialiser:includeVersionMetadata", true ) )
 	{
 		const std::string formatString( "Gaffer.Metadata.registerValue( {}, \"{}\", {}, persistent=False )\n" );
 
@@ -209,7 +211,9 @@ std::string Serialisation::result() const
 
 std::string Serialisation::modulePath( const IECore::RefCounted *object )
 {
-	boost::python::object o( RefCountedPtr( const_cast<RefCounted *>( object ) ) ); // we can only push non-const objects to python so we need the cast
+	boost::python::object o(
+		RefCountedPtr( const_cast<RefCounted *>( object ) )
+	); // we can only push non-const objects to python so we need the cast
 	return modulePath( o );
 }
 
@@ -231,7 +235,9 @@ std::string Serialisation::modulePath( const boost::python::object &o )
 
 std::string Serialisation::classPath( const IECore::RefCounted *object )
 {
-	boost::python::object o( RefCountedPtr( const_cast<RefCounted *>( object ) ) ); // we can only push non-const objects to python so we need the cast
+	boost::python::object o(
+		RefCountedPtr( const_cast<RefCounted *>( object ) )
+	); // we can only push non-const objects to python so we need the cast
 	return classPath( o );
 }
 
@@ -269,9 +275,13 @@ std::string Serialisation::classPath( const boost::python::object &object )
 	return result;
 }
 
-void Serialisation::walk( const Gaffer::GraphComponent *parent, const std::string &parentIdentifier, const Serialiser *parentSerialiser, const IECore::Canceller *canceller )
+void Serialisation::walk(
+	const Gaffer::GraphComponent *parent, const std::string &parentIdentifier, const Serialiser *parentSerialiser,
+	const IECore::Canceller *canceller
+)
 {
-	for( GraphComponent::ChildIterator it = parent->children().begin(), eIt = parent->children().end(); it != eIt; it++ )
+	for( GraphComponent::ChildIterator it = parent->children().begin(), eIt = parent->children().end(); it != eIt;
+		 it++ )
 	{
 		IECore::Canceller::check( canceller );
 
@@ -365,7 +375,9 @@ std::string Serialisation::identifier( const Gaffer::GraphComponent *graphCompon
 	return childIdentifier( parentIdentifier, graphComponent );
 }
 
-std::string Serialisation::childIdentifier( const std::string &parentIdentifier, const Gaffer::GraphComponent *child ) const
+std::string Serialisation::childIdentifier(
+	const std::string &parentIdentifier, const Gaffer::GraphComponent *child
+) const
 {
 	if( parentIdentifier.empty() )
 	{
@@ -391,7 +403,9 @@ std::string Serialisation::childIdentifier( const std::string &parentIdentifier,
 	return result;
 }
 
-std::string Serialisation::childIdentifier( const std::string &parentIdentifier, Gaffer::GraphComponent::ChildIterator child ) const
+std::string Serialisation::childIdentifier(
+	const std::string &parentIdentifier, Gaffer::GraphComponent::ChildIterator child
+) const
 {
 	if( parentIdentifier.empty() )
 	{
@@ -513,7 +527,9 @@ IECore::ObjectPtr Serialisation::objectFromBase64( const std::string &base64 )
 // Serialisation::Serialiser
 //////////////////////////////////////////////////////////////////////////
 
-void Serialisation::Serialiser::moduleDependencies( const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation ) const
+void Serialisation::Serialiser::moduleDependencies(
+	const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation
+) const
 {
 	const std::string module = Serialisation::modulePath( graphComponent );
 	if( !module.empty() )
@@ -522,34 +538,46 @@ void Serialisation::Serialiser::moduleDependencies( const Gaffer::GraphComponent
 	}
 }
 
-std::string Serialisation::Serialiser::constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const
+std::string Serialisation::Serialiser::constructor(
+	const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation
+) const
 {
 	object o( GraphComponentPtr( const_cast<GraphComponent *>( graphComponent ) ) );
 	std::string r = extract<std::string>( o.attr( "__repr__" )() );
 	return r;
 }
 
-std::string Serialisation::Serialiser::postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const
+std::string Serialisation::Serialiser::postConstructor(
+	const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+) const
 {
 	return "";
 }
 
-std::string Serialisation::Serialiser::postHierarchy( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const
+std::string Serialisation::Serialiser::postHierarchy(
+	const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+) const
 {
 	return "";
 }
 
-std::string Serialisation::Serialiser::postScript( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const
+std::string Serialisation::Serialiser::postScript(
+	const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+) const
 {
 	return "";
 }
 
-bool Serialisation::Serialiser::childNeedsSerialisation( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const
+bool Serialisation::Serialiser::childNeedsSerialisation(
+	const Gaffer::GraphComponent *child, const Serialisation &serialisation
+) const
 {
 	return true;
 }
 
-bool Serialisation::Serialiser::childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const
+bool Serialisation::Serialiser::childNeedsConstruction(
+	const Gaffer::GraphComponent *child, const Serialisation &serialisation
+) const
 {
 	return false;
 }

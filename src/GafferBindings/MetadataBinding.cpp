@@ -64,13 +64,17 @@ using namespace GafferBindings;
 namespace GafferBindings
 {
 
-std::string metadataSerialisation( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation )
+std::string metadataSerialisation(
+	const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+)
 {
-	const std::vector<InternedString> keys = Metadata::registeredValues( graphComponent, Metadata::RegistrationTypes::InstancePersistent );
+	const std::vector<InternedString> keys =
+		Metadata::registeredValues( graphComponent, Metadata::RegistrationTypes::InstancePersistent );
 
 	const Plug *plug = runTimeCast<const Plug>( graphComponent );
 	const Reference *reference = plug ? runTimeCast<const Reference>( plug->node() ) : nullptr;
-	bool requireEdits = reference && plug && plug != reference->userPlug() && !reference->userPlug()->isAncestorOf( plug );
+	bool requireEdits =
+		reference && plug && plug != reference->userPlug() && !reference->userPlug()->isAncestorOf( plug );
 
 	std::string result;
 	for( std::vector<InternedString>::const_iterator it = keys.begin(), eIt = keys.end(); it != eIt; ++it )
@@ -98,17 +102,13 @@ std::string metadataSerialisation( const Gaffer::GraphComponent *graphComponent,
 		if( MetadataAlgo::numericBookmarkAffectedByChange( *it ) )
 		{
 			result += fmt::format(
-				"Gaffer.MetadataAlgo.setNumericBookmark( {}.scriptNode(), {}, {} )\n",
-				identifier, MetadataAlgo::numericBookmark( IECore::runTimeCast<const Node>( graphComponent ) ),
-				identifier
+				"Gaffer.MetadataAlgo.setNumericBookmark( {}.scriptNode(), {}, {} )\n", identifier,
+				MetadataAlgo::numericBookmark( IECore::runTimeCast<const Node>( graphComponent ) ), identifier
 			);
 		}
 		else
 		{
-			result += fmt::format(
-				"Gaffer.Metadata.registerValue( {}, {}, {} )\n",
-				identifier, key, stringValue
-			);
+			result += fmt::format( "Gaffer.Metadata.registerValue( {}, {}, {} )\n", identifier, key, stringValue );
 		}
 	}
 

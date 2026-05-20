@@ -83,10 +83,7 @@ void validateDestination( const ScenePlug::ScenePath &destination, const ScenePl
 		// If we were to allow this, what would it mean? Would a destination of / just discard the mesh?
 		// Exception seems a lot clearer.
 		throw IECore::Exception(
-			fmt::format(
-				"Empty destination not allowed for source location '{}'.",
-				ScenePlug::pathToString( source )
-			)
+			fmt::format( "Empty destination not allowed for source location '{}'.", ScenePlug::pathToString( source ) )
 		);
 	}
 
@@ -100,10 +97,8 @@ void validateDestination( const ScenePlug::ScenePath &destination, const ScenePl
 		{
 			throw IECore::Exception(
 				fmt::format(
-					"Invalid destination `{}` for source location '{}'. {}",
-					ScenePlug::pathToString( destination ),
-					ScenePlug::pathToString( source ),
-					e.what()
+					"Invalid destination `{}` for source location '{}'. {}", ScenePlug::pathToString( destination ),
+					ScenePlug::pathToString( source ), e.what()
 				)
 			);
 		}
@@ -123,7 +118,7 @@ using SourcePaths = std::vector<ScenePlug::ScenePath>;
 class TreeData : public IECore::Data
 {
 
-	public:
+public:
 
 	struct Location
 	{
@@ -144,7 +139,9 @@ class TreeData : public IECore::Data
 	TreeData( const ScenePlug *inPlug, const FilterPlug *filterPlug, const StringPlug *destinationPlug )
 		: m_root( new Location() )
 	{
-		auto f = [this, destinationPlug]( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &sourcePath ) {
+		auto f = [this, destinationPlug](
+					 const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &sourcePath
+				 ) {
 			if( sourcePath.size() )
 			{
 				addDestination( destinationPlug, sourcePath );
@@ -154,21 +151,21 @@ class TreeData : public IECore::Data
 		SceneAlgo::filteredParallelTraverse( inPlug, filterPlug, f );
 	}
 
-	static bool affectedBy( const ScenePlug *inPlug, const FilterPlug *filterPlug, const StringPlug *destinationPlug, const Plug *input )
+	static bool affectedBy(
+		const ScenePlug *inPlug, const FilterPlug *filterPlug, const StringPlug *destinationPlug, const Plug *input
+	)
 	{
-		return input == filterPlug ||
-			input == inPlug->childNamesPlug() ||
-			input == destinationPlug;
+		return input == filterPlug || input == inPlug->childNamesPlug() || input == destinationPlug;
 	}
 
 	static void hash(
-		const ScenePlug *inPlug, const FilterPlug *filterPlug, const StringPlug *destinationPlug,
-		IECore::MurmurHash &h
+		const ScenePlug *inPlug, const FilterPlug *filterPlug, const StringPlug *destinationPlug, IECore::MurmurHash &h
 	)
 	{
 		// See `SceneAlgo::matchingPathsHash()` for documentation of this hashing strategy.
 		std::atomic<uint64_t> h1( 0 ), h2( 0 );
-		auto f = [destinationPlug, &h1, &h2]( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &sourcePath ) {
+		auto f = [destinationPlug, &h1,
+				  &h2]( const GafferScene::ScenePlug *scene, const GafferScene::ScenePlug::ScenePath &sourcePath ) {
 			IECore::MurmurHash h;
 			hashDestination( destinationPlug, sourcePath, h );
 			h1 += h.h1();
@@ -197,9 +194,11 @@ class TreeData : public IECore::Data
 		return result;
 	}
 
-	private:
+private:
 
-	static void hashDestination( const StringPlug *destinationPlug, const ScenePlug::ScenePath &sourcePath, IECore::MurmurHash &h )
+	static void hashDestination(
+		const StringPlug *destinationPlug, const ScenePlug::ScenePath &sourcePath, IECore::MurmurHash &h
+	)
 	{
 		h.append( sourcePath.data(), sourcePath.size() );
 		h.append( (uint64_t)sourcePath.size() );
@@ -240,9 +239,12 @@ IE_CORE_DECLAREPTR( TreeData )
 class MergeLocationData : public IECore::Data
 {
 
-	public:
+public:
 
-	MergeLocationData( const TreeData::Location *location, const ScenePlug::ScenePath &path, const MergeObjects *mergeObjects, const Context *context, const int rootFilterValue )
+	MergeLocationData(
+		const TreeData::Location *location, const ScenePlug::ScenePath &path, const MergeObjects *mergeObjects,
+		const Context *context, const int rootFilterValue
+	)
 	{
 		std::unordered_set<IECore::InternedString> availableDestinations;
 
@@ -292,7 +294,9 @@ class MergeLocationData : public IECore::Data
 						( IECore::PathMatcher::ExactMatch | IECore::PathMatcher::AncestorMatch ) )
 					{
 						// Check if this name is used by any destination
-						if( !( location && ( location->children.find( inChildNames[i] ) != location->children.end() || location->destinations.find( inChildNames[i] ) != location->destinations.end() ) ) )
+						if( !( location &&
+							   ( location->children.find( inChildNames[i] ) != location->children.end() ||
+								 location->destinations.find( inChildNames[i] ) != location->destinations.end() ) ) )
 						{
 							// Not used, we can prune it
 							if( !prune.size() )
@@ -439,8 +443,7 @@ class MergeLocationData : public IECore::Data
 					i.second.begin(), i.second.end(),
 					[]( const ScenePlug::ScenePath &a, const ScenePlug::ScenePath &b ) {
 						return lexicographical_compare(
-							a.begin(), a.end(), b.begin(), b.end(),
-							internedStringValueLess
+							a.begin(), a.end(), b.begin(), b.end(), internedStringValueLess
 						);
 					}
 				);
@@ -450,7 +453,10 @@ class MergeLocationData : public IECore::Data
 		m_childNamesData = childNamesData;
 	}
 
-	static void hash( const IECore::MurmurHash &treeHash, const ScenePlug::ScenePath &path, const MergeObjects *mergeObjects, const Context *context, const int rootFilterValue, IECore::MurmurHash &h )
+	static void hash(
+		const IECore::MurmurHash &treeHash, const ScenePlug::ScenePath &path, const MergeObjects *mergeObjects,
+		const Context *context, const int rootFilterValue, IECore::MurmurHash &h
+	)
 	{
 		if( mergeObjects->inPlug()->existsPlug()->getValue() )
 		{
@@ -511,8 +517,8 @@ void treeHash( const ObjectPlug *treePlug, const Gaffer::Context *context, IECor
 // parentHolder is used to ensure the memory isn't freed - the return value will be valid
 // as long as it is held.
 const std::vector<ScenePlug::ScenePath> *findSources(
-	const ObjectPlug *mergeLocationPlug,
-	const ScenePlug::ScenePath &path, const Gaffer::Context *context, ConstObjectPtr &parentHolder
+	const ObjectPlug *mergeLocationPlug, const ScenePlug::ScenePath &path, const Gaffer::Context *context,
+	ConstObjectPtr &parentHolder
 )
 {
 	if( !path.size() )
@@ -549,9 +555,8 @@ bool isConnected( const Gaffer::Plug *plug )
 // if we are still operating on the same destination, and matchingPrefix matches the length
 // of the prefix of the two paths that currently matches, then we can reuse the toDest matrix.
 M44f relativeTransform(
-	const ScenePlug::ScenePath &sourcePath, const ScenePlug::ScenePath &destPath,
-	const ScenePlug *sourceScene, const ScenePlug *destScene,
-	ScenePlug::PathScope &pathScope, ScenePlug::ScenePath &matchingPrefix, M44f &toDest
+	const ScenePlug::ScenePath &sourcePath, const ScenePlug::ScenePath &destPath, const ScenePlug *sourceScene,
+	const ScenePlug *destScene, ScenePlug::PathScope &pathScope, ScenePlug::ScenePath &matchingPrefix, M44f &toDest
 )
 {
 	unsigned int matchingLength = std::min( sourcePath.size(), destPath.size() );
@@ -632,9 +637,9 @@ IECore::MurmurHash g_invalidTransformHash = []() {
 }();
 
 IECore::MurmurHash relativeTransformHash(
-	const ScenePlug::ScenePath &sourcePath, const ScenePlug::ScenePath &destPath,
-	const ScenePlug *sourceScene, const ScenePlug *destScene,
-	ScenePlug::PathScope &pathScope, ScenePlug::ScenePath &matchingPrefix, IECore::MurmurHash &toDestHash
+	const ScenePlug::ScenePath &sourcePath, const ScenePlug::ScenePath &destPath, const ScenePlug *sourceScene,
+	const ScenePlug *destScene, ScenePlug::PathScope &pathScope, ScenePlug::ScenePath &matchingPrefix,
+	IECore::MurmurHash &toDestHash
 )
 {
 	unsigned int matchingLength = std::min( sourcePath.size(), destPath.size() );
@@ -709,7 +714,10 @@ IECore::MurmurHash relativeTransformHash(
 }
 
 // The filter value used for pruning the existing scene - if the sourcePlug is connected, then no pruning occurs.
-IECore::PathMatcher::Result pruneFilterValue( const GafferScene::ScenePlug *inPlug, const GafferScene::FilterPlug *filterPlug, const GafferScene::ScenePlug *sourcePlug, const Gaffer::Context *context )
+IECore::PathMatcher::Result pruneFilterValue(
+	const GafferScene::ScenePlug *inPlug, const GafferScene::FilterPlug *filterPlug,
+	const GafferScene::ScenePlug *sourcePlug, const Gaffer::Context *context
+)
 {
 	if( isConnected( sourcePlug ) )
 	{
@@ -752,9 +760,7 @@ MergeObjects::MergeObjects( const std::string &name, const std::string &defaultD
 	outPlug()->childBoundsPlug()->setFlags( Plug::AcceptsDependencyCycles, true );
 }
 
-MergeObjects::~MergeObjects()
-{
-}
+MergeObjects::~MergeObjects() {}
 
 GafferScene::ScenePlug *MergeObjects::sourcePlug()
 {
@@ -845,85 +851,50 @@ void MergeObjects::affects( const Plug *input, AffectedPlugsContainer &outputs )
 {
 	FilteredSceneProcessor::affects( input, outputs );
 
-	if(
-		TreeData::affectedBy( inPlug(), filterPlug(), destinationPlug(), input ) ||
-		TreeData::affectedBy( sourcePlug(), filterPlug(), destinationPlug(), input )
-	)
+	if( TreeData::affectedBy( inPlug(), filterPlug(), destinationPlug(), input ) ||
+		TreeData::affectedBy( sourcePlug(), filterPlug(), destinationPlug(), input ) )
 	{
 		outputs.push_back( treePlug() );
 	}
 
-	if(
-		input == inPlug()->childNamesPlug() ||
-		input == sourcePlug()->childNamesPlug() ||
-		input == treePlug()
-	)
+	if( input == inPlug()->childNamesPlug() || input == sourcePlug()->childNamesPlug() || input == treePlug() )
 	{
 		outputs.push_back( mergeLocationPlug() );
 	}
 
-	if(
-		input == mergeLocationPlug() ||
-		input == inPlug()->boundPlug() ||
-		input == sourcePlug()->boundPlug()
-	)
+	if( input == mergeLocationPlug() || input == inPlug()->boundPlug() || input == sourcePlug()->boundPlug() )
 	{
 		outputs.push_back( outPlug()->boundPlug() );
 	}
 
-	if(
-		input == mergeLocationPlug() ||
-		input == inPlug()->transformPlug()
-	)
+	if( input == mergeLocationPlug() || input == inPlug()->transformPlug() )
 	{
 		outputs.push_back( outPlug()->transformPlug() );
 	}
 
-	if(
-		input == mergeLocationPlug() ||
-		input == inPlug()->attributesPlug()
-	)
+	if( input == mergeLocationPlug() || input == inPlug()->attributesPlug() )
 	{
 		outputs.push_back( outPlug()->attributesPlug() );
 	}
 
-	if(
-		input == mergeLocationPlug() ||
-		input == inPlug()->objectPlug() ||
-		input == inPlug()->transformPlug() ||
-		input == sourcePlug()->objectPlug() ||
-		input == sourcePlug()->transformPlug() ||
-		input == sortKeyPlug() ||
-		input == sortPrimitiveVariablePlug() ||
-		input == sortOrderPlug() ||
-		affectsMergedObject( input )
-	)
+	if( input == mergeLocationPlug() || input == inPlug()->objectPlug() || input == inPlug()->transformPlug() ||
+		input == sourcePlug()->objectPlug() || input == sourcePlug()->transformPlug() || input == sortKeyPlug() ||
+		input == sortPrimitiveVariablePlug() || input == sortOrderPlug() || affectsMergedObject( input ) )
 	{
 		outputs.push_back( processedObjectPlug() );
 	}
 
-	if(
-		input == mergeLocationPlug() ||
-		input == inPlug()->objectPlug() ||
-		input == processedObjectPlug()
-	)
+	if( input == mergeLocationPlug() || input == inPlug()->objectPlug() || input == processedObjectPlug() )
 	{
 		outputs.push_back( outPlug()->objectPlug() );
 	}
 
-	if(
-		input == mergeLocationPlug() ||
-		input == inPlug()->childNamesPlug()
-	)
+	if( input == mergeLocationPlug() || input == inPlug()->childNamesPlug() )
 	{
 		outputs.push_back( outPlug()->childNamesPlug() );
 	}
 
-	if(
-		input == treePlug() ||
-		input == inPlug()->setPlug() ||
-		input == filterPlug()
-	)
+	if( input == treePlug() || input == inPlug()->setPlug() || input == filterPlug() )
 	{
 		outputs.push_back( outPlug()->setPlug() );
 	}
@@ -974,7 +945,9 @@ void MergeObjects::hash( const Gaffer::ValuePlug *output, const Gaffer::Context 
 
 		if( !sourcePaths )
 		{
-			throw IECore::Exception( "__processedObject should only be hashed from hashObject, which checks for a matching tree location first" );
+			throw IECore::Exception(
+				"__processedObject should only be hashed from hashObject, which checks for a matching tree location first"
+			);
 		}
 
 		{
@@ -991,8 +964,7 @@ void MergeObjects::hash( const Gaffer::ValuePlug *output, const Gaffer::Context 
 		tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
 
 		const IECore::MurmurHash reduction = tbb::parallel_deterministic_reduce(
-			tbb::blocked_range<size_t>( 0, sourcePaths->size() ),
-			IECore::MurmurHash(),
+			tbb::blocked_range<size_t>( 0, sourcePaths->size() ), IECore::MurmurHash(),
 			[&]( const tbb::blocked_range<size_t> &range, const MurmurHash &hash ) {
 				ScenePlug::ScenePath matchingPrefix;
 				IECore::MurmurHash toDestHash = g_invalidTransformHash;
@@ -1004,8 +976,7 @@ void MergeObjects::hash( const Gaffer::ValuePlug *output, const Gaffer::Context 
 					pathScope.setPath( &( ( *sourcePaths )[i] ) );
 					effectiveSource->objectPlug()->hash( result );
 					result.append( relativeTransformHash(
-						( *sourcePaths )[i], path, effectiveSource, inPlug(), pathScope,
-						matchingPrefix, toDestHash
+						( *sourcePaths )[i], path, effectiveSource, inPlug(), pathScope, matchingPrefix, toDestHash
 					) );
 				}
 
@@ -1016,8 +987,7 @@ void MergeObjects::hash( const Gaffer::ValuePlug *output, const Gaffer::Context 
 				result.append( y );
 				return result;
 			},
-			tbb::simple_partitioner(),
-			taskGroupContext
+			tbb::simple_partitioner(), taskGroupContext
 		);
 
 		h.append( reduction );
@@ -1029,9 +999,9 @@ void MergeObjects::compute( Gaffer::ValuePlug *output, const Gaffer::Context *co
 {
 	if( output == treePlug() )
 	{
-		static_cast<Gaffer::ObjectPlug *>( output )->setValue( new TreeData(
-			effectiveSourcePlug(), filterPlug(), destinationPlug()
-		) );
+		static_cast<Gaffer::ObjectPlug *>( output )->setValue(
+			new TreeData( effectiveSourcePlug(), filterPlug(), destinationPlug() )
+		);
 	}
 	else if( output == mergeLocationPlug() )
 	{
@@ -1074,7 +1044,9 @@ void MergeObjects::compute( Gaffer::ValuePlug *output, const Gaffer::Context *co
 
 		if( !sourcePaths )
 		{
-			throw IECore::Exception( "__processedObject should only be evaluated from computeObject, which checks for a matching tree location first" );
+			throw IECore::Exception(
+				"__processedObject should only be evaluated from computeObject, which checks for a matching tree location first"
+			);
 		}
 
 		// Prepare a vector of pairs of objects and transforms, to be merged.
@@ -1107,13 +1079,12 @@ void MergeObjects::compute( Gaffer::ValuePlug *output, const Gaffer::Context *co
 					pathScope.setPath( &( ( *sourcePaths )[sourcePathIndex] ) );
 					sources[i].first = effectiveSource->objectPlug()->getValue();
 					sources[i].second = relativeTransform(
-						( *sourcePaths )[sourcePathIndex], path, effectiveSource, inPlug(), pathScope,
-						matchingPrefix, toDest
+						( *sourcePaths )[sourcePathIndex], path, effectiveSource, inPlug(), pathScope, matchingPrefix,
+						toDest
 					);
 				}
 			},
-			tbb::auto_partitioner(),
-			taskGroupContext
+			tbb::auto_partitioner(), taskGroupContext
 		);
 
 
@@ -1129,9 +1100,7 @@ void MergeObjects::compute( Gaffer::ValuePlug *output, const Gaffer::Context *co
 
 			for( const auto &s : sources )
 			{
-				const IECoreScene::Primitive *prim = IECore::runTimeCast<const IECoreScene::Primitive>(
-					s.first.get()
-				);
+				const IECoreScene::Primitive *prim = IECore::runTimeCast<const IECoreScene::Primitive>( s.first.get() );
 
 				if( !prim )
 				{
@@ -1166,10 +1135,8 @@ void MergeObjects::compute( Gaffer::ValuePlug *output, const Gaffer::Context *co
 					{
 						throw IECore::Exception(
 							fmt::format(
-								"Mismatched types for key primitive variable \"{}\", {} vs {}.",
-								sortPrimitiveVariable,
-								sortVarTypeExemplar->typeName(),
-								primVarData->typeName()
+								"Mismatched types for key primitive variable \"{}\", {} vs {}.", sortPrimitiveVariable,
+								sortVarTypeExemplar->typeName(), primVarData->typeName()
 							)
 						);
 					}
@@ -1179,54 +1146,57 @@ void MergeObjects::compute( Gaffer::ValuePlug *output, const Gaffer::Context *co
 			IECore::dispatch( sortVarTypeExemplar, [&sources, &sortOrder, &sortPrimitiveVariable]( const auto *typed ) {
 				using TargetType = typename std::remove_const_t<std::remove_pointer_t<decltype( typed )>>;
 				if constexpr(
-					std::is_same_v<TargetType, IntData> ||
-					std::is_same_v<TargetType, FloatData> ||
+					std::is_same_v<TargetType, IntData> || std::is_same_v<TargetType, FloatData> ||
 					std::is_same_v<TargetType, StringData>
 				)
 				{
-					std::stable_sort( sources.begin(), sources.end(), [&sortOrder, &sortPrimitiveVariable]( const auto &a, const auto &b ) {
-						const IECoreScene::Primitive *aPrim = IECore::runTimeCast<const IECoreScene::Primitive>( a.first.get() );
-						const IECoreScene::Primitive *bPrim = IECore::runTimeCast<const IECoreScene::Primitive>( b.first.get() );
+					std::stable_sort(
+						sources.begin(), sources.end(),
+						[&sortOrder, &sortPrimitiveVariable]( const auto &a, const auto &b ) {
+							const IECoreScene::Primitive *aPrim =
+								IECore::runTimeCast<const IECoreScene::Primitive>( a.first.get() );
+							const IECoreScene::Primitive *bPrim =
+								IECore::runTimeCast<const IECoreScene::Primitive>( b.first.get() );
 
-						if( !( aPrim && bPrim ) )
-						{
+							if( !( aPrim && bPrim ) )
+							{
+								if( sortOrder == MergeObjects::SortOrder::Ascending )
+								{
+									return (bool)aPrim < (bool)bPrim;
+								}
+								else
+								{
+									return (bool)bPrim < (bool)aPrim;
+								}
+							}
+
+							// I don't love doing these lookups inside the sort comparison. If the sources
+							// vector is large, it would probably be more efficient to copy the sources to
+							// a new vector where each element was augmented with a pointer directly to the
+							// data. Then we could sort that using the data pointers before copying back to
+							// the sources vector.
+							// For now, this is a bit simpler, and it probably won't be an issue unless
+							// someone requires an ordered merge while merging a huge number of tiny meshes,
+							// which is pretty special case.
+							const auto &aVal = aPrim->variableData<TargetType>( sortPrimitiveVariable )->readable();
+							const auto &bVal = bPrim->variableData<TargetType>( sortPrimitiveVariable )->readable();
+
 							if( sortOrder == MergeObjects::SortOrder::Ascending )
 							{
-								return (bool)aPrim < (bool)bPrim;
+								return aVal < bVal;
 							}
 							else
 							{
-								return (bool)bPrim < (bool)aPrim;
+								return bVal < aVal;
 							}
 						}
-
-						// I don't love doing these lookups inside the sort comparison. If the sources
-						// vector is large, it would probably be more efficient to copy the sources to
-						// a new vector where each element was augmented with a pointer directly to the
-						// data. Then we could sort that using the data pointers before copying back to
-						// the sources vector.
-						// For now, this is a bit simpler, and it probably won't be an issue unless
-						// someone requires an ordered merge while merging a huge number of tiny meshes,
-						// which is pretty special case.
-						const auto &aVal = aPrim->variableData<TargetType>( sortPrimitiveVariable )->readable();
-						const auto &bVal = bPrim->variableData<TargetType>( sortPrimitiveVariable )->readable();
-
-						if( sortOrder == MergeObjects::SortOrder::Ascending )
-						{
-							return aVal < bVal;
-						}
-						else
-						{
-							return bVal < aVal;
-						}
-					} );
+					);
 				}
 				else
 				{
 					throw IECore::Exception(
 						fmt::format(
-							"Sort key primitive variable \"{}\", unsupported type {}.",
-							sortPrimitiveVariable,
+							"Sort key primitive variable \"{}\", unsupported type {}.", sortPrimitiveVariable,
 							typed->typeName()
 						)
 					);
@@ -1243,12 +1213,15 @@ void MergeObjects::compute( Gaffer::ValuePlug *output, const Gaffer::Context *co
 	}
 }
 
-void MergeObjects::hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void MergeObjects::hashBound(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	ConstObjectPtr parentHolder;
 	const SourcePaths *sourcePaths = findSources( mergeLocationPlug(), path, context, parentHolder );
 
-	ConstMergeLocationDataPtr mergeLocationData = IECore::runTimeCast<const MergeLocationData>( mergeLocationPlug()->getValue() );
+	ConstMergeLocationDataPtr mergeLocationData =
+		IECore::runTimeCast<const MergeLocationData>( mergeLocationPlug()->getValue() );
 	bool hasDescendantDestinations = mergeLocationData && mergeLocationData->m_hasDescendantDestinations;
 	bool inputExists = inPlug()->existsPlug()->getValue();
 	bool hasDescendantPruned = false;
@@ -1316,8 +1289,7 @@ void MergeObjects::hashBound( const ScenePath &path, const Gaffer::Context *cont
 	const ScenePlug *effectiveSource = effectiveSourcePlug();
 
 	const IECore::MurmurHash reduction = tbb::parallel_deterministic_reduce(
-		tbb::blocked_range<size_t>( 0, sourcePaths->size() ),
-		IECore::MurmurHash(),
+		tbb::blocked_range<size_t>( 0, sourcePaths->size() ), IECore::MurmurHash(),
 		[&]( const tbb::blocked_range<size_t> &range, const MurmurHash &hash ) {
 			ScenePlug::PathScope pathScope( threadState );
 			IECore::MurmurHash result = hash;
@@ -1334,14 +1306,15 @@ void MergeObjects::hashBound( const ScenePath &path, const Gaffer::Context *cont
 			result.append( y );
 			return result;
 		},
-		tbb::simple_partitioner(),
-		taskGroupContext
+		tbb::simple_partitioner(), taskGroupContext
 	);
 
 	h.append( reduction );
 }
 
-Imath::Box3f MergeObjects::computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::Box3f MergeObjects::computeBound(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ConstObjectPtr parentHolder;
 	const SourcePaths *sourcePaths = findSources( mergeLocationPlug(), path, context, parentHolder );
@@ -1351,7 +1324,8 @@ Imath::Box3f MergeObjects::computeBound( const ScenePath &path, const Gaffer::Co
 
 	// To know if we need to check the child bounds, we need to know if there are any destinations below this
 	// location. We can efficiently query this from the mergeLocationData.
-	ConstMergeLocationDataPtr mergeLocationData = IECore::runTimeCast<const MergeLocationData>( mergeLocationPlug()->getValue() );
+	ConstMergeLocationDataPtr mergeLocationData =
+		IECore::runTimeCast<const MergeLocationData>( mergeLocationPlug()->getValue() );
 
 	bool hasDescendantDestinations = mergeLocationData && mergeLocationData->m_hasDescendantDestinations;
 
@@ -1425,8 +1399,7 @@ Imath::Box3f MergeObjects::computeBound( const ScenePath &path, const Gaffer::Co
 	// This location is an actual destination, so accumulate bounds from everything being merged here.
 
 	return tbb::parallel_reduce(
-		tbb::blocked_range<size_t>( 0, sourcePaths->size() ),
-		childBound,
+		tbb::blocked_range<size_t>( 0, sourcePaths->size() ), childBound,
 		[&]( const tbb::blocked_range<size_t> &range, const Box3f &bound ) {
 			ScenePlug::PathScope pathScope( threadState );
 			Box3f result = bound;
@@ -1441,7 +1414,12 @@ Imath::Box3f MergeObjects::computeBound( const ScenePath &path, const Gaffer::Co
 
 				// We're evaluating relativeTransform here, which is also needed in computeObject(). It doesn't seem
 				// expensive enough to be worth another caching plug.
-				childBound = Imath::transform( childBound, relativeTransform( ( *sourcePaths )[i], path, effectiveSource, inPlug(), pathScope, matchingPrefix, toDest ) );
+				childBound = Imath::transform(
+					childBound,
+					relativeTransform(
+						( *sourcePaths )[i], path, effectiveSource, inPlug(), pathScope, matchingPrefix, toDest
+					)
+				);
 				result.extendBy( childBound );
 			}
 			return result;
@@ -1451,12 +1429,13 @@ Imath::Box3f MergeObjects::computeBound( const ScenePath &path, const Gaffer::Co
 			result.extendBy( y );
 			return result;
 		},
-		tbb::auto_partitioner(),
-		taskGroupContext
+		tbb::auto_partitioner(), taskGroupContext
 	);
 }
 
-void MergeObjects::hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void MergeObjects::hashObject(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	ConstObjectPtr parentHolder;
 	const SourcePaths *sourcePaths = findSources( mergeLocationPlug(), path, context, parentHolder );
@@ -1485,7 +1464,9 @@ void MergeObjects::hashObject( const ScenePath &path, const Gaffer::Context *con
 	processedObjectPlug()->hash( h );
 }
 
-IECore::ConstObjectPtr MergeObjects::computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstObjectPtr MergeObjects::computeObject(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ConstObjectPtr parentHolder;
 	const SourcePaths *sourcePaths = findSources( mergeLocationPlug(), path, context, parentHolder );
@@ -1513,7 +1494,9 @@ IECore::ConstObjectPtr MergeObjects::computeObject( const ScenePath &path, const
 	return processedObjectPlug()->getValue();
 }
 
-void MergeObjects::hashTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void MergeObjects::hashTransform(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	if( inPlug()->existsPlug()->getValue() )
 	{
@@ -1525,7 +1508,9 @@ void MergeObjects::hashTransform( const ScenePath &path, const Gaffer::Context *
 	}
 }
 
-Imath::M44f MergeObjects::computeTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::M44f MergeObjects::computeTransform(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( inPlug()->existsPlug()->getValue() )
 	{
@@ -1537,7 +1522,9 @@ Imath::M44f MergeObjects::computeTransform( const ScenePath &path, const Gaffer:
 	}
 }
 
-void MergeObjects::hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void MergeObjects::hashAttributes(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	if( inPlug()->existsPlug()->getValue() )
 	{
@@ -1549,7 +1536,9 @@ void MergeObjects::hashAttributes( const ScenePath &path, const Gaffer::Context 
 	}
 }
 
-IECore::ConstCompoundObjectPtr MergeObjects::computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstCompoundObjectPtr MergeObjects::computeAttributes(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( inPlug()->existsPlug()->getValue() )
 	{
@@ -1562,7 +1551,9 @@ IECore::ConstCompoundObjectPtr MergeObjects::computeAttributes( const ScenePath 
 }
 
 
-void MergeObjects::hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void MergeObjects::hashChildNames(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	FilteredSceneProcessor::hashChildNames( path, context, parent, h );
 	mergeLocationPlug()->hash( h );
@@ -1573,7 +1564,9 @@ void MergeObjects::hashChildNames( const ScenePath &path, const Gaffer::Context 
 	}
 }
 
-IECore::ConstInternedStringVectorDataPtr MergeObjects::computeChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstInternedStringVectorDataPtr MergeObjects::computeChildNames(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ConstObjectPtr mergeLocationUntyped = mergeLocationPlug()->getValue();
 	const MergeLocationData *mergeLocation = IECore::runTimeCast<const MergeLocationData>( mergeLocationUntyped.get() );
@@ -1599,7 +1592,10 @@ IECore::ConstInternedStringVectorDataPtr MergeObjects::computeChildNames( const 
 	}
 }
 
-void MergeObjects::hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void MergeObjects::hashSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent,
+	IECore::MurmurHash &h
+) const
 {
 	if( isConnected( sourcePlug() ) )
 	{
@@ -1631,7 +1627,9 @@ void MergeObjects::hashSet( const IECore::InternedString &setName, const Gaffer:
 	filterPlug()->hash( h );
 }
 
-IECore::ConstPathMatcherDataPtr MergeObjects::computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstPathMatcherDataPtr MergeObjects::computeSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( isConnected( sourcePlug() ) )
 	{
@@ -1693,13 +1691,16 @@ IECore::ConstPathMatcherDataPtr MergeObjects::computeSet( const IECore::Interned
 			// Check if there's a location for the current path
 			locationStack.back() ||
 			// Otherwise, maybe the parent location has this path as a destination?
-			( locationStack.size() >= 2 && locationStack[locationStack.size() - 2] && locationStack[locationStack.size() - 2]->destinations.count( pIt->back() ) )
+			( locationStack.size() >= 2 && locationStack[locationStack.size() - 2] &&
+			  locationStack[locationStack.size() - 2]->destinations.count( pIt->back() ) )
 		)
 		{
 			// If this path is in the treeData, we don't prune it
 
 			// If there is no filter match, we can stop examining this whole branch
-			if( !( m & ( IECore::PathMatcher::ExactMatch | IECore::PathMatcher::AncestorMatch | IECore::PathMatcher::DescendantMatch ) ) )
+			if( !( m &
+				   ( IECore::PathMatcher::ExactMatch | IECore::PathMatcher::AncestorMatch |
+					 IECore::PathMatcher::DescendantMatch ) ) )
 			{
 				pIt.prune();
 			}
@@ -1779,6 +1780,8 @@ bool MergeObjects::affectsMergedObject( const Gaffer::Plug *input ) const
 	return false;
 }
 
-void MergeObjects::hashMergedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void MergeObjects::hashMergedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 }

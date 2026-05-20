@@ -65,7 +65,7 @@ IE_CORE_FORWARDDECLARE( ContextTracker );
 class GAFFERUI_API AnnotationsGadget : public Gadget
 {
 
-	public:
+public:
 
 	~AnnotationsGadget() override;
 
@@ -89,7 +89,7 @@ class GAFFERUI_API AnnotationsGadget : public Gadget
 	// Returns the node and annotation name under the specified line.
 	std::optional<AnnotationIdentifier> annotationAt( const IECore::LineSegment3f &lineInGadgetSpace ) const;
 
-	protected:
+protected:
 
 	// Protected constructor and friend status so only GraphGadget can
 	// construct us.
@@ -101,7 +101,7 @@ class GAFFERUI_API AnnotationsGadget : public Gadget
 	unsigned layerMask() const override;
 	Imath::Box3f renderBound() const override;
 
-	private:
+private:
 
 	struct Annotations;
 
@@ -150,8 +150,12 @@ class GAFFERUI_API AnnotationsGadget : public Gadget
 	void schedulePlugValueSubstitutions( const Gaffer::Node *node, Annotations *annotations );
 	// These two functions do the actual work of calculating and applying
 	// substitutions.
-	std::unordered_map<IECore::InternedString, std::string> substitutedRenderText( const Gaffer::Node *node, const Annotations &annotations );
-	void applySubstitutedRenderText( const std::unordered_map<IECore::InternedString, std::string> &renderText, Annotations &annotations );
+	std::unordered_map<IECore::InternedString, std::string> substitutedRenderText(
+		const Gaffer::Node *node, const Annotations &annotations
+	);
+	void applySubstitutedRenderText(
+		const std::unordered_map<IECore::InternedString, std::string> &renderText, Annotations &annotations
+	);
 	// When we are hidden, we want to cancel all background tasks.
 	void visibilityChanged();
 
@@ -166,7 +170,11 @@ class GAFFERUI_API AnnotationsGadget : public Gadget
 
 	struct StandardAnnotation : public Gaffer::MetadataAlgo::Annotation
 	{
-		StandardAnnotation( const Gaffer::MetadataAlgo::Annotation &a, IECore::InternedString name ) : Annotation( a ), name( name ) {}
+		StandardAnnotation( const Gaffer::MetadataAlgo::Annotation &a, IECore::InternedString name )
+			: Annotation( a ),
+			  name( name )
+		{
+		}
 		IECore::InternedString name;
 		std::string renderText;
 	};

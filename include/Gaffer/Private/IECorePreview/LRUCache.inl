@@ -91,17 +91,14 @@ template<typename LRUCache>
 class Serial
 {
 
-	public:
+public:
 
 	using CacheEntry = typename LRUCache::CacheEntry;
 	using Key = typename LRUCache::KeyType;
 
 	struct Item
 	{
-		Item( const Key &key )
-			: key( key ), handleCount( 0 )
-		{
-		}
+		Item( const Key &key ) : key( key ), handleCount( 0 ) {}
 
 		Key key;
 		// multi_index_containers have const elements
@@ -118,18 +115,14 @@ class Serial
 		boost::multi_index::indexed_by<
 			// First index is equivalent to std::unordered_map,
 			// using Item::key as the key.
-			boost::multi_index::hashed_unique<
-				boost::multi_index::key<&Item::key>>,
+			boost::multi_index::hashed_unique<boost::multi_index::key<&Item::key>>,
 			// Second index is equivalent to std::list.
 			boost::multi_index::sequenced<>>>;
 
 	using MapIterator = typename MapAndList::iterator;
 	using List = typename MapAndList::template nth_index<1>::type;
 
-	Serial()
-		: currentCost( 0 )
-	{
-	}
+	Serial() : currentCost( 0 ) {}
 
 	// The Handle class provides controlled access to
 	// a CacheEntry stored within the policy. Handles
@@ -140,29 +133,17 @@ class Serial
 	struct Handle : private boost::noncopyable
 	{
 
-		Handle()
-			: m_inited( false )
-		{
-		}
+		Handle() : m_inited( false ) {}
 
-		~Handle()
-		{
-			release();
-		}
+		~Handle() { release(); }
 
 		// Read access to the underlying cache entry.
-		const CacheEntry &readable()
-		{
-			return m_it->cacheEntry;
-		}
+		const CacheEntry &readable() { return m_it->cacheEntry; }
 
 		// Write access to the underlying cache entry.
 		// Note that write access is not always permitted
 		// - see documentation for `isWritable()`.
-		CacheEntry &writable()
-		{
-			return m_it->cacheEntry;
-		}
+		CacheEntry &writable() { return m_it->cacheEntry; }
 
 		// Returns true if it is OK to call `writable()`. This is determined
 		// by the AcquireMode passed to `acquire()`.
@@ -191,7 +172,7 @@ class Serial
 			}
 		}
 
-		private:
+	private:
 
 		void init( MapIterator it )
 		{
@@ -277,7 +258,7 @@ class Serial
 
 	typename LRUCache::Cost currentCost;
 
-	private:
+private:
 
 	MapAndList m_mapAndList;
 };
@@ -289,7 +270,7 @@ template<typename LRUCache>
 class Parallel
 {
 
-	public:
+public:
 
 	using CacheEntry = typename LRUCache::CacheEntry;
 	using Key = typename LRUCache::KeyType;
@@ -330,8 +311,7 @@ class Parallel
 			//   key. This provides the possibility of creating a
 			//   prehashed key prior to taking a Bin lock, although
 			//   this is not implemented here yet.
-			boost::multi_index::hashed_unique<
-				boost::multi_index::key<&Item::key>>>>;
+			boost::multi_index::hashed_unique<boost::multi_index::key<&Item::key>>>>;
 
 	using MapIterator = typename Map::iterator;
 
@@ -362,19 +342,11 @@ class Parallel
 	struct Handle : private boost::noncopyable
 	{
 
-		Handle()
-			: m_item( nullptr ), m_writable( false )
-		{
-		}
+		Handle() : m_item( nullptr ), m_writable( false ) {}
 
-		~Handle()
-		{
-		}
+		~Handle() {}
 
-		const CacheEntry &readable()
-		{
-			return m_item->cacheEntry;
-		}
+		const CacheEntry &readable() { return m_item->cacheEntry; }
 
 		CacheEntry &writable()
 		{
@@ -382,10 +354,7 @@ class Parallel
 			return m_item->cacheEntry;
 		}
 
-		bool isWritable() const
-		{
-			return m_writable;
-		}
+		bool isWritable() const { return m_writable; }
 
 		template<typename F>
 		void execute( F &&f )
@@ -402,7 +371,7 @@ class Parallel
 			}
 		}
 
-		private:
+	private:
 
 		bool acquire( Bin &bin, const Key &key, AcquireMode mode, const IECore::Canceller *canceller )
 		{
@@ -596,7 +565,7 @@ class Parallel
 
 	AtomicCost currentCost;
 
-	private:
+private:
 
 	Bins m_bins;
 
@@ -634,7 +603,7 @@ template<typename LRUCache>
 class TaskParallel
 {
 
-	public:
+public:
 
 	using CacheEntry = typename LRUCache::CacheEntry;
 	using Key = typename LRUCache::KeyType;
@@ -675,8 +644,7 @@ class TaskParallel
 			//   key. This provides the possibility of creating a
 			//   prehashed key prior to taking a Bin lock, although
 			//   this is not implemented here yet.
-			boost::multi_index::hashed_unique<
-				boost::multi_index::key<&Item::key>>>>;
+			boost::multi_index::hashed_unique<boost::multi_index::key<&Item::key>>>>;
 
 	using MapIterator = typename Map::iterator;
 
@@ -707,19 +675,11 @@ class TaskParallel
 	struct Handle : private boost::noncopyable
 	{
 
-		Handle()
-			: m_item( nullptr ), m_spawnsTasks( false )
-		{
-		}
+		Handle() : m_item( nullptr ), m_spawnsTasks( false ) {}
 
-		~Handle()
-		{
-		}
+		~Handle() {}
 
-		const CacheEntry &readable()
-		{
-			return m_item->cacheEntry;
-		}
+		const CacheEntry &readable() { return m_item->cacheEntry; }
 
 		CacheEntry &writable()
 		{
@@ -727,10 +687,7 @@ class TaskParallel
 			return m_item->cacheEntry;
 		}
 
-		bool isWritable() const
-		{
-			return m_itemLock.isWriter();
-		}
+		bool isWritable() const { return m_itemLock.isWriter(); }
 
 		template<typename F>
 		void execute( F &&f )
@@ -762,7 +719,7 @@ class TaskParallel
 			}
 		}
 
-		private:
+	private:
 
 		bool acquire( Bin &bin, const Key &key, AcquireMode mode, bool spawnsTasks, const IECore::Canceller *canceller )
 		{
@@ -825,10 +782,7 @@ class TaskParallel
 
 				if( acquired )
 				{
-					if(
-						!m_itemLock.isWriter() &&
-						mode == Insert && it->cacheEntry.status() == LRUCache::Uncached
-					)
+					if( !m_itemLock.isWriter() && mode == Insert && it->cacheEntry.status() == LRUCache::Uncached )
 					{
 						// We found an old item that doesn't have a
 						// value. This can either be because it was
@@ -874,8 +828,7 @@ class TaskParallel
 			/// to do. `TaskMutex::ScopedLock::execute()` has significant
 			/// overhead, so we also want to avoid it if tasks won't
 			/// be spawned for a particular key.
-			mode == AcquireMode::Insert && spawnsTasks( key ),
-			canceller
+			mode == AcquireMode::Insert && spawnsTasks( key ), canceller
 		);
 	}
 
@@ -980,7 +933,7 @@ class TaskParallel
 
 	AtomicCost currentCost;
 
-	private:
+private:
 
 	Bins m_bins;
 
@@ -1004,13 +957,13 @@ class TaskParallel
 // =======================================================================
 
 template<typename Key, typename Value, template<typename> class Policy, typename GetterKey>
-LRUCache<Key, Value, Policy, GetterKey>::CacheEntry::CacheEntry()
-	: cost( 0 )
+LRUCache<Key, Value, Policy, GetterKey>::CacheEntry::CacheEntry() : cost( 0 )
 {
 }
 
 template<typename Key, typename Value, template<typename> class Policy, typename GetterKey>
-typename LRUCache<Key, Value, Policy, GetterKey>::Status LRUCache<Key, Value, Policy, GetterKey>::CacheEntry::status() const
+typename LRUCache<Key, Value, Policy, GetterKey>::Status LRUCache<
+	Key, Value, Policy, GetterKey>::CacheEntry::status() const
 {
 	return static_cast<Status>( state.which() );
 }
@@ -1019,8 +972,13 @@ typename LRUCache<Key, Value, Policy, GetterKey>::Status LRUCache<Key, Value, Po
 // =======================================================================
 
 template<typename Key, typename Value, template<typename> class Policy, typename GetterKey>
-LRUCache<Key, Value, Policy, GetterKey>::LRUCache( GetterFunction getter, Cost maxCost, RemovalCallback removalCallback, bool cacheErrors )
-	: m_getter( getter ), m_removalCallback( removalCallback ), m_maxCost( maxCost ), m_cacheErrors( cacheErrors )
+LRUCache<Key, Value, Policy, GetterKey>::LRUCache(
+	GetterFunction getter, Cost maxCost, RemovalCallback removalCallback, bool cacheErrors
+)
+	: m_getter( getter ),
+	  m_removalCallback( removalCallback ),
+	  m_maxCost( maxCost ),
+	  m_cacheErrors( cacheErrors )
 {
 }
 
@@ -1160,7 +1118,9 @@ bool LRUCache<Key, Value, Policy, GetterKey>::set( const Key &key, const Value &
 
 template<typename Key, typename Value, template<typename> class Policy, typename GetterKey>
 template<typename CostFunction>
-bool LRUCache<Key, Value, Policy, GetterKey>::setIfUncached( const Key &key, const Value &value, CostFunction &&costFunction )
+bool LRUCache<Key, Value, Policy, GetterKey>::setIfUncached(
+	const Key &key, const Value &value, CostFunction &&costFunction
+)
 {
 	typename Policy<LRUCache>::Handle handle;
 	m_policy.acquire( key, handle, LRUCachePolicy::Insert, /* canceller = */ nullptr );
@@ -1181,7 +1141,9 @@ bool LRUCache<Key, Value, Policy, GetterKey>::setIfUncached( const Key &key, con
 }
 
 template<typename Key, typename Value, template<typename> class Policy, typename GetterKey>
-bool LRUCache<Key, Value, Policy, GetterKey>::setInternal( const Key &key, CacheEntry &cacheEntry, const Value &value, Cost cost )
+bool LRUCache<Key, Value, Policy, GetterKey>::setInternal(
+	const Key &key, CacheEntry &cacheEntry, const Value &value, Cost cost
+)
 {
 	eraseInternal( key, cacheEntry );
 
@@ -1204,7 +1166,8 @@ bool LRUCache<Key, Value, Policy, GetterKey>::cached( const Key &key ) const
 	typename Policy<LRUCache>::Handle handle;
 	// Preferring const_cast over forcing all policies to implement
 	// a ConstHandle and const acquire() variant.
-	if( !const_cast<Policy<LRUCache> &>( m_policy ).acquire( key, handle, LRUCachePolicy::FindReadable, /* canceller = */ nullptr ) )
+	if( !const_cast<Policy<LRUCache> &>( m_policy )
+			 .acquire( key, handle, LRUCachePolicy::FindReadable, /* canceller = */ nullptr ) )
 	{
 		return false;
 	}

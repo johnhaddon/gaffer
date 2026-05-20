@@ -63,8 +63,7 @@ IE_CORE_DEFINERUNTIMETYPED( VolumeScatter );
 
 size_t VolumeScatter::g_firstPlugIndex = 0;
 
-VolumeScatter::VolumeScatter( const std::string &name )
-	: BranchCreator( name )
+VolumeScatter::VolumeScatter( const std::string &name ) : BranchCreator( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -74,9 +73,7 @@ VolumeScatter::VolumeScatter( const std::string &name )
 	addChild( new StringPlug( "pointType", Plug::In, "gl:point" ) );
 }
 
-VolumeScatter::~VolumeScatter()
-{
-}
+VolumeScatter::~VolumeScatter() {}
 
 Gaffer::StringPlug *VolumeScatter::namePlug()
 {
@@ -123,13 +120,17 @@ bool VolumeScatter::affectsBranchBound( const Gaffer::Plug *input ) const
 	return input == inPlug()->boundPlug();
 }
 
-void VolumeScatter::hashBranchBound( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void VolumeScatter::hashBranchBound(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	BranchCreator::hashBranchBound( sourcePath, branchPath, context, h );
 	h.append( inPlug()->boundHash( sourcePath ) );
 }
 
-Imath::Box3f VolumeScatter::computeBranchBound( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+Imath::Box3f VolumeScatter::computeBranchBound(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	// We could do a potentially more accurate bound by getting the bound for just the grid we're using from
 	// the vdb, but using the full bound from the vdb loader should be conservative, and it's rare that the grid
@@ -152,12 +153,16 @@ bool VolumeScatter::affectsBranchTransform( const Gaffer::Plug *input ) const
 	return false;
 }
 
-void VolumeScatter::hashBranchTransform( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void VolumeScatter::hashBranchTransform(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	BranchCreator::hashBranchTransform( sourcePath, branchPath, context, h );
 }
 
-Imath::M44f VolumeScatter::computeBranchTransform( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+Imath::M44f VolumeScatter::computeBranchTransform(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	return M44f();
 }
@@ -167,25 +172,28 @@ bool VolumeScatter::affectsBranchAttributes( const Gaffer::Plug *input ) const
 	return false;
 }
 
-void VolumeScatter::hashBranchAttributes( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void VolumeScatter::hashBranchAttributes(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	BranchCreator::hashBranchAttributes( sourcePath, branchPath, context, h );
 }
 
-IECore::ConstCompoundObjectPtr VolumeScatter::computeBranchAttributes( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+IECore::ConstCompoundObjectPtr VolumeScatter::computeBranchAttributes(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	return outPlug()->attributesPlug()->defaultValue();
 }
 
 bool VolumeScatter::affectsBranchObject( const Gaffer::Plug *input ) const
 {
-	return input == inPlug()->objectPlug() ||
-		input == gridPlug() ||
-		input == densityPlug() ||
-		input == pointTypePlug();
+	return input == inPlug()->objectPlug() || input == gridPlug() || input == densityPlug() || input == pointTypePlug();
 }
 
-void VolumeScatter::hashBranchObject( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void VolumeScatter::hashBranchObject(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	if( branchPath.size() == 1 )
 	{
@@ -206,17 +214,11 @@ namespace
 
 class PointsWriter
 {
-	public:
+public:
 
-	PointsWriter()
-		: pointsData( new IECore::V3fVectorData() ), points( pointsData->writable() )
-	{
-	}
+	PointsWriter() : pointsData( new IECore::V3fVectorData() ), points( pointsData->writable() ) {}
 
-	void add( const openvdb::Vec3R &pos )
-	{
-		points.emplace_back( pos.x(), pos.y(), pos.z() );
-	}
+	void add( const openvdb::Vec3R &pos ) { points.emplace_back( pos.x(), pos.y(), pos.z() ); }
 
 	IECore::V3fVectorDataPtr pointsData;
 	std::vector<Imath::V3f> &points;
@@ -224,7 +226,9 @@ class PointsWriter
 
 } // namespace
 
-IECore::ConstObjectPtr VolumeScatter::computeBranchObject( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+IECore::ConstObjectPtr VolumeScatter::computeBranchObject(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	if( branchPath.size() != 1 )
 	{
@@ -276,11 +280,8 @@ IECore::ConstObjectPtr VolumeScatter::computeBranchObject( const ScenePath &sour
 	// * support for level sets ( for every region neighbouring active voxels, if all adjacent voxels are under
 	//   threshold, we just generate points as usual, but if some adjacent voxels are over threshold, we
 	//   need to evaluate the interpolated value at each generated point to check if it is under threshold ).
-	using NonUniformScatter = openvdb::tools::NonUniformPointScatter<
-		PointsWriter, pcg32, Interrupter>;
-	NonUniformScatter densityPointScatter(
-		pointWriter, densityPlug()->getValue(), generator, spread, &interrupter
-	);
+	using NonUniformScatter = openvdb::tools::NonUniformPointScatter<PointsWriter, pcg32, Interrupter>;
+	NonUniformScatter densityPointScatter( pointWriter, densityPlug()->getValue(), generator, spread, &interrupter );
 
 	densityPointScatter( *floatGrid );
 
@@ -290,7 +291,9 @@ IECore::ConstObjectPtr VolumeScatter::computeBranchObject( const ScenePath &sour
 	}
 
 	IECoreScene::PointsPrimitivePtr result = new IECoreScene::PointsPrimitive( pointWriter.pointsData );
-	result->variables["type"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, new StringData( pointTypePlug()->getValue() ) );
+	result->variables["type"] = IECoreScene::PrimitiveVariable(
+		IECoreScene::PrimitiveVariable::Constant, new StringData( pointTypePlug()->getValue() )
+	);
 	return result;
 }
 
@@ -299,7 +302,9 @@ bool VolumeScatter::affectsBranchChildNames( const Gaffer::Plug *input ) const
 	return input == namePlug();
 }
 
-void VolumeScatter::hashBranchChildNames( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void VolumeScatter::hashBranchChildNames(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	if( branchPath.size() == 0 )
 	{
@@ -312,7 +317,9 @@ void VolumeScatter::hashBranchChildNames( const ScenePath &sourcePath, const Sce
 	}
 }
 
-IECore::ConstInternedStringVectorDataPtr VolumeScatter::computeBranchChildNames( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+IECore::ConstInternedStringVectorDataPtr VolumeScatter::computeBranchChildNames(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	if( branchPath.size() == 0 )
 	{

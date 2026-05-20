@@ -48,8 +48,7 @@ GAFFER_NODE_DEFINE_TYPE( ExternalProcedural );
 
 size_t ExternalProcedural::g_firstPlugIndex = 0;
 
-ExternalProcedural::ExternalProcedural( const std::string &name )
-	: ObjectSource( name, "procedural" )
+ExternalProcedural::ExternalProcedural( const std::string &name ) : ObjectSource( name, "procedural" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "fileName" ) );
@@ -57,9 +56,7 @@ ExternalProcedural::ExternalProcedural( const std::string &name )
 	addChild( new CompoundDataPlug( "parameters" ) );
 }
 
-ExternalProcedural::~ExternalProcedural()
-{
-}
+ExternalProcedural::~ExternalProcedural() {}
 
 Gaffer::StringPlug *ExternalProcedural::fileNamePlug()
 {
@@ -95,11 +92,7 @@ void ExternalProcedural::affects( const Gaffer::Plug *input, AffectedPlugsContai
 {
 	ObjectSource::affects( input, outputs );
 
-	if(
-		input == fileNamePlug() ||
-		boundPlug()->isAncestorOf( input ) ||
-		parametersPlug()->isAncestorOf( input )
-	)
+	if( input == fileNamePlug() || boundPlug()->isAncestorOf( input ) || parametersPlug()->isAncestorOf( input ) )
 	{
 		outputs.push_back( sourcePlug() );
 	}
@@ -114,7 +107,8 @@ void ExternalProcedural::hashSource( const Gaffer::Context *context, IECore::Mur
 
 IECore::ConstObjectPtr ExternalProcedural::computeSource( const Context *context ) const
 {
-	IECoreScene::ExternalProceduralPtr result = new IECoreScene::ExternalProcedural( fileNamePlug()->getValue(), boundPlug()->getValue() );
+	IECoreScene::ExternalProceduralPtr result =
+		new IECoreScene::ExternalProcedural( fileNamePlug()->getValue(), boundPlug()->getValue() );
 	parametersPlug()->fillCompoundData( result->parameters()->writable() );
 	return result;
 }

@@ -70,7 +70,9 @@ int colorIndex( const ValuePlug *plug )
 	return 0;
 }
 
-std::string channelName( const ValuePlug *outChannelPlug, const vector<string> &selectChannels, const vector<string> &channelNames )
+std::string channelName(
+	const ValuePlug *outChannelPlug, const vector<string> &selectChannels, const vector<string> &channelNames
+)
 {
 	int index = colorIndex( outChannelPlug );
 	if( selectChannels.size() <= (size_t)index )
@@ -96,8 +98,7 @@ GAFFER_NODE_DEFINE_TYPE( ImageStats );
 
 size_t ImageStats::g_firstPlugIndex = 0;
 
-ImageStats::ImageStats( const std::string &name )
-	: ComputeNode( name )
+ImageStats::ImageStats( const std::string &name ) : ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "in", Gaffer::Plug::In ) );
@@ -112,18 +113,25 @@ ImageStats::ImageStats( const std::string &name )
 	defaultChannels.push_back( "A" );
 	addChild( new StringVectorDataPlug( "channels", Plug::In, defaultChannelsData ) );
 
-	addChild( new IntPlug( "areaSource", Gaffer::Plug::In, ImageStats::Area, ImageStats::Area, ImageStats::DisplayWindow ) );
+	addChild(
+		new IntPlug( "areaSource", Gaffer::Plug::In, ImageStats::Area, ImageStats::Area, ImageStats::DisplayWindow )
+	);
 	addChild( new Box2iPlug( "area", Gaffer::Plug::In ) );
 	addChild( new Color4fPlug(
 		"average", Gaffer::Plug::Out, Imath::Color4f( 0, 0, 0, 1 ),
-		Imath::Color4f( -std::numeric_limits<float>::infinity() ), Imath::Color4f( std::numeric_limits<float>::infinity() )
+		Imath::Color4f( -std::numeric_limits<float>::infinity() ),
+		Imath::Color4f( std::numeric_limits<float>::infinity() )
 	) );
-	addChild(
-		new Color4fPlug( "min", Gaffer::Plug::Out, Imath::Color4f( 0, 0, 0, 1 ), Imath::Color4f( -std::numeric_limits<float>::infinity() ), Imath::Color4f( std::numeric_limits<float>::infinity() ) )
-	);
-	addChild(
-		new Color4fPlug( "max", Gaffer::Plug::Out, Imath::Color4f( 0, 0, 0, 1 ), Imath::Color4f( -std::numeric_limits<float>::infinity() ), Imath::Color4f( std::numeric_limits<float>::infinity() ) )
-	);
+	addChild( new Color4fPlug(
+		"min", Gaffer::Plug::Out, Imath::Color4f( 0, 0, 0, 1 ),
+		Imath::Color4f( -std::numeric_limits<float>::infinity() ),
+		Imath::Color4f( std::numeric_limits<float>::infinity() )
+	) );
+	addChild( new Color4fPlug(
+		"max", Gaffer::Plug::Out, Imath::Color4f( 0, 0, 0, 1 ),
+		Imath::Color4f( -std::numeric_limits<float>::infinity() ),
+		Imath::Color4f( std::numeric_limits<float>::infinity() )
+	) );
 
 	addChild( new ObjectPlug( "__tileStats", Gaffer::Plug::Out, new IECore::V3dData() ) );
 	addChild( new ObjectPlug( "__allStats", Gaffer::Plug::Out, new IECore::V3dData() ) );
@@ -138,9 +146,7 @@ ImageStats::ImageStats( const std::string &name )
 	flattenedInPlug()->setInput( deepStateNode->outPlug() );
 }
 
-ImageStats::~ImageStats()
-{
-}
+ImageStats::~ImageStats() {}
 
 ImagePlug *ImageStats::inPlug()
 {
@@ -257,39 +263,23 @@ void ImageStats::affects( const Gaffer::Plug *input, AffectedPlugsContainer &out
 {
 	ComputeNode::affects( input, outputs );
 
-	if(
-		input == viewPlug() ||
-		input == flattenedInPlug()->viewNamesPlug() ||
-		input == flattenedInPlug()->dataWindowPlug() ||
-		input == flattenedInPlug()->formatPlug() ||
-		input == flattenedInPlug()->channelDataPlug() ||
-		input == areaSourcePlug() ||
-		areaPlug()->isAncestorOf( input )
-	)
+	if( input == viewPlug() || input == flattenedInPlug()->viewNamesPlug() ||
+		input == flattenedInPlug()->dataWindowPlug() || input == flattenedInPlug()->formatPlug() ||
+		input == flattenedInPlug()->channelDataPlug() || input == areaSourcePlug() ||
+		areaPlug()->isAncestorOf( input ) )
 	{
 		outputs.push_back( tileStatsPlug() );
 	}
 
-	if(
-		input == viewPlug() ||
-		input == flattenedInPlug()->viewNamesPlug() ||
-		input == tileStatsPlug() ||
-		input == flattenedInPlug()->dataWindowPlug() ||
-		input == flattenedInPlug()->formatPlug() ||
-		input == areaSourcePlug() ||
-		areaPlug()->isAncestorOf( input )
-	)
+	if( input == viewPlug() || input == flattenedInPlug()->viewNamesPlug() || input == tileStatsPlug() ||
+		input == flattenedInPlug()->dataWindowPlug() || input == flattenedInPlug()->formatPlug() ||
+		input == areaSourcePlug() || areaPlug()->isAncestorOf( input ) )
 	{
 		outputs.push_back( allStatsPlug() );
 	}
 
-	if(
-		input == viewPlug() ||
-		input == flattenedInPlug()->viewNamesPlug() ||
-		input == allStatsPlug() ||
-		input == flattenedInPlug()->channelNamesPlug() ||
-		input == channelsPlug()
-	)
+	if( input == viewPlug() || input == flattenedInPlug()->viewNamesPlug() || input == allStatsPlug() ||
+		input == flattenedInPlug()->channelNamesPlug() || input == channelsPlug() )
 	{
 		for( unsigned int i = 0; i < 4; ++i )
 		{
@@ -391,15 +381,12 @@ void ImageStats::hash( const ValuePlug *output, const Context *context, IECore::
 		ImageAlgo::parallelGatherTiles(
 			flattenedInPlug(),
 			// Tile
-			[this]( const ImagePlug *imageP, const Imath::V2i &tileOrigin ) {
-				return tileStatsPlug()->hash();
-			},
+			[this]( const ImagePlug *imageP, const Imath::V2i &tileOrigin ) { return tileStatsPlug()->hash(); },
 			// Gather
 			[&h]( const ImagePlug *imageP, const Imath::V2i &tileOrigin, const IECore::MurmurHash &tileHash ) {
 				h.append( tileHash );
 			},
-			boundsIntersection,
-			ImageAlgo::TopToBottom
+			boundsIntersection, ImageAlgo::TopToBottom
 		);
 		h.append( areaMult );
 	}
@@ -417,11 +404,7 @@ void ImageStats::compute( ValuePlug *output, const Context *context ) const
 	viewScope.setViewNameChecked( &view, inPlug()->viewNames().get() );
 
 	const Plug *parent = output->parent<Plug>();
-	if(
-		parent == minPlug() ||
-		parent == maxPlug() ||
-		parent == averagePlug()
-	)
+	if( parent == minPlug() || parent == maxPlug() || parent == averagePlug() )
 	{
 		IECore::ConstStringVectorDataPtr channelsData = channelsPlug()->getValue();
 		IECore::ConstStringVectorDataPtr channelNamesData = inPlug()->channelNamesPlug()->getValue();
@@ -529,8 +512,7 @@ void ImageStats::compute( ValuePlug *output, const Context *context ) const
 				max = std::max( float( v[1] ), max );
 				sum += v[2];
 			},
-			boundsIntersection,
-			ImageAlgo::TopToBottom
+			boundsIntersection, ImageAlgo::TopToBottom
 		);
 		float average = sum / areaMult;
 		static_cast<ObjectPlug *>( output )->setValue( new IECore::V3dData( Imath::V3d( min, max, average ) ) );

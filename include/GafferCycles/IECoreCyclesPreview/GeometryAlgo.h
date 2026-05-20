@@ -62,23 +62,37 @@ namespace GeometryAlgo
 {
 
 /// Converts animated samples of an `IECore::Object` into an equivalent `ccl::Geometry` object.
-IECORECYCLES_API ccl::Geometry *convert( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times, ccl::Scene *scene );
+IECORECYCLES_API ccl::Geometry *convert(
+	const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times,
+	ccl::Scene *scene
+);
 
 /// Converts a primitive variable to a `ccl::Attribute` inside of a `ccl::AttributeSet`.
-IECORECYCLES_API void convertPrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, ccl::AttributeSet &attributes, ccl::AttributeElement attributeElement );
+IECORECYCLES_API void convertPrimitiveVariable(
+	const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, ccl::AttributeSet &attributes,
+	ccl::AttributeElement attributeElement
+);
 
 /// Converts motion for "P" primitive variable.
-IECORECYCLES_API void convertMotion( const IECoreScenePreview::Renderer::Samples<const IECoreScene::Primitive *> &samples, size_t primarySampleIndex, ccl::Geometry &geometry );
+IECORECYCLES_API void convertMotion(
+	const IECoreScenePreview::Renderer::Samples<const IECoreScene::Primitive *> &samples, size_t primarySampleIndex,
+	ccl::Geometry &geometry
+);
 
 /// Converts voxel grids from a VDB object.
-IECORECYCLES_API void convertVoxelGrids( const IECoreVDB::VDBObject *vdbObject, ccl::Volume *geometry, ccl::Scene *scene, int precision, float clipping );
+IECORECYCLES_API void convertVoxelGrids(
+	const IECoreVDB::VDBObject *vdbObject, ccl::Volume *geometry, ccl::Scene *scene, int precision, float clipping
+);
 
 /// Signature of a function which can convert a series of `IECore::Object`
 /// samples into a moving `ccl:Geometry` object. The `primarySampleIndex`
 /// argument indicates which sample should be used for the main conversion, and
 /// the converter should defer to `convertMotion()` to convert the positions of
 /// the remaining motion samples to ATTR_STD_MOTION_VERTEX_POSITION.
-using Converter = std::function<ccl::Geometry *( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times, size_t primarySampleIndex, ccl::Scene *scene )>;
+using Converter = std::function<ccl::Geometry *(
+	const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times,
+	size_t primarySampleIndex, ccl::Scene *scene
+)>;
 
 /// Registers a converter for a specific type.
 /// Use the ConverterDescription utility class in preference to
@@ -91,18 +105,25 @@ template<typename T>
 class ConverterDescription
 {
 
-	public:
+public:
 
 	/// Type-specific conversion function.
 	using TypedSamples = IECoreScenePreview::Renderer::Samples<const T *>;
-	using TypedConverter = ccl::Geometry *(*)( const TypedSamples &, const IECoreScenePreview::Renderer::SampleTimes &, size_t, ccl::Scene * );
+	using TypedConverter = ccl::Geometry *(*)( const TypedSamples &, const IECoreScenePreview::Renderer::SampleTimes &,
+											   size_t, ccl::Scene * );
 
 	ConverterDescription( TypedConverter converter )
 	{
 		registerConverter(
 			T::staticTypeId(),
-			[converter]( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times, size_t primarySampleIndex, ccl::Scene *scene ) {
-				return converter( IECoreScenePreview::Renderer::staticSamplesCast<const T *>( samples ), times, primarySampleIndex, scene );
+			[converter](
+				const IECoreScenePreview::Renderer::ObjectSamples &samples,
+				const IECoreScenePreview::Renderer::SampleTimes &times, size_t primarySampleIndex, ccl::Scene *scene
+			) {
+				return converter(
+					IECoreScenePreview::Renderer::staticSamplesCast<const T *>( samples ), times, primarySampleIndex,
+					scene
+				);
 			}
 		);
 	}

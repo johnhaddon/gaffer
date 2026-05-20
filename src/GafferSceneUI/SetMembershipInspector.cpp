@@ -72,15 +72,15 @@ struct HistoryCacheKey
 {
 	HistoryCacheKey() {};
 	HistoryCacheKey( const ValuePlug *plug )
-		: plug( plug ), contextHash( Context::current()->hash() ), dirtyCount( plug->dirtyCount() )
+		: plug( plug ),
+		  contextHash( Context::current()->hash() ),
+		  dirtyCount( plug->dirtyCount() )
 	{
 	}
 
 	bool operator == ( const HistoryCacheKey &rhs ) const
 	{
-		return plug == rhs.plug &&
-			contextHash == rhs.contextHash &&
-			dirtyCount == rhs.dirtyCount;
+		return plug == rhs.plug && contextHash == rhs.contextHash && dirtyCount == rhs.dirtyCount;
 	}
 
 	const ValuePlug *plug;
@@ -116,9 +116,7 @@ HistoryCache g_historyCache(
 		// owners. Destroying plugs can trigger dirty propagation, so as a
 		// precaution we destroy the history on the UI thread, where this would
 		// be OK.
-		ParallelAlgo::callOnUIThread(
-			[history]() {}
-		);
+		ParallelAlgo::callOnUIThread( [history]() {} );
 	}
 
 );
@@ -138,7 +136,8 @@ bool canEdit( const Gaffer::Plug *plug, const IECore::Object *value, std::string
 			return true;
 		}
 
-		if( runTimeCast<const Gaffer::ValuePlug>( plug ) && plug->parent<Spreadsheet::RowPlug>() && plug->ancestor<EditScope>() )
+		if( runTimeCast<const Gaffer::ValuePlug>( plug ) && plug->parent<Spreadsheet::RowPlug>() &&
+			plug->ancestor<EditScope>() )
 		{
 			return true;
 		}
@@ -158,7 +157,10 @@ bool canEdit( const Gaffer::Plug *plug, const IECore::Object *value, std::string
 	return false;
 }
 
-bool editSetMembership( Gaffer::Plug *plug, const std::string &setName, const ScenePlug::ScenePath &path, EditScopeAlgo::SetMembership setMembership )
+bool editSetMembership(
+	Gaffer::Plug *plug, const std::string &setName, const ScenePlug::ScenePath &path,
+	EditScopeAlgo::SetMembership setMembership
+)
 {
 	if( auto objectNode = runTimeCast<ObjectSource>( plug->node() ) )
 	{
@@ -190,12 +192,7 @@ bool editSetMembership( Gaffer::Plug *plug, const std::string &setName, const Sc
 		{
 			PathMatcher m;
 			m.addPath( path );
-			EditScopeAlgo::setSetMembership(
-				editScope,
-				m,
-				setName,
-				setMembership
-			);
+			EditScopeAlgo::setSetMembership( editScope, m, setName, setMembership );
 
 			return true;
 		}
@@ -226,9 +223,7 @@ std::string nonDisableableReason( const Gaffer::Plug *plug, const std::string &s
 } // namespace
 
 SetMembershipInspector::SetMembershipInspector(
-	const GafferScene::ScenePlugPtr &scene,
-	const Gaffer::PlugPtr &editScope,
-	IECore::InternedString setName
+	const GafferScene::ScenePlugPtr &scene, const Gaffer::PlugPtr &editScope, IECore::InternedString setName
 )
 	: Inspector( { scene->setPlug() }, "setMembership", setName.string(), editScope ),
 	  m_scene( scene ),
@@ -258,7 +253,9 @@ IECore::ConstObjectPtr SetMembershipInspector::value( const GafferScene::SceneAl
 	return matchResult & IECore::PathMatcher::Result::ExactMatch ? new BoolData( true ) : nullptr;
 }
 
-IECore::ConstObjectPtr SetMembershipInspector::fallbackValue( const GafferScene::SceneAlgo::History *history, std::string &description ) const
+IECore::ConstObjectPtr SetMembershipInspector::fallbackValue(
+	const GafferScene::SceneAlgo::History *history, std::string &description
+) const
 {
 	const auto &path = history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
 	ConstPathMatcherDataPtr setMembers = history->scene->set( m_setName );
@@ -289,7 +286,9 @@ IECore::ConstObjectPtr SetMembershipInspector::fallbackValue( const GafferScene:
 	return new BoolData( ancestorMatch );
 }
 
-Gaffer::ValuePlugPtr SetMembershipInspector::source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const
+Gaffer::ValuePlugPtr SetMembershipInspector::source(
+	const GafferScene::SceneAlgo::History *history, std::string &editWarning
+) const
 {
 	auto sceneNode = runTimeCast<SceneNode>( history->scene->node() );
 	if( !sceneNode || history->scene != sceneNode->outPlug() || !sceneNode->enabledPlug()->getValue() )
@@ -339,12 +338,12 @@ Gaffer::ValuePlugPtr SetMembershipInspector::source( const GafferScene::SceneAlg
 	return nullptr;
 }
 
-Inspector::AcquireEditFunctionOrFailure SetMembershipInspector::acquireEditFunction( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history ) const
+Inspector::AcquireEditFunctionOrFailure SetMembershipInspector::acquireEditFunction(
+	Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history
+) const
 {
 	const GraphComponent *readOnlyReason = EditScopeAlgo::setMembershipReadOnlyReason(
-		editScope,
-		m_setName.string(),
-		EditScopeAlgo::SetMembership::Added
+		editScope, m_setName.string(), EditScopeAlgo::SetMembership::Added
 	);
 
 	if( readOnlyReason )
@@ -354,37 +353,45 @@ Inspector::AcquireEditFunctionOrFailure SetMembershipInspector::acquireEditFunct
 	else
 	{
 		InternedString setName = m_setName;
-		return [editScope = editScope,
-				setName,
-				context = history->context]( bool createIfNecessary ) {
+		return [editScope = editScope, setName, context = history->context]( bool createIfNecessary ) {
 			Context::Scope scope( context.get() );
 			return EditScopeAlgo::acquireSetEdits( editScope, setName, createIfNecessary );
 		};
 	}
 }
 
-Inspector::CanEditFunction SetMembershipInspector::canEditFunction( const GafferScene::SceneAlgo::History *history ) const
+Inspector::CanEditFunction SetMembershipInspector::canEditFunction(
+	const GafferScene::SceneAlgo::History *history
+) const
 {
-	return []( const Gaffer::Plug *plug, const IECore::Object *value, std::string &failureReason ) { return ::canEdit( plug, value, failureReason ); };
+	return []( const Gaffer::Plug *plug, const IECore::Object *value, std::string &failureReason ) {
+		return ::canEdit( plug, value, failureReason );
+	};
 }
 
 Inspector::EditFunction SetMembershipInspector::editFunction( const GafferScene::SceneAlgo::History *history ) const
 {
 	const auto path = history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
-	return [setName = m_setName,
-			path]( Gaffer::Plug *plug, const IECore::Object *value ) {
+	return [setName = m_setName, path]( Gaffer::Plug *plug, const IECore::Object *value ) {
 		if( const auto boolValue = runTimeCast<const IECore::BoolData>( value ) )
 		{
-			return ::editSetMembership( plug, setName.string(), path, boolValue->readable() ? EditScopeAlgo::SetMembership::Added : EditScopeAlgo::SetMembership::Removed );
+			return ::editSetMembership(
+				plug, setName.string(), path,
+				boolValue->readable() ? EditScopeAlgo::SetMembership::Added : EditScopeAlgo::SetMembership::Removed
+			);
 		}
 		else
 		{
-			throw IECore::Exception( fmt::format( "Cannot edit. Data of type \"{}\" is not compatible.", value->typeName() ) );
+			throw IECore::Exception(
+				fmt::format( "Cannot edit. Data of type \"{}\" is not compatible.", value->typeName() )
+			);
 		}
 	};
 }
 
-Inspector::DisableEditFunctionOrFailure SetMembershipInspector::disableEditFunction( Gaffer::ValuePlug *plug, const GafferScene::SceneAlgo::History *history ) const
+Inspector::DisableEditFunctionOrFailure SetMembershipInspector::disableEditFunction(
+	Gaffer::ValuePlug *plug, const GafferScene::SceneAlgo::History *history
+) const
 {
 	const std::string nonDisableableReason = ::nonDisableableReason( plug, m_setName );
 
@@ -394,8 +401,7 @@ Inspector::DisableEditFunctionOrFailure SetMembershipInspector::disableEditFunct
 	}
 	else
 	{
-		return [plug = PlugPtr( plug ),
-				setName = m_setName,
+		return [plug = PlugPtr( plug ), setName = m_setName,
 				path = history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName )]() {
 			return ::editSetMembership( plug.get(), setName.string(), path, EditScopeAlgo::SetMembership::Unchanged );
 		};

@@ -64,7 +64,9 @@ struct MatchesData : public IECore::Data
 	using DescendantMatches = vector<DescendantMatch>;
 
 	MatchesData( const ConstStringVectorDataPtr &matches, DescendantMatches &&descendantMatches, bool inherit )
-		: matches( matches ), descendantMatches( descendantMatches ), inherit( inherit )
+		: matches( matches ),
+		  descendantMatches( descendantMatches ),
+		  inherit( inherit )
 	{
 	}
 
@@ -84,12 +86,12 @@ struct MatchesData : public IECore::Data
 IE_CORE_DECLAREPTR( MatchesData );
 
 const ConstStringVectorDataPtr g_emptyStringVectorData = new StringVectorData;
-const ConstMatchesDataPtr g_emptyMatches = new MatchesData( g_emptyStringVectorData, MatchesData::DescendantMatches(), false );
+const ConstMatchesDataPtr g_emptyMatches =
+	new MatchesData( g_emptyStringVectorData, MatchesData::DescendantMatches(), false );
 
 struct ParentScope : public Context::EditableScope
 {
-	ParentScope( const Context *context, const ScenePlug::ScenePath &path )
-		: Context::EditableScope( context )
+	ParentScope( const Context *context, const ScenePlug::ScenePath &path ) : Context::EditableScope( context )
 	{
 		if( path.size() )
 		{
@@ -102,7 +104,7 @@ struct ParentScope : public Context::EditableScope
 		}
 	}
 
-	private:
+private:
 
 	ScenePlug::ScenePath m_parentPath;
 };
@@ -110,9 +112,7 @@ struct ParentScope : public Context::EditableScope
 vector<InternedString> matchingSetNames( const ScenePlug *scene, const std::string &sets )
 {
 	ConstInternedStringVectorDataPtr sceneSetNames = scene->setNames();
-	unordered_set<InternedString> availableSets(
-		sceneSetNames->readable().begin(), sceneSetNames->readable().end()
-	);
+	unordered_set<InternedString> availableSets( sceneSetNames->readable().begin(), sceneSetNames->readable().end() );
 
 	vector<InternedString> setTokens;
 	IECore::StringAlgo::tokenize( sets, ' ', setTokens );
@@ -145,9 +145,7 @@ vector<InternedString> matchingSetNames( const ScenePlug *scene, const std::stri
 			}
 			std::sort(
 				result.begin() + firstAdded, result.end(),
-				[]( const InternedString &a, const InternedString &b ) {
-					return a.string() < b.string();
-				}
+				[]( const InternedString &a, const InternedString &b ) { return a.string() < b.string(); }
 			);
 		}
 	}
@@ -165,8 +163,7 @@ size_t SetQuery::g_firstPlugIndex = 0;
 
 GAFFER_NODE_DEFINE_TYPE( SetQuery )
 
-SetQuery::SetQuery( const std::string &name )
-	: ComputeNode( name )
+SetQuery::SetQuery( const std::string &name ) : ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "scene" ) );
@@ -178,9 +175,7 @@ SetQuery::SetQuery( const std::string &name )
 	addChild( new ObjectPlug( "__matchesInternal", Plug::Out, NullObject::defaultNullObject() ) );
 }
 
-SetQuery::~SetQuery()
-{
-}
+SetQuery::~SetQuery() {}
 
 ScenePlug *SetQuery::scenePlug()
 {
@@ -339,7 +334,9 @@ void SetQuery::compute( Gaffer::ValuePlug *output, const Gaffer::Context *contex
 			auto locationPath = ScenePlug::stringToPath( location );
 			ScenePlug::PathScope pathScope( context, &locationPath );
 			auto matchesData = boost::static_pointer_cast<const MatchesData>( matchesInternalPlug()->getValue() );
-			static_cast<StringPlug *>( output )->setValue( matchesData->matches->readable().size() ? matchesData->matches->readable().front() : "" );
+			static_cast<StringPlug *>( output )->setValue(
+				matchesData->matches->readable().size() ? matchesData->matches->readable().front() : ""
+			);
 		}
 		else
 		{
@@ -368,9 +365,7 @@ Gaffer::ValuePlug::CachePolicy SetQuery::computeCachePolicy( const ValuePlug *ou
 
 bool SetQuery::affectsMatchesInternal( const Gaffer::Plug *input ) const
 {
-	return input == scenePlug()->setNamesPlug() ||
-		input == setsPlug() ||
-		input == scenePlug()->setPlug() ||
+	return input == scenePlug()->setNamesPlug() || input == setsPlug() || input == scenePlug()->setPlug() ||
 		input == inheritPlug();
 }
 
@@ -416,18 +411,15 @@ IECore::ConstObjectPtr SetQuery::computeMatchesInternal( const Gaffer::Context *
 		{
 			descendantMatches.push_back( { setName, /* inherited = */ false } );
 		}
-		return new MatchesData(
-			g_emptyStringVectorData,
-			std::move( descendantMatches ),
-			inheritPlug()->getValue()
-		);
+		return new MatchesData( g_emptyStringVectorData, std::move( descendantMatches ), inheritPlug()->getValue() );
 	}
 	else
 	{
 		// Recurse to retrieve MatchesData from parent.
 
 		ParentScope scope( context, *path );
-		ConstMatchesDataPtr parentMatches = boost::static_pointer_cast<const MatchesData>( matchesInternalPlug()->getValue() );
+		ConstMatchesDataPtr parentMatches =
+			boost::static_pointer_cast<const MatchesData>( matchesInternalPlug()->getValue() );
 
 		// Optimisation for common cases, where we can reuse previous results
 		// because there are no additional matches at this location.
@@ -470,7 +462,9 @@ IECore::ConstObjectPtr SetQuery::computeMatchesInternal( const Gaffer::Context *
 			}
 		}
 
-		if( std::all_of( descendantMatches.begin(), descendantMatches.end(), []( const auto &m ) { return m.inherited; } ) )
+		if( std::all_of( descendantMatches.begin(), descendantMatches.end(), []( const auto &m ) {
+				return m.inherited;
+			} ) )
 		{
 			// All descendant matches are inherited. Clear them to trigger
 			// optimisation where this MatchesData is reused for children.

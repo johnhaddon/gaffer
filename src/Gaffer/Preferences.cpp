@@ -41,14 +41,9 @@ using namespace Gaffer;
 
 GAFFER_NODE_DEFINE_TYPE( Preferences );
 
-Preferences::Preferences( const std::string &name )
-	: Node( name )
-{
-}
+Preferences::Preferences( const std::string &name ) : Node( name ) {}
 
-Preferences::~Preferences()
-{
-}
+Preferences::~Preferences() {}
 
 bool Preferences::acceptsChild( const GraphComponent *potentialChild ) const
 {

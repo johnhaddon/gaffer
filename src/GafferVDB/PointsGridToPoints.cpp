@@ -190,132 +190,173 @@ struct Functions
 
 const std::map<std::string, Functions> converters = {
 	// scalar numeric types
-	{
-		openvdb::typeNameAsString<half>(),
-		Functions(
-			[]( size_t size ) -> IECore::DataPtr { return createArray<half>( size ); },
-			[]( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<half, half>( destArray, array, leafIter ); }
-		) },
+	{ openvdb::typeNameAsString<half>(),
+	  Functions(
+		  []( size_t size ) -> IECore::DataPtr { return createArray<half>( size ); },
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<half, half>( destArray, array, leafIter );
+		  }
+	  ) },
 	{ openvdb::typeNameAsString<float>(),
 	  Functions(
 		  []( size_t size ) -> IECore::DataPtr { return createArray<float>( size ); },
-		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<float, float>( destArray, array, leafIter ); }
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<float, float>( destArray, array, leafIter );
+		  }
 	  ) },
 	{ openvdb::typeNameAsString<double>(),
 	  Functions(
 		  []( size_t size ) -> IECore::DataPtr { return createArray<double>( size ); },
-		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<double, double>( destArray, array, leafIter ); }
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<double, double>( destArray, array, leafIter );
+		  }
 	  ) },
 	{ openvdb::typeNameAsString<uint8_t>(),
 	  Functions(
 		  []( size_t size ) -> IECore::DataPtr { return createArray<uint8_t>( size ); },
-		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<uint8_t, uint8_t>( destArray, array, leafIter ); }
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<uint8_t, uint8_t>( destArray, array, leafIter );
+		  }
 	  ) },
 	{ openvdb::typeNameAsString<uint16_t>(),
 	  Functions(
 		  []( size_t size ) -> IECore::DataPtr { return createArray<uint16_t>( size ); },
-		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<uint16_t, uint16_t>( destArray, array, leafIter ); }
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<uint16_t, uint16_t>( destArray, array, leafIter );
+		  }
 	  ) },
 	{ openvdb::typeNameAsString<uint32_t>(),
 	  Functions(
 		  []( size_t size ) -> IECore::DataPtr { return createArray<uint32_t>( size ); },
-		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<uint32_t, uint32_t>( destArray, array, leafIter ); }
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<uint32_t, uint32_t>( destArray, array, leafIter );
+		  }
 	  ) },
 	// todo check this function
-	{
-		openvdb::typeNameAsString<uint8_t>(),
-		Functions(
-			[]( size_t size ) -> IECore::DataPtr { return createArray<uint8_t>( size ); },
-			[]( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<uint8_t, int8_t>( destArray, array, leafIter ); }
-		) },
+	{ openvdb::typeNameAsString<uint8_t>(),
+	  Functions(
+		  []( size_t size ) -> IECore::DataPtr { return createArray<uint8_t>( size ); },
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<uint8_t, int8_t>( destArray, array, leafIter );
+		  }
+	  ) },
 	{ openvdb::typeNameAsString<int16_t>(),
 	  Functions(
 		  []( size_t size ) -> IECore::DataPtr { return createArray<int16_t>( size ); },
-		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<int16_t, int16_t>( destArray, array, leafIter ); }
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<int16_t, int16_t>( destArray, array, leafIter );
+		  }
 	  ) },
 	{ openvdb::typeNameAsString<int32_t>(),
 	  Functions(
 		  []( size_t size ) -> IECore::DataPtr { return createArray<int32_t>( size ); },
-		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<int32_t, int32_t>( destArray, array, leafIter ); }
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<int32_t, int32_t>( destArray, array, leafIter );
+		  }
 	  ) },
 
 	// Vec2 int, single, double
-	{
-		openvdb::typeNameAsString<openvdb::Vec2i>(),
-		Functions(
-			[]( size_t size ) -> IECore::DataPtr { return createArray<Imath::V2i, IECore::GeometricTypedData>( size ); },
-			[]( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<Imath::V2i, openvdb::Vec2i, IECore::GeometricTypedData>( destArray, array, leafIter ); }
-		) },
+	{ openvdb::typeNameAsString<openvdb::Vec2i>(),
+	  Functions(
+		  []( size_t size ) -> IECore::DataPtr { return createArray<Imath::V2i, IECore::GeometricTypedData>( size ); },
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<Imath::V2i, openvdb::Vec2i, IECore::GeometricTypedData>( destArray, array, leafIter );
+		  }
+	  ) },
 	{ openvdb::typeNameAsString<openvdb::Vec2s>(),
 	  Functions(
 		  []( size_t size ) -> IECore::DataPtr { return createArray<Imath::V2f, IECore::GeometricTypedData>( size ); },
-		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<Imath::V2f, openvdb::Vec2s, IECore::GeometricTypedData>( destArray, array, leafIter ); }
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<Imath::V2f, openvdb::Vec2s, IECore::GeometricTypedData>( destArray, array, leafIter );
+		  }
 	  ) },
 	{ openvdb::typeNameAsString<openvdb::Vec2d>(),
 	  Functions(
 		  []( size_t size ) -> IECore::DataPtr { return createArray<Imath::V2d, IECore::GeometricTypedData>( size ); },
-		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<Imath::V2d, openvdb::Vec2d, IECore::GeometricTypedData>( destArray, array, leafIter ); }
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<Imath::V2d, openvdb::Vec2d, IECore::GeometricTypedData>( destArray, array, leafIter );
+		  }
 	  ) },
 	// Vec3 u8, 16, int, single, double
-	{
-		openvdb::typeNameAsString<openvdb::Vec3U8>(),
-		Functions(
-			[]( size_t size ) -> IECore::DataPtr { return createArray<Imath::V3i, IECore::GeometricTypedData>( size ); },
-			[]( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<Imath::V3i, openvdb::Vec3U8, IECore::GeometricTypedData>( destArray, array, leafIter ); }
-		) },
+	{ openvdb::typeNameAsString<openvdb::Vec3U8>(),
+	  Functions(
+		  []( size_t size ) -> IECore::DataPtr { return createArray<Imath::V3i, IECore::GeometricTypedData>( size ); },
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<Imath::V3i, openvdb::Vec3U8, IECore::GeometricTypedData>( destArray, array, leafIter );
+		  }
+	  ) },
 	{ openvdb::typeNameAsString<openvdb::Vec3U16>(),
 	  Functions(
 		  []( size_t size ) -> IECore::DataPtr { return createArray<Imath::V3i, IECore::GeometricTypedData>( size ); },
-		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<Imath::V3i, openvdb::Vec3U16, IECore::GeometricTypedData>( destArray, array, leafIter ); }
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<Imath::V3i, openvdb::Vec3U16, IECore::GeometricTypedData>( destArray, array, leafIter );
+		  }
 	  ) },
 	{ openvdb::typeNameAsString<openvdb::Vec3i>(),
 	  Functions(
 		  []( size_t size ) -> IECore::DataPtr { return createArray<Imath::V3i, IECore::GeometricTypedData>( size ); },
-		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<Imath::V3i, openvdb::Vec3i, IECore::GeometricTypedData>( destArray, array, leafIter ); }
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<Imath::V3i, openvdb::Vec3i, IECore::GeometricTypedData>( destArray, array, leafIter );
+		  }
 	  ) },
 	{ openvdb::typeNameAsString<openvdb::Vec3s>(),
 	  Functions(
 		  []( size_t size ) -> IECore::DataPtr { return createArray<Imath::V3f, IECore::GeometricTypedData>( size ); },
-		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<Imath::V3f, openvdb::Vec3s, IECore::GeometricTypedData>( destArray, array, leafIter ); }
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<Imath::V3f, openvdb::Vec3s, IECore::GeometricTypedData>( destArray, array, leafIter );
+		  }
 	  ) },
 	{ openvdb::typeNameAsString<openvdb::Vec3d>(),
 	  Functions(
 		  []( size_t size ) -> IECore::DataPtr { return createArray<Imath::V3d, IECore::GeometricTypedData>( size ); },
-		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<Imath::V3d, openvdb::Vec3d, IECore::GeometricTypedData>( destArray, array, leafIter ); }
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<Imath::V3d, openvdb::Vec3d, IECore::GeometricTypedData>( destArray, array, leafIter );
+		  }
 	  ) },
 	{ openvdb::typeNameAsString<std::string>(),
 	  Functions(
 		  []( size_t size ) -> IECore::DataPtr { return createArray<std::string>( size ); },
-		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<std::string, std::string>( destArray, array, leafIter ); }
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<std::string, std::string>( destArray, array, leafIter );
+		  }
 	  ) },
 	// matrix conversion - single & double
-	{
-		openvdb::typeNameAsString<openvdb::Mat4s>(),
-		Functions(
-			[]( size_t size ) -> IECore::DataPtr { return createArray<Imath::M44f>( size ); },
-			[]( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<Imath::M44f, openvdb::Mat4s>( destArray, array, leafIter ); }
-		) },
+	{ openvdb::typeNameAsString<openvdb::Mat4s>(),
+	  Functions(
+		  []( size_t size ) -> IECore::DataPtr { return createArray<Imath::M44f>( size ); },
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<Imath::M44f, openvdb::Mat4s>( destArray, array, leafIter );
+		  }
+	  ) },
 	{ openvdb::typeNameAsString<openvdb::Mat4d>(),
 	  Functions(
 		  []( size_t size ) -> IECore::DataPtr { return createArray<Imath::M44d>( size ); },
-		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<Imath::M44d, openvdb::Mat4d>( destArray, array, leafIter ); }
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<Imath::M44d, openvdb::Mat4d>( destArray, array, leafIter );
+		  }
 	  ) },
 
 	// quaternions - single & double
-	{
-		openvdb::typeNameAsString<openvdb::math::Quats>(),
-		Functions(
-			[]( size_t size ) -> IECore::DataPtr { return createArray<Imath::Quatf>( size ); },
-			[]( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<Imath::Quatf, openvdb::math::Quats>( destArray, array, leafIter ); }
-		) },
+	{ openvdb::typeNameAsString<openvdb::math::Quats>(),
+	  Functions(
+		  []( size_t size ) -> IECore::DataPtr { return createArray<Imath::Quatf>( size ); },
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<Imath::Quatf, openvdb::math::Quats>( destArray, array, leafIter );
+		  }
+	  ) },
 	{ openvdb::typeNameAsString<openvdb::math::Quatd>(),
 	  Functions(
 		  []( size_t size ) -> IECore::DataPtr { return createArray<Imath::Quatd>( size ); },
-		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) { appendData<Imath::Quatd, openvdb::math::Quatd>( destArray, array, leafIter ); }
+		  []( IECore::Data *destArray, const openvdb::points::AttributeArray &array, LeafIter leafIter ) {
+			  appendData<Imath::Quatd, openvdb::math::Quatd>( destArray, array, leafIter );
+		  }
 	  ) },
 };
 
-void appendPrimitiveVariableData( IECoreScene::PrimitiveVariableMap &variableMap, const std::string &name, const std::string &type, LeafIter leafIter, const openvdb::points::AttributeArray &arrayData, uint64_t count )
+void appendPrimitiveVariableData(
+	IECoreScene::PrimitiveVariableMap &variableMap, const std::string &name, const std::string &type, LeafIter leafIter,
+	const openvdb::points::AttributeArray &arrayData, uint64_t count
+)
 {
 
 	auto itConverter = converters.find( type );
@@ -329,7 +370,9 @@ void appendPrimitiveVariableData( IECoreScene::PrimitiveVariableMap &variableMap
 	auto primVarIt = variableMap.find( name );
 	if( primVarIt == variableMap.end() )
 	{
-		primVar = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, itConverter->second.m_create( count ) );
+		primVar = IECoreScene::PrimitiveVariable(
+			IECoreScene::PrimitiveVariable::Vertex, itConverter->second.m_create( count )
+		);
 		variableMap[name] = primVar;
 	}
 	else
@@ -340,9 +383,12 @@ void appendPrimitiveVariableData( IECoreScene::PrimitiveVariableMap &variableMap
 	itConverter->second.m_append( primVar.data.get(), arrayData, leafIter );
 }
 
-IECoreScene::PointsPrimitivePtr createPointsPrimitive( openvdb::GridBase::ConstPtr baseGrid, std::function<bool( const std::string & )> primitiveVariableFilter )
+IECoreScene::PointsPrimitivePtr createPointsPrimitive(
+	openvdb::GridBase::ConstPtr baseGrid, std::function<bool( const std::string & )> primitiveVariableFilter
+)
 {
-	openvdb::points::PointDataGrid::ConstPtr pointsGrid = openvdb::GridBase::constGrid<openvdb::points::PointDataGrid>( baseGrid );
+	openvdb::points::PointDataGrid::ConstPtr pointsGrid =
+		openvdb::GridBase::constGrid<openvdb::points::PointDataGrid>( baseGrid );
 	if( !pointsGrid )
 	{
 		return nullptr;
@@ -373,7 +419,9 @@ IECoreScene::PointsPrimitivePtr createPointsPrimitive( openvdb::GridBase::ConstP
 				continue;
 			}
 			const openvdb::points::AttributeArray *attributeArray = attributeSet.get( index );
-			appendPrimitiveVariableData( primVars, attributeName, descriptor.type( index ).first, leafIter, *attributeArray, count );
+			appendPrimitiveVariableData(
+				primVars, attributeName, descriptor.type( index ).first, leafIter, *attributeArray, count
+			);
 		}
 
 		for( auto indexIter = leafIter->beginIndexOn(); indexIter; ++indexIter )
@@ -401,8 +449,7 @@ GAFFER_NODE_DEFINE_TYPE( PointsGridToPoints );
 
 size_t PointsGridToPoints::g_firstPlugIndex = 0;
 
-PointsGridToPoints::PointsGridToPoints( const std::string &name )
-	: ObjectProcessor( name )
+PointsGridToPoints::PointsGridToPoints( const std::string &name ) : ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -413,9 +460,7 @@ PointsGridToPoints::PointsGridToPoints( const std::string &name )
 	addChild( new BoolPlug( "invertNames" ) );
 }
 
-PointsGridToPoints::~PointsGridToPoints()
-{
-}
+PointsGridToPoints::~PointsGridToPoints() {}
 
 Gaffer::StringPlug *PointsGridToPoints::gridPlug()
 {
@@ -449,11 +494,13 @@ const Gaffer::BoolPlug *PointsGridToPoints::invertNamesPlug() const
 
 bool PointsGridToPoints::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return ObjectProcessor::affectsProcessedObject( input ) ||
-		input == gridPlug() || input == namesPlug() || input == invertNamesPlug();
+	return ObjectProcessor::affectsProcessedObject( input ) || input == gridPlug() || input == namesPlug() ||
+		input == invertNamesPlug();
 }
 
-void PointsGridToPoints::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void PointsGridToPoints::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ObjectProcessor::hashProcessedObject( path, context, h );
 
@@ -462,7 +509,9 @@ void PointsGridToPoints::hashProcessedObject( const ScenePath &path, const Gaffe
 	invertNamesPlug()->hash( h );
 }
 
-IECore::ConstObjectPtr PointsGridToPoints::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr PointsGridToPoints::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	const VDBObject *vdbObject = runTimeCast<const VDBObject>( inputObject );
 	if( !vdbObject )

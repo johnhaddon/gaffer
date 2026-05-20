@@ -93,12 +93,11 @@ static const boost::regex g_attrRegex( "<attr:([^>]+)>" );
 class UVView::UVScene : public SceneProcessor
 {
 
-	public:
+public:
 
 	GAFFER_NODE_DECLARE_TYPE( GafferSceneUI::UVView::UVScene, UVSceneTypeId, SceneProcessor );
 
-	UVScene( const std::string &name = defaultName<UVScene>() )
-		: SceneProcessor( name )
+	UVScene( const std::string &name = defaultName<UVScene>() ) : SceneProcessor( name )
 	{
 		storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -152,45 +151,21 @@ class UVView::UVScene : public SceneProcessor
 		outPlug()->setInput( transform->outPlug() );
 	}
 
-	StringVectorDataPlug *visiblePathsPlug()
-	{
-		return getChild<StringVectorDataPlug>( g_firstPlugIndex );
-	}
+	StringVectorDataPlug *visiblePathsPlug() { return getChild<StringVectorDataPlug>( g_firstPlugIndex ); }
 
-	const StringVectorDataPlug *visiblePathsPlug() const
-	{
-		return getChild<StringVectorDataPlug>( g_firstPlugIndex );
-	}
+	const StringVectorDataPlug *visiblePathsPlug() const { return getChild<StringVectorDataPlug>( g_firstPlugIndex ); }
 
-	StringPlug *uvSetPlug()
-	{
-		return getChild<StringPlug>( g_firstPlugIndex + 1 );
-	}
+	StringPlug *uvSetPlug() { return getChild<StringPlug>( g_firstPlugIndex + 1 ); }
 
-	const StringPlug *uvSetPlug() const
-	{
-		return getChild<StringPlug>( g_firstPlugIndex + 1 );
-	}
+	const StringPlug *uvSetPlug() const { return getChild<StringPlug>( g_firstPlugIndex + 1 ); }
 
-	StringPlug *textureFileNamePlug()
-	{
-		return getChild<StringPlug>( g_firstPlugIndex + 2 );
-	}
+	StringPlug *textureFileNamePlug() { return getChild<StringPlug>( g_firstPlugIndex + 2 ); }
 
-	const StringPlug *textureFileNamePlug() const
-	{
-		return getChild<StringPlug>( g_firstPlugIndex + 2 );
-	}
+	const StringPlug *textureFileNamePlug() const { return getChild<StringPlug>( g_firstPlugIndex + 2 ); }
 
-	CompoundObjectPlug *texturesPlug()
-	{
-		return getChild<CompoundObjectPlug>( g_firstPlugIndex + 3 );
-	}
+	CompoundObjectPlug *texturesPlug() { return getChild<CompoundObjectPlug>( g_firstPlugIndex + 3 ); }
 
-	const CompoundObjectPlug *texturesPlug() const
-	{
-		return getChild<CompoundObjectPlug>( g_firstPlugIndex + 3 );
-	}
+	const CompoundObjectPlug *texturesPlug() const { return getChild<CompoundObjectPlug>( g_firstPlugIndex + 3 ); }
 
 	void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override
 	{
@@ -213,7 +188,7 @@ class UVView::UVScene : public SceneProcessor
 		}
 	}
 
-	protected:
+protected:
 
 	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override
 	{
@@ -321,9 +296,8 @@ class UVView::UVScene : public SceneProcessor
 					udimFileNames.insert( substitutedFileName );
 				}
 
-				result->members()[udim.first] = new StringVectorData(
-					vector<string>( udimFileNames.begin(), udimFileNames.end() )
-				);
+				result->members()[udim.first] =
+					new StringVectorData( vector<string>( udimFileNames.begin(), udimFileNames.end() ) );
 			}
 			static_cast<CompoundObjectPlug *>( output )->setValue( result );
 		}
@@ -333,42 +307,24 @@ class UVView::UVScene : public SceneProcessor
 		}
 	}
 
-	private:
+private:
 
-	StringVectorDataPlug *udimQueryPathsPlug()
-	{
-		return getChild<StringVectorDataPlug>( g_firstPlugIndex + 4 );
-	}
+	StringVectorDataPlug *udimQueryPathsPlug() { return getChild<StringVectorDataPlug>( g_firstPlugIndex + 4 ); }
 
 	const StringVectorDataPlug *udimQueryPathsPlug() const
 	{
 		return getChild<StringVectorDataPlug>( g_firstPlugIndex + 4 );
 	}
 
-	StringPlug *udimQueryAttributesPlug()
-	{
-		return getChild<StringPlug>( g_firstPlugIndex + 5 );
-	}
+	StringPlug *udimQueryAttributesPlug() { return getChild<StringPlug>( g_firstPlugIndex + 5 ); }
 
-	const StringPlug *udimQueryAttributesPlug() const
-	{
-		return getChild<StringPlug>( g_firstPlugIndex + 5 );
-	}
+	const StringPlug *udimQueryAttributesPlug() const { return getChild<StringPlug>( g_firstPlugIndex + 5 ); }
 
-	CompoundObjectPlug *udimQueryPlug()
-	{
-		return getChild<CompoundObjectPlug>( g_firstPlugIndex + 6 );
-	}
+	CompoundObjectPlug *udimQueryPlug() { return getChild<CompoundObjectPlug>( g_firstPlugIndex + 6 ); }
 
-	const CompoundObjectPlug *udimQueryPlug() const
-	{
-		return getChild<CompoundObjectPlug>( g_firstPlugIndex + 6 );
-	}
+	const CompoundObjectPlug *udimQueryPlug() const { return getChild<CompoundObjectPlug>( g_firstPlugIndex + 6 ); }
 
-	StringVectorDataPlug *isolatePathsPlug()
-	{
-		return getChild<StringVectorDataPlug>( g_firstPlugIndex + 7 );
-	}
+	StringVectorDataPlug *isolatePathsPlug() { return getChild<StringVectorDataPlug>( g_firstPlugIndex + 7 ); }
 
 	const StringVectorDataPlug *isolatePathsPlug() const
 	{
@@ -391,13 +347,11 @@ namespace
 class GridGadget : public GafferUI::Gadget
 {
 
-	public:
+public:
 
-	GridGadget()
-	{
-	}
+	GridGadget() {}
 
-	protected:
+protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
 	{
@@ -421,12 +375,18 @@ class GridGadget : public GafferUI::Gadget
 
 			for( float x = floor( bound.min.x ); x <= bound.max.x; x += 1.0f / (float)divisions )
 			{
-				style->renderLine( IECore::LineSegment3f( V3f( x, bound.min.y, bound.min.z ), V3f( x, bound.max.y, bound.min.z ) ), lineWidth, &lineColor );
+				style->renderLine(
+					IECore::LineSegment3f( V3f( x, bound.min.y, bound.min.z ), V3f( x, bound.max.y, bound.min.z ) ),
+					lineWidth, &lineColor
+				);
 			}
 
 			for( float y = floor( bound.min.y ); y <= bound.max.y; y += 1.0f / (float)divisions )
 			{
-				style->renderLine( IECore::LineSegment3f( V3f( bound.min.x, y, bound.min.z ), V3f( bound.max.x, y, bound.min.z ) ), lineWidth, &lineColor );
+				style->renderLine(
+					IECore::LineSegment3f( V3f( bound.min.x, y, bound.min.z ), V3f( bound.max.x, y, bound.min.z ) ),
+					lineWidth, &lineColor
+				);
 			}
 		}
 
@@ -470,10 +430,7 @@ class GridGadget : public GafferUI::Gadget
 		return b;
 	}
 
-	unsigned layerMask() const override
-	{
-		return Layer::MidBack | Layer::MidFront;
-	}
+	unsigned layerMask() const override { return Layer::MidBack | Layer::MidFront; }
 };
 
 } // namespace
@@ -490,12 +447,11 @@ InternedString g_imageGadgetName( "imageGadget" );
 class TextureGadget : public GafferUI::Gadget
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( TextureGadget )
 
-	TextureGadget()
-		: m_imageReader( new ImageReader ), m_resize( new Resize )
+	TextureGadget() : m_imageReader( new ImageReader ), m_resize( new Resize )
 	{
 		m_resize->inPlug()->setInput( m_imageReader->outPlug() );
 		m_resize->formatPlug()->setValue( Format( 256, 256 ) );
@@ -506,10 +462,7 @@ class TextureGadget : public GafferUI::Gadget
 		imageGadget()->setImage( m_resize->outPlug() );
 	}
 
-	ImageGadget *imageGadget()
-	{
-		return getChild<ImageGadget>( g_imageGadgetName );
-	}
+	ImageGadget *imageGadget() { return getChild<ImageGadget>( g_imageGadgetName ); }
 
 	void setFileName( const std::string &fileName )
 	{
@@ -528,10 +481,7 @@ class TextureGadget : public GafferUI::Gadget
 		imageGadget()->setTransform( m );
 	}
 
-	string getFileName() const
-	{
-		return m_imageReader->fileNamePlug()->getValue();
-	}
+	string getFileName() const { return m_imageReader->fileNamePlug()->getValue(); }
 
 	std::string getToolTip( const IECore::LineSegment3f &position ) const override
 	{
@@ -544,7 +494,7 @@ class TextureGadget : public GafferUI::Gadget
 		return getFileName();
 	}
 
-	private:
+private:
 
 	ImageReaderPtr m_imageReader;
 	ResizePtr m_resize;
@@ -567,7 +517,9 @@ static InternedString g_gridGadgetName( "gridGadget" );
 GAFFER_NODE_DEFINE_TYPE( UVView )
 
 UVView::UVView( Gaffer::ScriptNodePtr scriptNode )
-	: View( defaultName<UVView>(), scriptNode, new ScenePlug ), m_textureGadgetsDirty( true ), m_framed( false )
+	: View( defaultName<UVView>(), scriptNode, new ScenePlug ),
+	  m_textureGadgetsDirty( true ),
+	  m_framed( false )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -599,13 +551,16 @@ UVView::UVView( Gaffer::ScriptNodePtr scriptNode )
 	sceneGadget()->setOpenGLOptions( openGLOptions.get() );
 	sceneGadget()->setMinimumExpansionDepth( 99999 );
 	sceneGadget()->setLayer( Gadget::Layer::MidFront );
-	sceneGadget()->stateChangedSignal().connect( [this]( SceneGadget *g ) { this->gadgetStateChanged( g, g->state() == SceneGadget::Running ); } );
+	sceneGadget()->stateChangedSignal().connect( [this]( SceneGadget *g ) {
+		this->gadgetStateChanged( g, g->state() == SceneGadget::Running );
+	} );
 
 	contextChangedSignal().connect( boost::bind( &UVView::contextChanged, this ) );
 	plugDirtiedSignal().connect( boost::bind( &UVView::plugDirtied, this, ::_1 ) );
 	viewportGadget()->preRenderSignal().connect( boost::bind( &UVView::preRender, this ) );
 	viewportGadget()->visibilityChangedSignal().connect( boost::bind( &UVView::visibilityChanged, this ) );
-	ScriptNodeAlgo::selectedPathsChangedSignal( scriptNode.get() ).connect( boost::bind( &UVView::selectedPathsChanged, this ) );
+	ScriptNodeAlgo::selectedPathsChangedSignal( scriptNode.get() )
+		.connect( boost::bind( &UVView::selectedPathsChanged, this ) );
 }
 
 UVView::~UVView()
@@ -768,11 +723,7 @@ void UVView::preRender()
 			if( refCount() )
 			{
 				UVViewPtr thisRef = this;
-				ParallelAlgo::callOnUIThread(
-					[thisRef, textures] {
-						thisRef->updateTextureGadgets( textures );
-					}
-				);
+				ParallelAlgo::callOnUIThread( [thisRef, textures] { thisRef->updateTextureGadgets( textures ); } );
 			}
 		}
 	);
@@ -819,15 +770,13 @@ void UVView::updateTextureGadgets( const IECore::ConstCompoundObjectPtr &texture
 
 			g->setTransform( M44f().translate( V3f( u, v, 0 ) ) );
 
-			g->imageGadget()->stateChangedSignal().connect(
-				[this]( ImageGadget *g ) { this->gadgetStateChanged( g, g->state() == ImageGadget::Running ); }
-			);
+			g->imageGadget()->stateChangedSignal().connect( [this]( ImageGadget *g ) {
+				this->gadgetStateChanged( g, g->state() == ImageGadget::Running );
+			} );
 		}
 
 		auto &fileNames = static_cast<const StringVectorData *>( texture.second.get() )->readable();
-		textureGadget->setFileName(
-			fileNames.size() == 1 ? fileNames[0] : ""
-		);
+		textureGadget->setFileName( fileNames.size() == 1 ? fileNames[0] : "" );
 
 		textureGadget->setVisible( !textureGadget->getFileName().empty() );
 	}

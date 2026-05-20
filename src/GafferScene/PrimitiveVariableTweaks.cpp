@@ -78,13 +78,18 @@ GAFFER_NODE_DEFINE_TYPE( PrimitiveVariableTweaks );
 
 size_t PrimitiveVariableTweaks::g_firstPlugIndex = 0;
 
-PrimitiveVariableTweaks::PrimitiveVariableTweaks( const std::string &name )
-	: Deformer( name )
+PrimitiveVariableTweaks::PrimitiveVariableTweaks( const std::string &name ) : Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
-	addChild( new IntPlug( "interpolation", Plug::In, PrimitiveVariable::Invalid, PrimitiveVariable::Invalid, PrimitiveVariable::FaceVarying ) );
-	addChild( new IntPlug( "selectionMode", Plug::In, (int)SelectionMode::All, (int)SelectionMode::All, (int)SelectionMode::MaskPrimitiveVariable ) );
+	addChild( new IntPlug(
+		"interpolation", Plug::In, PrimitiveVariable::Invalid, PrimitiveVariable::Invalid,
+		PrimitiveVariable::FaceVarying
+	) );
+	addChild( new IntPlug(
+		"selectionMode", Plug::In, (int)SelectionMode::All, (int)SelectionMode::All,
+		(int)SelectionMode::MaskPrimitiveVariable
+	) );
 	addChild( new Int64VectorDataPlug( "idList", Plug::In ) );
 	addChild( new StringPlug( "idListVariable", Plug::In, "" ) );
 	addChild( new StringPlug( "id", Plug::In, "" ) );
@@ -94,9 +99,7 @@ PrimitiveVariableTweaks::PrimitiveVariableTweaks( const std::string &name )
 	addChild( new TweaksPlug( "tweaks" ) );
 }
 
-PrimitiveVariableTweaks::~PrimitiveVariableTweaks()
-{
-}
+PrimitiveVariableTweaks::~PrimitiveVariableTweaks() {}
 
 Gaffer::IntPlug *PrimitiveVariableTweaks::interpolationPlug()
 {
@@ -190,19 +193,14 @@ const Gaffer::TweaksPlug *PrimitiveVariableTweaks::tweaksPlug() const
 
 bool PrimitiveVariableTweaks::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return Deformer::affectsProcessedObject( input ) ||
-		input == interpolationPlug() ||
-		input == selectionModePlug() ||
-		input == idListPlug() ||
-		input == idListVariablePlug() ||
-		input == idPlug() ||
-		input == maskVariablePlug() ||
-		input == invertSelectionPlug() ||
-		input == ignoreMissingPlug() ||
-		tweaksPlug()->isAncestorOf( input );
+	return Deformer::affectsProcessedObject( input ) || input == interpolationPlug() || input == selectionModePlug() ||
+		input == idListPlug() || input == idListVariablePlug() || input == idPlug() || input == maskVariablePlug() ||
+		input == invertSelectionPlug() || input == ignoreMissingPlug() || tweaksPlug()->isAncestorOf( input );
 }
 
-void PrimitiveVariableTweaks::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void PrimitiveVariableTweaks::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	if( tweaksPlug()->children().empty() )
 	{
@@ -223,7 +221,9 @@ void PrimitiveVariableTweaks::hashProcessedObject( const ScenePath &path, const 
 	}
 }
 
-IECore::ConstObjectPtr PrimitiveVariableTweaks::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr PrimitiveVariableTweaks::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	const Primitive *inputPrimitive = runTimeCast<const Primitive>( inputObject );
 	if( !inputPrimitive || tweaksPlug()->children().empty() )
@@ -231,17 +231,16 @@ IECore::ConstObjectPtr PrimitiveVariableTweaks::computeProcessedObject( const Sc
 		return inputObject;
 	}
 
-	PrimitiveVariable::Interpolation targetInterpolation = (PrimitiveVariable::Interpolation)interpolationPlug()->getValue();
+	PrimitiveVariable::Interpolation targetInterpolation =
+		(PrimitiveVariable::Interpolation)interpolationPlug()->getValue();
 
 	PrimitivePtr result = inputPrimitive->copy();
 
 	SelectionMode selectionMode = (SelectionMode)selectionModePlug()->getValue();
 	boost::dynamic_bitset<> mask;
 
-	if(
-		( selectionMode == SelectionMode::IdList || selectionMode == SelectionMode::IdListPrimitiveVariable ) &&
-		targetInterpolation != PrimitiveVariable::Invalid && targetInterpolation != PrimitiveVariable::Constant
-	)
+	if( ( selectionMode == SelectionMode::IdList || selectionMode == SelectionMode::IdListPrimitiveVariable ) &&
+		targetInterpolation != PrimitiveVariable::Invalid && targetInterpolation != PrimitiveVariable::Constant )
 	{
 		ConstIntVectorDataPtr idList;
 		ConstInt64VectorDataPtr idList64;
@@ -255,16 +254,21 @@ IECore::ConstObjectPtr PrimitiveVariableTweaks::computeProcessedObject( const Sc
 			auto idListVar = inputPrimitive->variables.find( idListVarName );
 			if( idListVar == inputPrimitive->variables.end() )
 			{
-				throw IECore::Exception( fmt::format( "Can't find id list primitive variable \"{}\".", idListVarName ) );
+				throw IECore::Exception(
+					fmt::format( "Can't find id list primitive variable \"{}\".", idListVarName )
+				);
 			}
 
 			if( idListVar->second.interpolation == PrimitiveVariable::Interpolation::Constant )
 			{
-				if( const Int64VectorData *int64Data = IECore::runTimeCast<Int64VectorData>( idListVar->second.data.get() ) )
+				if( const Int64VectorData *int64Data =
+						IECore::runTimeCast<Int64VectorData>( idListVar->second.data.get() ) )
 				{
 					idList64 = int64Data;
 				}
-				else if( const IntVectorData *intData = IECore::runTimeCast<IntVectorData>( idListVar->second.data.get() ) )
+				else if(
+					const IntVectorData *intData = IECore::runTimeCast<IntVectorData>( idListVar->second.data.get() )
+				)
 				{
 					idList = intData;
 				}
@@ -272,7 +276,12 @@ IECore::ConstObjectPtr PrimitiveVariableTweaks::computeProcessedObject( const Sc
 
 			if( !( idList || idList64 ) )
 			{
-				throw IECore::Exception( fmt::format( "Invalid id list primitive variable \"{}\". A constant IntVector or Int64Vector is required.", idListVarName ) );
+				throw IECore::Exception(
+					fmt::format(
+						"Invalid id list primitive variable \"{}\". A constant IntVector or Int64Vector is required.",
+						idListVarName
+					)
+				);
 			}
 		}
 
@@ -307,7 +316,9 @@ IECore::ConstObjectPtr PrimitiveVariableTweaks::computeProcessedObject( const Sc
 			auto idVar = inputPrimitive->variables.find( idVarName );
 			if( idVar == inputPrimitive->variables.end() )
 			{
-				throw IECore::Exception( fmt::format( "Id invalid, can't find primitive variable \"{}\".", idVarName ) );
+				throw IECore::Exception(
+					fmt::format( "Id invalid, can't find primitive variable \"{}\".", idVarName )
+				);
 			}
 
 			if( !inputPrimitive->isPrimitiveVariableValid( idVar->second ) )
@@ -317,7 +328,13 @@ IECore::ConstObjectPtr PrimitiveVariableTweaks::computeProcessedObject( const Sc
 
 			if( idVar->second.interpolation != targetInterpolation )
 			{
-				throw IECore::Exception( fmt::format( "Id variable \"{}\" : Interpolation `{}` doesn't match specified interpolation `{}`.", idVarName, interpolationToString( idVar->second.interpolation ), interpolationToString( targetInterpolation ) ) );
+				throw IECore::Exception(
+					fmt::format(
+						"Id variable \"{}\" : Interpolation `{}` doesn't match specified interpolation `{}`.",
+						idVarName, interpolationToString( idVar->second.interpolation ),
+						interpolationToString( targetInterpolation )
+					)
+				);
 			}
 
 			if( idVar->second.indices )
@@ -352,7 +369,9 @@ IECore::ConstObjectPtr PrimitiveVariableTweaks::computeProcessedObject( const Sc
 					}
 				}
 			}
-			else if( const Int64VectorData *int64IdsData = IECore::runTimeCast<Int64VectorData>( idVar->second.data.get() ) )
+			else if(
+				const Int64VectorData *int64IdsData = IECore::runTimeCast<Int64VectorData>( idVar->second.data.get() )
+			)
 			{
 				const std::vector<int64_t> &intIds = int64IdsData->readable();
 				for( size_t i = 0; i < intIds.size(); i++ )
@@ -365,13 +384,18 @@ IECore::ConstObjectPtr PrimitiveVariableTweaks::computeProcessedObject( const Sc
 			}
 			else
 			{
-				throw IECore::Exception( fmt::format( "Id invalid, can't find primitive variable \"{}\" of type IntVectorData or type Int64VectorData.", idVarName ) );
+				throw IECore::Exception(
+					fmt::format(
+						"Id invalid, can't find primitive variable \"{}\" of type IntVectorData or type Int64VectorData.",
+						idVarName
+					)
+				);
 			}
 		}
 	}
 	else if(
-		selectionMode == SelectionMode::MaskPrimitiveVariable &&
-		targetInterpolation != PrimitiveVariable::Invalid && targetInterpolation != PrimitiveVariable::Constant
+		selectionMode == SelectionMode::MaskPrimitiveVariable && targetInterpolation != PrimitiveVariable::Invalid &&
+		targetInterpolation != PrimitiveVariable::Constant
 	)
 	{
 		std::string maskVarName = maskVariablePlug()->getValue();
@@ -384,7 +408,12 @@ IECore::ConstObjectPtr PrimitiveVariableTweaks::computeProcessedObject( const Sc
 
 		if( maskVar->second.interpolation != targetInterpolation )
 		{
-			throw IECore::Exception( fmt::format( "Mask primitive variable \"{}\" has wrong interpolation `{}`, expected `{}`.", maskVarName, interpolationToString( maskVar->second.interpolation ), interpolationToString( targetInterpolation ) ) );
+			throw IECore::Exception(
+				fmt::format(
+					"Mask primitive variable \"{}\" has wrong interpolation `{}`, expected `{}`.", maskVarName,
+					interpolationToString( maskVar->second.interpolation ), interpolationToString( targetInterpolation )
+				)
+			);
 		}
 
 		IECore::dispatch( maskVar->second.data.get(), [&mask, &maskVar, &maskVarName]( auto *typedData ) {
@@ -400,7 +429,10 @@ IECore::ConstObjectPtr PrimitiveVariableTweaks::computeProcessedObject( const Sc
 
 					// There a few types that are numeric based, but it doesn't make sense to compare them
 					// to zero.
-					if constexpr( !TypeTraits::IsMatrix<ValueType>::value && !TypeTraits::IsQuat<ValueType>::value && !TypeTraits::IsBox<ValueType>::value )
+					if constexpr(
+						!TypeTraits::IsMatrix<ValueType>::value && !TypeTraits::IsQuat<ValueType>::value &&
+						!TypeTraits::IsBox<ValueType>::value
+					)
 					{
 						PrimitiveVariable::IndexedView<ValueType> indexedView( maskVar->second );
 						ValueType zeroValue( 0 );
@@ -415,7 +447,11 @@ IECore::ConstObjectPtr PrimitiveVariableTweaks::computeProcessedObject( const Sc
 				}
 			}
 
-			throw IECore::Exception( fmt::format( "Mask primitive variable \"{}\" has invalid type \"{}\".", maskVarName, typedData->typeName() ) );
+			throw IECore::Exception(
+				fmt::format(
+					"Mask primitive variable \"{}\" has invalid type \"{}\".", maskVarName, typedData->typeName()
+				)
+			);
 		} );
 	}
 
@@ -450,11 +486,9 @@ IECore::ConstObjectPtr PrimitiveVariableTweaks::computeProcessedObject( const Sc
 			source.data = varIt->second.data;
 			source.indices = varIt->second.indices;
 
-			if(
-				mode != TweakPlug::Create && mode != TweakPlug::CreateIfMissing &&
+			if( mode != TweakPlug::Create && mode != TweakPlug::CreateIfMissing &&
 				targetInterpolation != PrimitiveVariable::Invalid &&
-				targetInterpolation != varIt->second.interpolation
-			)
+				targetInterpolation != varIt->second.interpolation )
 			{
 				// \todo - Throwing an exception here is probably not the most useful to users. More useful options might
 				// be "ignore primvars that don't match" or "resample primvars so they do match" ... but we're not sure
@@ -466,7 +500,13 @@ IECore::ConstObjectPtr PrimitiveVariableTweaks::computeProcessedObject( const Sc
 				// is pretty clearly to apply the tweak to all FaceVertices corresponding to the selected Faces or Vertices.
 				// We haven't implemented this yet, but it would be pretty straightforward to make things behave properly
 				// instead of throwing in that specific case at least.
-				throw IECore::Exception( fmt::format( "Cannot apply tweak to \"{}\" : Interpolation `{}` doesn't match primitive variable interpolation `{}`.", name, interpolationToString( targetInterpolation ), interpolationToString( varIt->second.interpolation ) ) );
+				throw IECore::Exception(
+					fmt::format(
+						"Cannot apply tweak to \"{}\" : Interpolation `{}` doesn't match primitive variable interpolation `{}`.",
+						name, interpolationToString( targetInterpolation ),
+						interpolationToString( varIt->second.interpolation )
+					)
+				);
 			}
 
 			// "Create" is the only mode that can change the interpolation of an existing primvar
@@ -481,18 +521,20 @@ IECore::ConstObjectPtr PrimitiveVariableTweaks::computeProcessedObject( const Sc
 			// Some of these errors could be handled by TweakPlug, but since we don't know the interpolation to
 			// use, we don't know whether to call applyTweak or applyElementwiseTweak, so we just deal with
 			// these errors ourselves.
-			if(
-				mode == TweakPlug::Create || mode == TweakPlug::CreateIfMissing ||
-				mode == TweakPlug::ListPrepend || mode == TweakPlug::ListAppend
-			)
+			if( mode == TweakPlug::Create || mode == TweakPlug::CreateIfMissing || mode == TweakPlug::ListPrepend ||
+				mode == TweakPlug::ListAppend )
 			{
-				throw IECore::Exception( fmt::format( "Cannot create primitive variable \"{}\" when interpolation is set to `Any`."
-													  " Please select an interpolation.",
-													  name ) );
+				throw IECore::Exception(
+					fmt::format(
+						"Cannot create primitive variable \"{}\" when interpolation is set to `Any`."
+						" Please select an interpolation.",
+						name
+					)
+				);
 			}
 			else if(
-				missingMode == Gaffer::TweakPlug::MissingMode::Ignore ||
-				mode == TweakPlug::Remove || mode == Gaffer::TweakPlug::ListRemove
+				missingMode == Gaffer::TweakPlug::MissingMode::Ignore || mode == TweakPlug::Remove ||
+				mode == Gaffer::TweakPlug::ListRemove
 			)
 			{
 				continue;
@@ -505,15 +547,12 @@ IECore::ConstObjectPtr PrimitiveVariableTweaks::computeProcessedObject( const Sc
 		else if( resultInterpolation == PrimitiveVariable::Constant )
 		{
 			tweak->applyTweak(
-				[&source]( const std::string &valueName, const bool withFallback ) {
-					return source.data.get();
-				},
+				[&source]( const std::string &valueName, const bool withFallback ) { return source.data.get(); },
 				[&result]( const std::string &valueName, DataPtr newData ) {
 					if( newData )
 					{
-						result->variables[valueName] = PrimitiveVariable(
-							PrimitiveVariable::Constant, std::move( newData )
-						);
+						result->variables[valueName] =
+							PrimitiveVariable( PrimitiveVariable::Constant, std::move( newData ) );
 						return true;
 					}
 					else
@@ -527,21 +566,19 @@ IECore::ConstObjectPtr PrimitiveVariableTweaks::computeProcessedObject( const Sc
 		else
 		{
 			tweak->applyElementwiseTweak(
-				[&source]( const std::string &valueName, const bool withFallback ) {
-					return source;
-				},
-				[&result, &resultInterpolation]( const std::string &valueName, const TweakPlug::DataAndIndices &newPrimVar ) {
+				[&source]( const std::string &valueName, const bool withFallback ) { return source; },
+				[&result,
+				 &resultInterpolation]( const std::string &valueName, const TweakPlug::DataAndIndices &newPrimVar ) {
 					if( !newPrimVar.data )
 					{
 						return result->variables.erase( valueName ) > 0;
 					}
 
-					result->variables[valueName] = PrimitiveVariable( resultInterpolation, newPrimVar.data, newPrimVar.indices );
+					result->variables[valueName] =
+						PrimitiveVariable( resultInterpolation, newPrimVar.data, newPrimVar.indices );
 					return true;
 				},
-				result->variableSize( resultInterpolation ),
-				mask.size() ? &mask : nullptr,
-				missingMode
+				result->variableSize( resultInterpolation ), mask.size() ? &mask : nullptr, missingMode
 			);
 		}
 	}

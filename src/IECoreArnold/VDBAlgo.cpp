@@ -70,9 +70,7 @@ struct UCharVectorDataSink
 	using char_type = char;
 	using category = boost::iostreams::sink_tag;
 
-	UCharVectorDataSink( IECore::UCharVectorData *storage ) : m_storage( storage->writable() )
-	{
-	}
+	UCharVectorDataSink( IECore::UCharVectorData *storage ) : m_storage( storage->writable() ) {}
 
 	std::streamsize write( const char *s, std::streamsize n )
 	{
@@ -121,7 +119,11 @@ CompoundDataPtr createParameters( const IECoreVDB::VDBObject *vdbObject )
 	return parameters;
 }
 
-AtNode *convert( const IECoreScenePreview::Renderer::Samples<const IECoreVDB::VDBObject *> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &name, const AtNode *parent, const std::string &messageContext )
+AtNode *convert(
+	const IECoreScenePreview::Renderer::Samples<const IECoreVDB::VDBObject *> &samples, float motionStart,
+	float motionEnd, AtUniverse *universe, const std::string &name, const AtNode *parent,
+	const std::string &messageContext
+)
 {
 	AtNode *node = AiNode( universe, g_volume, AtString( name.c_str() ), parent );
 

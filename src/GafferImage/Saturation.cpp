@@ -45,16 +45,13 @@ GAFFER_NODE_DEFINE_TYPE( Saturation );
 
 size_t Saturation::g_firstPlugIndex = 0;
 
-Saturation::Saturation( const std::string &name )
-	: ColorProcessor( name )
+Saturation::Saturation( const std::string &name ) : ColorProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new FloatPlug( "saturation", Gaffer::Plug::In, 1.0f, 0.0f ) );
 }
 
-Saturation::~Saturation()
-{
-}
+Saturation::~Saturation() {}
 
 Gaffer::FloatPlug *Saturation::saturationPlug()
 {
@@ -84,17 +81,18 @@ ColorProcessor::ColorProcessorFunction Saturation::colorProcessor( const Gaffer:
 		return ColorProcessorFunction();
 	}
 
-	return [saturation]( IECore::FloatVectorData *rData, IECore::FloatVectorData *gData, IECore::FloatVectorData *bData ) {
-		std::vector<float> &r = rData->writable();
-		std::vector<float> &g = gData->writable();
-		std::vector<float> &b = bData->writable();
+	return
+		[saturation]( IECore::FloatVectorData *rData, IECore::FloatVectorData *gData, IECore::FloatVectorData *bData ) {
+			std::vector<float> &r = rData->writable();
+			std::vector<float> &g = gData->writable();
+			std::vector<float> &b = bData->writable();
 
-		for( int i = 0; i < ImagePlug::tilePixels(); i++ )
-		{
-			float lum = r[i] * 0.2126 + g[i] * 0.7152 + b[i] * 0.0722;
-			r[i] = ( r[i] - lum ) * saturation + lum;
-			g[i] = ( g[i] - lum ) * saturation + lum;
-			b[i] = ( b[i] - lum ) * saturation + lum;
-		}
-	};
+			for( int i = 0; i < ImagePlug::tilePixels(); i++ )
+			{
+				float lum = r[i] * 0.2126 + g[i] * 0.7152 + b[i] * 0.0722;
+				r[i] = ( r[i] - lum ) * saturation + lum;
+				g[i] = ( g[i] - lum ) * saturation + lum;
+				b[i] = ( b[i] - lum ) * saturation + lum;
+			}
+		};
 }

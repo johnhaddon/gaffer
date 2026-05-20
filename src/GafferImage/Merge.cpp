@@ -308,10 +308,7 @@ inline MergeRegion tileRegion( int i, const Box2i &boundA, const Box2i &boundB, 
 	bool inB = false;
 
 	V2i coord = ImagePlug::indexPixel( i, V2i( 0 ) );
-	int next = std::min(
-		nextBoxBoundaryIndex( i, coord, boundA, inA ),
-		nextBoxBoundaryIndex( i, coord, boundB, inB )
-	);
+	int next = std::min( nextBoxBoundaryIndex( i, coord, boundA, inA ), nextBoxBoundaryIndex( i, coord, boundB, inB ) );
 
 	length = next - i;
 	return (MergeRegion)( ( InsideA * inA ) | ( InsideB * inB ) );
@@ -330,15 +327,9 @@ struct MergeFunctor
 	// boundB and boundA are local tile bounds, relative to the tile origin
 	template<class Op>
 	ReturnType operator () (
-		const Box2i &boundB,
-		ConstFloatVectorDataPtr &channelDataB,
-		ConstFloatVectorDataPtr &alphaDataB,
-		const Box2i &boundA,
-		const ConstFloatVectorDataPtr &channelDataA,
-		const ConstFloatVectorDataPtr &alphaDataA,
-		FloatVectorDataPtr &mergeChannelBuffer,
-		FloatVectorDataPtr &mergeAlphaBuffer,
-		bool partialBound
+		const Box2i &boundB, ConstFloatVectorDataPtr &channelDataB, ConstFloatVectorDataPtr &alphaDataB,
+		const Box2i &boundA, const ConstFloatVectorDataPtr &channelDataA, const ConstFloatVectorDataPtr &alphaDataA,
+		FloatVectorDataPtr &mergeChannelBuffer, FloatVectorDataPtr &mergeAlphaBuffer, bool partialBound
 	)
 	{
 		if( !channelDataB )
@@ -369,11 +360,8 @@ struct MergeFunctor
 
 		// If both inputs are blackTile, or the operator is black when one input is black,
 		// we may be able to just pass through blackTile for the whole tile
-		if(
-			( emptyA && emptyB ) ||
-			( !partialBound && emptyA && Op::onlyB == SingleInputMode::Black ) ||
-			( !partialBound && emptyB && Op::onlyA == SingleInputMode::Black )
-		)
+		if( ( emptyA && emptyB ) || ( !partialBound && emptyA && Op::onlyB == SingleInputMode::Black ) ||
+			( !partialBound && emptyB && Op::onlyA == SingleInputMode::Black ) )
 		{
 			channelDataB = ImagePlug::blackTile();
 			alphaDataB = ImagePlug::blackTile();
@@ -430,11 +418,8 @@ struct MergeFunctor
 			// in a row with the same MergeRegion
 			region = tileRegion( i, boundA, boundB, length );
 
-			if(
-				( region == OutsideBoth ) ||
-				( region == InsideB && Op::onlyB == Black ) ||
-				( region == InsideA && Op::onlyA == Black )
-			)
+			if( ( region == OutsideBoth ) || ( region == InsideB && Op::onlyB == Black ) ||
+				( region == InsideA && Op::onlyA == Black ) )
 			{
 				// If we are outside both inputs, or the Op is black when one input is
 				// black, then everything is this region is black
@@ -564,12 +549,8 @@ struct PassthroughHashFunctor
 	// will just use the first approach instead
 	template<class Op>
 	ReturnType operator () (
-		MurmurHash &channelHashB,
-		MurmurHash &alphaHashB,
-		const MurmurHash &channelHashA,
-		const MurmurHash &alphaHashA,
-		bool partialBound,
-		bool &passthroughValid
+		MurmurHash &channelHashB, MurmurHash &alphaHashB, const MurmurHash &channelHashA, const MurmurHash &alphaHashA,
+		bool partialBound, bool &passthroughValid
 	)
 	{
 		if( partialBound && Op::onlyA != SingleInputMode::Black && Op::onlyB != SingleInputMode::Black )
@@ -590,11 +571,8 @@ struct PassthroughHashFunctor
 			const MurmurHash &blackTileHash = ImagePlug::blackTile()->Object::hash();
 			bool emptyB = channelHashB == blackTileHash && alphaHashB == blackTileHash;
 			bool emptyA = channelHashA == blackTileHash && alphaHashA == blackTileHash;
-			if(
-				( emptyB && emptyA ) ||
-				( emptyB && Op::onlyA == SingleInputMode::Black ) ||
-				( emptyA && Op::onlyB == SingleInputMode::Black )
-			)
+			if( ( emptyB && emptyA ) || ( emptyB && Op::onlyA == SingleInputMode::Black ) ||
+				( emptyA && Op::onlyB == SingleInputMode::Black ) )
 			{
 				channelHashB = blackTileHash;
 				alphaHashB = blackTileHash;
@@ -674,19 +652,16 @@ GAFFER_NODE_DEFINE_TYPE( Merge );
 
 size_t Merge::g_firstPlugIndex = 0;
 
-Merge::Merge( const std::string &name )
-	: FlatImageProcessor( name, 2 )
+Merge::Merge( const std::string &name ) : FlatImageProcessor( name, 2 )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
-	addChild(
-		new IntPlug(
-			"operation", // name
-			Plug::In, // direction
-			Add, // default
-			Add, // min
-			Max // the maximum value in the enum, which just happens to currently be named "Max"
-		)
-	);
+	addChild( new IntPlug(
+		"operation", // name
+		Plug::In, // direction
+		Add, // default
+		Add, // min
+		Max // the maximum value in the enum, which just happens to currently be named "Max"
+	) );
 
 	// We don't ever want to change these, so we make pass-through connections.
 	// Note that they are hard-coded to take the first input
@@ -695,9 +670,7 @@ Merge::Merge( const std::string &name )
 	outPlug()->metadataPlug()->setInput( inPlug()->metadataPlug() );
 }
 
-Merge::~Merge()
-{
-}
+Merge::~Merge() {}
 
 Gaffer::IntPlug *Merge::operationPlug()
 {
@@ -739,7 +712,9 @@ void Merge::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs 
 	}
 }
 
-void Merge::hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Merge::hashDataWindow(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageProcessor::hashDataWindow( output, context, h );
 
@@ -775,7 +750,9 @@ Imath::Box2i Merge::computeDataWindow( const Gaffer::Context *context, const Ima
 	return dataWindow;
 }
 
-void Merge::hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Merge::hashChannelNames(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageProcessor::hashChannelNames( output, context, h );
 
@@ -788,7 +765,9 @@ void Merge::hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer
 	}
 }
 
-IECore::ConstStringVectorDataPtr Merge::computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr Merge::computeChannelNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	IECore::StringVectorDataPtr outChannelStrVectorData( new IECore::StringVectorData() );
 	std::vector<std::string> &outChannels( outChannelStrVectorData->writable() );
@@ -816,7 +795,9 @@ IECore::ConstStringVectorDataPtr Merge::computeChannelNames( const Gaffer::Conte
 	return inPlug()->channelNamesPlug()->defaultValue();
 }
 
-void Merge::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Merge::hashChannelData(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageProcessor::hashChannelData( output, context, h );
 
@@ -908,7 +889,10 @@ void Merge::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer:
 		}
 
 		// Try computing a passthrough hash if it's possible
-		dispatchOperation( op, PassthroughHashFunctor(), passthroughHash, passthroughAlphaHash, channelHash, alphaHash, partialBound, passthroughValid );
+		dispatchOperation(
+			op, PassthroughHashFunctor(), passthroughHash, passthroughAlphaHash, channelHash, alphaHash, partialBound,
+			passthroughValid
+		);
 	}
 
 	if( passthroughValid )
@@ -919,7 +903,10 @@ void Merge::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer:
 	}
 }
 
-IECore::ConstFloatVectorDataPtr Merge::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr Merge::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	Operation op = (Operation)operationPlug()->getValue();
 
@@ -1007,7 +994,10 @@ IECore::ConstFloatVectorDataPtr Merge::computeChannelData( const std::string &ch
 		// and it will either point resultChannelData to something we can pass through, or allocate
 		// the merge buffers, operate in there, and then point resultChannelData to that
 		bool first = !resultChannelData;
-		dispatchOperation( op, MergeFunctor(), resultBound, resultChannelData, resultAlphaData, validBound, channelData, alphaData, mergeChannelBuffer, mergeAlphaBuffer, partialBound );
+		dispatchOperation(
+			op, MergeFunctor(), resultBound, resultChannelData, resultAlphaData, validBound, channelData, alphaData,
+			mergeChannelBuffer, mergeAlphaBuffer, partialBound
+		);
 		dispatchOperation( op, MergeDataWindowFunctor(), resultBound, validBound, first );
 	}
 

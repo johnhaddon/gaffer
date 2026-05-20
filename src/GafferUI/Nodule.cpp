@@ -52,14 +52,9 @@ using namespace std;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Nodule );
 
-Nodule::Nodule( Gaffer::PlugPtr plug )
-	: ConnectionCreator( defaultName<Nodule>() ), m_plug( plug )
-{
-}
+Nodule::Nodule( Gaffer::PlugPtr plug ) : ConnectionCreator( defaultName<Nodule>() ), m_plug( plug ) {}
 
-Nodule::~Nodule()
-{
-}
+Nodule::~Nodule() {}
 
 Gaffer::Plug *Nodule::plug()
 {
@@ -81,9 +76,7 @@ const Nodule *Nodule::nodule( const Gaffer::Plug *plug ) const
 	return nullptr;
 }
 
-void Nodule::updateDragEndPoint( const Imath::V3f position, const Imath::V3f &tangent )
-{
-}
+void Nodule::updateDragEndPoint( const Imath::V3f position, const Imath::V3f &tangent ) {}
 
 Nodule::TypeNameCreatorMap &Nodule::typeNameCreators()
 {
@@ -114,7 +107,12 @@ NodulePtr Nodule::create( Gaffer::PlugPtr plug )
 		}
 		else
 		{
-			IECore::msg( IECore::Msg::Warning, "Nodule::create", fmt::format( "Nonexistent nodule type \"{}\" requested for plug \"{}\"", noduleType->readable(), plug->fullName() ) );
+			IECore::msg(
+				IECore::Msg::Warning, "Nodule::create",
+				fmt::format(
+					"Nonexistent nodule type \"{}\" requested for plug \"{}\"", noduleType->readable(), plug->fullName()
+				)
+			);
 		}
 	}
 

@@ -40,14 +40,9 @@ using namespace GafferUI;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( SpacerGadget );
 
-SpacerGadget::SpacerGadget( const Imath::Box3f &size )
-	: Gadget( defaultName<SpacerGadget>() ), m_bound( size )
-{
-}
+SpacerGadget::SpacerGadget( const Imath::Box3f &size ) : Gadget( defaultName<SpacerGadget>() ), m_bound( size ) {}
 
-SpacerGadget::~SpacerGadget()
-{
-}
+SpacerGadget::~SpacerGadget() {}
 
 Imath::Box3f SpacerGadget::bound() const
 {

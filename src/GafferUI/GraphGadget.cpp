@@ -113,10 +113,7 @@ const InternedString g_dragEditGadgetName( "__dragEdit" );
 
 struct CompareV2fX
 {
-	bool operator () ( const Imath::V2f &a, const Imath::V2f &b ) const
-	{
-		return a[0] < b[0];
-	}
+	bool operator () ( const Imath::V2f &a, const Imath::V2f &b ) const { return a[0] < b[0]; }
 };
 
 // Action used to set node positions during drags. This implements
@@ -145,14 +142,11 @@ struct CompareV2fX
 class SetPositionsAction : public Gaffer::Action
 {
 
-	public:
+public:
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SetPositionsAction, GraphGadgetSetPositionsActionTypeId, Gaffer::Action );
 
-	SetPositionsAction( Gaffer::Node *root )
-		: m_scriptNode( root->scriptNode() )
-	{
-	}
+	SetPositionsAction( Gaffer::Node *root ) : m_scriptNode( root->scriptNode() ) {}
 
 	void addOffset( Gaffer::V2fPlugPtr plug, const V2f &offset )
 	{
@@ -160,12 +154,9 @@ class SetPositionsAction : public Gaffer::Action
 		m_positions[plug] = { v, v + offset };
 	}
 
-	protected:
+protected:
 
-	Gaffer::GraphComponent *subject() const override
-	{
-		return m_scriptNode;
-	}
+	Gaffer::GraphComponent *subject() const override { return m_scriptNode; }
 
 	void doAction() override
 	{
@@ -213,7 +204,7 @@ class SetPositionsAction : public Gaffer::Action
 		}
 	}
 
-	private:
+private:
 
 	Gaffer::ScriptNode *m_scriptNode;
 
@@ -239,7 +230,13 @@ IE_CORE_DECLAREPTR( SetPositionsAction )
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( GraphGadget );
 
 GraphGadget::GraphGadget( Gaffer::NodePtr root, Gaffer::SetPtr filter )
-	: m_dragStartPosition( 0 ), m_lastDragPosition( 0 ), m_dragMode( None ), m_dragReconnectCandidate( nullptr ), m_dragReconnectSrcNodule( nullptr ), m_dragReconnectDstNodule( nullptr ), m_dragMergeGroupId( 0 )
+	: m_dragStartPosition( 0 ),
+	  m_lastDragPosition( 0 ),
+	  m_dragMode( None ),
+	  m_dragReconnectCandidate( nullptr ),
+	  m_dragReconnectSrcNodule( nullptr ),
+	  m_dragReconnectDstNodule( nullptr ),
+	  m_dragMergeGroupId( 0 )
 {
 	buttonPressSignal().connect( boost::bind( &GraphGadget::buttonPress, this, ::_1, ::_2 ) );
 	buttonReleaseSignal().connect( boost::bind( &GraphGadget::buttonRelease, this, ::_1, ::_2 ) );
@@ -289,8 +286,10 @@ void GraphGadget::setRoot( Gaffer::NodePtr root, Gaffer::SetPtr filter )
 	{
 		rootChanged = true;
 		m_root = root;
-		m_rootChildAddedConnection = m_root->childAddedSignal().connect( boost::bind( &GraphGadget::rootChildAdded, this, ::_1, ::_2 ) );
-		m_rootChildRemovedConnection = m_root->childRemovedSignal().connect( boost::bind( &GraphGadget::rootChildRemoved, this, ::_1, ::_2 ) );
+		m_rootChildAddedConnection =
+			m_root->childAddedSignal().connect( boost::bind( &GraphGadget::rootChildAdded, this, ::_1, ::_2 ) );
+		m_rootChildRemovedConnection =
+			m_root->childRemovedSignal().connect( boost::bind( &GraphGadget::rootChildRemoved, this, ::_1, ::_2 ) );
 	}
 
 	Gaffer::ScriptNodePtr scriptNode = runTimeCast<Gaffer::ScriptNode>( m_root );
@@ -311,9 +310,8 @@ void GraphGadget::setRoot( Gaffer::NodePtr root, Gaffer::SetPtr filter )
 				boost::bind( &GraphGadget::selectionMemberRemoved, this, ::_1, ::_2 )
 			);
 			m_contextTracker = ContextTracker::acquireForFocus( m_scriptNode.get() );
-			m_contextTrackerChangedConnection = m_contextTracker->changedSignal().connect(
-				boost::bind( &GraphGadget::applyFocusContexts, this )
-			);
+			m_contextTrackerChangedConnection =
+				m_contextTracker->changedSignal().connect( boost::bind( &GraphGadget::applyFocusContexts, this ) );
 		}
 		else
 		{
@@ -364,8 +362,11 @@ void GraphGadget::setFilter( Gaffer::SetPtr filter )
 	m_filter = filter;
 	if( m_filter )
 	{
-		m_filterMemberAddedConnection = m_filter->memberAddedSignal().connect( boost::bind( &GraphGadget::filterMemberAdded, this, ::_1, ::_2 ) );
-		m_filterMemberRemovedConnection = m_filter->memberRemovedSignal().connect( boost::bind( &GraphGadget::filterMemberRemoved, this, ::_1, ::_2 ) );
+		m_filterMemberAddedConnection =
+			m_filter->memberAddedSignal().connect( boost::bind( &GraphGadget::filterMemberAdded, this, ::_1, ::_2 ) );
+		m_filterMemberRemovedConnection = m_filter->memberRemovedSignal().connect(
+			boost::bind( &GraphGadget::filterMemberRemoved, this, ::_1, ::_2 )
+		);
 	}
 	else
 	{
@@ -396,7 +397,9 @@ const ConnectionGadget *GraphGadget::connectionGadget( const Gaffer::Plug *dstPl
 	return findConnectionGadget( dstPlug );
 }
 
-size_t GraphGadget::connectionGadgets( const Gaffer::Plug *plug, std::vector<ConnectionGadget *> &connections, const Gaffer::Set *excludedNodes )
+size_t GraphGadget::connectionGadgets(
+	const Gaffer::Plug *plug, std::vector<ConnectionGadget *> &connections, const Gaffer::Set *excludedNodes
+)
 {
 	if( plug->direction() == Gaffer::Plug::In )
 	{
@@ -430,13 +433,19 @@ size_t GraphGadget::connectionGadgets( const Gaffer::Plug *plug, std::vector<Con
 	return connections.size();
 }
 
-size_t GraphGadget::connectionGadgets( const Gaffer::Plug *plug, std::vector<const ConnectionGadget *> &connections, const Gaffer::Set *excludedNodes ) const
+size_t GraphGadget::connectionGadgets(
+	const Gaffer::Plug *plug, std::vector<const ConnectionGadget *> &connections, const Gaffer::Set *excludedNodes
+) const
 {
 	// preferring naughty casts over maintaining two identical implementations
-	return const_cast<GraphGadget *>( this )->connectionGadgets( plug, reinterpret_cast<std::vector<ConnectionGadget *> &>( connections ), excludedNodes );
+	return const_cast<GraphGadget *>( this )->connectionGadgets(
+		plug, reinterpret_cast<std::vector<ConnectionGadget *> &>( connections ), excludedNodes
+	);
 }
 
-size_t GraphGadget::connectionGadgets( const Gaffer::Node *node, std::vector<ConnectionGadget *> &connections, const Gaffer::Set *excludedNodes )
+size_t GraphGadget::connectionGadgets(
+	const Gaffer::Node *node, std::vector<ConnectionGadget *> &connections, const Gaffer::Set *excludedNodes
+)
 {
 	for( Gaffer::Plug::RecursiveIterator it( node ); !it.done(); ++it )
 	{
@@ -446,7 +455,9 @@ size_t GraphGadget::connectionGadgets( const Gaffer::Node *node, std::vector<Con
 	return connections.size();
 }
 
-size_t GraphGadget::connectionGadgets( const Gaffer::Node *node, std::vector<const ConnectionGadget *> &connections, const Gaffer::Set *excludedNodes ) const
+size_t GraphGadget::connectionGadgets(
+	const Gaffer::Node *node, std::vector<const ConnectionGadget *> &connections, const Gaffer::Set *excludedNodes
+) const
 {
 	for( Gaffer::Plug::RecursiveIterator it( node ); !it.done(); ++it )
 	{
@@ -476,7 +487,9 @@ const AnnotationsGadget *GraphGadget::annotationsGadget() const
 	return getChild<AnnotationsGadget>( g_annotationsGadgetName );
 }
 
-size_t GraphGadget::upstreamNodeGadgets( const Gaffer::Node *node, std::vector<NodeGadget *> &upstreamNodeGadgets, size_t degreesOfSeparation )
+size_t GraphGadget::upstreamNodeGadgets(
+	const Gaffer::Node *node, std::vector<NodeGadget *> &upstreamNodeGadgets, size_t degreesOfSeparation
+)
 {
 	NodeGadget *g = nodeGadget( node );
 	if( !g )
@@ -490,13 +503,19 @@ size_t GraphGadget::upstreamNodeGadgets( const Gaffer::Node *node, std::vector<N
 	return 0;
 }
 
-size_t GraphGadget::upstreamNodeGadgets( const Gaffer::Node *node, std::vector<const NodeGadget *> &upstreamNodeGadgets, size_t degreesOfSeparation ) const
+size_t GraphGadget::upstreamNodeGadgets(
+	const Gaffer::Node *node, std::vector<const NodeGadget *> &upstreamNodeGadgets, size_t degreesOfSeparation
+) const
 {
 	// preferring naughty casts over maintaining two identical implementations
-	return const_cast<GraphGadget *>( this )->upstreamNodeGadgets( node, reinterpret_cast<std::vector<NodeGadget *> &>( upstreamNodeGadgets ), degreesOfSeparation );
+	return const_cast<GraphGadget *>( this )->upstreamNodeGadgets(
+		node, reinterpret_cast<std::vector<NodeGadget *> &>( upstreamNodeGadgets ), degreesOfSeparation
+	);
 }
 
-size_t GraphGadget::downstreamNodeGadgets( const Gaffer::Node *node, std::vector<NodeGadget *> &downstreamNodeGadgets, size_t degreesOfSeparation )
+size_t GraphGadget::downstreamNodeGadgets(
+	const Gaffer::Node *node, std::vector<NodeGadget *> &downstreamNodeGadgets, size_t degreesOfSeparation
+)
 {
 	NodeGadget *g = nodeGadget( node );
 	if( !g )
@@ -510,13 +529,20 @@ size_t GraphGadget::downstreamNodeGadgets( const Gaffer::Node *node, std::vector
 	return 0;
 }
 
-size_t GraphGadget::downstreamNodeGadgets( const Gaffer::Node *node, std::vector<const NodeGadget *> &downstreamNodeGadgets, size_t degreesOfSeparation ) const
+size_t GraphGadget::downstreamNodeGadgets(
+	const Gaffer::Node *node, std::vector<const NodeGadget *> &downstreamNodeGadgets, size_t degreesOfSeparation
+) const
 {
 	// preferring naughty casts over maintaining two identical implementations
-	return const_cast<GraphGadget *>( this )->downstreamNodeGadgets( node, reinterpret_cast<std::vector<NodeGadget *> &>( downstreamNodeGadgets ), degreesOfSeparation );
+	return const_cast<GraphGadget *>( this )->downstreamNodeGadgets(
+		node, reinterpret_cast<std::vector<NodeGadget *> &>( downstreamNodeGadgets ), degreesOfSeparation
+	);
 }
 
-size_t GraphGadget::connectedNodeGadgets( const Gaffer::Node *node, std::vector<NodeGadget *> &connectedNodeGadgets, Gaffer::Plug::Direction direction, size_t degreesOfSeparation )
+size_t GraphGadget::connectedNodeGadgets(
+	const Gaffer::Node *node, std::vector<NodeGadget *> &connectedNodeGadgets, Gaffer::Plug::Direction direction,
+	size_t degreesOfSeparation
+)
 {
 	NodeGadget *g = nodeGadget( node );
 	if( !g )
@@ -536,13 +562,21 @@ size_t GraphGadget::connectedNodeGadgets( const Gaffer::Node *node, std::vector<
 	return 0;
 }
 
-size_t GraphGadget::connectedNodeGadgets( const Gaffer::Node *node, std::vector<const NodeGadget *> &connectedNodeGadgets, Gaffer::Plug::Direction direction, size_t degreesOfSeparation ) const
+size_t GraphGadget::connectedNodeGadgets(
+	const Gaffer::Node *node, std::vector<const NodeGadget *> &connectedNodeGadgets, Gaffer::Plug::Direction direction,
+	size_t degreesOfSeparation
+) const
 {
 	// preferring naughty casts over maintaining two identical implementations
-	return const_cast<GraphGadget *>( this )->connectedNodeGadgets( node, reinterpret_cast<std::vector<NodeGadget *> &>( connectedNodeGadgets ), direction, degreesOfSeparation );
+	return const_cast<GraphGadget *>( this )->connectedNodeGadgets(
+		node, reinterpret_cast<std::vector<NodeGadget *> &>( connectedNodeGadgets ), direction, degreesOfSeparation
+	);
 }
 
-void GraphGadget::connectedNodeGadgetsWalk( NodeGadget *gadget, std::set<NodeGadget *> &connectedNodeGadgets, Gaffer::Plug::Direction direction, size_t degreesOfSeparation )
+void GraphGadget::connectedNodeGadgetsWalk(
+	NodeGadget *gadget, std::set<NodeGadget *> &connectedNodeGadgets, Gaffer::Plug::Direction direction,
+	size_t degreesOfSeparation
+)
 {
 	if( !degreesOfSeparation )
 	{
@@ -567,14 +601,18 @@ void GraphGadget::connectedNodeGadgetsWalk( NodeGadget *gadget, std::set<NodeGad
 				if( connectedNodeGadgets.insert( inputNodeGadget ).second )
 				{
 					// inserted the node for the first time
-					connectedNodeGadgetsWalk( inputNodeGadget, connectedNodeGadgets, direction, degreesOfSeparation - 1 );
+					connectedNodeGadgetsWalk(
+						inputNodeGadget, connectedNodeGadgets, direction, degreesOfSeparation - 1
+					);
 				}
 			}
 		}
 		else
 		{
 			// output plug
-			for( Gaffer::Plug::OutputContainer::const_iterator oIt = plug->outputs().begin(), eOIt = plug->outputs().end(); oIt != eOIt; oIt++ )
+			for( Gaffer::Plug::OutputContainer::const_iterator oIt = plug->outputs().begin(),
+															   eOIt = plug->outputs().end();
+				 oIt != eOIt; oIt++ )
 			{
 				ConnectionGadget *connection = connectionGadget( *oIt );
 				Nodule *nodule = connection ? connection->dstNodule() : nullptr;
@@ -584,7 +622,9 @@ void GraphGadget::connectedNodeGadgetsWalk( NodeGadget *gadget, std::set<NodeGad
 					if( connectedNodeGadgets.insert( outputNodeGadget ).second )
 					{
 						// inserted the node for the first time
-						connectedNodeGadgetsWalk( outputNodeGadget, connectedNodeGadgets, direction, degreesOfSeparation - 1 );
+						connectedNodeGadgetsWalk(
+							outputNodeGadget, connectedNodeGadgets, direction, degreesOfSeparation - 1
+						);
 					}
 				}
 			}
@@ -651,7 +691,9 @@ void GraphGadget::setNodeInputConnectionsMinimised( Gaffer::Node *node, bool min
 	Gaffer::BoolPlug *p = node->getChild<Gaffer::BoolPlug>( g_inputConnectionsMinimisedPlugName );
 	if( !p )
 	{
-		p = new Gaffer::BoolPlug( g_inputConnectionsMinimisedPlugName, Gaffer::Plug::In, false, Gaffer::Plug::Default | Gaffer::Plug::Dynamic );
+		p = new Gaffer::BoolPlug(
+			g_inputConnectionsMinimisedPlugName, Gaffer::Plug::In, false, Gaffer::Plug::Default | Gaffer::Plug::Dynamic
+		);
 		node->addChild( p );
 	}
 	p->setValue( minimised );
@@ -673,7 +715,9 @@ void GraphGadget::setNodeOutputConnectionsMinimised( Gaffer::Node *node, bool mi
 	Gaffer::BoolPlug *p = node->getChild<Gaffer::BoolPlug>( g_outputConnectionsMinimisedPlugName );
 	if( !p )
 	{
-		p = new Gaffer::BoolPlug( g_outputConnectionsMinimisedPlugName, Gaffer::Plug::In, false, Gaffer::Plug::Default | Gaffer::Plug::Dynamic );
+		p = new Gaffer::BoolPlug(
+			g_outputConnectionsMinimisedPlugName, Gaffer::Plug::In, false, Gaffer::Plug::Default | Gaffer::Plug::Dynamic
+		);
 		node->addChild( p );
 	}
 	p->setValue( minimised );
@@ -704,9 +748,8 @@ NodeGadget *GraphGadget::nodeGadgetAt( const IECore::LineSegment3f &lineInGadget
 {
 	const ViewportGadget *viewportGadget = ancestor<ViewportGadget>();
 
-	std::vector<Gadget *> gadgetsUnderMouse = viewportGadget->gadgetsAt(
-		viewportGadget->gadgetToRasterSpace( lineInGadgetSpace.p0, this )
-	);
+	std::vector<Gadget *> gadgetsUnderMouse =
+		viewportGadget->gadgetsAt( viewportGadget->gadgetToRasterSpace( lineInGadgetSpace.p0, this ) );
 
 	if( !gadgetsUnderMouse.size() )
 	{
@@ -726,9 +769,8 @@ ConnectionGadget *GraphGadget::connectionGadgetAt( const IECore::LineSegment3f &
 {
 	const ViewportGadget *viewportGadget = ancestor<ViewportGadget>();
 
-	std::vector<Gadget *> gadgetsUnderMouse = viewportGadget->gadgetsAt(
-		viewportGadget->gadgetToRasterSpace( lineInGadgetSpace.p0, this )
-	);
+	std::vector<Gadget *> gadgetsUnderMouse =
+		viewportGadget->gadgetsAt( viewportGadget->gadgetToRasterSpace( lineInGadgetSpace.p0, this ) );
 
 	if( !gadgetsUnderMouse.size() )
 	{
@@ -744,7 +786,9 @@ ConnectionGadget *GraphGadget::connectionGadgetAt( const IECore::LineSegment3f &
 	return connectionGadget;
 }
 
-ConnectionGadget *GraphGadget::reconnectionGadgetAt( const NodeGadget *gadget, const IECore::LineSegment3f &lineInGadgetSpace ) const
+ConnectionGadget *GraphGadget::reconnectionGadgetAt(
+	const NodeGadget *gadget, const IECore::LineSegment3f &lineInGadgetSpace
+) const
 {
 	const ViewportGadget *viewportGadget = ancestor<ViewportGadget>();
 	Imath::V3f center = gadget->transformedBound( this ).center();
@@ -753,18 +797,13 @@ ConnectionGadget *GraphGadget::reconnectionGadgetAt( const NodeGadget *gadget, c
 	rasterRegion.extendBy( viewportGadget->gadgetToRasterSpace( center - Imath::V3f( 2, 2, 1 ), this ) );
 	rasterRegion.extendBy( viewportGadget->gadgetToRasterSpace( center + Imath::V3f( 2, 2, 1 ), this ) );
 
-	std::vector<Gadget *> gadgetsUnderMouse = viewportGadget->gadgetsAt(
-		rasterRegion, GraphLayer::Connections
-	);
+	std::vector<Gadget *> gadgetsUnderMouse = viewportGadget->gadgetsAt( rasterRegion, GraphLayer::Connections );
 	for( Gadget *g : gadgetsUnderMouse )
 	{
 		if( ConnectionGadget *c = IECore::runTimeCast<ConnectionGadget>( g ) )
 		{
-			if(
-				c->srcNodule() &&
-				gadget->node() != c->srcNodule()->plug()->node() &&
-				gadget->node() != c->dstNodule()->plug()->node()
-			)
+			if( c->srcNodule() && gadget->node() != c->srcNodule()->plug()->node() &&
+				gadget->node() != c->dstNodule()->plug()->node() )
 			{
 				return c;
 			}
@@ -792,9 +831,12 @@ void GraphGadget::renderLayer( Layer layer, const Style *style, RenderReason rea
 					const NodeGadget *srcNodeGadget = nodeGadget( srcNodule->plug()->node() );
 					const Imath::V3f srcP = srcNodule->fullTransform( this ).translation();
 					const Imath::V3f dstP = m_dragReconnectDstNodule->fullTransform( this ).translation();
-					const Imath::V3f dstTangent = nodeGadget( m_dragReconnectDstNodule->plug()->node() )->connectionTangent( m_dragReconnectDstNodule );
+					const Imath::V3f dstTangent = nodeGadget( m_dragReconnectDstNodule->plug()->node() )
+													  ->connectionTangent( m_dragReconnectDstNodule );
 					/// \todo: can there be a highlighted/dashed state?
-					style->renderConnection( srcP, srcNodeGadget->connectionTangent( srcNodule ), dstP, dstTangent, Style::HighlightedState );
+					style->renderConnection(
+						srcP, srcNodeGadget->connectionTangent( srcNodule ), dstP, dstTangent, Style::HighlightedState
+					);
 				}
 
 				if( m_dragReconnectSrcNodule )
@@ -803,9 +845,12 @@ void GraphGadget::renderLayer( Layer layer, const Style *style, RenderReason rea
 					const NodeGadget *dstNodeGadget = nodeGadget( dstNodule->plug()->node() );
 					const Imath::V3f srcP = m_dragReconnectSrcNodule->fullTransform( this ).translation();
 					const Imath::V3f dstP = dstNodule->fullTransform( this ).translation();
-					const Imath::V3f srcTangent = nodeGadget( m_dragReconnectSrcNodule->plug()->node() )->connectionTangent( m_dragReconnectSrcNodule );
+					const Imath::V3f srcTangent = nodeGadget( m_dragReconnectSrcNodule->plug()->node() )
+													  ->connectionTangent( m_dragReconnectSrcNodule );
 					/// \todo: can there be a highlighted/dashed state?
-					style->renderConnection( srcP, srcTangent, dstP, dstNodeGadget->connectionTangent( dstNodule ), Style::HighlightedState );
+					style->renderConnection(
+						srcP, srcTangent, dstP, dstNodeGadget->connectionTangent( dstNodule ), Style::HighlightedState
+					);
 				}
 			}
 			break;
@@ -819,8 +864,12 @@ void GraphGadget::renderLayer( Layer layer, const Style *style, RenderReason rea
 				ViewportGadget::RasterScope rasterScope( viewportGadget );
 
 				Box2f b;
-				b.extendBy( viewportGadget->gadgetToRasterSpace( V3f( m_dragStartPosition.x, m_dragStartPosition.y, 0 ), this ) );
-				b.extendBy( viewportGadget->gadgetToRasterSpace( V3f( m_lastDragPosition.x, m_lastDragPosition.y, 0 ), this ) );
+				b.extendBy(
+					viewportGadget->gadgetToRasterSpace( V3f( m_dragStartPosition.x, m_dragStartPosition.y, 0 ), this )
+				);
+				b.extendBy(
+					viewportGadget->gadgetToRasterSpace( V3f( m_lastDragPosition.x, m_lastDragPosition.y, 0 ), this )
+				);
 				style->renderSelectionBox( b );
 			}
 			break;
@@ -955,7 +1004,8 @@ void GraphGadget::plugSet( Gaffer::Plug *plug )
 	{
 		std::vector<ConnectionGadget *> connections;
 		connectionGadgets( plug->node(), connections );
-		for( std::vector<ConnectionGadget *>::const_iterator it = connections.begin(), eIt = connections.end(); it != eIt; ++it )
+		for( std::vector<ConnectionGadget *>::const_iterator it = connections.begin(), eIt = connections.end();
+			 it != eIt; ++it )
 		{
 			updateConnectionGadgetMinimisation( *it );
 		}
@@ -1023,9 +1073,8 @@ bool GraphGadget::buttonPress( GadgetPtr gadget, const ButtonEvent &event )
 
 		ViewportGadget *viewportGadget = ancestor<ViewportGadget>();
 
-		std::vector<Gadget *> gadgetsUnderMouse = viewportGadget->gadgetsAt(
-			viewportGadget->gadgetToRasterSpace( event.line.p0, this )
-		);
+		std::vector<Gadget *> gadgetsUnderMouse =
+			viewportGadget->gadgetsAt( viewportGadget->gadgetToRasterSpace( event.line.p0, this ) );
 
 		if( !gadgetsUnderMouse.size() || gadgetsUnderMouse[0] == this )
 		{
@@ -1063,8 +1112,11 @@ bool GraphGadget::buttonPress( GadgetPtr gadget, const ButtonEvent &event )
 			if( ( event.modifiers & ButtonEvent::Alt ) && ( controlHeld || shiftHeld ) )
 			{
 				std::vector<NodeGadget *> connected;
-				connectedNodeGadgets( node, connected, event.modifiers & ButtonEvent::Shift ? Gaffer::Plug::In : Gaffer::Plug::Out );
-				for( std::vector<NodeGadget *>::const_iterator it = connected.begin(), eIt = connected.end(); it != eIt; ++it )
+				connectedNodeGadgets(
+					node, connected, event.modifiers & ButtonEvent::Shift ? Gaffer::Plug::In : Gaffer::Plug::Out
+				);
+				for( std::vector<NodeGadget *>::const_iterator it = connected.begin(), eIt = connected.end(); it != eIt;
+					 ++it )
 				{
 					affectedNodes.push_back( ( *it )->node() );
 				}
@@ -1119,11 +1171,8 @@ IECore::RunTimeTypedPtr GraphGadget::dragBegin( GadgetPtr gadget, const DragDrop
 	NodeGadget *nodeGadget = nodeGadgetAt( event.line );
 	if( event.buttons == ButtonEvent::Left )
 	{
-		if(
-			nodeGadget &&
-			m_scriptNode->selection()->contains( nodeGadget->node() ) &&
-			!readOnly( m_scriptNode->selection() )
-		)
+		if( nodeGadget && m_scriptNode->selection()->contains( nodeGadget->node() ) &&
+			!readOnly( m_scriptNode->selection() ) )
 		{
 			m_dragMode = Moving;
 			// we have to return an object to start the drag but the drag we're
@@ -1236,14 +1285,13 @@ bool GraphGadget::dragMove( GadgetPtr gadget, const DragDropEvent &event )
 		// the right X range.
 		const std::vector<Imath::V2f> &snapPoints = m_dragSnapPoints;
 		V2f pOffset = startPos - m_dragStartPosition;
-		vector<V2f>::const_iterator pEnd = lower_bound( snapPoints.begin(), snapPoints.end(), pOffset + V2f( snapThresh ), CompareV2fX() );
-		vector<V2f>::const_iterator pIt = upper_bound( snapPoints.begin(), snapPoints.end(), pOffset - V2f( snapThresh ), CompareV2fX() );
+		vector<V2f>::const_iterator pEnd =
+			lower_bound( snapPoints.begin(), snapPoints.end(), pOffset + V2f( snapThresh ), CompareV2fX() );
+		vector<V2f>::const_iterator pIt =
+			upper_bound( snapPoints.begin(), snapPoints.end(), pOffset - V2f( snapThresh ), CompareV2fX() );
 		for( ; pIt != pEnd; pIt++ )
 		{
-			if(
-				fabs( pOffset[1] - ( *pIt )[1] ) < snapThresh &&
-				fabs( pOffset[0] - ( *pIt )[0] ) < snapThresh
-			)
+			if( fabs( pOffset[1] - ( *pIt )[1] ) < snapThresh && fabs( pOffset[0] - ( *pIt )[0] ) < snapThresh )
 			{
 				pos = *pIt + m_dragStartPosition;
 				break;
@@ -1286,7 +1334,8 @@ void GraphGadget::updateDragReconnectCandidate( const DragDropEvent &event )
 		return;
 	}
 
-	const Gaffer::DependencyNode *node = IECore::runTimeCast<const Gaffer::DependencyNode>( m_scriptNode->selection()->member( 0 ) );
+	const Gaffer::DependencyNode *node =
+		IECore::runTimeCast<const Gaffer::DependencyNode>( m_scriptNode->selection()->member( 0 ) );
 	NodeGadget *nodeGadget = this->nodeGadget( node );
 	if( !node || !nodeGadget )
 	{
@@ -1317,10 +1366,8 @@ void GraphGadget::updateDragReconnectCandidate( const DragDropEvent &event )
 			continue;
 		}
 
-		if(
-			!connection->dstNodule()->plug()->acceptsInput( outPlug ) ||
-			!inPlug->acceptsInput( connection->srcNodule()->plug() )
-		)
+		if( !connection->dstNodule()->plug()->acceptsInput( outPlug ) ||
+			!inPlug->acceptsInput( connection->srcNodule()->plug() ) )
 		{
 			continue;
 		}
@@ -1337,7 +1384,9 @@ void GraphGadget::updateDragReconnectCandidate( const DragDropEvent &event )
 		}
 
 		bool haveOutputs = false;
-		for( Gaffer::Plug::OutputContainer::const_iterator oIt = outPlug->outputs().begin(), oeIt = outPlug->outputs().end(); oIt != oeIt; ++oIt )
+		for( Gaffer::Plug::OutputContainer::const_iterator oIt = outPlug->outputs().begin(),
+														   oeIt = outPlug->outputs().end();
+			 oIt != oeIt; ++oIt )
 		{
 			if( m_root->isAncestorOf( *oIt ) )
 			{
@@ -1424,7 +1473,8 @@ void GraphGadget::calculateDragSnapOffsets( Gaffer::Set *nodes )
 		connections.clear();
 		connectionGadgets( node, connections, nodes );
 
-		for( std::vector<const ConnectionGadget *>::const_iterator it = connections.begin(), eIt = connections.end(); it != eIt; ++it )
+		for( std::vector<const ConnectionGadget *>::const_iterator it = connections.begin(), eIt = connections.end();
+			 it != eIt; ++it )
 		{
 			// get the node gadgets at either end of the connection
 
@@ -1512,11 +1562,15 @@ void GraphGadget::calculateDragSnapOffsets( Gaffer::Set *nodes )
 
 			if( snapAxis == 0 )
 			{
-				m_dragSnapPoints.push_back( Imath::V2f( offset, baseOffsetOtherAxis + 1.5f * offsetDirectionOtherAxis ) );
+				m_dragSnapPoints.push_back(
+					Imath::V2f( offset, baseOffsetOtherAxis + 1.5f * offsetDirectionOtherAxis )
+				);
 			}
 			else
 			{
-				m_dragSnapPoints.push_back( Imath::V2f( baseOffsetOtherAxis + 1.5f * offsetDirectionOtherAxis, offset ) );
+				m_dragSnapPoints.push_back(
+					Imath::V2f( baseOffsetOtherAxis + 1.5f * offsetDirectionOtherAxis, offset )
+				);
 			}
 		}
 	}
@@ -1527,7 +1581,9 @@ void GraphGadget::calculateDragSnapOffsets( Gaffer::Set *nodes )
 	for( int axis = 0; axis <= 1; ++axis )
 	{
 		std::sort( m_dragSnapOffsets[axis].begin(), m_dragSnapOffsets[axis].end() );
-		m_dragSnapOffsets[axis].erase( std::unique( m_dragSnapOffsets[axis].begin(), m_dragSnapOffsets[axis].end() ), m_dragSnapOffsets[axis].end() );
+		m_dragSnapOffsets[axis].erase(
+			std::unique( m_dragSnapOffsets[axis].begin(), m_dragSnapOffsets[axis].end() ), m_dragSnapOffsets[axis].end()
+		);
 	}
 
 	std::sort( m_dragSnapPoints.begin(), m_dragSnapPoints.end(), CompareV2fX() );
@@ -1657,10 +1713,14 @@ NodeGadget *GraphGadget::addNodeGadget( Gaffer::Node *node )
 	addChild( nodeGadget );
 
 	NodeGadgetEntry &nodeGadgetEntry = m_nodeGadgets[node];
-	nodeGadgetEntry.inputChangedConnection = node->plugInputChangedSignal().connect( boost::bind( &GraphGadget::inputChanged, this, ::_1 ) );
-	nodeGadgetEntry.plugSetConnection = node->plugSetSignal().connect( boost::bind( &GraphGadget::plugSet, this, ::_1 ) );
-	nodeGadgetEntry.noduleAddedConnection = nodeGadget->noduleAddedSignal().connect( boost::bind( &GraphGadget::noduleAdded, this, ::_2 ) );
-	nodeGadgetEntry.noduleRemovedConnection = nodeGadget->noduleRemovedSignal().connect( boost::bind( &GraphGadget::noduleRemoved, this, ::_2 ) );
+	nodeGadgetEntry.inputChangedConnection =
+		node->plugInputChangedSignal().connect( boost::bind( &GraphGadget::inputChanged, this, ::_1 ) );
+	nodeGadgetEntry.plugSetConnection =
+		node->plugSetSignal().connect( boost::bind( &GraphGadget::plugSet, this, ::_1 ) );
+	nodeGadgetEntry.noduleAddedConnection =
+		nodeGadget->noduleAddedSignal().connect( boost::bind( &GraphGadget::noduleAdded, this, ::_2 ) );
+	nodeGadgetEntry.noduleRemovedConnection =
+		nodeGadget->noduleRemovedSignal().connect( boost::bind( &GraphGadget::noduleRemoved, this, ::_2 ) );
 	nodeGadgetEntry.gadget = nodeGadget.get();
 
 	if( m_scriptNode )
@@ -1738,7 +1798,8 @@ void GraphGadget::addConnectionGadgets( Nodule *nodule )
 	else
 	{
 		// Reconnect any old output connections which may have been dangling
-		for( Gaffer::Plug::OutputContainer::const_iterator oIt( nodule->plug()->outputs().begin() ); oIt != nodule->plug()->outputs().end(); ++oIt )
+		for( Gaffer::Plug::OutputContainer::const_iterator oIt( nodule->plug()->outputs().begin() );
+			 oIt != nodule->plug()->outputs().end(); ++oIt )
 		{
 			ConnectionGadget *connection = findConnectionGadget( *oIt );
 			if( connection && connection->srcNodule() != nodule )
@@ -1799,7 +1860,8 @@ void GraphGadget::removeConnectionGadgets( const Nodule *nodule )
 	else
 	{
 		// make output connection gadgets dangle
-		for( Gaffer::Plug::OutputContainer::const_iterator oIt( nodule->plug()->outputs().begin() ); oIt != nodule->plug()->outputs().end(); oIt++ )
+		for( Gaffer::Plug::OutputContainer::const_iterator oIt( nodule->plug()->outputs().begin() );
+			 oIt != nodule->plug()->outputs().end(); oIt++ )
 		{
 			if( ConnectionGadget *connection = findConnectionGadget( *oIt ) )
 			{

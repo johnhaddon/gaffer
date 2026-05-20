@@ -57,7 +57,7 @@ IE_CORE_FORWARDDECLARE( Plug )
 class GAFFER_API PerformanceMonitor : public Monitor
 {
 
-	public:
+public:
 
 	PerformanceMonitor();
 	~PerformanceMonitor() override;
@@ -68,8 +68,7 @@ class GAFFER_API PerformanceMonitor : public Monitor
 	{
 
 		Statistics(
-			size_t hashCount = 0,
-			size_t computeCount = 0,
+			size_t hashCount = 0, size_t computeCount = 0,
 			boost::chrono::nanoseconds hashDuration = boost::chrono::nanoseconds( 0 ),
 			boost::chrono::nanoseconds computeDuration = boost::chrono::nanoseconds( 0 )
 		);
@@ -92,12 +91,12 @@ class GAFFER_API PerformanceMonitor : public Monitor
 	const Statistics &combinedStatistics() const;
 
 
-	protected:
+protected:
 
 	void processStarted( const Process *process ) override;
 	void processFinished( const Process *process ) override;
 
-	private:
+private:
 
 	// For performance reasons we accumulate our statistics into
 	// thread local storage while computations are running.
@@ -114,7 +113,8 @@ class GAFFER_API PerformanceMonitor : public Monitor
 		boost::chrono::high_resolution_clock::time_point then;
 	};
 
-	tbb::enumerable_thread_specific<ThreadData, tbb::cache_aligned_allocator<ThreadData>, tbb::ets_key_per_instance> m_threadData;
+	tbb::enumerable_thread_specific<ThreadData, tbb::cache_aligned_allocator<ThreadData>, tbb::ets_key_per_instance>
+		m_threadData;
 
 	// Then when we want to query it, we collate it into m_statistics.
 	void collate() const;

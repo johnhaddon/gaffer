@@ -75,7 +75,9 @@ namespace
 const float g_cutLineRadius = 4.0f;
 const Color4f g_cutLineColor = Color4f( 0.7f, 0.2f, 0.1f, 0.375f );
 
-std::vector<ConnectionGadget *> editableConnectionGadgetsAtLine( const ViewportGadget *viewportGadget, const LineSegment2f &line, const float radius, const bool includeEndpoint )
+std::vector<ConnectionGadget *> editableConnectionGadgetsAtLine(
+	const ViewportGadget *viewportGadget, const LineSegment2f &line, const float radius, const bool includeEndpoint
+)
 {
 	std::unordered_set<Gadget *> gadgets;
 
@@ -96,7 +98,8 @@ std::vector<ConnectionGadget *> editableConnectionGadgetsAtLine( const ViewportG
 	for( int i = 0; i < samples; ++i )
 	{
 		const V2f p = line( i * step );
-		const std::vector<Gadget *> gadgetsAtBox = viewportGadget->gadgetsAt( Box2f( p - padding, p + padding ), GraphLayer::Connections );
+		const std::vector<Gadget *> gadgetsAtBox =
+			viewportGadget->gadgetsAt( Box2f( p - padding, p + padding ), GraphLayer::Connections );
 		gadgets.insert( gadgetsAtBox.begin(), gadgetsAtBox.end() );
 	}
 
@@ -108,10 +111,9 @@ std::vector<ConnectionGadget *> editableConnectionGadgetsAtLine( const ViewportG
 		{
 			connectionGadget = gadget->ancestor<ConnectionGadget>();
 		}
-		if(
-			connectionGadget && !Gaffer::MetadataAlgo::readOnly( connectionGadget->dstNodule()->plug() ) &&
-			( !connectionGadget->srcNodule() || !Gaffer::MetadataAlgo::readOnly( connectionGadget->srcNodule()->plug() ) )
-		)
+		if( connectionGadget && !Gaffer::MetadataAlgo::readOnly( connectionGadget->dstNodule()->plug() ) &&
+			( !connectionGadget->srcNodule() ||
+			  !Gaffer::MetadataAlgo::readOnly( connectionGadget->srcNodule()->plug() ) ) )
 		{
 			connectionGadgets.push_back( connectionGadget );
 		}
@@ -145,7 +147,10 @@ const char *translucentConstantFragSource()
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( DragEditGadget );
 
 DragEditGadget::DragEditGadget()
-	: Gadget( "DragEditGadget" ), m_mode( None ), m_editable( false ), m_dragPositions( new V3fVectorData )
+	: Gadget( "DragEditGadget" ),
+	  m_mode( None ),
+	  m_editable( false ),
+	  m_dragPositions( new V3fVectorData )
 {
 	buttonPressSignal().connect( boost::bind( &DragEditGadget::buttonPress, this, ::_1, ::_2 ) );
 	buttonReleaseSignal().connect( boost::bind( &DragEditGadget::buttonRelease, this, ::_1, ::_2 ) );
@@ -157,9 +162,7 @@ DragEditGadget::DragEditGadget()
 	leaveSignal().connect( boost::bind( &DragEditGadget::leave, this ) );
 }
 
-DragEditGadget::~DragEditGadget()
-{
-}
+DragEditGadget::~DragEditGadget() {}
 
 bool DragEditGadget::acceptsParent( const GraphComponent *potentialParent ) const
 {
@@ -173,12 +176,10 @@ void DragEditGadget::parentChanging( Gaffer::GraphComponent *newParent )
 
 	if( auto graphGadget = runTimeCast<GraphGadget>( newParent ) )
 	{
-		m_graphGadgetKeyPressConnection = graphGadget->keyPressSignal().connect(
-			boost::bind( &DragEditGadget::keyPress, this, ::_1, ::_2 )
-		);
-		m_graphGadgetKeyReleaseConnection = graphGadget->keyReleaseSignal().connect(
-			boost::bind( &DragEditGadget::keyRelease, this, ::_1, ::_2 )
-		);
+		m_graphGadgetKeyPressConnection =
+			graphGadget->keyPressSignal().connect( boost::bind( &DragEditGadget::keyPress, this, ::_1, ::_2 ) );
+		m_graphGadgetKeyReleaseConnection =
+			graphGadget->keyReleaseSignal().connect( boost::bind( &DragEditGadget::keyRelease, this, ::_1, ::_2 ) );
 	}
 }
 
@@ -212,14 +213,19 @@ void DragEditGadget::renderLayer( Layer layer, const Style *style, RenderReason 
 		group->getState()->add( new IECoreGL::CurvesPrimitive::GLLineWidth( g_cutLineRadius * 2.0f ) );
 		group->getState()->add( new IECoreGL::LineSmoothingStateComponent( true ) );
 		group->getState()->add( new IECoreGL::Color( g_cutLineColor ) );
-		group->getState()->add(
-			new IECoreGL::ShaderStateComponent( ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "", translucentConstantFragSource(), new CompoundObject )
-		);
+		group->getState()->add( new IECoreGL::ShaderStateComponent(
+			ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "",
+			translucentConstantFragSource(), new CompoundObject
+		) );
 
 		IntVectorDataPtr vertsPerCurve = new IntVectorData();
 		vertsPerCurve->writable().push_back( m_dragPositions->readable().size() );
-		IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive( CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurve );
-		curves->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, m_dragPositions ) );
+		IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive(
+			CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurve
+		);
+		curves->addPrimitiveVariable(
+			"P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, m_dragPositions )
+		);
 		group->addChild( curves );
 
 		group->render( glState );
@@ -255,7 +261,9 @@ bool DragEditGadget::keyPress( GadgetPtr gadget, const KeyEvent &event )
 	if( event.key == "X" && !event.modifiers )
 	{
 		m_mode = Disconnect;
-		m_editable = !( Gaffer::MetadataAlgo::readOnly( graphGadget()->getRoot() ) || Gaffer::MetadataAlgo::getChildNodesAreReadOnly( graphGadget()->getRoot() ) );
+		m_editable =
+			!( Gaffer::MetadataAlgo::readOnly( graphGadget()->getRoot() ) ||
+			   Gaffer::MetadataAlgo::getChildNodesAreReadOnly( graphGadget()->getRoot() ) );
 		Pointer::setCurrent( m_editable ? "cut" : "notEditable" );
 
 		return true;
@@ -414,7 +422,9 @@ void DragEditGadget::disconnectConnectionGadgets()
 		std::unordered_set<ConnectionGadget *> connectionsToDisconnect;
 		for( const auto &line : rasterLines )
 		{
-			const auto connectionsAtLine = editableConnectionGadgetsAtLine( viewportGadget, line, g_cutLineRadius, /* includeEndpoint = */ &line == &rasterLines.back() );
+			const auto connectionsAtLine = editableConnectionGadgetsAtLine(
+				viewportGadget, line, g_cutLineRadius, /* includeEndpoint = */ &line == &rasterLines.back()
+			);
 			connectionsToDisconnect.insert( connectionsAtLine.begin(), connectionsAtLine.end() );
 		}
 

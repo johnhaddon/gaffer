@@ -45,15 +45,12 @@ namespace Gaffer
 class GAFFER_API TransformPlug : public ValuePlug
 {
 
-	public:
+public:
 
 	explicit TransformPlug(
-		const std::string &name = defaultName<TransformPlug>(),
-		Direction direction = In,
-		const Imath::V3f &defaultTranslate = Imath::V3f( 0 ),
-		const Imath::V3f &defaultRotate = Imath::V3f( 0 ),
-		const Imath::V3f &defaultScale = Imath::V3f( 1 ),
-		const Imath::V3f &defaultPivot = Imath::V3f( 0 ),
+		const std::string &name = defaultName<TransformPlug>(), Direction direction = In,
+		const Imath::V3f &defaultTranslate = Imath::V3f( 0 ), const Imath::V3f &defaultRotate = Imath::V3f( 0 ),
+		const Imath::V3f &defaultScale = Imath::V3f( 1 ), const Imath::V3f &defaultPivot = Imath::V3f( 0 ),
 		unsigned flags = Default
 	);
 	~TransformPlug() override;
@@ -74,7 +71,7 @@ class GAFFER_API TransformPlug : public ValuePlug
 
 	Imath::M44f matrix() const;
 
-	private:
+private:
 
 	static size_t g_firstPlugIndex;
 };

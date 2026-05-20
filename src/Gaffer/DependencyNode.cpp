@@ -41,14 +41,9 @@ using namespace Gaffer;
 
 GAFFER_NODE_DEFINE_TYPE( DependencyNode );
 
-DependencyNode::DependencyNode( const std::string &name )
-	: Node( name )
-{
-}
+DependencyNode::DependencyNode( const std::string &name ) : Node( name ) {}
 
-DependencyNode::~DependencyNode()
-{
-}
+DependencyNode::~DependencyNode() {}
 
 void DependencyNode::affects( const Plug *input, AffectedPlugsContainer &outputs ) const
 {

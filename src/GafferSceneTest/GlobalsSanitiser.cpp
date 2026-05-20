@@ -50,9 +50,7 @@ using namespace Gaffer;
 using namespace GafferScene;
 using namespace GafferSceneTest;
 
-GlobalsSanitiser::GlobalsSanitiser()
-{
-}
+GlobalsSanitiser::GlobalsSanitiser() {}
 
 void GlobalsSanitiser::processStarted( const Gaffer::Process *process )
 {
@@ -108,8 +106,7 @@ void GlobalsSanitiser::warn( const Gaffer::Process &process, const Gaffer::Compo
 	IECore::msg(
 		IECore::Msg::Warning, "GlobalsSanitiser",
 		fmt::format(
-			"Globals {} depends on {}",
-			dependentGlobals->relativeName( dependentGlobals->ancestor<ScriptNode>() ),
+			"Globals {} depends on {}", dependentGlobals->relativeName( dependentGlobals->ancestor<ScriptNode>() ),
 			process.plug()->relativeName( process.plug()->ancestor<ScriptNode>() )
 		)
 	);

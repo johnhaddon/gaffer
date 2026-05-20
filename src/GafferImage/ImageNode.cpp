@@ -52,17 +52,14 @@ GAFFER_NODE_DEFINE_TYPE( ImageNode );
 
 size_t ImageNode::g_firstPlugIndex = 0;
 
-ImageNode::ImageNode( const std::string &name )
-	: ComputeNode( name )
+ImageNode::ImageNode( const std::string &name ) : ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "out", Gaffer::Plug::Out ) );
 	addChild( new BoolPlug( "enabled", Gaffer::Plug::In, true ) );
 }
 
-ImageNode::~ImageNode()
-{
-}
+ImageNode::~ImageNode() {}
 
 ImagePlug *ImageNode::outPlug()
 {
@@ -151,42 +148,58 @@ void ImageNode::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *co
 	}
 }
 
-void ImageNode::hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ImageNode::hashViewNames(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ComputeNode::hash( parent->viewNamesPlug(), context, h );
 }
 
-void ImageNode::hashFormat( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ImageNode::hashFormat(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ComputeNode::hash( parent->formatPlug(), context, h );
 }
 
-void ImageNode::hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ImageNode::hashDataWindow(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ComputeNode::hash( parent->dataWindowPlug(), context, h );
 }
 
-void ImageNode::hashMetadata( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ImageNode::hashMetadata(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ComputeNode::hash( parent->metadataPlug(), context, h );
 }
 
-void ImageNode::hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ImageNode::hashDeep(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ComputeNode::hash( parent->deepPlug(), context, h );
 }
 
-void ImageNode::hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ImageNode::hashSampleOffsets(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ComputeNode::hash( parent->sampleOffsetsPlug(), context, h );
 }
 
-void ImageNode::hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ImageNode::hashChannelNames(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ComputeNode::hash( parent->channelNamesPlug(), context, h );
 }
 
-void ImageNode::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ImageNode::hashChannelData(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ComputeNode::hash( parent->channelDataPlug(), context, h );
 }
@@ -219,33 +232,23 @@ void ImageNode::compute( ValuePlug *output, const Context *context ) const
 
 	if( output == imagePlug->viewNamesPlug() )
 	{
-		static_cast<StringVectorDataPlug *>( output )->setValue(
-			computeViewNames( context, imagePlug )
-		);
+		static_cast<StringVectorDataPlug *>( output )->setValue( computeViewNames( context, imagePlug ) );
 	}
 	else if( output == imagePlug->formatPlug() )
 	{
-		static_cast<AtomicFormatPlug *>( output )->setValue(
-			computeFormat( context, imagePlug )
-		);
+		static_cast<AtomicFormatPlug *>( output )->setValue( computeFormat( context, imagePlug ) );
 	}
 	else if( output == imagePlug->dataWindowPlug() )
 	{
-		static_cast<AtomicBox2iPlug *>( output )->setValue(
-			computeDataWindow( context, imagePlug )
-		);
+		static_cast<AtomicBox2iPlug *>( output )->setValue( computeDataWindow( context, imagePlug ) );
 	}
 	else if( output == imagePlug->metadataPlug() )
 	{
-		static_cast<AtomicCompoundDataPlug *>( output )->setValue(
-			computeMetadata( context, imagePlug )
-		);
+		static_cast<AtomicCompoundDataPlug *>( output )->setValue( computeMetadata( context, imagePlug ) );
 	}
 	else if( output == imagePlug->deepPlug() )
 	{
-		static_cast<BoolPlug *>( output )->setValue(
-			computeDeep( context, imagePlug )
-		);
+		static_cast<BoolPlug *>( output )->setValue( computeDeep( context, imagePlug ) );
 	}
 	else if( output == imagePlug->sampleOffsetsPlug() )
 	{
@@ -254,15 +257,11 @@ void ImageNode::compute( ValuePlug *output, const Context *context ) const
 		{
 			throw Exception( "The image:tileOrigin must be a multiple of ImagePlug::tileSize()" );
 		}
-		static_cast<IntVectorDataPlug *>( output )->setValue(
-			computeSampleOffsets( tileOrigin, context, imagePlug )
-		);
+		static_cast<IntVectorDataPlug *>( output )->setValue( computeSampleOffsets( tileOrigin, context, imagePlug ) );
 	}
 	else if( output == imagePlug->channelNamesPlug() )
 	{
-		static_cast<StringVectorDataPlug *>( output )->setValue(
-			computeChannelNames( context, imagePlug )
-		);
+		static_cast<StringVectorDataPlug *>( output )->setValue( computeChannelNames( context, imagePlug ) );
 	}
 	else if( output == imagePlug->channelDataPlug() )
 	{
@@ -285,7 +284,9 @@ void ImageNode::compute( ValuePlug *output, const Context *context ) const
 	}
 }
 
-IECore::ConstStringVectorDataPtr ImageNode::computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr ImageNode::computeViewNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	throw IECore::NotImplementedException( string( typeName() ) + "::computeViewNames" );
 }
@@ -311,17 +312,24 @@ bool ImageNode::computeDeep( const Gaffer::Context *context, const ImagePlug *pa
 	throw IECore::NotImplementedException( string( typeName() ) + "::computeDeep" );
 }
 
-IECore::ConstIntVectorDataPtr ImageNode::computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstIntVectorDataPtr ImageNode::computeSampleOffsets(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	throw IECore::NotImplementedException( string( typeName() ) + "::computeSampleOffsets" );
 }
 
-IECore::ConstStringVectorDataPtr ImageNode::computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr ImageNode::computeChannelNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	throw IECore::NotImplementedException( string( typeName() ) + "::computeChannelNames" );
 }
 
-IECore::ConstFloatVectorDataPtr ImageNode::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr ImageNode::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	throw IECore::NotImplementedException( string( typeName() ) + "::computeChannelData" );
 }

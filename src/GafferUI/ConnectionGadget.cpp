@@ -49,14 +49,14 @@ using namespace GafferUI;
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ConnectionGadget );
 
 ConnectionGadget::ConnectionGadget( GafferUI::NodulePtr srcNodule, GafferUI::NodulePtr dstNodule )
-	: ConnectionCreator( defaultName<ConnectionGadget>() ), m_active( false ), m_minimised( false )
+	: ConnectionCreator( defaultName<ConnectionGadget>() ),
+	  m_active( false ),
+	  m_minimised( false )
 {
 	setNodules( srcNodule, dstNodule );
 }
 
-ConnectionGadget::~ConnectionGadget()
-{
-}
+ConnectionGadget::~ConnectionGadget() {}
 
 bool ConnectionGadget::acceptsParent( const Gaffer::GraphComponent *potentialParent ) const
 {
@@ -145,7 +145,8 @@ ConnectionGadgetPtr ConnectionGadget::create( NodulePtr srcNodule, NodulePtr dst
 			NamedCreatorMap::const_iterator it = m.find( t );
 			if( it != m.end() )
 			{
-				for( RegexAndCreatorVector::const_reverse_iterator nIt = it->second.rbegin(); nIt != it->second.rend(); nIt++ )
+				for( RegexAndCreatorVector::const_reverse_iterator nIt = it->second.rbegin(); nIt != it->second.rend();
+					 nIt++ )
 				{
 					if( boost::regex_match( plugPath, nIt->first ) )
 					{
@@ -177,7 +178,9 @@ void ConnectionGadget::registerConnectionGadget( IECore::TypeId dstPlugType, Con
 	creators()[dstPlugType] = creator;
 }
 
-void ConnectionGadget::registerConnectionGadget( const IECore::TypeId nodeType, const std::string &dstPlugPathRegex, ConnectionGadgetCreator creator )
+void ConnectionGadget::registerConnectionGadget(
+	const IECore::TypeId nodeType, const std::string &dstPlugPathRegex, ConnectionGadgetCreator creator
+)
 {
 	namedCreators()[nodeType].push_back( RegexAndCreator( boost::regex( dstPlugPathRegex ), creator ) );
 }

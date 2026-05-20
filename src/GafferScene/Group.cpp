@@ -66,8 +66,7 @@ GAFFER_NODE_DEFINE_TYPE( Group );
 
 size_t Group::g_firstPlugIndex = 0;
 
-Group::Group( const std::string &name )
-	: SceneProcessor( name, 1 )
+Group::Group( const std::string &name ) : SceneProcessor( name, 1 )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -80,9 +79,7 @@ Group::Group( const std::string &name )
 	outPlug()->globalsPlug()->setInput( inPlug()->globalsPlug() );
 }
 
-Group::~Group()
-{
-}
+Group::~Group() {}
 
 ScenePlug *Group::nextInPlug()
 {
@@ -210,7 +207,9 @@ void Group::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context )
 	return SceneProcessor::compute( output, context );
 }
 
-void Group::hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Group::hashBound(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	if( path.size() == 0 ) // "/"
 	{
@@ -266,7 +265,9 @@ Imath::Box3f Group::computeBound( const ScenePath &path, const Gaffer::Context *
 	}
 }
 
-void Group::hashTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Group::hashTransform(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	if( path.size() == 0 ) // "/"
 	{
@@ -286,7 +287,9 @@ void Group::hashTransform( const ScenePath &path, const Gaffer::Context *context
 	}
 }
 
-Imath::M44f Group::computeTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::M44f Group::computeTransform(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( path.size() == 0 )
 	{
@@ -304,7 +307,9 @@ Imath::M44f Group::computeTransform( const ScenePath &path, const Gaffer::Contex
 	}
 }
 
-void Group::hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Group::hashAttributes(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	if( path.size() <= 1 ) // "/" or "/group"
 	{
@@ -319,7 +324,9 @@ void Group::hashAttributes( const ScenePath &path, const Gaffer::Context *contex
 	}
 }
 
-IECore::ConstCompoundObjectPtr Group::computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstCompoundObjectPtr Group::computeAttributes(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( path.size() <= 1 )
 	{
@@ -333,7 +340,9 @@ IECore::ConstCompoundObjectPtr Group::computeAttributes( const ScenePath &path, 
 	}
 }
 
-void Group::hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Group::hashObject(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	if( path.size() <= 1 ) // "/" or "/group"
 	{
@@ -348,7 +357,9 @@ void Group::hashObject( const ScenePath &path, const Gaffer::Context *context, c
 	}
 }
 
-IECore::ConstObjectPtr Group::computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstObjectPtr Group::computeObject(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( path.size() <= 1 )
 	{
@@ -362,7 +373,9 @@ IECore::ConstObjectPtr Group::computeObject( const ScenePath &path, const Gaffer
 	}
 }
 
-void Group::hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Group::hashChildNames(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	if( path.size() == 0 ) // "/"
 	{
@@ -383,7 +396,9 @@ void Group::hashChildNames( const ScenePath &path, const Gaffer::Context *contex
 	}
 }
 
-IECore::ConstInternedStringVectorDataPtr Group::computeChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstInternedStringVectorDataPtr Group::computeChildNames(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( path.size() == 0 )
 	{
@@ -396,7 +411,8 @@ IECore::ConstInternedStringVectorDataPtr Group::computeChildNames( const ScenePa
 	else if( path.size() == 1 )
 	{
 		ScenePlug::GlobalScope s( context );
-		Private::ConstChildNamesMapPtr mapping = boost::static_pointer_cast<const Private::ChildNamesMap>( mappingPlug()->getValue() );
+		Private::ConstChildNamesMapPtr mapping =
+			boost::static_pointer_cast<const Private::ChildNamesMap>( mappingPlug()->getValue() );
 		return mapping->outputChildNames();
 	}
 	else
@@ -417,7 +433,9 @@ void Group::hashSetNames( const Gaffer::Context *context, const ScenePlug *paren
 	setsPlug()->hash( h );
 }
 
-IECore::ConstInternedStringVectorDataPtr Group::computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstInternedStringVectorDataPtr Group::computeSetNames(
+	const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	InternedStringVectorDataPtr resultData = new InternedStringVectorData;
 	vector<InternedString> &result = resultData->writable();
@@ -428,7 +446,8 @@ IECore::ConstInternedStringVectorDataPtr Group::computeSetNames( const Gaffer::C
 		// enough and the InternedString comparison fast enough that this is OK.
 		ConstInternedStringVectorDataPtr inputSetNamesData = ( *it )->setNamesPlug()->getValue();
 		const vector<InternedString> &inputSetNames = inputSetNamesData->readable();
-		for( vector<InternedString>::const_iterator it = inputSetNames.begin(), eIt = inputSetNames.end(); it != eIt; ++it )
+		for( vector<InternedString>::const_iterator it = inputSetNames.begin(), eIt = inputSetNames.end(); it != eIt;
+			 ++it )
 		{
 			if( std::find( result.begin(), result.end(), *it ) == result.end() )
 			{
@@ -450,7 +469,10 @@ IECore::ConstInternedStringVectorDataPtr Group::computeSetNames( const Gaffer::C
 	return resultData;
 }
 
-void Group::hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Group::hashSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent,
+	IECore::MurmurHash &h
+) const
 {
 	SceneProcessor::hashSet( setName, context, parent, h );
 	for( const auto &p : ScenePlug::Range( *inPlugs() ) )
@@ -465,7 +487,9 @@ void Group::hashSet( const IECore::InternedString &setName, const Gaffer::Contex
 	h.append( setName );
 }
 
-IECore::ConstPathMatcherDataPtr Group::computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstPathMatcherDataPtr Group::computeSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	vector<ConstPathMatcherDataPtr> inputSets;
 	inputSets.reserve( inPlugs()->children().size() );
@@ -475,7 +499,8 @@ IECore::ConstPathMatcherDataPtr Group::computeSet( const IECore::InternedString 
 	}
 
 	ScenePlug::GlobalScope s( context );
-	Private::ConstChildNamesMapPtr mapping = boost::static_pointer_cast<const Private::ChildNamesMap>( mappingPlug()->getValue() );
+	Private::ConstChildNamesMapPtr mapping =
+		boost::static_pointer_cast<const Private::ChildNamesMap>( mappingPlug()->getValue() );
 	const InternedString name = namePlug()->getValue();
 	SceneAlgo::validateName( name );
 
@@ -495,7 +520,8 @@ IECore::ConstPathMatcherDataPtr Group::computeSet( const IECore::InternedString 
 SceneNode::ScenePath Group::sourcePath( const ScenePath &outputPath, const ScenePlug **source ) const
 {
 	ScenePlug::GlobalScope s( Context::current() );
-	Private::ConstChildNamesMapPtr mapping = boost::static_pointer_cast<const Private::ChildNamesMap>( mappingPlug()->getValue() );
+	Private::ConstChildNamesMapPtr mapping =
+		boost::static_pointer_cast<const Private::ChildNamesMap>( mappingPlug()->getValue() );
 
 	const Private::ChildNamesMap::Input &input = mapping->input( outputPath[1] );
 	*source = inPlugs()->getChild<ScenePlug>( input.index );

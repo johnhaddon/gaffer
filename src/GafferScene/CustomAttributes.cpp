@@ -41,11 +41,6 @@ using namespace GafferScene;
 
 GAFFER_NODE_DEFINE_TYPE( CustomAttributes );
 
-CustomAttributes::CustomAttributes( const std::string &name )
-	: Attributes( name )
-{
-}
+CustomAttributes::CustomAttributes( const std::string &name ) : Attributes( name ) {}
 
-CustomAttributes::~CustomAttributes()
-{
-}
+CustomAttributes::~CustomAttributes() {}

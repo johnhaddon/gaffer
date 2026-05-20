@@ -44,16 +44,13 @@ GAFFER_NODE_DEFINE_TYPE( ShuffleImageMetadata );
 
 size_t ShuffleImageMetadata::g_firstPlugIndex = 0;
 
-ShuffleImageMetadata::ShuffleImageMetadata( const std::string &name )
-	: MetadataProcessor( name )
+ShuffleImageMetadata::ShuffleImageMetadata( const std::string &name ) : MetadataProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ShufflesPlug( "shuffles" ) );
 }
 
-ShuffleImageMetadata::~ShuffleImageMetadata()
-{
-}
+ShuffleImageMetadata::~ShuffleImageMetadata() {}
 
 Gaffer::ShufflesPlug *ShuffleImageMetadata::shufflesPlug()
 {
@@ -80,7 +77,9 @@ void ShuffleImageMetadata::hashProcessedMetadata( const Gaffer::Context *context
 	shufflesPlug()->hash( h );
 }
 
-IECore::ConstCompoundDataPtr ShuffleImageMetadata::computeProcessedMetadata( const Gaffer::Context *context, const IECore::CompoundData *inputMetadata ) const
+IECore::ConstCompoundDataPtr ShuffleImageMetadata::computeProcessedMetadata(
+	const Gaffer::Context *context, const IECore::CompoundData *inputMetadata
+) const
 {
 	CompoundDataPtr result = new CompoundData();
 	result->writable() = shufflesPlug()->shuffle( inputMetadata->readable() );

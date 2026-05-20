@@ -94,19 +94,29 @@ struct Session
 	/// > Note : The `options` argument is not for `Riley::CreateCamera()`, but is
 	/// > a session-specific argument used to pass resolution etc from the camera to
 	/// > the session's options.
-	riley::CameraId createCamera( RtUString name, const riley::ShadingNode &projection, const riley::Transform &transform, const RtParamList &properties, const RtParamList &options );
+	riley::CameraId createCamera(
+		RtUString name, const riley::ShadingNode &projection, const riley::Transform &transform,
+		const RtParamList &properties, const RtParamList &options
+	);
 	void deleteCamera( riley::CameraId cameraId );
 
 	/// Lights
 	/// ------
 
-	riley::LightShaderId createLightShader( const riley::ShadingNetwork &light, const riley::ShadingNetwork &lightFilter );
+	riley::LightShaderId createLightShader(
+		const riley::ShadingNetwork &light, const riley::ShadingNetwork &lightFilter
+	);
 	void deleteLightShader( riley::LightShaderId lightShaderId );
 
-	riley::LightInstanceId createLightInstance( riley::GeometryPrototypeId geometry, riley::MaterialId materialId, riley::LightShaderId lightShaderId, const riley::CoordinateSystemList &coordinateSystems, const riley::Transform &transform, const RtParamList &attributes );
+	riley::LightInstanceId createLightInstance(
+		riley::GeometryPrototypeId geometry, riley::MaterialId materialId, riley::LightShaderId lightShaderId,
+		const riley::CoordinateSystemList &coordinateSystems, const riley::Transform &transform,
+		const RtParamList &attributes
+	);
 	riley::LightInstanceResult modifyLightInstance(
-		riley::LightInstanceId lightInstanceId, const riley::MaterialId *materialId, const riley::LightShaderId *lightShaderId, const riley::CoordinateSystemList *coordinateSystems, const riley::Transform *transform,
-		const RtParamList *attributes
+		riley::LightInstanceId lightInstanceId, const riley::MaterialId *materialId,
+		const riley::LightShaderId *lightShaderId, const riley::CoordinateSystemList *coordinateSystems,
+		const riley::Transform *transform, const RtParamList *attributes
 	);
 	void deleteLightInstance( riley::LightInstanceId lightInstanceId );
 
@@ -130,7 +140,7 @@ struct Session
 	/// portal lights and the associated dome light.
 	void updatePortals();
 
-	private:
+private:
 
 	RixRiCtl *m_riCtl;
 
@@ -144,10 +154,8 @@ struct Session
 	using CameraMap = boost::multi_index::multi_index_container<
 		CameraInfo,
 		boost::multi_index::indexed_by<
-			boost::multi_index::ordered_unique<
-				boost::multi_index::key<&CameraInfo::id>>,
-			boost::multi_index::ordered_unique<
-				boost::multi_index::key<&CameraInfo::name>>>>;
+			boost::multi_index::ordered_unique<boost::multi_index::key<&CameraInfo::id>>,
+			boost::multi_index::ordered_unique<boost::multi_index::key<&CameraInfo::name>>>>;
 	CameraMap m_cameras;
 
 	struct LightShaderInfo

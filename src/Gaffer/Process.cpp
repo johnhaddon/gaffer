@@ -76,9 +76,7 @@ std::string prefixedWhat( const IECore::Exception &e )
 // Collaboration
 //////////////////////////////////////////////////////////////////////////
 
-Process::Collaboration::~Collaboration() noexcept( true )
-{
-}
+Process::Collaboration::~Collaboration() noexcept( true ) {}
 
 bool Process::Collaboration::dependsOn( const Collaboration *collaboration ) const
 {
@@ -115,7 +113,11 @@ tbb::spin_mutex Process::Collaboration::g_dependentsMutex;
 //////////////////////////////////////////////////////////////////////////
 
 Process::Process( const IECore::InternedString &type, const Plug *plug, const Plug *destinationPlug )
-	: m_type( type ), m_plug( plug ), m_destinationPlug( destinationPlug ? destinationPlug : plug ), m_parent( m_threadState->m_process ), m_collaboration( m_parent ? m_parent->m_collaboration : nullptr )
+	: m_type( type ),
+	  m_plug( plug ),
+	  m_destinationPlug( destinationPlug ? destinationPlug : plug ),
+	  m_parent( m_threadState->m_process ),
+	  m_collaboration( m_parent ? m_parent->m_collaboration : nullptr )
 {
 	IECore::Canceller::check( context()->canceller() );
 	m_threadState->m_process = this;
@@ -141,8 +143,7 @@ Process::~Process()
 			IECore::msg(
 				IECore::Msg::Warning, "Process::~Process",
 				fmt::format(
-					"Cancellation for `{}` ({}) took {}s",
-					plug()->fullName(), type().string(),
+					"Cancellation for `{}` ({}) took {}s", plug()->fullName(), type().string(),
 					std::chrono::duration<float>( t ).count()
 				)
 			);
@@ -215,7 +216,9 @@ void Process::emitError( const std::string &error, const Plug *source ) const
 	}
 }
 
-bool Process::forceMonitoringInternal( const ThreadState &s, const Plug *plug, const IECore::InternedString &processType )
+bool Process::forceMonitoringInternal(
+	const ThreadState &s, const Plug *plug, const IECore::InternedString &processType
+)
 {
 	if( s.m_monitors )
 	{
@@ -236,8 +239,15 @@ bool Process::forceMonitoringInternal( const ThreadState &s, const Plug *plug, c
 // ProcessException
 //////////////////////////////////////////////////////////////////////////
 
-ProcessException::ProcessException( const ConstPlugPtr &plug, const Context *context, IECore::InternedString processType, const std::exception_ptr &exception, const char *what )
-	: std::runtime_error( formatWhat( plug.get(), what ) ), m_plug( plug ), m_context( new Context( *context ) ), m_processType( processType ), m_exception( exception )
+ProcessException::ProcessException(
+	const ConstPlugPtr &plug, const Context *context, IECore::InternedString processType,
+	const std::exception_ptr &exception, const char *what
+)
+	: std::runtime_error( formatWhat( plug.get(), what ) ),
+	  m_plug( plug ),
+	  m_context( new Context( *context ) ),
+	  m_processType( processType ),
+	  m_exception( exception )
 {
 }
 
@@ -266,7 +276,9 @@ void ProcessException::wrapCurrentException( const Process &process )
 	wrapCurrentException( process.plug(), process.context(), process.type() );
 }
 
-void ProcessException::wrapCurrentException( const ConstPlugPtr &plug, const Context *context, IECore::InternedString processType )
+void ProcessException::wrapCurrentException(
+	const ConstPlugPtr &plug, const Context *context, IECore::InternedString processType
+)
 {
 	assert( std::current_exception() );
 	try

@@ -46,7 +46,7 @@ namespace GafferScene
 class GAFFERSCENE_API DeleteAttributes final : public FilteredSceneProcessor
 {
 
-	public:
+public:
 
 	explicit DeleteAttributes( const std::string &name = defaultName<DeleteAttributes>() );
 	~DeleteAttributes() override;
@@ -61,7 +61,7 @@ class GAFFERSCENE_API DeleteAttributes final : public FilteredSceneProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	private:
+private:
 
 	enum class Operation
 	{
@@ -72,8 +72,12 @@ class GAFFERSCENE_API DeleteAttributes final : public FilteredSceneProcessor
 
 	Operation operation( const Gaffer::Context *context, std::string &names, bool &invertNames ) const;
 
-	void hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const final;
-	IECore::ConstCompoundObjectPtr computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const final;
+	void hashAttributes(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+	) const final;
+	IECore::ConstCompoundObjectPtr computeAttributes(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+	) const final;
 
 	static size_t g_firstPlugIndex;
 };

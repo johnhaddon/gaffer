@@ -67,7 +67,7 @@ IE_CORE_FORWARDDECLARE( Style );
 class GAFFERUI_API Style : public IECore::RunTimeTyped
 {
 
-	public:
+public:
 
 	Style();
 	~Style() override;
@@ -100,7 +100,9 @@ class GAFFERUI_API Style : public IECore::RunTimeTyped
 	//////////////////////////////////////////////////////////////////////////
 	//@{
 	virtual void renderImage( const Imath::Box2f &box, const IECoreGL::Texture *texture ) const = 0;
-	virtual void renderLine( const IECore::LineSegment3f &line, float width = 0.5, const Imath::Color4f *userColor = nullptr ) const = 0;
+	virtual void renderLine(
+		const IECore::LineSegment3f &line, float width = 0.5, const Imath::Color4f *userColor = nullptr
+	) const = 0;
 	virtual void renderSolidRectangle( const Imath::Box2f &box ) const = 0;
 	virtual void renderRectangle( const Imath::Box2f &box ) const = 0;
 	//@}
@@ -110,8 +112,12 @@ class GAFFERUI_API Style : public IECore::RunTimeTyped
 	//@{
 	virtual Imath::Box3f characterBound( TextType textType ) const = 0;
 	virtual Imath::Box3f textBound( TextType textType, const std::string &text ) const = 0;
-	virtual void renderText( TextType textType, const std::string &text, State state = NormalState, const Imath::Color4f *userColor = nullptr ) const = 0;
-	virtual void renderWrappedText( TextType textType, const std::string &text, const Imath::Box2f &bound, State state = NormalState ) const = 0;
+	virtual void renderText(
+		TextType textType, const std::string &text, State state = NormalState, const Imath::Color4f *userColor = nullptr
+	) const = 0;
+	virtual void renderWrappedText(
+		TextType textType, const std::string &text, const Imath::Box2f &bound, State state = NormalState
+	) const = 0;
 	//@}
 
 	/// @name Generic UI elements
@@ -125,17 +131,40 @@ class GAFFERUI_API Style : public IECore::RunTimeTyped
 	/// @name GraphEditor UI elements
 	//////////////////////////////////////////////////////////////////////////
 	//@{
-	virtual void renderNodeFrame( const Imath::Box2f &contents, float borderWidth, State state = NormalState, const Imath::Color3f *userColor = nullptr ) const = 0;
-	virtual void renderNodeFocusRegion( const Imath::Box2f &contents, float borderWidth, State state = NormalState ) const = 0;
-	virtual void renderNodule( float radius, State state = NormalState, const Imath::Color3f *userColor = nullptr ) const = 0;
+	virtual void renderNodeFrame(
+		const Imath::Box2f &contents, float borderWidth, State state = NormalState,
+		const Imath::Color3f *userColor = nullptr
+	) const = 0;
+	virtual void renderNodeFocusRegion(
+		const Imath::Box2f &contents, float borderWidth, State state = NormalState
+	) const = 0;
+	virtual void renderNodule(
+		float radius, State state = NormalState, const Imath::Color3f *userColor = nullptr
+	) const = 0;
 	/// The tangents give an indication of which direction is "out" from a node.
-	virtual void renderConnection( const Imath::V3f &srcPosition, const Imath::V3f &srcTangent, const Imath::V3f &dstPosition, const Imath::V3f &dstTangent, State state = NormalState, const Imath::Color3f *userColor = nullptr ) const = 0;
-	virtual Imath::V3f closestPointOnConnection( const Imath::V3f &p, const Imath::V3f &srcPosition, const Imath::V3f &srcTangent, const Imath::V3f &dstPosition, const Imath::V3f &dstTangent ) const = 0;
-	virtual void renderAuxiliaryConnection( const Imath::Box2f &srcNodeFrame, const Imath::Box2f &dstNodeFrame, State state ) const = 0;
-	virtual void renderAuxiliaryConnection( const Imath::V2f &srcPosition, const Imath::V2f &srcTangent, const Imath::V2f &dstPosition, const Imath::V2f &dstTangent, State state ) const = 0;
-	virtual void renderBackdrop( const Imath::Box2f &box, State state = NormalState, const Imath::Color3f *userColor = nullptr ) const = 0;
+	virtual void renderConnection(
+		const Imath::V3f &srcPosition, const Imath::V3f &srcTangent, const Imath::V3f &dstPosition,
+		const Imath::V3f &dstTangent, State state = NormalState, const Imath::Color3f *userColor = nullptr
+	) const = 0;
+	virtual Imath::V3f closestPointOnConnection(
+		const Imath::V3f &p, const Imath::V3f &srcPosition, const Imath::V3f &srcTangent, const Imath::V3f &dstPosition,
+		const Imath::V3f &dstTangent
+	) const = 0;
+	virtual void renderAuxiliaryConnection(
+		const Imath::Box2f &srcNodeFrame, const Imath::Box2f &dstNodeFrame, State state
+	) const = 0;
+	virtual void renderAuxiliaryConnection(
+		const Imath::V2f &srcPosition, const Imath::V2f &srcTangent, const Imath::V2f &dstPosition,
+		const Imath::V2f &dstTangent, State state
+	) const = 0;
+	virtual void renderBackdrop(
+		const Imath::Box2f &box, State state = NormalState, const Imath::Color3f *userColor = nullptr
+	) const = 0;
 	/// Renders an annotation for a node, returning an origin suitable for rendering the next annotation.
-	virtual Imath::V2f renderAnnotation( const Imath::V2f &origin, const std::string &text, State state = NormalState, const Imath::Color3f *userColor = nullptr ) const = 0;
+	virtual Imath::V2f renderAnnotation(
+		const Imath::V2f &origin, const std::string &text, State state = NormalState,
+		const Imath::Color3f *userColor = nullptr
+	) const = 0;
 	//@}
 
 	/// @name 3D UI elements
@@ -152,15 +181,21 @@ class GAFFERUI_API Style : public IECore::RunTimeTyped
 		XYZ
 	};
 	virtual void renderTranslateHandle( Axes axes, State state = NormalState ) const = 0;
-	virtual void renderRotateHandle( Axes axes, State state = NormalState, const Imath::V3f &highlightVector = Imath::V3f( 0 ) ) const = 0;
+	virtual void renderRotateHandle(
+		Axes axes, State state = NormalState, const Imath::V3f &highlightVector = Imath::V3f( 0 )
+	) const = 0;
 	virtual void renderScaleHandle( Axes axes, State state = NormalState ) const = 0;
 	//@}
 
 	/// @name Animation UI elements
 	//////////////////////////////////////////////////////////////////////////
 	//@{
-	virtual void renderAnimationCurve( const std::vector<Imath::V2f> &vertices, bool inKeyRange, State state, const Imath::Color3f *userColor = nullptr ) const = 0;
-	virtual void renderAnimationKey( const Imath::V2f &position, State state, float size = 2.0, const Imath::Color3f *userColor = nullptr ) const = 0;
+	virtual void renderAnimationCurve(
+		const std::vector<Imath::V2f> &vertices, bool inKeyRange, State state, const Imath::Color3f *userColor = nullptr
+	) const = 0;
+	virtual void renderAnimationKey(
+		const Imath::V2f &position, State state, float size = 2.0, const Imath::Color3f *userColor = nullptr
+	) const = 0;
 	//@}
 
 	using UnarySignal = Gaffer::Signals::Signal<void( Style * )>;
@@ -182,7 +217,7 @@ class GAFFERUI_API Style : public IECore::RunTimeTyped
 	static void setDefaultStyle( StylePtr style );
 	//@}
 
-	private:
+private:
 
 	UnarySignal m_changedSignal;
 

@@ -38,13 +38,9 @@
 
 using namespace IECoreGLPreview;
 
-ObjectVisualiser::ObjectVisualiser()
-{
-}
+ObjectVisualiser::ObjectVisualiser() {}
 
-ObjectVisualiser::~ObjectVisualiser()
-{
-}
+ObjectVisualiser::~ObjectVisualiser() {}
 
 //////////////////////////////////////////////////////////////////////////
 // Factory

@@ -55,8 +55,7 @@ static InternedString g_gridLinesName( "gridLines" );
 static InternedString g_centerLinesName( "centerLines" );
 static InternedString g_borderLinesName( "borderLines" );
 
-Grid::Grid( const std::string &name )
-	: SceneNode( name )
+Grid::Grid( const std::string &name ) : SceneNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -77,9 +76,7 @@ Grid::Grid( const std::string &name )
 	outPlug()->childBoundsPlug()->setFlags( Plug::AcceptsDependencyCycles, true );
 }
 
-Grid::~Grid()
-{
-}
+Grid::~Grid() {}
 
 Gaffer::StringPlug *Grid::namePlug()
 {
@@ -185,10 +182,7 @@ void Grid::affects( const Plug *input, AffectedPlugsContainer &outputs ) const
 {
 	SceneNode::affects( input, outputs );
 
-	if(
-		input == outPlug()->childBoundsPlug() ||
-		dimensionsPlug()->isAncestorOf( input )
-	)
+	if( input == outPlug()->childBoundsPlug() || dimensionsPlug()->isAncestorOf( input ) )
 	{
 		outputs.push_back( outPlug()->boundPlug() );
 	}
@@ -198,22 +192,13 @@ void Grid::affects( const Plug *input, AffectedPlugsContainer &outputs ) const
 		outputs.push_back( outPlug()->transformPlug() );
 	}
 
-	if(
-		input == gridPixelWidthPlug() ||
-		input == centerPixelWidthPlug() ||
-		input == borderPixelWidthPlug()
-	)
+	if( input == gridPixelWidthPlug() || input == centerPixelWidthPlug() || input == borderPixelWidthPlug() )
 	{
 		outputs.push_back( outPlug()->attributesPlug() );
 	}
 
-	if(
-		dimensionsPlug()->isAncestorOf( input ) ||
-		input == spacingPlug() ||
-		input->parent<Plug>() == gridColorPlug() ||
-		input->parent<Plug>() == centerColorPlug() ||
-		input->parent<Plug>() == borderColorPlug()
-	)
+	if( dimensionsPlug()->isAncestorOf( input ) || input == spacingPlug() || input->parent<Plug>() == gridColorPlug() ||
+		input->parent<Plug>() == centerColorPlug() || input->parent<Plug>() == borderColorPlug() )
 	{
 		outputs.push_back( outPlug()->objectPlug() );
 	}
@@ -224,7 +209,9 @@ void Grid::affects( const Plug *input, AffectedPlugsContainer &outputs ) const
 	}
 }
 
-void Grid::hashBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Grid::hashBound(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	if( path.size() == 0 )
 	{
@@ -237,7 +224,9 @@ void Grid::hashBound( const SceneNode::ScenePath &path, const Gaffer::Context *c
 	}
 }
 
-Imath::Box3f Grid::computeBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::Box3f Grid::computeBound(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( path.size() == 0 )
 	{
@@ -251,7 +240,9 @@ Imath::Box3f Grid::computeBound( const SceneNode::ScenePath &path, const Gaffer:
 	}
 }
 
-void Grid::hashTransform( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Grid::hashTransform(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	SceneNode::hashTransform( path, context, parent, h );
 
@@ -261,7 +252,9 @@ void Grid::hashTransform( const SceneNode::ScenePath &path, const Gaffer::Contex
 	}
 }
 
-Imath::M44f Grid::computeTransform( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::M44f Grid::computeTransform(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( path.size() == 1 )
 	{
@@ -270,7 +263,9 @@ Imath::M44f Grid::computeTransform( const SceneNode::ScenePath &path, const Gaff
 	return outPlug()->transformPlug()->defaultValue();
 }
 
-void Grid::hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Grid::hashAttributes(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	if( path.size() == 1 )
 	{
@@ -297,7 +292,9 @@ void Grid::hashAttributes( const ScenePath &path, const Gaffer::Context *context
 	h = outPlug()->attributesPlug()->defaultValue()->Object::hash();
 }
 
-IECore::ConstCompoundObjectPtr Grid::computeAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstCompoundObjectPtr Grid::computeAttributes(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( path.size() == 1 )
 	{
@@ -338,7 +335,9 @@ IECore::ConstCompoundObjectPtr Grid::computeAttributes( const SceneNode::ScenePa
 	return outPlug()->attributesPlug()->defaultValue();
 }
 
-void Grid::hashObject( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Grid::hashObject(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	if( path.size() == 2 )
 	{
@@ -365,7 +364,9 @@ void Grid::hashObject( const SceneNode::ScenePath &path, const Gaffer::Context *
 	}
 }
 
-IECore::ConstObjectPtr Grid::computeObject( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstObjectPtr Grid::computeObject(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( path.size() == 2 )
 	{
@@ -433,7 +434,9 @@ IECore::ConstObjectPtr Grid::computeObject( const SceneNode::ScenePath &path, co
 	return outPlug()->objectPlug()->defaultValue();
 }
 
-void Grid::hashChildNames( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Grid::hashChildNames(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	SceneNode::hashChildNames( path, context, parent, h );
 	h.append( (uint64_t)path.size() );
@@ -444,7 +447,9 @@ void Grid::hashChildNames( const SceneNode::ScenePath &path, const Gaffer::Conte
 	}
 }
 
-IECore::ConstInternedStringVectorDataPtr Grid::computeChildNames( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstInternedStringVectorDataPtr Grid::computeChildNames(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( path.size() <= 1 )
 	{
@@ -481,17 +486,24 @@ void Grid::hashSetNames( const Gaffer::Context *context, const ScenePlug *parent
 	h = outPlug()->setNamesPlug()->defaultValue()->Object::hash();
 }
 
-IECore::ConstInternedStringVectorDataPtr Grid::computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstInternedStringVectorDataPtr Grid::computeSetNames(
+	const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	return outPlug()->setNamesPlug()->defaultValue();
 }
 
-void Grid::hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Grid::hashSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent,
+	IECore::MurmurHash &h
+) const
 {
 	h = outPlug()->setPlug()->defaultValue()->Object::hash();
 }
 
-IECore::ConstPathMatcherDataPtr Grid::computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstPathMatcherDataPtr Grid::computeSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	return outPlug()->setPlug()->defaultValue();
 }

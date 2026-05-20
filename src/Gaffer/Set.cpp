@@ -39,13 +39,9 @@
 
 using namespace Gaffer;
 
-Set::Set()
-{
-}
+Set::Set() {}
 
-Set::~Set()
-{
-}
+Set::~Set() {}
 
 Set::MemberSignal &Set::memberAddedSignal()
 {

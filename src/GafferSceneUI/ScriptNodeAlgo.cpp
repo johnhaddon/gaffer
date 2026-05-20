@@ -88,7 +88,8 @@ ChangedSignals &changedSignals( ScriptNode *script )
 	// Deliberately "leaking" map as it may contain Python slots which can't
 	// be destroyed during static destruction (because Python has already
 	// shut down at that point).
-	static std::unordered_map<const ScriptNode *, ChangedSignals> *g_signals = new std::unordered_map<const ScriptNode *, ChangedSignals>;
+	static std::unordered_map<const ScriptNode *, ChangedSignals> *g_signals =
+		new std::unordered_map<const ScriptNode *, ChangedSignals>;
 	ChangedSignals &result = ( *g_signals )[script];
 	if( !result.connection.connected() )
 	{
@@ -101,7 +102,10 @@ ChangedSignals &changedSignals( ScriptNode *script )
 	return result;
 }
 
-bool expandWalk( const ScenePlug::ScenePath &path, const ScenePlug *scene, size_t depth, PathMatcher &expanded, PathMatcher &leafPaths )
+bool expandWalk(
+	const ScenePlug::ScenePath &path, const ScenePlug *scene, size_t depth, PathMatcher &expanded,
+	PathMatcher &leafPaths
+)
 {
 	bool result = false;
 
@@ -114,7 +118,8 @@ bool expandWalk( const ScenePlug::ScenePath &path, const ScenePlug *scene, size_
 
 		ScenePlug::ScenePath childPath = path;
 		childPath.push_back( InternedString() ); // room for the child name
-		for( std::vector<InternedString>::const_iterator cIt = childNames.begin(), ceIt = childNames.end(); cIt != ceIt; cIt++ )
+		for( std::vector<InternedString>::const_iterator cIt = childNames.begin(), ceIt = childNames.end(); cIt != ceIt;
+			 cIt++ )
 		{
 			childPath.back() = *cIt;
 			if( depth == 1 )
@@ -156,7 +161,9 @@ ScriptNodeAlgo::ChangedSignal &ScriptNodeAlgo::visibleSetChangedSignal( Gaffer::
 	return changedSignals( script ).visibleSetChangedSignal;
 }
 
-void ScriptNodeAlgo::expandInVisibleSet( Gaffer::ScriptNode *script, const IECore::PathMatcher &paths, bool expandAncestors )
+void ScriptNodeAlgo::expandInVisibleSet(
+	Gaffer::ScriptNode *script, const IECore::PathMatcher &paths, bool expandAncestors
+)
 {
 	VisibleSet visible = getVisibleSet( script );
 
@@ -182,7 +189,9 @@ void ScriptNodeAlgo::expandInVisibleSet( Gaffer::ScriptNode *script, const IECor
 	}
 }
 
-IECore::PathMatcher ScriptNodeAlgo::expandDescendantsInVisibleSet( Gaffer::ScriptNode *script, const IECore::PathMatcher &paths, const GafferScene::ScenePlug *scene, int depth )
+IECore::PathMatcher ScriptNodeAlgo::expandDescendantsInVisibleSet(
+	Gaffer::ScriptNode *script, const IECore::PathMatcher &paths, const GafferScene::ScenePlug *scene, int depth
+)
 {
 	auto visibleSet = getVisibleSet( script );
 
@@ -218,7 +227,9 @@ void ScriptNodeAlgo::setSelectedPaths( Gaffer::ScriptNode *script, const IECore:
 		if( !( paths.match( lastSelectedPath ) & PathMatcher::ExactMatch ) )
 		{
 			const PathMatcher::Iterator it = paths.begin();
-			Metadata::registerValue( script, g_lastSelectedPathName, new InternedStringVectorData( *it ), /* persistent = */ false );
+			Metadata::registerValue(
+				script, g_lastSelectedPathName, new InternedStringVectorData( *it ), /* persistent = */ false
+			);
 		}
 	}
 }
@@ -242,7 +253,9 @@ void ScriptNodeAlgo::setLastSelectedPath( Gaffer::ScriptNode *script, const std:
 		{
 			setSelectedPaths( script, selectedPaths );
 		}
-		Metadata::registerValue( script, g_lastSelectedPathName, new InternedStringVectorData( path ), /* persistent = */ false );
+		Metadata::registerValue(
+			script, g_lastSelectedPathName, new InternedStringVectorData( path ), /* persistent = */ false
+		);
 	}
 }
 
@@ -267,13 +280,20 @@ NameValuePlug *ScriptNodeAlgo::acquireRenderPassPlug( Gaffer::ScriptNode *script
 		}
 		else
 		{
-			throw IECore::Exception( fmt::format( "Plug type of {} is {}, but must be StringPlug", renderPassPlug->valuePlug()->fullName(), renderPassPlug->valuePlug()->typeName() ) );
+			throw IECore::Exception(
+				fmt::format(
+					"Plug type of {} is {}, but must be StringPlug", renderPassPlug->valuePlug()->fullName(),
+					renderPassPlug->valuePlug()->typeName()
+				)
+			);
 		}
 	}
 
 	if( createIfMissing )
 	{
-		auto renderPassPlug = new NameValuePlug( "renderPass", new StringPlug(), "renderPass", Gaffer::Plug::Flags::Default | Gaffer::Plug::Flags::Dynamic );
+		auto renderPassPlug = new NameValuePlug(
+			"renderPass", new StringPlug(), "renderPass", Gaffer::Plug::Flags::Default | Gaffer::Plug::Flags::Dynamic
+		);
 		MetadataAlgo::setReadOnly( renderPassPlug->namePlug(), true );
 		script->variablesPlug()->addChild( renderPassPlug );
 
@@ -291,7 +311,8 @@ void ScriptNodeAlgo::setCurrentRenderPass( Gaffer::ScriptNode *script, std::stri
 
 std::string ScriptNodeAlgo::getCurrentRenderPass( const Gaffer::ScriptNode *script )
 {
-	if( const auto renderPassPlug = acquireRenderPassPlug( const_cast<ScriptNode *>( script ), /* createIfMissing = */ false ) )
+	if( const auto renderPassPlug =
+			acquireRenderPassPlug( const_cast<ScriptNode *>( script ), /* createIfMissing = */ false ) )
 	{
 		return renderPassPlug->valuePlug<StringPlug>()->getValue();
 	}
@@ -302,12 +323,18 @@ std::string ScriptNodeAlgo::getCurrentRenderPass( const Gaffer::ScriptNode *scri
 // Visible Set Bookmarks
 // =====================
 
-void ScriptNodeAlgo::addVisibleSetBookmark( Gaffer::ScriptNode *script, const std::string &name, const GafferScene::VisibleSet &visibleSet, bool persistent )
+void ScriptNodeAlgo::addVisibleSetBookmark(
+	Gaffer::ScriptNode *script, const std::string &name, const GafferScene::VisibleSet &visibleSet, bool persistent
+)
 {
-	Metadata::registerValue( script, g_visibleSetBookmarkPrefix + name, new GafferScene::VisibleSetData( visibleSet ), persistent );
+	Metadata::registerValue(
+		script, g_visibleSetBookmarkPrefix + name, new GafferScene::VisibleSetData( visibleSet ), persistent
+	);
 }
 
-GafferScene::VisibleSet ScriptNodeAlgo::getVisibleSetBookmark( const Gaffer::ScriptNode *script, const std::string &name )
+GafferScene::VisibleSet ScriptNodeAlgo::getVisibleSetBookmark(
+	const Gaffer::ScriptNode *script, const std::string &name
+)
 {
 	if( const auto bookmarkData = Metadata::value<VisibleSetData>( script, g_visibleSetBookmarkPrefix + name ) )
 	{

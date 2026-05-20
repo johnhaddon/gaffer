@@ -77,7 +77,7 @@ IE_CORE_DECLAREPTR( ScriptContainer );
 class GAFFER_API ScriptNode : public Node
 {
 
-	public:
+public:
 
 	explicit ScriptNode( const std::string &name = defaultName<Node>() );
 	~ScriptNode() override;
@@ -129,7 +129,8 @@ class GAFFER_API ScriptNode : public Node
 	/// be active while those operations are being performed.
 	////////////////////////////////////////////////////////////////////
 	//@{
-	using ActionSignal = Signals::Signal<void( ScriptNode *, const Action *, Action::Stage stage ), Signals::CatchingCombiner<void>>;
+	using ActionSignal =
+		Signals::Signal<void( ScriptNode *, const Action *, Action::Stage stage ), Signals::CatchingCombiner<void>>;
 	using UndoAddedSignal = Signals::Signal<void( ScriptNode * ), Signals::CatchingCombiner<void>>;
 	bool undoAvailable() const;
 	void undo();
@@ -199,7 +200,9 @@ class GAFFER_API ScriptNode : public Node
 	/// serialised nodes to those contained in the set.
 	std::string serialise( const Node *parent = nullptr, const Set *filter = nullptr ) const;
 	/// Calls serialise() and saves the result into the specified file.
-	void serialiseToFile( const std::filesystem::path &fileName, const Node *parent = nullptr, const Set *filter = nullptr ) const;
+	void serialiseToFile(
+		const std::filesystem::path &fileName, const Node *parent = nullptr, const Set *filter = nullptr
+	) const;
 	/// Executes a previously generated serialisation. If continueOnError is true, then
 	/// errors are reported via IECore::MessageHandler rather than as exceptions, and
 	/// execution continues at the point after the error. This allows scripts to be loaded as
@@ -289,11 +292,11 @@ class GAFFER_API ScriptNode : public Node
 	const CompoundDataPlug *variablesPlug() const;
 	//@}
 
-	protected:
+protected:
 
 	void parentChanging( Gaffer::GraphComponent *newParent ) override;
 
-	private:
+private:
 
 	// Selection
 	// =========
@@ -342,7 +345,9 @@ class GAFFER_API ScriptNode : public Node
 	// ===========================
 
 	std::string serialiseInternal( const Node *parent, const Set *filter ) const;
-	bool executeInternal( const std::string &serialisation, Node *parent, bool continueOnError, const std::string &context = "" );
+	bool executeInternal(
+		const std::string &serialisation, Node *parent, bool continueOnError, const std::string &context = ""
+	);
 
 	using SerialiseFunction = std::function<std::string( const Node *, const Set * )>;
 	using ExecuteFunction = std::function<bool( ScriptNode *, const std::string &, Node *, bool, const std::string & )>;

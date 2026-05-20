@@ -54,8 +54,7 @@ GAFFER_NODE_DEFINE_TYPE( RankFilter );
 
 size_t RankFilter::g_firstPlugIndex = 0;
 
-RankFilter::RankFilter( const std::string &name, Mode mode )
-	: FlatImageProcessor( name )
+RankFilter::RankFilter( const std::string &name, Mode mode ) : FlatImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -72,9 +71,7 @@ RankFilter::RankFilter( const std::string &name, Mode mode )
 	m_mode = mode;
 }
 
-RankFilter::~RankFilter()
-{
-}
+RankFilter::~RankFilter() {}
 
 Gaffer::V2iPlug *RankFilter::radiusPlug()
 {
@@ -131,28 +128,23 @@ void RankFilter::affects( const Gaffer::Plug *input, AffectedPlugsContainer &out
 {
 	FlatImageProcessor::affects( input, outputs );
 
-	if(
-		input == expandDataWindowPlug() ||
-		input == inPlug()->dataWindowPlug() ||
-		input->parent<V2iPlug>() == radiusPlug()
-	)
+	if( input == expandDataWindowPlug() || input == inPlug()->dataWindowPlug() ||
+		input->parent<V2iPlug>() == radiusPlug() )
 	{
 		outputs.push_back( outPlug()->dataWindowPlug() );
 	}
 
-	if(
-		input == inPlug()->channelDataPlug() ||
-		input->parent<V2iPlug>() == radiusPlug() ||
-		input == boundingModePlug() ||
-		input == masterChannelPlug()
-	)
+	if( input == inPlug()->channelDataPlug() || input->parent<V2iPlug>() == radiusPlug() ||
+		input == boundingModePlug() || input == masterChannelPlug() )
 	{
 		outputs.push_back( pixelOffsetsPlug() );
 		outputs.push_back( outPlug()->channelDataPlug() );
 	}
 }
 
-void RankFilter::hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void RankFilter::hashDataWindow(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	const V2i radius = radiusPlug()->getValue();
 	if( radius == V2i( 0 ) || !expandDataWindowPlug()->getValue() )
@@ -203,19 +195,15 @@ const float infinity = std::numeric_limits<float>::infinity();
 // To compute the maximum of all pixels, we only need to hold the maximum value for each row
 class RankMaxBuffer
 {
-	public:
+public:
 
-	inline RankMaxBuffer( const V2i &size ) : m_values( size.y )
-	{
-	}
+	inline RankMaxBuffer( const V2i &size ) : m_values( size.y ) {}
 
 	inline void sampleRow( int rowIndex, Sampler &sampler, const Box2i &rowBound )
 	{
 		// Store the maximum value of the given row
 		float r = -infinity;
-		sampler.visitPixels( rowBound, [&r]( float v, int x, int y ) {
-			r = std::max( r, v );
-		} );
+		sampler.visitPixels( rowBound, [&r]( float v, int x, int y ) { r = std::max( r, v ); } );
 		m_values[rowIndex] = r;
 	}
 
@@ -236,7 +224,7 @@ class RankMaxBuffer
 		return m_values[rowIndex] == result;
 	}
 
-	private:
+private:
 
 	std::vector<float> m_values;
 };
@@ -244,19 +232,15 @@ class RankMaxBuffer
 // To compute the minimum of all pixels, we only need to hold the minimum value for each row
 class RankMinBuffer
 {
-	public:
+public:
 
-	inline RankMinBuffer( const V2i &size ) : m_values( size.y )
-	{
-	}
+	inline RankMinBuffer( const V2i &size ) : m_values( size.y ) {}
 
 	inline void sampleRow( int rowIndex, Sampler &sampler, const Box2i &rowBound )
 	{
 		// Store the minimum value of the given row
 		float r = infinity;
-		sampler.visitPixels( rowBound, [&r]( float v, int x, int y ) {
-			r = std::min( r, v );
-		} );
+		sampler.visitPixels( rowBound, [&r]( float v, int x, int y ) { r = std::min( r, v ); } );
 		m_values[rowIndex] = r;
 	}
 
@@ -277,7 +261,7 @@ class RankMinBuffer
 		return m_values[rowIndex] == result;
 	}
 
-	private:
+private:
 
 	std::vector<float> m_values;
 };
@@ -341,9 +325,13 @@ class RankMinBuffer
 
 class RankMedianBuffer
 {
-	public:
+public:
 
-	inline RankMedianBuffer( const V2i &size ) : m_size( size ), m_sortedRows( size.x * size.y ), m_splits( size.y ), m_splitValue( 0 )
+	inline RankMedianBuffer( const V2i &size )
+		: m_size( size ),
+		  m_sortedRows( size.x * size.y ),
+		  m_splits( size.y ),
+		  m_splitValue( 0 )
 	{
 		// We need to initialize the storage for everything
 		m_minHeap.reserve( size.y );
@@ -416,7 +404,10 @@ class RankMedianBuffer
 			// that could be included in the lower set.
 			for( int i = 0; i < m_size.y; i++ )
 			{
-				m_minHeap.update( m_minHeapHandles[i], std::make_pair( m_splits[i] < m_size.x ? m_sortedRows[i * m_size.x + m_splits[i]] : infinity, i ) );
+				m_minHeap.update(
+					m_minHeapHandles[i],
+					std::make_pair( m_splits[i] < m_size.x ? m_sortedRows[i * m_size.x + m_splits[i]] : infinity, i )
+				);
 			}
 
 			// For each element that needs to be added, we need to increment one of the splits
@@ -439,7 +430,10 @@ class RankMedianBuffer
 				assert( newSplit <= m_size.x );
 
 				// Update the entry for the row that we incremented, with a priority based on the new next element
-				m_minHeap.update( m_minHeapHandles[row], std::make_pair( newSplit < m_size.x ? m_sortedRows[row * m_size.x + newSplit] : infinity, row ) );
+				m_minHeap.update(
+					m_minHeapHandles[row],
+					std::make_pair( newSplit < m_size.x ? m_sortedRows[row * m_size.x + newSplit] : infinity, row )
+				);
 			}
 
 			// Once we've set all the splits correctly, the split value is the next element that
@@ -453,7 +447,10 @@ class RankMedianBuffer
 			// that could be removed from the lower set.
 			for( int i = 0; i < m_size.y; i++ )
 			{
-				m_maxHeap.update( m_maxHeapHandles[i], std::make_pair( m_splits[i] > 0 ? m_sortedRows[i * m_size.x + m_splits[i] - 1] : -infinity, i ) );
+				m_maxHeap.update(
+					m_maxHeapHandles[i],
+					std::make_pair( m_splits[i] > 0 ? m_sortedRows[i * m_size.x + m_splits[i] - 1] : -infinity, i )
+				);
 			}
 
 			// For each element that needs to be removed, we need to decrement one of the splits
@@ -478,7 +475,10 @@ class RankMedianBuffer
 				assert( newSplit >= 0 );
 
 				// Update the entry for the row that we decremented, with a priority based on the new next element
-				m_maxHeap.update( m_maxHeapHandles[row], std::make_pair( newSplit > 0 ? m_sortedRows[row * m_size.x + newSplit - 1] : -infinity, row ) );
+				m_maxHeap.update(
+					m_maxHeapHandles[row],
+					std::make_pair( newSplit > 0 ? m_sortedRows[row * m_size.x + newSplit - 1] : -infinity, row )
+				);
 			}
 
 			// Once we've set all the splits correctly, the split is the last element that
@@ -516,7 +516,7 @@ class RankMedianBuffer
 		return false;
 	}
 
-	private:
+private:
 
 	// Size of the filter, x is the size of each row, y is the number of rows
 	V2i m_size;
@@ -539,24 +539,20 @@ class RankMedianBuffer
 	// m_splits by choosing the row with the lowest value not yet included in the lower set.
 	struct MinCompare
 	{
-		bool operator () ( const HeapEntry &a, const HeapEntry &b ) const
-		{
-			return a.first > b.first;
-		}
+		bool operator () ( const HeapEntry &a, const HeapEntry &b ) const { return a.first > b.first; }
 	};
-	using MinHeap = boost::heap::d_ary_heap<HeapEntry, boost::heap::arity<2>, boost::heap::mutable_<true>, boost::heap::compare<MinCompare>>;
+	using MinHeap = boost::heap::d_ary_heap<
+		HeapEntry, boost::heap::arity<2>, boost::heap::mutable_<true>, boost::heap::compare<MinCompare>>;
 	MinHeap m_minHeap;
 
 	// The max heap is used when we need to decrease the number of elements in the lower set, decreasing
 	// m_splits by choosing the row with the highest value currently in the lower set.
 	struct MaxCompare
 	{
-		bool operator () ( const HeapEntry &a, const HeapEntry &b ) const
-		{
-			return a.first < b.first;
-		}
+		bool operator () ( const HeapEntry &a, const HeapEntry &b ) const { return a.first < b.first; }
 	};
-	using MaxHeap = boost::heap::d_ary_heap<HeapEntry, boost::heap::arity<2>, boost::heap::mutable_<true>, boost::heap::compare<MaxCompare>>;
+	using MaxHeap = boost::heap::d_ary_heap<
+		HeapEntry, boost::heap::arity<2>, boost::heap::mutable_<true>, boost::heap::compare<MaxCompare>>;
 	MaxHeap m_maxHeap;
 
 	// We store the handle for each every element in the heaps, in order matching the rows. This allows us to
@@ -573,7 +569,9 @@ inline int positiveModulo( int a, int d )
 // Fill in an accumulator buffer of the appropriate type, and then step it through each pixel, outputting
 // the result for each pixel in the tile.
 template<class Buffer>
-void processTile( Sampler &sampler, const V2i &radius, const Box2i &tileBound, vector<float> &result, const Canceller *canceller )
+void processTile(
+	Sampler &sampler, const V2i &radius, const Box2i &tileBound, vector<float> &result, const Canceller *canceller
+)
 {
 	V2i s = 2 * radius + V2i( 1 );
 	Buffer buffer( s );
@@ -614,7 +612,9 @@ void processTile( Sampler &sampler, const V2i &radius, const Box2i &tileBound, v
 }
 
 template<class Buffer>
-void processTileIndices( Sampler &sampler, const V2i &radius, const Box2i &tileBound, vector<V2i> &result, const Canceller *canceller )
+void processTileIndices(
+	Sampler &sampler, const V2i &radius, const Box2i &tileBound, vector<V2i> &result, const Canceller *canceller
+)
 {
 	V2i s = 2 * radius + V2i( 1 );
 	Buffer buffer( s );
@@ -661,10 +661,8 @@ void processTileIndices( Sampler &sampler, const V2i &radius, const Box2i &tileB
 			V2i r( INT_MAX, INT_MAX );
 			uint32_t closestMatch = UINT_MAX;
 
-			if(
-				( std::is_same_v<Buffer, RankMinBuffer> && resultValue == infinity ) ||
-				( std::is_same_v<Buffer, RankMaxBuffer> && resultValue == -infinity )
-			)
+			if( ( std::is_same_v<Buffer, RankMinBuffer> && resultValue == infinity ) ||
+				( std::is_same_v<Buffer, RankMaxBuffer> && resultValue == -infinity ) )
 			{
 				// If all pixels are the worst possible match, we can just use the current pixel
 				r = V2i( 0 );
@@ -676,9 +674,7 @@ void processTileIndices( Sampler &sampler, const V2i &radius, const Box2i &tileB
 					if( buffer.rowContainsResult( positiveModulo( rescanBound.min.y, s.y ), resultValue ) )
 					{
 						sampler.visitPixels( rescanBound, [p, resultValue, &r, &closestMatch]( float v, int x, int y ) {
-							if(
-								v == resultValue || ( resultValue == -infinity && std::isnan( v ) )
-							)
+							if( v == resultValue || ( resultValue == -infinity && std::isnan( v ) ) )
 							{
 								uint32_t absX = abs( x - p.x );
 								uint32_t absY = abs( y - p.y );
@@ -723,8 +719,7 @@ void RankFilter::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *c
 		Sampler sampler(
 			inPlug(),
 			// This plug should only be evaluated with channel name already set to the driver channel
-			context->get<std::string>( ImagePlug::channelNameContextName ),
-			inputBound,
+			context->get<std::string>( ImagePlug::channelNameContextName ), inputBound,
 			(Sampler::BoundingMode)boundingModePlug()->getValue()
 		);
 		sampler.hash( h );
@@ -755,8 +750,7 @@ void RankFilter::compute( Gaffer::ValuePlug *output, const Gaffer::Context *cont
 		Sampler sampler(
 			inPlug(),
 			// This plug should only be evaluated with channel name already set to the driver channel
-			context->get<std::string>( ImagePlug::channelNameContextName ),
-			inputBound,
+			context->get<std::string>( ImagePlug::channelNameContextName ), inputBound,
 			(Sampler::BoundingMode)boundingModePlug()->getValue()
 		);
 
@@ -783,7 +777,9 @@ void RankFilter::compute( Gaffer::ValuePlug *output, const Gaffer::Context *cont
 }
 
 
-void RankFilter::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void RankFilter::hashChannelData(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	const V2i radius = radiusPlug()->getValue();
 	if( radius == V2i( 0 ) )
@@ -799,9 +795,7 @@ void RankFilter::hashChannelData( const GafferImage::ImagePlug *parent, const Ga
 	const Box2i inputBound( tileBound.min - radius, tileBound.max + radius );
 
 	Sampler sampler(
-		inPlug(),
-		context->get<std::string>( ImagePlug::channelNameContextName ),
-		inputBound,
+		inPlug(), context->get<std::string>( ImagePlug::channelNameContextName ), inputBound,
 		(Sampler::BoundingMode)boundingModePlug()->getValue()
 	);
 	sampler.hash( h );
@@ -818,7 +812,10 @@ void RankFilter::hashChannelData( const GafferImage::ImagePlug *parent, const Ga
 	}
 }
 
-IECore::ConstFloatVectorDataPtr RankFilter::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr RankFilter::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	const V2i radius = radiusPlug()->getValue();
 	if( radius == V2i( 0 ) )
@@ -829,12 +826,7 @@ IECore::ConstFloatVectorDataPtr RankFilter::computeChannelData( const std::strin
 	const Box2i tileBound( tileOrigin, tileOrigin + V2i( ImagePlug::tileSize() ) );
 	const Box2i inputBound( tileBound.min - radius, tileBound.max + radius );
 
-	Sampler sampler(
-		inPlug(),
-		channelName,
-		inputBound,
-		(Sampler::BoundingMode)boundingModePlug()->getValue()
-	);
+	Sampler sampler( inPlug(), channelName, inputBound, (Sampler::BoundingMode)boundingModePlug()->getValue() );
 
 	FloatVectorDataPtr resultData = new FloatVectorData;
 	vector<float> &result = resultData->writable();

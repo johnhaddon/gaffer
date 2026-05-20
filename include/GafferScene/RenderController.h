@@ -60,9 +60,12 @@ IE_CORE_FORWARDDECLARE( ScenePlug )
 class GAFFERSCENE_API RenderController : public Gaffer::Signals::Trackable
 {
 
-	public:
+public:
 
-	RenderController( const ConstScenePlugPtr &scene, const Gaffer::ConstContextPtr &context, const IECoreScenePreview::RendererPtr &renderer );
+	RenderController(
+		const ConstScenePlugPtr &scene, const Gaffer::ConstContextPtr &context,
+		const IECoreScenePreview::RendererPtr &renderer
+	);
 	~RenderController() override;
 
 	// Renderer, scene and expansion
@@ -93,9 +96,14 @@ class GAFFERSCENE_API RenderController : public Gaffer::Signals::Trackable
 	using ProgressCallback = std::function<void( Gaffer::BackgroundTask::Status )>;
 
 	void update( const ProgressCallback &callback = ProgressCallback() );
-	std::shared_ptr<Gaffer::BackgroundTask> updateInBackground( const ProgressCallback &callback = ProgressCallback(), const IECore::PathMatcher &priorityPaths = IECore::PathMatcher() );
+	std::shared_ptr<Gaffer::BackgroundTask> updateInBackground(
+		const ProgressCallback &callback = ProgressCallback(),
+		const IECore::PathMatcher &priorityPaths = IECore::PathMatcher()
+	);
 
-	void updateMatchingPaths( const IECore::PathMatcher &pathsToUpdate, const ProgressCallback &callback = ProgressCallback() );
+	void updateMatchingPaths(
+		const IECore::PathMatcher &pathsToUpdate, const ProgressCallback &callback = ProgressCallback()
+	);
 
 	// Manifest
 	// ========
@@ -111,7 +119,7 @@ class GAFFERSCENE_API RenderController : public Gaffer::Signals::Trackable
 	bool getManifestRequired();
 
 
-	private:
+private:
 
 	enum GlobalComponents
 	{
@@ -125,8 +133,11 @@ class GAFFERSCENE_API RenderController : public Gaffer::Signals::Trackable
 		CameraShutterGlobalComponent = 64,
 		IncludedPurposesGlobalComponent = 128,
 		IDGlobalComponent = 256,
-		CapsuleAffectingGlobalComponents = TransformBlurGlobalComponent | DeformationBlurGlobalComponent | IncludedPurposesGlobalComponent,
-		AllGlobalComponents = GlobalsGlobalComponent | SetsGlobalComponent | RenderSetsGlobalComponent | CameraOptionsGlobalComponent | TransformBlurGlobalComponent | DeformationBlurGlobalComponent | IncludedPurposesGlobalComponent | IDGlobalComponent
+		CapsuleAffectingGlobalComponents =
+			TransformBlurGlobalComponent | DeformationBlurGlobalComponent | IncludedPurposesGlobalComponent,
+		AllGlobalComponents = GlobalsGlobalComponent | SetsGlobalComponent | RenderSetsGlobalComponent |
+			CameraOptionsGlobalComponent | TransformBlurGlobalComponent | DeformationBlurGlobalComponent |
+			IncludedPurposesGlobalComponent | IDGlobalComponent
 	};
 
 	void plugDirtied( const Gaffer::Plug *plug );
@@ -135,7 +146,10 @@ class GAFFERSCENE_API RenderController : public Gaffer::Signals::Trackable
 	void dirtyGlobals( unsigned components );
 	void dirtySceneGraphs( unsigned components );
 
-	void updateInternal( const ProgressCallback &callback = ProgressCallback(), const IECore::PathMatcher *pathsToUpdate = nullptr, bool signalCompletion = true );
+	void updateInternal(
+		const ProgressCallback &callback = ProgressCallback(), const IECore::PathMatcher *pathsToUpdate = nullptr,
+		bool signalCompletion = true
+	);
 	void updateDefaultCamera();
 	void cancelBackgroundTask();
 

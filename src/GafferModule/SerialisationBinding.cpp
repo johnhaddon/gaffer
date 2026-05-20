@@ -67,7 +67,9 @@ GraphComponentPtr parent( const Serialisation &serialisation )
 	return const_cast<GraphComponent *>( serialisation.parent() );
 }
 
-std::string childIdentifier( const Serialisation &serialisation, const std::string &parentIdentifier, const GraphComponent *child )
+std::string childIdentifier(
+	const Serialisation &serialisation, const std::string &parentIdentifier, const GraphComponent *child
+)
 {
 	return serialisation.childIdentifier( parentIdentifier, child );
 }
@@ -89,33 +91,34 @@ IECore::ObjectPtr objectFromBase64Wrapper( const std::string &base64String )
 void GafferModule::bindSerialisation()
 {
 
-	scope s = boost::python::class_<Serialisation, boost::noncopyable>( "Serialisation", no_init )
-				  .def(
-					  init<const Gaffer::GraphComponent *, const std::string &, const Gaffer::Set *>(
-						  (
-							  arg( "parent" ),
-							  arg( "parentName" ) = "parent",
-							  arg( "filter" ) = object()
-						  )
-					  )
-				  )
-				  .def( "parent", &parent )
-				  .def( "identifier", &Serialisation::identifier )
-				  .def( "childIdentifier", &childIdentifier )
-				  .def( "addModule", &Serialisation::addModule )
-				  .def( "result", &Serialisation::result )
-				  .def( "modulePath", (std::string ( * )( const object & ))&Serialisation::modulePath )
-				  .staticmethod( "modulePath" )
-				  .def( "classPath", (std::string ( * )( const object & ))&Serialisation::classPath )
-				  .staticmethod( "classPath" )
-				  .def( "objectToBase64", &objectToBase64Wrapper )
-				  .staticmethod( "objectToBase64" )
-				  .def( "objectFromBase64", &objectFromBase64Wrapper )
-				  .staticmethod( "objectFromBase64" )
-				  .def( "registerSerialiser", &Serialisation::registerSerialiser )
-				  .staticmethod( "registerSerialiser" )
-				  .def( "acquireSerialiser", &Serialisation::acquireSerialiser, return_value_policy<reference_existing_object>() )
-				  .staticmethod( "acquireSerialiser" );
+	scope s =
+		boost::python::class_<Serialisation, boost::noncopyable>( "Serialisation", no_init )
+			.def(
+				init<const Gaffer::GraphComponent *, const std::string &, const Gaffer::Set *>(
+					( arg( "parent" ), arg( "parentName" ) = "parent", arg( "filter" ) = object() )
+				)
+			)
+			.def( "parent", &parent )
+			.def( "identifier", &Serialisation::identifier )
+			.def( "childIdentifier", &childIdentifier )
+			.def( "addModule", &Serialisation::addModule )
+			.def( "result", &Serialisation::result )
+			.def( "modulePath", (std::string ( * )( const object & ))&Serialisation::modulePath )
+			.staticmethod( "modulePath" )
+			.def( "classPath", (std::string ( * )( const object & ))&Serialisation::classPath )
+			.staticmethod( "classPath" )
+			.def( "objectToBase64", &objectToBase64Wrapper )
+			.staticmethod( "objectToBase64" )
+			.def( "objectFromBase64", &objectFromBase64Wrapper )
+			.staticmethod( "objectFromBase64" )
+			.def( "registerSerialiser", &Serialisation::registerSerialiser )
+			.staticmethod( "registerSerialiser" )
+			.def(
+				"acquireSerialiser", &Serialisation::acquireSerialiser, return_value_policy<reference_existing_object>()
+			)
+			.staticmethod( "acquireSerialiser" );
 
-	SerialiserClass<Serialisation::Serialiser, IECore::RefCounted, SerialiserWrapper<Serialisation::Serialiser>>( "Serialiser" );
+	SerialiserClass<Serialisation::Serialiser, IECore::RefCounted, SerialiserWrapper<Serialisation::Serialiser>>(
+		"Serialiser"
+	);
 }

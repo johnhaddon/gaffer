@@ -82,9 +82,7 @@ std::map<FileCacheKey, std::weak_ptr<RenderManifest>> g_fileCache;
 
 } // namespace
 
-RenderManifest::RenderManifest()
-{
-}
+RenderManifest::RenderManifest() {}
 
 uint32_t RenderManifest::acquireID( const ScenePlug::ScenePath &path )
 {
@@ -192,14 +190,17 @@ size_t RenderManifest::size() const
 	return m_map.size();
 }
 
-std::shared_ptr<const RenderManifest> RenderManifest::loadFromImageMetadata( const IECore::CompoundData *metadata, const std::string &cryptomatteLayerName )
+std::shared_ptr<const RenderManifest> RenderManifest::loadFromImageMetadata(
+	const IECore::CompoundData *metadata, const std::string &cryptomatteLayerName
+)
 {
 	std::string sideCarManifestPath;
 	bool isCryptomatte = false;
 	IECore::ConstStringDataPtr cryptoManifestStringData;
 
 	const IECore::StringData *filePathData = metadata->member<IECore::StringData>( "filePath" );
-	const IECore::StringData *manifestFilePathData = metadata->member<IECore::StringData>( "gaffer:renderManifestFilePath" );
+	const IECore::StringData *manifestFilePathData =
+		metadata->member<IECore::StringData>( "gaffer:renderManifestFilePath" );
 	if( manifestFilePathData )
 	{
 		std::filesystem::path rawManifestPath( manifestFilePathData->readable() );
@@ -211,9 +212,12 @@ std::shared_ptr<const RenderManifest> RenderManifest::loadFromImageMetadata( con
 		{
 			if( !filePathData )
 			{
-				throw IECore::Exception( "Can't find \"filePath\" metadata to locate relative manifest path. It should have been set by the ImageReader." );
+				throw IECore::Exception(
+					"Can't find \"filePath\" metadata to locate relative manifest path. It should have been set by the ImageReader."
+				);
 			}
-			sideCarManifestPath = ( std::filesystem::path( filePathData->readable() ).parent_path() / rawManifestPath ).generic_string();
+			sideCarManifestPath =
+				( std::filesystem::path( filePathData->readable() ).parent_path() / rawManifestPath ).generic_string();
 		}
 	}
 
@@ -237,26 +241,28 @@ std::shared_ptr<const RenderManifest> RenderManifest::loadFromImageMetadata( con
 				const std::string metadataPrefix = match.str( 1 );
 
 				// Look for a valid Cryptomatte sidecar json.
-				const IECore::StringData *cryptoManifestPathData = metadata->member<IECore::StringData>(
-					fmt::format( "{}/manif_file", metadataPrefix )
-				);
+				const IECore::StringData *cryptoManifestPathData =
+					metadata->member<IECore::StringData>( fmt::format( "{}/manif_file", metadataPrefix ) );
 
 				if( cryptoManifestPathData )
 				{
 					if( !filePathData )
 					{
-						throw IECore::Exception( "Can't find \"filePath\" metadata to locate relative manifest path. It should have been set by the ImageReader." );
+						throw IECore::Exception(
+							"Can't find \"filePath\" metadata to locate relative manifest path. It should have been set by the ImageReader."
+						);
 					}
 
-					sideCarManifestPath = ( std::filesystem::path( filePathData->readable() ).parent_path() / cryptoManifestPathData->readable() ).generic_string();
+					sideCarManifestPath = ( std::filesystem::path( filePathData->readable() ).parent_path() /
+											cryptoManifestPathData->readable() )
+											  .generic_string();
 					isCryptomatte = true;
 				}
 				else
 				{
 					// Didn't find a sidecar file, look for a manifest stored directly in the header
-					cryptoManifestStringData = metadata->member<IECore::StringData>(
-						fmt::format( "{}/manifest", metadataPrefix )
-					);
+					cryptoManifestStringData =
+						metadata->member<IECore::StringData>( fmt::format( "{}/manifest", metadataPrefix ) );
 				}
 			}
 		}
@@ -281,7 +287,9 @@ std::shared_ptr<const RenderManifest> RenderManifest::loadFromImageMetadata( con
 		}
 
 		const std::string &cryptoManifestString = cryptoManifestStringData->readable();
-		boost::iostreams::stream<boost::iostreams::array_source> stream( cryptoManifestString.c_str(), cryptoManifestString.size() );
+		boost::iostreams::stream<boost::iostreams::array_source> stream(
+			cryptoManifestString.c_str(), cryptoManifestString.size()
+		);
 
 		std::shared_ptr<RenderManifest> result = std::make_shared<RenderManifest>();
 		result->loadCryptomatteJSON( stream );
@@ -392,21 +400,11 @@ void RenderManifest::writeEXRManifest( const std::filesystem::path &filePath ) c
 
 	Imf::MultiPartOutputFile exrOutput( filePath.generic_string().c_str(), headers.data(), 1 );
 
-	float image[93] = {
-		1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1,
-		1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0,
-		1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0
-	};
+	float image[93] = { 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1,
+						1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0,
+						1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0 };
 	Imf::FrameBuffer outBuf;
-	outBuf.insert(
-		"id",
-		Imf::Slice(
-			Imf::FLOAT,
-			(char *)image,
-			sizeof( float ),
-			sizeof( float ) * 31
-		)
-	);
+	outBuf.insert( "id", Imf::Slice( Imf::FLOAT, (char *)image, sizeof( float ), sizeof( float ) * 31 ) );
 
 	Imf::OutputPart outPart( exrOutput, 0 );
 	outPart.setFrameBuffer( outBuf );
@@ -439,7 +437,8 @@ void RenderManifest::loadCryptomatteJSON( std::istream &in )
 
 		const std::string &hashString = it.second.data().c_str();
 		uint32_t hash;
-		auto [_unused, errorCode] = std::from_chars( hashString.data(), hashString.data() + hashString.size(), hash, 16 );
+		auto [_unused, errorCode] =
+			std::from_chars( hashString.data(), hashString.data() + hashString.size(), hash, 16 );
 		if( errorCode != std::errc() )
 		{
 			throw IECore::Exception( fmt::format( "Expected hexadecimal while parsing manifest: {}", hashString ) );

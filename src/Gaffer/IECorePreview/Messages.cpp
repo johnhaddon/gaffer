@@ -57,8 +57,7 @@ bool Message::operator != ( const Message &other ) const
 	return !( *this == other );
 }
 
-Messages::Messages()
-	: m_bucketSize( 100 )
+Messages::Messages() : m_bucketSize( 100 )
 {
 	m_nextBucket.reserve( m_bucketSize );
 	clear();

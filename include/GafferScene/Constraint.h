@@ -51,7 +51,7 @@ namespace GafferScene
 class GAFFERSCENE_API Constraint : public SceneElementProcessor
 {
 
-	public:
+public:
 
 	explicit Constraint( const std::string &name = defaultName<Constraint>() );
 	~Constraint() override;
@@ -97,15 +97,19 @@ class GAFFERSCENE_API Constraint : public SceneElementProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
 	/// Reimplemented from SceneElementProcessor to call the constraint functions below.
 	bool processesTransform() const override;
-	void hashProcessedTransform( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	Imath::M44f computeProcessedTransform( const ScenePath &path, const Gaffer::Context *context, const Imath::M44f &inputTransform ) const override;
+	void hashProcessedTransform(
+		const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	Imath::M44f computeProcessedTransform(
+		const ScenePath &path, const Gaffer::Context *context, const Imath::M44f &inputTransform
+	) const override;
 
 	/// Must be implemented to return true if the specified plug affects the computation of the constraint.
 	virtual bool affectsConstraint( const Gaffer::Plug *input ) const = 0;
@@ -113,9 +117,11 @@ class GAFFERSCENE_API Constraint : public SceneElementProcessor
 	virtual void hashConstraint( const Gaffer::Context *context, IECore::MurmurHash &h ) const = 0;
 	/// Must be implemented to return a new full (absolute in world space) transform constraining fullInputTransform to
 	/// fullTargetTransform in some way.
-	virtual Imath::M44f computeConstraint( const Imath::M44f &fullTargetTransform, const Imath::M44f &fullInputTransform, const Imath::M44f &inputTransform ) const = 0;
+	virtual Imath::M44f computeConstraint(
+		const Imath::M44f &fullTargetTransform, const Imath::M44f &fullInputTransform, const Imath::M44f &inputTransform
+	) const = 0;
 
-	private:
+private:
 
 	// Plug used to cache the matrix computed from the `TargetMode`
 	// separately. The UV mode in particular is expensive, and caching it

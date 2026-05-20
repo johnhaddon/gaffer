@@ -112,8 +112,7 @@ const Gaffer::ValuePlug *OpenColorIOConfigPlug::displayTransformPlug() const
 
 bool OpenColorIOConfigPlug::acceptsChild( const GraphComponent *potentialChild ) const
 {
-	return ValuePlug::acceptsChild( potentialChild ) &&
-		children().size() < 4;
+	return ValuePlug::acceptsChild( potentialChild ) && children().size() < 4;
 }
 
 Gaffer::PlugPtr OpenColorIOConfigPlug::createCounterpart( const std::string &name, Direction direction ) const
@@ -121,7 +120,9 @@ Gaffer::PlugPtr OpenColorIOConfigPlug::createCounterpart( const std::string &nam
 	return new OpenColorIOConfigPlug( name, direction, getFlags() );
 }
 
-OpenColorIOConfigPlug *OpenColorIOConfigPlug::acquireDefaultConfigPlug( Gaffer::ScriptNode *scriptNode, bool createIfNecessary )
+OpenColorIOConfigPlug *OpenColorIOConfigPlug::acquireDefaultConfigPlug(
+	Gaffer::ScriptNode *scriptNode, bool createIfNecessary
+)
 {
 	if( auto plug = scriptNode->getChild<OpenColorIOConfigPlug>( g_defaultConfigPlugName ) )
 	{
@@ -151,9 +152,8 @@ void OpenColorIOConfigPlug::parentChanged( Gaffer::GraphComponent *oldParent )
 	if( auto scriptNode = parent<ScriptNode>() )
 	{
 		// We are the default config plug.
-		m_plugSetConnection = scriptNode->plugSetSignal().connect(
-			boost::bind( &OpenColorIOConfigPlug::plugSet, this, ::_1 )
-		);
+		m_plugSetConnection =
+			scriptNode->plugSetSignal().connect( boost::bind( &OpenColorIOConfigPlug::plugSet, this, ::_1 ) );
 		plugSet( this );
 	}
 }
@@ -197,7 +197,9 @@ void OpenColorIOConfigPlug::plugSet( Gaffer::Plug *plug )
 		}
 		else
 		{
-			throw IECore::Exception( fmt::format( "Variable {} is {}, but must be StringPlug", name, variable->valuePlug()->typeName() ) );
+			throw IECore::Exception(
+				fmt::format( "Variable {} is {}, but must be StringPlug", name, variable->valuePlug()->typeName() )
+			);
 		}
 	}
 

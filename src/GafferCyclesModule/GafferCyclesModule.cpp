@@ -83,7 +83,9 @@ BOOST_PYTHON_MODULE( _GafferCycles )
 		scope().attr( "IECoreCyclesPreview" ) = ieCoreCyclesModule;
 		scope ieCoreCyclesScope( ieCoreCyclesModule );
 
-		object shaderNetworkAlgoModule( borrowed( PyImport_AddModule( "GafferCycles.IECoreCyclesPreview.ShaderNetworkAlgo" ) ) );
+		object shaderNetworkAlgoModule(
+			borrowed( PyImport_AddModule( "GafferCycles.IECoreCyclesPreview.ShaderNetworkAlgo" ) )
+		);
 		scope().attr( "ShaderNetworkAlgo" ) = shaderNetworkAlgoModule;
 		scope shaderNetworkAlgoScope( shaderNetworkAlgoModule );
 

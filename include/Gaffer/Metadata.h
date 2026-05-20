@@ -59,7 +59,7 @@ IE_CORE_FORWARDDECLARE( Plug )
 class GAFFER_API Metadata
 {
 
-	public:
+public:
 
 	using ValueFunction = std::function<IECore::ConstDataPtr( IECore::InternedString )>;
 	using GraphComponentValueFunction = std::function<IECore::ConstDataPtr( const GraphComponent * )>;
@@ -81,15 +81,23 @@ class GAFFER_API Metadata
 	static void registerValue( IECore::TypeId typeId, IECore::InternedString key, GraphComponentValueFunction value );
 
 	/// Registers a static metadata value for plugs with the specified path relative to the ancestor type.
-	static void registerValue( IECore::TypeId ancestorTypeId, const IECore::StringAlgo::MatchPattern &plugPath, IECore::InternedString key, IECore::ConstDataPtr value );
+	static void registerValue(
+		IECore::TypeId ancestorTypeId, const IECore::StringAlgo::MatchPattern &plugPath, IECore::InternedString key,
+		IECore::ConstDataPtr value
+	);
 	/// Registers a dynamic metadata value for the specified plug. Each time the data is retrieved, the
 	/// PlugValueFunction will be called to compute it.
-	static void registerValue( IECore::TypeId ancestorTypeId, const IECore::StringAlgo::MatchPattern &plugPath, IECore::InternedString key, PlugValueFunction value );
+	static void registerValue(
+		IECore::TypeId ancestorTypeId, const IECore::StringAlgo::MatchPattern &plugPath, IECore::InternedString key,
+		PlugValueFunction value
+	);
 
 	/// Registers a metadata value specific to a single instance - this will take precedence over any
 	/// values registered above. If persistent is true, the value will be preserved across script save/load and cut/paste.
 	/// \undoable
-	static void registerValue( GraphComponent *target, IECore::InternedString key, IECore::ConstDataPtr value, bool persistent = true );
+	static void registerValue(
+		GraphComponent *target, IECore::InternedString key, IECore::ConstDataPtr value, bool persistent = true
+	);
 
 	/// Registration queries
 	/// ====================
@@ -108,9 +116,14 @@ class GAFFER_API Metadata
 	/// Fills the keys vector with keys for all values registered with the methods above.
 	static void registeredValues( IECore::InternedString target, std::vector<IECore::InternedString> &keys );
 	/// Returns the keys for all values relevant to `target`, taking into account only the specified `registrationTypes`.
-	static std::vector<IECore::InternedString> registeredValues( const GraphComponent *target, unsigned registrationTypes = RegistrationTypes::All );
+	static std::vector<IECore::InternedString> registeredValues(
+		const GraphComponent *target, unsigned registrationTypes = RegistrationTypes::All
+	);
 	/// \deprecated Pass RegistrationTypes instead.
-	static void registeredValues( const GraphComponent *target, std::vector<IECore::InternedString> &keys, bool instanceOnly = false, bool persistentOnly = false );
+	static void registeredValues(
+		const GraphComponent *target, std::vector<IECore::InternedString> &keys, bool instanceOnly = false,
+		bool persistentOnly = false
+	);
 
 	/// Value retrieval
 	/// ===============
@@ -120,18 +133,24 @@ class GAFFER_API Metadata
 	static typename T::ConstPtr value( IECore::InternedString target, IECore::InternedString key );
 	/// Ignores any values not included in `registrationTypes`.
 	template<typename T = IECore::Data>
-	static typename T::ConstPtr value( const GraphComponent *target, IECore::InternedString key, unsigned registrationTypes );
+	static typename T::ConstPtr value(
+		const GraphComponent *target, IECore::InternedString key, unsigned registrationTypes
+	);
 	/// \deprecated Pass RegistrationTypes instead. When we remove this,
 	/// default `registrationTypes` to `All` in overload above.
 	template<typename T = IECore::Data>
-	static typename T::ConstPtr value( const GraphComponent *target, IECore::InternedString key, bool instanceOnly = false );
+	static typename T::ConstPtr value(
+		const GraphComponent *target, IECore::InternedString key, bool instanceOnly = false
+	);
 
 	/// Value deregistration
 	/// ====================
 
 	static void deregisterValue( IECore::InternedString target, IECore::InternedString key );
 	static void deregisterValue( IECore::TypeId typeId, IECore::InternedString key );
-	static void deregisterValue( IECore::TypeId ancestorTypeId, const IECore::StringAlgo::MatchPattern &plugPath, IECore::InternedString key );
+	static void deregisterValue(
+		IECore::TypeId ancestorTypeId, const IECore::StringAlgo::MatchPattern &plugPath, IECore::InternedString key
+	);
 
 	/// \undoable
 	static void deregisterValue( GraphComponent *target, IECore::InternedString key );
@@ -141,15 +160,21 @@ class GAFFER_API Metadata
 
 	/// Returns the names of all matching string targets with the specified
 	/// metadata key.
-	static std::vector<IECore::InternedString> targetsWithMetadata( const IECore::StringAlgo::MatchPattern &targetPattern, IECore::InternedString key );
+	static std::vector<IECore::InternedString> targetsWithMetadata(
+		const IECore::StringAlgo::MatchPattern &targetPattern, IECore::InternedString key
+	);
 
 	/// Lists all node descendants of "root" with the specified metadata key.
 	/// If instanceOnly is true the search is restricted to instance metadata.
-	static std::vector<Node *> nodesWithMetadata( GraphComponent *root, IECore::InternedString key, bool instanceOnly = false );
+	static std::vector<Node *> nodesWithMetadata(
+		GraphComponent *root, IECore::InternedString key, bool instanceOnly = false
+	);
 
 	/// Lists all plug descendants of "root" with the specified metadata key.
 	/// If instanceOnly is true the search is restricted to instance metadata.
-	static std::vector<Plug *> plugsWithMetadata( GraphComponent *root, IECore::InternedString key, bool instanceOnly = false );
+	static std::vector<Plug *> plugsWithMetadata(
+		GraphComponent *root, IECore::InternedString key, bool instanceOnly = false
+	);
 
 	/// Signals
 	/// =======
@@ -168,9 +193,13 @@ class GAFFER_API Metadata
 		InstanceDeregistration
 	};
 
-	using ValueChangedSignal = Signals::Signal<void( IECore::InternedString target, IECore::InternedString key, ValueChangedReason reason ), Signals::CatchingCombiner<void>>;
-	using NodeValueChangedSignal = Signals::Signal<void( Node *node, IECore::InternedString key, ValueChangedReason reason ), Signals::CatchingCombiner<void>>;
-	using PlugValueChangedSignal = Signals::Signal<void( Plug *plug, IECore::InternedString key, ValueChangedReason reason ), Signals::CatchingCombiner<void>>;
+	using ValueChangedSignal = Signals::Signal<
+		void( IECore::InternedString target, IECore::InternedString key, ValueChangedReason reason ),
+		Signals::CatchingCombiner<void>>;
+	using NodeValueChangedSignal = Signals::Signal<
+		void( Node *node, IECore::InternedString key, ValueChangedReason reason ), Signals::CatchingCombiner<void>>;
+	using PlugValueChangedSignal = Signals::Signal<
+		void( Plug *plug, IECore::InternedString key, ValueChangedReason reason ), Signals::CatchingCombiner<void>>;
 
 	/// Returns a signal that will be emitted when metadata has changed for `target`.
 	static ValueChangedSignal &valueChangedSignal( IECore::InternedString target );
@@ -186,9 +215,17 @@ class GAFFER_API Metadata
 	/// Their usage leads to performance bottlenecks whereby all observers
 	/// are triggered by all edits. They will be removed in future.
 
-	using LegacyValueChangedSignal = Signals::Signal<void( IECore::InternedString target, IECore::InternedString key ), Signals::CatchingCombiner<void>>;
-	using LegacyNodeValueChangedSignal = Signals::Signal<void( IECore::TypeId nodeTypeId, IECore::InternedString key, Gaffer::Node *node ), Signals::CatchingCombiner<void>>;
-	using LegacyPlugValueChangedSignal = Signals::Signal<void( IECore::TypeId typeId, const IECore::StringAlgo::MatchPattern &plugPath, IECore::InternedString key, Gaffer::Plug *plug ), Signals::CatchingCombiner<void>>;
+	using LegacyValueChangedSignal = Signals::Signal<
+		void( IECore::InternedString target, IECore::InternedString key ), Signals::CatchingCombiner<void>>;
+	using LegacyNodeValueChangedSignal = Signals::Signal<
+		void( IECore::TypeId nodeTypeId, IECore::InternedString key, Gaffer::Node *node ),
+		Signals::CatchingCombiner<void>>;
+	using LegacyPlugValueChangedSignal = Signals::Signal<
+		void(
+			IECore::TypeId typeId, const IECore::StringAlgo::MatchPattern &plugPath, IECore::InternedString key,
+			Gaffer::Plug *plug
+		),
+		Signals::CatchingCombiner<void>>;
 
 	/// \deprecated
 	static LegacyValueChangedSignal &valueChangedSignal();
@@ -199,7 +236,7 @@ class GAFFER_API Metadata
 	/// \deprecated
 	static LegacyPlugValueChangedSignal &plugValueChangedSignal();
 
-	private:
+private:
 
 	/// Per-instance Metadata is stored as a mapping from GraphComponent * to the
 	/// metadata values, and needs to be removed when the instance dies. Currently
@@ -213,9 +250,13 @@ class GAFFER_API Metadata
 	static void instanceDestroyed( GraphComponent *graphComponent );
 
 	static IECore::ConstDataPtr valueInternal( IECore::InternedString target, IECore::InternedString key );
-	static IECore::ConstDataPtr valueInternal( const GraphComponent *target, IECore::InternedString key, unsigned registrationTypes );
+	static IECore::ConstDataPtr valueInternal(
+		const GraphComponent *target, IECore::InternedString key, unsigned registrationTypes
+	);
 	/// \deprecated
-	static IECore::ConstDataPtr valueInternal( const GraphComponent *target, IECore::InternedString key, bool instanceOnly );
+	static IECore::ConstDataPtr valueInternal(
+		const GraphComponent *target, IECore::InternedString key, bool instanceOnly
+	);
 };
 
 } // namespace Gaffer

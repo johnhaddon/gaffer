@@ -96,10 +96,8 @@ struct GAFFERSCENE_API Visualisation
 	};
 
 	Visualisation(
-		const IECoreGL::ConstRenderablePtr &renderable,
-		Scale scale = Scale::Local,
-		Category category = Category::Generic,
-		bool affectsFramingBound = true,
+		const IECoreGL::ConstRenderablePtr &renderable, Scale scale = Scale::Local,
+		Category category = Category::Generic, bool affectsFramingBound = true,
 		ColorSpace colorSpace = ColorSpace::Scene
 	);
 
@@ -112,13 +110,20 @@ struct GAFFERSCENE_API Visualisation
 	// Convenience constructors for well-known types of visualisation
 
 	// A visualisation representing an object to be rendered as a primitive would.
-	static Visualisation createGeometry( const IECoreGL::ConstRenderablePtr &renderable, ColorSpace colorSpace = ColorSpace::Display );
+	static Visualisation createGeometry(
+		const IECoreGL::ConstRenderablePtr &renderable, ColorSpace colorSpace = ColorSpace::Display
+	);
 	// An abstract visualisation or other decoration that uses `Scale::Visualiser`.
-	static Visualisation createOrnament( const IECoreGL::ConstRenderablePtr &renderable, bool affectsFramingBounds, ColorSpace colorSpace = ColorSpace::Display );
+	static Visualisation createOrnament(
+		const IECoreGL::ConstRenderablePtr &renderable, bool affectsFramingBounds,
+		ColorSpace colorSpace = ColorSpace::Display
+	);
 	// Frustums visualisations should be used for cameras or other 'projections'
 	// such as spot lights. By default they don't contribute to the framing bound
 	// for the location to make scene navigation easier.
-	static Visualisation createFrustum( const IECoreGL::ConstRenderablePtr &renderable, Scale scale, ColorSpace colorSpace = ColorSpace::Display );
+	static Visualisation createFrustum(
+		const IECoreGL::ConstRenderablePtr &renderable, Scale scale, ColorSpace colorSpace = ColorSpace::Display
+	);
 };
 
 

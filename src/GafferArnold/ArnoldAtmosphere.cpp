@@ -40,14 +40,9 @@ using namespace GafferArnold;
 
 GAFFER_NODE_DEFINE_TYPE( ArnoldAtmosphere );
 
-ArnoldAtmosphere::ArnoldAtmosphere( const std::string &name )
-	: GlobalShader( name )
-{
-}
+ArnoldAtmosphere::ArnoldAtmosphere( const std::string &name ) : GlobalShader( name ) {}
 
-ArnoldAtmosphere::~ArnoldAtmosphere()
-{
-}
+ArnoldAtmosphere::~ArnoldAtmosphere() {}
 
 bool ArnoldAtmosphere::affectsOptionName( const Gaffer::Plug *input ) const
 {

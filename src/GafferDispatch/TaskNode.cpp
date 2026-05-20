@@ -55,10 +55,7 @@ using namespace GafferDispatch;
 // Task implementation
 //////////////////////////////////////////////////////////////////////////
 
-TaskNode::Task::Task( ConstTaskPlugPtr plug, const Gaffer::Context *context )
-	: m_plug( plug ), m_context( context )
-{
-}
+TaskNode::Task::Task( ConstTaskPlugPtr plug, const Gaffer::Context *context ) : m_plug( plug ), m_context( context ) {}
 
 const TaskNode::TaskPlug *TaskNode::Task::plug() const
 {
@@ -85,7 +82,7 @@ namespace
 class TaskNodeProcess : public Gaffer::Process
 {
 
-	public:
+public:
 
 	TaskNodeProcess( const IECore::InternedString &type, const TaskNode::TaskPlug *plug )
 		: Process( type, plug->source(), plug )
@@ -102,10 +99,7 @@ class TaskNodeProcess : public Gaffer::Process
 		return n;
 	}
 
-	void handleException() const
-	{
-		Gaffer::Process::handleException();
-	}
+	void handleException() const { Gaffer::Process::handleException(); }
 
 	static InternedString hashProcessType;
 	static InternedString executeProcessType;
@@ -275,8 +269,7 @@ GAFFER_NODE_DEFINE_TYPE( TaskNode )
 
 size_t TaskNode::g_firstPlugIndex;
 
-TaskNode::TaskNode( const std::string &name )
-	: DependencyNode( name )
+TaskNode::TaskNode( const std::string &name ) : DependencyNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ArrayPlug( "preTasks", Plug::In, new TaskPlug( "preTask0" ) ) );
@@ -287,9 +280,7 @@ TaskNode::TaskNode( const std::string &name )
 	addChild( dispatcherPlug );
 }
 
-TaskNode::~TaskNode()
-{
-}
+TaskNode::~TaskNode() {}
 
 ArrayPlug *TaskNode::preTasksPlug()
 {
@@ -343,12 +334,8 @@ void TaskNode::affects( const Plug *input, AffectedPlugsContainer &outputs ) con
 
 bool TaskNode::affectsTask( const Plug *input ) const
 {
-	if(
-		input->direction() != Plug::In ||
-		userPlug()->isAncestorOf( input ) ||
-		postTasksPlug()->isAncestorOf( input ) ||
-		input == taskPlug()
-	)
+	if( input->direction() != Plug::In || userPlug()->isAncestorOf( input ) || postTasksPlug()->isAncestorOf( input ) ||
+		input == taskPlug() )
 	{
 		return false;
 	}
@@ -378,9 +365,7 @@ IECore::MurmurHash TaskNode::hash( const Context *context ) const
 	return h;
 }
 
-void TaskNode::execute() const
-{
-}
+void TaskNode::execute() const {}
 
 void TaskNode::executeSequence( const std::vector<float> &frames ) const
 {

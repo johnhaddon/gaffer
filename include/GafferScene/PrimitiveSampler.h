@@ -50,7 +50,7 @@ namespace GafferScene
 class GAFFERSCENE_API PrimitiveSampler : public Deformer
 {
 
-	public:
+public:
 
 	~PrimitiveSampler() override;
 
@@ -71,7 +71,7 @@ class GAFFERSCENE_API PrimitiveSampler : public Deformer
 	Gaffer::StringPlug *statusPlug();
 	const Gaffer::StringPlug *statusPlug() const;
 
-	protected:
+protected:
 
 	explicit PrimitiveSampler( const std::string &name = defaultName<PrimitiveSampler>() );
 
@@ -111,13 +111,19 @@ class GAFFERSCENE_API PrimitiveSampler : public Deformer
 	/// must be filled with the interpolation of the primitive variables to be added
 	/// to the destination primitive. The sampling function will then be queried with
 	/// `index` values in the interval `[ 0, destinationPrimitive->variableSize( interpolation ) )`.
-	virtual SamplingFunction computeSamplingFunction( const IECoreScene::Primitive *destinationPrimitive, IECoreScene::PrimitiveVariable::Interpolation &interpolation ) const = 0;
+	virtual SamplingFunction computeSamplingFunction(
+		const IECoreScene::Primitive *destinationPrimitive, IECoreScene::PrimitiveVariable::Interpolation &interpolation
+	) const = 0;
 
-	private:
+private:
 
 	bool affectsProcessedObject( const Gaffer::Plug *input ) const final;
-	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const final;
-	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const final;
+	void hashProcessedObject(
+		const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const final;
+	IECore::ConstObjectPtr computeProcessedObject(
+		const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+	) const final;
 	Gaffer::ValuePlug::CachePolicy processedObjectComputeCachePolicy() const final;
 
 	bool adjustBounds() const final;

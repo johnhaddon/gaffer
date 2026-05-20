@@ -41,16 +41,14 @@ using namespace GafferScene;
 
 GAFFER_NODE_DEFINE_TYPE( DeletePrimitiveVariables );
 
-DeletePrimitiveVariables::DeletePrimitiveVariables( const std::string &name )
-	: PrimitiveVariableProcessor( name )
-{
-}
+DeletePrimitiveVariables::DeletePrimitiveVariables( const std::string &name ) : PrimitiveVariableProcessor( name ) {}
 
-DeletePrimitiveVariables::~DeletePrimitiveVariables()
-{
-}
+DeletePrimitiveVariables::~DeletePrimitiveVariables() {}
 
-void DeletePrimitiveVariables::processPrimitiveVariable( const ScenePath &path, const Gaffer::Context *context, IECoreScene::ConstPrimitivePtr inputGeometry, IECoreScene::PrimitiveVariable &variable ) const
+void DeletePrimitiveVariables::processPrimitiveVariable(
+	const ScenePath &path, const Gaffer::Context *context, IECoreScene::ConstPrimitivePtr inputGeometry,
+	IECoreScene::PrimitiveVariable &variable
+) const
 {
 	variable.interpolation = IECoreScene::PrimitiveVariable::Invalid;
 	variable.data = nullptr;

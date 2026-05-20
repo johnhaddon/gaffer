@@ -54,22 +54,11 @@ namespace Gaffer
 class DownstreamIterator : public boost::iterator_facade<DownstreamIterator, const Plug, boost::forward_traversal_tag>
 {
 
-	public:
+public:
 
-	DownstreamIterator( const Plug *plug )
-		: m_root( plug ), m_pruned( false )
-	{
-		m_stack.push_back(
-			Level(
-				plug
-			)
-		);
-	}
+	DownstreamIterator( const Plug *plug ) : m_root( plug ), m_pruned( false ) { m_stack.push_back( Level( plug ) ); }
 
-	size_t depth() const
-	{
-		return m_stack.size() - 1;
-	}
+	size_t depth() const { return m_stack.size() - 1; }
 
 	const Plug *upstream() const
 	{
@@ -82,28 +71,21 @@ class DownstreamIterator : public boost::iterator_facade<DownstreamIterator, con
 
 	/// Calling prune() causes the next increment to skip any recursion
 	/// that it would normally perform.
-	void prune()
-	{
-		m_pruned = true;
-	}
+	void prune() { m_pruned = true; }
 
 	/// Returns true when iteration is complete.
-	bool done() const
-	{
-		return m_stack.size() == 1 && m_stack[0].it == m_stack[0].end;
-	}
+	bool done() const { return m_stack.size() == 1 && m_stack[0].it == m_stack[0].end; }
 
-	private:
+private:
 
 	friend class boost::iterator_core_access;
 
 	class Level
 	{
 
-		public:
+	public:
 
-		Level( const Plug *plug )
-			: plugs( plug->outputs().begin(), plug->outputs().end() )
+		Level( const Plug *plug ) : plugs( plug->outputs().begin(), plug->outputs().end() )
 		{
 			addDependentPlugs( plug );
 			addAncestorOutputs( plug );
@@ -111,10 +93,7 @@ class DownstreamIterator : public boost::iterator_facade<DownstreamIterator, con
 			end = plugs.end();
 		}
 
-		Level( const Level &other )
-		{
-			*this = other;
-		}
+		Level( const Level &other ) { *this = other; }
 
 		bool operator == ( const Level &other ) const
 		{
@@ -133,7 +112,7 @@ class DownstreamIterator : public boost::iterator_facade<DownstreamIterator, con
 		DependencyNode::AffectedPlugsContainer::const_iterator it;
 		DependencyNode::AffectedPlugsContainer::const_iterator end;
 
-		private:
+	private:
 
 		void addDependentPlugs( const Plug *plug )
 		{
@@ -167,31 +146,16 @@ class DownstreamIterator : public boost::iterator_facade<DownstreamIterator, con
 			}
 			catch( const std::exception &e )
 			{
-				IECore::msg(
-					IECore::Msg::Error,
-					node->fullName() + "::affects()",
-					e.what()
-				);
+				IECore::msg( IECore::Msg::Error, node->fullName() + "::affects()", e.what() );
 			}
 			catch( ... )
 			{
-				IECore::msg(
-					IECore::Msg::Error,
-					node->fullName() + "::affects()",
-					"Unknown exception"
-				);
+				IECore::msg( IECore::Msg::Error, node->fullName() + "::affects()", "Unknown exception" );
 			}
 
 			// Likewise we don't want client code to be exposed to
 			// dependencies which are disallowed.
-			plugs.erase(
-				std::remove_if(
-					plugs.begin() + firstDependentIndex,
-					plugs.end(),
-					isNonLeaf
-				),
-				plugs.end()
-			);
+			plugs.erase( std::remove_if( plugs.begin() + firstDependentIndex, plugs.end(), isNonLeaf ), plugs.end() );
 		}
 
 		static bool isNonLeaf( const Plug *plug )
@@ -202,8 +166,7 @@ class DownstreamIterator : public boost::iterator_facade<DownstreamIterator, con
 			}
 			const Node *node = plug->node();
 			IECore::msg(
-				IECore::Msg::Error,
-				node->fullName() + "::affects()",
+				IECore::Msg::Error, node->fullName() + "::affects()",
 				"Non-leaf plug " + plug->relativeName( node ) + " returned by affects()"
 			);
 			return true;
@@ -223,7 +186,8 @@ class DownstreamIterator : public boost::iterator_facade<DownstreamIterator, con
 			plug = plug->parent<Plug>();
 			while( plug )
 			{
-				for( Plug::OutputContainer::const_iterator pIt = plug->outputs().begin(), eIt = plug->outputs().end(); pIt != eIt; ++pIt )
+				for( Plug::OutputContainer::const_iterator pIt = plug->outputs().begin(), eIt = plug->outputs().end();
+					 pIt != eIt; ++pIt )
 				{
 					if( ( *pIt )->children().empty() )
 					{
@@ -264,25 +228,13 @@ class DownstreamIterator : public boost::iterator_facade<DownstreamIterator, con
 		m_pruned = false;
 	}
 
-	bool equal( const DownstreamIterator &other ) const
-	{
-		return m_stack == other.m_stack;
-	}
+	bool equal( const DownstreamIterator &other ) const { return m_stack == other.m_stack; }
 
-	const Plug &dereference() const
-	{
-		return **( stackTop().it );
-	}
+	const Plug &dereference() const { return **( stackTop().it ); }
 
-	Level &stackTop()
-	{
-		return *( m_stack.rbegin() );
-	}
+	Level &stackTop() { return *( m_stack.rbegin() ); }
 
-	const Level &stackTop() const
-	{
-		return *( m_stack.rbegin() );
-	}
+	const Level &stackTop() const { return *( m_stack.rbegin() ); }
 
 	bool cyclic() const
 	{

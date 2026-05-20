@@ -67,9 +67,7 @@ struct DispatchTest
 			// Use an arena to limit any parallel TBB work to 1
 			// thread, since Serial policy is not threadsafe.
 			tbb::task_arena arena( 1 );
-			arena.execute(
-				[&f] { f(); }
-			);
+			arena.execute( [&f] { f(); } );
 		}
 		else if( policy == "parallel" )
 		{
@@ -93,7 +91,10 @@ struct TestLRUCache
 {
 
 	TestLRUCache( int numIterations, int numValues, int maxCost, int clearFrequency )
-		: m_numIterations( numIterations ), m_numValues( numValues ), m_maxCost( maxCost ), m_clearFrequency( clearFrequency )
+		: m_numIterations( numIterations ),
+		  m_numValues( numValues ),
+		  m_maxCost( maxCost ),
+		  m_clearFrequency( clearFrequency )
 	{
 	}
 
@@ -101,13 +102,15 @@ struct TestLRUCache
 	{
 		using Cache = LRUCache<int, int, Policy>;
 		Cache cache(
-			[]( int key, size_t &cost, const IECore::Canceller *canceller ) { cost = 1; return key; },
+			[]( int key, size_t &cost, const IECore::Canceller *canceller ) {
+				cost = 1;
+				return key;
+			},
 			m_maxCost
 		);
 
 		tbb::parallel_for(
-			tbb::blocked_range<size_t>( 0, m_numIterations ),
-			[&]( const tbb::blocked_range<size_t> &r ) {
+			tbb::blocked_range<size_t>( 0, m_numIterations ), [&]( const tbb::blocked_range<size_t> &r ) {
 				for( size_t i = r.begin(); i != r.end(); ++i )
 				{
 					const int k = i % m_numValues;
@@ -123,7 +126,7 @@ struct TestLRUCache
 		);
 	}
 
-	private:
+private:
 
 	const int m_numIterations;
 	const int m_numValues;
@@ -153,11 +156,7 @@ struct TestLRUCacheRemovalCallback
 			},
 			/* maxCost = */ 5,
 			// Removal callback
-			[&removed]( int key, int value ) {
-				removed.push_back(
-					std::make_pair( key, value )
-				);
-			}
+			[&removed]( int key, int value ) { removed.push_back( std::make_pair( key, value ) ); }
 		);
 
 		GAFFERTEST_ASSERTEQUAL( cache.get( 1 ), 2 );
@@ -187,13 +186,7 @@ struct TestLRUCacheRemovalCallback
 
 		for( int i = 1; i < 8; ++i )
 		{
-			GAFFERTEST_ASSERTEQUAL(
-				std::count(
-					removed.begin(), removed.end(),
-					std::make_pair( i, i * 2 )
-				),
-				1
-			);
+			GAFFERTEST_ASSERTEQUAL( std::count( removed.begin(), removed.end(), std::make_pair( i, i * 2 ) ), 1 );
 		}
 	}
 };
@@ -207,33 +200,30 @@ template<template<typename> class Policy>
 struct TestLRUCacheContentionForOneItem
 {
 
-	TestLRUCacheContentionForOneItem( bool withCanceller )
-		: m_withCanceller( withCanceller )
-	{
-	}
+	TestLRUCacheContentionForOneItem( bool withCanceller ) : m_withCanceller( withCanceller ) {}
 
 	void operator () ()
 	{
 		using Cache = LRUCache<int, int, Policy>;
 		Cache cache(
-			[]( int key, size_t &cost, const IECore::Canceller *canceller ) { cost = 1; return key; },
+			[]( int key, size_t &cost, const IECore::Canceller *canceller ) {
+				cost = 1;
+				return key;
+			},
 			100
 		);
 
 		IECore::CancellerPtr canceller = m_withCanceller ? new IECore::Canceller : nullptr;
 
-		tbb::parallel_for(
-			tbb::blocked_range<size_t>( 0, 10000000 ),
-			[&]( const tbb::blocked_range<size_t> &r ) {
-				for( size_t i = r.begin(); i < r.end(); ++i )
-				{
-					GAFFERTEST_ASSERTEQUAL( cache.get( 1, canceller.get() ), 1 );
-				}
+		tbb::parallel_for( tbb::blocked_range<size_t>( 0, 10000000 ), [&]( const tbb::blocked_range<size_t> &r ) {
+			for( size_t i = r.begin(); i < r.end(); ++i )
+			{
+				GAFFERTEST_ASSERTEQUAL( cache.get( 1, canceller.get() ), 1 );
 			}
-		);
+		} );
 	}
 
-	private:
+private:
 
 	bool m_withCanceller;
 };
@@ -248,7 +238,9 @@ struct TestLRUCacheRecursion
 {
 
 	TestLRUCacheRecursion( int numIterations, int numValues, int maxCost )
-		: m_numIterations( numIterations ), m_numValues( numValues ), m_maxCost( maxCost )
+		: m_numIterations( numIterations ),
+		  m_numValues( numValues ),
+		  m_maxCost( maxCost )
 	{
 	}
 
@@ -258,32 +250,29 @@ struct TestLRUCacheRecursion
 		using CachePtr = std::unique_ptr<Cache>;
 
 		CachePtr cache;
-		cache.reset(
-			new Cache(
-				// Getter that calls back into the cache with a different key.
-				[&cache]( int key, size_t &cost, const IECore::Canceller *canceller ) {
-					cost = 1;
-					switch( key )
-					{
-						case 0 :
-							return 0;
-						case 1 :
-						case 2 :
-							return 1;
-						default :
-							return cache->get( key - 1 ) + cache->get( key - 2 );
-					}
-				},
-				m_maxCost
-			)
-		);
+		cache.reset( new Cache(
+			// Getter that calls back into the cache with a different key.
+			[&cache]( int key, size_t &cost, const IECore::Canceller *canceller ) {
+				cost = 1;
+				switch( key )
+				{
+					case 0 :
+						return 0;
+					case 1 :
+					case 2 :
+						return 1;
+					default :
+						return cache->get( key - 1 ) + cache->get( key - 2 );
+				}
+			},
+			m_maxCost
+		) );
 
 		GAFFERTEST_ASSERTEQUAL( cache->get( 40 ), 102334155 );
 		cache->clear();
 
 		tbb::parallel_for(
-			tbb::blocked_range<size_t>( 0, m_numIterations ),
-			[&]( const tbb::blocked_range<size_t> &r ) {
+			tbb::blocked_range<size_t>( 0, m_numIterations ), [&]( const tbb::blocked_range<size_t> &r ) {
 				for( size_t i = r.begin(); i < r.end(); ++i )
 				{
 					cache->get( i % m_numValues );
@@ -292,7 +281,7 @@ struct TestLRUCacheRecursion
 		);
 	}
 
-	private:
+private:
 
 	const int m_numIterations;
 	const int m_numValues;
@@ -314,16 +303,18 @@ struct TestLRUCacheClearFromGet
 		using CachePtr = std::unique_ptr<Cache>;
 
 		CachePtr cache;
-		cache.reset(
-			new Cache(
-				// Calling `clear()` from inside a getter is basically insane. But it can happen
-				// in Gaffer, because `get()` might trigger arbitrary python, arbitrary python
-				// might trigger garbage collection, garbage collection might destroy a plug,
-				// and destroying a plug clears the cache.
-				[&cache]( int key, size_t &cost, const IECore::Canceller *canceller ) { cache->clear(); cost = 1; return key; },
-				100
-			)
-		);
+		cache.reset( new Cache(
+			// Calling `clear()` from inside a getter is basically insane. But it can happen
+			// in Gaffer, because `get()` might trigger arbitrary python, arbitrary python
+			// might trigger garbage collection, garbage collection might destroy a plug,
+			// and destroying a plug clears the cache.
+			[&cache]( int key, size_t &cost, const IECore::Canceller *canceller ) {
+				cache->clear();
+				cost = 1;
+				return key;
+			},
+			100
+		) );
 
 		GAFFERTEST_ASSERTEQUAL( cache->get( 0 ), 0 );
 	}
@@ -346,9 +337,7 @@ struct TestLRUCacheExceptions
 		Cache cache(
 			[&calls]( int key, size_t &cost, const IECore::Canceller *canceller ) -> int {
 				calls.push_back( key );
-				throw IECore::Exception(
-					fmt::format( "Get failed for {}", key )
-				);
+				throw IECore::Exception( fmt::format( "Get failed for {}", key ) );
 			},
 			1000
 		);
@@ -363,10 +352,7 @@ struct TestLRUCacheExceptions
 		catch( const IECore::Exception &e )
 		{
 			caughtException = true;
-			GAFFERTEST_ASSERTEQUAL(
-				e.what(),
-				std::string( "Get failed for 10" )
-			);
+			GAFFERTEST_ASSERTEQUAL( e.what(), std::string( "Get failed for 10" ) );
 		}
 
 		GAFFERTEST_ASSERT( caughtException );
@@ -384,10 +370,7 @@ struct TestLRUCacheExceptions
 		catch( const IECore::Exception &e )
 		{
 			caughtException = true;
-			GAFFERTEST_ASSERTEQUAL(
-				e.what(),
-				std::string( "Get failed for 10" )
-			);
+			GAFFERTEST_ASSERTEQUAL( e.what(), std::string( "Get failed for 10" ) );
 		}
 
 		GAFFERTEST_ASSERT( caughtException );
@@ -405,10 +388,7 @@ struct TestLRUCacheExceptions
 		catch( const IECore::Exception &e )
 		{
 			caughtException = true;
-			GAFFERTEST_ASSERTEQUAL(
-				e.what(),
-				std::string( "Get failed for 10" )
-			);
+			GAFFERTEST_ASSERTEQUAL( e.what(), std::string( "Get failed for 10" ) );
 		}
 
 		GAFFERTEST_ASSERT( caughtException );
@@ -426,10 +406,7 @@ struct TestLRUCacheExceptions
 		catch( const IECore::Exception &e )
 		{
 			caughtException = true;
-			GAFFERTEST_ASSERTEQUAL(
-				e.what(),
-				std::string( "Get failed for 10" )
-			);
+			GAFFERTEST_ASSERTEQUAL( e.what(), std::string( "Get failed for 10" ) );
 		}
 
 		GAFFERTEST_ASSERT( caughtException );
@@ -441,12 +418,9 @@ struct TestLRUCacheExceptions
 		Cache noErrorsCache(
 			[&calls]( int key, size_t &cost, const IECore::Canceller *canceller ) -> int {
 				calls.push_back( key );
-				throw IECore::Exception(
-					fmt::format( "Get failed for {}", key )
-				);
+				throw IECore::Exception( fmt::format( "Get failed for {}", key ) );
 			},
-			1000,
-			typename Cache::RemovalCallback(),
+			1000, typename Cache::RemovalCallback(),
 			/* cacheErrors = */ false
 		);
 
@@ -458,10 +432,7 @@ struct TestLRUCacheExceptions
 		catch( const IECore::Exception &e )
 		{
 			caughtException = true;
-			GAFFERTEST_ASSERTEQUAL(
-				e.what(),
-				std::string( "Get failed for 10" )
-			);
+			GAFFERTEST_ASSERTEQUAL( e.what(), std::string( "Get failed for 10" ) );
 		}
 
 		GAFFERTEST_ASSERT( caughtException );
@@ -475,10 +446,7 @@ struct TestLRUCacheExceptions
 		catch( const IECore::Exception &e )
 		{
 			caughtException = true;
-			GAFFERTEST_ASSERTEQUAL(
-				e.what(),
-				std::string( "Get failed for 10" )
-			);
+			GAFFERTEST_ASSERTEQUAL( e.what(), std::string( "Get failed for 10" ) );
 		}
 
 		GAFFERTEST_ASSERT( caughtException );
@@ -593,11 +561,7 @@ struct TestLRUCacheCancellationOfSecondGet
 		IECore::CancellerPtr firstCanceller = new IECore::Canceller;
 		tbb::task_group taskGroup;
 
-		taskGroup.run(
-			[&cache, &firstCanceller] {
-				cache.get( 1, firstCanceller.get() );
-			}
-		);
+		taskGroup.run( [&cache, &firstCanceller] { cache.get( 1, firstCanceller.get() ); } );
 
 		// Wait for it to get stuck inside the getter.
 
@@ -663,39 +627,34 @@ struct TestLRUCacheUncacheableItem
 		using CachePtr = std::unique_ptr<Cache>;
 
 		CachePtr cache;
-		cache.reset(
-			new Cache(
-				[&cache]( int key, size_t &cost, const IECore::Canceller *canceller ) {
-					if( key == 0 )
-					{
-						// Too big to cache
-						cost = std::numeric_limits<size_t>::max();
-						// Recursive call to cache, with new key chosen to require
-						// the same bin as this key.
-						return cache->get( key + std::thread::hardware_concurrency() );
-					}
-					else
-					{
-						cost = 1;
-						return key;
-					}
-				},
-				1000
-			)
-		);
+		cache.reset( new Cache(
+			[&cache]( int key, size_t &cost, const IECore::Canceller *canceller ) {
+				if( key == 0 )
+				{
+					// Too big to cache
+					cost = std::numeric_limits<size_t>::max();
+					// Recursive call to cache, with new key chosen to require
+					// the same bin as this key.
+					return cache->get( key + std::thread::hardware_concurrency() );
+				}
+				else
+				{
+					cost = 1;
+					return key;
+				}
+			},
+			1000
+		) );
 
 		for( int i = 0; i < 10000; ++i )
 		{
 			cache->clear();
-			tbb::parallel_for(
-				tbb::blocked_range<size_t>( 0, 100 ),
-				[&]( const tbb::blocked_range<size_t> &r ) {
-					for( size_t i = r.begin(); i < r.end(); ++i )
-					{
-						cache->get( 0 );
-					}
+			tbb::parallel_for( tbb::blocked_range<size_t>( 0, 100 ), [&]( const tbb::blocked_range<size_t> &r ) {
+				for( size_t i = r.begin(); i < r.end(); ++i )
+				{
+					cache->get( 0 );
 				}
-			);
+			} );
 		}
 	}
 };
@@ -791,10 +750,12 @@ void testLRUCacheSetIfUncached( const std::string &policy )
 
 void GafferTestModule::bindLRUCacheTest()
 {
-	def( "testLRUCache", &testLRUCache, ( arg( "numIterations" ), arg( "numValues" ), arg( "maxCost" ), arg( "clearFrequency" ) = 0 ) );
+	def( "testLRUCache", &testLRUCache,
+		 ( arg( "numIterations" ), arg( "numValues" ), arg( "maxCost" ), arg( "clearFrequency" ) = 0 ) );
 	def( "testLRUCacheRemovalCallback", &testLRUCacheRemovalCallback );
 	def( "testLRUCacheContentionForOneItem", &testLRUCacheContentionForOneItem, arg( "withCanceller" ) = false );
-	def( "testLRUCacheRecursion", &testLRUCacheRecursion, ( arg( "numIterations" ), arg( "numValues" ), arg( "maxCost" ) ) );
+	def( "testLRUCacheRecursion", &testLRUCacheRecursion,
+		 ( arg( "numIterations" ), arg( "numValues" ), arg( "maxCost" ) ) );
 	def( "testLRUCacheClearFromGet", &testLRUCacheClearFromGet );
 	def( "testLRUCacheExceptions", &testLRUCacheExceptions );
 	def( "testLRUCacheCancellation", &testLRUCacheCancellation );

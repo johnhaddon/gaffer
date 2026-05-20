@@ -66,8 +66,7 @@ const IECore::InternedString ImagePlug::tileOriginContextName = "image:tileOrigi
 const std::string ImagePlug::defaultViewName = "default";
 
 static ContextAlgo::GlobalScope::Registration g_globalScopeRegistration(
-	ImagePlug::staticTypeId(),
-	{ ImagePlug::channelNameContextName, ImagePlug::tileOriginContextName }
+	ImagePlug::staticTypeId(), { ImagePlug::channelNameContextName, ImagePlug::tileOriginContextName }
 );
 
 size_t ImagePlug::g_firstPlugIndex = 0;
@@ -79,82 +78,24 @@ ImagePlug::ImagePlug( const std::string &name, Direction direction, unsigned fla
 
 	const unsigned childFlags = flags & ~Dynamic;
 
-	addChild(
-		new StringVectorDataPlug(
-			"viewNames",
-			direction,
-			defaultViewNames(),
-			childFlags
-		)
-	);
+	addChild( new StringVectorDataPlug( "viewNames", direction, defaultViewNames(), childFlags ) );
 
-	addChild(
-		new AtomicFormatPlug(
-			"format",
-			direction,
-			Format(),
-			childFlags
-		)
-	);
+	addChild( new AtomicFormatPlug( "format", direction, Format(), childFlags ) );
 
-	addChild(
-		new AtomicBox2iPlug(
-			"dataWindow",
-			direction,
-			Imath::Box2i(),
-			childFlags
-		)
-	);
+	addChild( new AtomicBox2iPlug( "dataWindow", direction, Imath::Box2i(), childFlags ) );
 
-	addChild(
-		new AtomicCompoundDataPlug(
-			"metadata",
-			direction,
-			new IECore::CompoundData,
-			childFlags
-		)
-	);
+	addChild( new AtomicCompoundDataPlug( "metadata", direction, new IECore::CompoundData, childFlags ) );
 
-	addChild(
-		new BoolPlug(
-			"deep",
-			direction,
-			false,
-			childFlags
-		)
-	);
+	addChild( new BoolPlug( "deep", direction, false, childFlags ) );
 
-	addChild(
-		new IntVectorDataPlug(
-			"sampleOffsets",
-			direction,
-			flatTileSampleOffsets(),
-			childFlags
-		)
-	);
+	addChild( new IntVectorDataPlug( "sampleOffsets", direction, flatTileSampleOffsets(), childFlags ) );
 
-	addChild(
-		new StringVectorDataPlug(
-			"channelNames",
-			direction,
-			new StringVectorData(),
-			childFlags
-		)
-	);
+	addChild( new StringVectorDataPlug( "channelNames", direction, new StringVectorData(), childFlags ) );
 
-	addChild(
-		new FloatVectorDataPlug(
-			"channelData",
-			direction,
-			blackTile(),
-			childFlags
-		)
-	);
+	addChild( new FloatVectorDataPlug( "channelData", direction, blackTile(), childFlags ) );
 }
 
-ImagePlug::~ImagePlug()
-{
-}
+ImagePlug::~ImagePlug() {}
 
 const IECore::IntVectorData *ImagePlug::flatTileSampleOffsets()
 {
@@ -190,13 +131,17 @@ const IECore::FloatVectorData *ImagePlug::emptyTile()
 
 const IECore::FloatVectorData *ImagePlug::whiteTile()
 {
-	static IECore::ConstFloatVectorDataPtr g_whiteTile( new IECore::FloatVectorData( std::vector<float>( ImagePlug::tilePixels(), 1. ) ) );
+	static IECore::ConstFloatVectorDataPtr g_whiteTile(
+		new IECore::FloatVectorData( std::vector<float>( ImagePlug::tilePixels(), 1. ) )
+	);
 	return g_whiteTile.get();
 };
 
 const IECore::FloatVectorData *ImagePlug::blackTile()
 {
-	static IECore::ConstFloatVectorDataPtr g_blackTile( new IECore::FloatVectorData( std::vector<float>( ImagePlug::tilePixels(), 0. ) ) );
+	static IECore::ConstFloatVectorDataPtr g_blackTile(
+		new IECore::FloatVectorData( std::vector<float>( ImagePlug::tilePixels(), 0. ) )
+	);
 	return g_blackTile.get();
 };
 
@@ -308,36 +253,30 @@ const Gaffer::FloatVectorDataPlug *ImagePlug::channelDataPlug() const
 	return getChild<FloatVectorDataPlug>( g_firstPlugIndex + 7 );
 }
 
-ImagePlug::GlobalScope::GlobalScope( const Gaffer::Context *context )
-	: EditableScope( context )
+ImagePlug::GlobalScope::GlobalScope( const Gaffer::Context *context ) : EditableScope( context )
 {
 	remove( channelNameContextName );
 	remove( tileOriginContextName );
 }
 
-ImagePlug::GlobalScope::GlobalScope( const Gaffer::ThreadState &threadState )
-	: EditableScope( threadState )
+ImagePlug::GlobalScope::GlobalScope( const Gaffer::ThreadState &threadState ) : EditableScope( threadState )
 {
 	remove( channelNameContextName );
 	remove( tileOriginContextName );
 }
 
-ImagePlug::ViewScope::ViewScope( const Gaffer::Context *context )
-	: EditableScope( context )
-{
-}
+ImagePlug::ViewScope::ViewScope( const Gaffer::Context *context ) : EditableScope( context ) {}
 
-ImagePlug::ViewScope::ViewScope( const Gaffer::ThreadState &threadState )
-	: EditableScope( threadState )
-{
-}
+ImagePlug::ViewScope::ViewScope( const Gaffer::ThreadState &threadState ) : EditableScope( threadState ) {}
 
 void ImagePlug::ViewScope::setViewName( const std::string *viewName )
 {
 	set( viewNameContextName, viewName );
 }
 
-void ImagePlug::ViewScope::setViewNameChecked( const std::string *viewName, const IECore::StringVectorData *viewNamesData )
+void ImagePlug::ViewScope::setViewNameChecked(
+	const std::string *viewName, const IECore::StringVectorData *viewNamesData
+)
 {
 	const std::vector<std::string> &viewNames = viewNamesData->readable();
 	if( std::find( viewNames.begin(), viewNames.end(), *viewName ) == viewNames.end() )
@@ -351,15 +290,9 @@ void ImagePlug::ViewScope::setViewNameChecked( const std::string *viewName, cons
 	set( viewNameContextName, viewName );
 }
 
-ImagePlug::ChannelDataScope::ChannelDataScope( const Gaffer::Context *context )
-	: ViewScope( context )
-{
-}
+ImagePlug::ChannelDataScope::ChannelDataScope( const Gaffer::Context *context ) : ViewScope( context ) {}
 
-ImagePlug::ChannelDataScope::ChannelDataScope( const Gaffer::ThreadState &threadState )
-	: ViewScope( threadState )
-{
-}
+ImagePlug::ChannelDataScope::ChannelDataScope( const Gaffer::ThreadState &threadState ) : ViewScope( threadState ) {}
 
 void ImagePlug::ChannelDataScope::setTileOrigin( const V2i *tileOrigin )
 {
@@ -371,7 +304,9 @@ void ImagePlug::ChannelDataScope::setChannelName( const std::string *channelName
 	set( channelNameContextName, channelName );
 }
 
-IECore::ConstFloatVectorDataPtr ImagePlug::channelData( const std::string &channelName, const Imath::V2i &tile, const std::string *viewName ) const
+IECore::ConstFloatVectorDataPtr ImagePlug::channelData(
+	const std::string &channelName, const Imath::V2i &tile, const std::string *viewName
+) const
 {
 	ChannelDataScope channelDataScope( Context::current() );
 	channelDataScope.setChannelName( &channelName );
@@ -384,7 +319,9 @@ IECore::ConstFloatVectorDataPtr ImagePlug::channelData( const std::string &chann
 	return channelDataPlug()->getValue();
 }
 
-IECore::MurmurHash ImagePlug::channelDataHash( const std::string &channelName, const Imath::V2i &tile, const std::string *viewName ) const
+IECore::MurmurHash ImagePlug::channelDataHash(
+	const std::string &channelName, const Imath::V2i &tile, const std::string *viewName
+) const
 {
 	ChannelDataScope channelDataScope( Context::current() );
 	channelDataScope.setChannelName( &channelName );

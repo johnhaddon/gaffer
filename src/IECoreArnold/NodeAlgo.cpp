@@ -67,7 +67,10 @@ namespace IECoreArnold
 namespace NodeAlgo
 {
 
-AtNode *convert( const IECoreScenePreview::Renderer::ObjectSamples &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )
+AtNode *convert(
+	const IECoreScenePreview::Renderer::ObjectSamples &samples, float motionStart, float motionEnd,
+	AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext
+)
 {
 	if( samples.empty() )
 	{
@@ -95,7 +98,10 @@ AtNode *convert( const IECoreScenePreview::Renderer::ObjectSamples &samples, flo
 	return it->second( samples, motionStart, motionEnd, universe, nodeName, parentNode, messageContext );
 }
 
-AtNode *convert( const IECore::Object *object, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )
+AtNode *convert(
+	const IECore::Object *object, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode,
+	const std::string &messageContext
+)
 {
 	return convert( { object }, 0, 1, universe, nodeName, parentNode, messageContext );
 }

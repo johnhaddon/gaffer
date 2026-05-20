@@ -76,23 +76,11 @@ void bindSetAlgo()
 	scope().attr( "SetAlgo" ) = module;
 	scope moduleScope( module );
 
-	def(
-		"evaluateSetExpression",
-		&evaluateSetExpressionWrapper,
-		( arg( "expression" ), arg( "scene" ) )
-	);
+	def( "evaluateSetExpression", &evaluateSetExpressionWrapper, ( arg( "expression" ), arg( "scene" ) ) );
 
-	def(
-		"setExpressionHash",
-		&setExpressionHashWrapper1,
-		( arg( "expression" ), arg( "scene" ) )
-	);
+	def( "setExpressionHash", &setExpressionHashWrapper1, ( arg( "expression" ), arg( "scene" ) ) );
 
-	def(
-		"setExpressionHash",
-		&setExpressionHashWrapper2,
-		( arg( "expression" ), arg( "scene" ), arg( "h" ) )
-	);
+	def( "setExpressionHash", &setExpressionHashWrapper2, ( arg( "expression" ), arg( "scene" ), arg( "h" ) ) );
 
 	def( "affectsSetExpression", &SetAlgo::affectsSetExpression );
 }

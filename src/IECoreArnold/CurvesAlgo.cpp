@@ -81,8 +81,7 @@ ConstCurvesPrimitivePtr resampleVertexToVarying( const CurvesPrimitive *curves, 
 	if(
 		// For linear and pinned curves, Vertex and Varying both have the same
 		// `CurvesPrimitive::variableSize()`, so there is no need to resample
-		curves->basis().standardBasis() == StandardCubicBasis::Linear ||
-		CurvesAlgo::isPinned( curves )
+		curves->basis().standardBasis() == StandardCubicBasis::Linear || CurvesAlgo::isPinned( curves )
 	)
 	{
 		return curves;
@@ -104,18 +103,17 @@ ConstCurvesPrimitivePtr resampleVertexToVarying( const CurvesPrimitive *curves, 
 			if( it.second.data->typeId() == IECore::QuatfVectorDataTypeId )
 			{
 				updatedCurves->variables.erase( it.first );
-				msg(
-					Msg::Warning,
-					messageContext,
-					fmt::format(
-						"Unable to create user parameter \"{}\" for primitive variable of type \"{}\"",
-						it.first, it.second.data->typeName()
-					)
-				);
+				msg( Msg::Warning, messageContext,
+					 fmt::format(
+						 "Unable to create user parameter \"{}\" for primitive variable of type \"{}\"", it.first,
+						 it.second.data->typeName()
+					 ) );
 				continue;
 			}
 
-			IECoreScene::CurvesAlgo::resamplePrimitiveVariable( updatedCurves.get(), updatedCurves->variables[it.first], PrimitiveVariable::Varying );
+			IECoreScene::CurvesAlgo::resamplePrimitiveVariable(
+				updatedCurves.get(), updatedCurves->variables[it.first], PrimitiveVariable::Varying
+			);
 		}
 	}
 
@@ -132,7 +130,10 @@ void convertUVs( const IECoreScene::CurvesPrimitive *curves, AtNode *node, const
 
 	if( !runTimeCast<const V2fVectorData>( it->second.data.get() ) )
 	{
-		msg( Msg::Warning, messageContext, fmt::format( "Variable \"uv\" has unsupported type \"{}\" (expected V2fVectorData).", it->second.data->typeName() ) );
+		msg( Msg::Warning, messageContext,
+			 fmt::format(
+				 "Variable \"uv\" has unsupported type \"{}\" (expected V2fVectorData).", it->second.data->typeName()
+			 ) );
 		return;
 	}
 
@@ -147,15 +148,17 @@ void convertUVs( const IECoreScene::CurvesPrimitive *curves, AtNode *node, const
 	AiNodeSetArray( node, g_uvsArnoldString, array );
 }
 
-AtNode *convertCommon( const IECoreScene::CurvesPrimitive *curves, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )
+AtNode *convertCommon(
+	const IECoreScene::CurvesPrimitive *curves, AtUniverse *universe, const std::string &nodeName,
+	const AtNode *parentNode, const std::string &messageContext
+)
 {
 
 	AtNode *result = AiNode( universe, g_curvesArnoldString, AtString( nodeName.c_str() ), parentNode );
 
 	const std::vector<int> &verticesPerCurve = curves->verticesPerCurve()->readable();
 	AiNodeSetArray(
-		result,
-		g_numPointsArnoldString,
+		result, g_numPointsArnoldString,
 		AiArrayConvert( verticesPerCurve.size(), 1, AI_TYPE_INT, (void *)&( verticesPerCurve[0] ) )
 	);
 
@@ -197,7 +200,8 @@ AtNode *convertCommon( const IECoreScene::CurvesPrimitive *curves, AtUniverse *u
 		case CurvesPrimitive::Wrap::Periodic :
 			// Arnold has an enum value for this, but hasn't implemented it, and
 			// errors if we use it. We prefer a warning to an error.
-			msg( IECore::Msg::Warning, messageContext, "Arnold does not implement periodic wrap. Using nonperiodic instead." );
+			msg( IECore::Msg::Warning, messageContext,
+				 "Arnold does not implement periodic wrap. Using nonperiodic instead." );
 			break;
 		case CurvesPrimitive::Wrap::NonPeriodic :
 			// Arnold default. No need to set.
@@ -214,7 +218,11 @@ AtNode *convertCommon( const IECoreScene::CurvesPrimitive *curves, AtUniverse *u
 	return result;
 }
 
-AtNode *convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::CurvesPrimitive *> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )
+AtNode *convert(
+	const IECoreScenePreview::Renderer::Samples<const IECoreScene::CurvesPrimitive *> &samples, float motionStart,
+	float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode,
+	const std::string &messageContext
+)
 {
 	// Arnold does not support Vertex PrimitiveVariables (see `ShapeAlgo::convertPrimitiveVariable()`),
 	// so we must resample unless Vertex and Varying have equivalent variable sizes.
@@ -254,7 +262,10 @@ AtNode *convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::
 	}
 	else if( nSamples.size() )
 	{
-		IECore::msg( IECore::Msg::Warning, messageContext, "Missing sample for primitive variable \"N\" - not setting orientations." );
+		IECore::msg(
+			IECore::Msg::Warning, messageContext,
+			"Missing sample for primitive variable \"N\" - not setting orientations."
+		);
 	}
 
 	AiNodeSetFlt( result, g_motionStartArnoldString, motionStart );

@@ -47,17 +47,14 @@ using namespace boost::placeholders;
 using namespace IECore;
 using namespace Gaffer;
 
-NumericBookmarkSet::NumericBookmarkSet( ScriptNodePtr script, int bookmark )
-	: m_bookmark( 0 )
+NumericBookmarkSet::NumericBookmarkSet( ScriptNodePtr script, int bookmark ) : m_bookmark( 0 )
 {
 	m_script = script;
 	Metadata::nodeValueChangedSignal().connect( boost::bind( &NumericBookmarkSet::metadataChanged, this, ::_2, ::_3 ) );
 	setBookmark( bookmark );
 }
 
-NumericBookmarkSet::~NumericBookmarkSet()
-{
-}
+NumericBookmarkSet::~NumericBookmarkSet() {}
 
 void NumericBookmarkSet::setBookmark( int bookmark )
 {

@@ -67,51 +67,37 @@ SceneElementProcessor::SceneElementProcessor( const std::string &name, IECore::P
 	outPlug()->setPlug()->setInput( inPlug()->setPlug() );
 }
 
-SceneElementProcessor::~SceneElementProcessor()
-{
-}
+SceneElementProcessor::~SceneElementProcessor() {}
 
 void SceneElementProcessor::affects( const Plug *input, AffectedPlugsContainer &outputs ) const
 {
 	FilteredSceneProcessor::affects( input, outputs );
 
-	if(
-		input == filterPlug() ||
-		input == inPlug()->boundPlug() ||
-		input == inPlug()->childNamesPlug() ||
-		input == outPlug()->childBoundsPlug() ||
-		input == inPlug()->objectPlug()
-	)
+	if( input == filterPlug() || input == inPlug()->boundPlug() || input == inPlug()->childNamesPlug() ||
+		input == outPlug()->childBoundsPlug() || input == inPlug()->objectPlug() )
 	{
 		outputs.push_back( outPlug()->boundPlug() );
 	}
 
-	if(
-		input == filterPlug() ||
-		input == inPlug()->transformPlug()
-	)
+	if( input == filterPlug() || input == inPlug()->transformPlug() )
 	{
 		outputs.push_back( outPlug()->transformPlug() );
 	}
 
-	if(
-		input == filterPlug() ||
-		input == inPlug()->attributesPlug()
-	)
+	if( input == filterPlug() || input == inPlug()->attributesPlug() )
 	{
 		outputs.push_back( outPlug()->attributesPlug() );
 	}
 
-	if(
-		input == filterPlug() ||
-		input == inPlug()->objectPlug()
-	)
+	if( input == filterPlug() || input == inPlug()->objectPlug() )
 	{
 		outputs.push_back( outPlug()->objectPlug() );
 	}
 }
 
-void SceneElementProcessor::hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void SceneElementProcessor::hashBound(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	switch( boundMethod( context ) )
 	{
@@ -140,7 +126,9 @@ void SceneElementProcessor::hashBound( const ScenePath &path, const Gaffer::Cont
 	}
 }
 
-Imath::Box3f SceneElementProcessor::computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::Box3f SceneElementProcessor::computeBound(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	switch( boundMethod( context ) )
 	{
@@ -175,7 +163,9 @@ Imath::Box3f SceneElementProcessor::computeBound( const ScenePath &path, const G
 	}
 }
 
-void SceneElementProcessor::hashTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void SceneElementProcessor::hashTransform(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	IECore::PathMatcher::Result match = IECore::PathMatcher::NoMatch;
 	if( processesTransform() )
@@ -196,7 +186,9 @@ void SceneElementProcessor::hashTransform( const ScenePath &path, const Gaffer::
 	}
 }
 
-Imath::M44f SceneElementProcessor::computeTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::M44f SceneElementProcessor::computeTransform(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( filterValue( context ) & IECore::PathMatcher::ExactMatch )
 	{
@@ -208,7 +200,9 @@ Imath::M44f SceneElementProcessor::computeTransform( const ScenePath &path, cons
 	}
 }
 
-void SceneElementProcessor::hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void SceneElementProcessor::hashAttributes(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	IECore::PathMatcher::Result match = IECore::PathMatcher::NoMatch;
 	if( processesAttributes() )
@@ -229,7 +223,9 @@ void SceneElementProcessor::hashAttributes( const ScenePath &path, const Gaffer:
 	}
 }
 
-IECore::ConstCompoundObjectPtr SceneElementProcessor::computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstCompoundObjectPtr SceneElementProcessor::computeAttributes(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( filterValue( context ) & IECore::PathMatcher::ExactMatch )
 	{
@@ -241,7 +237,9 @@ IECore::ConstCompoundObjectPtr SceneElementProcessor::computeAttributes( const S
 	}
 }
 
-void SceneElementProcessor::hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void SceneElementProcessor::hashObject(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	IECore::PathMatcher::Result match = IECore::PathMatcher::NoMatch;
 	if( processesObject() )
@@ -262,7 +260,9 @@ void SceneElementProcessor::hashObject( const ScenePath &path, const Gaffer::Con
 	}
 }
 
-IECore::ConstObjectPtr SceneElementProcessor::computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstObjectPtr SceneElementProcessor::computeObject(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( filterValue( context ) & IECore::PathMatcher::ExactMatch )
 	{
@@ -279,11 +279,15 @@ bool SceneElementProcessor::processesBound() const
 	return false;
 }
 
-void SceneElementProcessor::hashProcessedBound( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void SceneElementProcessor::hashProcessedBound(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 }
 
-Imath::Box3f SceneElementProcessor::computeProcessedBound( const ScenePath &path, const Gaffer::Context *context, const Imath::Box3f &inputBound ) const
+Imath::Box3f SceneElementProcessor::computeProcessedBound(
+	const ScenePath &path, const Gaffer::Context *context, const Imath::Box3f &inputBound
+) const
 {
 	return inputBound;
 }
@@ -293,11 +297,15 @@ bool SceneElementProcessor::processesTransform() const
 	return false;
 }
 
-void SceneElementProcessor::hashProcessedTransform( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void SceneElementProcessor::hashProcessedTransform(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 }
 
-Imath::M44f SceneElementProcessor::computeProcessedTransform( const ScenePath &path, const Gaffer::Context *context, const Imath::M44f &inputTransform ) const
+Imath::M44f SceneElementProcessor::computeProcessedTransform(
+	const ScenePath &path, const Gaffer::Context *context, const Imath::M44f &inputTransform
+) const
 {
 	return inputTransform;
 }
@@ -307,11 +315,15 @@ bool SceneElementProcessor::processesAttributes() const
 	return false;
 }
 
-void SceneElementProcessor::hashProcessedAttributes( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void SceneElementProcessor::hashProcessedAttributes(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 }
 
-IECore::ConstCompoundObjectPtr SceneElementProcessor::computeProcessedAttributes( const ScenePath &path, const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputAttributes ) const
+IECore::ConstCompoundObjectPtr SceneElementProcessor::computeProcessedAttributes(
+	const ScenePath &path, const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputAttributes
+) const
 {
 	return inputAttributes;
 }
@@ -321,11 +333,15 @@ bool SceneElementProcessor::processesObject() const
 	return false;
 }
 
-void SceneElementProcessor::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void SceneElementProcessor::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 }
 
-IECore::ConstObjectPtr SceneElementProcessor::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::ConstObjectPtr inputObject ) const
+IECore::ConstObjectPtr SceneElementProcessor::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::ConstObjectPtr inputObject
+) const
 {
 	return inputObject;
 }

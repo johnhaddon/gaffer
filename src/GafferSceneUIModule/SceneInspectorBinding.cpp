@@ -125,7 +125,7 @@ const IECore::InternedString g_globalsPathName( "Globals" );
 class InspectorTree : public IECore::RefCounted, public Gaffer::Signals::Trackable
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( InspectorTree )
 
@@ -133,13 +133,18 @@ class InspectorTree : public IECore::RefCounted, public Gaffer::Signals::Trackab
 	using Contexts = std::array<Gaffer::ConstContextPtr, 2>;
 
 	InspectorTree( const ScenePlugPtr &scene, const Contexts &contexts, const Gaffer::PlugPtr &editScope )
-		: m_scene( scene ), m_editScope( editScope ), m_filter( "/..." ), m_isolateDifferences( false )
+		: m_scene( scene ),
+		  m_editScope( editScope ),
+		  m_filter( "/..." ),
+		  m_isolateDifferences( false )
 	{
 		setContexts( contexts );
 		scene->node()->plugDirtiedSignal().connect( boost::bind( &InspectorTree::plugDirtied, this, ::_1 ) );
 		if( editScope && editScope->node() )
 		{
-			editScope->node()->plugInputChangedSignal().connect( boost::bind( &InspectorTree::editScopeInputChanged, this, ::_1 ) );
+			editScope->node()->plugInputChangedSignal().connect(
+				boost::bind( &InspectorTree::editScopeInputChanged, this, ::_1 )
+			);
 		}
 	}
 
@@ -174,10 +179,7 @@ class InspectorTree : public IECore::RefCounted, public Gaffer::Signals::Trackab
 		}
 	}
 
-	const Contexts &getContexts() const
-	{
-		return m_contexts;
-	}
+	const Contexts &getContexts() const { return m_contexts; }
 
 	// It's easier for InspectorTree to do its own filter than it
 	// is to use a PathFilter, so that's what we do.
@@ -199,10 +201,7 @@ class InspectorTree : public IECore::RefCounted, public Gaffer::Signals::Trackab
 		}
 	}
 
-	const IECore::StringAlgo::MatchPattern &getFilter() const
-	{
-		return m_filter;
-	}
+	const IECore::StringAlgo::MatchPattern &getFilter() const { return m_filter; }
 
 	void setIsolateDifferences( bool isolateDifferences )
 	{
@@ -224,10 +223,7 @@ class InspectorTree : public IECore::RefCounted, public Gaffer::Signals::Trackab
 
 	using DirtiedSignal = Gaffer::Signals::Signal<void()>;
 
-	DirtiedSignal &dirtiedSignal()
-	{
-		return m_dirtiedSignal;
-	}
+	DirtiedSignal &dirtiedSignal() { return m_dirtiedSignal; }
 
 	// Inspector Registry
 	// ==================
@@ -241,7 +237,8 @@ class InspectorTree : public IECore::RefCounted, public Gaffer::Signals::Trackab
 	{
 		Inspection() = default;
 		Inspection( const vector<InternedString> &path, const GafferSceneUI::Private::ConstInspectorPtr inspector )
-			: path( path ), inspector( inspector )
+			: path( path ),
+			  inspector( inspector )
 		{
 		}
 		vector<InternedString> path;
@@ -264,11 +261,7 @@ class InspectorTree : public IECore::RefCounted, public Gaffer::Signals::Trackab
 		auto &providers = inspectionProviders();
 		providers.erase(
 			std::remove_if(
-				providers.begin(),
-				providers.end(),
-				[&]( const auto &item ) {
-					return item.first == path;
-				}
+				providers.begin(), providers.end(), [&]( const auto &item ) { return item.first == path; }
 			),
 			providers.end()
 		);
@@ -283,7 +276,7 @@ class InspectorTree : public IECore::RefCounted, public Gaffer::Signals::Trackab
 		}
 	};
 
-	protected:
+protected:
 
 	friend class InspectorPath;
 
@@ -309,7 +302,9 @@ class InspectorTree : public IECore::RefCounted, public Gaffer::Signals::Trackab
 		return false;
 	}
 
-	void propertyNames( const Path::Names &path, std::vector<IECore::InternedString> &propertyNames, const IECore::Canceller *canceller ) const
+	void propertyNames(
+		const Path::Names &path, std::vector<IECore::InternedString> &propertyNames, const IECore::Canceller *canceller
+	) const
 	{
 		propertyNames.push_back( g_inspectorPropertyName );
 		propertyNames.push_back( g_contextPropertyName );
@@ -317,7 +312,9 @@ class InspectorTree : public IECore::RefCounted, public Gaffer::Signals::Trackab
 		propertyNames.push_back( g_contextBPropertyName );
 	}
 
-	IECore::ConstRunTimeTypedPtr property( const Path::Names &path, const IECore::InternedString &propertyName, const IECore::Canceller *canceller ) const
+	IECore::ConstRunTimeTypedPtr property(
+		const Path::Names &path, const IECore::InternedString &propertyName, const IECore::Canceller *canceller
+	) const
 	{
 		if( propertyName == g_inspectorPropertyName )
 		{
@@ -328,16 +325,17 @@ class InspectorTree : public IECore::RefCounted, public Gaffer::Signals::Trackab
 		return nullptr;
 	}
 
-	Gaffer::ConstContextPtr contextProperty( const Path::Names &path, const IECore::InternedString &propertyName, const IECore::Canceller *canceller ) const
+	Gaffer::ConstContextPtr contextProperty(
+		const Path::Names &path, const IECore::InternedString &propertyName, const IECore::Canceller *canceller
+	) const
 	{
-		if( propertyName == g_contextPropertyName || propertyName == g_contextAPropertyName || propertyName == g_contextBPropertyName )
+		if( propertyName == g_contextPropertyName || propertyName == g_contextAPropertyName ||
+			propertyName == g_contextBPropertyName )
 		{
 			std::scoped_lock lock( m_mutex );
 			const Context *context = m_contexts[propertyName == g_contextBPropertyName ? 1 : 0].get();
-			if(
-				path.size() && path[0] == g_locationPathName &&
-				!context->getIfExists<ScenePlug::ScenePath>( ScenePlug::scenePathContextName )
-			)
+			if( path.size() && path[0] == g_locationPathName &&
+				!context->getIfExists<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ) )
 			{
 				// Prevent inspection in an invalid context.
 				return nullptr;
@@ -363,12 +361,9 @@ class InspectorTree : public IECore::RefCounted, public Gaffer::Signals::Trackab
 		return result;
 	}
 
-	const Gaffer::Plug *cancellationSubject() const
-	{
-		return m_scene.get();
-	}
+	const Gaffer::Plug *cancellationSubject() const { return m_scene.get(); }
 
-	private:
+private:
 
 	// A single entry in the tree, corresponding to a particular path.
 	// May hold an Inspector and child items indexed by name.
@@ -384,9 +379,7 @@ class InspectorTree : public IECore::RefCounted, public Gaffer::Signals::Trackab
 		using ChildMap = multi_index::multi_index_container<
 			NamedChild,
 			multi_index::indexed_by<
-				multi_index::ordered_unique<
-					multi_index::key<&NamedChild::first>>,
-				multi_index::sequenced<>>>;
+				multi_index::ordered_unique<multi_index::key<&NamedChild::first>>, multi_index::sequenced<>>>;
 
 		GafferSceneUI::Private::ConstInspectorPtr inspector;
 		ChildMap children;
@@ -456,10 +449,8 @@ class InspectorTree : public IECore::RefCounted, public Gaffer::Signals::Trackab
 	{
 		if( path.size() && path[0] == g_locationPathName )
 		{
-			if(
-				!Context::current()->getIfExists<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ) ||
-				!m_scene->existsPlug()->getValue()
-			)
+			if( !Context::current()->getIfExists<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ) ||
+				!m_scene->existsPlug()->getValue() )
 			{
 				return false;
 			}
@@ -639,63 +630,62 @@ IE_CORE_DECLAREPTR( InspectorTree )
 class InspectorPath : public Gaffer::Path
 {
 
-	public:
+public:
 
-	InspectorPath( const InspectorTreePtr &tree, const Names &names, const IECore::InternedString &root = "/", const Gaffer::PathFilterPtr &filter = nullptr )
-		: Path( names, root, filter ), m_tree( tree )
+	InspectorPath(
+		const InspectorTreePtr &tree, const Names &names, const IECore::InternedString &root = "/",
+		const Gaffer::PathFilterPtr &filter = nullptr
+	)
+		: Path( names, root, filter ),
+		  m_tree( tree )
 	{
 	}
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( InspectorPath, GafferSceneUI::InspectorPathTypeId, Gaffer::Path );
 
-	~InspectorPath() override
-	{
-	}
+	~InspectorPath() override {}
 
-	InspectorTree *tree()
-	{
-		return m_tree.get();
-	}
+	InspectorTree *tree() { return m_tree.get(); }
 
 	bool isValid( const IECore::Canceller *canceller = nullptr ) const override
 	{
 		return m_tree->isValid( names(), canceller );
 	}
 
-	bool isLeaf( const IECore::Canceller *canceller ) const override
-	{
-		return m_tree->isLeaf( names(), canceller );
-	}
+	bool isLeaf( const IECore::Canceller *canceller ) const override { return m_tree->isLeaf( names(), canceller ); }
 
 	PathPtr copy() const override
 	{
 		return new InspectorPath( m_tree, names(), root(), const_cast<PathFilter *>( getFilter() ) );
 	}
 
-	void propertyNames( std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr ) const override
+	void propertyNames(
+		std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr
+	) const override
 	{
 		Path::propertyNames( names, canceller );
 		m_tree->propertyNames( this->names(), names, canceller );
 	}
 
-	IECore::ConstRunTimeTypedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override
+	IECore::ConstRunTimeTypedPtr property(
+		const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr
+	) const override
 	{
 		auto p = m_tree->property( names(), name, canceller );
 		return p ? p : Path::property( name, canceller );
 	}
 
-	Gaffer::ConstContextPtr contextProperty( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override
+	Gaffer::ConstContextPtr contextProperty(
+		const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr
+	) const override
 	{
 		auto p = m_tree->contextProperty( names(), name, canceller );
 		return p ? p : Path::contextProperty( name, canceller );
 	}
 
-	const Gaffer::Plug *cancellationSubject() const override
-	{
-		return m_tree->cancellationSubject();
-	}
+	const Gaffer::Plug *cancellationSubject() const override { return m_tree->cancellationSubject(); }
 
-	protected:
+protected:
 
 	void doChildren( std::vector<PathPtr> &children, const IECore::Canceller *canceller ) const override
 	{
@@ -716,12 +706,9 @@ class InspectorPath : public Gaffer::Path
 		m_treeDirtiedConnection = m_tree->dirtiedSignal().connect( boost::bind( &InspectorPath::treeDirtied, this ) );
 	}
 
-	private:
+private:
 
-	void treeDirtied()
-	{
-		emitPathChanged();
-	}
+	void treeDirtied() { emitPathChanged(); }
 
 	InspectorTreePtr m_tree;
 	Gaffer::Signals::ScopedConnection m_treeDirtiedConnection;
@@ -742,13 +729,17 @@ InspectorTree::Inspections transformInspectionProvider( ScenePlug *scene, const 
 		for( auto component : { C::Matrix, C::Translate, C::Rotate, C::Scale, C::Shear } )
 		{
 			path[1] = TransformInspector::toString( component );
-			result.push_back( { path, new GafferSceneUI::Private::TransformInspector( scene, editScope, space, component ) } );
+			result.push_back(
+				{ path, new GafferSceneUI::Private::TransformInspector( scene, editScope, space, component ) }
+			);
 		}
 	}
 	return result;
 }
 
-const InspectorTree::Registration g_transformInspectionRegistration( { "Location", "Transform" }, transformInspectionProvider );
+const InspectorTree::Registration g_transformInspectionRegistration(
+	{ "Location", "Transform" }, transformInspectionProvider
+);
 
 // Bound inspectors
 // ================
@@ -756,20 +747,31 @@ const InspectorTree::Registration g_transformInspectionRegistration( { "Location
 InspectorTree::Inspections boundInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &editScope )
 {
 	InspectorTree::Inspections result;
-	result.push_back( { { "Local" }, new GafferSceneUI::Private::BasicInspector( scene->boundPlug(), editScope, []( const AtomicBox3fPlug *boundPlug ) {
-							return new Box3fData( boundPlug->getValue() );
-						} ) } );
-	result.push_back( { { "World" }, new GafferSceneUI::Private::BasicInspector( scene->boundPlug(), editScope, []( const AtomicBox3fPlug *boundPlug ) {
-							const Imath::Box3f bound = Imath::transform(
-								boundPlug->getValue(),
-								// Calling `fullTransform()` is a bit naughty, because we're only
-								// meant to be inspecting the `bound` plug. But we get away with
-								// it because InspectorPath emits `changedSignal()` when any child
-								// of the ScenePlug is dirtied.
-								boundPlug->parent<ScenePlug>()->fullTransform( Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ) )
-							);
-							return new Box3fData( bound );
-						} ) } );
+	result.push_back(
+		{ { "Local" },
+		  new GafferSceneUI::Private::BasicInspector(
+			  scene->boundPlug(), editScope,
+			  []( const AtomicBox3fPlug *boundPlug ) { return new Box3fData( boundPlug->getValue() ); }
+		  ) }
+	);
+	result.push_back(
+		{ { "World" },
+		  new GafferSceneUI::Private::BasicInspector(
+			  scene->boundPlug(), editScope, []( const AtomicBox3fPlug *boundPlug ) {
+				  const Imath::Box3f bound = Imath::transform(
+					  boundPlug->getValue(),
+					  // Calling `fullTransform()` is a bit naughty, because we're only
+					  // meant to be inspecting the `bound` plug. But we get away with
+					  // it because InspectorPath emits `changedSignal()` when any child
+					  // of the ScenePlug is dirtied.
+					  boundPlug->parent<ScenePlug>()->fullTransform(
+						  Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName )
+					  )
+				  );
+				  return new Box3fData( bound );
+			  }
+		  ) }
+	);
 	return result;
 }
 
@@ -787,10 +789,9 @@ vector<InternedString> alphabeticallySortedKeys( const T &container )
 	{
 		result.push_back( name );
 	}
-	std::sort(
-		result.begin(), result.end(),
-		[]( InternedString a, InternedString b ) { return a.string() < b.string(); }
-	);
+	std::sort( result.begin(), result.end(), []( InternedString a, InternedString b ) {
+		return a.string() < b.string();
+	} );
 	return result;
 }
 
@@ -798,14 +799,17 @@ const InternedString g_other( "Other" );
 const InternedString g_category( "category" );
 
 template<typename ShaderInspector, typename ParameterInspector>
-void addShaderInspections( InspectorTree::Inspections &inspections, const vector<InternedString> &path, const IECoreScene::ShaderNetwork *shaderNetwork, const ShaderInspector &&shaderInspector, const ParameterInspector &&parameterInspector )
+void addShaderInspections(
+	InspectorTree::Inspections &inspections, const vector<InternedString> &path,
+	const IECoreScene::ShaderNetwork *shaderNetwork, const ShaderInspector &&shaderInspector,
+	const ParameterInspector &&parameterInspector
+)
 {
 	// Sort the shaders in the order you'd encounter them if you started
 	// at the final output and worked backwards up the connections.
 	vector<InternedString> orderedShaderHandles;
 	IECoreScene::ShaderNetworkAlgo::depthFirstTraverse(
-		shaderNetwork,
-		[&]( const ShaderNetwork *network, InternedString shaderHandle ) {
+		shaderNetwork, [&]( const ShaderNetwork *network, InternedString shaderHandle ) {
 			orderedShaderHandles.push_back( shaderHandle );
 		}
 	);
@@ -834,10 +838,9 @@ void addShaderInspections( InspectorTree::Inspections &inspections, const vector
 		{
 			parameterNames.push_back( connection.destination.name );
 		}
-		std::sort(
-			parameterNames.begin(), parameterNames.end(),
-			[]( InternedString a, InternedString b ) { return a.string() < b.string(); }
-		);
+		std::sort( parameterNames.begin(), parameterNames.end(), []( InternedString a, InternedString b ) {
+			return a.string() < b.string();
+		} );
 		parameterNames.erase( std::unique( parameterNames.begin(), parameterNames.end() ), parameterNames.end() );
 
 		vector<InternedString> parameterPath = shaderPath;
@@ -852,18 +855,22 @@ void addShaderInspections( InspectorTree::Inspections &inspections, const vector
 
 InspectorTree::Inspections attributeInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &editScope )
 {
-	ConstCompoundObjectPtr attributes = scene->fullAttributes( Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ) );
+	ConstCompoundObjectPtr attributes =
+		scene->fullAttributes( Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ) );
 	const vector<InternedString> sortedAttributeNames = alphabeticallySortedKeys( attributes->members() );
 
 	InspectorTree::Inspections result;
 	for( auto name : sortedAttributeNames )
 	{
 		InternedString category = g_other;
-		if( auto categoryMetadata = Metadata::value<StringData>( fmt::format( "attribute:{}", name.c_str() ), g_category ) )
+		if( auto categoryMetadata =
+				Metadata::value<StringData>( fmt::format( "attribute:{}", name.c_str() ), g_category ) )
 		{
 			category = categoryMetadata->readable();
 		}
-		result.push_back( { { category, name }, new GafferSceneUI::Private::AttributeInspector( scene, editScope, name ) } );
+		result.push_back(
+			{ { category, name }, new GafferSceneUI::Private::AttributeInspector( scene, editScope, name ) }
+		);
 		if( auto shaderNetwork = attributes->member<const ShaderNetwork>( name ) )
 		{
 			addShaderInspections(
@@ -899,7 +906,9 @@ InspectorTree::Inspections attributeInspectionProvider( ScenePlug *scene, const 
 	return result;
 }
 
-const InspectorTree::Registration g_attributeInspectionRegistration( { "Location", "Attributes" }, attributeInspectionProvider );
+const InspectorTree::Registration g_attributeInspectionRegistration(
+	{ "Location", "Attributes" }, attributeInspectionProvider
+);
 
 // Object Inspectors
 // =================
@@ -910,29 +919,35 @@ InspectorTree::Inspections objectTypeInspectionProvider( ScenePlug *scene, const
 	ConstObjectPtr object = scene->objectPlug()->getValue();
 	if( object->typeId() != NullObjectTypeId )
 	{
-		result.push_back( { { "Type" }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) -> ConstStringDataPtr {
-								ConstObjectPtr object = objectPlug->getValue();
-								if( object->typeId() == NullObjectTypeId )
-								{
-									return nullptr;
-								}
-								return new StringData( object->typeName() );
-							} ) } );
+		result.push_back(
+			{ { "Type" },
+			  new GafferSceneUI::Private::BasicInspector(
+				  scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) -> ConstStringDataPtr {
+					  ConstObjectPtr object = objectPlug->getValue();
+					  if( object->typeId() == NullObjectTypeId )
+					  {
+						  return nullptr;
+					  }
+					  return new StringData( object->typeName() );
+				  }
+			  ) }
+		);
 	}
 
 	return result;
 }
 
-const InspectorTree::Registration g_objectTypeInspectionRegistration( { "Location", "Object" }, objectTypeInspectionProvider );
+const InspectorTree::Registration g_objectTypeInspectionRegistration(
+	{ "Location", "Object" }, objectTypeInspectionProvider
+);
 
-const boost::container::flat_map<PrimitiveVariable::Interpolation, ConstStringDataPtr> g_primitiveVariableInterpolations = {
-	{ PrimitiveVariable::Invalid, new StringData( "Invalid" ) },
-	{ PrimitiveVariable::Constant, new StringData( "Constant" ) },
-	{ PrimitiveVariable::Uniform, new StringData( "Uniform" ) },
-	{ PrimitiveVariable::Vertex, new StringData( "Vertex" ) },
-	{ PrimitiveVariable::Varying, new StringData( "Varying" ) },
-	{ PrimitiveVariable::FaceVarying, new StringData( "FaceVarying" ) }
-};
+const boost::container::flat_map<PrimitiveVariable::Interpolation, ConstStringDataPtr>
+	g_primitiveVariableInterpolations = { { PrimitiveVariable::Invalid, new StringData( "Invalid" ) },
+										  { PrimitiveVariable::Constant, new StringData( "Constant" ) },
+										  { PrimitiveVariable::Uniform, new StringData( "Uniform" ) },
+										  { PrimitiveVariable::Vertex, new StringData( "Vertex" ) },
+										  { PrimitiveVariable::Varying, new StringData( "Varying" ) },
+										  { PrimitiveVariable::FaceVarying, new StringData( "FaceVarying" ) } };
 
 InspectorTree::Inspections primitiveTopologyInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &editScope )
 {
@@ -947,20 +962,28 @@ InspectorTree::Inspections primitiveTopologyInspectionProvider( ScenePlug *scene
 			{
 				continue;
 			}
-			result.push_back( { { interpolationName->readable() }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, [interpolation = interpolation]( const ObjectPlug *objectPlug ) -> ConstDataPtr {
-									ConstObjectPtr object = objectPlug->getValue();
-									if( auto primitive = runTimeCast<const Primitive>( object.get() ) )
-									{
-										return new IntData( primitive->variableSize( interpolation ) );
-									}
-									return nullptr;
-								} ) } );
+			result.push_back(
+				{ { interpolationName->readable() },
+				  new GafferSceneUI::Private::BasicInspector(
+					  scene->objectPlug(), editScope,
+					  [interpolation = interpolation]( const ObjectPlug *objectPlug ) -> ConstDataPtr {
+						  ConstObjectPtr object = objectPlug->getValue();
+						  if( auto primitive = runTimeCast<const Primitive>( object.get() ) )
+						  {
+							  return new IntData( primitive->variableSize( interpolation ) );
+						  }
+						  return nullptr;
+					  }
+				  ) }
+			);
 		}
 	}
 	return result;
 }
 
-const InspectorTree::Registration g_primitiveTopologyInspectionRegistration( { "Location", "Object", "Topology" }, primitiveTopologyInspectionProvider );
+const InspectorTree::Registration g_primitiveTopologyInspectionRegistration(
+	{ "Location", "Object", "Topology" }, primitiveTopologyInspectionProvider
+);
 
 InspectorTree::Inspections meshTopologyInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &editScope )
 {
@@ -969,39 +992,61 @@ InspectorTree::Inspections meshTopologyInspectionProvider( ScenePlug *scene, con
 	ConstObjectPtr object = scene->objectPlug()->getValue();
 	if( runTimeCast<const MeshPrimitive>( object.get() ) )
 	{
-		result.push_back( { { "Vertices" }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) -> ConstDataPtr {
-								if( auto mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() ) )
-								{
-									return new IntData( mesh->variableSize( PrimitiveVariable::Vertex ) );
-								}
-								return nullptr;
-							} ) } );
-		result.push_back( { { "Faces" }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) -> ConstDataPtr {
-								if( auto mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() ) )
-								{
-									return new IntData( mesh->numFaces() );
-								}
-								return nullptr;
-							} ) } );
-		result.push_back( { { "Vertices Per Face" }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) -> ConstDataPtr {
-								if( auto mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() ) )
-								{
-									return mesh->verticesPerFace();
-								}
-								return nullptr;
-							} ) } );
-		result.push_back( { { "Vertex Ids" }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) -> ConstDataPtr {
-								if( auto mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() ) )
-								{
-									return mesh->vertexIds();
-								}
-								return nullptr;
-							} ) } );
+		result.push_back(
+			{ { "Vertices" },
+			  new GafferSceneUI::Private::BasicInspector(
+				  scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) -> ConstDataPtr {
+					  if( auto mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() ) )
+					  {
+						  return new IntData( mesh->variableSize( PrimitiveVariable::Vertex ) );
+					  }
+					  return nullptr;
+				  }
+			  ) }
+		);
+		result.push_back(
+			{ { "Faces" },
+			  new GafferSceneUI::Private::BasicInspector(
+				  scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) -> ConstDataPtr {
+					  if( auto mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() ) )
+					  {
+						  return new IntData( mesh->numFaces() );
+					  }
+					  return nullptr;
+				  }
+			  ) }
+		);
+		result.push_back(
+			{ { "Vertices Per Face" },
+			  new GafferSceneUI::Private::BasicInspector(
+				  scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) -> ConstDataPtr {
+					  if( auto mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() ) )
+					  {
+						  return mesh->verticesPerFace();
+					  }
+					  return nullptr;
+				  }
+			  ) }
+		);
+		result.push_back(
+			{ { "Vertex Ids" },
+			  new GafferSceneUI::Private::BasicInspector(
+				  scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) -> ConstDataPtr {
+					  if( auto mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() ) )
+					  {
+						  return mesh->vertexIds();
+					  }
+					  return nullptr;
+				  }
+			  ) }
+		);
 	}
 	return result;
 }
 
-const InspectorTree::Registration g_meshTopologyInspectionRegistration( { "Location", "Object", "Mesh Topology" }, meshTopologyInspectionProvider );
+const InspectorTree::Registration g_meshTopologyInspectionRegistration(
+	{ "Location", "Object", "Mesh Topology" }, meshTopologyInspectionProvider
+);
 
 const boost::container::flat_map<StandardCubicBasis, ConstStringDataPtr> g_curveBases = {
 	{ StandardCubicBasis::Unknown, new StringData( "Unknown" ) },
@@ -1025,47 +1070,74 @@ InspectorTree::Inspections curvesTopologyInspectionProvider( ScenePlug *scene, c
 	ConstObjectPtr object = scene->objectPlug()->getValue();
 	if( runTimeCast<const CurvesPrimitive>( object.get() ) )
 	{
-		result.push_back( { { "Vertices" }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) -> ConstDataPtr {
-								if( auto curves = runTimeCast<const CurvesPrimitive>( objectPlug->getValue() ) )
-								{
-									return new IntData( curves->variableSize( PrimitiveVariable::Vertex ) );
-								}
-								return nullptr;
-							} ) } );
-		result.push_back( { { "Curves" }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) -> ConstDataPtr {
-								if( auto curves = runTimeCast<const CurvesPrimitive>( objectPlug->getValue() ) )
-								{
-									return new IntData( curves->numCurves() );
-								}
-								return nullptr;
-							} ) } );
-		result.push_back( { { "Vertices Per Curve" }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) -> ConstDataPtr {
-								if( auto curves = runTimeCast<const CurvesPrimitive>( objectPlug->getValue() ) )
-								{
-									return curves->verticesPerCurve();
-								}
-								return nullptr;
-							} ) } );
-		result.push_back( { { "Wrap" }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) -> ConstDataPtr {
-								if( auto curves = runTimeCast<const CurvesPrimitive>( objectPlug->getValue() ) )
-								{
-									return g_curveWraps.at( curves->wrap() );
-								}
-								return nullptr;
-							} ) } );
-		result.push_back( { { "Basis" }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) -> ConstDataPtr {
-								if( auto curves = runTimeCast<const CurvesPrimitive>( objectPlug->getValue() ) )
-								{
-									return g_curveBases.at( curves->basis().standardBasis() );
-								}
-								return nullptr;
-							} ) } );
+		result.push_back(
+			{ { "Vertices" },
+			  new GafferSceneUI::Private::BasicInspector(
+				  scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) -> ConstDataPtr {
+					  if( auto curves = runTimeCast<const CurvesPrimitive>( objectPlug->getValue() ) )
+					  {
+						  return new IntData( curves->variableSize( PrimitiveVariable::Vertex ) );
+					  }
+					  return nullptr;
+				  }
+			  ) }
+		);
+		result.push_back(
+			{ { "Curves" },
+			  new GafferSceneUI::Private::BasicInspector(
+				  scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) -> ConstDataPtr {
+					  if( auto curves = runTimeCast<const CurvesPrimitive>( objectPlug->getValue() ) )
+					  {
+						  return new IntData( curves->numCurves() );
+					  }
+					  return nullptr;
+				  }
+			  ) }
+		);
+		result.push_back(
+			{ { "Vertices Per Curve" },
+			  new GafferSceneUI::Private::BasicInspector(
+				  scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) -> ConstDataPtr {
+					  if( auto curves = runTimeCast<const CurvesPrimitive>( objectPlug->getValue() ) )
+					  {
+						  return curves->verticesPerCurve();
+					  }
+					  return nullptr;
+				  }
+			  ) }
+		);
+		result.push_back(
+			{ { "Wrap" },
+			  new GafferSceneUI::Private::BasicInspector(
+				  scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) -> ConstDataPtr {
+					  if( auto curves = runTimeCast<const CurvesPrimitive>( objectPlug->getValue() ) )
+					  {
+						  return g_curveWraps.at( curves->wrap() );
+					  }
+					  return nullptr;
+				  }
+			  ) }
+		);
+		result.push_back(
+			{ { "Basis" },
+			  new GafferSceneUI::Private::BasicInspector(
+				  scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) -> ConstDataPtr {
+					  if( auto curves = runTimeCast<const CurvesPrimitive>( objectPlug->getValue() ) )
+					  {
+						  return g_curveBases.at( curves->basis().standardBasis() );
+					  }
+					  return nullptr;
+				  }
+			  ) }
+		);
 	}
 
 	return result;
 }
 
-const InspectorTree::Registration g_curvesTopologyInspectionRegistration( { "Location", "Object", "Curves Topology" }, curvesTopologyInspectionProvider );
+const InspectorTree::Registration g_curvesTopologyInspectionRegistration(
+	{ "Location", "Object", "Curves Topology" }, curvesTopologyInspectionProvider
+);
 
 const CompoundData *objectParameters( const Object *object )
 {
@@ -1089,20 +1161,27 @@ InspectorTree::Inspections objectParametersInspectionProvider( ScenePlug *scene,
 	{
 		for( const auto name : alphabeticallySortedKeys( parameters->readable() ) )
 		{
-			result.push_back( { { name }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, [name = name]( const ObjectPlug *objectPlug ) -> ConstDataPtr {
-									ConstObjectPtr object = objectPlug->getValue();
-									if( auto parameters = objectParameters( object.get() ) )
-									{
-										return parameters->member( name );
-									}
-									return nullptr;
-								} ) } );
+			result.push_back(
+				{ { name },
+				  new GafferSceneUI::Private::BasicInspector(
+					  scene->objectPlug(), editScope, [name = name]( const ObjectPlug *objectPlug ) -> ConstDataPtr {
+						  ConstObjectPtr object = objectPlug->getValue();
+						  if( auto parameters = objectParameters( object.get() ) )
+						  {
+							  return parameters->member( name );
+						  }
+						  return nullptr;
+					  }
+				  ) }
+			);
 		}
 	}
 	return result;
 }
 
-const InspectorTree::Registration g_objectParametersInspectionRegistration( { "Location", "Object", "Parameters" }, objectParametersInspectionProvider );
+const InspectorTree::Registration g_objectParametersInspectionRegistration(
+	{ "Location", "Object", "Parameters" }, objectParametersInspectionProvider
+);
 
 InspectorTree::Inspections primitiveVariablesInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &editScope )
 {
@@ -1117,23 +1196,50 @@ InspectorTree::Inspections primitiveVariablesInspectionProvider( ScenePlug *scen
 
 	for( const auto name : alphabeticallySortedKeys( primitive->variables ) )
 	{
-		result.push_back( { { name, "Interpolation" }, new GafferSceneUI::Private::PrimitiveVariableInspector( scene, editScope, name, PrimitiveVariableInspector::Property::Interpolation ) } );
-		result.push_back( { { name, "Type" }, new GafferSceneUI::Private::PrimitiveVariableInspector( scene, editScope, name, PrimitiveVariableInspector::Property::Type ) } );
+		result.push_back(
+			{ { name, "Interpolation" },
+			  new GafferSceneUI::Private::PrimitiveVariableInspector(
+				  scene, editScope, name, PrimitiveVariableInspector::Property::Interpolation
+			  ) }
+		);
+		result.push_back(
+			{ { name, "Type" },
+			  new GafferSceneUI::Private::PrimitiveVariableInspector(
+				  scene, editScope, name, PrimitiveVariableInspector::Property::Type
+			  ) }
+		);
 
 		const Data *data = primitive->variables.find( name )->second.data.get();
 		if( data && IECore::trait<IECore::TypeTraits::IsGeometricTypedData>( data ) )
 		{
-			result.push_back( { { name, "Interpretation" }, new GafferSceneUI::Private::PrimitiveVariableInspector( scene, editScope, name, PrimitiveVariableInspector::Property::Interpretation ) } );
+			result.push_back(
+				{ { name, "Interpretation" },
+				  new GafferSceneUI::Private::PrimitiveVariableInspector(
+					  scene, editScope, name, PrimitiveVariableInspector::Property::Interpretation
+				  ) }
+			);
 		}
 
-		result.push_back( { { name, "Data" }, new GafferSceneUI::Private::PrimitiveVariableInspector( scene, editScope, name, PrimitiveVariableInspector::Property::Data ) } );
-		result.push_back( { { name, "Indices" }, new GafferSceneUI::Private::PrimitiveVariableInspector( scene, editScope, name, PrimitiveVariableInspector::Property::Indices ) } );
+		result.push_back(
+			{ { name, "Data" },
+			  new GafferSceneUI::Private::PrimitiveVariableInspector(
+				  scene, editScope, name, PrimitiveVariableInspector::Property::Data
+			  ) }
+		);
+		result.push_back(
+			{ { name, "Indices" },
+			  new GafferSceneUI::Private::PrimitiveVariableInspector(
+				  scene, editScope, name, PrimitiveVariableInspector::Property::Indices
+			  ) }
+		);
 	}
 
 	return result;
 }
 
-const InspectorTree::Registration g_primitiveVariablesInspectionRegistration( { "Location", "Object", "Primitive Variables" }, primitiveVariablesInspectionProvider );
+const InspectorTree::Registration g_primitiveVariablesInspectionRegistration(
+	{ "Location", "Object", "Primitive Variables" }, primitiveVariablesInspectionProvider
+);
 
 InspectorTree::Inspections subdivisionInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &editScope )
 {
@@ -1146,64 +1252,121 @@ InspectorTree::Inspections subdivisionInspectionProvider( ScenePlug *scene, cons
 		return result;
 	}
 
-	result.push_back( { { "Interpolation" }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
-							ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
-							return mesh ? new StringData( mesh->interpolation() ) : nullptr;
-						} ) } );
+	result.push_back(
+		{ { "Interpolation" },
+		  new GafferSceneUI::Private::BasicInspector(
+			  scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
+				  ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
+				  return mesh ? new StringData( mesh->interpolation() ) : nullptr;
+			  }
+		  ) }
+	);
 
-	result.push_back( { { "Corners" }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
-							ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
-							return mesh ? new UInt64Data( mesh->cornerIds()->readable().size() ) : nullptr;
-						} ) } );
+	result.push_back(
+		{ { "Corners" },
+		  new GafferSceneUI::Private::BasicInspector(
+			  scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
+				  ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
+				  return mesh ? new UInt64Data( mesh->cornerIds()->readable().size() ) : nullptr;
+			  }
+		  ) }
+	);
 
-	result.push_back( { { "Corners", "Indices" }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
-							ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
-							return mesh ? mesh->cornerIds() : nullptr;
-						} ) } );
+	result.push_back(
+		{ { "Corners", "Indices" },
+		  new GafferSceneUI::Private::BasicInspector(
+			  scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
+				  ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
+				  return mesh ? mesh->cornerIds() : nullptr;
+			  }
+		  ) }
+	);
 
-	result.push_back( { { "Corners", "Sharpnesses" }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
-							ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
-							return mesh ? mesh->cornerSharpnesses() : nullptr;
-						} ) } );
+	result.push_back(
+		{ { "Corners", "Sharpnesses" },
+		  new GafferSceneUI::Private::BasicInspector(
+			  scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
+				  ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
+				  return mesh ? mesh->cornerSharpnesses() : nullptr;
+			  }
+		  ) }
+	);
 
-	result.push_back( { { "Creases" }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
-							ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
-							return mesh ? new UInt64Data( mesh->creaseLengths()->readable().size() ) : nullptr;
-						} ) } );
+	result.push_back(
+		{ { "Creases" },
+		  new GafferSceneUI::Private::BasicInspector(
+			  scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
+				  ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
+				  return mesh ? new UInt64Data( mesh->creaseLengths()->readable().size() ) : nullptr;
+			  }
+		  ) }
+	);
 
-	result.push_back( { { "Creases", "Lengths" }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
-							ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
-							return mesh ? mesh->creaseLengths() : nullptr;
-						} ) } );
+	result.push_back(
+		{ { "Creases", "Lengths" },
+		  new GafferSceneUI::Private::BasicInspector(
+			  scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
+				  ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
+				  return mesh ? mesh->creaseLengths() : nullptr;
+			  }
+		  ) }
+	);
 
-	result.push_back( { { "Creases", "Ids" }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
-							ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
-							return mesh ? mesh->creaseIds() : nullptr;
-						} ) } );
+	result.push_back(
+		{ { "Creases", "Ids" },
+		  new GafferSceneUI::Private::BasicInspector(
+			  scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
+				  ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
+				  return mesh ? mesh->creaseIds() : nullptr;
+			  }
+		  ) }
+	);
 
-	result.push_back( { { "Creases", "Sharpnesses" }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
-							ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
-							return mesh ? mesh->creaseSharpnesses() : nullptr;
-						} ) } );
+	result.push_back(
+		{ { "Creases", "Sharpnesses" },
+		  new GafferSceneUI::Private::BasicInspector(
+			  scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
+				  ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
+				  return mesh ? mesh->creaseSharpnesses() : nullptr;
+			  }
+		  ) }
+	);
 
-	result.push_back( { { "Interpolate Boundary" }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
-							ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
-							return mesh ? new StringData( mesh->getInterpolateBoundary() ) : nullptr;
-						} ) } );
+	result.push_back(
+		{ { "Interpolate Boundary" },
+		  new GafferSceneUI::Private::BasicInspector(
+			  scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
+				  ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
+				  return mesh ? new StringData( mesh->getInterpolateBoundary() ) : nullptr;
+			  }
+		  ) }
+	);
 
-	result.push_back( { { "FaceVarying Linear Interpolation" }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
-							ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
-							return mesh ? new StringData( mesh->getFaceVaryingLinearInterpolation() ) : nullptr;
-						} ) } );
+	result.push_back(
+		{ { "FaceVarying Linear Interpolation" },
+		  new GafferSceneUI::Private::BasicInspector(
+			  scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
+				  ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
+				  return mesh ? new StringData( mesh->getFaceVaryingLinearInterpolation() ) : nullptr;
+			  }
+		  ) }
+	);
 
-	result.push_back( { { "Triangle Subdivision Rule" }, new GafferSceneUI::Private::BasicInspector( scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
-							ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
-							return mesh ? new StringData( mesh->getTriangleSubdivisionRule() ) : nullptr;
-						} ) } );
+	result.push_back(
+		{ { "Triangle Subdivision Rule" },
+		  new GafferSceneUI::Private::BasicInspector(
+			  scene->objectPlug(), editScope, []( const ObjectPlug *objectPlug ) {
+				  ConstMeshPrimitivePtr mesh = runTimeCast<const MeshPrimitive>( objectPlug->getValue() );
+				  return mesh ? new StringData( mesh->getTriangleSubdivisionRule() ) : nullptr;
+			  }
+		  ) }
+	);
 	return result;
 }
 
-const InspectorTree::Registration g_subdivisionInspectionRegistration( { "Location", "Object", "Subdivision" }, subdivisionInspectionProvider );
+const InspectorTree::Registration g_subdivisionInspectionRegistration(
+	{ "Location", "Object", "Subdivision" }, subdivisionInspectionProvider
+);
 
 // Option Inspectors
 // =================
@@ -1222,16 +1385,23 @@ IECore::ConstObjectPtr parameterData( const Object *attribute, const ShaderNetwo
 		return nullptr;
 	}
 
-	const IECoreScene::Shader *shader = parameter.shader.string().empty() ? shaderNetwork->outputShader() : shaderNetwork->getShader( parameter.shader );
+	const IECoreScene::Shader *shader = parameter.shader.string().empty() ?
+		shaderNetwork->outputShader() :
+		shaderNetwork->getShader( parameter.shader );
 	if( !shader )
 	{
 		return nullptr;
 	}
 
-	const ShaderNetwork::Parameter input = parameter.shader.string().empty() ? shaderNetwork->input( { shaderNetwork->getOutput().shader, parameter.name } ) : shaderNetwork->input( parameter );
+	const ShaderNetwork::Parameter input = parameter.shader.string().empty() ?
+		shaderNetwork->input( { shaderNetwork->getOutput().shader, parameter.name } ) :
+		shaderNetwork->input( parameter );
 	if( input )
 	{
-		return new CompoundData( { { g_shaderConnectionShader, new InternedStringData( input.shader ) }, { g_shaderConnectionParameter, new InternedStringData( input.name ) } } );
+		return new CompoundData(
+			{ { g_shaderConnectionShader, new InternedStringData( input.shader ) },
+			  { g_shaderConnectionParameter, new InternedStringData( input.name ) } }
+		);
 	}
 
 	return shader->parametersData()->member( parameter.name );
@@ -1255,7 +1425,9 @@ InspectorTree::Inspections optionsInspectionProvider( ScenePlug *scene, const Ga
 			category = categoryMetadata->readable();
 		}
 
-		result.push_back( { { category, optionName }, new GafferSceneUI::Private::OptionInspector( scene, editScope, optionName ) } );
+		result.push_back(
+			{ { category, optionName }, new GafferSceneUI::Private::OptionInspector( scene, editScope, optionName ) }
+		);
 
 		if( auto shaderNetwork = globals->member<const ShaderNetwork>( name ) )
 		{
@@ -1282,8 +1454,7 @@ InspectorTree::Inspections optionsInspectionProvider( ScenePlug *scene, const Ga
 
 				[&]( const ShaderNetwork::Parameter &parameter ) {
 					return new GafferSceneUI::Private::BasicInspector(
-						scene->globalsPlug(), editScope,
-						[name, parameter]( const CompoundObjectPlug *plug ) {
+						scene->globalsPlug(), editScope, [name, parameter]( const CompoundObjectPlug *plug ) {
 							ConstCompoundObjectPtr globals = plug->getValue();
 							return parameterData( globals->member( name ), parameter );
 						}
@@ -1296,7 +1467,9 @@ InspectorTree::Inspections optionsInspectionProvider( ScenePlug *scene, const Ga
 	return result;
 }
 
-const InspectorTree::Registration g_optionsInspectionRegistration( { "Globals", "Options" }, optionsInspectionProvider );
+const InspectorTree::Registration g_optionsInspectionRegistration(
+	{ "Globals", "Options" }, optionsInspectionProvider
+);
 
 // Global Attribute Inspectors
 // ============================
@@ -1319,10 +1492,15 @@ InspectorTree::Inspections globalAttributesInspectionProvider( ScenePlug *scene,
 			category = categoryMetadata->readable();
 		}
 
-		result.push_back( { { category, attributeName }, new GafferSceneUI::Private::BasicInspector( scene->globalsPlug(), editScope, [name = name]( const CompoundObjectPlug *globalsPlug ) {
-								ConstCompoundObjectPtr globals = globalsPlug->getValue();
-								return globals->member( name );
-							} ) } );
+		result.push_back(
+			{ { category, attributeName },
+			  new GafferSceneUI::Private::BasicInspector(
+				  scene->globalsPlug(), editScope, [name = name]( const CompoundObjectPlug *globalsPlug ) {
+					  ConstCompoundObjectPtr globals = globalsPlug->getValue();
+					  return globals->member( name );
+				  }
+			  ) }
+		);
 
 		if( auto shaderNetwork = globals->member<const ShaderNetwork>( name ) )
 		{
@@ -1349,8 +1527,7 @@ InspectorTree::Inspections globalAttributesInspectionProvider( ScenePlug *scene,
 
 				[&]( const ShaderNetwork::Parameter &parameter ) {
 					return new GafferSceneUI::Private::BasicInspector(
-						scene->globalsPlug(), editScope,
-						[name, parameter]( const CompoundObjectPlug *plug ) {
+						scene->globalsPlug(), editScope, [name, parameter]( const CompoundObjectPlug *plug ) {
 							ConstCompoundObjectPtr globals = plug->getValue();
 							return parameterData( globals->member( name ), parameter );
 						}
@@ -1363,7 +1540,9 @@ InspectorTree::Inspections globalAttributesInspectionProvider( ScenePlug *scene,
 	return result;
 }
 
-const InspectorTree::Registration g_globalAttributesInspectionRegistration( { "Globals", "Attributes" }, globalAttributesInspectionProvider );
+const InspectorTree::Registration g_globalAttributesInspectionRegistration(
+	{ "Globals", "Attributes" }, globalAttributesInspectionProvider
+);
 
 // Output Inspectors
 // =================
@@ -1389,50 +1568,69 @@ InspectorTree::Inspections outputsInspectionProvider( ScenePlug *scene, const Ga
 
 		vector<InternedString> path = ScenePlug::stringToPath( name.string().substr( g_outputPrefix.size() ) );
 		path.push_back( "File Name" );
-		result.push_back( { path, new GafferSceneUI::Private::BasicInspector( scene->globalsPlug(), editScope, [name = name]( const CompoundObjectPlug *globalsPlug ) {
-								ConstOutputPtr output = globalsPlug->getValue()->member<Output>( name );
-								return output ? new StringData( output->getName() ) : nullptr;
-							} ) } );
+		result.push_back(
+			{ path,
+			  new GafferSceneUI::Private::BasicInspector(
+				  scene->globalsPlug(), editScope, [name = name]( const CompoundObjectPlug *globalsPlug ) {
+					  ConstOutputPtr output = globalsPlug->getValue()->member<Output>( name );
+					  return output ? new StringData( output->getName() ) : nullptr;
+				  }
+			  ) }
+		);
 
 		path.back() = "Type";
-		result.push_back( { path, new GafferSceneUI::Private::BasicInspector( scene->globalsPlug(), editScope, [name = name]( const CompoundObjectPlug *globalsPlug ) {
-								ConstOutputPtr output = globalsPlug->getValue()->member<Output>( name );
-								return output ? new StringData( output->getType() ) : nullptr;
-							} ) } );
+		result.push_back(
+			{ path,
+			  new GafferSceneUI::Private::BasicInspector(
+				  scene->globalsPlug(), editScope, [name = name]( const CompoundObjectPlug *globalsPlug ) {
+					  ConstOutputPtr output = globalsPlug->getValue()->member<Output>( name );
+					  return output ? new StringData( output->getType() ) : nullptr;
+				  }
+			  ) }
+		);
 
 		path.back() = "Data";
-		result.push_back( { path, new GafferSceneUI::Private::BasicInspector( scene->globalsPlug(), editScope, [name = name]( const CompoundObjectPlug *globalsPlug ) {
-								ConstOutputPtr output = globalsPlug->getValue()->member<Output>( name );
-								return output ? new StringData( output->getData() ) : nullptr;
-							} ) } );
+		result.push_back(
+			{ path,
+			  new GafferSceneUI::Private::BasicInspector(
+				  scene->globalsPlug(), editScope, [name = name]( const CompoundObjectPlug *globalsPlug ) {
+					  ConstOutputPtr output = globalsPlug->getValue()->member<Output>( name );
+					  return output ? new StringData( output->getData() ) : nullptr;
+				  }
+			  ) }
+		);
 
 		path.back() = "Parameters";
 		path.resize( path.size() + 1 );
 		for( const auto parameterName : alphabeticallySortedKeys( output->parameters() ) )
 		{
 			path.back() = parameterName;
-			result.push_back( { path, new GafferSceneUI::Private::BasicInspector( scene->globalsPlug(), editScope, [name = name, parameterName = parameterName]( const CompoundObjectPlug *globalsPlug ) {
-									ConstOutputPtr output = globalsPlug->getValue()->member<Output>( name );
-									return output ? output->parametersData()->member( parameterName ) : nullptr;
-								} ) } );
+			result.push_back(
+				{ path,
+				  new GafferSceneUI::Private::BasicInspector(
+					  scene->globalsPlug(), editScope,
+					  [name = name, parameterName = parameterName]( const CompoundObjectPlug *globalsPlug ) {
+						  ConstOutputPtr output = globalsPlug->getValue()->member<Output>( name );
+						  return output ? output->parametersData()->member( parameterName ) : nullptr;
+					  }
+				  ) }
+			);
 		}
 	}
 	return result;
 }
 
-const InspectorTree::Registration g_outputsInspectionRegistration( { "Globals", "Outputs" }, outputsInspectionProvider );
+const InspectorTree::Registration g_outputsInspectionRegistration(
+	{ "Globals", "Outputs" }, outputsInspectionProvider
+);
 
 // InspectorDiffColumn
 // ===================
 
-const std::array<ConstStringDataPtr, 2> g_diffColumnHeaders = {
-	new StringData( "A" ),
-	new StringData( "B" )
-};
+const std::array<ConstStringDataPtr, 2> g_diffColumnHeaders = { new StringData( "A" ), new StringData( "B" ) };
 
 const std::array<ConstColor4fDataPtr, 2> g_diffColumnBackgroundColors = {
-	new Color4fData( Color4f( 0.7, 0.12, 0, 0.3 ) ),
-	new Color4fData( Color4f( 0.13, 0.62, 0, 0.3 ) )
+	new Color4fData( Color4f( 0.7, 0.12, 0, 0.3 ) ), new Color4fData( Color4f( 0.13, 0.62, 0, 0.3 ) )
 };
 
 const std::array<InternedString, 2> g_diffColumnContextProperties = { "inspector:contextA", "inspector:contextB" };
@@ -1440,7 +1638,7 @@ const std::array<InternedString, 2> g_diffColumnContextProperties = { "inspector
 class InspectorDiffColumn : public GafferSceneUI::Private::InspectorColumn
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( InspectorDiffColumn )
 
@@ -1452,15 +1650,16 @@ class InspectorDiffColumn : public GafferSceneUI::Private::InspectorColumn
 
 	InspectorDiffColumn( DiffContext diffContext )
 		: InspectorColumn(
-			  "inspector:inspector",
-			  CellData( g_diffColumnHeaders[(int)diffContext] ),
-			  g_diffColumnContextProperties[(int)diffContext],
-			  SizeMode::Stretch
+			  "inspector:inspector", CellData( g_diffColumnHeaders[(int)diffContext] ),
+			  g_diffColumnContextProperties[(int)diffContext], SizeMode::Stretch
 		  ),
 		  m_backgroundColor( g_diffColumnBackgroundColors[(int)diffContext] )
 	{
 		const DiffContext otherContext = diffContext == DiffContext::A ? DiffContext::B : DiffContext::A;
-		m_otherColumn = new InspectorColumn( "inspector:inspector", CellData( g_diffColumnHeaders[(int)diffContext] ), g_diffColumnContextProperties[(int)otherContext] );
+		m_otherColumn = new InspectorColumn(
+			"inspector:inspector", CellData( g_diffColumnHeaders[(int)diffContext] ),
+			g_diffColumnContextProperties[(int)otherContext]
+		);
 	}
 
 	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
@@ -1488,7 +1687,7 @@ class InspectorDiffColumn : public GafferSceneUI::Private::InspectorColumn
 		return result;
 	}
 
-	private:
+private:
 
 	GafferSceneUI::Private::ConstInspectorColumnPtr m_otherColumn;
 	ConstColor4fDataPtr m_backgroundColor;
@@ -1522,7 +1721,9 @@ void inspectorTreeSetContextsWrapper( InspectorTree &tree, object pythonContexts
 boost::python::tuple inspectorTreeGetContextsWrapper( InspectorTree &tree )
 {
 	auto c = tree.getContexts();
-	return boost::python::make_tuple( boost::const_pointer_cast<Context>( c[0] ), boost::const_pointer_cast<Context>( c[1] ) );
+	return boost::python::make_tuple(
+		boost::const_pointer_cast<Context>( c[0] ), boost::const_pointer_cast<Context>( c[1] )
+	);
 }
 
 void inspectorTreeSetFilterWrapper( InspectorTree &tree, const IECore::StringAlgo::MatchPattern &filter )
@@ -1539,20 +1740,21 @@ void inspectorTreeSetIsolateDifferencesWrapper( InspectorTree &tree, bool isolat
 
 void inspectorTreeRegisterInspectorsWrapper( const vector<InternedString> &path, object pythonInspectionProvider )
 {
-	InspectorTree::InspectionProvider inspectionProvider = [pythonInspectionProvider]( ScenePlug *scene, const Gaffer::PlugPtr &editScope ) {
-		InspectorTree::Inspections result;
-		IECorePython::ScopedGILLock gilLock;
-		try
-		{
-			object pythonInspections = pythonInspectionProvider( ScenePlugPtr( scene ), editScope );
-			boost::python::container_utils::extend_container( result, pythonInspections );
-		}
-		catch( const error_already_set & )
-		{
-			IECorePython::ExceptionAlgo::translatePythonException();
-		}
-		return result;
-	};
+	InspectorTree::InspectionProvider inspectionProvider =
+		[pythonInspectionProvider]( ScenePlug *scene, const Gaffer::PlugPtr &editScope ) {
+			InspectorTree::Inspections result;
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				object pythonInspections = pythonInspectionProvider( ScenePlugPtr( scene ), editScope );
+				boost::python::container_utils::extend_container( result, pythonInspections );
+			}
+			catch( const error_already_set & )
+			{
+				IECorePython::ExceptionAlgo::translatePythonException();
+			}
+			return result;
+		};
 	InspectorTree::registerInspectors( path, inspectionProvider );
 }
 
@@ -1570,13 +1772,9 @@ void GafferSceneUIModule::bindSceneInspector()
 					  .def(
 						  "__init__",
 						  make_constructor(
-							  inspectorTreeConstructor,
-							  default_call_policies(),
-							  (
-								  boost::python::arg( "scene" ),
-								  boost::python::arg( "contexts" ),
-								  boost::python::arg( "editScope" )
-							  )
+							  inspectorTreeConstructor, default_call_policies(),
+							  ( boost::python::arg( "scene" ), boost::python::arg( "contexts" ),
+								boost::python::arg( "editScope" ) )
 						  )
 					  )
 					  .def( "setContexts", &inspectorTreeSetContextsWrapper )
@@ -1600,12 +1798,8 @@ void GafferSceneUIModule::bindSceneInspector()
 
 		.def(
 			init<InspectorTreePtr, const Path::Names &, const std::string &, const Gaffer::PathFilterPtr &>(
-				(
-					boost::python::arg( "tree" ),
-					boost::python::arg( "names" ) = boost::python::list(),
-					boost::python::arg( "root" ) = "/",
-					boost::python::arg( "filter" ) = object()
-				)
+				( boost::python::arg( "tree" ), boost::python::arg( "names" ) = boost::python::list(),
+				  boost::python::arg( "root" ) = "/", boost::python::arg( "filter" ) = object() )
 			)
 		)
 		.def( "tree", &InspectorPath::tree, return_value_policy<CastToIntrusivePtr>() );

@@ -102,17 +102,15 @@ void testSelfDisconnectingSlot()
 	// though the slot disconnects in the middle of the call.
 
 	Signals::Signal<void()> signal;
-	connection = signal.connect(
-		[sentinel]() {
-			GAFFERTEST_ASSERTEQUAL( callCount, 0 );
-			GAFFERTEST_ASSERT( !weakSentinel.expired() );
-			connection.disconnect();
-			GAFFERTEST_ASSERT( !connection.connected() );
-			GAFFERTEST_ASSERT( !weakSentinel.expired() );
-			callCount += 1;
-			GAFFERTEST_ASSERTEQUAL( callCount, 1 );
-		}
-	);
+	connection = signal.connect( [sentinel]() {
+		GAFFERTEST_ASSERTEQUAL( callCount, 0 );
+		GAFFERTEST_ASSERT( !weakSentinel.expired() );
+		connection.disconnect();
+		GAFFERTEST_ASSERT( !connection.connected() );
+		GAFFERTEST_ASSERT( !weakSentinel.expired() );
+		callCount += 1;
+		GAFFERTEST_ASSERTEQUAL( callCount, 1 );
+	} );
 
 	// Drop our reference to the sentinel, and assert that the
 	// slot is keeping it alive.

@@ -55,9 +55,7 @@ const size_t g_typePlugIndex = 2;
 const size_t g_interpolationPlugIndex = 3;
 
 const Gaffer::ValuePlug *correspondingPlug(
-	const Gaffer::ValuePlug *const parent,
-	const Gaffer::ValuePlug *const child,
-	const Gaffer::ValuePlug *const other
+	const Gaffer::ValuePlug *const parent, const Gaffer::ValuePlug *const child, const Gaffer::ValuePlug *const other
 )
 {
 	boost::container::small_vector<const Gaffer::ValuePlug *, 4> path;
@@ -81,7 +79,9 @@ const Gaffer::ValuePlug *correspondingPlug(
 	return plug;
 }
 
-void addChildPlugsToAffectedOutputs( const Gaffer::Plug *const plug, Gaffer::DependencyNode::AffectedPlugsContainer &outputs )
+void addChildPlugsToAffectedOutputs(
+	const Gaffer::Plug *const plug, Gaffer::DependencyNode::AffectedPlugsContainer &outputs
+)
 {
 	assert( plug != 0 );
 
@@ -129,27 +129,30 @@ size_t PrimitiveVariableQuery::g_firstPlugIndex = 0;
 
 GAFFER_NODE_DEFINE_TYPE( PrimitiveVariableQuery );
 
-PrimitiveVariableQuery::PrimitiveVariableQuery( const std::string &name )
-	: Gaffer::ComputeNode( name )
+PrimitiveVariableQuery::PrimitiveVariableQuery( const std::string &name ) : Gaffer::ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "scene" ) );
 	addChild( new Gaffer::StringPlug( "location" ) );
 	/// \todo See notes in `ShaderQuery::ShaderQuery`.
-	addChild( new Gaffer::ArrayPlug( "queries", Gaffer::Plug::Direction::In, nullptr, 1, std::numeric_limits<size_t>::max(), Gaffer::Plug::Flags::Default, false ) );
-	addChild( new Gaffer::ArrayPlug( "out", Gaffer::Plug::Direction::Out, nullptr, 1, std::numeric_limits<size_t>::max(), Gaffer::Plug::Flags::Default, false ) );
-	addChild( new Gaffer::ObjectPlug( "__internalObject", Gaffer::Plug::Out, IECore::NullObject::defaultNullObject() ) );
+	addChild( new Gaffer::ArrayPlug(
+		"queries", Gaffer::Plug::Direction::In, nullptr, 1, std::numeric_limits<size_t>::max(),
+		Gaffer::Plug::Flags::Default, false
+	) );
+	addChild( new Gaffer::ArrayPlug(
+		"out", Gaffer::Plug::Direction::Out, nullptr, 1, std::numeric_limits<size_t>::max(),
+		Gaffer::Plug::Flags::Default, false
+	) );
+	addChild(
+		new Gaffer::ObjectPlug( "__internalObject", Gaffer::Plug::Out, IECore::NullObject::defaultNullObject() )
+	);
 }
 
-PrimitiveVariableQuery::~PrimitiveVariableQuery()
-{
-}
+PrimitiveVariableQuery::~PrimitiveVariableQuery() {}
 
 ScenePlug *PrimitiveVariableQuery::scenePlug()
 {
-	return const_cast<ScenePlug *>(
-		static_cast<const PrimitiveVariableQuery *>( this )->scenePlug()
-	);
+	return const_cast<ScenePlug *>( static_cast<const PrimitiveVariableQuery *>( this )->scenePlug() );
 }
 
 const ScenePlug *PrimitiveVariableQuery::scenePlug() const
@@ -159,9 +162,7 @@ const ScenePlug *PrimitiveVariableQuery::scenePlug() const
 
 Gaffer::StringPlug *PrimitiveVariableQuery::locationPlug()
 {
-	return const_cast<Gaffer::StringPlug *>(
-		static_cast<const PrimitiveVariableQuery *>( this )->locationPlug()
-	);
+	return const_cast<Gaffer::StringPlug *>( static_cast<const PrimitiveVariableQuery *>( this )->locationPlug() );
 }
 
 const Gaffer::StringPlug *PrimitiveVariableQuery::locationPlug() const
@@ -171,9 +172,7 @@ const Gaffer::StringPlug *PrimitiveVariableQuery::locationPlug() const
 
 Gaffer::ArrayPlug *PrimitiveVariableQuery::queriesPlug()
 {
-	return const_cast<Gaffer::ArrayPlug *>(
-		static_cast<const PrimitiveVariableQuery *>( this )->queriesPlug()
-	);
+	return const_cast<Gaffer::ArrayPlug *>( static_cast<const PrimitiveVariableQuery *>( this )->queriesPlug() );
 }
 
 const Gaffer::ArrayPlug *PrimitiveVariableQuery::queriesPlug() const
@@ -183,9 +182,7 @@ const Gaffer::ArrayPlug *PrimitiveVariableQuery::queriesPlug() const
 
 Gaffer::ArrayPlug *PrimitiveVariableQuery::outPlug()
 {
-	return const_cast<Gaffer::ArrayPlug *>(
-		static_cast<const PrimitiveVariableQuery *>( this )->outPlug()
-	);
+	return const_cast<Gaffer::ArrayPlug *>( static_cast<const PrimitiveVariableQuery *>( this )->outPlug() );
 }
 
 const Gaffer::ArrayPlug *PrimitiveVariableQuery::outPlug() const
@@ -205,39 +202,21 @@ Gaffer::NameValuePlug *PrimitiveVariableQuery::addQuery(
 	// NOTE : create the query plug with name and value child plugs
 
 	Gaffer::NameValuePlugPtr childQueryPlug = new Gaffer::NameValuePlug(
-		"",
-		plug->createCounterpart( "query0", Gaffer::Plug::Direction::In ),
-		"query0",
-		Gaffer::Plug::Flags::Default
+		"", plug->createCounterpart( "query0", Gaffer::Plug::Direction::In ), "query0", Gaffer::Plug::Flags::Default
 	);
 	childQueryPlug->namePlug()->setValue( variable );
 
 	// NOTE : create the output plug with exists, value, type and interpolation plugs
 
 	Gaffer::ValuePlugPtr newOutPlug = new Gaffer::ValuePlug( "out0", Gaffer::Plug::Direction::Out );
-	newOutPlug->addChild(
-		new Gaffer::BoolPlug(
-			"exists",
-			Gaffer::Plug::Direction::Out,
-			false
-		)
-	);
+	newOutPlug->addChild( new Gaffer::BoolPlug( "exists", Gaffer::Plug::Direction::Out, false ) );
 	newOutPlug->addChild( plug->createCounterpart( "value", Gaffer::Plug::Direction::Out ) );
-	newOutPlug->addChild(
-		new Gaffer::StringPlug(
-			"type",
-			Gaffer::Plug::Direction::Out
-		)
-	);
-	newOutPlug->addChild(
-		new Gaffer::IntPlug(
-			"interpolation",
-			Gaffer::Plug::Direction::Out,
-			static_cast<int>( IECoreScene::PrimitiveVariable::Invalid ),
-			static_cast<int>( IECoreScene::PrimitiveVariable::Invalid ),
-			static_cast<int>( IECoreScene::PrimitiveVariable::FaceVarying )
-		)
-	);
+	newOutPlug->addChild( new Gaffer::StringPlug( "type", Gaffer::Plug::Direction::Out ) );
+	newOutPlug->addChild( new Gaffer::IntPlug(
+		"interpolation", Gaffer::Plug::Direction::Out, static_cast<int>( IECoreScene::PrimitiveVariable::Invalid ),
+		static_cast<int>( IECoreScene::PrimitiveVariable::Invalid ),
+		static_cast<int>( IECoreScene::PrimitiveVariable::FaceVarying )
+	) );
 
 	// NOTE : store new query and output plugs
 
@@ -255,7 +234,9 @@ void PrimitiveVariableQuery::removeQuery( Gaffer::NameValuePlug *const plug )
 	outPlug()->removeChild( const_cast<Gaffer::ValuePlug *>( outputPlug ) );
 }
 
-const Gaffer::BoolPlug *PrimitiveVariableQuery::existsPlugFromQuery( const Gaffer::NameValuePlug *const queryPlug ) const
+const Gaffer::BoolPlug *PrimitiveVariableQuery::existsPlugFromQuery(
+	const Gaffer::NameValuePlug *const queryPlug
+) const
 {
 	const Gaffer::ValuePlug *const outputPlug = outPlugFromQuery( queryPlug );
 	if( g_existsPlugIndex < outputPlug->children().size() )
@@ -270,7 +251,9 @@ const Gaffer::BoolPlug *PrimitiveVariableQuery::existsPlugFromQuery( const Gaffe
 	throw IECore::Exception( "PrimitiveVariableQuery : \"exists\" plug is missing." );
 }
 
-const Gaffer::ValuePlug *PrimitiveVariableQuery::valuePlugFromQuery( const Gaffer::NameValuePlug *const queryPlug ) const
+const Gaffer::ValuePlug *PrimitiveVariableQuery::valuePlugFromQuery(
+	const Gaffer::NameValuePlug *const queryPlug
+) const
 {
 	const Gaffer::ValuePlug *const outputPlug = outPlugFromQuery( queryPlug );
 	if( g_valuePlugIndex < outputPlug->children().size() )
@@ -285,7 +268,9 @@ const Gaffer::ValuePlug *PrimitiveVariableQuery::valuePlugFromQuery( const Gaffe
 	throw IECore::Exception( "PrimitiveVariableQuery : \"value\" plug is missing." );
 }
 
-const Gaffer::StringPlug *PrimitiveVariableQuery::typePlugFromQuery( const Gaffer::NameValuePlug *const queryPlug ) const
+const Gaffer::StringPlug *PrimitiveVariableQuery::typePlugFromQuery(
+	const Gaffer::NameValuePlug *const queryPlug
+) const
 {
 	const Gaffer::ValuePlug *const outputPlug = outPlugFromQuery( queryPlug );
 	if( g_typePlugIndex < outputPlug->children().size() )
@@ -300,7 +285,9 @@ const Gaffer::StringPlug *PrimitiveVariableQuery::typePlugFromQuery( const Gaffe
 	throw IECore::Exception( "PrimitiveVariableQuery : \"type\" plug is missing." );
 }
 
-const Gaffer::IntPlug *PrimitiveVariableQuery::interpolationPlugFromQuery( const Gaffer::NameValuePlug *const queryPlug ) const
+const Gaffer::IntPlug *PrimitiveVariableQuery::interpolationPlugFromQuery(
+	const Gaffer::NameValuePlug *const queryPlug
+) const
 {
 	const Gaffer::ValuePlug *const outputPlug = outPlugFromQuery( queryPlug );
 	if( g_interpolationPlugIndex < outputPlug->children().size() )
@@ -344,7 +331,8 @@ const Gaffer::NameValuePlug *PrimitiveVariableQuery::queryPlug( const Gaffer::Va
 		throw IECore::Exception( "PrimitiveVariableQuery : \"query\" plug is missing." );
 	}
 
-	if( const Gaffer::NameValuePlug *const childQueryPlug = queriesPlug()->getChild<Gaffer::NameValuePlug>( childIndex ) )
+	if( const Gaffer::NameValuePlug *const childQueryPlug =
+			queriesPlug()->getChild<Gaffer::NameValuePlug>( childIndex ) )
 	{
 		return childQueryPlug;
 	}
@@ -377,9 +365,7 @@ void PrimitiveVariableQuery::affects( const Gaffer::Plug *const input, AffectedP
 		addChildPlugsToAffectedOutputs( outPlug(), outputs );
 	}
 	else if(
-		( input == locationPlug() ) ||
-		( input == scenePlug()->existsPlug() ) ||
-		( input == scenePlug()->objectPlug() )
+		( input == locationPlug() ) || ( input == scenePlug()->existsPlug() ) || ( input == scenePlug()->objectPlug() )
 	)
 	{
 		outputs.push_back( internalObjectPlug() );
@@ -404,18 +390,17 @@ void PrimitiveVariableQuery::affects( const Gaffer::Plug *const input, AffectedP
 		}
 		else if( childQueryPlug->valuePlug() == input || childQueryPlug->valuePlug()->isAncestorOf( input ) )
 		{
-			outputs.push_back(
-				correspondingPlug(
-					static_cast<const Gaffer::ValuePlug *>( childQueryPlug->valuePlug<const Gaffer::ValuePlug>() ),
-					IECore::runTimeCast<const Gaffer::ValuePlug>( input ),
-					valuePlug
-				)
-			);
+			outputs.push_back( correspondingPlug(
+				static_cast<const Gaffer::ValuePlug *>( childQueryPlug->valuePlug<const Gaffer::ValuePlug>() ),
+				IECore::runTimeCast<const Gaffer::ValuePlug>( input ), valuePlug
+			) );
 		}
 	}
 }
 
-void PrimitiveVariableQuery::hash( const Gaffer::ValuePlug *const output, const Gaffer::Context *const context, IECore::MurmurHash &h ) const
+void PrimitiveVariableQuery::hash(
+	const Gaffer::ValuePlug *const output, const Gaffer::Context *const context, IECore::MurmurHash &h
+) const
 {
 	Gaffer::ComputeNode::hash( output, context, h );
 
@@ -439,11 +424,9 @@ void PrimitiveVariableQuery::hash( const Gaffer::ValuePlug *const output, const 
 		const Gaffer::ValuePlug *const outputPlug = outPlug( output );
 		const Gaffer::NameValuePlug *const childQueryPlug = queryPlug( outputPlug );
 
-		if(
-			( output == outputPlug->getChild( g_existsPlugIndex ) ) ||
+		if( ( output == outputPlug->getChild( g_existsPlugIndex ) ) ||
 			( output == outputPlug->getChild( g_typePlugIndex ) ) ||
-			( output == outputPlug->getChild( g_interpolationPlugIndex ) )
-		)
+			( output == outputPlug->getChild( g_interpolationPlugIndex ) ) )
 		{
 			internalObjectPlug()->hash( h );
 			childQueryPlug->namePlug()->hash( h );
@@ -456,9 +439,7 @@ void PrimitiveVariableQuery::hash( const Gaffer::ValuePlug *const output, const 
 			internalObjectPlug()->hash( h );
 			childQueryPlug->namePlug()->hash( h );
 			correspondingPlug(
-				valuePlug,
-				output,
-				static_cast<const Gaffer::ValuePlug *>( childQueryPlug->valuePlug() )
+				valuePlug, output, static_cast<const Gaffer::ValuePlug *>( childQueryPlug->valuePlug() )
 			)
 				->hash( h );
 		}
@@ -513,16 +494,13 @@ void PrimitiveVariableQuery::compute( Gaffer::ValuePlug *const output, const Gaf
 			}
 		}
 
-		const Gaffer::ValuePlug *const valuePlug =
-			outputPlug->getChild<const Gaffer::ValuePlug>( g_valuePlugIndex );
+		const Gaffer::ValuePlug *const valuePlug = outputPlug->getChild<const Gaffer::ValuePlug>( g_valuePlugIndex );
 
 		if( output == outputPlug->getChild( g_existsPlugIndex ) )
 		{
 			// NOTE : set the query's output exists plug. no need to expand indexed data
 
-			static_cast<Gaffer::BoolPlug *>( output )->setValue(
-				static_cast<bool>( resultVariable.data )
-			);
+			static_cast<Gaffer::BoolPlug *>( output )->setValue( static_cast<bool>( resultVariable.data ) );
 
 			return;
 		}
@@ -538,7 +516,11 @@ void PrimitiveVariableQuery::compute( Gaffer::ValuePlug *const output, const Gaf
 		{
 			// NOTE : set the query's output interpolation plug. no need to expand indexed data
 
-			static_cast<Gaffer::IntPlug *>( output )->setValue( static_cast<int>( ( resultVariable.data ) ? resultVariable.interpolation : IECoreScene::PrimitiveVariable::Invalid ) );
+			static_cast<Gaffer::IntPlug *>( output )->setValue(
+				static_cast<int>(
+					( resultVariable.data ) ? resultVariable.interpolation : IECoreScene::PrimitiveVariable::Invalid
+				)
+			);
 
 			return;
 		}
@@ -565,13 +547,9 @@ void PrimitiveVariableQuery::compute( Gaffer::ValuePlug *const output, const Gaf
 			}
 
 			output->setFrom(
-				static_cast<const Gaffer::ValuePlug *>(
-					correspondingPlug(
-						valuePlug,
-						output,
-						static_cast<const Gaffer::ValuePlug *>( childQueryPlug->valuePlug() )
-					)
-				)
+				static_cast<const Gaffer::ValuePlug *>( correspondingPlug(
+					valuePlug, output, static_cast<const Gaffer::ValuePlug *>( childQueryPlug->valuePlug() )
+				) )
 			);
 
 			return;

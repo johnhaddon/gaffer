@@ -50,22 +50,21 @@ GAFFER_NODE_DEFINE_TYPE( OpenColorIOContext );
 
 size_t OpenColorIOContext::g_firstPlugIndex;
 
-OpenColorIOContext::OpenColorIOContext( const std::string &name )
-	: ContextProcessor( name )
+OpenColorIOContext::OpenColorIOContext( const std::string &name ) : ContextProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
 	addChild( new OptionalValuePlug( "config", new StringPlug( "value" ) ) );
-	addChild( new OptionalValuePlug( "workingSpace", new StringPlug( "value", Plug::In, OCIO_NAMESPACE::ROLE_SCENE_LINEAR ) ) );
+	addChild(
+		new OptionalValuePlug( "workingSpace", new StringPlug( "value", Plug::In, OCIO_NAMESPACE::ROLE_SCENE_LINEAR ) )
+	);
 
 	addChild( new ValuePlug( "variables" ) );
 	addChild( new AtomicCompoundDataPlug( "extraVariables", Plug::In, new IECore::CompoundData ) );
 	addChild( new AtomicCompoundDataPlug( "__combinedVariables", Plug::Out, new IECore::CompoundData ) );
 }
 
-OpenColorIOContext::~OpenColorIOContext()
-{
-}
+OpenColorIOContext::~OpenColorIOContext() {}
 
 Gaffer::OptionalValuePlug *OpenColorIOContext::configPlug()
 {
@@ -121,12 +120,8 @@ void OpenColorIOContext::affects( const Gaffer::Plug *input, DependencyNode::Aff
 {
 	ContextProcessor::affects( input, outputs );
 
-	if(
-		configPlug()->isAncestorOf( input ) ||
-		workingSpacePlug()->isAncestorOf( input ) ||
-		variablesPlug()->isAncestorOf( input ) ||
-		input == extraVariablesPlug()
-	)
+	if( configPlug()->isAncestorOf( input ) || workingSpacePlug()->isAncestorOf( input ) ||
+		variablesPlug()->isAncestorOf( input ) || input == extraVariablesPlug() )
 	{
 		outputs.push_back( combinedVariablesPlug() );
 	}
@@ -180,7 +175,9 @@ void OpenColorIOContext::compute( ValuePlug *output, const Context *context ) co
 			}
 			else
 			{
-				throw IECore::Exception( fmt::format( "Extra variable {} is {}, but must be StringData", name.string(), value->typeName() ) );
+				throw IECore::Exception(
+					fmt::format( "Extra variable {} is {}, but must be StringData", name.string(), value->typeName() )
+				);
 			}
 		}
 
@@ -205,7 +202,9 @@ void OpenColorIOContext::compute( ValuePlug *output, const Context *context ) co
 			}
 			else
 			{
-				throw IECore::Exception( fmt::format( "Variable {} is {}, but must be StringPlug", name, plug->valuePlug()->typeName() ) );
+				throw IECore::Exception(
+					fmt::format( "Variable {} is {}, but must be StringPlug", name, plug->valuePlug()->typeName() )
+				);
 			}
 		}
 
@@ -216,7 +215,9 @@ void OpenColorIOContext::compute( ValuePlug *output, const Context *context ) co
 	return ContextProcessor::compute( output, context );
 }
 
-void OpenColorIOContext::processContext( Gaffer::Context::EditableScope &context, IECore::ConstRefCountedPtr &storage ) const
+void OpenColorIOContext::processContext(
+	Gaffer::Context::EditableScope &context, IECore::ConstRefCountedPtr &storage
+) const
 {
 	IECore::ConstCompoundDataPtr combinedVariables = combinedVariablesPlug()->getValue();
 	for( const auto &[name, value] : combinedVariables->readable() )

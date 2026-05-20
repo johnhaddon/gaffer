@@ -74,14 +74,9 @@ const Dot *dotChainSource( const Plug *plug )
 
 GAFFER_NODE_DEFINE_TYPE( BoxOut )
 
-BoxOut::BoxOut( const std::string &name )
-	: BoxIO( Plug::Out, name )
-{
-}
+BoxOut::BoxOut( const std::string &name ) : BoxIO( Plug::Out, name ) {}
 
-BoxOut::~BoxOut()
-{
-}
+BoxOut::~BoxOut() {}
 
 bool BoxOut::acceptsInput( const Plug *plug, const Plug *inputPlug ) const
 {
@@ -100,11 +95,7 @@ bool BoxOut::acceptsInput( const Plug *plug, const Plug *inputPlug ) const
 	// same parent as us.
 
 	const BoxIn *boxIn = inputPlug->parent<BoxIn>();
-	if(
-		boxIn &&
-		boxIn->parent() == parent() &&
-		inputPlug == boxIn->plug()
-	)
+	if( boxIn && boxIn->parent() == parent() && inputPlug == boxIn->plug() )
 	{
 		return true;
 	}

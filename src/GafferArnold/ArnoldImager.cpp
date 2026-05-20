@@ -79,17 +79,14 @@ GAFFER_NODE_DEFINE_TYPE( ArnoldImager );
 
 size_t ArnoldImager::g_firstPlugIndex = 0;
 
-ArnoldImager::ArnoldImager( const std::string &name )
-	: GlobalsProcessor( name )
+ArnoldImager::ArnoldImager( const std::string &name ) : GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ShaderPlug( "imager" ) );
 	addChild( new IntPlug( "mode", Plug::In, (int)Mode::Replace, (int)Mode::Replace, (int)Mode::InsertLast ) );
 }
 
-ArnoldImager::~ArnoldImager()
-{
-}
+ArnoldImager::~ArnoldImager() {}
 
 GafferScene::ShaderPlug *ArnoldImager::imagerPlug()
 {
@@ -165,7 +162,9 @@ void ArnoldImager::hashProcessedGlobals( const Gaffer::Context *context, IECore:
 	modePlug()->hash( h );
 }
 
-IECore::ConstCompoundObjectPtr ArnoldImager::computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const
+IECore::ConstCompoundObjectPtr ArnoldImager::computeProcessedGlobals(
+	const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals
+) const
 {
 	ConstCompoundObjectPtr attributes = imagerPlug()->attributes();
 	if( attributes->members().empty() )
@@ -200,13 +199,17 @@ IECore::ConstCompoundObjectPtr ArnoldImager::computeProcessedGlobals( const Gaff
 			ShaderNetwork::Parameter insertedOut = ShaderNetworkAlgo::addShaders( mergedImager.get(), imager );
 			if( mode == Mode::InsertLast )
 			{
-				mergedImager->addConnection( { mergedImager->getOutput(), firstInput( mergedImager.get(), insertedOut.shader ) } );
+				mergedImager->addConnection(
+					{ mergedImager->getOutput(), firstInput( mergedImager.get(), insertedOut.shader ) }
+				);
 				mergedImager->setOutput( insertedOut );
 			}
 			else
 			{
 				assert( mode == Mode::InsertFirst );
-				mergedImager->addConnection( { insertedOut, firstInput( mergedImager.get(), mergedImager->getOutput().shader ) } );
+				mergedImager->addConnection(
+					{ insertedOut, firstInput( mergedImager.get(), mergedImager->getOutput().shader ) }
+				);
 			}
 			result->members()[g_imagerOptionName] = mergedImager;
 		}

@@ -50,7 +50,7 @@ namespace Gaffer
 
 class GAFFER_API ContextQuery : public Gaffer::ComputeNode
 {
-	public:
+public:
 
 	explicit ContextQuery( const std::string &name = defaultName<ContextQuery>() );
 	~ContextQuery() override;
@@ -67,10 +67,7 @@ class GAFFER_API ContextQuery : public Gaffer::ComputeNode
 	/// The returned NameValuePlug is parented to queriesPlug() and may be edited
 	/// subsequently to modify the variable name and default. Corresponding children
 	/// are added to existsPlug() and valuePlug() to provide the output from the query.
-	Gaffer::NameValuePlug *addQuery(
-		const Gaffer::ValuePlug *plug,
-		const std::string &variable = ""
-	);
+	Gaffer::NameValuePlug *addQuery( const Gaffer::ValuePlug *plug, const std::string &variable = "" );
 	/// Removes a query. Throws an Exception if the query or corresponding children
 	/// of `valuesPlug()` and `existsPlug()` can not be deleted.
 	void removeQuery( Gaffer::NameValuePlug *plug );
@@ -91,12 +88,12 @@ class GAFFER_API ContextQuery : public Gaffer::ComputeNode
 	Gaffer::BoolPlug *existsPlugFromQueryPlug( const Gaffer::NameValuePlug *queryPlug );
 	Gaffer::ValuePlug *valuePlugFromQueryPlug( const Gaffer::NameValuePlug *queryPlug );
 
-	protected:
+protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-	private:
+private:
 
 	static size_t g_firstPlugIndex;
 };

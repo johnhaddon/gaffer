@@ -50,7 +50,10 @@ NameValuePlug::NameValuePlug( const std::string &name, Direction direction, unsi
 {
 }
 
-NameValuePlug::NameValuePlug( const std::string &nameDefault, const IECore::Data *valueDefault, const std::string &name, Direction direction, unsigned flags )
+NameValuePlug::NameValuePlug(
+	const std::string &nameDefault, const IECore::Data *valueDefault, const std::string &name, Direction direction,
+	unsigned flags
+)
 	: NameValuePlug( nameDefault, PlugAlgo::createPlugFromData( "value", direction, flags, valueDefault ).get(), name )
 {
 }
@@ -60,7 +63,9 @@ NameValuePlug::NameValuePlug( const std::string &nameDefault, Gaffer::PlugPtr va
 {
 }
 
-NameValuePlug::NameValuePlug( const std::string &nameDefault, Gaffer::PlugPtr valuePlug, const std::string &name, unsigned flags )
+NameValuePlug::NameValuePlug(
+	const std::string &nameDefault, Gaffer::PlugPtr valuePlug, const std::string &name, unsigned flags
+)
 	: NameValuePlug( name, valuePlug->direction(), flags )
 {
 	addChild( new StringPlug( "name", valuePlug->direction(), nameDefault ) );
@@ -68,18 +73,26 @@ NameValuePlug::NameValuePlug( const std::string &nameDefault, Gaffer::PlugPtr va
 	addChild( valuePlug );
 }
 
-NameValuePlug::NameValuePlug( const std::string &nameDefault, const IECore::Data *valueDefault, bool enabled, const std::string &name, Direction direction, unsigned flags )
+NameValuePlug::NameValuePlug(
+	const std::string &nameDefault, const IECore::Data *valueDefault, bool enabled, const std::string &name,
+	Direction direction, unsigned flags
+)
 	: NameValuePlug( nameDefault, valueDefault, name, direction, flags )
 {
 	addChild( new BoolPlug( "enabled", direction, enabled ) );
 }
 
-NameValuePlug::NameValuePlug( const std::string &nameDefault, Gaffer::PlugPtr valuePlug, bool enabled, const std::string &name )
+NameValuePlug::NameValuePlug(
+	const std::string &nameDefault, Gaffer::PlugPtr valuePlug, bool enabled, const std::string &name
+)
 	: NameValuePlug( nameDefault, valuePlug, enabled, name, valuePlug->getFlags() )
 {
 }
 
-NameValuePlug::NameValuePlug( const std::string &nameDefault, Gaffer::PlugPtr valuePlug, bool defaultEnabled, const std::string &name, unsigned flags )
+NameValuePlug::NameValuePlug(
+	const std::string &nameDefault, Gaffer::PlugPtr valuePlug, bool defaultEnabled, const std::string &name,
+	unsigned flags
+)
 	: NameValuePlug( nameDefault, valuePlug, name, flags )
 {
 	addChild( new BoolPlug( "enabled", direction(), defaultEnabled ) );
@@ -121,28 +134,18 @@ bool NameValuePlug::acceptsChild( const Gaffer::GraphComponent *potentialChild )
 		return false;
 	}
 
-	if(
-		potentialChild->isInstanceOf( StringPlug::staticTypeId() ) &&
-		potentialChild->getName() == "name" &&
-		( children().size() == 0 )
-	)
+	if( potentialChild->isInstanceOf( StringPlug::staticTypeId() ) && potentialChild->getName() == "name" &&
+		( children().size() == 0 ) )
+	{
+		return true;
+	}
+	else if( potentialChild->getName() == "value" && ( children().size() == 1 ) && namePlug() )
 	{
 		return true;
 	}
 	else if(
-		potentialChild->getName() == "value" &&
-		( children().size() == 1 ) &&
-		namePlug()
-	)
-	{
-		return true;
-	}
-	else if(
-		potentialChild->isInstanceOf( BoolPlug::staticTypeId() ) &&
-		potentialChild->getName() == "enabled" &&
-		( children().size() == 2 ) &&
-		namePlug() &&
-		valuePlug()
+		potentialChild->isInstanceOf( BoolPlug::staticTypeId() ) && potentialChild->getName() == "enabled" &&
+		( children().size() == 2 ) && namePlug() && valuePlug()
 	)
 	{
 		return true;
@@ -165,7 +168,9 @@ PlugPtr NameValuePlug::createCounterpart( const std::string &name, Direction dir
 
 	if( !namePlug() || !valuePlug() )
 	{
-		throw IECore::Exception( "Cannot create counterpart for : " + fullName() + " - NameValuePlug must have name and value." );
+		throw IECore::Exception(
+			"Cannot create counterpart for : " + fullName() + " - NameValuePlug must have name and value."
+		);
 	}
 
 	PlugPtr valueCounterpart = valuePlug()->createCounterpart( "value", direction );
@@ -178,8 +183,6 @@ PlugPtr NameValuePlug::createCounterpart( const std::string &name, Direction dir
 	}
 	else
 	{
-		return new NameValuePlug(
-			namePlug()->defaultValue(), valueCounterpart, name, getFlags()
-		);
+		return new NameValuePlug( namePlug()->defaultValue(), valueCounterpart, name, getFlags() );
 	}
 }

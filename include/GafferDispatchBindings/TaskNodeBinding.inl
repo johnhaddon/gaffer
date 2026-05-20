@@ -124,8 +124,7 @@ struct TaskNodeAccessor
 } // namespace Detail
 
 template<typename T, typename Ptr>
-TaskNodeClass<T, Ptr>::TaskNodeClass( const char *docString )
-	: GafferBindings::DependencyNodeClass<T, Ptr>( docString )
+TaskNodeClass<T, Ptr>::TaskNodeClass( const char *docString ) : GafferBindings::DependencyNodeClass<T, Ptr>( docString )
 {
 	this->def( "affectsTask", &Detail::TaskNodeAccessor::affectsTask<T> );
 	this->def( "preTasks", &Detail::TaskNodeAccessor::preTasks<T> );

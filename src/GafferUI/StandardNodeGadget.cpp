@@ -103,11 +103,9 @@ const IECoreGL::Texture *focusIconTexture( bool focus, bool hover )
 
 class FocusGadget : public Gadget
 {
-	public:
+public:
 
-	FocusGadget( StandardNodeGadget *parent )
-		: m_oval( false ),
-		  m_mouseOver( false )
+	FocusGadget( StandardNodeGadget *parent ) : m_oval( false ), m_mouseOver( false )
 	{
 		buttonPressSignal().connect( boost::bind( &FocusGadget::buttonPressed, this, ::_1, ::_2 ) );
 		buttonReleaseSignal().connect( boost::bind( &FocusGadget::buttonRelease, this, ::_1, ::_2 ) );
@@ -137,17 +135,11 @@ class FocusGadget : public Gadget
 		dirty( DirtyType::Render );
 	}
 
-	bool getOval() const
-	{
-		return m_oval;
-	}
+	bool getOval() const { return m_oval; }
 
-	Imath::Box3f bound() const override
-	{
-		return Box3f();
-	}
+	Imath::Box3f bound() const override { return Box3f(); }
 
-	protected:
+protected:
 
 	void toggleFocus()
 	{
@@ -166,10 +158,7 @@ class FocusGadget : public Gadget
 		}
 	}
 
-	bool buttonPressed( GadgetPtr gadget, const ButtonEvent &event )
-	{
-		return true;
-	}
+	bool buttonPressed( GadgetPtr gadget, const ButtonEvent &event ) { return true; }
 
 	bool buttonRelease( GadgetPtr gadget, const ButtonEvent &event )
 	{
@@ -210,22 +199,24 @@ class FocusGadget : public Gadget
 	bool nodeMouseEntered( GadgetPtr gadget, const ButtonEvent &event )
 	{
 		static QTimer focusGadgetTimer;
-		static QMetaObject::Connection focusGadgetTimerCallback = focusGadgetTimer.callOnTimeout(
-			[] {
-				if( g_pendingHoveredFocus )
+		static QMetaObject::Connection focusGadgetTimerCallback = focusGadgetTimer.callOnTimeout( [] {
+			if( g_pendingHoveredFocus )
+			{
+				StandardNodeGadget *parentNodeGadget =
+					static_cast<StandardNodeGadget *>( g_pendingHoveredFocus->parent() );
+				if( !parentNodeGadget )
 				{
-					StandardNodeGadget *parentNodeGadget = static_cast<StandardNodeGadget *>( g_pendingHoveredFocus->parent() );
-					if( !parentNodeGadget )
-					{
-						IECore::msg( IECore::Msg::Error, "FocusGadget::nodeMouseEntered", "Focus gadget hover timer triggered on unparented FocusGadget" );
-						return;
-					}
-					g_hoveredFocus = g_pendingHoveredFocus;
-					g_hoveredFocusNodePosition = parentNodeGadget->getTransform();
-					g_pendingHoveredFocus->dirty( DirtyType::Render );
+					IECore::msg(
+						IECore::Msg::Error, "FocusGadget::nodeMouseEntered",
+						"Focus gadget hover timer triggered on unparented FocusGadget"
+					);
+					return;
 				}
+				g_hoveredFocus = g_pendingHoveredFocus;
+				g_hoveredFocusNodePosition = parentNodeGadget->getTransform();
+				g_pendingHoveredFocus->dirty( DirtyType::Render );
 			}
-		);
+		} );
 		focusGadgetTimer.stop();
 		focusGadgetTimer.setSingleShot( true );
 		g_pendingHoveredFocus = this;
@@ -304,10 +295,7 @@ class FocusGadget : public Gadget
 		}
 	}
 
-	unsigned layerMask() const override
-	{
-		return (int)GraphLayer::Highlighting;
-	}
+	unsigned layerMask() const override { return (int)GraphLayer::Highlighting; }
 
 	Imath::Box3f renderBound() const override
 	{
@@ -335,7 +323,7 @@ class FocusGadget : public Gadget
 		return Box3f( center - V3f( maxRadius ), center + V3f( maxRadius ) );
 	}
 
-	private:
+private:
 
 	bool m_oval;
 	bool m_mouseOver;
@@ -367,10 +355,11 @@ M44f FocusGadget::g_hoveredFocusNodePosition;
 class StandardNodeGadget::ErrorGadget : public Gadget
 {
 
-	public:
+public:
 
 	ErrorGadget( const std::string &name = defaultName<ErrorGadget>() )
-		: Gadget( name ), m_image( new ImageGadget( "gadgetError.png" ) )
+		: Gadget( name ),
+		  m_image( new ImageGadget( "gadgetError.png" ) )
 	{
 		m_image->setTransform( M44f().scale( V3f( .025 ) ) );
 		addChild( m_image );
@@ -386,7 +375,8 @@ class StandardNodeGadget::ErrorGadget : public Gadget
 		}
 		if( !entry.parentChangedConnection.connected() )
 		{
-			entry.parentChangedConnection = plug->parentChangedSignal().connect( boost::bind( &ErrorGadget::plugParentChanged, this, ::_1 ) );
+			entry.parentChangedConnection =
+				plug->parentChangedSignal().connect( boost::bind( &ErrorGadget::plugParentChanged, this, ::_1 ) );
 		}
 		m_image->setVisible( true );
 	}
@@ -442,7 +432,7 @@ class StandardNodeGadget::ErrorGadget : public Gadget
 		return result;
 	}
 
-	private:
+private:
 
 	void plugParentChanged( GraphComponent *plug )
 	{
@@ -555,7 +545,9 @@ bool hasStaticValue( const Gaffer::BoolPlug *plug )
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( StandardNodeGadget );
 
-NodeGadget::NodeGadgetTypeDescription<StandardNodeGadget> StandardNodeGadget::g_nodeGadgetTypeDescription( Gaffer::Node::staticTypeId() );
+NodeGadget::NodeGadgetTypeDescription<StandardNodeGadget> StandardNodeGadget::g_nodeGadgetTypeDescription(
+	Gaffer::Node::staticTypeId()
+);
 
 static const float g_defaultMinWidth = 10.0f;
 static IECore::InternedString g_minWidthKey( "nodeGadget:minWidth" );
@@ -569,10 +561,7 @@ static IECore::InternedString g_iconKey( "icon" );
 static IECore::InternedString g_iconScaleKey( "iconScale" );
 static IECore::InternedString g_errorGadgetName( "__error" );
 
-StandardNodeGadget::StandardNodeGadget( Gaffer::NodePtr node )
-	: StandardNodeGadget( node, false )
-{
-}
+StandardNodeGadget::StandardNodeGadget( Gaffer::NodePtr node ) : StandardNodeGadget( node, false ) {}
 
 
 // \todo - Needing an auxiliary argument here isn't great - it's overly tight binding with AuxiliaryNodeGadget,
@@ -594,19 +583,11 @@ StandardNodeGadget::StandardNodeGadget( Gaffer::NodePtr node, bool auxiliary )
 	////////////////////////////////////////////////////////
 
 	LinearContainerPtr contentsColumn = new LinearContainer(
-		"contentsColumn",
-		LinearContainer::Y,
-		LinearContainer::Centre,
-		0.0f,
-		LinearContainer::Decreasing
+		"contentsColumn", LinearContainer::Y, LinearContainer::Centre, 0.0f, LinearContainer::Decreasing
 	);
 
-	LinearContainerPtr contentsRow = new LinearContainer(
-		"paddingRow",
-		LinearContainer::X,
-		LinearContainer::Centre,
-		0.5f
-	);
+	LinearContainerPtr contentsRow =
+		new LinearContainer( "paddingRow", LinearContainer::X, LinearContainer::Centre, 0.5f );
 
 	IndividualContainerPtr iconContainer = new IndividualContainer();
 	iconContainer->setName( "iconContainer" );
@@ -634,8 +615,12 @@ StandardNodeGadget::StandardNodeGadget( Gaffer::NodePtr node, bool auxiliary )
 
 		LinearContainerPtr topNoduleContainer = new LinearContainer( "topNoduleContainer", LinearContainer::X );
 		LinearContainerPtr bottomNoduleContainer = new LinearContainer( "bottomNoduleContainer", LinearContainer::X );
-		LinearContainerPtr leftNoduleContainer = new LinearContainer( "leftNoduleContainer", LinearContainer::Y, LinearContainer::Centre, 0.0f, LinearContainer::Decreasing );
-		LinearContainerPtr rightNoduleContainer = new LinearContainer( "rightNoduleContainer", LinearContainer::Y, LinearContainer::Centre, 0.0f, LinearContainer::Decreasing );
+		LinearContainerPtr leftNoduleContainer = new LinearContainer(
+			"leftNoduleContainer", LinearContainer::Y, LinearContainer::Centre, 0.0f, LinearContainer::Decreasing
+		);
+		LinearContainerPtr rightNoduleContainer = new LinearContainer(
+			"rightNoduleContainer", LinearContainer::Y, LinearContainer::Centre, 0.0f, LinearContainer::Decreasing
+		);
 
 		topNoduleContainer->addChild( new SpacerGadget( Box3f( V3f( 0 ), V3f( 2, 1, 0 ) ) ) );
 		topNoduleContainer->addChild( new NoduleLayout( node, "top" ) );
@@ -656,21 +641,12 @@ StandardNodeGadget::StandardNodeGadget( Gaffer::NodePtr node, bool auxiliary )
 		// column - this is our outermost structuring container
 
 		LinearContainerPtr column = new LinearContainer(
-			"column",
-			LinearContainer::Y,
-			LinearContainer::Centre,
-			0.0f,
-			LinearContainer::Decreasing
+			"column", LinearContainer::Y, LinearContainer::Centre, 0.0f, LinearContainer::Decreasing
 		);
 
 		column->addChild( topNoduleContainer );
 
-		LinearContainerPtr row = new LinearContainer(
-			"row",
-			LinearContainer::X,
-			LinearContainer::Centre,
-			0.0f
-		);
+		LinearContainerPtr row = new LinearContainer( "row", LinearContainer::X, LinearContainer::Centre, 0.0f );
 
 		column->addChild( row );
 
@@ -711,7 +687,8 @@ StandardNodeGadget::StandardNodeGadget( Gaffer::NodePtr node, bool auxiliary )
 		}
 	}
 
-	Metadata::nodeValueChangedSignal( node.get() ).connect( boost::bind( &StandardNodeGadget::nodeMetadataChanged, this, ::_2 ) );
+	Metadata::nodeValueChangedSignal( node.get() )
+		.connect( boost::bind( &StandardNodeGadget::nodeMetadataChanged, this, ::_2 ) );
 
 	// do our first update
 	////////////////////////////////////////////////////////
@@ -725,9 +702,7 @@ StandardNodeGadget::StandardNodeGadget( Gaffer::NodePtr node, bool auxiliary )
 	applyNoduleLabelVisibilityMetadata();
 }
 
-StandardNodeGadget::~StandardNodeGadget()
-{
-}
+StandardNodeGadget::~StandardNodeGadget() {}
 
 Imath::Box3f StandardNodeGadget::bound() const
 {
@@ -750,7 +725,8 @@ void StandardNodeGadget::renderLayer( Layer layer, const Style *style, RenderRea
 	{
 		case GraphLayer::Nodes : {
 			// decide what state we're rendering in
-			Style::State state = getHighlighted() ? Style::HighlightedState : ( m_active ? Style::NormalState : Style::DisabledState );
+			Style::State state =
+				getHighlighted() ? Style::HighlightedState : ( m_active ? Style::NormalState : Style::DisabledState );
 
 			// draw our background frame
 			const Box3f b = bound();
@@ -763,9 +739,7 @@ void StandardNodeGadget::renderLayer( Layer layer, const Style *style, RenderRea
 
 			style->renderNodeFrame(
 				Box2f( V2f( b.min.x, b.min.y ) + V2f( borderWidth ), V2f( b.max.x, b.max.y ) - V2f( borderWidth ) ),
-				borderWidth,
-				state,
-				userColor()
+				borderWidth, state, userColor()
 			);
 
 			break;
@@ -788,8 +762,7 @@ void StandardNodeGadget::renderLayer( Layer layer, const Style *style, RenderRea
 				}
 
 				style->renderLine(
-					IECore::LineSegment3f( V3f( b.min.x, b.min.y, 0 ), V3f( b.max.x, b.max.y, 0 ) ),
-					0.5f, &c
+					IECore::LineSegment3f( V3f( b.min.x, b.min.y, 0 ), V3f( b.max.x, b.max.y, 0 ) ), 0.5f, &c
 				);
 			}
 			break;
@@ -816,8 +789,7 @@ void StandardNodeGadget::renderLayer( Layer layer, const Style *style, RenderRea
 			}
 
 			style->renderNodeFocusRegion(
-				Box2f( V2f( b.min.x, b.min.y ), V2f( b.max.x, b.max.y ) ),
-				borderWidth + focusBorderWidth()
+				Box2f( V2f( b.min.x, b.min.y ), V2f( b.max.x, b.max.y ) ), borderWidth + focusBorderWidth()
 			);
 
 			break;
@@ -881,8 +853,7 @@ Imath::Box3f StandardNodeGadget::renderBound() const
 {
 	Box3f b = bound();
 	return Box3f(
-		b.min - V3f( g_maxFocusWidth, g_maxFocusWidth, 0.f ),
-		b.max + V3f( g_maxFocusWidth, g_maxFocusWidth, 0.f )
+		b.min - V3f( g_maxFocusWidth, g_maxFocusWidth, 0.f ), b.max + V3f( g_maxFocusWidth, g_maxFocusWidth, 0.f )
 	);
 }
 
@@ -1472,22 +1443,22 @@ void StandardNodeGadget::updateFocusGadgetVisibility()
 void StandardNodeGadget::applyNoduleLabelVisibilityMetadata()
 {
 	bool inputVisible = false;
-	if( IECore::ConstBoolDataPtr d = Gaffer::Metadata::value<IECore::BoolData>( node(), g_inputNoduleLabelsVisibleKey ) )
+	if( IECore::ConstBoolDataPtr d =
+			Gaffer::Metadata::value<IECore::BoolData>( node(), g_inputNoduleLabelsVisibleKey ) )
 	{
 		inputVisible = d->readable();
 	}
 
 	bool outputVisible = false;
-	if( IECore::ConstBoolDataPtr d = Gaffer::Metadata::value<IECore::BoolData>( node(), g_outputNoduleLabelsVisibleKey ) )
+	if( IECore::ConstBoolDataPtr d =
+			Gaffer::Metadata::value<IECore::BoolData>( node(), g_outputNoduleLabelsVisibleKey ) )
 	{
 		outputVisible = d->readable();
 	}
 
 	for( StandardNodule::RecursiveIterator it( this ); !it.done(); ++it )
 	{
-		( *it )->setLabelVisible(
-			( *it )->plug()->direction() == Plug::Direction::In ? inputVisible : outputVisible
-		);
+		( *it )->setLabelVisible( ( *it )->plug()->direction() == Plug::Direction::In ? inputVisible : outputVisible );
 	}
 }
 
@@ -1537,7 +1508,11 @@ void StandardNodeGadget::error( const Gaffer::Plug *plug, const Gaffer::Plug *so
 	// on the main thread. We _must_ use smart pointers for both
 	// this and plug, because otherwise we have no guarantee that
 	// they'll be alive later when the UI thread does its thing.
-	ParallelAlgo::callOnUIThread( boost::bind( &StandardNodeGadget::displayError, StandardNodeGadgetPtr( this ), ConstPlugPtr( plug ), header + message ) );
+	ParallelAlgo::callOnUIThread(
+		boost::bind(
+			&StandardNodeGadget::displayError, StandardNodeGadgetPtr( this ), ConstPlugPtr( plug ), header + message
+		)
+	);
 }
 
 void StandardNodeGadget::displayError( ConstPlugPtr plug, const std::string &message )

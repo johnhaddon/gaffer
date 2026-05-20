@@ -68,7 +68,9 @@ GAFFERIMAGE_API const std::string &getWorkingSpace( const Gaffer::Context *conte
 /// Adds an OCIO "string var" to be used in `context`. Note that OCIO also calls these
 /// "environment vars" and "context vars" but they're all the same thing.
 GAFFERIMAGE_API void addVariable( Gaffer::Context *context, const std::string &name, const std::string &value );
-GAFFERIMAGE_API void addVariable( Gaffer::Context::EditableScope &context, const std::string &name, const std::string *value );
+GAFFERIMAGE_API void addVariable(
+	Gaffer::Context::EditableScope &context, const std::string &name, const std::string *value
+);
 /// Gets the value of an OCIO "string var".
 GAFFERIMAGE_API const std::string &getVariable( const Gaffer::Context *context, const std::string &name );
 /// Removes an OCIO "string var".

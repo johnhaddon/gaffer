@@ -50,7 +50,7 @@ namespace GafferVDB
 class GAFFERVDB_API SphereLevelSet : public GafferScene::ObjectSource
 {
 
-	public:
+public:
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferVDB::SphereLevelSet, GafferVDB::SphereLevelSetTypeId, ObjectSource );
 
@@ -74,7 +74,7 @@ class GAFFERVDB_API SphereLevelSet : public GafferScene::ObjectSource
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
 	// The ObjectSource base class does implement these bound methods for
 	// us, but only by computing the source object and taking its bound.
@@ -82,15 +82,20 @@ class GAFFERVDB_API SphereLevelSet : public GafferScene::ObjectSource
 	// reimplement to provide an efficient version.
 	/// \todo Should the base class provide some facility for making this
 	/// easier, so we don't need to account for the transform?
-	void hashBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const GafferScene::ScenePlug *parent, IECore::MurmurHash &h ) const override;
-	Imath::Box3f computeBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const GafferScene::ScenePlug *parent ) const override;
+	void hashBound(
+		const SceneNode::ScenePath &path, const Gaffer::Context *context, const GafferScene::ScenePlug *parent,
+		IECore::MurmurHash &h
+	) const override;
+	Imath::Box3f computeBound(
+		const SceneNode::ScenePath &path, const Gaffer::Context *context, const GafferScene::ScenePlug *parent
+	) const override;
 
 	void hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	IECore::ConstObjectPtr computeSource( const Gaffer::Context *context ) const override;
 
 	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-	private:
+private:
 
 	static size_t g_firstPlugIndex;
 };

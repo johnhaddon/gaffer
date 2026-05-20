@@ -53,13 +53,12 @@ using namespace Gaffer;
 IE_CORE_DEFINERUNTIMETYPED( FileSequencePathFilter );
 
 FileSequencePathFilter::FileSequencePathFilter( Keep mode, IECore::CompoundDataPtr userData )
-	: PathFilter( userData ), m_mode( mode )
+	: PathFilter( userData ),
+	  m_mode( mode )
 {
 }
 
-FileSequencePathFilter::~FileSequencePathFilter()
-{
-}
+FileSequencePathFilter::~FileSequencePathFilter() {}
 
 FileSequencePathFilter::Keep FileSequencePathFilter::getMode() const
 {
@@ -80,11 +79,7 @@ void FileSequencePathFilter::setMode( Keep mode )
 void FileSequencePathFilter::doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const
 {
 	paths.erase(
-		std::remove_if(
-			paths.begin(),
-			paths.end(),
-			boost::bind( &FileSequencePathFilter::remove, this, ::_1 )
-		),
+		std::remove_if( paths.begin(), paths.end(), boost::bind( &FileSequencePathFilter::remove, this, ::_1 ) ),
 		paths.end()
 	);
 }

@@ -59,8 +59,7 @@ GAFFER_NODE_DEFINE_TYPE( LightFilter );
 
 size_t LightFilter::g_firstPlugIndex = 0;
 
-LightFilter::LightFilter( GafferScene::ShaderPtr shader, const std::string &name )
-	: ObjectSource( name, "lightFilter" )
+LightFilter::LightFilter( GafferScene::ShaderPtr shader, const std::string &name ) : ObjectSource( name, "lightFilter" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -74,9 +73,7 @@ LightFilter::LightFilter( GafferScene::ShaderPtr shader, const std::string &name
 	shaderNode()->parametersPlug()->setInput( parametersPlug() );
 }
 
-LightFilter::~LightFilter()
-{
-}
+LightFilter::~LightFilter() {}
 
 void LightFilter::loadShader( const std::string &shaderName, bool keepExistingValues )
 {
@@ -144,9 +141,7 @@ void LightFilter::affects( const Gaffer::Plug *input, AffectedPlugsContainer &ou
 	}
 }
 
-void LightFilter::hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const
-{
-}
+void LightFilter::hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const {}
 
 IECore::ConstObjectPtr LightFilter::computeSource( const Context *context ) const
 {
@@ -155,7 +150,9 @@ IECore::ConstObjectPtr LightFilter::computeSource( const Context *context ) cons
 	return IECore::NullObject::defaultNullObject();
 }
 
-void LightFilter::hashAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void LightFilter::hashAttributes(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	// We must call the base class before appending to the hash, but our direct
 	// base class (ObjectSource) is set up with a hardcoded hash suitable only
@@ -166,7 +163,9 @@ void LightFilter::hashAttributes( const SceneNode::ScenePath &path, const Gaffer
 	filteredLightsPlug()->hash( h );
 }
 
-IECore::ConstCompoundObjectPtr LightFilter::computeAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstCompoundObjectPtr LightFilter::computeAttributes(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	IECore::CompoundObjectPtr result = new IECore::CompoundObject;
 
@@ -194,7 +193,9 @@ IECore::ConstInternedStringVectorDataPtr LightFilter::computeStandardSetNames() 
 	return result;
 }
 
-void LightFilter::hashBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void LightFilter::hashBound(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	SceneNode::hashBound( path, context, parent, h );
 
@@ -204,7 +205,9 @@ void LightFilter::hashBound( const SceneNode::ScenePath &path, const Gaffer::Con
 	}
 }
 
-Imath::Box3f LightFilter::computeBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::Box3f LightFilter::computeBound(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	Imath::Box3f result = Imath::Box3f( Imath::V3f( -.5 ), Imath::V3f( .5 ) );
 

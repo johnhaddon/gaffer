@@ -45,15 +45,12 @@ using namespace GafferUI;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( TranslateHandle );
 
-TranslateHandle::TranslateHandle( Style::Axes axes )
-	: Handle( defaultName<TranslateHandle>() ), m_axes( Style::X )
+TranslateHandle::TranslateHandle( Style::Axes axes ) : Handle( defaultName<TranslateHandle>() ), m_axes( Style::X )
 {
 	setAxes( axes );
 }
 
-TranslateHandle::~TranslateHandle()
-{
-}
+TranslateHandle::~TranslateHandle() {}
 
 void TranslateHandle::setAxes( Style::Axes axes )
 {

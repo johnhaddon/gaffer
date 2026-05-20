@@ -57,8 +57,7 @@ GAFFER_NODE_DEFINE_TYPE( Shape );
 size_t Shape::g_firstPlugIndex = 0;
 static std::string g_shapeChannelName( "__shape" );
 
-Shape::Shape( const std::string &name )
-	: FlatImageProcessor( name )
+Shape::Shape( const std::string &name ) : FlatImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -114,9 +113,7 @@ Shape::Shape( const std::string &name )
 	outPlug()->setInput( merge->outPlug() );
 }
 
-Shape::~Shape()
-{
-}
+Shape::~Shape() {}
 
 Gaffer::Color4fPlug *Shape::colorPlug()
 {
@@ -226,7 +223,9 @@ void Shape::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs 
 	}
 }
 
-void Shape::hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Shape::hashViewNames(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	assert( parent == shapePlug() );
 	FlatImageProcessor::hashViewNames( parent, context, h );
@@ -234,13 +233,17 @@ void Shape::hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::C
 	// anything else to the hash.
 }
 
-IECore::ConstStringVectorDataPtr Shape::computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr Shape::computeViewNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	assert( parent == shapePlug() );
 	return ImagePlug::defaultViewNames();
 }
 
-void Shape::hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Shape::hashDataWindow(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	assert( parent == shapePlug() );
 	hashShapeDataWindow( context, h );
@@ -252,7 +255,9 @@ Imath::Box2i Shape::computeDataWindow( const Gaffer::Context *context, const Ima
 	return computeShapeDataWindow( context );
 }
 
-void Shape::hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Shape::hashChannelNames(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	assert( parent == shapePlug() );
 	FlatImageProcessor::hashChannelNames( parent, context, h );
@@ -260,7 +265,9 @@ void Shape::hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer
 	// anything else to the hash.
 }
 
-IECore::ConstStringVectorDataPtr Shape::computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr Shape::computeChannelNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	assert( parent == shapePlug() );
 	StringVectorDataPtr result = new StringVectorData();
@@ -271,7 +278,9 @@ IECore::ConstStringVectorDataPtr Shape::computeChannelNames( const Gaffer::Conte
 	return result;
 }
 
-void Shape::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Shape::hashChannelData(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	assert( parent == shapePlug() || parent == shadowShapePlug() );
 	const std::string &channelName = context->get<std::string>( ImagePlug::channelNameContextName );
@@ -282,7 +291,8 @@ void Shape::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer:
 	}
 	else
 	{
-		const MurmurHash shapeHash = parent->channelDataHash( g_shapeChannelName, context->get<V2i>( ImagePlug::tileOriginContextName ) );
+		const MurmurHash shapeHash =
+			parent->channelDataHash( g_shapeChannelName, context->get<V2i>( ImagePlug::tileOriginContextName ) );
 		const float c = channelValue( parent, channelName );
 		if( c == 1 )
 		{
@@ -297,7 +307,10 @@ void Shape::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer:
 	}
 }
 
-IECore::ConstFloatVectorDataPtr Shape::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr Shape::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	assert( parent == shapePlug() || parent == shadowShapePlug() );
 	if( channelName == g_shapeChannelName )
@@ -307,7 +320,8 @@ IECore::ConstFloatVectorDataPtr Shape::computeChannelData( const std::string &ch
 	}
 	else
 	{
-		ConstFloatVectorDataPtr shape = parent->channelData( g_shapeChannelName, context->get<V2i>( ImagePlug::tileOriginContextName ) );
+		ConstFloatVectorDataPtr shape =
+			parent->channelData( g_shapeChannelName, context->get<V2i>( ImagePlug::tileOriginContextName ) );
 		const float c = channelValue( parent, channelName );
 		if( c == 1 )
 		{
@@ -355,7 +369,9 @@ bool Shape::affectsShapeChannelData( const Gaffer::Plug *input ) const
 	return false;
 }
 
-void Shape::hashShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Shape::hashShapeChannelData(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageProcessor::hashChannelData( shapePlug(), context, h );
 }

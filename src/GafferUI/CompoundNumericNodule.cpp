@@ -121,11 +121,9 @@ void connectAllSourceComponents( Plug *source, Plug *destination )
 	}
 }
 
-IECore::TypeId g_compoundNumericTypeIds[] = {
-	V2fPlug::staticTypeId(), V3fPlug::staticTypeId(),
-	V2iPlug::staticTypeId(), V3iPlug::staticTypeId(),
-	Color3fPlug::staticTypeId(), Color4fPlug::staticTypeId()
-};
+IECore::TypeId g_compoundNumericTypeIds[] = { V2fPlug::staticTypeId(),	   V3fPlug::staticTypeId(),
+											  V2iPlug::staticTypeId(),	   V3iPlug::staticTypeId(),
+											  Color3fPlug::staticTypeId(), Color4fPlug::staticTypeId() };
 
 struct TypeDescription
 {
@@ -134,9 +132,7 @@ struct TypeDescription
 		for( auto t : g_compoundNumericTypeIds )
 		{
 			Nodule::registerNodule(
-				CompoundNumericNodule::staticTypeName(),
-				[]( PlugPtr p ) { return new CompoundNumericNodule( p ); },
-				t
+				CompoundNumericNodule::staticTypeName(), []( PlugPtr p ) { return new CompoundNumericNodule( p ); }, t
 			);
 		}
 	}
@@ -152,16 +148,14 @@ TypeDescription g_typeDescription;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( CompoundNumericNodule );
 
-CompoundNumericNodule::CompoundNumericNodule( Gaffer::PlugPtr plug )
-	: StandardNodule( plug )
+CompoundNumericNodule::CompoundNumericNodule( Gaffer::PlugPtr plug ) : StandardNodule( plug )
 {
-	Metadata::plugValueChangedSignal( plug->node() ).connect( boost::bind( &CompoundNumericNodule::plugMetadataChanged, this, ::_1, ::_2 ) );
+	Metadata::plugValueChangedSignal( plug->node() )
+		.connect( boost::bind( &CompoundNumericNodule::plugMetadataChanged, this, ::_1, ::_2 ) );
 	updateChildNoduleVisibility();
 }
 
-CompoundNumericNodule::~CompoundNumericNodule()
-{
-}
+CompoundNumericNodule::~CompoundNumericNodule() {}
 
 Nodule *CompoundNumericNodule::nodule( const Gaffer::Plug *plug )
 {

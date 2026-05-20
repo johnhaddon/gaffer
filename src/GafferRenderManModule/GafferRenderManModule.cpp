@@ -55,8 +55,12 @@ using namespace GafferRenderMan;
 
 BOOST_PYTHON_MODULE( _GafferRenderMan )
 {
-	GafferBindings::PlugClass<BXDFPlug>()
-		.def( init<const std::string &, Gaffer::Plug::Direction, unsigned>( ( arg( "name" ) = Gaffer::GraphComponent::defaultName<BXDFPlug>(), arg( "direction" ) = Gaffer::Plug::In, arg( "flags" ) = Gaffer::Plug::Default ) ) );
+	GafferBindings::PlugClass<BXDFPlug>().def(
+		init<const std::string &, Gaffer::Plug::Direction, unsigned>(
+			( arg( "name" ) = Gaffer::GraphComponent::defaultName<BXDFPlug>(), arg( "direction" ) = Gaffer::Plug::In,
+			  arg( "flags" ) = Gaffer::Plug::Default )
+		)
+	);
 
 
 	GafferBindings::DependencyNodeClass<RenderManLight>();

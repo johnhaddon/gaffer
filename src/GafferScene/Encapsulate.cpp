@@ -48,8 +48,7 @@ GAFFER_NODE_DEFINE_TYPE( Encapsulate );
 
 size_t Encapsulate::g_firstPlugIndex = 0;
 
-Encapsulate::Encapsulate( const std::string &name )
-	: FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
+Encapsulate::Encapsulate( const std::string &name ) : FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -60,34 +59,23 @@ Encapsulate::Encapsulate( const std::string &name )
 	outPlug()->setNamesPlug()->setInput( inPlug()->setNamesPlug() );
 }
 
-Encapsulate::~Encapsulate()
-{
-}
+Encapsulate::~Encapsulate() {}
 
 void Encapsulate::affects( const Plug *input, AffectedPlugsContainer &outputs ) const
 {
 	FilteredSceneProcessor::affects( input, outputs );
 
-	if(
-		input == filterPlug() ||
-		input->parent() == inPlug()
-	)
+	if( input == filterPlug() || input->parent() == inPlug() )
 	{
 		outputs.push_back( outPlug()->objectPlug() );
 	}
 
-	if(
-		input == filterPlug() ||
-		input == inPlug()->childNamesPlug()
-	)
+	if( input == filterPlug() || input == inPlug()->childNamesPlug() )
 	{
 		outputs.push_back( outPlug()->childNamesPlug() );
 	}
 
-	if(
-		input == filterPlug() ||
-		input == inPlug()->setPlug()
-	)
+	if( input == filterPlug() || input == inPlug()->setPlug() )
 	{
 		outputs.push_back( outPlug()->setPlug() );
 	}
@@ -107,7 +95,9 @@ IECore::PathMatcher::Result Encapsulate::filterValueChecked( const Gaffer::Conte
 	return f;
 }
 
-void Encapsulate::hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Encapsulate::hashObject(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	if( filterValueChecked( context ) & IECore::PathMatcher::ExactMatch )
 	{
@@ -138,15 +128,14 @@ void Encapsulate::hashObject( const ScenePath &path, const Gaffer::Context *cont
 	}
 }
 
-IECore::ConstObjectPtr Encapsulate::computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstObjectPtr Encapsulate::computeObject(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( filterValueChecked( context ) & IECore::PathMatcher::ExactMatch )
 	{
 		return new Capsule(
-			inPlug()->source<ScenePlug>(),
-			path,
-			*context,
-			outPlug()->objectPlug()->hash(),
+			inPlug()->source<ScenePlug>(), path, *context, outPlug()->objectPlug()->hash(),
 			inPlug()->boundPlug()->getValue()
 		);
 	}
@@ -156,7 +145,9 @@ IECore::ConstObjectPtr Encapsulate::computeObject( const ScenePath &path, const 
 	}
 }
 
-void Encapsulate::hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Encapsulate::hashChildNames(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	if( filterValueChecked( context ) & IECore::PathMatcher::ExactMatch )
 	{
@@ -168,7 +159,9 @@ void Encapsulate::hashChildNames( const ScenePath &path, const Gaffer::Context *
 	}
 }
 
-IECore::ConstInternedStringVectorDataPtr Encapsulate::computeChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstInternedStringVectorDataPtr Encapsulate::computeChildNames(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( filterValueChecked( context ) & IECore::PathMatcher::ExactMatch )
 	{
@@ -180,7 +173,10 @@ IECore::ConstInternedStringVectorDataPtr Encapsulate::computeChildNames( const S
 	}
 }
 
-void Encapsulate::hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Encapsulate::hashSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent,
+	IECore::MurmurHash &h
+) const
 {
 	FilteredSceneProcessor::hashSet( setName, context, parent, h );
 	inPlug()->setPlug()->hash( h );
@@ -201,7 +197,9 @@ void Encapsulate::hashSet( const IECore::InternedString &setName, const Gaffer::
 	filterPlug()->hash( h );
 }
 
-IECore::ConstPathMatcherDataPtr Encapsulate::computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstPathMatcherDataPtr Encapsulate::computeSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ConstPathMatcherDataPtr inputSetData = inPlug()->setPlug()->getValue();
 	const PathMatcher &inputSet = inputSetData->readable();

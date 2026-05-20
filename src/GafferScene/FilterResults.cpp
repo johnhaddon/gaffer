@@ -48,8 +48,7 @@ size_t FilterResults::g_firstPlugIndex = 0;
 
 GAFFER_NODE_DEFINE_TYPE( FilterResults )
 
-FilterResults::FilterResults( const std::string &name )
-	: ComputeNode( name )
+FilterResults::FilterResults( const std::string &name ) : ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "scene" ) );
@@ -60,9 +59,7 @@ FilterResults::FilterResults( const std::string &name )
 	addChild( new StringVectorDataPlug( "outStrings", Gaffer::Plug::Out, new StringVectorData ) );
 }
 
-FilterResults::~FilterResults()
-{
-}
+FilterResults::~FilterResults() {}
 
 ScenePlug *FilterResults::scenePlug()
 {
@@ -133,11 +130,7 @@ void FilterResults::affects( const Gaffer::Plug *input, AffectedPlugsContainer &
 		filterPlug()->sceneAffects( input, outputs );
 	}
 
-	if(
-		input == filterPlug() ||
-		input == rootPlug() ||
-		input == scenePlug()->childNamesPlug()
-	)
+	if( input == filterPlug() || input == rootPlug() || input == scenePlug()->childNamesPlug() )
 	{
 		outputs.push_back( internalOutPlug() );
 	}

@@ -62,18 +62,26 @@ using namespace std;
 namespace
 {
 
-void sampleChannel( const ImagePlug *image, const Box2i &displayWindow, const string &channelName, const vector<V3f> &positions, float pixelAspect, const IECore::Canceller *canceller, float *outData, int stride, float multiplier = 1.0f )
+void sampleChannel(
+	const ImagePlug *image, const Box2i &displayWindow, const string &channelName, const vector<V3f> &positions,
+	float pixelAspect, const IECore::Canceller *canceller, float *outData, int stride, float multiplier = 1.0f
+)
 {
 	Sampler sampler( image, channelName, displayWindow, Sampler::Clamp );
 	sampler.populate(); // Multithread the population of image tiles
 
 	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
-	tbb::parallel_for( tbb::blocked_range<size_t>( 0, positions.size() ), [&]( const tbb::blocked_range<size_t> &range ) {
+	tbb::parallel_for(
+		tbb::blocked_range<size_t>( 0, positions.size() ),
+		[&]( const tbb::blocked_range<size_t> &range ) {
 			IECore::Canceller::check( canceller );
 			for( size_t i = range.begin(); i < range.end(); ++i )
 			{
-				outData[i*stride] = sampler.sample( positions[i].x / pixelAspect, positions[i].y ) * multiplier;
-			} }, taskGroupContext );
+				outData[i * stride] = sampler.sample( positions[i].x / pixelAspect, positions[i].y ) * multiplier;
+			}
+		},
+		taskGroupContext
+	);
 }
 
 } // namespace
@@ -86,8 +94,7 @@ GAFFER_NODE_DEFINE_TYPE( ImageScatter );
 
 size_t ImageScatter::g_firstPlugIndex = 0;
 
-ImageScatter::ImageScatter( const std::string &name )
-	: ObjectSource( name, "points" )
+ImageScatter::ImageScatter( const std::string &name ) : ObjectSource( name, "points" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "image" ) );
@@ -99,9 +106,7 @@ ImageScatter::ImageScatter( const std::string &name )
 	addChild( new StringPlug( "widthChannel" ) );
 }
 
-ImageScatter::~ImageScatter()
-{
-}
+ImageScatter::~ImageScatter() {}
 
 GafferImage::ImagePlug *ImageScatter::imagePlug()
 {
@@ -177,19 +182,10 @@ void ImageScatter::affects( const Plug *input, AffectedPlugsContainer &outputs )
 {
 	ObjectSource::affects( input, outputs );
 
-	if(
-		input == viewPlug() ||
-		input == imagePlug()->viewNamesPlug() ||
-		input == imagePlug()->channelNamesPlug() ||
-		input == densityChannelPlug() ||
-		input == widthChannelPlug() ||
-		input == imagePlug()->formatPlug() ||
-		input == imagePlug()->dataWindowPlug() ||
-		input == imagePlug()->channelDataPlug() ||
-		input == densityPlug() ||
-		input == widthPlug() ||
-		input == primitiveVariablesPlug()
-	)
+	if( input == viewPlug() || input == imagePlug()->viewNamesPlug() || input == imagePlug()->channelNamesPlug() ||
+		input == densityChannelPlug() || input == widthChannelPlug() || input == imagePlug()->formatPlug() ||
+		input == imagePlug()->dataWindowPlug() || input == imagePlug()->channelDataPlug() || input == densityPlug() ||
+		input == widthPlug() || input == primitiveVariablesPlug() )
 	{
 		outputs.push_back( sourcePlug() );
 	}
@@ -296,9 +292,7 @@ IECore::ConstObjectPtr ImageScatter::computeSource( const Context *context ) con
 	PointDistribution::defaultInstance()(
 		Box2f( V2f( 0 ), V2f( outputArea.size() ) / scale ),
 		// Scale density to be in points per pixel
-		densityPlug()->getValue() * scale * scale,
-		densityFunction,
-		emitter
+		densityPlug()->getValue() * scale * scale, densityFunction, emitter
 	);
 
 	// Make a PointsPrimitive from the positions
@@ -310,7 +304,8 @@ IECore::ConstObjectPtr ImageScatter::computeSource( const Context *context ) con
 	const float width = widthPlug()->getValue();
 	if( widthChannel.empty() )
 	{
-		result->variables["width"] = PrimitiveVariable( PrimitiveVariable::Interpolation::Constant, new FloatData( width ) );
+		result->variables["width"] =
+			PrimitiveVariable( PrimitiveVariable::Interpolation::Constant, new FloatData( width ) );
 	}
 
 	const std::string primitiveVariablesMatchPattern = primitiveVariablesPlug()->getValue();
@@ -332,7 +327,10 @@ IECore::ConstObjectPtr ImageScatter::computeSource( const Context *context ) con
 					colorData->writable().resize( positions.size() );
 					result->variables[name] = PrimitiveVariable( PrimitiveVariable::Vertex, colorData );
 				}
-				sampleChannel( imagePlug(), displayWindow, channelName, positions, pixelAspect, context->canceller(), colorData->baseWritable() + colorIndex, 3 );
+				sampleChannel(
+					imagePlug(), displayWindow, channelName, positions, pixelAspect, context->canceller(),
+					colorData->baseWritable() + colorIndex, 3
+				);
 			}
 			else
 			{
@@ -341,7 +339,10 @@ IECore::ConstObjectPtr ImageScatter::computeSource( const Context *context ) con
 				FloatVectorDataPtr floatData = new FloatVectorData;
 				floatData->writable().resize( positions.size() );
 				result->variables[name] = PrimitiveVariable( PrimitiveVariable::Vertex, floatData );
-				sampleChannel( imagePlug(), displayWindow, channelName, positions, pixelAspect, context->canceller(), floatData->writable().data(), 1 );
+				sampleChannel(
+					imagePlug(), displayWindow, channelName, positions, pixelAspect, context->canceller(),
+					floatData->writable().data(), 1
+				);
 			}
 		}
 
@@ -350,7 +351,10 @@ IECore::ConstObjectPtr ImageScatter::computeSource( const Context *context ) con
 			FloatVectorDataPtr widthData = new FloatVectorData;
 			widthData->writable().resize( positions.size() );
 			result->variables["width"] = PrimitiveVariable( PrimitiveVariable::Vertex, widthData );
-			sampleChannel( imagePlug(), displayWindow, channelName, positions, pixelAspect, context->canceller(), widthData->writable().data(), 1, width );
+			sampleChannel(
+				imagePlug(), displayWindow, channelName, positions, pixelAspect, context->canceller(),
+				widthData->writable().data(), 1, width
+			);
 		}
 	}
 

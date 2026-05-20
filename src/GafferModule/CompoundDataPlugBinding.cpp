@@ -53,7 +53,9 @@ using namespace Gaffer;
 namespace
 {
 
-CompoundDataPlugPtr compoundDataPlugConstructor( const char *name, Plug::Direction direction, unsigned flags, tuple children )
+CompoundDataPlugPtr compoundDataPlugConstructor(
+	const char *name, Plug::Direction direction, unsigned flags, tuple children
+)
 {
 	CompoundDataPlugPtr result = new CompoundDataPlug( name, direction, flags );
 	size_t s = extract<size_t>( children.attr( "__len__" )() );
@@ -100,7 +102,15 @@ void GafferModule::bindCompoundDataPlug()
 {
 
 	scope s = PlugClass<CompoundDataPlug>()
-				  .def( "__init__", make_constructor( compoundDataPlugConstructor, default_call_policies(), ( arg( "name" ) = GraphComponent::defaultName<CompoundDataPlug>(), arg( "direction" ) = Gaffer::Plug::In, arg( "flags" ) = Gaffer::Plug::Default, arg( "children" ) = tuple() ) ) )
+				  .def(
+					  "__init__",
+					  make_constructor(
+						  compoundDataPlugConstructor, default_call_policies(),
+						  ( arg( "name" ) = GraphComponent::defaultName<CompoundDataPlug>(),
+							arg( "direction" ) = Gaffer::Plug::In, arg( "flags" ) = Gaffer::Plug::Default,
+							arg( "children" ) = tuple() )
+					  )
+				  )
 				  .def( "addMembers", &addMembersWrapper, ( arg_( "members" ), arg_( "useNameAsPlugName" ) = false ) )
 				  .def( "memberDataAndName", &memberDataAndNameWrapper )
 				  .def( "fillCompoundData", &fillCompoundData )

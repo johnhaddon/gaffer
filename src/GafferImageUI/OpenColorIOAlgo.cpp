@@ -67,9 +67,7 @@ void SetTextureParameters( GLenum textureType, OCIO_NAMESPACE::Interpolation int
 }
 
 void AllocateTexture3D(
-	unsigned index, unsigned &texId,
-	OCIO_NAMESPACE::Interpolation interpolation,
-	unsigned edgelen, const float *values
+	unsigned index, unsigned &texId, OCIO_NAMESPACE::Interpolation interpolation, unsigned edgelen, const float *values
 )
 {
 	if( values == nullptr )
@@ -85,17 +83,12 @@ void AllocateTexture3D(
 
 	SetTextureParameters( GL_TEXTURE_3D, interpolation );
 
-	glTexImage3D(
-		GL_TEXTURE_3D, 0, GL_RGB32F_ARB,
-		edgelen, edgelen, edgelen, 0, GL_RGB, GL_FLOAT, values
-	);
+	glTexImage3D( GL_TEXTURE_3D, 0, GL_RGB32F_ARB, edgelen, edgelen, edgelen, 0, GL_RGB, GL_FLOAT, values );
 }
 
 void AllocateTexture2D(
-	unsigned index, unsigned &texId,
-	unsigned width, unsigned height,
-	OCIO_NAMESPACE::GpuShaderDesc::TextureType channel,
-	OCIO_NAMESPACE::Interpolation interpolation, const float *values
+	unsigned index, unsigned &texId, unsigned width, unsigned height,
+	OCIO_NAMESPACE::GpuShaderDesc::TextureType channel, OCIO_NAMESPACE::Interpolation interpolation, const float *values
 )
 {
 	if( values == nullptr )
@@ -261,7 +254,8 @@ IECoreGL::Shader::SetupPtr displayTransformToFramebufferShader( const OCIO_NAMES
 		shaderDesc->setLanguage( OCIO_NAMESPACE::GPU_LANGUAGE_GLSL_1_2 );
 		shaderDesc->setFunctionName( "OCIODisplay" );
 
-		OCIO_NAMESPACE::ConstGPUProcessorRcPtr gpuProc = processor->getOptimizedGPUProcessor( OCIO_NAMESPACE::OPTIMIZATION_VERY_GOOD );
+		OCIO_NAMESPACE::ConstGPUProcessorRcPtr gpuProc =
+			processor->getOptimizedGPUProcessor( OCIO_NAMESPACE::OPTIMIZATION_VERY_GOOD );
 		gpuProc->extractGpuShaderInfo( shaderDesc );
 
 		colorTransformCode = shaderDesc->getShaderText();
@@ -273,9 +267,8 @@ IECoreGL::Shader::SetupPtr displayTransformToFramebufferShader( const OCIO_NAMES
 
 	// Build and compile GLSL shader
 
-	const std::string fragmentSource = boost::replace_first_copy(
-		g_fragmentSource, "<OCIODisplay>", colorTransformCode
-	);
+	const std::string fragmentSource =
+		boost::replace_first_copy( g_fragmentSource, "<OCIODisplay>", colorTransformCode );
 
 	IECoreGL::Shader::SetupPtr shaderSetup = new IECoreGL::Shader::Setup(
 		IECoreGL::ShaderLoader::defaultShaderLoader()->create( g_vertexSource, "", fragmentSource )
@@ -304,9 +297,7 @@ IECoreGL::Shader::SetupPtr displayTransformToFramebufferShader( const OCIO_NAMES
 			OCIO_NAMESPACE::Interpolation interpolation = OCIO_NAMESPACE::INTERP_LINEAR;
 			shaderDesc->get3DTexture( idx, textureName, samplerName, edgelen, interpolation );
 
-			if(
-				!textureName || !*textureName || !samplerName || !*samplerName || edgelen == 0
-			)
+			if( !textureName || !*textureName || !samplerName || !*samplerName || edgelen == 0 )
 			{
 				throw IECore::Exception( "OpenColorIOAlgo : Initializing LUT : The texture data is corrupted" );
 			}
@@ -352,9 +343,7 @@ IECoreGL::Shader::SetupPtr displayTransformToFramebufferShader( const OCIO_NAMES
 #else
 			shaderDesc->getTexture( idx, textureName, samplerName, width, height, channel, interpolation );
 #endif
-			if(
-				!textureName || !*textureName || !samplerName || !*samplerName || width == 0
-			)
+			if( !textureName || !*textureName || !samplerName || !*samplerName || width == 0 )
 			{
 				throw IECore::Exception( "OpenColorIOAlgo : Initializing LUT : The texture data is corrupted" );
 			}

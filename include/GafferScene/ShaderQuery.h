@@ -50,7 +50,7 @@ namespace GafferScene
 
 class GAFFERSCENE_API ShaderQuery : public Gaffer::ComputeNode
 {
-	public:
+public:
 
 	explicit ShaderQuery( const std::string &name = defaultName<ShaderQuery>() );
 	~ShaderQuery() override;
@@ -79,10 +79,7 @@ class GAFFERSCENE_API ShaderQuery : public Gaffer::ComputeNode
 	/// The returned NameValuePlug is parented to queriesPlug() and may be edited
 	/// subsequently to modify the parameter name and default. Corresponding children
 	/// are added to existsPlug() and valuePlug() to provide the output from the query.
-	Gaffer::NameValuePlug *addQuery(
-		const Gaffer::ValuePlug *plug,
-		const std::string &parameter = ""
-	);
+	Gaffer::NameValuePlug *addQuery( const Gaffer::ValuePlug *plug, const std::string &parameter = "" );
 	/// Removes a query. Throws an Exception if the query or corresponding children
 	/// of `valuesPlug()` and `existsPlug()` can not be deleted.
 	void removeQuery( Gaffer::NameValuePlug *plug );
@@ -102,12 +99,12 @@ class GAFFERSCENE_API ShaderQuery : public Gaffer::ComputeNode
 	const Gaffer::NameValuePlug *queryPlug( const Gaffer::ValuePlug *outputPlug ) const;
 	const Gaffer::ValuePlug *outPlug( const Gaffer::ValuePlug *outputPlug ) const;
 
-	protected:
+protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-	private:
+private:
 
 	AttributeQuery *attributeQuery();
 	const AttributeQuery *attributeQuery() const;

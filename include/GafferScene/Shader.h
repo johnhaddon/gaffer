@@ -67,7 +67,7 @@ namespace GafferScene
 class GAFFERSCENE_API Shader : public Gaffer::ComputeNode
 {
 
-	public:
+public:
 
 	explicit Shader( const std::string &name = defaultName<Shader>() );
 	~Shader() override;
@@ -132,7 +132,7 @@ class GAFFERSCENE_API Shader : public Gaffer::ComputeNode
 	/// \deprecated See above.
 	IECore::ConstCompoundObjectPtr attributes() const;
 
-	protected:
+protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -161,7 +161,7 @@ class GAFFERSCENE_API Shader : public Gaffer::ComputeNode
 	/// cases.
 	virtual IECore::DataPtr parameterValue( const Gaffer::Plug *parameterPlug ) const;
 
-	private:
+private:
 
 	class NetworkBuilder;
 
@@ -186,8 +186,7 @@ class GAFFERSCENE_API Shader : public Gaffer::ComputeNode
 	const Gaffer::CompoundObjectPlug *outAttributesPlug() const;
 
 	const Gaffer::ValuePlug *parameterSource(
-		const Gaffer::Plug *output,
-		const IECoreScene::ShaderNetwork::Parameter &parameter
+		const Gaffer::Plug *output, const IECoreScene::ShaderNetwork::Parameter &parameter
 	) const;
 
 	static const IECore::InternedString g_outputParameterContextName;

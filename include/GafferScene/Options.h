@@ -47,7 +47,7 @@ namespace GafferScene
 class GAFFERSCENE_API Options : public GlobalsProcessor
 {
 
-	public:
+public:
 
 	explicit Options( const std::string &name = defaultName<Options>() );
 	~Options() override;
@@ -62,19 +62,21 @@ class GAFFERSCENE_API Options : public GlobalsProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
 	/// Automatically adds plugs for all options for the specified renderer, based
 	/// on `option:{rendererPrefix}:*` metadata registrations.
 	Options( const std::string &name, const std::string &rendererPrefix );
 
 	void hashProcessedGlobals( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	IECore::ConstCompoundObjectPtr computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedGlobals(
+		const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals
+	) const override;
 
 	virtual void hashPrefix( const Gaffer::Context *context, IECore::MurmurHash &h ) const;
 	virtual std::string computePrefix( const Gaffer::Context *context ) const;
 
-	private:
+private:
 
 	static size_t g_firstPlugIndex;
 };

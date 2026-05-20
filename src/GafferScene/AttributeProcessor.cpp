@@ -63,10 +63,7 @@ AttributeProcessor::AttributeProcessor( const std::string &name, IECore::PathMat
 	init();
 }
 
-AttributeProcessor::AttributeProcessor( const std::string &name )
-	: AttributeProcessor( name, PathMatcher::NoMatch )
-{
-}
+AttributeProcessor::AttributeProcessor( const std::string &name ) : AttributeProcessor( name, PathMatcher::NoMatch ) {}
 
 AttributeProcessor::AttributeProcessor( const std::string &name, size_t minInputs, size_t maxInputs )
 	: FilteredSceneProcessor( name, minInputs, maxInputs )
@@ -94,9 +91,7 @@ void AttributeProcessor::init()
 	plugInputChangedSignal().connect( boost::bind( &AttributeProcessor::plugInputChanged, this, ::_1 ) );
 }
 
-AttributeProcessor::~AttributeProcessor()
-{
-}
+AttributeProcessor::~AttributeProcessor() {}
 
 Gaffer::BoolPlug *AttributeProcessor::globalPlug()
 {
@@ -112,12 +107,8 @@ void AttributeProcessor::affects( const Gaffer::Plug *input, AffectedPlugsContai
 {
 	FilteredSceneProcessor::affects( input, outputs );
 
-	if(
-		input == globalPlug() ||
-		input == filterPlug() ||
-		input == inPlug()->attributesPlug() ||
-		affectsProcessedAttributes( input )
-	)
+	if( input == globalPlug() || input == filterPlug() || input == inPlug()->attributesPlug() ||
+		affectsProcessedAttributes( input ) )
 	{
 		// We can only affect a particular output if we haven't
 		// connected it as a pass-through in `updateInternalConnections()`.
@@ -127,11 +118,7 @@ void AttributeProcessor::affects( const Gaffer::Plug *input, AffectedPlugsContai
 		}
 	}
 
-	if(
-		input == globalPlug() ||
-		input == inPlug()->globalsPlug() ||
-		affectsProcessedAttributes( input )
-	)
+	if( input == globalPlug() || input == inPlug()->globalsPlug() || affectsProcessedAttributes( input ) )
 	{
 		// See above.
 		if( !outPlug()->globalsPlug()->getInput() )
@@ -146,9 +133,7 @@ bool AttributeProcessor::affectsProcessedAttributes( const Gaffer::Plug *input )
 	return false;
 }
 
-void AttributeProcessor::hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const
-{
-}
+void AttributeProcessor::hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const {}
 
 void AttributeProcessor::plugSet( Gaffer::Plug *plug )
 {
@@ -180,15 +165,15 @@ void AttributeProcessor::updateInternalConnections()
 		global = globalPlug()->getValue();
 	}
 
-	outPlug()->globalsPlug()->setInput(
-		global || boost::indeterminate( global ) ? nullptr : inPlug()->globalsPlug()
-	);
+	outPlug()->globalsPlug()->setInput( global || boost::indeterminate( global ) ? nullptr : inPlug()->globalsPlug() );
 	outPlug()->attributesPlug()->setInput(
 		!global || boost::indeterminate( global ) ? nullptr : inPlug()->attributesPlug()
 	);
 }
 
-void AttributeProcessor::hashGlobals( const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void AttributeProcessor::hashGlobals(
+	const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	MurmurHash processedAttributesHash;
 	if( globalPlug()->getValue() )
@@ -209,7 +194,9 @@ void AttributeProcessor::hashGlobals( const Gaffer::Context *context, const Scen
 	}
 }
 
-IECore::ConstCompoundObjectPtr AttributeProcessor::computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstCompoundObjectPtr AttributeProcessor::computeGlobals(
+	const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ConstCompoundObjectPtr inputGlobals = inPlug()->globalsPlug()->getValue();
 	if( !globalPlug()->getValue() )
@@ -232,7 +219,8 @@ IECore::ConstCompoundObjectPtr AttributeProcessor::computeGlobals( const Gaffer:
 		}
 	}
 
-	IECore::ConstCompoundObjectPtr processedAttributes = computeProcessedAttributes( context, attributesToProcess.get() );
+	IECore::ConstCompoundObjectPtr processedAttributes =
+		computeProcessedAttributes( context, attributesToProcess.get() );
 	for( const auto &[name, value] : processedAttributes->members() )
 	{
 		result->members()[g_attributePrefix + name.string()] = value;
@@ -241,7 +229,9 @@ IECore::ConstCompoundObjectPtr AttributeProcessor::computeGlobals( const Gaffer:
 	return result;
 }
 
-void AttributeProcessor::hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void AttributeProcessor::hashAttributes(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	MurmurHash processedAttributesHash;
 	if( !globalPlug()->getValue() && ( filterValue( context ) & IECore::PathMatcher::ExactMatch ) )
@@ -262,7 +252,9 @@ void AttributeProcessor::hashAttributes( const ScenePath &path, const Gaffer::Co
 	}
 }
 
-IECore::ConstCompoundObjectPtr AttributeProcessor::computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstCompoundObjectPtr AttributeProcessor::computeAttributes(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( !globalPlug()->getValue() && ( filterValue( context ) & IECore::PathMatcher::ExactMatch ) )
 	{

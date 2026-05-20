@@ -68,9 +68,7 @@ struct ScenePathFromInternedStringVectorData
 	ScenePathFromInternedStringVectorData()
 	{
 		boost::python::converter::registry::push_back(
-			&convertible,
-			nullptr,
-			boost::python::type_id<ScenePlug::ScenePath>()
+			&convertible, nullptr, boost::python::type_id<ScenePlug::ScenePath>()
 		);
 	}
 
@@ -98,9 +96,7 @@ struct ScenePathFromString
 	ScenePathFromString()
 	{
 		boost::python::converter::registry::push_back(
-			&convertible,
-			&construct,
-			boost::python::type_id<ScenePlug::ScenePath>()
+			&convertible, &construct, boost::python::type_id<ScenePlug::ScenePath>()
 		);
 	}
 
@@ -138,9 +134,7 @@ struct ScenePathFromList
 	ScenePathFromList()
 	{
 		boost::python::converter::registry::push_back(
-			&convertible,
-			&construct,
-			boost::python::type_id<ScenePlug::ScenePath>()
+			&convertible, &construct, boost::python::type_id<ScenePlug::ScenePath>()
 		);
 	}
 
@@ -191,7 +185,9 @@ IECore::ObjectPtr objectWrapper( const ScenePlug &plug, const ScenePlug::ScenePa
 	return copy ? o->copy() : boost::const_pointer_cast<IECore::Object>( o );
 }
 
-IECore::InternedStringVectorDataPtr childNamesWrapper( const ScenePlug &plug, const ScenePlug::ScenePath &scenePath, bool copy )
+IECore::InternedStringVectorDataPtr childNamesWrapper(
+	const ScenePlug &plug, const ScenePlug::ScenePath &scenePath, bool copy
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	IECore::ConstInternedStringVectorDataPtr n = plug.childNames( scenePath );
@@ -205,7 +201,9 @@ IECore::CompoundObjectPtr attributesWrapper( const ScenePlug &plug, const SceneP
 	return copy ? a->copy() : boost::const_pointer_cast<IECore::CompoundObject>( a );
 }
 
-IECore::CompoundObjectPtr fullAttributesWrapper( const ScenePlug &plug, const ScenePlug::ScenePath &scenePath, bool withGlobalAttributes )
+IECore::CompoundObjectPtr fullAttributesWrapper(
+	const ScenePlug &plug, const ScenePlug::ScenePath &scenePath, bool withGlobalAttributes
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	return plug.fullAttributes( scenePath, withGlobalAttributes );
@@ -268,7 +266,9 @@ IECore::MurmurHash attributesHashWrapper( const ScenePlug &plug, const ScenePlug
 	return plug.attributesHash( scenePath );
 }
 
-IECore::MurmurHash fullAttributesHashWrapper( const ScenePlug &plug, const ScenePlug::ScenePath &scenePath, bool withGlobalAttributes )
+IECore::MurmurHash fullAttributesHashWrapper(
+	const ScenePlug &plug, const ScenePlug::ScenePath &scenePath, bool withGlobalAttributes
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	return plug.fullAttributesHash( scenePath, withGlobalAttributes );
@@ -337,7 +337,9 @@ std::string pathToStringWrapper( const ScenePlug::ScenePath &scenePath )
 class SceneProcessorSerialiser : public NodeSerialiser
 {
 
-	bool childNeedsSerialisation( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsSerialisation(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override
 	{
 		const auto sceneProcessor = static_cast<const SceneProcessor *>( child->parent() );
 		const bool isSubclassed = sceneProcessor->typeId() != SceneProcessor::staticTypeId();
@@ -361,7 +363,9 @@ class SceneProcessorSerialiser : public NodeSerialiser
 		return NodeSerialiser::childNeedsSerialisation( child, serialisation );
 	}
 
-	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsConstruction(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override
 	{
 		if( child->parent()->typeId() == SceneProcessor::staticTypeId() )
 		{
@@ -387,7 +391,12 @@ void GafferSceneModule::bindCore()
 {
 
 	PlugClass<ScenePlug>()
-		.def( init<const std::string &, Plug::Direction, unsigned>( ( arg( "name" ) = Gaffer::GraphComponent::defaultName<ScenePlug>(), arg( "direction" ) = Gaffer::Plug::In, arg( "flags" ) = Gaffer::Plug::Default ) ) )
+		.def(
+			init<const std::string &, Plug::Direction, unsigned>(
+				( arg( "name" ) = Gaffer::GraphComponent::defaultName<ScenePlug>(),
+				  arg( "direction" ) = Gaffer::Plug::In, arg( "flags" ) = Gaffer::Plug::Default )
+			)
+		)
 		// value accessors
 		.def( "bound", &boundWrapper )
 		.def( "transform", &transformWrapper )
@@ -395,7 +404,11 @@ void GafferSceneModule::bindCore()
 		.def( "object", &objectWrapper, ( boost::python::arg_( "_copy" ) = true ) )
 		.def( "childNames", &childNamesWrapper, ( boost::python::arg_( "_copy" ) = true ) )
 		.def( "attributes", &attributesWrapper, ( boost::python::arg_( "_copy" ) = true ) )
-		.def( "fullAttributes", &fullAttributesWrapper, ( boost::python::arg_( "self" ), boost::python::arg_( "scenePath" ), boost::python::arg_( "withGlobalAttributes" ) = false ) )
+		.def(
+			"fullAttributes", &fullAttributesWrapper,
+			( boost::python::arg_( "self" ), boost::python::arg_( "scenePath" ),
+			  boost::python::arg_( "withGlobalAttributes" ) = false )
+		)
 		.def( "globals", &globalsWrapper, ( boost::python::arg_( "_copy" ) = true ) )
 		.def( "setNames", &setNamesWrapper, ( boost::python::arg_( "_copy" ) = true ) )
 		.def( "set", &setWrapper, ( boost::python::arg_( "_copy" ) = true ) )
@@ -406,7 +419,11 @@ void GafferSceneModule::bindCore()
 		.def( "objectHash", &objectHashWrapper )
 		.def( "childNamesHash", &childNamesHashWrapper )
 		.def( "attributesHash", &attributesHashWrapper )
-		.def( "fullAttributesHash", &fullAttributesHashWrapper, ( ( boost::python::arg_( "self" ), boost::python::arg_( "scenePath" ), boost::python::arg_( "withGlobalAttributes" ) = false ) ) )
+		.def(
+			"fullAttributesHash", &fullAttributesHashWrapper,
+			( ( boost::python::arg_( "self" ), boost::python::arg_( "scenePath" ),
+				boost::python::arg_( "withGlobalAttributes" ) = false ) )
+		)
 		.def( "globalsHash", &globalsHashWrapper )
 		.def( "setNamesHash", &setNamesHashWrapper )
 		.def( "setHash", &setHashWrapper )
@@ -430,8 +447,12 @@ void GafferSceneModule::bindCore()
 	GafferBindings::DependencyNodeClass<SceneNode, SceneNodeWrapper>();
 
 	using SceneProcessorWrapper = ComputeNodeWrapper<SceneProcessor>;
-	GafferBindings::DependencyNodeClass<SceneProcessor, SceneProcessorWrapper>()
-		.def( init<const std::string &, size_t, size_t>( ( arg( "name" ) = GraphComponent::defaultName<SceneProcessor>(), arg( "minInputs" ), arg( "maxInputs" ) = std::numeric_limits<size_t>::max() ) ) );
+	GafferBindings::DependencyNodeClass<SceneProcessor, SceneProcessorWrapper>().def(
+		init<const std::string &, size_t, size_t>(
+			( arg( "name" ) = GraphComponent::defaultName<SceneProcessor>(), arg( "minInputs" ),
+			  arg( "maxInputs" ) = std::numeric_limits<size_t>::max() )
+		)
+	);
 
 	Serialisation::registerSerialiser( SceneProcessor::staticTypeId(), new SceneProcessorSerialiser );
 }

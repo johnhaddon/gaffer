@@ -56,8 +56,7 @@ IE_CORE_DEFINERUNTIMETYPED( SphereLevelSet );
 
 size_t SphereLevelSet::g_firstPlugIndex = 0;
 
-SphereLevelSet::SphereLevelSet( const std::string &name )
-	: ObjectSource( name, "sphere" )
+SphereLevelSet::SphereLevelSet( const std::string &name ) : ObjectSource( name, "sphere" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "grid", Plug::In, "surface" ) );
@@ -67,9 +66,7 @@ SphereLevelSet::SphereLevelSet( const std::string &name )
 	addChild( new FloatPlug( "halfWidth", Plug::In, (float)openvdb::LEVEL_SET_HALF_WIDTH, 1.0001f ) );
 }
 
-SphereLevelSet::~SphereLevelSet()
-{
-}
+SphereLevelSet::~SphereLevelSet() {}
 
 Gaffer::StringPlug *SphereLevelSet::gridPlug()
 {
@@ -125,19 +122,17 @@ void SphereLevelSet::affects( const Plug *input, AffectedPlugsContainer &outputs
 {
 	ObjectSource::affects( input, outputs );
 
-	if(
-		input == gridPlug() ||
-		input == radiusPlug() ||
-		input->parent() == centerPlug() ||
-		input == voxelSizePlug() ||
-		input == halfWidthPlug()
-	)
+	if( input == gridPlug() || input == radiusPlug() || input->parent() == centerPlug() || input == voxelSizePlug() ||
+		input == halfWidthPlug() )
 	{
 		outputs.push_back( sourcePlug() );
 	}
 }
 
-void SphereLevelSet::hashBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const GafferScene::ScenePlug *parent, IECore::MurmurHash &h ) const
+void SphereLevelSet::hashBound(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const GafferScene::ScenePlug *parent,
+	IECore::MurmurHash &h
+) const
 {
 	SceneNode::hashBound( path, context, parent, h );
 
@@ -152,7 +147,9 @@ void SphereLevelSet::hashBound( const SceneNode::ScenePath &path, const Gaffer::
 	}
 }
 
-Imath::Box3f SphereLevelSet::computeBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const GafferScene::ScenePlug *parent ) const
+Imath::Box3f SphereLevelSet::computeBound(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const GafferScene::ScenePlug *parent
+) const
 {
 	const float radius = radiusPlug()->getValue() + ( halfWidthPlug()->getValue() - 0.5 ) * voxelSizePlug()->getValue();
 	const V3f center = centerPlug()->getValue();
@@ -182,11 +179,8 @@ IECore::ConstObjectPtr SphereLevelSet::computeSource( const Context *context ) c
 	const auto center = centerPlug()->getValue();
 
 	openvdb::FloatGrid::Ptr grid = openvdb::tools::createLevelSetSphere<openvdb::FloatGrid, Interrupter>(
-		radiusPlug()->getValue(),
-		openvdb::Vec3f( center.x, center.y, center.z ),
-		voxelSizePlug()->getValue(),
-		halfWidthPlug()->getValue(),
-		&interrupter
+		radiusPlug()->getValue(), openvdb::Vec3f( center.x, center.y, center.z ), voxelSizePlug()->getValue(),
+		halfWidthPlug()->getValue(), &interrupter
 	);
 
 	Canceller::check( context->canceller() );

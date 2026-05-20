@@ -80,16 +80,19 @@ namespace
 class InclusionsColumn : public PathColumn
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( InclusionsColumn )
 
 	InclusionsColumn( ScriptNodePtr script )
-		: PathColumn(), m_script( script ), m_visibleSet( ScriptNodeAlgo::getVisibleSet( script.get() ) )
+		: PathColumn(),
+		  m_script( script ),
+		  m_visibleSet( ScriptNodeAlgo::getVisibleSet( script.get() ) )
 	{
 		buttonPressSignal().connect( boost::bind( &InclusionsColumn::buttonPress, this, ::_3 ) );
 		buttonReleaseSignal().connect( boost::bind( &InclusionsColumn::buttonRelease, this, ::_1, ::_2, ::_3 ) );
-		ScriptNodeAlgo::visibleSetChangedSignal( script.get() ).connect( boost::bind( &InclusionsColumn::visibleSetChanged, this ) );
+		ScriptNodeAlgo::visibleSetChangedSignal( script.get() )
+			.connect( boost::bind( &InclusionsColumn::visibleSetChanged, this ) );
 	}
 
 	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
@@ -103,7 +106,8 @@ class InclusionsColumn : public PathColumn
 		}
 
 		const auto inclusionsMatch = m_visibleSet.inclusions.match( scenePath->names() );
-		const auto locationExcluded = m_visibleSet.exclusions.match( scenePath->names() ) & ( IECore::PathMatcher::Result::ExactMatch | IECore::PathMatcher::Result::AncestorMatch );
+		const auto locationExcluded = m_visibleSet.exclusions.match( scenePath->names() ) &
+			( IECore::PathMatcher::Result::ExactMatch | IECore::PathMatcher::Result::AncestorMatch );
 
 		auto iconData = new CompoundData;
 		iconData->writable()["state:highlighted"] = g_locationIncludedHighlightedTransparentIconName;
@@ -161,10 +165,14 @@ class InclusionsColumn : public PathColumn
 
 	CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override
 	{
-		return CellData( /* value = */ nullptr, /* icon = */ m_visibleSet.inclusions.isEmpty() ? g_ancestorIncludedIconName : g_locationIncludedIconName, /* background = */ nullptr, /* tooltip = */ new StringData( "Visible Set Inclusions" ) );
+		return CellData(
+			/* value = */ nullptr,
+			/* icon = */ m_visibleSet.inclusions.isEmpty() ? g_ancestorIncludedIconName : g_locationIncludedIconName,
+			/* background = */ nullptr, /* tooltip = */ new StringData( "Visible Set Inclusions" )
+		);
 	}
 
-	private:
+private:
 
 	void visibleSetChanged()
 	{
@@ -200,7 +208,8 @@ class InclusionsColumn : public PathColumn
 		{
 			// Permit bulk editing of a selection of paths when clicking on one of the selected paths
 			const auto selectedPaths = std::get<std::vector<IECore::PathMatcher>>( selection );
-			if( selectedPaths.size() && selectedPaths[0].match( scenePath->names() ) & IECore::PathMatcher::Result::ExactMatch )
+			if( selectedPaths.size() &&
+				selectedPaths[0].match( scenePath->names() ) & IECore::PathMatcher::Result::ExactMatch )
 			{
 				paths = selectedPaths[0];
 			}
@@ -258,15 +267,19 @@ class InclusionsColumn : public PathColumn
 };
 
 StringDataPtr InclusionsColumn::g_descendantIncludedIconName = new StringData( "descendantIncluded.png" );
-StringDataPtr InclusionsColumn::g_descendantIncludedTransparentIconName = new StringData( "descendantIncludedTransparent.png" );
+StringDataPtr InclusionsColumn::g_descendantIncludedTransparentIconName =
+	new StringData( "descendantIncludedTransparent.png" );
 StringDataPtr InclusionsColumn::g_locationExpandedIconName = new StringData( "locationExpanded.png" );
 StringDataPtr InclusionsColumn::g_locationIncludedIconName = new StringData( "locationIncluded.png" );
 StringDataPtr InclusionsColumn::g_locationIncludedDisabledIconName = new StringData( "locationIncludedDisabled.png" );
 StringDataPtr InclusionsColumn::g_ancestorIncludedIconName = new StringData( "locationIncludedTransparent.png" );
-StringDataPtr InclusionsColumn::g_locationIncludedHighlightedIconName = new StringData( "locationIncludedHighlighted.png" );
-StringDataPtr InclusionsColumn::g_locationIncludedHighlightedTransparentIconName = new StringData( "locationIncludedHighlightedTransparent.png" );
+StringDataPtr InclusionsColumn::g_locationIncludedHighlightedIconName =
+	new StringData( "locationIncludedHighlighted.png" );
+StringDataPtr InclusionsColumn::g_locationIncludedHighlightedTransparentIconName =
+	new StringData( "locationIncludedHighlightedTransparent.png" );
 
-StringDataPtr InclusionsColumn::g_inclusionToolTip = new StringData( "Click to include this branch in the Visible Set, causing it to always appear in Viewers." );
+StringDataPtr InclusionsColumn::g_inclusionToolTip =
+	new StringData( "Click to include this branch in the Visible Set, causing it to always appear in Viewers." );
 StringDataPtr InclusionsColumn::g_inclusionOverrideToolTip = new StringData(
 	"Click to include this branch in the Visible Set, even though it will be overridden by an existing exclusion."
 );
@@ -309,16 +322,19 @@ StringDataPtr InclusionsColumn::g_descendantIncludedOverrideToolTip = new String
 class ExclusionsColumn : public PathColumn
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( ExclusionsColumn )
 
 	ExclusionsColumn( ScriptNodePtr script )
-		: PathColumn(), m_script( script ), m_visibleSet( ScriptNodeAlgo::getVisibleSet( script.get() ) )
+		: PathColumn(),
+		  m_script( script ),
+		  m_visibleSet( ScriptNodeAlgo::getVisibleSet( script.get() ) )
 	{
 		buttonPressSignal().connect( boost::bind( &ExclusionsColumn::buttonPress, this, ::_3 ) );
 		buttonReleaseSignal().connect( boost::bind( &ExclusionsColumn::buttonRelease, this, ::_1, ::_2, ::_3 ) );
-		ScriptNodeAlgo::visibleSetChangedSignal( script.get() ).connect( boost::bind( &ExclusionsColumn::visibleSetChanged, this ) );
+		ScriptNodeAlgo::visibleSetChangedSignal( script.get() )
+			.connect( boost::bind( &ExclusionsColumn::visibleSetChanged, this ) );
 	}
 
 	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
@@ -363,10 +379,14 @@ class ExclusionsColumn : public PathColumn
 
 	CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override
 	{
-		return CellData( /* value = */ nullptr, /* icon = */ m_visibleSet.exclusions.isEmpty() ? g_ancestorExcludedIconName : g_locationExcludedIconName, /* background = */ nullptr, /* tooltip = */ new StringData( "Visible Set Exclusions" ) );
+		return CellData(
+			/* value = */ nullptr,
+			/* icon = */ m_visibleSet.exclusions.isEmpty() ? g_ancestorExcludedIconName : g_locationExcludedIconName,
+			/* background = */ nullptr, /* tooltip = */ new StringData( "Visible Set Exclusions" )
+		);
 	}
 
-	private:
+private:
 
 	void visibleSetChanged()
 	{
@@ -402,7 +422,8 @@ class ExclusionsColumn : public PathColumn
 		{
 			// Permit bulk editing of a selection of paths when clicking on one of the selected paths
 			const auto selectedPaths = std::get<std::vector<IECore::PathMatcher>>( selection );
-			if( selectedPaths.size() && selectedPaths[0].match( scenePath->names() ) & IECore::PathMatcher::Result::ExactMatch )
+			if( selectedPaths.size() &&
+				selectedPaths[0].match( scenePath->names() ) & IECore::PathMatcher::Result::ExactMatch )
 			{
 				paths = selectedPaths[0];
 			}
@@ -455,10 +476,13 @@ class ExclusionsColumn : public PathColumn
 StringDataPtr ExclusionsColumn::g_descendantExcludedIconName = new StringData( "descendantExcluded.png" );
 StringDataPtr ExclusionsColumn::g_locationExcludedIconName = new StringData( "locationExcluded.png" );
 StringDataPtr ExclusionsColumn::g_ancestorExcludedIconName = new StringData( "locationExcludedTransparent.png" );
-StringDataPtr ExclusionsColumn::g_locationExcludedHighlightedIconName = new StringData( "locationExcludedHighlighted.png" );
-StringDataPtr ExclusionsColumn::g_locationExcludedHighlightedTransparentIconName = new StringData( "locationExcludedHighlightedTransparent.png" );
+StringDataPtr ExclusionsColumn::g_locationExcludedHighlightedIconName =
+	new StringData( "locationExcludedHighlighted.png" );
+StringDataPtr ExclusionsColumn::g_locationExcludedHighlightedTransparentIconName =
+	new StringData( "locationExcludedHighlightedTransparent.png" );
 
-StringDataPtr ExclusionsColumn::g_exclusionToolTip = new StringData( "Click to exclude this branch from the Visible Set, causing it to not appear in Viewers." );
+StringDataPtr ExclusionsColumn::g_exclusionToolTip =
+	new StringData( "Click to exclude this branch from the Visible Set, causing it to not appear in Viewers." );
 StringDataPtr ExclusionsColumn::g_locationExcludedToolTip = new StringData(
 	"This branch is excluded from the Visible Set, causing it to not appear in Viewers.\n\n"
 	"Click to remove the exclusion.\n"

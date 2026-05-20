@@ -67,7 +67,7 @@ namespace Gaffer
 class GAFFER_API Context : public IECore::RefCounted
 {
 
-	public:
+public:
 
 
 	Context();
@@ -82,7 +82,8 @@ class GAFFER_API Context : public IECore::RefCounted
 
 	IE_CORE_DECLAREMEMBERPTR( Context )
 
-	using ChangedSignal = Signals::Signal<void( const Context *context, const IECore::InternedString & ), Signals::CatchingCombiner<void>>;
+	using ChangedSignal = Signals::Signal<
+		void( const Context *context, const IECore::InternedString & ), Signals::CatchingCombiner<void>>;
 
 	/// Sets a variable to the specified value. A copy is taken so that
 	/// subsequent changes to `value` do not affect the context.
@@ -166,7 +167,9 @@ class GAFFER_API Context : public IECore::RefCounted
 
 	/// Uses `IECore::StringAlgo::substitute()` to perform variable
 	/// substitutions using values from the context.
-	std::string substitute( const std::string &input, unsigned substitutions = IECore::StringAlgo::AllSubstitutions ) const;
+	std::string substitute(
+		const std::string &input, unsigned substitutions = IECore::StringAlgo::AllSubstitutions
+	) const;
 	/// An `IECore::StringAlgo::VariableProvider` that can be used to
 	/// pass context variables to `IECore::StringAlgo::substitute()`.
 	class SubstitutionProvider;
@@ -181,7 +184,7 @@ class GAFFER_API Context : public IECore::RefCounted
 	class GAFFER_API Scope : private ThreadState::Scope
 	{
 
-		public:
+	public:
 
 		/// Constructing the Scope pushes the current context.
 		/// If context is `nullptr` then this is a no-op.
@@ -201,7 +204,7 @@ class GAFFER_API Context : public IECore::RefCounted
 	class GAFFER_API EditableScope : private ThreadState::Scope
 	{
 
-		public:
+	public:
 
 		/// It is the caller's responsibility to
 		/// guarantee that `context` outlives
@@ -247,7 +250,7 @@ class GAFFER_API Context : public IECore::RefCounted
 
 		const Context *context() const { return m_context.get(); }
 
-		private:
+	private:
 
 		Ptr m_context;
 		// Provides storage for `setFrame()` and `setTime()` to use
@@ -267,7 +270,7 @@ class GAFFER_API Context : public IECore::RefCounted
 		TypeDescription();
 	};
 
-	private:
+private:
 
 	// Determines the operation of the private copy constructor.
 	enum class CopyMode
@@ -323,7 +326,7 @@ class GAFFER_API Context : public IECore::RefCounted
 		template<typename T>
 		static void registerType();
 
-		private:
+	private:
 
 		Value( IECore::TypeId typeId, const void *value, const IECore::MurmurHash &hash );
 

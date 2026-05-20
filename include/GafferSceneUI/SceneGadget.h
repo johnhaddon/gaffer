@@ -63,7 +63,7 @@ IE_CORE_FORWARDDECLARE( SceneGadget );
 class GAFFERSCENEUI_API SceneGadget : public GafferUI::Gadget
 {
 
-	public:
+public:
 
 	SceneGadget();
 	~SceneGadget() override;
@@ -173,13 +173,13 @@ class GAFFERSCENEUI_API SceneGadget : public GafferUI::Gadget
 	/// such object.
 	bool objectAt( const IECore::LineSegment3f &lineInGadgetSpace, GafferScene::ScenePlug::ScenePath &path ) const;
 	/// As above. Additionally hitPoint is filled with the approximate intersection point in gadget space.
-	bool objectAt( const IECore::LineSegment3f &lineInGadgetSpace, GafferScene::ScenePlug::ScenePath &path, Imath::V3f &hitPoint ) const;
+	bool objectAt(
+		const IECore::LineSegment3f &lineInGadgetSpace, GafferScene::ScenePlug::ScenePath &path, Imath::V3f &hitPoint
+	) const;
 	/// Fills paths with all objects intersected by a rectangle in screen space,
 	/// defined by two corners in gadget space (as required for drag selection).
 	size_t objectsAt(
-		const Imath::V3f &corner0InGadgetSpace,
-		const Imath::V3f &corner1InGadgetSpace,
-		IECore::PathMatcher &paths
+		const Imath::V3f &corner0InGadgetSpace, const Imath::V3f &corner1InGadgetSpace, IECore::PathMatcher &paths
 	) const;
 
 	/// Returns the approximate gadget space normal of the frontmost object intersecting
@@ -204,20 +204,21 @@ class GAFFERSCENEUI_API SceneGadget : public GafferUI::Gadget
 	/// All of the supplied metadata will be written, regardless of conflicts with
 	/// OpenImageIO built-in metadata.
 	void snapshotToFile(
-		const std::filesystem::path &fileName,
-		const Imath::Box2f &resolutionGate = Imath::Box2f(),
+		const std::filesystem::path &fileName, const Imath::Box2f &resolutionGate = Imath::Box2f(),
 		const IECore::CompoundData *metadata = nullptr
 	) const;
 
-	protected:
+protected:
 
 	void renderLayer( Layer layer, const GafferUI::Style *style, RenderReason reason ) const override;
 	unsigned layerMask() const override;
 	Imath::Box3f renderBound() const override;
 
-	private:
+private:
 
-	bool openGLObjectAt( const IECore::LineSegment3f &lineInGadgetSpace, GafferScene::ScenePlug::ScenePath &path, float &depth ) const;
+	bool openGLObjectAt(
+		const IECore::LineSegment3f &lineInGadgetSpace, GafferScene::ScenePlug::ScenePath &path, float &depth
+	) const;
 
 	void updateRenderer();
 	void updateCamera( GafferUI::ViewportGadget::CameraFlags changes );

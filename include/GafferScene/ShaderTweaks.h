@@ -49,7 +49,7 @@ namespace GafferScene
 class GAFFERSCENE_API ShaderTweaks : public AttributeProcessor
 {
 
-	public:
+public:
 
 	explicit ShaderTweaks( const std::string &name = defaultName<ShaderTweaks>() );
 	~ShaderTweaks() override;
@@ -68,18 +68,22 @@ class GAFFERSCENE_API ShaderTweaks : public AttributeProcessor
 	Gaffer::BoolPlug *localisePlug();
 	const Gaffer::BoolPlug *localisePlug() const;
 
-	protected:
+protected:
 
 	bool affectsProcessedAttributes( const Gaffer::Plug *input ) const override;
 	void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedAttributes(
+		const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes
+	) const override;
 
 	// Overridden from AttributeProcessor so that we can tweak shaders stored as options as well as attributes.
-	IECore::ConstCompoundObjectPtr computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	IECore::ConstCompoundObjectPtr computeGlobals(
+		const Gaffer::Context *context, const ScenePlug *parent
+	) const override;
 
 	static size_t g_firstPlugIndex;
 
-	private:
+private:
 
 	bool applyTweaks( IECoreScene::ShaderNetwork *shaderNetwork, Gaffer::TweakPlug::MissingMode missingMode ) const;
 };

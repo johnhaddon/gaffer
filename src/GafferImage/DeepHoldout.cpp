@@ -61,8 +61,7 @@ GAFFER_NODE_DEFINE_TYPE( DeepHoldout );
 
 size_t DeepHoldout::g_firstPlugIndex = 0;
 
-DeepHoldout::DeepHoldout( const std::string &name )
-	: ImageProcessor( name )
+DeepHoldout::DeepHoldout( const std::string &name ) : ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new GafferImage::ImagePlug( "holdout" ) );
@@ -102,9 +101,7 @@ DeepHoldout::DeepHoldout( const std::string &name )
 	outPlug()->metadataPlug()->setInput( inPlug()->metadataPlug() );
 }
 
-DeepHoldout::~DeepHoldout()
-{
-}
+DeepHoldout::~DeepHoldout() {}
 
 GafferImage::ImagePlug *DeepHoldout::holdoutPlug()
 {
@@ -161,13 +158,17 @@ void DeepHoldout::affects( const Gaffer::Plug *input, AffectedPlugsContainer &ou
 	}
 }
 
-void DeepHoldout::hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepHoldout::hashChannelNames(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashChannelNames( output, context, h );
 	inPlug()->channelNamesPlug()->hash( h );
 }
 
-IECore::ConstStringVectorDataPtr DeepHoldout::computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr DeepHoldout::computeChannelNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	ConstStringVectorDataPtr inChannelNamesData = inPlug()->channelNamesPlug()->getValue();
 
@@ -198,7 +199,9 @@ IECore::ConstStringVectorDataPtr DeepHoldout::computeChannelNames( const Gaffer:
 }
 
 
-void DeepHoldout::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepHoldout::hashChannelData(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	if( output == intermediateInPlug() )
 	{
@@ -261,7 +264,10 @@ void DeepHoldout::hashChannelData( const GafferImage::ImagePlug *output, const G
 	}
 }
 
-IECore::ConstFloatVectorDataPtr DeepHoldout::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr DeepHoldout::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	if( parent == intermediateInPlug() )
 	{
@@ -352,12 +358,16 @@ bool DeepHoldout::computeDeep( const Gaffer::Context *context, const ImagePlug *
 	return false;
 }
 
-void DeepHoldout::hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepHoldout::hashSampleOffsets(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = ImagePlug::flatTileSampleOffsets()->Object::hash();
 }
 
-IECore::ConstIntVectorDataPtr DeepHoldout::computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstIntVectorDataPtr DeepHoldout::computeSampleOffsets(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	return ImagePlug::flatTileSampleOffsets();
 }

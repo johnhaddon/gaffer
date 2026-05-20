@@ -64,8 +64,7 @@ GAFFER_NODE_DEFINE_TYPE( PathFilter );
 
 size_t PathFilter::g_firstPlugIndex = 0;
 
-PathFilter::PathFilter( const std::string &name )
-	: Filter( name )
+PathFilter::PathFilter( const std::string &name ) : Filter( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringVectorDataPlug( "paths", Plug::In, new StringVectorData ) );
@@ -76,9 +75,7 @@ PathFilter::PathFilter( const std::string &name )
 	plugDirtiedSignal().connect( boost::bind( &PathFilter::plugDirtied, this, ::_1 ) );
 }
 
-PathFilter::~PathFilter()
-{
-}
+PathFilter::~PathFilter() {}
 
 Gaffer::StringVectorDataPlug *PathFilter::pathsPlug()
 {

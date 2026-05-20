@@ -50,7 +50,7 @@ namespace GafferUIBindings
 template<typename T, typename TWrapper = T>
 class GadgetClass : public GafferBindings::GraphComponentClass<T, TWrapper>
 {
-	public:
+public:
 
 	GadgetClass( const char *docString = nullptr );
 };
@@ -58,7 +58,7 @@ class GadgetClass : public GafferBindings::GraphComponentClass<T, TWrapper>
 template<typename WrappedType>
 class GadgetWrapper : public GafferBindings::GraphComponentWrapper<WrappedType>
 {
-	public:
+public:
 
 	template<typename... Args>
 	GadgetWrapper( PyObject *self, Args &&...args )
@@ -152,7 +152,9 @@ class GadgetWrapper : public GafferBindings::GraphComponentWrapper<WrappedType>
 		WrappedType::updateLayout();
 	}
 
-	void renderLayer( GafferUI::Gadget::Layer layer, const GafferUI::Style *style, GafferUI::Gadget::RenderReason reason ) const override
+	void renderLayer(
+		GafferUI::Gadget::Layer layer, const GafferUI::Style *style, GafferUI::Gadget::RenderReason reason
+	) const override
 	{
 		if( this->isSubclassed() )
 		{

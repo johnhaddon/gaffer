@@ -58,10 +58,9 @@ namespace
 class SwitchPlugAdder : public PlugAdder
 {
 
-	public:
+public:
 
-	SwitchPlugAdder( SwitchPtr node )
-		: m_switch( node )
+	SwitchPlugAdder( SwitchPtr node ) : m_switch( node )
 	{
 		node->childAddedSignal().connect( boost::bind( &SwitchPlugAdder::childAdded, this ) );
 		node->childRemovedSignal().connect( boost::bind( &SwitchPlugAdder::childRemoved, this ) );
@@ -69,7 +68,7 @@ class SwitchPlugAdder : public PlugAdder
 		updateVisibility();
 	}
 
-	protected:
+protected:
 
 	bool canCreateConnection( const Plug *endpoint ) const override
 	{
@@ -123,22 +122,13 @@ class SwitchPlugAdder : public PlugAdder
 		applyEdgeMetadata( outPlug, !inOpposite );
 	}
 
-	private:
+private:
 
-	void childAdded()
-	{
-		updateVisibility();
-	}
+	void childAdded() { updateVisibility(); }
 
-	void childRemoved()
-	{
-		updateVisibility();
-	}
+	void childRemoved() { updateVisibility(); }
 
-	void updateVisibility()
-	{
-		setVisible( m_switch->getChild<ArrayPlug>( "in" ) == nullptr );
-	}
+	void updateVisibility() { setVisible( m_switch->getChild<ArrayPlug>( "in" ) == nullptr ); }
 
 	SwitchPtr m_switch;
 };
@@ -146,12 +136,9 @@ class SwitchPlugAdder : public PlugAdder
 struct Registration
 {
 
-	Registration()
-	{
-		NoduleLayout::registerCustomGadget( "GafferUI.SwitchUI.PlugAdder", &create );
-	}
+	Registration() { NoduleLayout::registerCustomGadget( "GafferUI.SwitchUI.PlugAdder", &create ); }
 
-	private:
+private:
 
 	static GadgetPtr create( GraphComponentPtr parent )
 	{

@@ -52,8 +52,7 @@ GAFFER_NODE_DEFINE_TYPE( Scatter );
 
 size_t Scatter::g_firstPlugIndex = 0;
 
-Scatter::Scatter( const std::string &name )
-	: BranchCreator( name )
+Scatter::Scatter( const std::string &name ) : BranchCreator( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -69,9 +68,7 @@ Scatter::Scatter( const std::string &name )
 	addChild( new StringPlug( "pointType", Plug::In, "gl:point" ) );
 }
 
-Scatter::~Scatter()
-{
-}
+Scatter::~Scatter() {}
 
 Gaffer::StringPlug *Scatter::namePlug()
 {
@@ -148,13 +145,17 @@ bool Scatter::affectsBranchBound( const Gaffer::Plug *input ) const
 	return input == inPlug()->boundPlug();
 }
 
-void Scatter::hashBranchBound( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Scatter::hashBranchBound(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	BranchCreator::hashBranchBound( sourcePath, branchPath, context, h );
 	h.append( inPlug()->boundHash( sourcePath ) );
 }
 
-Imath::Box3f Scatter::computeBranchBound( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+Imath::Box3f Scatter::computeBranchBound(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	Box3f b = inPlug()->bound( sourcePath );
 	if( !b.isEmpty() )
@@ -172,12 +173,16 @@ bool Scatter::affectsBranchTransform( const Gaffer::Plug *input ) const
 	return false;
 }
 
-void Scatter::hashBranchTransform( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Scatter::hashBranchTransform(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	BranchCreator::hashBranchTransform( sourcePath, branchPath, context, h );
 }
 
-Imath::M44f Scatter::computeBranchTransform( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+Imath::M44f Scatter::computeBranchTransform(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	return M44f();
 }
@@ -187,28 +192,30 @@ bool Scatter::affectsBranchAttributes( const Gaffer::Plug *input ) const
 	return false;
 }
 
-void Scatter::hashBranchAttributes( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Scatter::hashBranchAttributes(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	BranchCreator::hashBranchAttributes( sourcePath, branchPath, context, h );
 }
 
-IECore::ConstCompoundObjectPtr Scatter::computeBranchAttributes( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+IECore::ConstCompoundObjectPtr Scatter::computeBranchAttributes(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	return outPlug()->attributesPlug()->defaultValue();
 }
 
 bool Scatter::affectsBranchObject( const Gaffer::Plug *input ) const
 {
-	return input == inPlug()->objectPlug() ||
-		input == densityPlug() ||
-		input == densityPrimitiveVariablePlug() ||
-		input == referencePositionPlug() ||
-		input == uvPlug() ||
-		input == primitiveVariablesPlug() ||
+	return input == inPlug()->objectPlug() || input == densityPlug() || input == densityPrimitiveVariablePlug() ||
+		input == referencePositionPlug() || input == uvPlug() || input == primitiveVariablesPlug() ||
 		input == pointTypePlug();
 }
 
-void Scatter::hashBranchObject( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Scatter::hashBranchObject(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	if( branchPath.size() == 1 )
 	{
@@ -226,7 +233,9 @@ void Scatter::hashBranchObject( const ScenePath &sourcePath, const ScenePath &br
 	h = outPlug()->objectPlug()->defaultValue()->Object::hash();
 }
 
-IECore::ConstObjectPtr Scatter::computeBranchObject( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+IECore::ConstObjectPtr Scatter::computeBranchObject(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	if( branchPath.size() == 1 )
 	{
@@ -238,16 +247,12 @@ IECore::ConstObjectPtr Scatter::computeBranchObject( const ScenePath &sourcePath
 		}
 
 		PointsPrimitivePtr result = MeshAlgo::distributePoints(
-			mesh.get(),
-			densityPlug()->getValue(),
-			V2f( 0 ),
-			densityPrimitiveVariablePlug()->getValue(),
-			uvPlug()->getValue(),
-			referencePositionPlug()->getValue(),
-			primitiveVariablesPlug()->getValue(),
+			mesh.get(), densityPlug()->getValue(), V2f( 0 ), densityPrimitiveVariablePlug()->getValue(),
+			uvPlug()->getValue(), referencePositionPlug()->getValue(), primitiveVariablesPlug()->getValue(),
 			context->canceller()
 		);
-		result->variables["type"] = PrimitiveVariable( PrimitiveVariable::Constant, new StringData( pointTypePlug()->getValue() ) );
+		result->variables["type"] =
+			PrimitiveVariable( PrimitiveVariable::Constant, new StringData( pointTypePlug()->getValue() ) );
 
 		return result;
 	}
@@ -259,7 +264,9 @@ bool Scatter::affectsBranchChildNames( const Gaffer::Plug *input ) const
 	return input == namePlug();
 }
 
-void Scatter::hashBranchChildNames( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Scatter::hashBranchChildNames(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	if( branchPath.size() == 0 )
 	{
@@ -272,7 +279,9 @@ void Scatter::hashBranchChildNames( const ScenePath &sourcePath, const ScenePath
 	}
 }
 
-IECore::ConstInternedStringVectorDataPtr Scatter::computeBranchChildNames( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+IECore::ConstInternedStringVectorDataPtr Scatter::computeBranchChildNames(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	if( branchPath.size() == 0 )
 	{

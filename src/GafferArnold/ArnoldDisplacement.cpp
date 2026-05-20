@@ -53,8 +53,7 @@ static IECore::InternedString g_zeroValueAttributeName = "ai:disp_zero_value";
 static IECore::InternedString g_autoBumpAttributeName = "ai:disp_autobump";
 static IECore::InternedString g_mapInputAttributeNames[] = { "ai:surface", "osl:shader", "" };
 
-ArnoldDisplacement::ArnoldDisplacement( const std::string &name )
-	: Shader( name )
+ArnoldDisplacement::ArnoldDisplacement( const std::string &name ) : Shader( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ShaderPlug( "map" ) );
@@ -65,9 +64,7 @@ ArnoldDisplacement::ArnoldDisplacement( const std::string &name )
 	addChild( new Plug( "out", Plug::Out ) );
 }
 
-ArnoldDisplacement::~ArnoldDisplacement()
-{
-}
+ArnoldDisplacement::~ArnoldDisplacement() {}
 
 GafferScene::ShaderPlug *ArnoldDisplacement::mapPlug()
 {
@@ -131,12 +128,8 @@ const Gaffer::Plug *ArnoldDisplacement::outPlug() const
 
 bool ArnoldDisplacement::affectsAttributes( const Gaffer::Plug *input ) const
 {
-	return Shader::affectsAttributes( input ) ||
-		input == mapPlug() ||
-		input == heightPlug() ||
-		input == paddingPlug() ||
-		input == zeroValuePlug() ||
-		input == autoBumpPlug();
+	return Shader::affectsAttributes( input ) || input == mapPlug() || input == heightPlug() ||
+		input == paddingPlug() || input == zeroValuePlug() || input == autoBumpPlug();
 }
 
 void ArnoldDisplacement::attributesHash( const Gaffer::Plug *output, IECore::MurmurHash &h ) const

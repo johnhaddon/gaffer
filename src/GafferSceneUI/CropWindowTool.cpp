@@ -122,7 +122,7 @@ GafferScene::ScenePlug *findSceneForImage( GafferImage::ImagePlug *image, std::s
 class CropWindowTool::Rectangle : public GafferUI::Gadget
 {
 
-	public:
+public:
 
 	enum RectangleChangedReason
 	{
@@ -134,7 +134,13 @@ class CropWindowTool::Rectangle : public GafferUI::Gadget
 	};
 
 	Rectangle( bool rasterSpace )
-		: Gadget(), m_rasterSpace( rasterSpace ), m_editable( true ), m_masked( false ), m_dragInside( false ), m_xDragEdge( 0 ), m_yDragEdge( 0 )
+		: Gadget(),
+		  m_rasterSpace( rasterSpace ),
+		  m_editable( true ),
+		  m_masked( false ),
+		  m_dragInside( false ),
+		  m_xDragEdge( 0 ),
+		  m_yDragEdge( 0 )
 	{
 		mouseMoveSignal().connect( boost::bind( &Rectangle::mouseMove, this, ::_2 ) );
 		buttonPressSignal().connect( boost::bind( &Rectangle::buttonPress, this, ::_2 ) );
@@ -155,31 +161,18 @@ class CropWindowTool::Rectangle : public GafferUI::Gadget
 		else
 		{
 			return Box3f(
-				V3f( m_rectangle.min.x, m_rectangle.min.y, 0 ),
-				V3f( m_rectangle.max.x, m_rectangle.max.y, 0 )
+				V3f( m_rectangle.min.x, m_rectangle.min.y, 0 ), V3f( m_rectangle.max.x, m_rectangle.max.y, 0 )
 			);
 		}
 	}
 
-	void setRectangle( const Imath::Box2f &rectangle )
-	{
-		setRectangleInternal( rectangle, SetBound );
-	}
+	void setRectangle( const Imath::Box2f &rectangle ) { setRectangleInternal( rectangle, SetBound ); }
 
-	const Imath::Box2f &getRectangle() const
-	{
-		return m_rectangle;
-	}
+	const Imath::Box2f &getRectangle() const { return m_rectangle; }
 
-	void setEditable( bool editable )
-	{
-		m_editable = editable;
-	}
+	void setEditable( bool editable ) { m_editable = editable; }
 
-	bool getEditable() const
-	{
-		return m_editable;
-	}
+	bool getEditable() const { return m_editable; }
 
 	void setMasked( bool masked )
 	{
@@ -191,18 +184,12 @@ class CropWindowTool::Rectangle : public GafferUI::Gadget
 		dirty( DirtyType::Render );
 	}
 
-	bool getMasked() const
-	{
-		return m_masked;
-	}
+	bool getMasked() const { return m_masked; }
 
 	using UnarySignal = Signals::Signal<void( Rectangle *, RectangleChangedReason )>;
-	UnarySignal &rectangleChangedSignal()
-	{
-		return m_rectangleChangedSignal;
-	}
+	UnarySignal &rectangleChangedSignal() { return m_rectangleChangedSignal; }
 
-	protected:
+protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
 	{
@@ -251,12 +238,10 @@ class CropWindowTool::Rectangle : public GafferUI::Gadget
 					V2f( m_rectangle.max.x + 100000, m_rectangle.max.y + 100000 )
 				) );
 				style->renderSolidRectangle( Box2f(
-					V2f( m_rectangle.min.x - 100000, m_rectangle.min.y ),
-					V2f( m_rectangle.min.x, m_rectangle.max.y )
+					V2f( m_rectangle.min.x - 100000, m_rectangle.min.y ), V2f( m_rectangle.min.x, m_rectangle.max.y )
 				) );
 				style->renderSolidRectangle( Box2f(
-					V2f( m_rectangle.max.x, m_rectangle.min.y ),
-					V2f( m_rectangle.max.x + 100000, m_rectangle.max.y )
+					V2f( m_rectangle.max.x, m_rectangle.min.y ), V2f( m_rectangle.max.x + 100000, m_rectangle.max.y )
 				) );
 			}
 
@@ -269,10 +254,7 @@ class CropWindowTool::Rectangle : public GafferUI::Gadget
 		glPopAttrib();
 	}
 
-	unsigned layerMask() const override
-	{
-		return (unsigned)Layer::Front;
-	}
+	unsigned layerMask() const override { return (unsigned)Layer::Front; }
 
 	Imath::Box3f renderBound() const override
 	{
@@ -291,7 +273,7 @@ class CropWindowTool::Rectangle : public GafferUI::Gadget
 		}
 	}
 
-	private:
+private:
 
 	void setRectangleInternal( const Imath::Box2f &rectangle, RectangleChangedReason reason )
 	{
@@ -426,10 +408,7 @@ class CropWindowTool::Rectangle : public GafferUI::Gadget
 		setRectangleInternal( c, reason );
 	}
 
-	void leave()
-	{
-		Pointer::setCurrent( "" );
-	}
+	void leave() { Pointer::setCurrent( "" ); }
 
 	void hoveredEdges( const ButtonEvent &event, int &x, int &y, bool &inside ) const
 	{
@@ -512,7 +491,10 @@ CropWindowTool::ToolDescription<CropWindowTool, SceneView> CropWindowTool::g_sce
 CropWindowTool::ToolDescription<CropWindowTool, ImageView> CropWindowTool::g_imageToolDescription;
 
 CropWindowTool::CropWindowTool( View *view, const std::string &name )
-	: Tool( view, name ), m_needScenePlugSearch( true ), m_needCropWindowPlugSearch( true ), m_overlayDirty( true )
+	: Tool( view, name ),
+	  m_needScenePlugSearch( true ),
+	  m_needCropWindowPlugSearch( true ),
+	  m_overlayDirty( true )
 {
 	const bool rasterSpace = runTimeCast<SceneView>( view );
 	m_overlay = new Rectangle( rasterSpace );
@@ -526,7 +508,9 @@ CropWindowTool::CropWindowTool( View *view, const std::string &name )
 	m_overlay->setVisible( false );
 	m_overlay->setMasked( true );
 	view->viewportGadget()->setChild( "__cropWindowOverlay", m_overlay );
-	m_overlayRectangleChangedConnection = m_overlay->rectangleChangedSignal().connect( boost::bind( &CropWindowTool::overlayRectangleChanged, this, ::_2 ) );
+	m_overlayRectangleChangedConnection = m_overlay->rectangleChangedSignal().connect(
+		boost::bind( &CropWindowTool::overlayRectangleChanged, this, ::_2 )
+	);
 
 	view->viewportGadget()->viewportChangedSignal().connect( boost::bind( &CropWindowTool::viewportChanged, this ) );
 	view->viewportGadget()->preRenderSignal().connect( boost::bind( &CropWindowTool::preRender, this ) );
@@ -538,9 +522,7 @@ CropWindowTool::CropWindowTool( View *view, const std::string &name )
 	view->viewportGadget()->keyPressSignal().connect( boost::bind( &CropWindowTool::keyPress, this, ::_2 ) );
 }
 
-CropWindowTool::~CropWindowTool()
-{
-}
+CropWindowTool::~CropWindowTool() {}
 
 std::string CropWindowTool::status() const
 {
@@ -676,9 +658,7 @@ void CropWindowTool::plugDirtied( const Gaffer::Plug *plug )
 
 	if( requestRender && runTimeCast<ImageView>( view() ) )
 	{
-		view()->viewportGadget()->renderRequestSignal()(
-			view()->viewportGadget()
-		);
+		view()->viewportGadget()->renderRequestSignal()( view()->viewportGadget() );
 	}
 }
 
@@ -690,9 +670,7 @@ void CropWindowTool::metadataChanged( IECore::InternedString key )
 	}
 
 	m_needCropWindowPlugSearch = m_overlayDirty = true;
-	view()->viewportGadget()->renderRequestSignal()(
-		view()->viewportGadget()
-	);
+	view()->viewportGadget()->renderRequestSignal()( view()->viewportGadget() );
 }
 
 void CropWindowTool::overlayRectangleChanged( unsigned reason )
@@ -722,14 +700,8 @@ void CropWindowTool::overlayRectangleChanged( unsigned reason )
 	Box2f b = m_overlay->getRectangle();
 	const Box2f r = resolutionGate();
 	b = Box2f(
-		V2f(
-			lerpfactor( b.min.x, r.min.x, r.max.x ),
-			lerpfactor( b.min.y, r.min.y, r.max.y )
-		),
-		V2f(
-			lerpfactor( b.max.x, r.min.x, r.max.x ),
-			lerpfactor( b.max.y, r.min.y, r.max.y )
-		)
+		V2f( lerpfactor( b.min.x, r.min.x, r.max.x ), lerpfactor( b.min.y, r.min.y, r.max.y ) ),
+		V2f( lerpfactor( b.max.x, r.min.x, r.max.x ), lerpfactor( b.max.y, r.min.y, r.max.y ) )
 	);
 
 	if( runTimeCast<ImageView>( view() ) )
@@ -804,18 +776,10 @@ void CropWindowTool::preRender()
 		}
 
 		Signals::BlockedConnection blockedConnection( m_overlayRectangleChangedConnection );
-		m_overlay->setRectangle(
-			Box2f(
-				V2f(
-					lerp( r.min.x, r.max.x, cropWindow.min.x ),
-					lerp( r.min.y, r.max.y, cropWindow.min.y )
-				),
-				V2f(
-					lerp( r.min.x, r.max.x, cropWindow.max.x ),
-					lerp( r.min.y, r.max.y, cropWindow.max.y )
-				)
-			)
-		);
+		m_overlay->setRectangle( Box2f(
+			V2f( lerp( r.min.x, r.max.x, cropWindow.min.x ), lerp( r.min.y, r.max.y, cropWindow.min.y ) ),
+			V2f( lerp( r.min.x, r.max.x, cropWindow.max.x ), lerp( r.min.y, r.max.y, cropWindow.max.y ) )
+		) );
 
 		setOverlayVisible( true );
 	}
@@ -903,14 +867,21 @@ void CropWindowTool::findCropWindowPlug()
 				// plug is editable, it could be expressioned or locked even if our value plug isn't.
 				if( m_cropWindowEnabledPlug && m_cropWindowEnabledPlug->getValue() == false )
 				{
-					plugEditable &= ( m_cropWindowEnabledPlug->settable() && !MetadataAlgo::readOnly( m_cropWindowEnabledPlug.get() ) );
+					plugEditable &=
+						( m_cropWindowEnabledPlug->settable() &&
+						  !MetadataAlgo::readOnly( m_cropWindowEnabledPlug.get() ) );
 				}
 
 				m_overlay->setEditable( plugEditable );
-				setOverlayMessage( plugEditable ? ( "Info: Editing <b>" + plugName + "</b>" ) : ( "Warning: <b>" + plugName + "</b> isn't editable" ) );
+				setOverlayMessage(
+					plugEditable ? ( "Info: Editing <b>" + plugName + "</b>" ) :
+								   ( "Warning: <b>" + plugName + "</b> isn't editable" )
+				);
 			}
 
-			m_cropWindowPlugDirtiedConnection = m_cropWindowPlug->node()->plugDirtiedSignal().connect( boost::bind( &CropWindowTool::plugDirtied, this, ::_1 ) );
+			m_cropWindowPlugDirtiedConnection = m_cropWindowPlug->node()->plugDirtiedSignal().connect(
+				boost::bind( &CropWindowTool::plugDirtied, this, ::_1 )
+			);
 		}
 		else
 		{

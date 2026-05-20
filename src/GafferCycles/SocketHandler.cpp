@@ -75,7 +75,10 @@ namespace
 {
 
 template<typename PlugType>
-Gaffer::Plug *setupNumericPlug( const ccl::NodeType *nodeType, const ccl::SocketType &socketType, Gaffer::GraphComponent *plugParent, Gaffer::Plug::Direction direction, typename PlugType::ValueType defaultValue )
+Gaffer::Plug *setupNumericPlug(
+	const ccl::NodeType *nodeType, const ccl::SocketType &socketType, Gaffer::GraphComponent *plugParent,
+	Gaffer::Plug::Direction direction, typename PlugType::ValueType defaultValue
+)
 {
 	using ValueType = typename PlugType::ValueType;
 
@@ -87,30 +90,25 @@ Gaffer::Plug *setupNumericPlug( const ccl::NodeType *nodeType, const ccl::Socket
 
 	string name = boost::replace_first_copy( string( socketType.name.c_str() ), ".", "__" );
 	PlugType *existingPlug = plugParent->getChild<PlugType>( name );
-	if(
-		existingPlug &&
-		existingPlug->direction() == direction &&
-		existingPlug->defaultValue() == defaultValue &&
-		existingPlug->minValue() == minValue
-	)
+	if( existingPlug && existingPlug->direction() == direction && existingPlug->defaultValue() == defaultValue &&
+		existingPlug->minValue() == minValue )
 	{
 		return existingPlug;
 	}
 
-	typename PlugType::Ptr plug = new PlugType( name, direction, defaultValue, minValue, std::numeric_limits<ValueType>::max(), Plug::Default );
+	typename PlugType::Ptr plug =
+		new PlugType( name, direction, defaultValue, minValue, std::numeric_limits<ValueType>::max(), Plug::Default );
 	PlugAlgo::replacePlug( plugParent, plug );
 
 	return plug.get();
 }
 
-Gaffer::Plug *setupNodePlug( const IECore::InternedString &socketName, Gaffer::GraphComponent *plugParent, Gaffer::Plug::Direction direction )
+Gaffer::Plug *setupNodePlug(
+	const IECore::InternedString &socketName, Gaffer::GraphComponent *plugParent, Gaffer::Plug::Direction direction
+)
 {
 	Plug *existingPlug = plugParent->getChild<Plug>( socketName );
-	if(
-		existingPlug &&
-		existingPlug->direction() == direction &&
-		existingPlug->typeId() == Plug::staticTypeId()
-	)
+	if( existingPlug && existingPlug->direction() == direction && existingPlug->typeId() == Plug::staticTypeId() )
 	{
 		existingPlug->setFlags( Gaffer::Plug::Dynamic, false );
 		return existingPlug;
@@ -123,15 +121,14 @@ Gaffer::Plug *setupNodePlug( const IECore::InternedString &socketName, Gaffer::G
 }
 
 template<typename PlugType>
-Gaffer::Plug *setupTypedPlug( const IECore::InternedString &socketName, Gaffer::GraphComponent *plugParent, Gaffer::Plug::Direction direction, const typename PlugType::ValueType &defaultValue )
+Gaffer::Plug *setupTypedPlug(
+	const IECore::InternedString &socketName, Gaffer::GraphComponent *plugParent, Gaffer::Plug::Direction direction,
+	const typename PlugType::ValueType &defaultValue
+)
 {
 	string name = boost::replace_first_copy( string( socketName ), ".", "__" );
 	PlugType *existingPlug = plugParent->getChild<PlugType>( name );
-	if(
-		existingPlug &&
-		existingPlug->direction() == direction &&
-		existingPlug->defaultValue() == defaultValue
-	)
+	if( existingPlug && existingPlug->direction() == direction && existingPlug->defaultValue() == defaultValue )
 	{
 		existingPlug->setFlags( Gaffer::Plug::Dynamic, false );
 		return existingPlug;
@@ -145,13 +142,19 @@ Gaffer::Plug *setupTypedPlug( const IECore::InternedString &socketName, Gaffer::
 }
 
 template<typename PlugType>
-Gaffer::Plug *setupTypedPlug( const ccl::NodeType *nodeType, const ccl::SocketType socketType, Gaffer::GraphComponent *plugParent, Gaffer::Plug::Direction direction, const typename PlugType::ValueType &defaultValue )
+Gaffer::Plug *setupTypedPlug(
+	const ccl::NodeType *nodeType, const ccl::SocketType socketType, Gaffer::GraphComponent *plugParent,
+	Gaffer::Plug::Direction direction, const typename PlugType::ValueType &defaultValue
+)
 {
 	return setupTypedPlug<PlugType>( socketType.name.c_str(), plugParent, direction, defaultValue );
 }
 
 template<typename PlugType>
-Gaffer::Plug *setupColorPlug( const ccl::NodeType *nodeType, const ccl::SocketType socketType, Gaffer::GraphComponent *plugParent, Gaffer::Plug::Direction direction )
+Gaffer::Plug *setupColorPlug(
+	const ccl::NodeType *nodeType, const ccl::SocketType socketType, Gaffer::GraphComponent *plugParent,
+	Gaffer::Plug::Direction direction
+)
 {
 	using ValueType = typename PlugType::ValueType;
 	using BaseType = typename ValueType::BaseType;
@@ -167,13 +170,8 @@ Gaffer::Plug *setupColorPlug( const ccl::NodeType *nodeType, const ccl::SocketTy
 
 	string name = boost::replace_first_copy( string( socketType.name.c_str() ), ".", "__" );
 	PlugType *existingPlug = plugParent->getChild<PlugType>( name );
-	if(
-		existingPlug &&
-		existingPlug->direction() == direction &&
-		existingPlug->defaultValue() == defaultValue &&
-		existingPlug->minValue() == minValue &&
-		existingPlug->maxValue() == maxValue
-	)
+	if( existingPlug && existingPlug->direction() == direction && existingPlug->defaultValue() == defaultValue &&
+		existingPlug->minValue() == minValue && existingPlug->maxValue() == maxValue )
 	{
 		existingPlug->setFlags( Gaffer::Plug::Dynamic, false );
 		return existingPlug;
@@ -219,7 +217,10 @@ namespace SocketHandler
 
 {
 
-Gaffer::Plug *setupPlug( const IECore::InternedString &socketName, int socketType, Gaffer::GraphComponent *plugParent, Gaffer::Plug::Direction direction )
+Gaffer::Plug *setupPlug(
+	const IECore::InternedString &socketName, int socketType, Gaffer::GraphComponent *plugParent,
+	Gaffer::Plug::Direction direction
+)
 {
 	switch( socketType )
 	{
@@ -269,7 +270,9 @@ Gaffer::Plug *setupPlug( const IECore::InternedString &socketName, int socketTyp
 			points.insert( std::pair<float, float>( 0.0f, 0.0f ) );
 			points.insert( std::pair<float, float>( 1.0f, 1.0f ) );
 
-			return setupTypedPlug<RampffPlug>( socketName, plugParent, direction, Rampff( points, RampInterpolation::CatmullRom ) );
+			return setupTypedPlug<RampffPlug>(
+				socketName, plugParent, direction, Rampff( points, RampInterpolation::CatmullRom )
+			);
 		}
 
 		case ccl::SocketType::COLOR_ARRAY :
@@ -281,26 +284,27 @@ Gaffer::Plug *setupPlug( const IECore::InternedString &socketName, int socketTyp
 			points.insert( std::pair<float, Color3f>( 0.0f, Color3f( 0.0f ) ) );
 			points.insert( std::pair<float, Color3f>( 1.0f, Color3f( 1.0f ) ) );
 
-			return setupTypedPlug<RampfColor3fPlug>( socketName, plugParent, direction, RampfColor3f( points, RampInterpolation::CatmullRom ) );
+			return setupTypedPlug<RampfColor3fPlug>(
+				socketName, plugParent, direction, RampfColor3f( points, RampInterpolation::CatmullRom )
+			);
 		}
 
 		default :
 
-			msg(
-				Msg::Warning,
-				"GafferCycles::SocketHandler::setupPlug",
-				fmt::format(
-					"Unsupported socket type \"{}\" for \"{}\" on node \"{}\"",
-					ccl::SocketType::type_name( (ccl::SocketType::Type)socketType ),
-					socketName.string(),
-					nodeName( plugParent )
-				)
-			);
+			msg( Msg::Warning, "GafferCycles::SocketHandler::setupPlug",
+				 fmt::format(
+					 "Unsupported socket type \"{}\" for \"{}\" on node \"{}\"",
+					 ccl::SocketType::type_name( (ccl::SocketType::Type)socketType ), socketName.string(),
+					 nodeName( plugParent )
+				 ) );
 			return nullptr;
 	}
 }
 
-Gaffer::Plug *setupPlug( const ccl::NodeType *nodeType, const ccl::SocketType socketType, Gaffer::GraphComponent *plugParent, Gaffer::Plug::Direction direction )
+Gaffer::Plug *setupPlug(
+	const ccl::NodeType *nodeType, const ccl::SocketType socketType, Gaffer::GraphComponent *plugParent,
+	Gaffer::Plug::Direction direction
+)
 {
 	Plug *plug = nullptr;
 
@@ -310,16 +314,14 @@ Gaffer::Plug *setupPlug( const ccl::NodeType *nodeType, const ccl::SocketType so
 		case ccl::SocketType::UINT :
 
 			plug = setupNumericPlug<IntPlug>(
-				nodeType, socketType, plugParent, direction,
-				*static_cast<const int *>( socketType.default_value )
+				nodeType, socketType, plugParent, direction, *static_cast<const int *>( socketType.default_value )
 			);
 			break;
 
 		case ccl::SocketType::FLOAT :
 
 			plug = setupNumericPlug<FloatPlug>(
-				nodeType, socketType, plugParent, direction,
-				*static_cast<const float *>( socketType.default_value )
+				nodeType, socketType, plugParent, direction, *static_cast<const float *>( socketType.default_value )
 			);
 			break;
 
@@ -341,14 +343,7 @@ Gaffer::Plug *setupPlug( const ccl::NodeType *nodeType, const ccl::SocketType so
 		{
 			const ccl::float2 *defaultValue = (ccl::float2 *)socketType.default_value;
 			plug = setupTypedPlug<V2fPlug>(
-				nodeType,
-				socketType,
-				plugParent,
-				direction,
-				V2f(
-					defaultValue->x,
-					defaultValue->y
-				)
+				nodeType, socketType, plugParent, direction, V2f( defaultValue->x, defaultValue->y )
 			);
 		}
 		break;
@@ -360,15 +355,7 @@ Gaffer::Plug *setupPlug( const ccl::NodeType *nodeType, const ccl::SocketType so
 		{
 			const ccl::float3 *defaultValue = (ccl::float3 *)socketType.default_value;
 			plug = setupTypedPlug<V3fPlug>(
-				nodeType,
-				socketType,
-				plugParent,
-				direction,
-				V3f(
-					defaultValue->x,
-					defaultValue->y,
-					defaultValue->z
-				)
+				nodeType, socketType, plugParent, direction, V3f( defaultValue->x, defaultValue->y, defaultValue->z )
 			);
 		}
 		break;
@@ -379,26 +366,15 @@ Gaffer::Plug *setupPlug( const ccl::NodeType *nodeType, const ccl::SocketType so
 			const int *defaultValue = (int *)socketType.default_value;
 			const ccl::NodeEnum &enums = *socketType.enum_values;
 
-			plug = setupTypedPlug<StringPlug>(
-				nodeType,
-				socketType,
-				plugParent,
-				direction,
-				enums[*defaultValue].c_str()
-			);
+			plug =
+				setupTypedPlug<StringPlug>( nodeType, socketType, plugParent, direction, enums[*defaultValue].c_str() );
 		}
 		break;
 
 		case ccl::SocketType::STRING :
 
 		{
-			plug = setupTypedPlug<StringPlug>(
-				nodeType,
-				socketType,
-				plugParent,
-				direction,
-				""
-			);
+			plug = setupTypedPlug<StringPlug>( nodeType, socketType, plugParent, direction, "" );
 		}
 		break;
 
@@ -406,23 +382,14 @@ Gaffer::Plug *setupPlug( const ccl::NodeType *nodeType, const ccl::SocketType so
 
 		{
 			ccl::Transform *t = (ccl::Transform *)socketType.default_value;
-			plug = setupTypedPlug<M44fPlug>(
-				nodeType,
-				socketType,
-				plugParent,
-				direction,
-				SocketAlgo::getTransform( *t )
-			);
+			plug =
+				setupTypedPlug<M44fPlug>( nodeType, socketType, plugParent, direction, SocketAlgo::getTransform( *t ) );
 		}
 		break;
 
 		case ccl::SocketType::CLOSURE :
 
-			plug = setupNodePlug(
-				socketType.name.c_str(),
-				plugParent,
-				direction
-			);
+			plug = setupNodePlug( socketType.name.c_str(), plugParent, direction );
 			break;
 
 		case ccl::SocketType::FLOAT_ARRAY :
@@ -432,11 +399,7 @@ Gaffer::Plug *setupPlug( const ccl::NodeType *nodeType, const ccl::SocketType so
 			points.insert( std::pair<float, float>( 0.0f, 0.0f ) );
 			points.insert( std::pair<float, float>( 1.0f, 1.0f ) );
 			plug = setupTypedPlug<RampffPlug>(
-				nodeType,
-				socketType,
-				plugParent,
-				direction,
-				Rampff( points, RampInterpolation::CatmullRom )
+				nodeType, socketType, plugParent, direction, Rampff( points, RampInterpolation::CatmullRom )
 			);
 		}
 		break;
@@ -449,11 +412,7 @@ Gaffer::Plug *setupPlug( const ccl::NodeType *nodeType, const ccl::SocketType so
 			points.insert( std::pair<float, Color3f>( 0.0f, Color3f( 0.0f ) ) );
 			points.insert( std::pair<float, Color3f>( 1.0f, Color3f( 1.0f ) ) );
 			plug = setupTypedPlug<RampfColor3fPlug>(
-				nodeType,
-				socketType,
-				plugParent,
-				direction,
-				RampfColor3f( points, RampInterpolation::CatmullRom )
+				nodeType, socketType, plugParent, direction, RampfColor3f( points, RampInterpolation::CatmullRom )
 			);
 		}
 		break;
@@ -464,17 +423,11 @@ Gaffer::Plug *setupPlug( const ccl::NodeType *nodeType, const ccl::SocketType so
 
 	if( !plug )
 	{
-		msg(
-			Msg::Warning,
-			"GafferCycles::SocketHandler::setupPlug",
-			fmt::format(
-				"Unsupported socket \"{}\" of type \"{}\" on node \"{}\" of type \"{}\"",
-				socketType.name.c_str(),
-				ccl::SocketType::type_name( socketType.type ).c_str(),
-				nodeName( plugParent ),
-				nodeType->name.c_str()
-			)
-		);
+		msg( Msg::Warning, "GafferCycles::SocketHandler::setupPlug",
+			 fmt::format(
+				 "Unsupported socket \"{}\" of type \"{}\" on node \"{}\" of type \"{}\"", socketType.name.c_str(),
+				 ccl::SocketType::type_name( socketType.type ).c_str(), nodeName( plugParent ), nodeType->name.c_str()
+			 ) );
 	}
 
 	return plug;
@@ -530,10 +483,16 @@ void setupLightPlugs( const std::string &shaderName, Gaffer::GraphComponent *plu
 
 	if( shaderName != "portal" )
 	{
-		validPlugs.insert( setupPlug( nodeType, *( nodeType->find_input( ccl::ustring( "cast_shadow" ) ) ), plugsParent, Gaffer::Plug::In ) );
+		validPlugs.insert( setupPlug(
+			nodeType, *( nodeType->find_input( ccl::ustring( "cast_shadow" ) ) ), plugsParent, Gaffer::Plug::In
+		) );
 		validPlugs.insert( setupTypedPlug<BoolPlug>( "use_mis", plugsParent, Gaffer::Plug::In, true ) );
-		validPlugs.insert( setupPlug( nodeType, *( nodeType->find_input( ccl::ustring( "use_caustics" ) ) ), plugsParent, Gaffer::Plug::In ) );
-		validPlugs.insert( setupPlug( nodeType, *( nodeType->find_input( ccl::ustring( "max_bounces" ) ) ), plugsParent, Gaffer::Plug::In ) );
+		validPlugs.insert( setupPlug(
+			nodeType, *( nodeType->find_input( ccl::ustring( "use_caustics" ) ) ), plugsParent, Gaffer::Plug::In
+		) );
+		validPlugs.insert( setupPlug(
+			nodeType, *( nodeType->find_input( ccl::ustring( "max_bounces" ) ) ), plugsParent, Gaffer::Plug::In
+		) );
 		validPlugs.insert( setupTypedPlug<FloatPlug>( "intensity", plugsParent, Gaffer::Plug::In, 1.0f ) );
 		validPlugs.insert( setupTypedPlug<FloatPlug>( "exposure", plugsParent, Gaffer::Plug::In, 0.0f ) );
 		validPlugs.insert( setupTypedPlug<Color3fPlug>( "color", plugsParent, Gaffer::Plug::In, Color3f( 1.0f ) ) );
@@ -546,7 +505,9 @@ void setupLightPlugs( const std::string &shaderName, Gaffer::GraphComponent *plu
 	}
 	else if( shaderName == "spot_light" )
 	{
-		validPlugs.insert( setupPlug( nodeType, *( nodeType->find_input( ccl::ustring( "size" ) ) ), plugsParent, Gaffer::Plug::In ) );
+		validPlugs.insert(
+			setupPlug( nodeType, *( nodeType->find_input( ccl::ustring( "size" ) ) ), plugsParent, Gaffer::Plug::In )
+		);
 		const ccl::SocketType *angleSocket = nodeType->find_input( ccl::ustring( "spot_angle" ) );
 		validPlugs.insert(
 			setupNumericPlug<FloatPlug>(
@@ -556,13 +517,21 @@ void setupLightPlugs( const std::string &shaderName, Gaffer::GraphComponent *plu
 				IECore::radiansToDegrees( *static_cast<const float *>( angleSocket->default_value ) )
 			)
 		);
-		validPlugs.insert( setupPlug( nodeType, *( nodeType->find_input( ccl::ustring( "spot_smooth" ) ) ), plugsParent, Gaffer::Plug::In ) );
-		validPlugs.insert( setupPlug( nodeType, *( nodeType->find_input( ccl::ustring( "is_sphere" ) ) ), plugsParent, Gaffer::Plug::In ) );
+		validPlugs.insert( setupPlug(
+			nodeType, *( nodeType->find_input( ccl::ustring( "spot_smooth" ) ) ), plugsParent, Gaffer::Plug::In
+		) );
+		validPlugs.insert( setupPlug(
+			nodeType, *( nodeType->find_input( ccl::ustring( "is_sphere" ) ) ), plugsParent, Gaffer::Plug::In
+		) );
 	}
 	else if( shaderName == "point_light" )
 	{
-		validPlugs.insert( setupPlug( nodeType, *( nodeType->find_input( ccl::ustring( "size" ) ) ), plugsParent, Gaffer::Plug::In ) );
-		validPlugs.insert( setupPlug( nodeType, *( nodeType->find_input( ccl::ustring( "is_sphere" ) ) ), plugsParent, Gaffer::Plug::In ) );
+		validPlugs.insert(
+			setupPlug( nodeType, *( nodeType->find_input( ccl::ustring( "size" ) ) ), plugsParent, Gaffer::Plug::In )
+		);
+		validPlugs.insert( setupPlug(
+			nodeType, *( nodeType->find_input( ccl::ustring( "is_sphere" ) ) ), plugsParent, Gaffer::Plug::In
+		) );
 	}
 	else if( shaderName == "disk_light" )
 	{

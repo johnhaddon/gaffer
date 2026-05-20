@@ -75,7 +75,7 @@ struct ObjectSets
 	// CompoundObjectInterface.
 	static ObjectSets &instance();
 
-	private:
+private:
 
 	struct ObjectSetData
 	{
@@ -137,7 +137,10 @@ struct CompoundObjectInterface : public IECoreScenePreview::Renderer::ObjectInte
 		}
 	}
 
-	void transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times ) override
+	void transform(
+		const IECoreScenePreview::Renderer::TransformSamples &samples,
+		const IECoreScenePreview::Renderer::SampleTimes &times
+	) override
 	{
 		for( auto &o : objects )
 		{
@@ -161,7 +164,9 @@ struct CompoundObjectInterface : public IECoreScenePreview::Renderer::ObjectInte
 		return true;
 	}
 
-	void link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objectSet ) override
+	void link(
+		const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objectSet
+	) override
 	{
 		Renderer::ConstObjectSetPtr &current = m_links[type];
 		if( current == objectSet )
@@ -217,7 +222,7 @@ struct CompoundObjectInterface : public IECoreScenePreview::Renderer::ObjectInte
 	/// See comment for CompoundAttributesInterface::attributes.
 	std::array<IECoreScenePreview::Renderer::ObjectInterfacePtr, 2> objects;
 
-	private:
+private:
 
 	// We don't anticipate more than a couple of link types per object, so use
 	// a sorted static vector to store links without the overhead of allocations.
@@ -297,8 +302,7 @@ ObjectSets &ObjectSets::instance()
 // Renderer implementation
 //////////////////////////////////////////////////////////////////////////
 
-CompoundRenderer::CompoundRenderer( const Renderers &renderers )
-	: m_renderers( renderers )
+CompoundRenderer::CompoundRenderer( const Renderers &renderers ) : m_renderers( renderers )
 {
 	if( m_renderers.size() != 2 )
 	{
@@ -306,9 +310,7 @@ CompoundRenderer::CompoundRenderer( const Renderers &renderers )
 	}
 }
 
-CompoundRenderer::~CompoundRenderer()
-{
-}
+CompoundRenderer::~CompoundRenderer() {}
 
 IECore::InternedString CompoundRenderer::name() const
 {
@@ -336,18 +338,26 @@ Renderer::AttributesInterfacePtr CompoundRenderer::attributes( const IECore::Com
 	return new CompoundAttributesInterface( m_renderers, attributes );
 }
 
-Renderer::ObjectInterfacePtr CompoundRenderer::camera( const std::string &name, const CameraSamples &samples, const SampleTimes &times, const AttributesInterface *attributes )
+Renderer::ObjectInterfacePtr CompoundRenderer::camera(
+	const std::string &name, const CameraSamples &samples, const SampleTimes &times,
+	const AttributesInterface *attributes
+)
 {
 	auto compoundAttributes = static_cast<const CompoundAttributesInterface *>( attributes );
 	CompoundObjectInterfacePtr result = new CompoundObjectInterface;
 	for( size_t i = 0; i < m_renderers.size(); ++i )
 	{
-		result->objects[i] = m_renderers[i]->camera( name, samples, times, compoundAttributes ? compoundAttributes->attributes[i].get() : nullptr );
+		result->objects[i] = m_renderers[i]->camera(
+			name, samples, times, compoundAttributes ? compoundAttributes->attributes[i].get() : nullptr
+		);
 	}
 	return result;
 }
 
-Renderer::ObjectInterfacePtr CompoundRenderer::light( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes )
+Renderer::ObjectInterfacePtr CompoundRenderer::light(
+	const std::string &name, const ObjectSamples &samples, const SampleTimes &times,
+	const AttributesInterface *attributes
+)
 {
 	auto compoundAttributes = static_cast<const CompoundAttributesInterface *>( attributes );
 	CompoundObjectInterfacePtr result = new CompoundObjectInterface;
@@ -358,18 +368,25 @@ Renderer::ObjectInterfacePtr CompoundRenderer::light( const std::string &name, c
 	return result;
 }
 
-Renderer::ObjectInterfacePtr CompoundRenderer::lightFilter( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes )
+Renderer::ObjectInterfacePtr CompoundRenderer::lightFilter(
+	const std::string &name, const ObjectSamples &samples, const SampleTimes &times,
+	const AttributesInterface *attributes
+)
 {
 	auto compoundAttributes = static_cast<const CompoundAttributesInterface *>( attributes );
 	CompoundObjectInterfacePtr result = new CompoundObjectInterface;
 	for( size_t i = 0; i < m_renderers.size(); ++i )
 	{
-		result->objects[i] = m_renderers[i]->lightFilter( name, samples, times, compoundAttributes->attributes[i].get() );
+		result->objects[i] =
+			m_renderers[i]->lightFilter( name, samples, times, compoundAttributes->attributes[i].get() );
 	}
 	return result;
 }
 
-Renderer::ObjectInterfacePtr CompoundRenderer::object( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes )
+Renderer::ObjectInterfacePtr CompoundRenderer::object(
+	const std::string &name, const ObjectSamples &samples, const SampleTimes &times,
+	const AttributesInterface *attributes
+)
 {
 	auto compoundAttributes = static_cast<const CompoundAttributesInterface *>( attributes );
 	CompoundObjectInterfacePtr result = new CompoundObjectInterface;
@@ -396,7 +413,9 @@ void CompoundRenderer::pause()
 	}
 }
 
-IECore::DataPtr CompoundRenderer::command( const IECore::InternedString name, const IECore::CompoundDataMap &parameters )
+IECore::DataPtr CompoundRenderer::command(
+	const IECore::InternedString name, const IECore::CompoundDataMap &parameters
+)
 {
 	for( auto &r : m_renderers )
 	{

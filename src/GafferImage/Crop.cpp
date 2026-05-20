@@ -54,10 +54,8 @@ namespace
 
 Box2i localTileWindow( const V2i &tileOrigin, const Box2i &dataWindow )
 {
-	Box2i result = BufferAlgo::intersection(
-		Box2i( tileOrigin, tileOrigin + V2i( ImagePlug::tileSize() ) ),
-		dataWindow
-	);
+	Box2i result =
+		BufferAlgo::intersection( Box2i( tileOrigin, tileOrigin + V2i( ImagePlug::tileSize() ) ), dataWindow );
 
 	if( !result.isEmpty() )
 	{
@@ -74,8 +72,7 @@ GAFFER_NODE_DEFINE_TYPE( Crop );
 
 size_t Crop::g_firstPlugIndex = 0;
 
-Crop::Crop( const std::string &name )
-	: ImageProcessor( name )
+Crop::Crop( const std::string &name ) : ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new IntPlug( "areaSource", Gaffer::Plug::In, Crop::Area, Crop::Area, Crop::Auto ) );
@@ -109,9 +106,7 @@ Crop::Crop( const std::string &name )
 	outPlug()->channelNamesPlug()->setInput( inPlug()->channelNamesPlug() );
 }
 
-Crop::~Crop()
-{
-}
+Crop::~Crop() {}
 
 Gaffer::IntPlug *Crop::areaSourcePlug()
 {
@@ -237,13 +232,8 @@ void Crop::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs )
 {
 	ImageProcessor::affects( input, outputs );
 
-	if(
-		input == areaSourcePlug() ||
-		areaPlug()->isAncestorOf( input ) ||
-		formatPlug()->isAncestorOf( input ) ||
-		input == formatCenterPlug() ||
-		input == inPlug()->dataWindowPlug() ||
-		input == inPlug()->formatPlug() ||
+	if( input == areaSourcePlug() || areaPlug()->isAncestorOf( input ) || formatPlug()->isAncestorOf( input ) ||
+		input == formatCenterPlug() || input == inPlug()->dataWindowPlug() || input == inPlug()->formatPlug() ||
 		(
 			// The auto area depends on the input channel data,
 			// which changes far more frequently than the other
@@ -251,40 +241,25 @@ void Crop::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs )
 			// depend on this when we actually really need to.
 			input == autoAreaPlug() &&
 			( PlugAlgo::dependsOnCompute( areaSourcePlug() ) || areaSourcePlug()->getValue() == AreaSource::Auto )
-		)
-	)
+		) )
 	{
 		outputs.push_back( cropWindowPlug() );
 	}
 
-	if(
-		input == cropWindowPlug() ||
-		input == affectDisplayWindowPlug() ||
-		offsetPlug()->isAncestorOf( input ) ||
-		input == inPlug()->formatPlug()
-	)
+	if( input == cropWindowPlug() || input == affectDisplayWindowPlug() || offsetPlug()->isAncestorOf( input ) ||
+		input == inPlug()->formatPlug() )
 	{
 		outputs.push_back( outPlug()->formatPlug() );
 	}
 
-	if(
-		input == cropWindowPlug() ||
-		input == affectDataWindowPlug() ||
-		offsetPlug()->isAncestorOf( input ) ||
-		input == inPlug()->dataWindowPlug() ||
-		input == enabledPlug()
-	)
+	if( input == cropWindowPlug() || input == affectDataWindowPlug() || offsetPlug()->isAncestorOf( input ) ||
+		input == inPlug()->dataWindowPlug() || input == enabledPlug() )
 	{
 		outputs.push_back( cropDataWindowPlug() );
 	}
 
-	if(
-		input == affectDisplayWindowPlug() ||
-		input == areaSourcePlug() ||
-		input == formatCenterPlug() ||
-		input == resetOriginPlug() ||
-		input == cropWindowPlug()
-	)
+	if( input == affectDisplayWindowPlug() || input == areaSourcePlug() || input == formatCenterPlug() ||
+		input == resetOriginPlug() || input == cropWindowPlug() )
 	{
 		outputs.push_back( offsetPlug()->getChild( 0 ) );
 		outputs.push_back( offsetPlug()->getChild( 1 ) );
@@ -301,7 +276,9 @@ void Crop::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs )
 	}
 }
 
-void Crop::hashFormat( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Crop::hashFormat(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	if( !affectDisplayWindowPlug()->getValue() )
 	{
@@ -475,9 +452,7 @@ void Crop::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) 
 				offset -= cropWindowPlug()->getValue().min - formatPlug()->getValue().getDisplayWindow().min;
 			}
 		}
-		static_cast<IntPlug *>( output )->setValue(
-			output == offsetPlug()->getChild( 0 ) ? offset[0] : offset[1]
-		);
+		static_cast<IntPlug *>( output )->setValue( output == offsetPlug()->getChild( 0 ) ? offset[0] : offset[1] );
 	}
 	else if( output == tileAutoAreaPlug() )
 	{
@@ -515,10 +490,8 @@ ValuePlug::CachePolicy Crop::hashCachePolicy( const Gaffer::ValuePlug *output ) 
 
 bool Crop::affectsTileAutoArea( const Gaffer::Plug *input ) const
 {
-	return input == inPlug()->dataWindowPlug() ||
-		input == inPlug()->deepPlug() ||
-		input == inPlug()->channelNamesPlug() ||
-		input == inPlug()->channelDataPlug() ||
+	return input == inPlug()->dataWindowPlug() || input == inPlug()->deepPlug() ||
+		input == inPlug()->channelNamesPlug() || input == inPlug()->channelDataPlug() ||
 		input == inPlug()->sampleOffsetsPlug();
 }
 
@@ -526,10 +499,8 @@ void Crop::hashTileAutoArea( const Gaffer::Context *context, IECore::MurmurHash 
 {
 	// We compute the area relative to the tile's origin, so we can
 	// reuse results for tiles with identical input hashes.
-	const Box2i localWindow = localTileWindow(
-		context->get<V2i>( ImagePlug::tileOriginContextName ),
-		inPlug()->dataWindow()
-	);
+	const Box2i localWindow =
+		localTileWindow( context->get<V2i>( ImagePlug::tileOriginContextName ), inPlug()->dataWindow() );
 	h.append( localWindow );
 
 	if( !inPlug()->deep() )
@@ -550,10 +521,8 @@ void Crop::hashTileAutoArea( const Gaffer::Context *context, IECore::MurmurHash 
 
 Imath::Box2i Crop::computeTileAutoArea( const Gaffer::Context *context ) const
 {
-	const Box2i localWindow = localTileWindow(
-		context->get<V2i>( ImagePlug::tileOriginContextName ),
-		inPlug()->dataWindow()
-	);
+	const Box2i localWindow =
+		localTileWindow( context->get<V2i>( ImagePlug::tileOriginContextName ), inPlug()->dataWindow() );
 
 	Box2i result;
 
@@ -626,8 +595,7 @@ void Crop::hashAutoArea( const Gaffer::Context *context, IECore::MurmurHash &h )
 		[&h]( const ImagePlug *image, const V2i &tileOrigin, const IECore::MurmurHash &tileHash ) {
 			h.append( tileHash );
 		},
-		inPlug()->dataWindowPlug()->getValue(),
-		ImageAlgo::TileOrder::TopToBottom
+		inPlug()->dataWindowPlug()->getValue(), ImageAlgo::TileOrder::TopToBottom
 	);
 }
 
@@ -648,8 +616,7 @@ Imath::Box2i Crop::computeAutoArea( const Gaffer::Context *context ) const
 		[&result]( const ImagePlug *image, const V2i &tileOrigin, const Box2i &tileResult ) {
 			result.extendBy( tileResult );
 		},
-		inPlug()->dataWindowPlug()->getValue(),
-		ImageAlgo::TileOrder::TopToBottom
+		inPlug()->dataWindowPlug()->getValue(), ImageAlgo::TileOrder::TopToBottom
 	);
 
 	return result;

@@ -50,18 +50,17 @@ GAFFER_NODE_DEFINE_TYPE( DataToTensor );
 size_t DataToTensor::g_firstPlugIndex = 0;
 const IECore::InternedString DataToTensor::g_dataPlugName( "data" );
 
-DataToTensor::DataToTensor( const std::string &name )
-	: ComputeNode( name )
+DataToTensor::DataToTensor( const std::string &name ) : ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
-	addChild( new IntPlug( "shapeMode", Plug::In, (int)ShapeMode::Automatic, (int)ShapeMode::Automatic, (int)ShapeMode::Custom ) );
+	addChild( new IntPlug(
+		"shapeMode", Plug::In, (int)ShapeMode::Automatic, (int)ShapeMode::Automatic, (int)ShapeMode::Custom
+	) );
 	addChild( new Int64VectorDataPlug( "shape" ) );
 	addChild( new TensorPlug( "tensor", Plug::Out ) );
 }
 
-DataToTensor::~DataToTensor()
-{
-}
+DataToTensor::~DataToTensor() {}
 
 bool DataToTensor::canSetup( const Gaffer::ValuePlug *prototypeDataPlug )
 {
@@ -120,11 +119,7 @@ void DataToTensor::affects( const Gaffer::Plug *input, AffectedPlugsContainer &o
 {
 	ComputeNode::affects( input, outputs );
 
-	if(
-		input == dataPlug() ||
-		input == shapeModePlug() ||
-		input == shapePlug()
-	)
+	if( input == dataPlug() || input == shapeModePlug() || input == shapePlug() )
 	{
 		outputs.push_back( tensorPlug() );
 	}

@@ -81,7 +81,8 @@ struct CortexMeshAdapter
 		// want to process n-gons with > 4 verts somehow to preserve watertightness. Currently, we pass
 		// n-gons through unchanged, and then VDB discards them, which breaks watertightness and causes
 		// level set conversion to completely fail on meshes with n-gons.
-		for( vector<int>::const_iterator it = m_verticesPerFace.begin(), eIt = m_verticesPerFace.end(); it != eIt; ++it )
+		for( vector<int>::const_iterator it = m_verticesPerFace.begin(), eIt = m_verticesPerFace.end(); it != eIt;
+			 ++it )
 		{
 			m_faceOffsets.push_back( offset );
 			offset += *it;
@@ -91,20 +92,11 @@ struct CortexMeshAdapter
 		m_points = &points->readable();
 	}
 
-	size_t polygonCount() const
-	{
-		return m_numFaces;
-	}
+	size_t polygonCount() const { return m_numFaces; }
 
-	size_t pointCount() const
-	{
-		return m_numVertices;
-	}
+	size_t pointCount() const { return m_numVertices; }
 
-	size_t vertexCount( size_t polygonIndex ) const
-	{
-		return m_verticesPerFace[polygonIndex];
-	}
+	size_t vertexCount( size_t polygonIndex ) const { return m_verticesPerFace[polygonIndex]; }
 
 	// Return position pos in local grid index space for polygon n and vertex v
 	void getIndexSpacePoint( size_t polygonIndex, size_t polygonVertexIndex, openvdb::Vec3d &pos ) const
@@ -113,7 +105,7 @@ struct CortexMeshAdapter
 		pos = openvdb::math::Vec3s( p.x, p.y, p.z );
 	}
 
-	private:
+private:
 
 	const size_t m_numFaces;
 	const size_t m_numVertices;
@@ -133,8 +125,7 @@ GAFFER_NODE_DEFINE_TYPE( MeshToLevelSet );
 
 size_t MeshToLevelSet::g_firstPlugIndex = 0;
 
-MeshToLevelSet::MeshToLevelSet( const std::string &name )
-	: MergeObjects( name, "${scene:path}" )
+MeshToLevelSet::MeshToLevelSet( const std::string &name ) : MergeObjects( name, "${scene:path}" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -144,9 +135,7 @@ MeshToLevelSet::MeshToLevelSet( const std::string &name )
 	addChild( new FloatPlug( "interiorBandwidth", Plug::In, 3.0f, 0.0001f ) );
 }
 
-MeshToLevelSet::~MeshToLevelSet()
-{
-}
+MeshToLevelSet::~MeshToLevelSet() {}
 
 Gaffer::StringPlug *MeshToLevelSet::gridPlug()
 {
@@ -190,11 +179,8 @@ const FloatPlug *MeshToLevelSet::interiorBandwidthPlug() const
 
 bool MeshToLevelSet::affectsMergedObject( const Gaffer::Plug *input ) const
 {
-	return MergeObjects::affectsMergedObject( input ) ||
-		input == gridPlug() ||
-		input == voxelSizePlug() ||
-		input == exteriorBandwidthPlug() ||
-		input == interiorBandwidthPlug();
+	return MergeObjects::affectsMergedObject( input ) || input == gridPlug() || input == voxelSizePlug() ||
+		input == exteriorBandwidthPlug() || input == interiorBandwidthPlug();
 }
 
 void MeshToLevelSet::hashMergedObject(
@@ -209,7 +195,9 @@ void MeshToLevelSet::hashMergedObject(
 	interiorBandwidthPlug()->hash( h );
 }
 
-IECore::ConstObjectPtr MeshToLevelSet::computeMergedObject( const std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f>> &sources, const Gaffer::Context *context ) const
+IECore::ConstObjectPtr MeshToLevelSet::computeMergedObject(
+	const std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f>> &sources, const Gaffer::Context *context
+) const
 {
 	std::vector<IECoreScene::MeshPrimitivePtr> meshStorage;
 	std::vector<std::pair<const IECoreScene::Primitive *, Imath::M44f>> meshes;
@@ -263,9 +251,7 @@ IECore::ConstObjectPtr MeshToLevelSet::computeMergedObject( const std::vector<st
 		Interrupter interrupter( context->canceller() );
 
 		grid = openvdb::tools::meshToVolume<openvdb::FloatGrid>(
-			interrupter,
-			CortexMeshAdapter( mergedMesh.get() ),
-			*vdbTransform,
+			interrupter, CortexMeshAdapter( mergedMesh.get() ), *vdbTransform,
 			exteriorBandwidth, //in voxel units
 			interiorBandwidth, //in voxel units
 			0 //conversionFlags

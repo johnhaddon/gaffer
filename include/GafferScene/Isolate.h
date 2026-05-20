@@ -51,7 +51,7 @@ namespace GafferScene
 class GAFFERSCENE_API Isolate : public FilteredSceneProcessor
 {
 
-	public:
+public:
 
 	explicit Isolate( const std::string &name = defaultName<Isolate>() );
 	~Isolate() override;
@@ -72,17 +72,30 @@ class GAFFERSCENE_API Isolate : public FilteredSceneProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
-	void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-	void hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-	void hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
+	void hashBound(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+	) const override;
+	void hashChildNames(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+	) const override;
+	void hashSet(
+		const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent,
+		IECore::MurmurHash &h
+	) const override;
 
-	Imath::Box3f computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
-	IECore::ConstInternedStringVectorDataPtr computeChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
-	IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	Imath::Box3f computeBound(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+	) const override;
+	IECore::ConstInternedStringVectorDataPtr computeChildNames(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+	) const override;
+	IECore::ConstPathMatcherDataPtr computeSet(
+		const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent
+	) const override;
 
-	private:
+private:
 
 	struct SetsToKeep;
 	bool mayPruneChildren( const ScenePath &path, const Gaffer::Context *context, const SetsToKeep &setsToKeep ) const;

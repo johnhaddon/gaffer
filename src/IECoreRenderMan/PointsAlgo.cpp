@@ -45,9 +45,16 @@ using namespace IECoreRenderMan;
 namespace
 {
 
-RtUString convertPoints( const IECoreScenePreview::Renderer::Samples<const IECoreScene::PointsPrimitive *> &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext )
+RtUString convertPoints(
+	const IECoreScenePreview::Renderer::Samples<const IECoreScene::PointsPrimitive *> &samples,
+	const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars,
+	const std::string &messageContext
+)
 {
-	GeometryAlgo::convertPrimitive( IECoreScenePreview::Renderer::staticSamplesCast<const IECoreScene::Primitive *>( samples ), sampleTimes, primVars, messageContext );
+	GeometryAlgo::convertPrimitive(
+		IECoreScenePreview::Renderer::staticSamplesCast<const IECoreScene::Primitive *>( samples ), sampleTimes,
+		primVars, messageContext
+	);
 	return Loader::strings().k_Ri_Points;
 }
 

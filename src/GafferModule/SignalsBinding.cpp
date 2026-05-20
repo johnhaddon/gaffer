@@ -56,20 +56,11 @@ template<typename SlotCallIterator>
 struct SlotCallRange
 {
 
-	SlotCallRange( const SlotCallRange &other )
-		: current( other.current ), last( other.last )
-	{
-	}
+	SlotCallRange( const SlotCallRange &other ) : current( other.current ), last( other.last ) {}
 
-	SlotCallRange( SlotCallIterator f, SlotCallIterator l )
-		: current( f ), last( l )
-	{
-	}
+	SlotCallRange( SlotCallIterator f, SlotCallIterator l ) : current( f ), last( l ) {}
 
-	SlotCallRange &iter()
-	{
-		return *this;
-	}
+	SlotCallRange &iter() { return *this; }
 
 	object next()
 	{
@@ -98,15 +89,9 @@ struct PythonResultCombiner
 
 	using result_type = object;
 
-	PythonResultCombiner()
-		: combiner( object() )
-	{
-	}
+	PythonResultCombiner() : combiner( object() ) {}
 
-	PythonResultCombiner( object c )
-		: combiner( c )
-	{
-	}
+	PythonResultCombiner( object c ) : combiner( c ) {}
 
 	template<typename SlotCallIterator>
 	result_type operator () ( SlotCallIterator first, SlotCallIterator last ) const
@@ -146,8 +131,8 @@ void bind( const char *name )
 
 	// bind using the standard SignalClass, and add a constructor allowing a custom
 	// result combiner to be passed.
-	scope s = SignalClass<Signal>( name )
-				  .def( "__init__", make_constructor( &construct<Signal>, default_call_policies() ) );
+	scope s =
+		SignalClass<Signal>( name ).def( "__init__", make_constructor( &construct<Signal>, default_call_policies() ) );
 
 	// bind the appropriate result range type so the custom result combiner can get the slot results.
 	using Range = SlotCallRange<typename Signal::SlotCallIterator>;

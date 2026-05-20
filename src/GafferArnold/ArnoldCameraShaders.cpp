@@ -59,8 +59,7 @@ GAFFER_NODE_DEFINE_TYPE( ArnoldCameraShaders );
 
 size_t ArnoldCameraShaders::g_firstPlugIndex = 0;
 
-ArnoldCameraShaders::ArnoldCameraShaders( const std::string &name )
-	: Shader( name )
+ArnoldCameraShaders::ArnoldCameraShaders( const std::string &name ) : Shader( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ShaderPlug( "filterMap" ) );
@@ -68,9 +67,7 @@ ArnoldCameraShaders::ArnoldCameraShaders( const std::string &name )
 	addChild( new Plug( "out", Plug::Out ) );
 }
 
-ArnoldCameraShaders::~ArnoldCameraShaders()
-{
-}
+ArnoldCameraShaders::~ArnoldCameraShaders() {}
 
 GafferScene::ShaderPlug *ArnoldCameraShaders::filterMapPlug()
 {
@@ -104,9 +101,7 @@ const Gaffer::Plug *ArnoldCameraShaders::outPlug() const
 
 bool ArnoldCameraShaders::affectsAttributes( const Gaffer::Plug *input ) const
 {
-	return Shader::affectsAttributes( input ) ||
-		input == filterMapPlug() ||
-		input == uvRemapPlug();
+	return Shader::affectsAttributes( input ) || input == filterMapPlug() || input == uvRemapPlug();
 }
 
 void ArnoldCameraShaders::attributesHash( const Gaffer::Plug *output, IECore::MurmurHash &h ) const

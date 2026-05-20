@@ -49,7 +49,9 @@ namespace IECorePreview
 struct GAFFER_API Message
 {
 	Message( IECore::MessageHandler::Level l, const std::string &c, const std::string &m )
-		: level( l ), context( c ), message( m )
+		: level( l ),
+		  context( c ),
+		  message( m )
 	{
 	}
 
@@ -71,7 +73,7 @@ struct GAFFER_API Message
 ///
 class GAFFER_API Messages
 {
-	public:
+public:
 
 	Messages();
 	Messages( const Messages &other ) = default;
@@ -103,7 +105,7 @@ class GAFFER_API Messages
 	/// when they are added, so this is cheap.
 	IECore::MurmurHash hash() const;
 
-	private:
+private:
 
 	// \todo The current implementation is naive and is sensitive to
 	// bucketSize .vs. ingest/copy rate and total number of messages.

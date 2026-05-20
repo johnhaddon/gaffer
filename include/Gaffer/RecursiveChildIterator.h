@@ -49,63 +49,42 @@ namespace Gaffer
 ///
 /// for( RecursiveChildIterator it( parent ); !it.done(); ++it )
 /// ...
-class RecursiveChildIterator : public boost::iterator_facade<RecursiveChildIterator, const GraphComponentPtr, boost::forward_traversal_tag>
+class RecursiveChildIterator
+	: public boost::iterator_facade<RecursiveChildIterator, const GraphComponentPtr, boost::forward_traversal_tag>
 {
 
-	public:
+public:
 
-	RecursiveChildIterator()
-		: m_pruned( false )
+	RecursiveChildIterator() : m_pruned( false ) {}
+
+	RecursiveChildIterator( const GraphComponent *parent ) : m_pruned( false )
 	{
+		m_stack.push_back( Level( parent->children(), parent->children().begin() ) );
 	}
 
-	RecursiveChildIterator( const GraphComponent *parent )
-		: m_pruned( false )
+	RecursiveChildIterator( const GraphComponent *parent, const GraphComponent::ChildIterator &it ) : m_pruned( false )
 	{
-		m_stack.push_back(
-			Level(
-				parent->children(),
-				parent->children().begin()
-			)
-		);
+		m_stack.push_back( Level( parent->children(), it ) );
 	}
 
-	RecursiveChildIterator( const GraphComponent *parent, const GraphComponent::ChildIterator &it )
-		: m_pruned( false )
-	{
-		m_stack.push_back(
-			Level(
-				parent->children(),
-				it
-			)
-		);
-	}
-
-	size_t depth() const
-	{
-		return m_stack.size() - 1;
-	}
+	size_t depth() const { return m_stack.size() - 1; }
 
 	/// Calling prune() causes the next increment to skip any recursion
 	/// that it would normally perform.
-	void prune()
-	{
-		m_pruned = true;
-	}
+	void prune() { m_pruned = true; }
 
-	bool done() const
-	{
-		return m_stack.size() == 1 && m_stack[0].it == m_stack[0].end;
-	}
+	bool done() const { return m_stack.size() == 1 && m_stack[0].it == m_stack[0].end; }
 
-	private:
+private:
 
 	friend class boost::iterator_core_access;
 
 	struct Level
 	{
 		Level( const GraphComponent::ChildContainer &container, GraphComponent::ChildIterator i )
-			: begin( container.begin() ), end( container.end() ), it( i )
+			: begin( container.begin() ),
+			  end( container.end() ),
+			  it( i )
 		{
 		}
 
@@ -128,12 +107,7 @@ class RecursiveChildIterator : public boost::iterator_facade<RecursiveChildItera
 		const GraphComponent *currentGraphComponent = stackTop().it->get();
 		if( !m_pruned && currentGraphComponent->children().size() )
 		{
-			m_stack.push_back(
-				Level(
-					currentGraphComponent->children(),
-					currentGraphComponent->children().begin()
-				)
-			);
+			m_stack.push_back( Level( currentGraphComponent->children(), currentGraphComponent->children().begin() ) );
 		}
 		else
 		{
@@ -147,25 +121,13 @@ class RecursiveChildIterator : public boost::iterator_facade<RecursiveChildItera
 		m_pruned = false;
 	}
 
-	bool equal( const RecursiveChildIterator &other ) const
-	{
-		return m_stack == other.m_stack;
-	}
+	bool equal( const RecursiveChildIterator &other ) const { return m_stack == other.m_stack; }
 
-	const GraphComponentPtr &dereference() const
-	{
-		return *( stackTop().it );
-	}
+	const GraphComponentPtr &dereference() const { return *( stackTop().it ); }
 
-	Level &stackTop()
-	{
-		return *( m_stack.rbegin() );
-	}
+	Level &stackTop() { return *( m_stack.rbegin() ); }
 
-	const Level &stackTop() const
-	{
-		return *( m_stack.rbegin() );
-	}
+	const Level &stackTop() const { return *( m_stack.rbegin() ); }
 };
 
 } // namespace Gaffer

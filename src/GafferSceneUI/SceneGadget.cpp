@@ -97,27 +97,23 @@ Box3f sceneBound( const ScenePlug *scene, const PathMatcher *include, const Path
 		}
 	};
 
-	tbb::this_task_arena::isolate(
-		[&]() {
-			if( include )
-			{
-				SceneAlgo::filteredParallelTraverse( scene, *include, f );
-			}
-			else
-			{
-				SceneAlgo::parallelTraverse( scene, f );
-			}
+	tbb::this_task_arena::isolate( [&]() {
+		if( include )
+		{
+			SceneAlgo::filteredParallelTraverse( scene, *include, f );
 		}
-	);
+		else
+		{
+			SceneAlgo::parallelTraverse( scene, f );
+		}
+	} );
 
-	return threadBounds.combine(
-		[]( const Box3f b1, const Box3f b2 ) {
-			Box3f bc;
-			bc.extendBy( b1 );
-			bc.extendBy( b2 );
-			return bc;
-		}
-	);
+	return threadBounds.combine( []( const Box3f b1, const Box3f b2 ) {
+		Box3f bc;
+		bc.extendBy( b1 );
+		bc.extendBy( b2 );
+		return bc;
+	} );
 }
 
 vector<IECore::TypeId> typeIdsFromTypeNames( const vector<string> &typeNames )
@@ -161,13 +157,11 @@ PathMatcher findTypedObjects( const ScenePlug *scene, const PathMatcher &paths, 
 
 	SceneAlgo::filteredParallelTraverse( scene, paths, f );
 
-	return threadResults.combine(
-		[]( const PathMatcher &a, const PathMatcher &b ) {
-			PathMatcher c = a;
-			c.addPaths( b );
-			return c;
-		}
-	);
+	return threadResults.combine( []( const PathMatcher &a, const PathMatcher &b ) {
+		PathMatcher c = a;
+		c.addPaths( b );
+		return c;
+	} );
 }
 
 } // namespace
@@ -194,7 +188,11 @@ SceneGadget::SceneGadget()
 {
 	using Option = CompoundObject::ObjectMap::value_type;
 	CompoundObjectPtr openGLOptions = new CompoundObject;
-	openGLOptions->members().insert( { Option( "gl:primitive:wireframeColor", new Color4fData( Color4f( 0.2f, 0.2f, 0.2f, 1.0f ) ) ), Option( "gl:primitive:pointColor", new Color4fData( Color4f( 0.9f, 0.9f, 0.9f, 1.0f ) ) ), Option( "gl:primitive:pointWidth", new FloatData( 2.0f ) ) } );
+	openGLOptions->members().insert(
+		{ Option( "gl:primitive:wireframeColor", new Color4fData( Color4f( 0.2f, 0.2f, 0.2f, 1.0f ) ) ),
+		  Option( "gl:primitive:pointColor", new Color4fData( Color4f( 0.9f, 0.9f, 0.9f, 1.0f ) ) ),
+		  Option( "gl:primitive:pointWidth", new FloatData( 2.0f ) ) }
+	);
 	m_openGLOptions = openGLOptions;
 
 	visibilityChangedSignal().connect( boost::bind( &SceneGadget::visibilityChanged, this ) );
@@ -361,10 +359,12 @@ void SceneGadget::setRenderer( IECore::InternedString name )
 	{
 		try
 		{
-			m_renderer = new IECoreScenePreview::CompoundRenderer( {
-				m_renderer,
-				IECoreScenePreview::Renderer::create( name, IECoreScenePreview::Renderer::Interactive ),
-			} );
+			m_renderer = new IECoreScenePreview::CompoundRenderer(
+				{
+					m_renderer,
+					IECoreScenePreview::Renderer::create( name, IECoreScenePreview::Renderer::Interactive ),
+				}
+			);
 			m_outputBuffer = std::make_unique<OutputBuffer>( m_renderer.get() );
 			m_outputBuffer->bufferChangedSignal().connect( boost::bind( &SceneGadget::bufferChanged, this ) );
 		}
@@ -392,9 +392,7 @@ void SceneGadget::setRenderer( IECore::InternedString name )
 	m_controller->setVisibleSet( currentVisibleSet );
 	m_controller->setMinimumExpansionDepth( currentMinimumExpansionDepth );
 
-	m_controller->updateRequiredSignal().connect(
-		boost::bind( &SceneGadget::dirty, this, DirtyType::Layout )
-	);
+	m_controller->updateRequiredSignal().connect( boost::bind( &SceneGadget::dirty, this, DirtyType::Layout ) );
 
 	m_rendererName = name;
 
@@ -490,13 +488,17 @@ const IECore::StringVectorData *SceneGadget::getSelectionMask() const
 	return m_selectionMask.get();
 }
 
-bool SceneGadget::objectAt( const IECore::LineSegment3f &lineInGadgetSpace, GafferScene::ScenePlug::ScenePath &path ) const
+bool SceneGadget::objectAt(
+	const IECore::LineSegment3f &lineInGadgetSpace, GafferScene::ScenePlug::ScenePath &path
+) const
 {
 	V3f unused;
 	return objectAt( lineInGadgetSpace, path, unused );
 }
 
-bool SceneGadget::objectAt( const IECore::LineSegment3f &lineInGadgetSpace, GafferScene::ScenePlug::ScenePath &path, V3f &hitPoint ) const
+bool SceneGadget::objectAt(
+	const IECore::LineSegment3f &lineInGadgetSpace, GafferScene::ScenePlug::ScenePath &path, V3f &hitPoint
+) const
 {
 	if( m_updateErrored )
 	{
@@ -554,11 +556,15 @@ bool SceneGadget::objectAt( const IECore::LineSegment3f &lineInGadgetSpace, Gaff
 	return true;
 }
 
-bool SceneGadget::openGLObjectAt( const IECore::LineSegment3f &lineInGadgetSpace, GafferScene::ScenePlug::ScenePath &path, float &depth ) const
+bool SceneGadget::openGLObjectAt(
+	const IECore::LineSegment3f &lineInGadgetSpace, GafferScene::ScenePlug::ScenePath &path, float &depth
+) const
 {
 	std::vector<IECoreGL::HitRecord> selection;
 	{
-		ViewportGadget::SelectionScope selectionScope( lineInGadgetSpace, this, selection, IECoreGL::Selector::IDRender );
+		ViewportGadget::SelectionScope selectionScope(
+			lineInGadgetSpace, this, selection, IECoreGL::Selector::IDRender
+		);
 
 		IECore::CompoundDataMap parameters;
 		parameters["colorSpace"] = g_sceneColorSpace;
@@ -596,9 +602,7 @@ bool SceneGadget::openGLObjectAt( const IECore::LineSegment3f &lineInGadgetSpace
 }
 
 size_t SceneGadget::objectsAt(
-	const Imath::V3f &corner0InGadgetSpace,
-	const Imath::V3f &corner1InGadgetSpace,
-	IECore::PathMatcher &paths
+	const Imath::V3f &corner0InGadgetSpace, const Imath::V3f &corner1InGadgetSpace, IECore::PathMatcher &paths
 ) const
 {
 	if( m_updateErrored )
@@ -608,7 +612,9 @@ size_t SceneGadget::objectsAt(
 
 	vector<IECoreGL::HitRecord> selection;
 	{
-		ViewportGadget::SelectionScope selectionScope( corner0InGadgetSpace, corner1InGadgetSpace, this, selection, IECoreGL::Selector::OcclusionQuery );
+		ViewportGadget::SelectionScope selectionScope(
+			corner0InGadgetSpace, corner1InGadgetSpace, this, selection, IECoreGL::Selector::OcclusionQuery
+		);
 		IECore::CompoundDataMap parameters;
 		parameters["colorSpace"] = g_sceneColorSpace;
 		m_renderer->command( "gl:renderToCurrentContext", parameters );
@@ -629,8 +635,12 @@ size_t SceneGadget::objectsAt(
 	{
 		auto viewportGadget = ancestor<ViewportGadget>();
 		Box2f ndcBox;
-		ndcBox.extendBy( viewportGadget->gadgetToRasterSpace( corner0InGadgetSpace, this ) / viewportGadget->getViewport() );
-		ndcBox.extendBy( viewportGadget->gadgetToRasterSpace( corner1InGadgetSpace, this ) / viewportGadget->getViewport() );
+		ndcBox.extendBy(
+			viewportGadget->gadgetToRasterSpace( corner0InGadgetSpace, this ) / viewportGadget->getViewport()
+		);
+		ndcBox.extendBy(
+			viewportGadget->gadgetToRasterSpace( corner1InGadgetSpace, this ) / viewportGadget->getViewport()
+		);
 		PathMatcher bufferPaths = m_controller->renderManifest()->pathsForIDs( m_outputBuffer->idsAt( ndcBox ) );
 		if( m_selectionMask )
 		{
@@ -671,16 +681,11 @@ std::optional<V3f> SceneGadget::normalAt( const IECore::LineSegment3f &lineInGad
 
 		ScenePlug::ScenePath prevPath;
 		V3f prevP;
-		bool prevHit = objectAt(
-			viewportGadget->rasterToGadgetSpace( centerRasterP + V2f( -spread, 0 ), this ),
-			prevPath,
-			prevP
-		);
+		bool prevHit =
+			objectAt( viewportGadget->rasterToGadgetSpace( centerRasterP + V2f( -spread, 0 ), this ), prevPath, prevP );
 
 		std::array<V2f, 4> offsetList{
-			V2f( 0, -spread ),
-			V2f( spread, 0 ),
-			V2f( 0, spread ),
+			V2f( 0, -spread ), V2f( spread, 0 ), V2f( 0, spread ),
 			V2f( -spread, 0 ) // wrap back to left for final comparison
 		};
 
@@ -720,12 +725,7 @@ IECore::PathMatcher SceneGadget::convertSelection( IECore::UIntVectorDataPtr ids
 		parameters["mask"] = m_selectionMask;
 	}
 
-	auto pathsData = static_pointer_cast<PathMatcherData>(
-		m_renderer->command(
-			"gl:querySelection",
-			parameters
-		)
-	);
+	auto pathsData = static_pointer_cast<PathMatcherData>( m_renderer->command( "gl:querySelection", parameters ) );
 
 	PathMatcher result = pathsData->readable();
 
@@ -798,7 +798,9 @@ Imath::Box3f SceneGadget::bound( bool selected, const PathMatcher *userOmitted )
 	// visualisations, and when it is the sole renderer it also gets the scene
 	// bounds cheaply, without any need to perform computations.
 
-	ConstDataPtr d = m_renderer->command( "gl:queryBound", { { "selection", new BoolData( selected ) }, { "omitted", new PathMatcherData( omitted ) } } );
+	ConstDataPtr d = m_renderer->command(
+		"gl:queryBound", { { "selection", new BoolData( selected ) }, { "omitted", new PathMatcherData( omitted ) } }
+	);
 	Box3f result = static_cast<const Box3fData *>( d.get() )->readable();
 
 	// If we're using another renderer as well, then the GL renderer won't have
@@ -837,9 +839,7 @@ Imath::Box3f SceneGadget::bound() const
 }
 
 void SceneGadget::snapshotToFile(
-	const std::filesystem::path &fileName,
-	const Box2f &resolutionGate,
-	const CompoundData *metadata
+	const std::filesystem::path &fileName, const Box2f &resolutionGate, const CompoundData *metadata
 ) const
 {
 	if( !m_outputBuffer )
@@ -937,31 +937,27 @@ void SceneGadget::updateRenderer()
 		}
 
 		bool shouldRequestRender = !m_renderRequestPending.exchange( true );
-		bool shouldEmitStateChange =
-			progress == BackgroundTask::Completed ||
-			progress == BackgroundTask::Errored;
+		bool shouldEmitStateChange = progress == BackgroundTask::Completed || progress == BackgroundTask::Errored;
 
 		if( shouldRequestRender || shouldEmitStateChange )
 		{
 			// Must hold a reference to stop us dying before our UI thread call is scheduled.
 			SceneGadgetPtr thisRef = this;
-			ParallelAlgo::callOnUIThread(
-				[thisRef, shouldRequestRender, shouldEmitStateChange, progress] {
-					if( progress == BackgroundTask::Errored )
-					{
-						thisRef->m_updateErrored = true;
-					}
-					if( shouldEmitStateChange )
-					{
-						thisRef->stateChangedSignal()( thisRef.get() );
-					}
-					if( shouldRequestRender )
-					{
-						thisRef->m_renderRequestPending = false;
-						thisRef->dirty( DirtyType::Bound );
-					}
+			ParallelAlgo::callOnUIThread( [thisRef, shouldRequestRender, shouldEmitStateChange, progress] {
+				if( progress == BackgroundTask::Errored )
+				{
+					thisRef->m_updateErrored = true;
 				}
-			);
+				if( shouldEmitStateChange )
+				{
+					thisRef->stateChangedSignal()( thisRef.get() );
+				}
+				if( shouldRequestRender )
+				{
+					thisRef->m_renderRequestPending = false;
+					thisRef->dirty( DirtyType::Bound );
+				}
+			} );
 		}
 	};
 
@@ -1032,11 +1028,7 @@ void SceneGadget::bufferChanged()
 	}
 
 	// Using `thisRef` to stop us dying before our UI thread call is scheduled.
-	ParallelAlgo::callOnUIThread(
-		[thisRef = Ptr( this )] {
-			thisRef->Gadget::dirty( DirtyType::Render );
-		}
-	);
+	ParallelAlgo::callOnUIThread( [thisRef = Ptr( this )] { thisRef->Gadget::dirty( DirtyType::Render ); } );
 }
 
 void SceneGadget::visibilityChanged()
@@ -1050,9 +1042,8 @@ void SceneGadget::visibilityChanged()
 			m_viewportChangedConnection = viewport->viewportChangedSignal().connect(
 				boost::bind( &SceneGadget::updateCamera, this, ViewportGadget::CameraFlags::Camera )
 			);
-			m_viewportCameraChangedConnection = viewport->cameraChangedSignal().connect(
-				boost::bind( &SceneGadget::updateCamera, this, ::_2 )
-			);
+			m_viewportCameraChangedConnection =
+				viewport->cameraChangedSignal().connect( boost::bind( &SceneGadget::updateCamera, this, ::_2 ) );
 		}
 	}
 	else

@@ -57,6 +57,7 @@ void GafferUIModule::bindWidgetSignal()
 	using WidgetEventSignal = Signals::Signal<bool( object, object ), EventSignalCombiner<bool>>;
 	SignalClass<WidgetEventSignal>( "WidgetEventSignal" );
 
-	using WidgetDragBeginSignal = Signals::Signal<IECore::RunTimeTypedPtr( object, object ), EventSignalCombiner<IECore::RunTimeTypedPtr>>;
+	using WidgetDragBeginSignal =
+		Signals::Signal<IECore::RunTimeTypedPtr( object, object ), EventSignalCombiner<IECore::RunTimeTypedPtr>>;
 	SignalClass<WidgetDragBeginSignal>( "WidgetDragBeginSignal" );
 }

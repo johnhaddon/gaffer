@@ -84,17 +84,14 @@ void testTaskMutex()
 			{
 				// Simulate an expensive multithreaded
 				// initialisation process.
-				lock.execute(
-					[&]() {
-						tbb::parallel_for(
-							tbb::blocked_range<size_t>( 0, 1000000 ),
-							[&]( const tbb::blocked_range<size_t> &r ) {
-								didInitialisationTasks.local() = true;
-								std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
-							}
-						);
-					}
-				);
+				lock.execute( [&]() {
+					tbb::parallel_for(
+						tbb::blocked_range<size_t>( 0, 1000000 ), [&]( const tbb::blocked_range<size_t> &r ) {
+							didInitialisationTasks.local() = true;
+							std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
+						}
+					);
+				} );
 				initialised = true;
 				didInitialisation.local() = true;
 			}
@@ -105,15 +102,12 @@ void testTaskMutex()
 	// do the lazy initialisation. Only one should do it,
 	// but the rest should help out in doing the work.
 
-	tbb::parallel_for(
-		tbb::blocked_range<size_t>( 0, 1000000 ),
-		[&]( const tbb::blocked_range<size_t> &r ) {
-			for( size_t i = r.begin(); i < r.end(); ++i )
-			{
-				initialise();
-			}
+	tbb::parallel_for( tbb::blocked_range<size_t>( 0, 1000000 ), [&]( const tbb::blocked_range<size_t> &r ) {
+		for( size_t i = r.begin(); i < r.end(); ++i )
+		{
+			initialise();
 		}
-	);
+	} );
 
 	// Only one thread should have done the initialisation,
 	// but everyone should have got the lock, and everyone should
@@ -128,25 +122,18 @@ void testTaskMutexWithinIsolate()
 	TaskMutex mutex;
 
 	auto getMutexWithinIsolate = [&mutex]() {
-		tbb::this_task_arena::isolate(
-			[&mutex]() {
-				TaskMutex::ScopedLock lock( mutex );
-				GAFFERTEST_ASSERT( lock.isWriter() );
-				std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-			}
-		);
+		tbb::this_task_arena::isolate( [&mutex]() {
+			TaskMutex::ScopedLock lock( mutex );
+			GAFFERTEST_ASSERT( lock.isWriter() );
+			std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
+		} );
 	};
 
-	tbb::this_task_arena::isolate(
-		[&]() {
-			tbb::parallel_for(
-				tbb::blocked_range<size_t>( 0, 1000000 ),
-				[&]( const tbb::blocked_range<size_t> &r ) {
-					getMutexWithinIsolate();
-				}
-			);
-		}
-	);
+	tbb::this_task_arena::isolate( [&]() {
+		tbb::parallel_for( tbb::blocked_range<size_t>( 0, 1000000 ), [&]( const tbb::blocked_range<size_t> &r ) {
+			getMutexWithinIsolate();
+		} );
+	} );
 
 	// This test was written to guard against deadlocks
 	// caused by an early version of TaskMutex. Hence
@@ -175,17 +162,14 @@ void testTaskMutexJoiningOuterTasks()
 		{
 			// Simulate an expensive multithreaded
 			// initialisation process.
-			lock.execute(
-				[&]() {
-					tbb::parallel_for(
-						tbb::blocked_range<size_t>( 0, 1000000 ),
-						[&]( const tbb::blocked_range<size_t> &r ) {
-							didInitialisationTasks.local() = true;
-							std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
-						}
-					);
-				}
-			);
+			lock.execute( [&]() {
+				tbb::parallel_for(
+					tbb::blocked_range<size_t>( 0, 1000000 ), [&]( const tbb::blocked_range<size_t> &r ) {
+						didInitialisationTasks.local() = true;
+						std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
+					}
+				);
+			} );
 			initialised = true;
 			didInitialisation.local() = true;
 		}
@@ -202,17 +186,12 @@ void testTaskMutexJoiningOuterTasks()
 	}
 
 	tbb::parallel_for(
-		tbb::blocked_range<size_t>( 0, independentTasks.size() ),
-		[&]( const tbb::blocked_range<size_t> &r ) {
+		tbb::blocked_range<size_t>( 0, independentTasks.size() ), [&]( const tbb::blocked_range<size_t> &r ) {
 			for( size_t i = r.begin(); i < r.end(); ++i )
 			{
 				TaskMutex::ScopedLock lock( *independentTasks[i] );
 				GAFFERTEST_ASSERT( lock.isWriter() )
-				lock.execute(
-					[&]() {
-						initialise();
-					}
-				);
+				lock.execute( [&]() { initialise(); } );
 			}
 		}
 	);
@@ -234,17 +213,14 @@ void testTaskMutexHeavyContention( bool acceptWork )
 	TaskMutex mutex;
 	bool initialised = true;
 
-	tbb::parallel_for(
-		tbb::blocked_range<size_t>( 0, 1000000 ),
-		[&]( const tbb::blocked_range<size_t> &r ) {
-			for( size_t i = r.begin(); i < r.end(); ++i )
-			{
-				TaskMutex::ScopedLock lock( mutex, /* write = */ false, acceptWork );
-				GAFFERTEST_ASSERT( !lock.isWriter() );
-				GAFFERTEST_ASSERTEQUAL( initialised, true );
-			}
+	tbb::parallel_for( tbb::blocked_range<size_t>( 0, 1000000 ), [&]( const tbb::blocked_range<size_t> &r ) {
+		for( size_t i = r.begin(); i < r.end(); ++i )
+		{
+			TaskMutex::ScopedLock lock( mutex, /* write = */ false, acceptWork );
+			GAFFERTEST_ASSERT( !lock.isWriter() );
+			GAFFERTEST_ASSERTEQUAL( initialised, true );
 		}
-	);
+	} );
 }
 
 void testTaskMutexAcquireOr()
@@ -254,10 +230,10 @@ void testTaskMutexAcquireOr()
 
 	TaskMutex::ScopedLock lock2;
 	bool workAvailable = true;
-	const bool acquired = lock2.acquireOr(
-		mutex, /* write = */ true,
-		[&workAvailable]( bool wa ) { workAvailable = wa; return true; }
-	);
+	const bool acquired = lock2.acquireOr( mutex, /* write = */ true, [&workAvailable]( bool wa ) {
+		workAvailable = wa;
+		return true;
+	} );
 
 	GAFFERTEST_ASSERT( !acquired );
 	GAFFERTEST_ASSERT( !workAvailable );
@@ -275,9 +251,7 @@ void testTaskMutexExceptions()
 	try
 	{
 		TaskMutex::ScopedLock lock( mutex );
-		lock.execute(
-			[] { throw IECore::Exception( "Oops!" ); }
-		);
+		lock.execute( [] { throw IECore::Exception( "Oops!" ); } );
 	}
 	catch( const IECore::Exception &e )
 	{
@@ -291,9 +265,7 @@ void testTaskMutexExceptions()
 	// still succeed.
 
 	TaskMutex::ScopedLock lock( mutex );
-	lock.execute(
-		[&initialised] { initialised = true; }
-	);
+	lock.execute( [&initialised] { initialised = true; } );
 
 	GAFFERTEST_ASSERTEQUAL( initialised, true );
 }
@@ -328,25 +300,20 @@ void testTaskMutexWorkerExceptions()
 			initialisingThread = std::this_thread::get_id();
 			try
 			{
-				lock.execute(
-					[&]() {
-						tbb::parallel_for(
-							0, 1000,
-							[&]( size_t i ) {
-								if( std::this_thread::get_id() != initialisingThread )
-								{
-									throw IECore::Exception( "Oops!" );
-								}
-								else
-								{
-									// Wait a bit so we don't just run through all the tasks
-									// ourselves on the main thread.
-									std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
-								}
-							}
-						);
-					}
-				);
+				lock.execute( [&]() {
+					tbb::parallel_for( 0, 1000, [&]( size_t i ) {
+						if( std::this_thread::get_id() != initialisingThread )
+						{
+							throw IECore::Exception( "Oops!" );
+						}
+						else
+						{
+							// Wait a bit so we don't just run through all the tasks
+							// ourselves on the main thread.
+							std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
+						}
+					} );
+				} );
 			}
 			catch( const IECore::Exception &e )
 			{
@@ -356,12 +323,7 @@ void testTaskMutexWorkerExceptions()
 		}
 	};
 
-	tbb::parallel_for(
-		0, 1000,
-		[&initialise]( int i ) {
-			initialise();
-		}
-	);
+	tbb::parallel_for( 0, 1000, [&initialise]( int i ) { initialise(); } );
 
 	GAFFERTEST_ASSERTEQUAL( numAcquisitionExceptions.load(), 0 );
 	GAFFERTEST_ASSERTEQUAL( executionException, "Oops!" );
@@ -393,11 +355,7 @@ void testTaskMutexDontSilentlyCancel()
 		// execute the functor.  It should, in that case, throw IECore::Cancelled.
 		TaskMutex mutex;
 		TaskMutex::ScopedLock lock( mutex );
-		lock.execute(
-			[&]() {
-				completed = true;
-			}
-		);
+		lock.execute( [&]() { completed = true; } );
 
 		// If we haven't thrown an exception yet, then the function should have run
 		// A cancellation of the parent task shouldn't silently halt the lock.execute
@@ -409,12 +367,7 @@ void testTaskMutexDontSilentlyCancel()
 
 	try
 	{
-		tbb::parallel_for(
-			0, 1000,
-			[&runOrThrow]( int i ) {
-				runOrThrow( ( i % 10 ) == 9 );
-			}
-		);
+		tbb::parallel_for( 0, 1000, [&runOrThrow]( int i ) { runOrThrow( ( i % 10 ) == 9 ); } );
 	}
 	catch( TestCancelled & )
 	{
@@ -429,9 +382,7 @@ void testTaskMutexCancellation()
 
 	auto executeWithLock = [&mutex]() {
 		TaskMutex::ScopedLock lock( mutex );
-		lock.execute(
-			[]() { std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) ); }
-		);
+		lock.execute( []() { std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) ); } );
 	};
 
 	// Launch many tasks that all acquire the same mutex and call `execute()`.

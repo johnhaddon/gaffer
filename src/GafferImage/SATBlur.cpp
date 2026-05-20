@@ -84,7 +84,8 @@ inline float satReconstructPixel( const Imath::V2i &p, const std::vector<float> 
 	{
 		// Not on an edge, recover value by a SAT rect lookup on the
 		// 4 corners of the pixel
-		return sat[index] + sat[index - ImagePlug::tileSize() - 1] - sat[index - ImagePlug::tileSize()] - sat[index - 1];
+		return sat[index] + sat[index - ImagePlug::tileSize() - 1] - sat[index - ImagePlug::tileSize()] -
+			sat[index - 1];
 	}
 }
 
@@ -114,7 +115,9 @@ inline float satBilinear( float x, float y, const std::vector<float> &sat )
 		// Not on an edge, regular bilinear interpolation
 		int baseIndex = ( intY << ImagePlug::tileSizeLog2() ) + intX;
 		return ( sat[baseIndex] * ( 1.0f - xFrac ) + sat[baseIndex + 1] * xFrac ) * ( 1.0f - yFrac ) +
-			( sat[baseIndex + ImagePlug::tileSize()] * ( 1.0f - xFrac ) + sat[baseIndex + ImagePlug::tileSize() + 1] * xFrac ) * yFrac;
+			( sat[baseIndex + ImagePlug::tileSize()] * ( 1.0f - xFrac ) +
+			  sat[baseIndex + ImagePlug::tileSize() + 1] * xFrac ) *
+			yFrac;
 	}
 	else if( intX < -1 || intY < -1 )
 	{
@@ -146,7 +149,9 @@ inline float satBilinear( float x, float y, const std::vector<float> &sat )
 	else if( intX == -1 )
 	{
 		// Within the left edge. Two pixels bilinearly interpolated with 2 zero pixels
-		return ( sat[intY << ImagePlug::tileSizeLog2()] * ( 1.0f - yFrac ) + sat[( intY + 1 ) << ImagePlug::tileSizeLog2()] * yFrac ) * xFrac;
+		return ( sat[intY << ImagePlug::tileSizeLog2()] * ( 1.0f - yFrac ) +
+				 sat[( intY + 1 ) << ImagePlug::tileSizeLog2()] * yFrac ) *
+			xFrac;
 	}
 	else if( intY == -1 )
 	{
@@ -269,8 +274,7 @@ GAFFER_NODE_DEFINE_TYPE( SATBlur );
 
 size_t SATBlur::g_firstPlugIndex = 0;
 
-SATBlur::SATBlur( const std::string &name )
-	: ImageProcessor( name )
+SATBlur::SATBlur( const std::string &name ) : ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new V2fPlug( "radius", Plug::In, V2f( 0.0f ), V2f( 0.0f ) ) );
@@ -296,9 +300,7 @@ SATBlur::SATBlur( const std::string &name )
 	outPlug()->sampleOffsetsPlug()->setInput( inPlug()->sampleOffsetsPlug() );
 }
 
-SATBlur::~SATBlur()
-{
-}
+SATBlur::~SATBlur() {}
 
 Gaffer::V2fPlug *SATBlur::radiusPlug()
 {
@@ -404,32 +406,16 @@ void SATBlur::affects( const Gaffer::Plug *input, AffectedPlugsContainer &output
 {
 	ImageProcessor::affects( input, outputs );
 
-	if(
-		input == inPlug()->channelDataPlug() ||
-		input == inPlug()->channelNamesPlug() ||
-		input == inPlug()->dataWindowPlug() ||
-		input == inPlug()->deepPlug() ||
-		input == depthChannelPlug()
-	)
+	if( input == inPlug()->channelDataPlug() || input == inPlug()->channelNamesPlug() ||
+		input == inPlug()->dataWindowPlug() || input == inPlug()->deepPlug() || input == depthChannelPlug() )
 	{
 		outputs.push_back( satPlug() );
 	}
 
-	if(
-		input->parent<V2fPlug>() == radiusPlug() ||
-		input == radiusChannelPlug() ||
-		input == boundingModePlug() ||
-		input == filterPlug() ||
-		input == diskRectanglesPlug() ||
-		input == maxRadiusPlug() ||
-		input == satPlug() ||
-		input == inPlug()->channelDataPlug() ||
-		input == inPlug()->dataWindowPlug() ||
-		input == inPlug()->deepPlug() ||
-		input == inPlug()->channelNamesPlug() ||
-		input == layerBoundariesPlug() ||
-		input == depthLookupChannelPlug()
-	)
+	if( input->parent<V2fPlug>() == radiusPlug() || input == radiusChannelPlug() || input == boundingModePlug() ||
+		input == filterPlug() || input == diskRectanglesPlug() || input == maxRadiusPlug() || input == satPlug() ||
+		input == inPlug()->channelDataPlug() || input == inPlug()->dataWindowPlug() || input == inPlug()->deepPlug() ||
+		input == inPlug()->channelNamesPlug() || input == layerBoundariesPlug() || input == depthLookupChannelPlug() )
 	{
 		outputs.push_back( outPlug()->channelDataPlug() );
 	}
@@ -622,7 +608,9 @@ Gaffer::ValuePlug::CachePolicy SATBlur::computeCachePolicy( const Gaffer::ValueP
 	return ImageNode::computeCachePolicy( output );
 }
 
-void SATBlur::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void SATBlur::hashChannelData(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashChannelData( parent, context, h );
 
@@ -673,10 +661,12 @@ void SATBlur::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffe
 	const std::string &channelName = context->get<std::string>( ImagePlug::channelNameContextName );
 
 	const Box2i possibleInBound = BufferAlgo::intersection(
-		dataWindow,
-		Box2i( tileOrigin - V2i( maxRadiusInt ), tileOrigin + V2i( ImagePlug::tileSize() + maxRadiusInt ) )
+		dataWindow, Box2i( tileOrigin - V2i( maxRadiusInt ), tileOrigin + V2i( ImagePlug::tileSize() + maxRadiusInt ) )
 	);
-	const Box2i possibleTileBound = Box2i( ImagePlug::tileOrigin( possibleInBound.min ), ImagePlug::tileOrigin( possibleInBound.max - V2i( 1 ) ) + V2i( ImagePlug::tileSize() ) );
+	const Box2i possibleTileBound = Box2i(
+		ImagePlug::tileOrigin( possibleInBound.min ),
+		ImagePlug::tileOrigin( possibleInBound.max - V2i( 1 ) ) + V2i( ImagePlug::tileSize() )
+	);
 
 	ImagePlug::ChannelDataScope channelDataScope( context );
 
@@ -706,9 +696,11 @@ void SATBlur::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffe
 
 	channelDataScope.setChannelName( &channelName );
 	V2i inTileOrigin;
-	for( inTileOrigin.y = possibleTileBound.min.y; inTileOrigin.y < possibleTileBound.max.y; inTileOrigin.y += ImagePlug::tileSize() )
+	for( inTileOrigin.y = possibleTileBound.min.y; inTileOrigin.y < possibleTileBound.max.y;
+		 inTileOrigin.y += ImagePlug::tileSize() )
 	{
-		for( inTileOrigin.x = possibleTileBound.min.x; inTileOrigin.x < possibleTileBound.max.x; inTileOrigin.x += ImagePlug::tileSize() )
+		for( inTileOrigin.x = possibleTileBound.min.x; inTileOrigin.x < possibleTileBound.max.x;
+			 inTileOrigin.x += ImagePlug::tileSize() )
 		{
 			channelDataScope.setTileOrigin( &inTileOrigin );
 			satPlug()->hash( h );
@@ -728,9 +720,8 @@ namespace
 float readSat(
 	const V2i &tileOrigin, const V2i &outPixel, float floatX, float floatY, const V2f &inputRad,
 	const Box2i &possibleTileBound, const Box2i &inputTileBound, const V2i &visitOrderPermutate,
-	const FloatVectorDataPlug *satPlug, ImagePlug::ChannelDataScope &tileScope,
-	ConstFloatVectorDataPtr *satData, const std::vector<float> **satDataReadable,
-	const std::vector<Box2f> &rects
+	const FloatVectorDataPlug *satPlug, ImagePlug::ChannelDataScope &tileScope, ConstFloatVectorDataPtr *satData,
+	const std::vector<float> **satDataReadable, const std::vector<Box2f> &rects
 )
 {
 	const int possibleTileBoundWidth = possibleTileBound.size().x;
@@ -799,8 +790,7 @@ float readSat(
 			for( int i = minRect; i <= maxRect; i++ )
 			{
 				const Box2f &r = rects[i];
-				ret +=
-					satBilinear( floatXLocal + inputRad.x * r.min.x, floatYLocal + inputRad.y * r.min.y, sat ) +
+				ret += satBilinear( floatXLocal + inputRad.x * r.min.x, floatYLocal + inputRad.y * r.min.y, sat ) +
 					satBilinear( floatXLocal + inputRad.x * r.max.x, floatYLocal + inputRad.y * r.max.y, sat ) -
 					satBilinear( floatXLocal + inputRad.x * r.min.x, floatYLocal + inputRad.y * r.max.y, sat ) -
 					satBilinear( floatXLocal + inputRad.x * r.max.x, floatYLocal + inputRad.y * r.min.y, sat );
@@ -813,7 +803,10 @@ float readSat(
 
 } // namespace
 
-IECore::ConstFloatVectorDataPtr SATBlur::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr SATBlur::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	if( inPlug()->deep() )
 	{
@@ -873,10 +866,11 @@ IECore::ConstFloatVectorDataPtr SATBlur::computeChannelData( const std::string &
 	}
 
 	const Box2i possibleInBound = BufferAlgo::intersection(
-		dataWindow,
-		Box2i( tileOrigin - V2i( maxRadiusInt ), tileOrigin + V2i( ImagePlug::tileSize() + maxRadiusInt ) )
+		dataWindow, Box2i( tileOrigin - V2i( maxRadiusInt ), tileOrigin + V2i( ImagePlug::tileSize() + maxRadiusInt ) )
 	);
-	const Box2i possibleTileBound = Box2i( ImagePlug::tileIndex( possibleInBound.min ), ImagePlug::tileIndex( possibleInBound.max - V2i( 1 ) ) + V2i( 1 ) );
+	const Box2i possibleTileBound = Box2i(
+		ImagePlug::tileIndex( possibleInBound.min ), ImagePlug::tileIndex( possibleInBound.max - V2i( 1 ) ) + V2i( 1 )
+	);
 
 	// We use a fixed size vector cache with an entry for every tile we may use - this gives us fast,
 	// constant time access when reusing tiles ( this is crucial because for large radiuses, every
@@ -943,7 +937,9 @@ IECore::ConstFloatVectorDataPtr SATBlur::computeChannelData( const std::string &
 
 			// The total input radius we actually use includes this half pixel offset because the user
 			// specified radius doesn't include the pixel itself.
-			const V2f inputRad = noBlur ? V2f( 0.0f ) : V2f( 0.5f + std::min( maxRadius, fabs( curRadius.x ) ), 0.5f + std::min( maxRadius, fabs( curRadius.y ) ) );
+			const V2f inputRad = noBlur ? V2f( 0.0f ) :
+										  V2f( 0.5f + std::min( maxRadius, fabs( curRadius.x ) ),
+											   0.5f + std::min( maxRadius, fabs( curRadius.y ) ) );
 
 			if( boundingMode == BoundingMode::Normalize && !noBlur )
 			{
@@ -952,13 +948,23 @@ IECore::ConstFloatVectorDataPtr SATBlur::computeChannelData( const std::string &
 
 				// Rather than transforming each box, we transform the dataWindow once to be in the space
 				// of the default kernel.
-				Box2f relativeDataWindow( ( V2f( dataWindow.min ) - V2f( 0.5 ) - outPixel - tileOrigin ) / inputRad, ( V2f( dataWindow.max ) - V2f( 0.5 ) - outPixel - tileOrigin ) / inputRad );
+				Box2f relativeDataWindow(
+					( V2f( dataWindow.min ) - V2f( 0.5 ) - outPixel - tileOrigin ) / inputRad,
+					( V2f( dataWindow.max ) - V2f( 0.5 ) - outPixel - tileOrigin ) / inputRad
+				);
 
 				float totalArea = 0;
 				for( const Box2f &r : rects )
 				{
 					// Compute the area of the part of this rectangle inside the dataWindow.
-					totalArea += std::max( 0.0f, std::min( r.max.x, relativeDataWindow.max.x ) - std::max( r.min.x, relativeDataWindow.min.x ) ) * std::max( 0.0f, std::min( r.max.y, relativeDataWindow.max.y ) - std::max( r.min.y, relativeDataWindow.min.y ) );
+					totalArea += std::max(
+									 0.0f,
+									 std::min( r.max.x, relativeDataWindow.max.x ) -
+										 std::max( r.min.x, relativeDataWindow.min.x )
+								 ) *
+						std::max( 0.0f,
+								  std::min( r.max.y, relativeDataWindow.max.y ) -
+									  std::max( r.min.y, relativeDataWindow.min.y ) );
 				}
 				normalization = 4.0f / totalArea;
 			}
@@ -971,11 +977,14 @@ IECore::ConstFloatVectorDataPtr SATBlur::computeChannelData( const std::string &
 			if( layerBoundaries.size() && depthLookups )
 			{
 				float depthLookup = ( *depthLookups )[ImagePlug::pixelIndex( outPixel, Imath::V2i( 0 ) )];
-				layerIndex = -1 + ( std::lower_bound( layerBoundaries.begin(), layerBoundaries.end(), depthLookup ) - layerBoundaries.begin() );
+				layerIndex = -1 +
+					( std::lower_bound( layerBoundaries.begin(), layerBoundaries.end(), depthLookup ) -
+					  layerBoundaries.begin() );
 
 				layerIndex = std::max( 0, std::min( (int)layerBoundaries.size() - 2, layerIndex ) );
 
-				layerLerp = ( depthLookup - layerBoundaries[layerIndex] ) / ( layerBoundaries[layerIndex + 1] - layerBoundaries[layerIndex] );
+				layerLerp = ( depthLookup - layerBoundaries[layerIndex] ) /
+					( layerBoundaries[layerIndex + 1] - layerBoundaries[layerIndex] );
 
 				// If an image is locally flat in depth, we don't want the region to receive zero contribution
 				// from itself, so we bias the depth by 0.01.
@@ -1009,8 +1018,7 @@ IECore::ConstFloatVectorDataPtr SATBlur::computeChannelData( const std::string &
 				Box2i( outPixel + tileOrigin - curRadiusInt, outPixel + tileOrigin + curRadiusInt + V2i( 1 ) )
 			);
 			const Box2i inputTileBound(
-				ImagePlug::tileIndex( inputBound.min ),
-				ImagePlug::tileIndex( inputBound.max - V2i( 1 ) ) + V2i( 1 )
+				ImagePlug::tileIndex( inputBound.min ), ImagePlug::tileIndex( inputBound.max - V2i( 1 ) ) + V2i( 1 )
 			);
 
 			// This is a rather odd optimization, which doesn't always help, but it's also pretty simple:
@@ -1042,11 +1050,8 @@ IECore::ConstFloatVectorDataPtr SATBlur::computeChannelData( const std::string &
 			{
 				// Just doing a simple one layer lookup
 				val = readSat(
-					tileOrigin, outPixel, floatX, floatY, inputRad,
-					possibleTileBound, inputTileBound, visitOrderPermutate,
-					satPlug(),
-					tileScope, &satData[0], &satDataReadable[0],
-					rects
+					tileOrigin, outPixel, floatX, floatY, inputRad, possibleTileBound, inputTileBound,
+					visitOrderPermutate, satPlug(), tileScope, &satData[0], &satDataReadable[0], rects
 				);
 			}
 			else
@@ -1071,7 +1076,12 @@ IECore::ConstFloatVectorDataPtr SATBlur::computeChannelData( const std::string &
 						tileScope.remove( g_layerBoundaryName );
 					}
 
-					val += curWeight * readSat( tileOrigin, outPixel, floatX, floatY, inputRad, possibleTileBound, inputTileBound, visitOrderPermutate, satPlug(), tileScope, &satData[layerTiles * planeIndex], &satDataReadable[layerTiles * planeIndex], rects );
+					val += curWeight *
+						readSat(
+							   tileOrigin, outPixel, floatX, floatY, inputRad, possibleTileBound, inputTileBound,
+							   visitOrderPermutate, satPlug(), tileScope, &satData[layerTiles * planeIndex],
+							   &satDataReadable[layerTiles * planeIndex], rects
+						);
 				}
 			}
 

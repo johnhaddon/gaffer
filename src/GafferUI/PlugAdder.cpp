@@ -82,12 +82,10 @@ V3f tangent( const PlugAdder *g )
 
 StandardNodeGadget::Edge tangentEdge( const V3f &tangent )
 {
-	auto tangents = {
-		make_pair( V3f( 0, 1, 0 ), StandardNodeGadget::TopEdge ),
-		make_pair( V3f( 0, -1, 0 ), StandardNodeGadget::BottomEdge ),
-		make_pair( V3f( -1, 0, 0 ), StandardNodeGadget::LeftEdge ),
-		make_pair( V3f( 1, 0, 0 ), StandardNodeGadget::RightEdge )
-	};
+	auto tangents = { make_pair( V3f( 0, 1, 0 ), StandardNodeGadget::TopEdge ),
+					  make_pair( V3f( 0, -1, 0 ), StandardNodeGadget::BottomEdge ),
+					  make_pair( V3f( -1, 0, 0 ), StandardNodeGadget::LeftEdge ),
+					  make_pair( V3f( 1, 0, 0 ), StandardNodeGadget::RightEdge ) };
 
 	for( const auto &t : tangents )
 	{
@@ -151,8 +149,7 @@ void updateMetadata( Plug *plug, InternedString key, const char *value )
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( PlugAdder );
 
-PlugAdder::PlugAdder()
-	: m_dragging( false )
+PlugAdder::PlugAdder() : m_dragging( false )
 {
 	enterSignal().connect( boost::bind( &PlugAdder::enter, this, ::_1, ::_2 ) );
 	leaveSignal().connect( boost::bind( &PlugAdder::leave, this, ::_1, ::_2 ) );
@@ -165,9 +162,7 @@ PlugAdder::PlugAdder()
 	dragEndSignal().connect( boost::bind( &PlugAdder::dragEnd, this, ::_2 ) );
 }
 
-PlugAdder::~PlugAdder()
-{
-}
+PlugAdder::~PlugAdder() {}
 
 Imath::Box3f PlugAdder::bound() const
 {
@@ -181,7 +176,8 @@ bool PlugAdder::canCreateConnection( const Gaffer::Plug *endpoint ) const
 		return false;
 	}
 
-	ConstStringDataPtr noduleType = Gaffer::Metadata::value<StringData>( endpoint, IECore::InternedString( "nodule:type" ) );
+	ConstStringDataPtr noduleType =
+		Gaffer::Metadata::value<StringData>( endpoint, IECore::InternedString( "nodule:type" ) );
 	if( noduleType )
 	{
 		if( noduleType->readable() == "GafferUI::CompoundNodule" )
@@ -223,7 +219,9 @@ void PlugAdder::renderLayer( Layer layer, const Style *style, RenderReason reaso
 				if( !isSelectionRender( reason ) )
 				{
 					const V3f srcTangent = tangent( this );
-					style->renderConnection( V3f( 0 ), srcTangent, m_dragPosition, m_dragTangent, Style::HighlightedState );
+					style->renderConnection(
+						V3f( 0 ), srcTangent, m_dragPosition, m_dragTangent, Style::HighlightedState
+					);
 				}
 			}
 			break;

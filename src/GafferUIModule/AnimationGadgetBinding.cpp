@@ -59,9 +59,18 @@ void GafferUIModule::bindAnimationGadget()
 
 	GadgetClass<AnimationGadget>()
 		.def( init<>() )
-		.def( "visiblePlugs", ( Gaffer::StandardSet * (AnimationGadget::*)() ) & AnimationGadget::visiblePlugs, return_value_policy<IECorePython::CastToIntrusivePtr>() )
-		.def( "editablePlugs", ( Gaffer::StandardSet * (AnimationGadget::*)() ) & AnimationGadget::editablePlugs, return_value_policy<IECorePython::CastToIntrusivePtr>() )
-		.def( "selectedKeys", ( Gaffer::Set * (AnimationGadget::*)() ) & AnimationGadget::selectedKeys, return_value_policy<IECorePython::CastToIntrusivePtr>() )
+		.def(
+			"visiblePlugs", ( Gaffer::StandardSet * (AnimationGadget::*)() ) & AnimationGadget::visiblePlugs,
+			return_value_policy<IECorePython::CastToIntrusivePtr>()
+		)
+		.def(
+			"editablePlugs", ( Gaffer::StandardSet * (AnimationGadget::*)() ) & AnimationGadget::editablePlugs,
+			return_value_policy<IECorePython::CastToIntrusivePtr>()
+		)
+		.def(
+			"selectedKeys", ( Gaffer::Set * (AnimationGadget::*)() ) & AnimationGadget::selectedKeys,
+			return_value_policy<IECorePython::CastToIntrusivePtr>()
+		)
 		.def( "setContext", &AnimationGadget::setContext )
 		.def( "onTimeAxis", &AnimationGadget::onTimeAxis )
 		.def( "onValueAxis", &AnimationGadget::onValueAxis );

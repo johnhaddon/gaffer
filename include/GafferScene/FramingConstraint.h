@@ -51,7 +51,7 @@ namespace GafferScene
 class GAFFERSCENE_API FramingConstraint : public SceneElementProcessor
 {
 
-	public:
+public:
 
 	explicit FramingConstraint( const std::string &name = defaultName<FramingConstraint>() );
 	~FramingConstraint() override;
@@ -84,7 +84,7 @@ class GAFFERSCENE_API FramingConstraint : public SceneElementProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
 	Gaffer::ObjectVectorPlug *transformAndObjectPlug();
 	const Gaffer::ObjectVectorPlug *transformAndObjectPlug() const;
@@ -93,12 +93,20 @@ class GAFFERSCENE_API FramingConstraint : public SceneElementProcessor
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
 	bool processesTransform() const override;
-	void hashProcessedTransform( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	Imath::M44f computeProcessedTransform( const ScenePath &path, const Gaffer::Context *context, const Imath::M44f &inputTransform ) const override;
+	void hashProcessedTransform(
+		const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	Imath::M44f computeProcessedTransform(
+		const ScenePath &path, const Gaffer::Context *context, const Imath::M44f &inputTransform
+	) const override;
 
 	bool processesObject() const override;
-	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::ConstObjectPtr inputObject ) const override;
+	void hashProcessedObject(
+		const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstObjectPtr computeProcessedObject(
+		const ScenePath &path, const Gaffer::Context *context, IECore::ConstObjectPtr inputObject
+	) const override;
 
 	struct Target
 	{
@@ -109,7 +117,7 @@ class GAFFERSCENE_API FramingConstraint : public SceneElementProcessor
 	bool affectsTarget( const Gaffer::Plug *input ) const;
 	std::optional<Target> target() const;
 
-	private:
+private:
 
 	static size_t g_firstPlugIndex;
 };

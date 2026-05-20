@@ -53,8 +53,7 @@ GAFFER_NODE_DEFINE_TYPE( Ramp );
 
 size_t Ramp::g_firstPlugIndex = 0;
 
-Ramp::Ramp( const std::string &name )
-	: FlatImageSource( name )
+Ramp::Ramp( const std::string &name ) : FlatImageSource( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new FormatPlug( "format" ) );
@@ -68,9 +67,7 @@ Ramp::Ramp( const std::string &name )
 	addChild( new Transform2DPlug( "transform" ) );
 }
 
-Ramp::~Ramp()
-{
-}
+Ramp::~Ramp() {}
 
 GafferImage::FormatPlug *Ramp::formatPlug()
 {
@@ -136,12 +133,8 @@ void Ramp::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs )
 {
 	FlatImageSource::affects( input, outputs );
 
-	if(
-		rampPlug()->isAncestorOf( input ) ||
-		input->parent<V2fPlug>() == startPositionPlug() ||
-		input->parent<V2fPlug>() == endPositionPlug() ||
-		transformPlug()->isAncestorOf( input )
-	)
+	if( rampPlug()->isAncestorOf( input ) || input->parent<V2fPlug>() == startPositionPlug() ||
+		input->parent<V2fPlug>() == endPositionPlug() || transformPlug()->isAncestorOf( input ) )
 	{
 		outputs.push_back( outPlug()->channelDataPlug() );
 	}
@@ -163,7 +156,9 @@ void Ramp::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs )
 	}
 }
 
-void Ramp::hashFormat( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Ramp::hashFormat(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageSource::hashFormat( output, context, h );
 	h.append( formatPlug()->hash() );
@@ -174,7 +169,9 @@ GafferImage::Format Ramp::computeFormat( const Gaffer::Context *context, const I
 	return formatPlug()->getValue();
 }
 
-void Ramp::hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Ramp::hashDataWindow(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageSource::hashDataWindow( output, context, h );
 	h.append( formatPlug()->hash() );
@@ -190,13 +187,17 @@ IECore::ConstCompoundDataPtr Ramp::computeMetadata( const Gaffer::Context *conte
 	return outPlug()->metadataPlug()->defaultValue();
 }
 
-void Ramp::hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Ramp::hashChannelNames(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageSource::hashChannelNames( output, context, h );
 	layerPlug()->hash( h );
 }
 
-IECore::ConstStringVectorDataPtr Ramp::computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr Ramp::computeChannelNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	std::string channelNamePrefix = layerPlug()->getValue();
 	if( !channelNamePrefix.empty() )
@@ -215,7 +216,9 @@ IECore::ConstStringVectorDataPtr Ramp::computeChannelNames( const Gaffer::Contex
 	return resultData;
 }
 
-void Ramp::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Ramp::hashChannelData(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageSource::hashChannelData( output, context, h );
 
@@ -232,7 +235,10 @@ void Ramp::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::
 	endPositionPlug()->hash( h );
 }
 
-IECore::ConstFloatVectorDataPtr Ramp::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr Ramp::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	const int channelIndex = ImageAlgo::colorIndex( context->get<std::string>( ImagePlug::channelNameContextName ) );
 

@@ -52,16 +52,18 @@ GAFFER_NODE_DEFINE_TYPE( ResamplePrimitiveVariables );
 
 size_t ResamplePrimitiveVariables::g_firstPlugIndex = 0;
 
-ResamplePrimitiveVariables::ResamplePrimitiveVariables( const std::string &name ) : PrimitiveVariableProcessor( name, IECore::PathMatcher::NoMatch )
+ResamplePrimitiveVariables::ResamplePrimitiveVariables( const std::string &name )
+	: PrimitiveVariableProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
-	addChild( new IntPlug( "interpolation", Plug::In, PrimitiveVariable::Vertex, PrimitiveVariable::Constant, PrimitiveVariable::FaceVarying ) );
+	addChild( new IntPlug(
+		"interpolation", Plug::In, PrimitiveVariable::Vertex, PrimitiveVariable::Constant,
+		PrimitiveVariable::FaceVarying
+	) );
 }
 
-ResamplePrimitiveVariables::~ResamplePrimitiveVariables()
-{
-}
+ResamplePrimitiveVariables::~ResamplePrimitiveVariables() {}
 
 Gaffer::IntPlug *ResamplePrimitiveVariables::interpolationPlug()
 {
@@ -83,26 +85,36 @@ void ResamplePrimitiveVariables::affects( const Gaffer::Plug *input, AffectedPlu
 	}
 }
 
-void ResamplePrimitiveVariables::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ResamplePrimitiveVariables::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	PrimitiveVariableProcessor::hashProcessedObject( path, context, h );
 
 	interpolationPlug()->hash( h );
 }
 
-void ResamplePrimitiveVariables::processPrimitiveVariable( const ScenePath &path, const Gaffer::Context *context, IECoreScene::ConstPrimitivePtr inputGeometry, IECoreScene::PrimitiveVariable &variable ) const
+void ResamplePrimitiveVariables::processPrimitiveVariable(
+	const ScenePath &path, const Gaffer::Context *context, IECoreScene::ConstPrimitivePtr inputGeometry,
+	IECoreScene::PrimitiveVariable &variable
+) const
 {
-	PrimitiveVariable::Interpolation interpolation = static_cast<PrimitiveVariable::Interpolation>( interpolationPlug()->getValue() );
+	PrimitiveVariable::Interpolation interpolation =
+		static_cast<PrimitiveVariable::Interpolation>( interpolationPlug()->getValue() );
 
 	if( const MeshPrimitive *meshPrimitive = IECore::runTimeCast<const MeshPrimitive>( inputGeometry.get() ) )
 	{
 		MeshAlgo::resamplePrimitiveVariable( meshPrimitive, variable, interpolation, context->canceller() );
 	}
-	else if( const CurvesPrimitive *curvesPrimitive = IECore::runTimeCast<const CurvesPrimitive>( inputGeometry.get() ) )
+	else if(
+		const CurvesPrimitive *curvesPrimitive = IECore::runTimeCast<const CurvesPrimitive>( inputGeometry.get() )
+	)
 	{
 		CurvesAlgo::resamplePrimitiveVariable( curvesPrimitive, variable, interpolation, context->canceller() );
 	}
-	else if( const PointsPrimitive *pointsPrimitive = IECore::runTimeCast<const PointsPrimitive>( inputGeometry.get() ) )
+	else if(
+		const PointsPrimitive *pointsPrimitive = IECore::runTimeCast<const PointsPrimitive>( inputGeometry.get() )
+	)
 	{
 		PointsAlgo::resamplePrimitiveVariable( pointsPrimitive, variable, interpolation, context->canceller() );
 	}

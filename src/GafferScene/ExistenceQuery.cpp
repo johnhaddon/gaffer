@@ -45,8 +45,7 @@ size_t ExistenceQuery::g_firstPlugIndex = 0;
 
 GAFFER_NODE_DEFINE_TYPE( ExistenceQuery );
 
-ExistenceQuery::ExistenceQuery( const std::string &name )
-	: Gaffer::ComputeNode( name )
+ExistenceQuery::ExistenceQuery( const std::string &name ) : Gaffer::ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "scene" ) );
@@ -55,15 +54,11 @@ ExistenceQuery::ExistenceQuery( const std::string &name )
 	addChild( new Gaffer::StringPlug( "closestAncestor", Gaffer::Plug::Out ) );
 }
 
-ExistenceQuery::~ExistenceQuery()
-{
-}
+ExistenceQuery::~ExistenceQuery() {}
 
 ScenePlug *ExistenceQuery::scenePlug()
 {
-	return const_cast<ScenePlug *>(
-		static_cast<const ExistenceQuery *>( this )->scenePlug()
-	);
+	return const_cast<ScenePlug *>( static_cast<const ExistenceQuery *>( this )->scenePlug() );
 }
 
 const ScenePlug *ExistenceQuery::scenePlug() const
@@ -73,9 +68,7 @@ const ScenePlug *ExistenceQuery::scenePlug() const
 
 Gaffer::StringPlug *ExistenceQuery::locationPlug()
 {
-	return const_cast<Gaffer::StringPlug *>(
-		static_cast<const ExistenceQuery *>( this )->locationPlug()
-	);
+	return const_cast<Gaffer::StringPlug *>( static_cast<const ExistenceQuery *>( this )->locationPlug() );
 }
 
 const Gaffer::StringPlug *ExistenceQuery::locationPlug() const
@@ -85,9 +78,7 @@ const Gaffer::StringPlug *ExistenceQuery::locationPlug() const
 
 Gaffer::BoolPlug *ExistenceQuery::existsPlug()
 {
-	return const_cast<Gaffer::BoolPlug *>(
-		static_cast<const ExistenceQuery *>( this )->existsPlug()
-	);
+	return const_cast<Gaffer::BoolPlug *>( static_cast<const ExistenceQuery *>( this )->existsPlug() );
 }
 
 const Gaffer::BoolPlug *ExistenceQuery::existsPlug() const
@@ -97,9 +88,7 @@ const Gaffer::BoolPlug *ExistenceQuery::existsPlug() const
 
 Gaffer::StringPlug *ExistenceQuery::closestAncestorPlug()
 {
-	return const_cast<Gaffer::StringPlug *>(
-		static_cast<const ExistenceQuery *>( this )->closestAncestorPlug()
-	);
+	return const_cast<Gaffer::StringPlug *>( static_cast<const ExistenceQuery *>( this )->closestAncestorPlug() );
 }
 
 const Gaffer::StringPlug *ExistenceQuery::closestAncestorPlug() const
@@ -111,17 +100,16 @@ void ExistenceQuery::affects( const Gaffer::Plug *const input, AffectedPlugsCont
 {
 	ComputeNode::affects( input, outputs );
 
-	if(
-		( input == locationPlug() ) ||
-		( input == scenePlug()->existsPlug() )
-	)
+	if( ( input == locationPlug() ) || ( input == scenePlug()->existsPlug() ) )
 	{
 		outputs.push_back( existsPlug() );
 		outputs.push_back( closestAncestorPlug() );
 	}
 }
 
-void ExistenceQuery::hash( const Gaffer::ValuePlug *const output, const Gaffer::Context *const context, IECore::MurmurHash &h ) const
+void ExistenceQuery::hash(
+	const Gaffer::ValuePlug *const output, const Gaffer::Context *const context, IECore::MurmurHash &h
+) const
 {
 	ComputeNode::hash( output, context, h );
 

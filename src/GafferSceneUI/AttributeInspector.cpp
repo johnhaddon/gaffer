@@ -79,15 +79,15 @@ struct HistoryCacheKey
 {
 	HistoryCacheKey() {};
 	HistoryCacheKey( const ValuePlug *plug )
-		: plug( plug ), contextHash( Context::current()->hash() ), dirtyCount( plug->dirtyCount() )
+		: plug( plug ),
+		  contextHash( Context::current()->hash() ),
+		  dirtyCount( plug->dirtyCount() )
 	{
 	}
 
 	bool operator == ( const HistoryCacheKey &rhs ) const
 	{
-		return plug == rhs.plug &&
-			contextHash == rhs.contextHash &&
-			dirtyCount == rhs.dirtyCount;
+		return plug == rhs.plug && contextHash == rhs.contextHash && dirtyCount == rhs.dirtyCount;
 	}
 
 	const ValuePlug *plug;
@@ -123,9 +123,7 @@ HistoryCache g_historyCache(
 		// owners. Destroying plugs can trigger dirty propagation, so as a
 		// precaution we destroy the history on the UI thread, where this would
 		// be OK.
-		ParallelAlgo::callOnUIThread(
-			[history]() {}
-		);
+		ParallelAlgo::callOnUIThread( [history]() {} );
 	}
 
 );
@@ -134,7 +132,8 @@ struct AttributeHistoryCacheKey : public HistoryCacheKey
 {
 	AttributeHistoryCacheKey() {};
 	AttributeHistoryCacheKey( const ScenePlug *plug, IECore::InternedString attribute )
-		: HistoryCacheKey( plug->attributesPlug() ), attribute( attribute )
+		: HistoryCacheKey( plug->attributesPlug() ),
+		  attribute( attribute )
 	{
 	}
 
@@ -158,7 +157,8 @@ using AttributeHistoryCache = IECorePreview::LRUCache<AttributeHistoryCacheKey, 
 
 AttributeHistoryCache g_attributeHistoryCache(
 	// Getter
-	[]( const AttributeHistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) -> SceneAlgo::History::ConstPtr {
+	[]( const AttributeHistoryCacheKey &key, size_t &cost,
+		const IECore::Canceller *canceller ) -> SceneAlgo::History::ConstPtr {
 		assert( canceller == Context::current()->canceller() );
 		cost = 1;
 		SceneAlgo::History::ConstPtr attributesHistory = g_historyCache.get( key, canceller );
@@ -169,9 +169,7 @@ AttributeHistoryCache g_attributeHistoryCache(
 	// Removal callback
 	[]( const AttributeHistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
 		// See comment in g_historyCache
-		ParallelAlgo::callOnUIThread(
-			[history]() {}
-		);
+		ParallelAlgo::callOnUIThread( [history]() {} );
 	}
 
 );
@@ -200,13 +198,12 @@ static InternedString g_filteredLightsAttributeName( "filteredLights" );
 IE_CORE_DEFINERUNTIMETYPED( AttributeInspector )
 
 AttributeInspector::AttributeInspector(
-	const GafferScene::ScenePlugPtr &scene,
-	const Gaffer::PlugPtr &editScope,
-	IECore::InternedString attribute,
-	const std::string &name,
-	const std::string &type
+	const GafferScene::ScenePlugPtr &scene, const Gaffer::PlugPtr &editScope, IECore::InternedString attribute,
+	const std::string &name, const std::string &type
 )
-	: Inspector( { scene->attributesPlug(), scene->globalsPlug() }, type, name == "" ? attribute.string() : name, editScope ),
+	: Inspector(
+		  { scene->attributesPlug(), scene->globalsPlug() }, type, name == "" ? attribute.string() : name, editScope
+	  ),
 	  m_scene( scene ),
 	  m_attribute( attribute )
 {
@@ -219,7 +216,9 @@ GafferScene::SceneAlgo::History::ConstPtr AttributeInspector::history() const
 		return nullptr;
 	}
 
-	return g_attributeHistoryCache.get( AttributeHistoryCacheKey( m_scene.get(), m_attribute ), Context::current()->canceller() );
+	return g_attributeHistoryCache.get(
+		AttributeHistoryCacheKey( m_scene.get(), m_attribute ), Context::current()->canceller()
+	);
 }
 
 IECore::ConstObjectPtr AttributeInspector::value( const GafferScene::SceneAlgo::History *history ) const
@@ -232,7 +231,9 @@ IECore::ConstObjectPtr AttributeInspector::value( const GafferScene::SceneAlgo::
 	return nullptr;
 }
 
-IECore::ConstObjectPtr AttributeInspector::fallbackValue( const GafferScene::SceneAlgo::History *history, std::string &description ) const
+IECore::ConstObjectPtr AttributeInspector::fallbackValue(
+	const GafferScene::SceneAlgo::History *history, std::string &description
+) const
 {
 	ScenePlug::PathScope pathScope( Context::current() );
 	ScenePlug::ScenePath currentPath( history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ) );
@@ -258,12 +259,15 @@ IECore::ConstObjectPtr AttributeInspector::fallbackValue( const GafferScene::Sce
 		}
 	}
 
-	if( const auto globalAttribute = history->scene->globals()->member<Object>( g_attributePrefix + m_attribute.string() ) )
+	if( const auto globalAttribute =
+			history->scene->globals()->member<Object>( g_attributePrefix + m_attribute.string() ) )
 	{
 		description = "Global attribute";
 		return globalAttribute;
 	}
-	else if( const auto defaultValue = Gaffer::Metadata::value( g_attributePrefix + m_attribute.string(), g_defaultValue ) )
+	else if(
+		const auto defaultValue = Gaffer::Metadata::value( g_attributePrefix + m_attribute.string(), g_defaultValue )
+	)
 	{
 		description = "Default value";
 		return defaultValue;
@@ -272,7 +276,9 @@ IECore::ConstObjectPtr AttributeInspector::fallbackValue( const GafferScene::Sce
 	return nullptr;
 }
 
-Gaffer::ValuePlugPtr AttributeInspector::source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const
+Gaffer::ValuePlugPtr AttributeInspector::source(
+	const GafferScene::SceneAlgo::History *history, std::string &editWarning
+) const
 {
 	auto sceneNode = runTimeCast<SceneNode>( history->scene->node() );
 	if( !sceneNode || history->scene != sceneNode->outPlug() )
@@ -305,25 +311,22 @@ Gaffer::ValuePlugPtr AttributeInspector::source( const GafferScene::SceneAlgo::H
 
 	else if( auto attributes = runTimeCast<GafferScene::Attributes>( sceneNode ) )
 	{
-		if( attributes->globalPlug()->getValue() || !( attributes->filterPlug()->match( attributes->inPlug() ) & PathMatcher::ExactMatch ) )
+		if( attributes->globalPlug()->getValue() ||
+			!( attributes->filterPlug()->match( attributes->inPlug() ) & PathMatcher::ExactMatch ) )
 		{
 			return nullptr;
 		}
 
 		for( const auto &plug : NameValuePlug::Range( *attributes->attributesPlug() ) )
 		{
-			if(
-				plug->namePlug()->getValue() == m_attribute.string() &&
-				( !plug->enabledPlug() || plug->enabledPlug()->getValue() )
-			)
+			if( plug->namePlug()->getValue() == m_attribute.string() &&
+				( !plug->enabledPlug() || plug->enabledPlug()->getValue() ) )
 			{
 				/// \todo This is overly conservative. We should test to see if there is more than
 				/// one filter match (but make sure to early-out once two are found, rather than test
 				/// the rest of the scene).
-				editWarning = fmt::format(
-					"Edits to \"{}\" may affect other locations in the scene.",
-					m_attribute.string()
-				);
+				editWarning =
+					fmt::format( "Edits to \"{}\" may affect other locations in the scene.", m_attribute.string() );
 				return plug;
 			}
 		}
@@ -331,7 +334,8 @@ Gaffer::ValuePlugPtr AttributeInspector::source( const GafferScene::SceneAlgo::H
 
 	else if( auto attributeTweaks = runTimeCast<AttributeTweaks>( sceneNode ) )
 	{
-		if( attributeTweaks->globalPlug()->getValue() || !( attributeTweaks->filterPlug()->match( attributeTweaks->inPlug() ) & PathMatcher::ExactMatch ) )
+		if( attributeTweaks->globalPlug()->getValue() ||
+			!( attributeTweaks->filterPlug()->match( attributeTweaks->inPlug() ) & PathMatcher::ExactMatch ) )
 		{
 			return nullptr;
 		}
@@ -339,18 +343,19 @@ Gaffer::ValuePlugPtr AttributeInspector::source( const GafferScene::SceneAlgo::H
 		ConstCompoundObjectPtr attributes;
 		for( const auto &tweak : TweakPlug::Range( *attributeTweaks->tweaksPlug() ) )
 		{
-			if(
-				tweak->namePlug()->getValue() == m_attribute.string() &&
-				tweak->enabledPlug()->getValue()
-			)
+			if( tweak->namePlug()->getValue() == m_attribute.string() && tweak->enabledPlug()->getValue() )
 			{
 				if( tweak->modePlug()->getValue() == TweakPlug::CreateIfMissing )
 				{
 					if( !attributes )
 					{
-						ScenePlug::ScenePath currentPath( history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ) );
+						ScenePlug::ScenePath currentPath(
+							history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName )
+						);
 						attributes = attributeTweaks->localisePlug()->getValue() ?
-							attributeTweaks->inPlug()->fullAttributes( currentPath, /* withGlobalAttributes = */ true ) :
+							attributeTweaks->inPlug()->fullAttributes(
+								currentPath, /* withGlobalAttributes = */ true
+							) :
 							attributeTweaks->inPlug()->attributesPlug()->getValue();
 					}
 
@@ -370,7 +375,9 @@ Gaffer::ValuePlugPtr AttributeInspector::source( const GafferScene::SceneAlgo::H
 	return nullptr;
 }
 
-Inspector::AcquireEditFunctionOrFailure AttributeInspector::acquireEditFunction( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history ) const
+Inspector::AcquireEditFunctionOrFailure AttributeInspector::acquireEditFunction(
+	Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history
+) const
 {
 	InternedString attributeName = m_attribute;
 	if( auto attributeHistory = dynamic_cast<const SceneAlgo::AttributeHistory *>( history ) )
@@ -379,9 +386,7 @@ Inspector::AcquireEditFunctionOrFailure AttributeInspector::acquireEditFunction(
 	}
 
 	const GraphComponent *readOnlyReason = EditScopeAlgo::attributeEditReadOnlyReason(
-		editScope,
-		history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ),
-		attributeName
+		editScope, history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ), attributeName
 	);
 
 	if( readOnlyReason )
@@ -393,14 +398,11 @@ Inspector::AcquireEditFunctionOrFailure AttributeInspector::acquireEditFunction(
 	}
 	else
 	{
-		return [editScope = EditScopePtr( editScope ),
-				attributeName,
+		return [editScope = EditScopePtr( editScope ), attributeName,
 				context = history->context]( bool createIfNecessary ) {
 			Context::Scope scope( context.get() );
 			return EditScopeAlgo::acquireAttributeEdit(
-				editScope.get(),
-				context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ),
-				attributeName,
+				editScope.get(), context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ), attributeName,
 				createIfNecessary
 			);
 		};

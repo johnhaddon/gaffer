@@ -131,8 +131,7 @@ GAFFER_NODE_DEFINE_TYPE( ShaderView );
 /// but that would be a breaking change (albeit a small one).
 ShaderView::ViewDescription<ShaderView> ShaderView::g_viewDescription( GafferScene::Shader::staticTypeId(), "out" );
 
-ShaderView::ShaderView( Gaffer::ScriptNodePtr scriptNode )
-	: ImageView( scriptNode ), m_framed( false )
+ShaderView::ShaderView( Gaffer::ScriptNodePtr scriptNode ) : ImageView( scriptNode ), m_framed( false )
 {
 	// Create a converter to generate an image
 	// from the input shader.
@@ -153,7 +152,8 @@ ShaderView::ShaderView( Gaffer::ScriptNodePtr scriptNode )
 	output->parameters()["quantize"] = new IECore::IntVectorData( std::vector<int>( 4, 0 ) );
 	output->parameters()["driverType"] = new IECore::StringData( "ClientDisplayDriver" );
 	output->parameters()["displayHost"] = new IECore::StringData( "localhost" );
-	output->parameters()["displayPort"] = new IECore::StringData( boost::lexical_cast<std::string>( displayDriverServer()->portNumber() ) );
+	output->parameters()["displayPort"] =
+		new IECore::StringData( boost::lexical_cast<std::string>( displayDriverServer()->portNumber() ) );
 	output->parameters()["remoteDisplayType"] = new IECore::StringData( "GafferScene::GafferDisplayDriver" );
 	output->parameters()["shaderView:id"] = new IECore::StringData( boost::lexical_cast<std::string>( this ) );
 
@@ -182,9 +182,7 @@ ShaderView::ShaderView( Gaffer::ScriptNodePtr scriptNode )
 	imageGadget()->stateChangedSignal().connect( boost::bind( &ShaderView::imageGadgetStateChanged, this ) );
 }
 
-ShaderView::~ShaderView()
-{
-}
+ShaderView::~ShaderView() {}
 
 Gaffer::StringPlug *ShaderView::scenePlug()
 {
@@ -214,7 +212,9 @@ std::string ShaderView::shaderPrefix() const
 		attributes = inPlug<ShaderPlug>()->attributes();
 	}
 	const char *shaders[] = { "surface", "displacement", "shader", nullptr };
-	for( IECore::CompoundObject::ObjectMap::const_iterator it = attributes->members().begin(), eIt = attributes->members().end(); it != eIt; ++it )
+	for( IECore::CompoundObject::ObjectMap::const_iterator it = attributes->members().begin(),
+														   eIt = attributes->members().end();
+		 it != eIt; ++it )
 	{
 		for( const char **shader = shaders; *shader; ++shader )
 		{
@@ -342,9 +342,7 @@ void ShaderView::updateRenderer()
 	}
 
 	m_renderer = it->second();
-	m_renderer->inPlug()->setInput(
-		m_imageConverter->getChild<SceneNode>( "Outputs" )->outPlug()
-	);
+	m_renderer->inPlug()->setInput( m_imageConverter->getChild<SceneNode>( "Outputs" )->outPlug() );
 
 	updateRendererContext();
 }
@@ -365,7 +363,9 @@ void ShaderView::updateRendererState()
 	}
 
 	m_renderer->statePlug()->setValue(
-		( viewportGadget()->visible() && imageGadget()->state() != GafferImageUI::ImageGadget::Paused ) ? InteractiveRender::Running : InteractiveRender::Stopped
+		( viewportGadget()->visible() && imageGadget()->state() != GafferImageUI::ImageGadget::Paused ) ?
+			InteractiveRender::Running :
+			InteractiveRender::Stopped
 	);
 }
 
@@ -492,7 +492,9 @@ void ShaderView::deregisterRenderer( const std::string &shaderPrefix )
 	rendererRegistrationChangedSignal()();
 }
 
-void ShaderView::registerScene( const std::string &shaderPrefix, const std::string &name, const std::filesystem::path &fileName )
+void ShaderView::registerScene(
+	const std::string &shaderPrefix, const std::string &name, const std::filesystem::path &fileName
+)
 {
 	// See ShaderViewBinding.cpp for details.
 	throw IECore::Exception( "ShaderView::registerScene currently only implemented in Python" );

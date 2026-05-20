@@ -61,15 +61,15 @@ struct HistoryCacheKey
 {
 	HistoryCacheKey() {};
 	HistoryCacheKey( const ValuePlug *plug )
-		: plug( plug ), contextHash( Context::current()->hash() ), dirtyCount( plug->dirtyCount() )
+		: plug( plug ),
+		  contextHash( Context::current()->hash() ),
+		  dirtyCount( plug->dirtyCount() )
 	{
 	}
 
 	bool operator == ( const HistoryCacheKey &rhs ) const
 	{
-		return plug == rhs.plug &&
-			contextHash == rhs.contextHash &&
-			dirtyCount == rhs.dirtyCount;
+		return plug == rhs.plug && contextHash == rhs.contextHash && dirtyCount == rhs.dirtyCount;
 	}
 
 	const ValuePlug *plug;
@@ -93,7 +93,8 @@ HistoryCache g_historyCache(
 	[]( const HistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) {
 		assert( canceller == Context::current()->canceller() );
 		cost = 1;
-		const ScenePlug::ScenePath *path = Context::current()->getIfExists<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
+		const ScenePlug::ScenePath *path =
+			Context::current()->getIfExists<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
 		return path ? SceneAlgo::history( key.plug, *path ) : SceneAlgo::history( key.plug );
 	},
 	// Max cost
@@ -104,9 +105,7 @@ HistoryCache g_historyCache(
 		// owners. Destroying plugs can trigger dirty propagation, so as a
 		// precaution we destroy the history on the UI thread, where this would
 		// be OK.
-		ParallelAlgo::callOnUIThread(
-			[history]() {}
-		);
+		ParallelAlgo::callOnUIThread( [history]() {} );
 	}
 
 );
@@ -119,9 +118,7 @@ HistoryCache g_historyCache(
 
 IE_CORE_DEFINERUNTIMETYPED( BasicInspector )
 
-BasicInspector::~BasicInspector()
-{
-}
+BasicInspector::~BasicInspector() {}
 
 void BasicInspector::init()
 {
@@ -153,7 +150,9 @@ IECore::ConstObjectPtr BasicInspector::value( const GafferScene::SceneAlgo::Hist
 	return m_valueFunction( history->scene->getChild<ValuePlug>( m_plug->getName() ) );
 }
 
-Gaffer::ValuePlugPtr BasicInspector::source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const
+Gaffer::ValuePlugPtr BasicInspector::source(
+	const GafferScene::SceneAlgo::History *history, std::string &editWarning
+) const
 {
 	if( history->scene->direction() == Plug::Out )
 	{

@@ -49,8 +49,7 @@ GAFFER_NODE_DEFINE_TYPE( DeepSampler );
 
 size_t DeepSampler::g_firstPlugIndex = 0;
 
-DeepSampler::DeepSampler( const std::string &name )
-	: ComputeNode( name )
+DeepSampler::DeepSampler( const std::string &name ) : ComputeNode( name )
 {
 
 	storeIndexOfNextChild( g_firstPlugIndex );
@@ -60,9 +59,7 @@ DeepSampler::DeepSampler( const std::string &name )
 	addChild( new AtomicCompoundDataPlug( "pixelData", Plug::Out, new IECore::CompoundData ) );
 }
 
-DeepSampler::~DeepSampler()
-{
-}
+DeepSampler::~DeepSampler() {}
 
 ImagePlug *DeepSampler::imagePlug()
 {
@@ -98,12 +95,8 @@ void DeepSampler::affects( const Gaffer::Plug *input, AffectedPlugsContainer &ou
 {
 	ComputeNode::affects( input, outputs );
 
-	if(
-		input == imagePlug()->dataWindowPlug() ||
-		input == imagePlug()->channelDataPlug() ||
-		input == imagePlug()->channelNamesPlug() ||
-		input->parent<Plug>() == pixelPlug()
-	)
+	if( input == imagePlug()->dataWindowPlug() || input == imagePlug()->channelDataPlug() ||
+		input == imagePlug()->channelNamesPlug() || input->parent<Plug>() == pixelPlug() )
 	{
 		outputs.push_back( pixelDataPlug() );
 	}
@@ -172,8 +165,7 @@ void DeepSampler::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 					FloatVectorDataPtr pixelChannelData = new FloatVectorData();
 					pixelChannelData->writable().resize( pixelSize );
 					memcpy(
-						&pixelChannelData->writable()[0],
-						&channelData->readable()[prevOffset],
+						&pixelChannelData->writable()[0], &channelData->readable()[prevOffset],
 						sizeof( float ) * pixelSize
 					);
 					result->writable()[i] = pixelChannelData;

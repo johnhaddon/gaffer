@@ -133,7 +133,10 @@ T *attributeCast( const IECore::RunTimeTyped *v, const IECore::InternedString &n
 		return t;
 	}
 
-	IECore::msg( IECore::Msg::Warning, "IECoreRenderMan::Renderer", fmt::format( "Expected {} but got {} for attribute \"{}\".", T::staticTypeName(), v->typeName(), name.c_str() ) );
+	IECore::msg(
+		IECore::Msg::Warning, "IECoreRenderMan::Renderer",
+		fmt::format( "Expected {} but got {} for attribute \"{}\".", T::staticTypeName(), v->typeName(), name.c_str() )
+	);
 	return nullptr;
 }
 
@@ -165,7 +168,9 @@ T attributeValue( const CompoundObject::ObjectMap &attributes, IECore::InternedS
 	return data ? data->readable() : defaultValue;
 }
 
-pair<InternedString, const ShaderNetwork *> shaderNetworkAttribute( const CompoundObject::ObjectMap &attributes, const vector<InternedString> &attributeNames )
+pair<InternedString, const ShaderNetwork *> shaderNetworkAttribute(
+	const CompoundObject::ObjectMap &attributes, const vector<InternedString> &attributeNames
+)
 {
 	for( const auto &name : attributeNames )
 	{
@@ -186,15 +191,9 @@ bool isMeshLight( const IECoreScene::ShaderNetwork *lightShader )
 IECoreScene::ConstShaderNetworkPtr g_facingRatio = []() {
 	ShaderNetworkPtr result = new ShaderNetwork;
 
-	const InternedString facingRatioHandle = result->addShader(
-		"facingRatio", new Shader( "PxrFacingRatio" )
-	);
-	const InternedString toFloat3Handle = result->addShader(
-		"toFloat3", new Shader( "PxrToFloat3" )
-	);
-	const InternedString constantHandle = result->addShader(
-		"constant", new Shader( "PxrConstant" )
-	);
+	const InternedString facingRatioHandle = result->addShader( "facingRatio", new Shader( "PxrFacingRatio" ) );
+	const InternedString toFloat3Handle = result->addShader( "toFloat3", new Shader( "PxrToFloat3" ) );
+	const InternedString constantHandle = result->addShader( "constant", new Shader( "PxrConstant" ) );
 
 	result->addConnection( { { facingRatioHandle, "resultF" }, { toFloat3Handle, "input" } } );
 	result->addConnection( { { toFloat3Handle, "resultRGB" }, { constantHandle, "emitColor" } } );
@@ -205,9 +204,7 @@ IECoreScene::ConstShaderNetworkPtr g_facingRatio = []() {
 
 IECoreScene::ConstShaderNetworkPtr g_black = []() {
 	ShaderNetworkPtr result = new ShaderNetwork;
-	const InternedString blackHandle = result->addShader(
-		"black", new Shader( "PxrBlack" )
-	);
+	const InternedString blackHandle = result->addShader( "black", new Shader( "PxrBlack" ) );
 	result->setOutput( { blackHandle, "out" } );
 
 	return result;
@@ -223,9 +220,12 @@ Attributes::Attributes( const IECore::CompoundObject *attributes, MaterialCache 
 	// Convert shaders.
 
 	const auto [surfaceName, surface] = shaderNetworkAttribute( attributes->members(), g_surfaceAttributeNames );
-	m_surfaceMaterial = materialCache->getMaterial( surface ? surface : g_facingRatio.get(), surface ? surfaceName : InternedString(), attributes );
+	m_surfaceMaterial = materialCache->getMaterial(
+		surface ? surface : g_facingRatio.get(), surface ? surfaceName : InternedString(), attributes
+	);
 
-	const auto [displacementName, displacement] = shaderNetworkAttribute( attributes->members(), g_displacementAttributeNames );
+	const auto [displacementName, displacement] =
+		shaderNetworkAttribute( attributes->members(), g_displacementAttributeNames );
 	if( displacement )
 	{
 		m_displacement = materialCache->getDisplacement( displacement, displacementName, attributes );
@@ -237,7 +237,9 @@ Attributes::Attributes( const IECore::CompoundObject *attributes, MaterialCache 
 		// Mesh lights default to having a black material so they don't appear
 		// in indirect rays, but the user can override with a surface assignment
 		// if they want further control. Other lights don't have materials.
-		m_lightMaterial = materialCache->getMaterial( surface ? surface : g_black.get(), surface ? surfaceName : InternedString(), attributes );
+		m_lightMaterial = materialCache->getMaterial(
+			surface ? surface : g_black.get(), surface ? surfaceName : InternedString(), attributes
+		);
 	}
 
 	if( surface )
@@ -284,9 +286,7 @@ Attributes::Attributes( const IECore::CompoundObject *attributes, MaterialCache 
 		else if( boost::starts_with( name.string(), g_renderAttributePrefix ) )
 		{
 			const string withUserPrefix = g_userAttributePrefix + ( name.c_str() + g_renderAttributePrefix.size() );
-			ParamListAlgo::convertParameter(
-				RtUString( withUserPrefix.c_str() ), data, m_instanceAttributes
-			);
+			ParamListAlgo::convertParameter( RtUString( withUserPrefix.c_str() ), data, m_instanceAttributes );
 		}
 
 		if( !boost::starts_with( name.c_str(), g_renderManPrefix.c_str() ) )
@@ -307,16 +307,16 @@ Attributes::Attributes( const IECore::CompoundObject *attributes, MaterialCache 
 		}
 		else
 		{
-			ParamListAlgo::convertParameter( RtUString( name.c_str() + g_renderManPrefix.size() ), data, m_instanceAttributes );
+			ParamListAlgo::convertParameter(
+				RtUString( name.c_str() + g_renderManPrefix.size() ), data, m_instanceAttributes
+			);
 		}
 	}
 
 	m_lightFilter = attribute<ShaderNetwork>( attributes->members(), g_renderManLightFilterAttributeName );
 }
 
-Attributes::~Attributes()
-{
-}
+Attributes::~Attributes() {}
 
 const std::optional<IECore::MurmurHash> &Attributes::prototypeHash() const
 {

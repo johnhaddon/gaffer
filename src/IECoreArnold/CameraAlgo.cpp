@@ -80,10 +80,7 @@ AtVector2 curvePoint( const Rampff::Point &point )
 	// Clamping enforces constraints specified in Arnold docs.
 	// Not likely to be an issue in the X-axis, but in Y it's
 	// easy to go over 1 accidentally if using a cubic basis.
-	return AtVector2(
-		Imath::clamp( point.first, 0.0f, 1.0f ),
-		Imath::clamp( point.second, 0.0f, 1.0f )
-	);
+	return AtVector2( Imath::clamp( point.first, 0.0f, 1.0f ), Imath::clamp( point.second, 0.0f, 1.0f ) );
 }
 
 void setShutterCurveParameter( AtNode *camera, const IECore::Data *value, const std::string &messageContext )
@@ -91,7 +88,8 @@ void setShutterCurveParameter( AtNode *camera, const IECore::Data *value, const 
 	auto *rampData = runTimeCast<const IECore::RampffData>( value );
 	if( !rampData )
 	{
-		msg( Msg::Warning, messageContext, fmt::format( "Unsupported value type \"{}\" (expected RampffData).", value->typeName() ) );
+		msg( Msg::Warning, messageContext,
+			 fmt::format( "Unsupported value type \"{}\" (expected RampffData).", value->typeName() ) );
 		return;
 	}
 
@@ -129,7 +127,10 @@ void setShutterCurveParameter( AtNode *camera, const IECore::Data *value, const 
 }
 
 // Converts the parts of the camera that can't be animated in Arnold.
-AtNode *convertStatic( const IECoreScene::Camera *camera, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )
+AtNode *convertStatic(
+	const IECoreScene::Camera *camera, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode,
+	const std::string &messageContext
+)
 {
 	// Use projection to decide what sort of camera node to create
 	const std::string projection = camera->getProjection();
@@ -160,7 +161,8 @@ AtNode *convertStatic( const IECoreScene::Camera *camera, AtUniverse *universe, 
 
 	// Set any Arnold-specific parameters
 	const AtNodeEntry *nodeEntry = AiNodeGetNodeEntry( result );
-	for( CompoundDataMap::const_iterator it = camera->parameters().begin(), eIt = camera->parameters().end(); it != eIt; ++it )
+	for( CompoundDataMap::const_iterator it = camera->parameters().begin(), eIt = camera->parameters().end(); it != eIt;
+		 ++it )
 	{
 		AtString paramNameArnold( it->first.c_str() );
 		if( it->first == "mesh" )
@@ -250,7 +252,10 @@ auto parameterSamples( const IECoreArnold::CameraAlgo::CameraSamples &cameraSamp
 	return result;
 }
 
-void setAnimatedFloat( AtNode *node, AtString name, const IECoreArnold::CameraAlgo::CameraSamples &cameraSamples, float ( *parameterFunction )( const IECoreScene::Camera * ) )
+void setAnimatedFloat(
+	AtNode *node, AtString name, const IECoreArnold::CameraAlgo::CameraSamples &cameraSamples,
+	float ( *parameterFunction )( const IECoreScene::Camera * )
+)
 {
 	const auto samples = parameterSamples( cameraSamples, parameterFunction );
 	if( samples.size() > 1 )
@@ -265,14 +270,19 @@ void setAnimatedFloat( AtNode *node, AtString name, const IECoreArnold::CameraAl
 
 } // namespace
 
-AtNode *CameraAlgo::convert( const CameraSamples &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )
+AtNode *CameraAlgo::convert(
+	const CameraSamples &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName,
+	const AtNode *parentNode, const std::string &messageContext
+)
 {
 	AtNode *result = convertStatic( samples[0], universe, nodeName, parentNode, messageContext );
 	if( samples[0]->getProjection() == "perspective" )
 	{
 		setAnimatedFloat( result, g_fovArnoldString, samples, fieldOfView );
 		setAnimatedFloat( result, g_apertureSizeArnoldString, samples, apertureSize );
-		setAnimatedFloat( result, g_focusDistanceArnoldString, samples, []( auto camera ) { return camera->getFocusDistance(); } );
+		setAnimatedFloat( result, g_focusDistanceArnoldString, samples, []( auto camera ) {
+			return camera->getFocusDistance();
+		} );
 	}
 
 	const auto sw = parameterSamples( samples, screenWindow );

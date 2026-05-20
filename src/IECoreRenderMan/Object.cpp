@@ -84,19 +84,23 @@ RtParamList mergedAttributes( const RtParamList &attributes, const RtParamList &
 
 } // namespace
 
-Object::Object( const std::string &name, const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, LightLinker *lightLinker, const Session *session )
-	: m_session( session ), m_lightLinker( lightLinker ), m_geometryInstance( riley::GeometryInstanceId::InvalidId() ), m_attributes( attributes ), m_geometryPrototype( geometryPrototype )
+Object::Object(
+	const std::string &name, const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes,
+	LightLinker *lightLinker, const Session *session
+)
+	: m_session( session ),
+	  m_lightLinker( lightLinker ),
+	  m_geometryInstance( riley::GeometryInstanceId::InvalidId() ),
+	  m_attributes( attributes ),
+	  m_geometryPrototype( geometryPrototype )
 {
 	m_extraAttributes.SetString( Loader::strings().k_identifier_name, RtUString( name.c_str() ) );
 	m_extraAttributes.SetString( Loader::strings().k_grouping_membership, g_defaultShadowGroup );
 
 	m_geometryInstance = m_session->riley->CreateGeometryInstance(
 		riley::UserId(),
-		/* group = */ riley::GeometryPrototypeId::InvalidId(),
-		m_geometryPrototype->id(),
-		m_attributes->surfaceMaterial()->id(),
-		g_emptyCoordinateSystems,
-		IdentityTransform(),
+		/* group = */ riley::GeometryPrototypeId::InvalidId(), m_geometryPrototype->id(),
+		m_attributes->surfaceMaterial()->id(), g_emptyCoordinateSystems, IdentityTransform(),
 		mergedAttributes( m_attributes->instanceAttributes(), m_extraAttributes )
 	);
 }
@@ -120,15 +124,16 @@ Object::~Object()
 	}
 }
 
-void Object::transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times )
+void Object::transform(
+	const IECoreScenePreview::Renderer::TransformSamples &samples,
+	const IECoreScenePreview::Renderer::SampleTimes &times
+)
 {
 	AnimatedTransform animatedTransform( samples, times );
 	const riley::GeometryInstanceResult result = m_session->riley->ModifyGeometryInstance(
-		/* group = */ riley::GeometryPrototypeId::InvalidId(),
-		m_geometryInstance,
+		/* group = */ riley::GeometryPrototypeId::InvalidId(), m_geometryInstance,
 		/* material = */ nullptr,
-		/* coordsys = */ nullptr,
-		&animatedTransform,
+		/* coordsys = */ nullptr, &animatedTransform,
 		/* attributes = */ nullptr
 	);
 
@@ -149,12 +154,10 @@ bool Object::attributes( const IECoreScenePreview::Renderer::AttributesInterface
 	RtParamList allAttributes = mergedAttributes( typedAttributes->instanceAttributes(), m_extraAttributes );
 
 	const riley::GeometryInstanceResult result = m_session->riley->ModifyGeometryInstance(
-		/* group = */ riley::GeometryPrototypeId::InvalidId(),
-		m_geometryInstance,
+		/* group = */ riley::GeometryPrototypeId::InvalidId(), m_geometryInstance,
 		&typedAttributes->surfaceMaterial()->id(),
 		/* coordsys = */ nullptr,
-		/* xform = */ nullptr,
-		&allAttributes
+		/* xform = */ nullptr, &allAttributes
 	);
 	m_attributes = typedAttributes;
 

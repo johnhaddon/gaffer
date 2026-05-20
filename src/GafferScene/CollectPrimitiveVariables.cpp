@@ -52,8 +52,7 @@ GAFFER_NODE_DEFINE_TYPE( CollectPrimitiveVariables );
 
 size_t CollectPrimitiveVariables::g_firstPlugIndex = 0;
 
-CollectPrimitiveVariables::CollectPrimitiveVariables( const std::string &name )
-	: ObjectProcessor( name )
+CollectPrimitiveVariables::CollectPrimitiveVariables( const std::string &name ) : ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -63,9 +62,7 @@ CollectPrimitiveVariables::CollectPrimitiveVariables( const std::string &name )
 	addChild( new BoolPlug( "requireVariation", Plug::In, false ) );
 }
 
-CollectPrimitiveVariables::~CollectPrimitiveVariables()
-{
-}
+CollectPrimitiveVariables::~CollectPrimitiveVariables() {}
 
 Gaffer::StringPlug *CollectPrimitiveVariables::primitiveVariablesPlug()
 {
@@ -109,14 +106,13 @@ const Gaffer::BoolPlug *CollectPrimitiveVariables::requireVariationPlug() const
 
 bool CollectPrimitiveVariables::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return ObjectProcessor::affectsProcessedObject( input ) ||
-		input == suffixesPlug() ||
-		input == suffixContextVariablePlug() ||
-		input == primitiveVariablesPlug() ||
-		input == requireVariationPlug();
+	return ObjectProcessor::affectsProcessedObject( input ) || input == suffixesPlug() ||
+		input == suffixContextVariablePlug() || input == primitiveVariablesPlug() || input == requireVariationPlug();
 }
 
-void CollectPrimitiveVariables::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CollectPrimitiveVariables::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ObjectProcessor::hashProcessedObject( path, context, h );
 
@@ -154,7 +150,9 @@ void CollectPrimitiveVariables::hashProcessedObject( const ScenePath &path, cons
 	}
 }
 
-IECore::ConstObjectPtr CollectPrimitiveVariables::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr CollectPrimitiveVariables::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	const IECoreScene::Primitive *inPrimitive = runTimeCast<const IECoreScene::Primitive>( inputObject );
 	if( !inPrimitive )
@@ -213,7 +211,8 @@ IECore::ConstObjectPtr CollectPrimitiveVariables::computeProcessedObject( const 
 	IECoreScene::PrimitivePtr result = inPrimitive->copy();
 	for( unsigned int i = 0; i < suffixes.size(); i++ )
 	{
-		const IECoreScene::Primitive *collectPrimitive = runTimeCast<const IECoreScene::Primitive>( collectedObjects[i].get() );
+		const IECoreScene::Primitive *collectPrimitive =
+			runTimeCast<const IECoreScene::Primitive>( collectedObjects[i].get() );
 
 		if( !collectPrimitive )
 		{

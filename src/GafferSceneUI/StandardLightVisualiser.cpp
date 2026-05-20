@@ -72,14 +72,19 @@ using namespace IECoreGLPreview;
 namespace
 {
 
-IECore::InternedString metadataTargetForNetwork( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork )
+IECore::InternedString metadataTargetForNetwork(
+	const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork
+)
 {
 	const IECoreScene::Shader *shader = shaderNetwork->outputShader();
 	return attributeName.string() + ":" + shader->getName();
 }
 
 template<typename T>
-T parameter( InternedString metadataTarget, const IECore::CompoundData *parameters, InternedString parameterNameMetadata, T defaultValue )
+T parameter(
+	InternedString metadataTarget, const IECore::CompoundData *parameters, InternedString parameterNameMetadata,
+	T defaultValue
+)
 {
 	ConstStringDataPtr parameterName = Metadata::value<StringData>( metadataTarget, parameterNameMetadata );
 	if( !parameterName )
@@ -129,17 +134,18 @@ const InternedString g_roundnessParameterString( "roundnessParameter" );
 //////////////////////////////////////////////////////////////////////////
 
 // Register as the standard fallback visualiser.
-LightVisualiser::LightVisualiserDescription<StandardLightVisualiser> StandardLightVisualiser::g_description( "light *:light", "*" );
+LightVisualiser::LightVisualiserDescription<StandardLightVisualiser> StandardLightVisualiser::g_description(
+	"light *:light", "*"
+);
 
-StandardLightVisualiser::StandardLightVisualiser()
-{
-}
+StandardLightVisualiser::StandardLightVisualiser() {}
 
-StandardLightVisualiser::~StandardLightVisualiser()
-{
-}
+StandardLightVisualiser::~StandardLightVisualiser() {}
 
-Visualisations StandardLightVisualiser::visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const
+Visualisations StandardLightVisualiser::visualise(
+	const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork,
+	const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state
+) const
 {
 	const InternedString metadataTarget = metadataTargetForNetwork( attributeName, shaderNetwork );
 	const IECore::CompoundData *shaderParameters = shaderNetwork->outputShader()->parametersData();
@@ -155,7 +161,8 @@ Visualisations StandardLightVisualiser::visualise( const IECore::InternedString 
 		}
 	}
 
-	const Color3f color = parameter<Color3f>( metadataTarget, shaderParameters, g_colorParameterString, Color3f( 1.0f ) );
+	const Color3f color =
+		parameter<Color3f>( metadataTarget, shaderParameters, g_colorParameterString, Color3f( 1.0f ) );
 	const Color3f tint = parameter<Color3f>( metadataTarget, shaderParameters, g_tintParameterString, Color3f( 1.0f ) );
 
 	const FloatData *visualiserScaleData = attributes->member<FloatData>( g_glVisualiserScaleString );
@@ -163,13 +170,15 @@ Visualisations StandardLightVisualiser::visualise( const IECore::InternedString 
 	const FloatData *frustumScaleData = attributes->member<FloatData>( g_glLightFrustumScaleString );
 	const float frustumScale = frustumScaleData ? frustumScaleData->readable() : 1.0;
 	const StringData *visualiserDrawingModeData = attributes->member<StringData>( g_glLightDrawingModeString );
-	const std::string visualiserDrawingMode = visualiserDrawingModeData ? visualiserDrawingModeData->readable() : "texture";
+	const std::string visualiserDrawingMode =
+		visualiserDrawingModeData ? visualiserDrawingModeData->readable() : "texture";
 
 	const bool drawShaded = visualiserDrawingMode != "wireframe";
 	const bool drawTextured = visualiserDrawingMode == "texture";
 
 	const IntData *maxTextureResolutionData = attributes->member<IntData>( g_glVisualiserMaxTextureResolutionString );
-	const int maxTextureResolution = maxTextureResolutionData ? maxTextureResolutionData->readable() : std::numeric_limits<int>::max();
+	const int maxTextureResolution =
+		maxTextureResolutionData ? maxTextureResolutionData->readable() : std::numeric_limits<int>::max();
 
 	const BoolData *muteData = attributes->member<BoolData>( g_lightMuteString );
 	const bool muted = muteData ? muteData->readable() : false;
@@ -184,16 +193,26 @@ Visualisations StandardLightVisualiser::visualise( const IECore::InternedString 
 	// UsdLux allows a shaping cone to be applied to _any_ light, so we visualise those here
 	// before dealing with specific light types.
 
-	const bool haveCone =
-		type == "spot" ||
+	const bool haveCone = type == "spot" ||
 		parameter<float>( metadataTarget, shaderParameters, g_coneAngleParameterString, -1.0f ) >= 0.0f;
 	if( haveCone )
 	{
 		float innerAngle, outerAngle, radius, lensRadius;
 		spotlightParameters( attributeName, shaderNetwork, innerAngle, outerAngle, radius, lensRadius );
-		result.push_back( Visualisation::createOrnament( spotlightCone( innerAngle, outerAngle, lensRadius / visualiserScale, 1.0f, 1.0f, muted ),
-														 /* affectsFramingBound = */ true ) );
-		result.push_back( Visualisation::createFrustum( spotlightCone( innerAngle, outerAngle, lensRadius / visualiserScale, 10.0f * frustumScale, 0.5f, muted ), Visualisation::Scale::Visualiser ) );
+		result.push_back(
+			Visualisation::createOrnament(
+				spotlightCone( innerAngle, outerAngle, lensRadius / visualiserScale, 1.0f, 1.0f, muted ),
+				/* affectsFramingBound = */ true
+			)
+		);
+		result.push_back(
+			Visualisation::createFrustum(
+				spotlightCone(
+					innerAngle, outerAngle, lensRadius / visualiserScale, 10.0f * frustumScale, 0.5f, muted
+				),
+				Visualisation::Scale::Visualiser
+			)
+		);
 	}
 
 	// Now do visualisations based on light type.
@@ -202,27 +221,52 @@ Visualisations StandardLightVisualiser::visualise( const IECore::InternedString 
 	{
 		if( drawShaded )
 		{
-			ConstDataPtr textureData = drawTextured ? surfaceTexture( attributeName, shaderNetwork, attributes, maxTextureResolution ) : nullptr;
-			result.push_back( Visualisation::createOrnament( environmentSphereSurface( textureData, tint, /* saturation = */ 1.f, /* gamma = */ Color3f( 1.f ), maxTextureResolution, color ),
-															 /* affectsFramingBound = */ true, Visualisation::ColorSpace::Scene ) );
+			ConstDataPtr textureData = drawTextured ?
+				surfaceTexture( attributeName, shaderNetwork, attributes, maxTextureResolution ) :
+				nullptr;
+			result.push_back(
+				Visualisation::createOrnament(
+					environmentSphereSurface(
+						textureData, tint, /* saturation = */ 1.f, /* gamma = */ Color3f( 1.f ), maxTextureResolution,
+						color
+					),
+					/* affectsFramingBound = */ true, Visualisation::ColorSpace::Scene
+				)
+			);
 		}
-		result.push_back( Visualisation::createOrnament( sphereWireframe( 1.05f, Vec3<bool>( true ), 1.0f, V3f( 0.0f ), muted ),
-														 /* affectsFramingBound = */ true ) );
+		result.push_back(
+			Visualisation::createOrnament(
+				sphereWireframe( 1.05f, Vec3<bool>( true ), 1.0f, V3f( 0.0f ), muted ),
+				/* affectsFramingBound = */ true
+			)
+		);
 	}
 	else if( type == "spot" )
 	{
 		const float radius = parameter<float>( metadataTarget, shaderParameters, g_radiusParameterString, 0.0f );
 		result.push_back( Visualisation(
-			sphereWireframe( radius, Vec3<bool>( false, false, true ), 0.5f, V3f( 0.0f, 0.0f, 0.1f * visualiserScale ), muted ),
+			sphereWireframe(
+				radius, Vec3<bool>( false, false, true ), 0.5f, V3f( 0.0f, 0.0f, 0.1f * visualiserScale ), muted
+			),
 			Visualisation::Scale::None
 		) );
-		addRay( V3f( 0 ), V3f( 0, 0, -1 ), ornamentWireframeVertsPerCurve->writable(), ornamentWireframePoints->writable() );
-		result.push_back( Visualisation::createOrnament( colorIndicator( color ), /* affectsFramingBound = */ false, Visualisation::ColorSpace::Scene ) );
+		addRay(
+			V3f( 0 ), V3f( 0, 0, -1 ), ornamentWireframeVertsPerCurve->writable(), ornamentWireframePoints->writable()
+		);
+		result.push_back(
+			Visualisation::createOrnament(
+				colorIndicator( color ), /* affectsFramingBound = */ false, Visualisation::ColorSpace::Scene
+			)
+		);
 	}
 	else if( type == "distant" )
 	{
 		result.push_back( Visualisation::createOrnament( distantRays( muted ), /* affectsFramingBound = */ true ) );
-		result.push_back( Visualisation::createOrnament( colorIndicator( color ), /* affectsFramingBound = */ false, Visualisation::ColorSpace::Scene ) );
+		result.push_back(
+			Visualisation::createOrnament(
+				colorIndicator( color ), /* affectsFramingBound = */ false, Visualisation::ColorSpace::Scene
+			)
+		);
 	}
 	else if( type == "quad" )
 	{
@@ -232,17 +276,33 @@ Visualisations StandardLightVisualiser::visualise( const IECore::InternedString 
 			parameter<float>( metadataTarget, shaderParameters, g_widthParameterString, 2.0f ),
 			parameter<float>( metadataTarget, shaderParameters, g_heightParameterString, 2.0f )
 		);
-		const float roundness = std::clamp( parameter<float>( metadataTarget, shaderParameters, g_roundnessParameterString, 0.f ), 0.f, 1.f );
+		const float roundness = std::clamp(
+			parameter<float>( metadataTarget, shaderParameters, g_roundnessParameterString, 0.f ), 0.f, 1.f
+		);
 		const V2f radii( roundness * size * 0.5f );
 
 		if( drawShaded )
 		{
-			ConstDataPtr textureData = drawTextured ? surfaceTexture( attributeName, shaderNetwork, attributes, maxTextureResolution ) : nullptr;
-			result.push_back( Visualisation::createGeometry( roundedQuadSurface( size, radii, textureData, tint, /* saturation = */ 1.f, /* gamma = */ Color3f( 1.f ), maxTextureResolution, color, uvOrientation ? uvOrientation->readable() : M33f() ), Visualisation::ColorSpace::Scene ) );
+			ConstDataPtr textureData = drawTextured ?
+				surfaceTexture( attributeName, shaderNetwork, attributes, maxTextureResolution ) :
+				nullptr;
+			result.push_back(
+				Visualisation::createGeometry(
+					roundedQuadSurface(
+						size, radii, textureData, tint, /* saturation = */ 1.f, /* gamma = */ Color3f( 1.f ),
+						maxTextureResolution, color, uvOrientation ? uvOrientation->readable() : M33f()
+					),
+					Visualisation::ColorSpace::Scene
+				)
+			);
 		}
 		else
 		{
-			result.push_back( Visualisation::createOrnament( colorIndicator( color * tint ), /* affectsFramingBound = */ true, Visualisation::ColorSpace::Scene ) );
+			result.push_back(
+				Visualisation::createOrnament(
+					colorIndicator( color * tint ), /* affectsFramingBound = */ true, Visualisation::ColorSpace::Scene
+				)
+			);
 		}
 		result.push_back( Visualisation::createGeometry( roundedQuadWireframe( size, radii, 1.f, muted ) ) );
 
@@ -251,7 +311,9 @@ Visualisations StandardLightVisualiser::visualise( const IECore::InternedString 
 		{
 			addAreaSpread( spread, ornamentWireframeVertsPerCurve->writable(), ornamentWireframePoints->writable() );
 		}
-		addRay( V3f( 0 ), V3f( 0, 0, -1 ), ornamentWireframeVertsPerCurve->writable(), ornamentWireframePoints->writable() );
+		addRay(
+			V3f( 0 ), V3f( 0, 0, -1 ), ornamentWireframeVertsPerCurve->writable(), ornamentWireframePoints->writable()
+		);
 	}
 	else if( type == "portal" )
 	{
@@ -260,7 +322,9 @@ Visualisations StandardLightVisualiser::visualise( const IECore::InternedString 
 			parameter<float>( metadataTarget, shaderParameters, g_heightParameterString, 1.0f )
 		);
 		result.push_back( Visualisation::createGeometry( quadPortal( size, /* hatchingScale = */ 1.0f, muted ) ) );
-		addRay( V3f( 0 ), V3f( 0, 0, -1 ), ornamentWireframeVertsPerCurve->writable(), ornamentWireframePoints->writable() );
+		addRay(
+			V3f( 0 ), V3f( 0, 0, -1 ), ornamentWireframeVertsPerCurve->writable(), ornamentWireframePoints->writable()
+		);
 	}
 	else if( type == "disk" )
 	{
@@ -269,16 +333,32 @@ Visualisations StandardLightVisualiser::visualise( const IECore::InternedString 
 
 		if( drawShaded )
 		{
-			ConstDataPtr textureData = drawTextured ? surfaceTexture( attributeName, shaderNetwork, attributes, maxTextureResolution ) : nullptr;
-			result.push_back( Visualisation::createGeometry( diskSurface( radius, textureData, tint, /* saturation = */ 1.f, /* gamma = */ Color3f( 1.f ), maxTextureResolution, color ), Visualisation::ColorSpace::Scene ) );
+			ConstDataPtr textureData = drawTextured ?
+				surfaceTexture( attributeName, shaderNetwork, attributes, maxTextureResolution ) :
+				nullptr;
+			result.push_back(
+				Visualisation::createGeometry(
+					diskSurface(
+						radius, textureData, tint, /* saturation = */ 1.f, /* gamma = */ Color3f( 1.f ),
+						maxTextureResolution, color
+					),
+					Visualisation::ColorSpace::Scene
+				)
+			);
 		}
 		else
 		{
-			result.push_back( Visualisation::createOrnament( colorIndicator( color * tint ), /* affectsFramingBound = */ false, Visualisation::ColorSpace::Scene ) );
+			result.push_back(
+				Visualisation::createOrnament(
+					colorIndicator( color * tint ), /* affectsFramingBound = */ false, Visualisation::ColorSpace::Scene
+				)
+			);
 		}
 
 		result.push_back( Visualisation::createGeometry( diskWireframe( radius, 1.f, muted ) ) );
-		addRay( V3f( 0 ), V3f( 0, 0, -1 ), ornamentWireframeVertsPerCurve->writable(), ornamentWireframePoints->writable() );
+		addRay(
+			V3f( 0 ), V3f( 0, 0, -1 ), ornamentWireframeVertsPerCurve->writable(), ornamentWireframePoints->writable()
+		);
 
 		const float spread = parameter<float>( metadataTarget, shaderParameters, g_spreadParameterString, -1 );
 		if( spread >= 0.0f )
@@ -290,15 +370,25 @@ Visualisations StandardLightVisualiser::visualise( const IECore::InternedString 
 	{
 		const float radius = parameter<float>( metadataTarget, shaderParameters, g_radiusParameterString, 1 );
 		const float length = parameter<float>( metadataTarget, shaderParameters, g_lengthParameterString, 2 );
-		result.push_back( Visualisation::createOrnament( cylinderRays( radius, muted ), /* affectsFramingBound = */ false ) );
+		result.push_back(
+			Visualisation::createOrnament( cylinderRays( radius, muted ), /* affectsFramingBound = */ false )
+		);
 		result.push_back( Visualisation::createGeometry( cylinderWireframe( radius, length, 1.f, muted ) ) );
 		if( drawShaded )
 		{
-			result.push_back( Visualisation::createGeometry( cylinderSurface( radius, length, color * tint ), Visualisation::ColorSpace::Scene ) );
+			result.push_back(
+				Visualisation::createGeometry(
+					cylinderSurface( radius, length, color * tint ), Visualisation::ColorSpace::Scene
+				)
+			);
 		}
 		else
 		{
-			result.push_back( Visualisation::createOrnament( colorIndicator( color * tint ), /* affectsFramingBound = */ false, Visualisation::ColorSpace::Scene ) );
+			result.push_back(
+				Visualisation::createOrnament(
+					colorIndicator( color * tint ), /* affectsFramingBound = */ false, Visualisation::ColorSpace::Scene
+				)
+			);
 		}
 	}
 	else if( type == "mesh" )
@@ -322,8 +412,14 @@ Visualisations StandardLightVisualiser::visualise( const IECore::InternedString 
 				Visualisation::Scale::None
 			) );
 		}
-		result.push_back( Visualisation::createOrnament( colorIndicator( color ), /* affectsFramingBound = */ false, Visualisation::ColorSpace::Scene ) );
-		addRay( V3f( 0 ), V3f( 0, 0, -1 ), ornamentWireframeVertsPerCurve->writable(), ornamentWireframePoints->writable() );
+		result.push_back(
+			Visualisation::createOrnament(
+				colorIndicator( color ), /* affectsFramingBound = */ false, Visualisation::ColorSpace::Scene
+			)
+		);
+		addRay(
+			V3f( 0 ), V3f( 0, 0, -1 ), ornamentWireframeVertsPerCurve->writable(), ornamentWireframePoints->writable()
+		);
 	}
 	else
 	{
@@ -336,16 +432,34 @@ Visualisations StandardLightVisualiser::visualise( const IECore::InternedString 
 
 		if( !haveCone )
 		{
-			result.push_back( Visualisation::createOrnament( pointRays( radius / visualiserScale, muted ), /* affectsFramingBound = */ true ) );
+			result.push_back(
+				Visualisation::createOrnament(
+					pointRays( radius / visualiserScale, muted ), /* affectsFramingBound = */ true
+				)
+			);
 		}
-		result.push_back( Visualisation::createOrnament( colorIndicator( color ), /* affectsFramingBound = */ false, Visualisation::ColorSpace::Scene ) );
+		result.push_back(
+			Visualisation::createOrnament(
+				colorIndicator( color ), /* affectsFramingBound = */ false, Visualisation::ColorSpace::Scene
+			)
+		);
 	}
 
 	if( ornamentWireframePoints->readable().size() > 0 )
 	{
-		IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, ornamentWireframeVertsPerCurve );
-		curves->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, ornamentWireframePoints ) );
-		curves->addPrimitiveVariable( "Cs", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, new Color3fData( lightWireframeColor( muted ) ) ) );
+		IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive(
+			IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic,
+			ornamentWireframeVertsPerCurve
+		);
+		curves->addPrimitiveVariable(
+			"P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, ornamentWireframePoints )
+		);
+		curves->addPrimitiveVariable(
+			"Cs",
+			IECoreScene::PrimitiveVariable(
+				IECoreScene::PrimitiveVariable::Constant, new Color3fData( lightWireframeColor( muted ) )
+			)
+		);
 		result.push_back( Visualisation::createOrnament( curves, /* affectsFramingBound = */ false ) );
 	}
 
@@ -370,7 +484,10 @@ void StandardLightVisualiser::registerSurfaceTexture( SurfaceTexture texture )
 	surfaceTextureMap().push_back( texture );
 }
 
-IECore::DataPtr StandardLightVisualiser::surfaceTexture( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECore::CompoundObject *attributes, int maxTextureResolution ) const
+IECore::DataPtr StandardLightVisualiser::surfaceTexture(
+	const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork,
+	const IECore::CompoundObject *attributes, int maxTextureResolution
+) const
 {
 	for( const auto &textureFunction : ::surfaceTextureMap() )
 	{
@@ -382,7 +499,8 @@ IECore::DataPtr StandardLightVisualiser::surfaceTexture( const IECore::InternedS
 
 	const IECore::InternedString metadataTarget = metadataTargetForNetwork( attributeName, shaderNetwork );
 	const IECore::CompoundData *shaderParameters = shaderNetwork->outputShader()->parametersData();
-	const std::string textureName = parameter<std::string>( metadataTarget, shaderParameters, "textureNameParameter", "" );
+	const std::string textureName =
+		parameter<std::string>( metadataTarget, shaderParameters, "textureNameParameter", "" );
 	if( !textureName.empty() )
 	{
 		return new IECore::StringData( textureName );
@@ -391,7 +509,10 @@ IECore::DataPtr StandardLightVisualiser::surfaceTexture( const IECore::InternedS
 	return nullptr;
 }
 
-void StandardLightVisualiser::spotlightParameters( const InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, float &innerAngle, float &outerAngle, float &radius, float &lensRadius )
+void StandardLightVisualiser::spotlightParameters(
+	const InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, float &innerAngle,
+	float &outerAngle, float &radius, float &lensRadius
+)
 {
 
 	InternedString metadataTarget = metadataTargetForNetwork( attributeName, shaderNetwork );

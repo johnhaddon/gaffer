@@ -60,24 +60,18 @@ void replacePlug( GraphComponent &parent, Plug &plug )
 
 object findDestinationWrapper( Plug *plug, object predicate )
 {
-	return PlugAlgo::findDestination(
-		plug,
-		[&predicate]( Plug *plug ) {
-			object o = predicate( PlugPtr( plug ) );
-			return o;
-		}
-	);
+	return PlugAlgo::findDestination( plug, [&predicate]( Plug *plug ) {
+		object o = predicate( PlugPtr( plug ) );
+		return o;
+	} );
 }
 
 object findSourceWrapper( Plug *plug, object predicate )
 {
-	return PlugAlgo::findSource(
-		plug,
-		[&predicate]( Plug *plug ) {
-			object o = predicate( PlugPtr( plug ) );
-			return o;
-		}
-	);
+	return PlugAlgo::findSource( plug, [&predicate]( Plug *plug ) {
+		object o = predicate( PlugPtr( plug ) );
+		return o;
+	} );
 }
 
 object contextSensitiveSourceWrapper( const Plug *plug )
@@ -89,12 +83,13 @@ object contextSensitiveSourceWrapper( const Plug *plug )
 		std::tie( sourcePlug, sourceContext ) = PlugAlgo::contextSensitiveSource( plug );
 	}
 	return boost::python::make_tuple(
-		PlugPtr( const_cast<Plug *>( sourcePlug ) ),
-		ContextPtr( new Context( *sourceContext ) )
+		PlugPtr( const_cast<Plug *>( sourcePlug ) ), ContextPtr( new Context( *sourceContext ) )
 	);
 }
 
-ValuePlugPtr createPlugFromData( const std::string &name, Plug::Direction direction, unsigned flags, const IECore::Data *value )
+ValuePlugPtr createPlugFromData(
+	const std::string &name, Plug::Direction direction, unsigned flags, const IECore::Data *value
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	return PlugAlgo::createPlugFromData( name, direction, flags, value );
@@ -141,7 +136,10 @@ PlugPtr promote( Plug &plug, Plug *parent, const IECore::StringAlgo::MatchPatter
 	return PlugAlgo::promote( &plug, parent, excludeMetadata );
 }
 
-PlugPtr promoteWithName( Plug &plug, const IECore::InternedString &name, Plug *parent, const IECore::StringAlgo::MatchPattern &excludeMetadata )
+PlugPtr promoteWithName(
+	Plug &plug, const IECore::InternedString &name, Plug *parent,
+	const IECore::StringAlgo::MatchPattern &excludeMetadata
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	return PlugAlgo::promoteWithName( &plug, name, parent, excludeMetadata );
@@ -177,7 +175,8 @@ void GafferModule::bindPlugAlgo()
 
 	def( "canPromote", &PlugAlgo::canPromote, ( arg( "plug" ), arg( "parent" ) = object() ) );
 	def( "promote", &promote, ( arg( "plug" ), arg( "parent" ) = object(), arg( "excludeMetadata" ) = "layout:*" ) );
-	def( "promoteWithName", &promoteWithName, ( arg( "plug" ), arg( "name" ), arg( "parent" ) = object(), arg( "excludeMetadata" ) = "layout:*" ) );
+	def( "promoteWithName", &promoteWithName,
+		 ( arg( "plug" ), arg( "name" ), arg( "parent" ) = object(), arg( "excludeMetadata" ) = "layout:*" ) );
 	def( "isPromoted", &PlugAlgo::isPromoted, ( arg( "plug" ) ) );
 	def( "unpromote", &unpromote, ( arg( "plug" ) ) );
 }

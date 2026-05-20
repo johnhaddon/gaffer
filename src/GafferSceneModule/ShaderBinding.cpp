@@ -106,9 +106,12 @@ void reloadShader( Shader &shader )
 class ShaderSerialiser : public GafferBindings::NodeSerialiser
 {
 
-	std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
+	std::string postConstructor(
+		const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+	) const override
 	{
-		std::string defaultPC = GafferBindings::NodeSerialiser::postConstructor( graphComponent, identifier, serialisation );
+		std::string defaultPC =
+			GafferBindings::NodeSerialiser::postConstructor( graphComponent, identifier, serialisation );
 		const Shader *shader = static_cast<const Shader *>( graphComponent );
 		const std::string shaderName = shader->namePlug()->getValue();
 		if( shaderName.size() )
@@ -161,7 +164,12 @@ void GafferSceneModule::bindShader()
 	GafferBindings::Serialisation::registerSerialiser( Shader::staticTypeId(), new ShaderSerialiser() );
 
 	PlugClass<ShaderPlug>()
-		.def( init<const std::string &, Plug::Direction, unsigned>( ( arg( "name" ) = Gaffer::GraphComponent::defaultName<ShaderPlug>(), arg( "direction" ) = Gaffer::Plug::In, arg( "flags" ) = Gaffer::Plug::Default ) ) )
+		.def(
+			init<const std::string &, Plug::Direction, unsigned>(
+				( arg( "name" ) = Gaffer::GraphComponent::defaultName<ShaderPlug>(),
+				  arg( "direction" ) = Gaffer::Plug::In, arg( "flags" ) = Gaffer::Plug::Default )
+			)
+		)
 		// value accessors
 		.def( "attributesHash", &shaderPlugAttributesHash )
 		.def( "attributes", &shaderPlugAttributes, ( boost::python::arg_( "_copy" ) = true ) )
@@ -169,6 +177,10 @@ void GafferSceneModule::bindShader()
 
 	GafferBindings::NodeClass<OpenGLShader>();
 
-	PlugClass<ClosurePlug>()
-		.def( init<const std::string &, Gaffer::Plug::Direction, unsigned>( ( arg( "name" ) = Gaffer::GraphComponent::defaultName<ClosurePlug>(), arg( "direction" ) = Gaffer::Plug::In, arg( "flags" ) = Gaffer::Plug::Default ) ) );
+	PlugClass<ClosurePlug>().def(
+		init<const std::string &, Gaffer::Plug::Direction, unsigned>(
+			( arg( "name" ) = Gaffer::GraphComponent::defaultName<ClosurePlug>(), arg( "direction" ) = Gaffer::Plug::In,
+			  arg( "flags" ) = Gaffer::Plug::Default )
+		)
+	);
 }

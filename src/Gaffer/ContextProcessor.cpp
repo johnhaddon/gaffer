@@ -49,10 +49,9 @@ static IECore::InternedString g_outPlugName( "out" );
 class ContextProcessor::ProcessedScope : public Context::EditableScope
 {
 
-	public:
+public:
 
-	ProcessedScope( const Context *context, const ContextProcessor *processor )
-		: EditableScope( context )
+	ProcessedScope( const Context *context, const ContextProcessor *processor ) : EditableScope( context )
 	{
 		ContextAlgo::GlobalScope globalScope( context, processor->inPlug() );
 		if( processor->enabledPlug()->getValue() )
@@ -61,7 +60,7 @@ class ContextProcessor::ProcessedScope : public Context::EditableScope
 		}
 	}
 
-	private:
+private:
 
 	IECore::ConstRefCountedPtr m_storage;
 };
@@ -70,16 +69,13 @@ GAFFER_NODE_DEFINE_TYPE( ContextProcessor );
 
 size_t ContextProcessor::g_firstPlugIndex = 0;
 
-ContextProcessor::ContextProcessor( const std::string &name )
-	: ComputeNode( name )
+ContextProcessor::ContextProcessor( const std::string &name ) : ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new BoolPlug( "enabled", Gaffer::Plug::In, true ) );
 }
 
-ContextProcessor::~ContextProcessor()
-{
-}
+ContextProcessor::~ContextProcessor() {}
 
 void ContextProcessor::setup( const Plug *plug )
 {
@@ -216,7 +212,9 @@ void ContextProcessor::compute( ValuePlug *output, const Context *context ) cons
 	return ComputeNode::compute( output, context );
 }
 
-const Plug *ContextProcessor::correspondingDescendant( const Plug *plug, const Plug *plugAncestor, const Plug *oppositeAncestor )
+const Plug *ContextProcessor::correspondingDescendant(
+	const Plug *plug, const Plug *plugAncestor, const Plug *oppositeAncestor
+)
 {
 	// this method recursively computes oppositeAncestor->descendant( plug->relativeName( plugAncestor ) ).
 	// ie it finds the relative path from plugAncestor to plug, and follows it from oppositeAncestor.

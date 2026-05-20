@@ -119,9 +119,7 @@ std::string tensorRepr( const Tensor &tensor )
 template<typename T, typename FinalT = T>
 object tensorGetItemTyped( const Tensor &tensor, const std::vector<int64_t> &location )
 {
-	return object(
-		static_cast<FinalT>( const_cast<Ort::Value &>( tensor.value() ).At<T>( location ) )
-	);
+	return object( static_cast<FinalT>( const_cast<Ort::Value &>( tensor.value() ).At<T>( location ) ) );
 }
 
 object tensorGetItem( const Tensor &tensor, const std::vector<int64_t> &location )
@@ -179,7 +177,9 @@ void dataToTensorSetupWrapper( DataToTensor &dataToTensor, ValuePlug &prototypeD
 class DataToTensorSerialiser : public NodeSerialiser
 {
 
-	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsConstruction(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override
 	{
 		auto dataToTensor = child->parent<DataToTensor>();
 		if( child == dataToTensor->dataPlug() )
@@ -190,7 +190,9 @@ class DataToTensorSerialiser : public NodeSerialiser
 		return NodeSerialiser::childNeedsConstruction( child, serialisation );
 	}
 
-	std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
+	std::string postConstructor(
+		const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+	) const override
 	{
 		std::string result = NodeSerialiser::postConstructor( graphComponent, identifier, serialisation );
 
@@ -226,14 +228,20 @@ BOOST_PYTHON_MODULE( _GafferML )
 {
 
 	{
-		scope s = IECorePython::RunTimeTypedClass<GafferML::Tensor>()
-					  .def( init<>() )
-					  .def( "__init__", make_constructor( tensorConstructorWrapper, default_call_policies(), ( arg( "data" ), arg( "shape" ) = object() ) ) )
-					  .def( "asData", (IECore::DataPtr ( Tensor::* )())&Tensor::asData )
-					  .def( "shape", &tensorShapeWrapper )
-					  .def( "__repr__", &tensorRepr )
-					  .def( "__getitem__", &tensorGetItem1D )
-					  .def( "__getitem__", &tensorGetItemND );
+		scope s =
+			IECorePython::RunTimeTypedClass<GafferML::Tensor>()
+				.def( init<>() )
+				.def(
+					"__init__",
+					make_constructor(
+						tensorConstructorWrapper, default_call_policies(), ( arg( "data" ), arg( "shape" ) = object() )
+					)
+				)
+				.def( "asData", (IECore::DataPtr ( Tensor::* )())&Tensor::asData )
+				.def( "shape", &tensorShapeWrapper )
+				.def( "__repr__", &tensorRepr )
+				.def( "__getitem__", &tensorGetItem1D )
+				.def( "__getitem__", &tensorGetItemND );
 		enum_<Tensor::ElementType>( "ElementType" )
 			.value( "Undefined", Tensor::ElementType::Undefined )
 			.value( "Float", Tensor::ElementType::Float )
@@ -263,8 +271,7 @@ BOOST_PYTHON_MODULE( _GafferML )
 		Serialisation::registerSerialiser( DataToTensor::staticTypeId(), new DataToTensorSerialiser );
 	}
 
-	GafferBindings::DependencyNodeClass<Inference>()
-		.def( "loadModel", &loadModelWrapper );
+	GafferBindings::DependencyNodeClass<Inference>().def( "loadModel", &loadModelWrapper );
 	GafferBindings::DependencyNodeClass<TensorToMesh>();
 
 	GafferBindings::DependencyNodeClass<ImageToTensor>();

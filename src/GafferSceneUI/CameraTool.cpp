@@ -114,8 +114,7 @@ CameraTool::ToolDescription<CameraTool, SceneView> CameraTool::g_toolDescription
 
 size_t CameraTool::g_firstPlugIndex = 0;
 
-CameraTool::CameraTool( SceneView *view, const std::string &name )
-	: SelectionTool( view, name ), m_dragId( 0 )
+CameraTool::CameraTool( SceneView *view, const std::string &name ) : SelectionTool( view, name ), m_dragId( 0 )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -128,7 +127,9 @@ CameraTool::CameraTool( SceneView *view, const std::string &name )
 	view->viewportGadget()->dragBeginSignal().connectFront( boost::bind( &CameraTool::viewportDragBegin, this, ::_2 ) );
 	view->viewportGadget()->wheelSignal().connectFront( boost::bind( &CameraTool::viewportWheel, this, ::_2 ) );
 	view->viewportGadget()->keyPressSignal().connectFront( boost::bind( &CameraTool::viewportKeyPress, this, ::_2 ) );
-	view->viewportGadget()->buttonPressSignal().connectFront( boost::bind( &CameraTool::viewportButtonPress, this, ::_2 ) );
+	view->viewportGadget()->buttonPressSignal().connectFront(
+		boost::bind( &CameraTool::viewportButtonPress, this, ::_2 )
+	);
 	// Connect to `cameraChangedSignal()` so we can turn the viewport interaction into
 	// camera edits in the node graph itself.
 	m_viewportCameraChangedConnection = view->viewportGadget()->cameraChangedSignal().connect(
@@ -141,9 +142,7 @@ CameraTool::CameraTool( SceneView *view, const std::string &name )
 	view->viewportGadget()->preRenderSignal().connect( boost::bind( &CameraTool::preRenderEnd, this ) );
 }
 
-CameraTool::~CameraTool()
-{
-}
+CameraTool::~CameraTool() {}
 
 const GafferScene::ScenePlug *CameraTool::scenePlug() const
 {
@@ -168,15 +167,9 @@ void CameraTool::contextChanged()
 
 void CameraTool::plugDirtied( const Gaffer::Plug *plug )
 {
-	if(
-		plug == activePlug() ||
-		plug == scenePlug()->childNamesPlug() ||
-		plug == scenePlug()->transformPlug() ||
-		plug == scenePlug()->globalsPlug() ||
-		plug == lookThroughEnabledPlug() ||
-		plug == lookThroughCameraPlug() ||
-		plug == view()->editScopePlug()
-	)
+	if( plug == activePlug() || plug == scenePlug()->childNamesPlug() || plug == scenePlug()->transformPlug() ||
+		plug == scenePlug()->globalsPlug() || plug == lookThroughEnabledPlug() || plug == lookThroughCameraPlug() ||
+		plug == view()->editScopePlug() )
 	{
 		if( !g_editingTransform )
 		{
@@ -232,12 +225,7 @@ const TransformTool::Selection &CameraTool::cameraSelection()
 	ScenePlug::ScenePath cameraPath = this->cameraPath();
 	if( !cameraPath.empty() )
 	{
-		TransformTool::Selection candidateSelection(
-			scenePlug(),
-			cameraPath,
-			view()->context(),
-			view()->editScope()
-		);
+		TransformTool::Selection candidateSelection( scenePlug(), cameraPath, view()->context(), view()->editScope() );
 		// TransformTool::Selection will fall back to editing
 		// a parent path if it can't edit the `cameraPath`.
 		// Parent edits are not suitable for the camera tool, so
@@ -301,9 +289,7 @@ void CameraTool::preRenderEnd()
 
 	if( selectionEditable )
 	{
-		view()->viewportGadget()->setCenterOfInterest(
-			getCameraCenterOfInterest( selection.path() )
-		);
+		view()->viewportGadget()->setCenterOfInterest( getCameraCenterOfInterest( selection.path() ) );
 		m_viewportCameraChangedConnection.setBlocked( false );
 	}
 }
@@ -410,14 +396,12 @@ void CameraTool::viewportCameraChanged()
 		edit->translate,
 		// Do
 		boost::bind(
-			&CameraTool::setCameraCenterOfInterest,
-			CameraToolPtr( this ), selection.path(),
+			&CameraTool::setCameraCenterOfInterest, CameraToolPtr( this ), selection.path(),
 			view()->viewportGadget()->getCenterOfInterest()
 		),
 		// Undo
 		boost::bind(
-			&CameraTool::setCameraCenterOfInterest,
-			CameraToolPtr( this ), selection.path(),
+			&CameraTool::setCameraCenterOfInterest, CameraToolPtr( this ), selection.path(),
 			getCameraCenterOfInterest( selection.path() )
 		)
 	);

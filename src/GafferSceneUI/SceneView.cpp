@@ -99,10 +99,9 @@ using namespace GafferSceneUI;
 class SceneView::Renderer : public Gaffer::Signals::Trackable
 {
 
-	public:
+public:
 
-	Renderer( SceneView *view )
-		: m_view( view )
+	Renderer( SceneView *view ) : m_view( view )
 	{
 		view->addChild( new Plug( "renderer" ) );
 		rendererPlug()->addChild( new StringPlug( "name", Plug::In, "OpenGL" ) );
@@ -175,42 +174,31 @@ class SceneView::Renderer : public Gaffer::Signals::Trackable
 		return result;
 	}
 
-	GafferScene::SceneProcessor *preprocessor()
-	{
-		return m_sceneProcessor.get();
-	}
+	GafferScene::SceneProcessor *preprocessor() { return m_sceneProcessor.get(); }
 
-	private:
+private:
 
-	Plug *rendererPlug()
-	{
-		return m_view->getChild<Plug>( "renderer" );
-	}
+	Plug *rendererPlug() { return m_view->getChild<Plug>( "renderer" ); }
 
-	StringPlug *rendererNamePlug()
-	{
-		return rendererPlug()->getChild<StringPlug>( "name" );
-	}
+	StringPlug *rendererNamePlug() { return rendererPlug()->getChild<StringPlug>( "name" ); }
 
 	void plugSet( const Gaffer::Plug *plug )
 	{
 		if( plug == rendererNamePlug() )
 		{
-			static_cast<SceneGadget *>( m_view->viewportGadget()->getPrimaryChild() )->setRenderer( rendererNamePlug()->getValue() );
+			static_cast<SceneGadget *>( m_view->viewportGadget()->getPrimaryChild() )
+				->setRenderer( rendererNamePlug()->getValue() );
 		}
 	}
 
 	using RendererMap = unordered_map<string, SettingsCreator>;
 	static RendererMap &rendererMap()
 	{
-		static RendererMap g_m = {
-			{ "OpenGL",
-			  [] {
-				  SceneProcessorPtr result = new SceneProcessor;
-				  result->outPlug()->setInput( result->inPlug() );
-				  return result;
-			  } }
-		};
+		static RendererMap g_m = { { "OpenGL", [] {
+										SceneProcessorPtr result = new SceneProcessor;
+										result->outPlug()->setInput( result->inPlug() );
+										return result;
+									} } };
 		return g_m;
 	}
 
@@ -225,35 +213,27 @@ class SceneView::Renderer : public Gaffer::Signals::Trackable
 class SceneView::SelectionMask : public Signals::Trackable
 {
 
-	public:
+public:
 
-	SelectionMask( SceneView *view )
-		: m_view( view )
+	SelectionMask( SceneView *view ) : m_view( view )
 	{
-		view->addChild(
-			new StringVectorDataPlug(
-				"selectionMask",
-				Plug::In,
-				new StringVectorData( { "Renderable", "NullObject" } )
-			)
-		);
+		view->addChild( new StringVectorDataPlug(
+			"selectionMask", Plug::In, new StringVectorData( { "Renderable", "NullObject" } )
+		) );
 
 		updateSelectionMask();
 
 		view->plugSetSignal().connect( boost::bind( &SelectionMask::plugSet, this, ::_1 ) );
 	}
 
-	private:
+private:
 
 	Gaffer::StringVectorDataPlug *selectionMaskPlug()
 	{
 		return m_view->getChild<StringVectorDataPlug>( "selectionMask" );
 	}
 
-	SceneGadget *sceneGadget()
-	{
-		return static_cast<SceneGadget *>( m_view->viewportGadget()->getPrimaryChild() );
-	}
+	SceneGadget *sceneGadget() { return static_cast<SceneGadget *>( m_view->viewportGadget()->getPrimaryChild() ); }
 
 	void plugSet( const Plug *plug )
 	{
@@ -280,10 +260,9 @@ class SceneView::SelectionMask : public Signals::Trackable
 class SceneView::DrawingMode : public Signals::Trackable
 {
 
-	public:
+public:
 
-	DrawingMode( SceneView *view )
-		: m_view( view )
+	DrawingMode( SceneView *view ) : m_view( view )
 	{
 
 		// Plugs controlling OpenGL render options. We use these to
@@ -324,7 +303,8 @@ class SceneView::DrawingMode : public Signals::Trackable
 
 		// Included purposes
 
-		auto *includedPurposesPlug = standardOptions->optionsPlug()->getChild<NameValuePlug>( "render:includedPurposes" );
+		auto *includedPurposesPlug =
+			standardOptions->optionsPlug()->getChild<NameValuePlug>( "render:includedPurposes" );
 		auto viewIncludedPurposesPlug = boost::static_pointer_cast<NameValuePlug>(
 			includedPurposesPlug->createCounterpart( "includedPurposes", Plug::In )
 		);
@@ -341,7 +321,8 @@ class SceneView::DrawingMode : public Signals::Trackable
 
 		StringPlugPtr frustrumAttrValuePlug = new StringPlug( "value", Plug::In, "whenSelected" );
 
-		NameValuePlugPtr frustumAttrPlug = new Gaffer::NameValuePlug( "gl:visualiser:frustum", frustrumAttrValuePlug, true, "frustum" );
+		NameValuePlugPtr frustumAttrPlug =
+			new Gaffer::NameValuePlug( "gl:visualiser:frustum", frustrumAttrValuePlug, true, "frustum" );
 		attr->addChild( frustumAttrPlug );
 		PlugPtr frustumViewPlug = frustrumAttrValuePlug->createCounterpart( "frustum", Plug::In );
 		visualiser->addChild( frustumViewPlug );
@@ -351,7 +332,8 @@ class SceneView::DrawingMode : public Signals::Trackable
 
 		FloatPlugPtr visualiserScaleAttrValuePlug = new FloatPlug( "value", Plug::In, 1.0f, 0.01f );
 
-		NameValuePlugPtr visualiserScaleAttrPlug = new Gaffer::NameValuePlug( "gl:visualiser:scale", visualiserScaleAttrValuePlug, true, "scale" );
+		NameValuePlugPtr visualiserScaleAttrPlug =
+			new Gaffer::NameValuePlug( "gl:visualiser:scale", visualiserScaleAttrValuePlug, true, "scale" );
 		attr->addChild( visualiserScaleAttrPlug );
 		PlugPtr visualiserScaleViewPlug = visualiserScaleAttrValuePlug->createCounterpart( "scale", Plug::In );
 		visualiser->addChild( visualiserScaleViewPlug );
@@ -366,7 +348,8 @@ class SceneView::DrawingMode : public Signals::Trackable
 
 		StringPlugPtr lightModeAttrValuePlug = new StringPlug( "value", Plug::In, "texture" );
 
-		NameValuePlugPtr lightModeAttrPlug = new Gaffer::NameValuePlug( "gl:light:drawingMode", lightModeAttrValuePlug, true, "lightDrawingMode" );
+		NameValuePlugPtr lightModeAttrPlug =
+			new Gaffer::NameValuePlug( "gl:light:drawingMode", lightModeAttrValuePlug, true, "lightDrawingMode" );
 		attr->addChild( lightModeAttrPlug );
 		PlugPtr lightModeViewPlug = lightModeAttrValuePlug->createCounterpart( "drawingMode", Plug::In );
 		light->addChild( lightModeViewPlug );
@@ -376,9 +359,12 @@ class SceneView::DrawingMode : public Signals::Trackable
 
 		FloatPlugPtr lightFrustumScaleAttrValuePlug = new FloatPlug( "value", Plug::In, 1.0f, 0.01f );
 
-		NameValuePlugPtr lightFrustumScaleAttrPlug = new Gaffer::NameValuePlug( "gl:light:frustumScale", lightFrustumScaleAttrValuePlug, true, "lightFrustumScale" );
+		NameValuePlugPtr lightFrustumScaleAttrPlug = new Gaffer::NameValuePlug(
+			"gl:light:frustumScale", lightFrustumScaleAttrValuePlug, true, "lightFrustumScale"
+		);
 		attr->addChild( lightFrustumScaleAttrPlug );
-		PlugPtr lightFrustumScaleViewPlug = lightFrustumScaleAttrValuePlug->createCounterpart( "frustumScale", Plug::In );
+		PlugPtr lightFrustumScaleViewPlug =
+			lightFrustumScaleAttrValuePlug->createCounterpart( "frustumScale", Plug::In );
 		light->addChild( lightFrustumScaleViewPlug );
 		lightFrustumScaleAttrValuePlug->setInput( lightFrustumScaleViewPlug );
 
@@ -390,22 +376,13 @@ class SceneView::DrawingMode : public Signals::Trackable
 	}
 
 	/// @see SceneProcessor::preprocessor
-	SceneProcessor *preprocessor()
-	{
-		return m_preprocessor.get();
-	}
+	SceneProcessor *preprocessor() { return m_preprocessor.get(); }
 
-	private:
+private:
 
-	Gaffer::Plug *drawingModePlug()
-	{
-		return m_view->getChild<Plug>( "drawingMode" );
-	}
+	Gaffer::Plug *drawingModePlug() { return m_view->getChild<Plug>( "drawingMode" ); }
 
-	SceneGadget *sceneGadget()
-	{
-		return static_cast<SceneGadget *>( m_view->viewportGadget()->getPrimaryChild() );
-	}
+	SceneGadget *sceneGadget() { return static_cast<SceneGadget *>( m_view->viewportGadget()->getPrimaryChild() ); }
 
 	void plugSet( const Plug *plug )
 	{
@@ -421,19 +398,21 @@ class SceneView::DrawingMode : public Signals::Trackable
 		GraphComponent *curvesPlug = drawingModePlug()->getChild( "curvesPrimitive" );
 		GraphComponent *pointsPlug = drawingModePlug()->getChild( "pointsPrimitive" );
 
-		options->members()["gl:primitive:solid"] = new BoolData( drawingModePlug()->getChild<BoolPlug>( "solid" )->getValue() );
-		options->members()["gl:primitive:wireframe"] = new BoolData( drawingModePlug()->getChild<BoolPlug>( "wireframe" )->getValue() );
-		options->members()["gl:primitive:points"] = new BoolData( drawingModePlug()->getChild<BoolPlug>( "points" )->getValue() );
-		options->members()["gl:curvesPrimitive:useGLLines"] = new BoolData( curvesPlug->getChild<BoolPlug>( "useGLLines" )->getValue() );
+		options->members()["gl:primitive:solid"] =
+			new BoolData( drawingModePlug()->getChild<BoolPlug>( "solid" )->getValue() );
+		options->members()["gl:primitive:wireframe"] =
+			new BoolData( drawingModePlug()->getChild<BoolPlug>( "wireframe" )->getValue() );
+		options->members()["gl:primitive:points"] =
+			new BoolData( drawingModePlug()->getChild<BoolPlug>( "points" )->getValue() );
+		options->members()["gl:curvesPrimitive:useGLLines"] =
+			new BoolData( curvesPlug->getChild<BoolPlug>( "useGLLines" )->getValue() );
 		/// \todo As a general rule we strive for a one-to-one mapping between cortex/gaffer/ui,
 		/// but in this case IgnoreBasis is far too technical a term. Consider changing the name
 		/// in Cortex.
-		options->members()["gl:curvesPrimitive:ignoreBasis"] = new BoolData( !curvesPlug->getChild<BoolPlug>( "interpolate" )->getValue() );
-		options->members()["gl:pointsPrimitive:useGLPoints"] = new StringData(
-			pointsPlug->getChild<BoolPlug>( "useGLPoints" )->getValue() ?
-				"forAll" :
-				"forGLPoints"
-		);
+		options->members()["gl:curvesPrimitive:ignoreBasis"] =
+			new BoolData( !curvesPlug->getChild<BoolPlug>( "interpolate" )->getValue() );
+		options->members()["gl:pointsPrimitive:useGLPoints"] =
+			new StringData( pointsPlug->getChild<BoolPlug>( "useGLPoints" )->getValue() ? "forAll" : "forGLPoints" );
 
 		sceneGadget()->setOpenGLOptions( options.get() );
 	}
@@ -450,10 +429,9 @@ class SceneView::DrawingMode : public Signals::Trackable
 class SceneView::ShadingMode : public Signals::Trackable
 {
 
-	public:
+public:
 
-	ShadingMode( SceneView *view )
-		: m_view( view )
+	ShadingMode( SceneView *view ) : m_view( view )
 	{
 		view->addChild( new StringPlug( "shadingMode" ) );
 
@@ -468,10 +446,7 @@ class SceneView::ShadingMode : public Signals::Trackable
 	/// that instead anyone can insert a preprocessor into a chain of preprocessors,
 	/// and then individual components like this one can be more self
 	/// sufficient.
-	SceneProcessor *preprocessor()
-	{
-		return m_preprocessor.get();
-	}
+	SceneProcessor *preprocessor() { return m_preprocessor.get(); }
 
 	static void registerShadingMode( const std::string &name, ShadingModeCreator creator )
 	{
@@ -488,17 +463,11 @@ class SceneView::ShadingMode : public Signals::Trackable
 		}
 	}
 
-	private:
+private:
 
-	Gaffer::StringPlug *shadingModePlug()
-	{
-		return m_view->getChild<StringPlug>( "shadingMode" );
-	}
+	Gaffer::StringPlug *shadingModePlug() { return m_view->getChild<StringPlug>( "shadingMode" ); }
 
-	const Gaffer::StringPlug *shadingModePlug() const
-	{
-		return m_view->getChild<StringPlug>( "shadingMode" );
-	}
+	const Gaffer::StringPlug *shadingModePlug() const { return m_view->getChild<StringPlug>( "shadingMode" ); }
 
 	void plugSet( const Plug *plug )
 	{
@@ -562,10 +531,9 @@ class SceneView::ShadingMode : public Signals::Trackable
 class SceneView::Grid : public Gaffer::Node
 {
 
-	public:
+public:
 
-	Grid( SceneView *view )
-		: m_gadget( new SceneGadget )
+	Grid( SceneView *view ) : m_gadget( new SceneGadget )
 	{
 		// Add plugs to represent our settings
 
@@ -610,32 +578,17 @@ class SceneView::Grid : public Gaffer::Node
 		plugDirtiedSignal().connect( boost::bind( &Grid::plugDirtied, this, ::_1 ) );
 	}
 
-	SceneGadget *gadget()
-	{
-		return m_gadget.get();
-	}
+	SceneGadget *gadget() { return m_gadget.get(); }
 
-	const SceneGadget *gadget() const
-	{
-		return m_gadget.get();
-	}
+	const SceneGadget *gadget() const { return m_gadget.get(); }
 
-	private:
+private:
 
-	BoolPlug *visiblePlug()
-	{
-		return getChild<BoolPlug>( g_firstChildIndex );
-	}
+	BoolPlug *visiblePlug() { return getChild<BoolPlug>( g_firstChildIndex ); }
 
-	V2fPlug *dimensionsPlug()
-	{
-		return getChild<V2fPlug>( g_firstChildIndex + 1 );
-	}
+	V2fPlug *dimensionsPlug() { return getChild<V2fPlug>( g_firstChildIndex + 1 ); }
 
-	GafferScene::Grid *grid()
-	{
-		return getChild<GafferScene::Grid>( g_firstChildIndex + 2 );
-	}
+	GafferScene::Grid *grid() { return getChild<GafferScene::Grid>( g_firstChildIndex + 2 ); }
 
 	void plugDirtied( Gaffer::Plug *plug )
 	{
@@ -662,13 +615,11 @@ namespace
 class GnomonGadget : public GafferUI::Gadget
 {
 
-	public:
+public:
 
-	GnomonGadget()
-	{
-	}
+	GnomonGadget() {}
 
-	protected:
+protected:
 
 	Imath::Box3f renderBound() const override
 	{
@@ -741,10 +692,7 @@ class GnomonGadget : public GafferUI::Gadget
 		glPopMatrix();
 	}
 
-	unsigned layerMask() const override
-	{
-		return (unsigned)Layer::MidFront;
-	}
+	unsigned layerMask() const override { return (unsigned)Layer::MidFront; }
 
 	virtual void renderGnomon( const Style *style ) const = 0;
 };
@@ -752,7 +700,7 @@ class GnomonGadget : public GafferUI::Gadget
 class GnomonAxes : public GnomonGadget
 {
 
-	protected:
+protected:
 
 	void renderGnomon( const Style *style ) const override
 	{
@@ -765,16 +713,15 @@ class GnomonAxes : public GnomonGadget
 class GnomonPlane : public GnomonGadget
 {
 
-	public:
+public:
 
-	GnomonPlane()
-		: GnomonGadget(), m_hovering( false )
+	GnomonPlane() : GnomonGadget(), m_hovering( false )
 	{
 		enterSignal().connect( boost::bind( &GnomonPlane::enter, this ) );
 		leaveSignal().connect( boost::bind( &GnomonPlane::leave, this ) );
 	}
 
-	protected:
+protected:
 
 	void renderGnomon( const Style *style ) const override
 	{
@@ -786,7 +733,7 @@ class GnomonPlane : public GnomonGadget
 		}
 	}
 
-	private:
+private:
 
 	void enter()
 	{
@@ -808,10 +755,9 @@ class GnomonPlane : public GnomonGadget
 class SceneView::Gnomon : public Signals::Trackable
 {
 
-	public:
+public:
 
-	Gnomon( SceneView *view )
-		: m_view( view ), m_gadget( new Gadget() )
+	Gnomon( SceneView *view ) : m_view( view ), m_gadget( new Gadget() )
 	{
 		ValuePlugPtr plug = new ValuePlug( "gnomon" );
 		view->addChild( plug );
@@ -844,34 +790,19 @@ class SceneView::Gnomon : public Signals::Trackable
 		update();
 	}
 
-	Gaffer::ValuePlug *plug()
-	{
-		return m_view->getChild<Gaffer::ValuePlug>( "gnomon" );
-	}
+	Gaffer::ValuePlug *plug() { return m_view->getChild<Gaffer::ValuePlug>( "gnomon" ); }
 
-	const Gaffer::ValuePlug *plug() const
-	{
-		return m_view->getChild<Gaffer::ValuePlug>( "gnomon" );
-	}
+	const Gaffer::ValuePlug *plug() const { return m_view->getChild<Gaffer::ValuePlug>( "gnomon" ); }
 
-	Gadget *gadget()
-	{
-		return m_gadget.get();
-	}
+	Gadget *gadget() { return m_gadget.get(); }
 
-	const Gadget *gadget() const
-	{
-		return m_gadget.get();
-	}
+	const Gadget *gadget() const { return m_gadget.get(); }
 
-	private:
+private:
 
 	void plugDirtied( Gaffer::Plug *plug )
 	{
-		if(
-			plug == this->plug() ||
-			plug == m_view->cameraPlug()->getChild<BoolPlug>( "lookThroughEnabled" )
-		)
+		if( plug == this->plug() || plug == m_view->cameraPlug()->getChild<BoolPlug>( "lookThroughEnabled" ) )
 		{
 			update();
 		}
@@ -900,9 +831,7 @@ class SceneView::Gnomon : public Signals::Trackable
 		}
 
 		auto freeCameraPlug = m_view->cameraPlug()->getChild<StringPlug>( "freeCamera" );
-		freeCameraPlug->setValue(
-			freeCameraPlug->getValue() == "perspective" ? gadget->getName() : "perspective"
-		);
+		freeCameraPlug->setValue( freeCameraPlug->getValue() == "perspective" ? gadget->getName() : "perspective" );
 
 		return true;
 	}
@@ -914,10 +843,9 @@ class SceneView::Gnomon : public Signals::Trackable
 class SceneView::FPS : public Signals::Trackable
 {
 
-	public:
+public:
 
-	FPS( SceneView *view )
-		: m_view( view ), m_gadget( new FPSGadget() )
+	FPS( SceneView *view ) : m_view( view ), m_gadget( new FPSGadget() )
 	{
 		ValuePlugPtr plug = new ValuePlug( "fps" );
 		view->addChild( plug );
@@ -931,17 +859,11 @@ class SceneView::FPS : public Signals::Trackable
 		update();
 	}
 
-	Gaffer::ValuePlug *plug()
-	{
-		return m_view->getChild<Gaffer::ValuePlug>( "fps" );
-	}
+	Gaffer::ValuePlug *plug() { return m_view->getChild<Gaffer::ValuePlug>( "fps" ); }
 
-	const Gaffer::ValuePlug *plug() const
-	{
-		return m_view->getChild<Gaffer::ValuePlug>( "fps" );
-	}
+	const Gaffer::ValuePlug *plug() const { return m_view->getChild<Gaffer::ValuePlug>( "fps" ); }
 
-	private:
+private:
 
 	void plugDirtied( Gaffer::Plug *plug )
 	{
@@ -951,10 +873,7 @@ class SceneView::FPS : public Signals::Trackable
 		}
 	}
 
-	void update()
-	{
-		m_gadget->setVisible( plug()->getChild<BoolPlug>( "visible" )->getValue() );
-	}
+	void update() { m_gadget->setVisible( plug()->getChild<BoolPlug>( "visible" )->getValue() ); }
 
 	SceneView *m_view;
 	FPSGadgetPtr m_gadget;
@@ -970,12 +889,9 @@ namespace
 class CameraOverlay : public GafferUI::Gadget
 {
 
-	public:
+public:
 
-	CameraOverlay()
-		: Gadget()
-	{
-	}
+	CameraOverlay() : Gadget() {}
 
 	Imath::Box3f bound() const override
 	{
@@ -994,10 +910,7 @@ class CameraOverlay : public GafferUI::Gadget
 		dirty( DirtyType::Render );
 	}
 
-	const Box2f &getResolutionGate() const
-	{
-		return m_resolutionGate;
-	}
+	const Box2f &getResolutionGate() const { return m_resolutionGate; }
 
 	// Specified in raster space.
 	void setApertureGate( const Box2f &apertureGate )
@@ -1010,10 +923,7 @@ class CameraOverlay : public GafferUI::Gadget
 		dirty( DirtyType::Render );
 	}
 
-	const Box2f &getApertureGate() const
-	{
-		return m_apertureGate;
-	}
+	const Box2f &getApertureGate() const { return m_apertureGate; }
 
 	// Specified in 0-1 space relative to resolution gate
 	void setCropWindow( const Box2f &cropWindow )
@@ -1026,10 +936,7 @@ class CameraOverlay : public GafferUI::Gadget
 		dirty( DirtyType::Render );
 	}
 
-	const Box2f &getCropWindow() const
-	{
-		return m_cropWindow;
-	}
+	const Box2f &getCropWindow() const { return m_cropWindow; }
 
 	// left, top, right, bottom
 	void setOverscan( const V4f &overscan )
@@ -1042,10 +949,7 @@ class CameraOverlay : public GafferUI::Gadget
 		dirty( DirtyType::Render );
 	}
 
-	const V4f &getOverscan() const
-	{
-		return m_overscan;
-	}
+	const V4f &getOverscan() const { return m_overscan; }
 
 	void setCaption( const std::string &caption )
 	{
@@ -1057,10 +961,7 @@ class CameraOverlay : public GafferUI::Gadget
 		dirty( DirtyType::Render );
 	}
 
-	const std::string &getCaption() const
-	{
-		return m_caption;
-	}
+	const std::string &getCaption() const { return m_caption; }
 
 	void setIcon( const std::string &icon )
 	{
@@ -1072,12 +973,9 @@ class CameraOverlay : public GafferUI::Gadget
 		dirty( DirtyType::Render );
 	}
 
-	const std::string &getIcon() const
-	{
-		return m_icon;
-	}
+	const std::string &getIcon() const { return m_icon; }
 
-	protected:
+protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
 	{
@@ -1117,12 +1015,8 @@ class CameraOverlay : public GafferUI::Gadget
 					V2f dirX( right ? 1 : -1, 0 );
 					V2f dirY( 0, up ? 1 : -1 );
 
-					style->renderRectangle(
-						Box2f( curCorner + startDist * dirY, curCorner + endDist * dirY )
-					);
-					style->renderRectangle(
-						Box2f( curCorner + startDist * dirX, curCorner + endDist * dirX )
-					);
+					style->renderRectangle( Box2f( curCorner + startDist * dirY, curCorner + endDist * dirY ) );
+					style->renderRectangle( Box2f( curCorner + startDist * dirX, curCorner + endDist * dirX ) );
 				}
 			}
 		}
@@ -1134,14 +1028,10 @@ class CameraOverlay : public GafferUI::Gadget
 
 			glColor4f( 0.5, 0.5, 0.5, 0.5 );
 			style->renderRectangle( Box2f(
-				V2f(
-					lerp( m_resolutionGate.min.x, m_resolutionGate.max.x, m_cropWindow.min.x ),
-					lerp( m_resolutionGate.min.y, m_resolutionGate.max.y, m_cropWindow.min.y )
-				),
-				V2f(
-					lerp( m_resolutionGate.min.x, m_resolutionGate.max.x, m_cropWindow.max.x ),
-					lerp( m_resolutionGate.min.y, m_resolutionGate.max.y, m_cropWindow.max.y )
-				)
+				V2f( lerp( m_resolutionGate.min.x, m_resolutionGate.max.x, m_cropWindow.min.x ),
+					 lerp( m_resolutionGate.min.y, m_resolutionGate.max.y, m_cropWindow.min.y ) ),
+				V2f( lerp( m_resolutionGate.min.x, m_resolutionGate.max.x, m_cropWindow.max.x ),
+					 lerp( m_resolutionGate.min.y, m_resolutionGate.max.y, m_cropWindow.max.y ) )
 			) );
 
 			glColor4f( 0, 0.25, 0, 1.0f );
@@ -1154,14 +1044,10 @@ class CameraOverlay : public GafferUI::Gadget
 
 				const V2f gateSize = m_resolutionGate.size();
 				style->renderRectangle( Box2f(
-					V2f(
-						m_resolutionGate.min.x - ( m_overscan[0] * gateSize.x ),
-						m_resolutionGate.min.y - ( m_overscan[1] * gateSize.y )
-					),
-					V2f(
-						m_resolutionGate.max.x + ( m_overscan[2] * gateSize.x ),
-						m_resolutionGate.max.y + ( m_overscan[3] * gateSize.y )
-					)
+					V2f( m_resolutionGate.min.x - ( m_overscan[0] * gateSize.x ),
+						 m_resolutionGate.min.y - ( m_overscan[1] * gateSize.y ) ),
+					V2f( m_resolutionGate.max.x + ( m_overscan[2] * gateSize.x ),
+						 m_resolutionGate.max.y + ( m_overscan[3] * gateSize.y ) )
 				) );
 
 				glDisable( GL_LINE_STIPPLE );
@@ -1171,16 +1057,10 @@ class CameraOverlay : public GafferUI::Gadget
 			{
 				IECoreGL::ConstTexturePtr texture = ImageGadget::loadTexture( m_icon );
 				const V2f size(
-					std::min(
-						std::min( m_resolutionGate.size().x, m_resolutionGate.size().y ) / 4.0f,
-						100.0f
-					)
+					std::min( std::min( m_resolutionGate.size().x, m_resolutionGate.size().y ) / 4.0f, 100.0f )
 				);
 				style->renderImage(
-					Box2f(
-						m_resolutionGate.center() + size / 2.0f,
-						m_resolutionGate.center() - size / 2.0f
-					),
+					Box2f( m_resolutionGate.center() + size / 2.0f, m_resolutionGate.center() - size / 2.0f ),
 					texture.get()
 				);
 			}
@@ -1197,10 +1077,7 @@ class CameraOverlay : public GafferUI::Gadget
 		glPopAttrib();
 	}
 
-	unsigned layerMask() const override
-	{
-		return (unsigned)Layer::MidFront;
-	}
+	unsigned layerMask() const override { return (unsigned)Layer::MidFront; }
 
 	Imath::Box3f renderBound() const override
 	{
@@ -1210,7 +1087,7 @@ class CameraOverlay : public GafferUI::Gadget
 		return b;
 	}
 
-	private:
+private:
 
 	Box2f m_resolutionGate;
 	Box2f m_apertureGate;
@@ -1227,11 +1104,7 @@ struct FreeCamera
 
 	static FreeCamera createFromViewport( const ViewportGadget *viewport )
 	{
-		return {
-			viewport->getCamera()->copy(),
-			viewport->getCameraTransform(),
-			viewport->getCenterOfInterest()
-		};
+		return { viewport->getCamera()->copy(), viewport->getCameraTransform(), viewport->getCenterOfInterest() };
 	}
 
 	static FreeCamera createOrthographic( int viewAxis )
@@ -1256,11 +1129,7 @@ struct FreeCamera
 				break;
 		}
 
-		return {
-			camera,
-			transform,
-			1.0f
-		};
+		return { camera, transform, 1.0f };
 	}
 
 	void applyToViewport( ViewportGadget *viewport ) const
@@ -1310,7 +1179,7 @@ struct FreeCamera
 class SceneView::Camera : public Signals::Trackable
 {
 
-	public:
+public:
 
 	Camera( SceneView *view )
 		: m_view( view ),
@@ -1329,47 +1198,26 @@ class SceneView::Camera : public Signals::Trackable
 
 		plug->addChild( new StringPlug( "freeCamera", Plug::In, "perspective", Plug::Default & ~Plug::AcceptsInputs ) );
 
-		plug->addChild(
-			new Gaffer::FloatPlug(
-				"fieldOfView",
-				Plug::In,
-				54.43f,
-				0.01f,
-				179.99f,
-				Plug::Default & ~Plug::AcceptsInputs
-			)
-		);
-		plug->addChild(
-			new Gaffer::V2fPlug(
-				"clippingPlanes", Plug::In,
-				V2f( 0.1, 100000 ),
-				V2f( 0.0001 ),
-				V2f( std::numeric_limits<float>::max() ),
-				Plug::Default & ~Plug::AcceptsInputs
-			)
-		);
+		plug->addChild( new Gaffer::FloatPlug(
+			"fieldOfView", Plug::In, 54.43f, 0.01f, 179.99f, Plug::Default & ~Plug::AcceptsInputs
+		) );
+		plug->addChild( new Gaffer::V2fPlug(
+			"clippingPlanes", Plug::In, V2f( 0.1, 100000 ), V2f( 0.0001 ), V2f( std::numeric_limits<float>::max() ),
+			Plug::Default & ~Plug::AcceptsInputs
+		) );
 
 		plug->addChild( new BoolPlug( "lookThroughEnabled", Plug::In, false, Plug::Default & ~Plug::AcceptsInputs ) );
 		plug->addChild( new StringPlug( "lookThroughCamera", Plug::In, "", Plug::Default & ~Plug::AcceptsInputs ) );
-		plug->addChild(
-			new Gaffer::FloatPlug(
-				"lightLookThroughDefaultDistantAperture", Plug::In,
-				2.0f,
-				0.0f,
-				std::numeric_limits<float>::max(),
-				Plug::Default & ~Plug::AcceptsInputs
-			)
-		);
+		plug->addChild( new Gaffer::FloatPlug(
+			"lightLookThroughDefaultDistantAperture", Plug::In, 2.0f, 0.0f, std::numeric_limits<float>::max(),
+			Plug::Default & ~Plug::AcceptsInputs
+		) );
 
-		plug->addChild(
-			new Gaffer::V2fPlug(
-				"lightLookThroughDefaultClippingPlanes", Plug::In,
-				V2f( -100000, 100000 ),
-				V2f( std::numeric_limits<float>::lowest() ),
-				V2f( std::numeric_limits<float>::max() ),
-				Plug::Default & ~Plug::AcceptsInputs
-			)
-		);
+		plug->addChild( new Gaffer::V2fPlug(
+			"lightLookThroughDefaultClippingPlanes", Plug::In, V2f( -100000, 100000 ),
+			V2f( std::numeric_limits<float>::lowest() ), V2f( std::numeric_limits<float>::max() ),
+			Plug::Default & ~Plug::AcceptsInputs
+		) );
 
 		view->addChild( plug );
 
@@ -1421,20 +1269,16 @@ class SceneView::Camera : public Signals::Trackable
 		view->plugDirtiedSignal().connect( boost::bind( &Camera::plugDirtied, this, ::_1 ) );
 		view->viewportGadget()->preRenderSignal().connect( boost::bind( &Camera::preRender, this ) );
 		view->viewportGadget()->viewportChangedSignal().connect( boost::bind( &Camera::viewportChanged, this ) );
-		m_viewportCameraChangedConnection = view->viewportGadget()->cameraChangedSignal().connect( boost::bind( &Camera::viewportCameraChanged, this ) );
+		m_viewportCameraChangedConnection = view->viewportGadget()->cameraChangedSignal().connect(
+			boost::bind( &Camera::viewportCameraChanged, this )
+		);
 
 		view->contextChangedSignal().connect( boost::bind( &Camera::contextChanged, this ) );
 	}
 
-	Gaffer::ValuePlug *plug()
-	{
-		return m_view->getChild<Gaffer::ValuePlug>( "camera" );
-	}
+	Gaffer::ValuePlug *plug() { return m_view->getChild<Gaffer::ValuePlug>( "camera" ); }
 
-	const Gaffer::ValuePlug *plug() const
-	{
-		return m_view->getChild<Gaffer::ValuePlug>( "camera" );
-	}
+	const Gaffer::ValuePlug *plug() const { return m_view->getChild<Gaffer::ValuePlug>( "camera" ); }
 
 	const Imath::Box2f &resolutionGate() const
 	{
@@ -1443,82 +1287,40 @@ class SceneView::Camera : public Signals::Trackable
 		return m_overlay->getResolutionGate();
 	}
 
-	string lookThroughCameraPath() const
-	{
-		return lookThroughCameraPlug()->getValue();
-	}
+	string lookThroughCameraPath() const { return lookThroughCameraPlug()->getValue(); }
 
-	private:
+private:
 
-	const GafferScene::ScenePlug *scenePlug() const
-	{
-		return m_lightToCamera->outPlug();
-	}
+	const GafferScene::ScenePlug *scenePlug() const { return m_lightToCamera->outPlug(); }
 
-	Gaffer::StringPlug *freeCameraPlug()
-	{
-		return plug()->getChild<Gaffer::StringPlug>( 0 );
-	}
+	Gaffer::StringPlug *freeCameraPlug() { return plug()->getChild<Gaffer::StringPlug>( 0 ); }
 
-	const Gaffer::StringPlug *freeCameraPlug() const
-	{
-		return plug()->getChild<Gaffer::StringPlug>( 0 );
-	}
+	const Gaffer::StringPlug *freeCameraPlug() const { return plug()->getChild<Gaffer::StringPlug>( 0 ); }
 
-	Gaffer::FloatPlug *fieldOfViewPlug()
-	{
-		return plug()->getChild<Gaffer::FloatPlug>( 1 );
-	}
+	Gaffer::FloatPlug *fieldOfViewPlug() { return plug()->getChild<Gaffer::FloatPlug>( 1 ); }
 
-	const Gaffer::FloatPlug *fieldOfViewPlug() const
-	{
-		return plug()->getChild<Gaffer::FloatPlug>( 1 );
-	}
+	const Gaffer::FloatPlug *fieldOfViewPlug() const { return plug()->getChild<Gaffer::FloatPlug>( 1 ); }
 
-	Gaffer::V2fPlug *clippingPlanesPlug()
-	{
-		return plug()->getChild<Gaffer::V2fPlug>( 2 );
-	}
+	Gaffer::V2fPlug *clippingPlanesPlug() { return plug()->getChild<Gaffer::V2fPlug>( 2 ); }
 
-	const Gaffer::V2fPlug *clippingPlanesPlug() const
-	{
-		return plug()->getChild<Gaffer::V2fPlug>( 2 );
-	}
+	const Gaffer::V2fPlug *clippingPlanesPlug() const { return plug()->getChild<Gaffer::V2fPlug>( 2 ); }
 
-	const Gaffer::BoolPlug *lookThroughEnabledPlug() const
-	{
-		return plug()->getChild<BoolPlug>( 3 );
-	}
+	const Gaffer::BoolPlug *lookThroughEnabledPlug() const { return plug()->getChild<BoolPlug>( 3 ); }
 
-	const Gaffer::StringPlug *lookThroughCameraPlug() const
-	{
-		return plug()->getChild<StringPlug>( 4 );
-	}
+	const Gaffer::StringPlug *lookThroughCameraPlug() const { return plug()->getChild<StringPlug>( 4 ); }
 
 	const Gaffer::FloatPlug *lightLookThroughDefaultDistantAperturePlug() const
 	{
 		return plug()->getChild<FloatPlug>( 5 );
 	}
 
-	Gaffer::FloatPlug *lightLookThroughDefaultDistantAperturePlug()
-	{
-		return plug()->getChild<FloatPlug>( 5 );
-	}
+	Gaffer::FloatPlug *lightLookThroughDefaultDistantAperturePlug() { return plug()->getChild<FloatPlug>( 5 ); }
 
-	const Gaffer::V2fPlug *lightLookThroughDefaultClippingPlanesPlug() const
-	{
-		return plug()->getChild<V2fPlug>( 6 );
-	}
+	const Gaffer::V2fPlug *lightLookThroughDefaultClippingPlanesPlug() const { return plug()->getChild<V2fPlug>( 6 ); }
 
-	Gaffer::V2fPlug *lightLookThroughDefaultClippingPlanesPlug()
-	{
-		return plug()->getChild<V2fPlug>( 6 );
-	}
+	Gaffer::V2fPlug *lightLookThroughDefaultClippingPlanesPlug() { return plug()->getChild<V2fPlug>( 6 ); }
 
-	SceneGadget *sceneGadget()
-	{
-		return static_cast<SceneGadget *>( m_view->viewportGadget()->getPrimaryChild() );
-	}
+	SceneGadget *sceneGadget() { return static_cast<SceneGadget *>( m_view->viewportGadget()->getPrimaryChild() ); }
 
 	void contextChanged()
 	{
@@ -1530,10 +1332,7 @@ class SceneView::Camera : public Signals::Trackable
 
 	void plugSet( Gaffer::Plug *plug )
 	{
-		if(
-			plug == clippingPlanesPlug() ||
-			plug == fieldOfViewPlug()
-		)
+		if( plug == clippingPlanesPlug() || plug == fieldOfViewPlug() )
 		{
 			// Camera settings changed. Transfer onto free cameras.
 			for( auto &camera : m_freeCameras )
@@ -1558,15 +1357,9 @@ class SceneView::Camera : public Signals::Trackable
 			return;
 		}
 
-		if(
-			plug == scenePlug()->childNamesPlug() ||
-			plug == scenePlug()->globalsPlug() ||
-			plug == scenePlug()->objectPlug() ||
-			plug == scenePlug()->transformPlug() ||
-			plug == lookThroughEnabledPlug() ||
-			plug == lookThroughCameraPlug() ||
-			plug == freeCameraPlug()
-		)
+		if( plug == scenePlug()->childNamesPlug() || plug == scenePlug()->globalsPlug() ||
+			plug == scenePlug()->objectPlug() || plug == scenePlug()->transformPlug() ||
+			plug == lookThroughEnabledPlug() || plug == lookThroughCameraPlug() || plug == freeCameraPlug() )
 		{
 			m_lookThroughCameraDirty = m_viewportCameraDirty = true;
 			m_view->viewportGadget()->renderRequestSignal()( m_view->viewportGadget() );
@@ -1675,7 +1468,8 @@ class SceneView::Camera : public Signals::Trackable
 					throw IECore::Exception( "Camera \"" + cameraPathString + "\" does not exist" );
 				}
 
-				IECoreScene::ConstCameraPtr constCamera = runTimeCast<const IECoreScene::Camera>( scenePlug()->object( cameraPath ) );
+				IECoreScene::ConstCameraPtr constCamera =
+					runTimeCast<const IECoreScene::Camera>( scenePlug()->object( cameraPath ) );
 				if( !constCamera )
 				{
 					throw IECore::Exception( "Location \"" + cameraPathString + "\" does not have a camera" );
@@ -1716,9 +1510,7 @@ class SceneView::Camera : public Signals::Trackable
 		const bool isCamera = cameraSet->readable().match( cameraPathString );
 		if( isCamera )
 		{
-			m_view->deleteObjectFilter()->pathsPlug()->setValue(
-				new StringVectorData( { cameraPathString } )
-			);
+			m_view->deleteObjectFilter()->pathsPlug()->setValue( new StringVectorData( { cameraPathString } ) );
 		}
 
 		// Make sure that the camera and anything parented below it are always
@@ -1757,7 +1549,12 @@ class SceneView::Camera : public Signals::Trackable
 		{
 			const V2i resolution = m_lookThroughCamera->getResolution();
 			const float pixelAspectRatio = m_lookThroughCamera->getPixelAspectRatio();
-			m_overlay->setCaption( fmt::format( "{}x{}, {:.3f}, {}", resolution.x, resolution.y, pixelAspectRatio, !cameraPathString.empty() ? cameraPathString : "default" ) );
+			m_overlay->setCaption(
+				fmt::format(
+					"{}x{}, {:.3f}, {}", resolution.x, resolution.y, pixelAspectRatio,
+					!cameraPathString.empty() ? cameraPathString : "default"
+				)
+			);
 			m_overlay->setIcon( "" );
 		}
 		else
@@ -1800,14 +1597,17 @@ class SceneView::Camera : public Signals::Trackable
 		const float pixelAspectRatio = fabsf( m_lookThroughCamera->getPixelAspectRatio() );
 
 		Box2f apertureGate = m_lookThroughCamera->frustum( IECoreScene::Camera::Distort );
-		Box2f resolutionGate = m_lookThroughCamera->frustum( m_lookThroughCamera->getFilmFit(), resolution.x * pixelAspectRatio / resolution.y );
+		Box2f resolutionGate = m_lookThroughCamera->frustum(
+			m_lookThroughCamera->getFilmFit(), resolution.x * pixelAspectRatio / resolution.y
+		);
 
 		// We want the aspect ratio of the resolution gate to match the aspect ratio of the resolution
 		// When using Distort film fit, they won't match by default, so we apply this squish factor
 		// to the resolutionGate, the apertureGate, and the aperture of the viewportCamera.  This keeps
 		// everything aligned, with the correct aspect ratio ( though the objects in the view are now
 		// distorted )
-		float horizSquish = ( resolutionGate.size().x * resolution.y ) / ( resolutionGate.size().y * resolution.x * pixelAspectRatio );
+		float horizSquish =
+			( resolutionGate.size().x * resolution.y ) / ( resolutionGate.size().y * resolution.x * pixelAspectRatio );
 
 		apertureGate.min.x /= horizSquish;
 		apertureGate.max.x /= horizSquish;
@@ -1831,7 +1631,8 @@ class SceneView::Camera : public Signals::Trackable
 			viewportTarget.max.x = max( viewportTarget.max.x, apertureGate.max.x );
 		}
 
-		Box2f insetScreenWindow = IECoreScene::Camera::fitWindow( viewportTarget, IECoreScene::Camera::Fit, insetViewportAspectRatio );
+		Box2f insetScreenWindow =
+			IECoreScene::Camera::fitWindow( viewportTarget, IECoreScene::Camera::Fit, insetViewportAspectRatio );
 		V2f insetCenter = insetScreenWindow.center();
 		V2f insetScale = insetViewport / viewport;
 
@@ -1935,7 +1736,9 @@ SceneView::SceneView( ScriptNodePtr scriptNode )
 
 	storeIndexOfNextChild( g_firstPlugIndex );
 
-	addChild( new IntPlug( "minimumExpansionDepth", Plug::In, 0, 0, std::numeric_limits<int>::max(), Plug::Default & ~Plug::AcceptsInputs ) );
+	addChild( new IntPlug(
+		"minimumExpansionDepth", Plug::In, 0, 0, std::numeric_limits<int>::max(), Plug::Default & ~Plug::AcceptsInputs
+	) );
 
 	plugSetSignal().connect( boost::bind( &SceneView::plugSet, this, ::_1 ) );
 
@@ -1998,15 +1801,25 @@ SceneView::SceneView( ScriptNodePtr scriptNode )
 
 	preprocessor->addChild( m_renderer->preprocessor() );
 	m_renderer->preprocessor()->inPlug()->setInput( m_drawingMode->preprocessor()->outPlug() );
-	adaptors->getChild<StringPlug>( "renderer" )->setInput( getChild<Plug>( "renderer" )->getChild<StringPlug>( "name" ) );
+	adaptors->getChild<StringPlug>( "renderer" )
+		->setInput( getChild<Plug>( "renderer" )->getChild<StringPlug>( "name" ) );
 
 	// remove motion blur, because the opengl renderer doesn't support it.
 
 	StandardOptionsPtr standardOptions = new StandardOptions( "disableBlur" );
 	standardOptions->optionsPlug()->getChild<NameValuePlug>( "render:transformBlur" )->enabledPlug()->setValue( true );
-	standardOptions->optionsPlug()->getChild<NameValuePlug>( "render:transformBlur" )->valuePlug<BoolPlug>()->setValue( false );
-	standardOptions->optionsPlug()->getChild<NameValuePlug>( "render:deformationBlur" )->enabledPlug()->setValue( true );
-	standardOptions->optionsPlug()->getChild<NameValuePlug>( "render:deformationBlur" )->valuePlug<BoolPlug>()->setValue( false );
+	standardOptions->optionsPlug()
+		->getChild<NameValuePlug>( "render:transformBlur" )
+		->valuePlug<BoolPlug>()
+		->setValue( false );
+	standardOptions->optionsPlug()
+		->getChild<NameValuePlug>( "render:deformationBlur" )
+		->enabledPlug()
+		->setValue( true );
+	standardOptions->optionsPlug()
+		->getChild<NameValuePlug>( "render:deformationBlur" )
+		->valuePlug<BoolPlug>()
+		->setValue( false );
 
 	preprocessor->addChild( standardOptions );
 	standardOptions->inPlug()->setInput( m_renderer->preprocessor()->outPlug() );
@@ -2026,14 +1839,14 @@ SceneView::SceneView( ScriptNodePtr scriptNode )
 	// Connect to ScriptNodeAlgo for selection and visible set updates,
 	// and arrange to update when our context changes.
 
-	ScriptNodeAlgo::selectedPathsChangedSignal( scriptNode.get() ).connect( boost::bind( &SceneView::selectedPathsChanged, this ) );
-	ScriptNodeAlgo::visibleSetChangedSignal( scriptNode.get() ).connect( boost::bind( &SceneView::visibleSetChanged, this ) );
+	ScriptNodeAlgo::selectedPathsChangedSignal( scriptNode.get() )
+		.connect( boost::bind( &SceneView::selectedPathsChanged, this ) );
+	ScriptNodeAlgo::visibleSetChangedSignal( scriptNode.get() )
+		.connect( boost::bind( &SceneView::visibleSetChanged, this ) );
 	contextChangedSignal().connect( boost::bind( &SceneView::contextChanged, this ) );
 }
 
-SceneView::~SceneView()
-{
-}
+SceneView::~SceneView() {}
 
 Gaffer::IntPlug *SceneView::minimumExpansionDepthPlug()
 {
@@ -2212,7 +2025,9 @@ void SceneView::frame( const PathMatcher &filter, const Imath::V3f &direction )
 void SceneView::expandSelection( size_t depth )
 {
 	Context::Scope scope( context() );
-	PathMatcher selection = ScriptNodeAlgo::expandDescendantsInVisibleSet( scriptNode(), m_sceneGadget->getSelection(), preprocessedInPlug<ScenePlug>(), depth - 1 );
+	PathMatcher selection = ScriptNodeAlgo::expandDescendantsInVisibleSet(
+		scriptNode(), m_sceneGadget->getSelection(), preprocessedInPlug<ScenePlug>(), depth - 1
+	);
 	ScriptNodeAlgo::setSelectedPaths( scriptNode(), selection );
 }
 

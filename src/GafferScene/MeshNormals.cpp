@@ -48,20 +48,23 @@ GAFFER_NODE_DEFINE_TYPE( MeshNormals );
 
 size_t MeshNormals::g_firstPlugIndex = 0;
 
-MeshNormals::MeshNormals( const std::string &name )
-	: ObjectProcessor( name )
+MeshNormals::MeshNormals( const std::string &name ) : ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
-	addChild( new IntPlug( "interpolation", Plug::In, PrimitiveVariable::Vertex, /* min */ PrimitiveVariable::Uniform, /* max */ PrimitiveVariable::FaceVarying ) );
-	addChild( new IntPlug( "weighting", Plug::In, (int)MeshAlgo::NormalWeighting::Angle, /* min */ (int)MeshAlgo::NormalWeighting::Equal, /* max */ (int)MeshAlgo::NormalWeighting::Area ) );
+	addChild( new IntPlug(
+		"interpolation", Plug::In, PrimitiveVariable::Vertex, /* min */ PrimitiveVariable::Uniform,
+		/* max */ PrimitiveVariable::FaceVarying
+	) );
+	addChild( new IntPlug(
+		"weighting", Plug::In, (int)MeshAlgo::NormalWeighting::Angle, /* min */ (int)MeshAlgo::NormalWeighting::Equal,
+		/* max */ (int)MeshAlgo::NormalWeighting::Area
+	) );
 	addChild( new FloatPlug( "thresholdAngle", Plug::In, 40, /* min */ 0.0f, /* max */ 180.0f ) );
 	addChild( new StringPlug( "position", Plug::In, "P" ) );
 	addChild( new StringPlug( "normal", Plug::In, "N" ) );
 }
 
-MeshNormals::~MeshNormals()
-{
-}
+MeshNormals::~MeshNormals() {}
 
 Gaffer::IntPlug *MeshNormals::interpolationPlug()
 {
@@ -120,15 +123,13 @@ Gaffer::ValuePlug::CachePolicy MeshNormals::processedObjectComputeCachePolicy() 
 
 bool MeshNormals::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return ObjectProcessor::affectsProcessedObject( input ) ||
-		input == interpolationPlug() ||
-		input == weightingPlug() ||
-		input == thresholdAnglePlug() ||
-		input == positionPlug() ||
-		input == normalPlug();
+	return ObjectProcessor::affectsProcessedObject( input ) || input == interpolationPlug() ||
+		input == weightingPlug() || input == thresholdAnglePlug() || input == positionPlug() || input == normalPlug();
 }
 
-void MeshNormals::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void MeshNormals::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ObjectProcessor::hashProcessedObject( path, context, h );
 	interpolationPlug()->hash( h );
@@ -138,7 +139,9 @@ void MeshNormals::hashProcessedObject( const ScenePath &path, const Gaffer::Cont
 	normalPlug()->hash( h );
 }
 
-IECore::ConstObjectPtr MeshNormals::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr MeshNormals::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	const MeshPrimitive *mesh = runTimeCast<const MeshPrimitive>( inputObject );
 	if( !mesh )
@@ -156,21 +159,17 @@ IECore::ConstObjectPtr MeshNormals::computeProcessedObject( const ScenePath &pat
 
 	if( interpolation == PrimitiveVariable::Uniform )
 	{
-		meshWithNormals->variables[normal] = MeshAlgo::calculateUniformNormals(
-			meshWithNormals.get(), position
-		);
+		meshWithNormals->variables[normal] = MeshAlgo::calculateUniformNormals( meshWithNormals.get(), position );
 	}
 	else if( interpolation == PrimitiveVariable::Vertex || interpolation == PrimitiveVariable::Varying )
 	{
-		meshWithNormals->variables[normal] = MeshAlgo::calculateVertexNormals(
-			meshWithNormals.get(), weighting, position
-		);
+		meshWithNormals->variables[normal] =
+			MeshAlgo::calculateVertexNormals( meshWithNormals.get(), weighting, position );
 	}
 	else if( interpolation == PrimitiveVariable::FaceVarying )
 	{
-		meshWithNormals->variables[normal] = MeshAlgo::calculateFaceVaryingNormals(
-			meshWithNormals.get(), weighting, thresholdAngle, position
-		);
+		meshWithNormals->variables[normal] =
+			MeshAlgo::calculateFaceVaryingNormals( meshWithNormals.get(), weighting, thresholdAngle, position );
 	}
 
 	return meshWithNormals;

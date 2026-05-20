@@ -236,7 +236,8 @@ IECoreGL::MeshPrimitivePtr circle()
 		vertsPerPoly.push_back( 3 );
 	}
 
-	IECoreScene::MeshPrimitivePtr circle = new IECoreScene::MeshPrimitive( vertsPerPolyData, vertIdsData, "linear", pData );
+	IECoreScene::MeshPrimitivePtr circle =
+		new IECoreScene::MeshPrimitive( vertsPerPolyData, vertIdsData, "linear", pData );
 	ToGLMeshConverterPtr converter = new ToGLMeshConverter( circle );
 	result = runTimeCast<IECoreGL::MeshPrimitive>( converter->convert() );
 
@@ -273,7 +274,8 @@ IECoreGL::MeshPrimitivePtr cone( float height, float startRadius, float endRadiu
 		vertsPerPoly.push_back( 4 );
 	}
 
-	IECoreScene::MeshPrimitivePtr mesh = new IECoreScene::MeshPrimitive( vertsPerPolyData, vertIdsData, "linear", pData );
+	IECoreScene::MeshPrimitivePtr mesh =
+		new IECoreScene::MeshPrimitive( vertsPerPolyData, vertIdsData, "linear", pData );
 	IECoreGL::ToGLMeshConverterPtr converter = new ToGLMeshConverter( mesh );
 	result = runTimeCast<IECoreGL::MeshPrimitive>( converter->convert() );
 
@@ -324,15 +326,11 @@ std::string selectedUpstreamPathToString( const std::vector<TransformTool::Selec
 class DistanceHandle : public Handle
 {
 
-	public:
+public:
 
-	DistanceHandle( const bool requiresPivot ) : m_requiresPivot( requiresPivot )
-	{
-	}
+	DistanceHandle( const bool requiresPivot ) : m_requiresPivot( requiresPivot ) {}
 
-	~DistanceHandle() override
-	{
-	}
+	~DistanceHandle() override {}
 
 	// Set the position of the pivot from the given world-space coordinate.
 	void setPivot( const std::optional<V3f> &p )
@@ -341,10 +339,7 @@ class DistanceHandle : public Handle
 		dirty( DirtyType::Render );
 	}
 
-	const std::optional<V3f> &getPivot() const
-	{
-		return m_pivot;
-	}
+	const std::optional<V3f> &getPivot() const { return m_pivot; }
 
 	// Set the position of the target from the given world-space coordinate.
 	void setTarget( const std::optional<V3f> &p )
@@ -353,42 +348,24 @@ class DistanceHandle : public Handle
 		dirty( DirtyType::Render );
 	}
 
-	const std::optional<V3f> &getTarget() const
-	{
-		return m_target;
-	}
+	const std::optional<V3f> &getTarget() const { return m_target; }
 
-	void setPivotDistance( const std::optional<float> d )
-	{
-		m_pivotDistance = d;
-	}
+	void setPivotDistance( const std::optional<float> d ) { m_pivotDistance = d; }
 
-	const std::optional<float> &getPivotDistance() const
-	{
-		return m_pivotDistance;
-	}
+	const std::optional<float> &getPivotDistance() const { return m_pivotDistance; }
 
 	V3f translation( const DragDropEvent &event )
 	{
 		return V3f( 0, 0, m_drag.updatedPosition( event ) - m_drag.startPosition() );
 	}
 
-	void setTransformToSceneSpace( const M44f &t )
-	{
-		m_transformToSceneSpace = t;
-	}
+	void setTransformToSceneSpace( const M44f &t ) { m_transformToSceneSpace = t; }
 
-	void setRequiresPivot( const bool requiresPivot )
-	{
-		m_requiresPivot = requiresPivot;
-	}
+	void setRequiresPivot( const bool requiresPivot ) { m_requiresPivot = requiresPivot; }
 
-	bool getRequiresPivot() const
-	{
-		return m_requiresPivot;
-	}
+	bool getRequiresPivot() const { return m_requiresPivot; }
 
-	protected:
+protected:
 
 	void renderHandle( const Style *style, Style::State state ) const override
 	{
@@ -422,42 +399,30 @@ class DistanceHandle : public Handle
 
 		IECoreGL::GroupPtr group = new IECoreGL::Group;
 
-		group->getState()->add(
-			new IECoreGL::ShaderStateComponent(
-				ShaderLoader::defaultShaderLoader(),
-				TextureLoader::defaultTextureLoader(),
-				"",
-				"",
-				constantFragSource(),
-				new CompoundObject
-			)
-		);
+		group->getState()->add( new IECoreGL::ShaderStateComponent(
+			ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "", constantFragSource(),
+			new CompoundObject
+		) );
 
 		auto standardStyle = runTimeCast<const StandardStyle>( style );
-		const Color3f highlightColor3 = standardStyle ? standardStyle->getColor( StandardStyle::Color::HighlightColor ) : Color3f( 0.466, 0.612, 0.741 );
+		const Color3f highlightColor3 = standardStyle ?
+			standardStyle->getColor( StandardStyle::Color::HighlightColor ) :
+			Color3f( 0.466, 0.612, 0.741 );
 		const Color4f highlightColor4 = Color4f( highlightColor3.x, highlightColor3.y, highlightColor3.z, 1.f );
 
-		group->getState()->add(
-			new IECoreGL::Color(
-				enabled() ? ( highlighted ? highlightColor4 : g_lightToolColor4 ) : g_lightToolDisabledColor4
-			)
-		);
+		group->getState()->add( new IECoreGL::Color(
+			enabled() ? ( highlighted ? highlightColor4 : g_lightToolColor4 ) : g_lightToolDisabledColor4
+		) );
 
 		const M44f fullTransformInverse = fullTransform().inverse();
 
 		if( m_pivot && m_requiresPivot )
 		{
 			IECoreGL::GroupPtr pivotGroup = new IECoreGL::Group;
-			pivotGroup->getState()->add(
-				new IECoreGL::ShaderStateComponent(
-					ShaderLoader::defaultShaderLoader(),
-					TextureLoader::defaultTextureLoader(),
-					faceCameraVertexSource(),
-					"",
-					constantFragSource(),
-					new CompoundObject
-				)
-			);
+			pivotGroup->getState()->add( new IECoreGL::ShaderStateComponent(
+				ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), faceCameraVertexSource(),
+				"", constantFragSource(), new CompoundObject
+			) );
 			pivotGroup->addChild( circle() );
 
 			const V3f localPivot = m_pivot.value() * m_transformToSceneSpace * fullTransformInverse;
@@ -482,23 +447,17 @@ class DistanceHandle : public Handle
 			const V3f coneScale = V3f( coneSize ) * ::rasterScaleFactor( this, localTarget );
 			coneHeightOffset = V3f( 0, 0, g_unitConeHeight * coneScale.z );
 
-			coneGroup->setTransform(
-				M44f().scale( coneScale ) *
-				M44f().translate( localTarget + coneHeightOffset )
-			);
+			coneGroup->setTransform( M44f().scale( coneScale ) * M44f().translate( localTarget + coneHeightOffset ) );
 
 			group->addChild( coneGroup );
 
 			if( !m_requiresPivot || m_pivot )
 			{
 				IECoreGL::GroupPtr lineGroup = new IECoreGL::Group;
-				lineGroup->addChild(
-					cone(
-						localTarget.length() - coneHeightOffset.z,
-						lineRadius * ::rasterScaleFactor( this, V3f( 0 ) ),
-						lineRadius * ::rasterScaleFactor( this, localTarget )
-					)
-				);
+				lineGroup->addChild( cone(
+					localTarget.length() - coneHeightOffset.z, lineRadius * ::rasterScaleFactor( this, V3f( 0 ) ),
+					lineRadius * ::rasterScaleFactor( this, localTarget )
+				) );
 
 				group->addChild( lineGroup );
 			}
@@ -516,7 +475,7 @@ class DistanceHandle : public Handle
 		m_startDistance = m_pivotDistance.value();
 	}
 
-	private:
+private:
 
 	// As with `LightPositionTool::m_pivotMap` and `LightPositionTool::m_targetMap`,
 	// we store the pivot and target position in transform space.
@@ -541,9 +500,10 @@ GAFFER_NODE_DEFINE_TYPE( LightPositionTool );
 LightPositionTool::ToolDescription<LightPositionTool, SceneView> LightPositionTool::g_toolDescription;
 size_t LightPositionTool::g_firstPlugIndex = 0;
 
-LightPositionTool::LightPositionTool( SceneView *view, const std::string &name ) : TransformTool( view, name ),
-																				   m_targetMode( TargetMode::None ),
-																				   m_draggingTarget( false )
+LightPositionTool::LightPositionTool( SceneView *view, const std::string &name )
+	: TransformTool( view, name ),
+	  m_targetMode( TargetMode::None ),
+	  m_draggingTarget( false )
 {
 	m_distanceHandle = new DistanceHandle( true );
 	m_distanceHandle->setRasterScale( 0 );
@@ -577,7 +537,9 @@ LightPositionTool::LightPositionTool( SceneView *view, const std::string &name )
 	// We need to track the tool state/view visibility so we don't leave a lingering target cursor
 	sg->visibilityChangedSignal().connect( boost::bind( &LightPositionTool::visibilityChanged, this, ::_1 ) );
 
-	this->view()->viewportGadget()->leaveSignal().connect( boost::bind( &LightPositionTool::viewportGadgetLeave, this, ::_2 ) );
+	this->view()->viewportGadget()->leaveSignal().connect(
+		boost::bind( &LightPositionTool::viewportGadgetLeave, this, ::_2 )
+	);
 
 	plugSetSignal().connect( boost::bind( &LightPositionTool::plugSet, this, ::_1 ) );
 
@@ -596,9 +558,7 @@ const IntPlug *LightPositionTool::modePlug() const
 	return getChild<IntPlug>( g_firstPlugIndex );
 }
 
-LightPositionTool::~LightPositionTool()
-{
-}
+LightPositionTool::~LightPositionTool() {}
 
 void LightPositionTool::positionShadow( const V3f &pivot, const V3f &target, const float pivotDistance )
 {
@@ -622,21 +582,14 @@ void LightPositionTool::positionShadow( const V3f &pivot, const V3f &target, con
 }
 
 void LightPositionTool::positionHighlight(
-	const V3f &highlightTarget,
-	const V3f &viewpoint,
-	const V3f &normal,
-	const float targetDistance
+	const V3f &highlightTarget, const V3f &viewpoint, const V3f &normal, const float targetDistance
 )
 {
 	const V3f reflectionRay = reflect( ( viewpoint - highlightTarget ), normal ).normalize();
 	positionAlongNormal( highlightTarget, reflectionRay, targetDistance );
 }
 
-void LightPositionTool::positionAlongNormal(
-	const V3f &target,
-	const V3f &normal,
-	const float distance
-)
+void LightPositionTool::positionAlongNormal( const V3f &target, const V3f &normal, const float distance )
 {
 	if( !m_distanceHandle->enabled() || selection().empty() )
 	{
@@ -674,7 +627,8 @@ void LightPositionTool::updateHandles( float rasterScale )
 
 	if( !m_drag )
 	{
-		bool isLight = s.scene()->set( g_lightsSetName )->readable().match( s.path() ) & IECore::PathMatcher::ExactMatch;
+		bool isLight =
+			s.scene()->set( g_lightsSetName )->readable().match( s.path() ) & IECore::PathMatcher::ExactMatch;
 		m_distanceHandle->setVisible( isLight );
 		m_rotateHandle->setVisible( isLight );
 
@@ -682,13 +636,14 @@ void LightPositionTool::updateHandles( float rasterScale )
 
 		TranslationRotation trDistanceHandle( s, Orientation::World );
 		m_distanceHandle->setEnabled(
-			singleSelection &&
-			trDistanceHandle.canApplyTranslation() &&
+			singleSelection && trDistanceHandle.canApplyTranslation() &&
 			trDistanceHandle.canApplyRotation( V3i( 1, 1, 1 ), /* maintainRoll = */ false )
 		);
 
 		TranslationRotation trRotateHandle( s, Orientation::Local );
-		m_rotateHandle->setEnabled( singleSelection && trRotateHandle.canApplyRotation( V3i( 0, 0, 1 ), /* maintainRoll = */ false ) );
+		m_rotateHandle->setEnabled(
+			singleSelection && trRotateHandle.canApplyRotation( V3i( 0, 0, 1 ), /* maintainRoll = */ false )
+		);
 
 		m_distanceHandle->setRasterScale( 0 );
 		m_rotateHandle->setRasterScale( rasterScale );
@@ -741,12 +696,10 @@ void LightPositionTool::updateHandles( float rasterScale )
 	V3f direction;
 	transform.multDirMatrix( V3f( 0, 0, -1.f ), direction );
 
-	if(
-		!m_drag &&
+	if( !m_drag &&
 		( !direction.normalized().equalWithAbsError( handleDir, 1e-4 ) ||
 		  ( distanceHandle->getPivotDistance() &&
-			handleLine.distanceTo( p ) > distanceHandle->getPivotDistance().value() * 1e-4 ) )
-	)
+			handleLine.distanceTo( p ) > distanceHandle->getPivotDistance().value() * 1e-4 ) ) )
 	{
 		distanceHandle->setPivot( std::nullopt );
 		distanceHandle->setTarget( std::nullopt );
@@ -820,11 +773,7 @@ void LightPositionTool::handleLeave()
 
 RunTimeTypedPtr LightPositionTool::sceneGadgetDragBegin( Gadget *gadget, const DragDropEvent &event )
 {
-	if(
-		!activePlug()->getValue() ||
-		getTargetMode() == TargetMode::None ||
-		!m_distanceHandle->visible()
-	)
+	if( !activePlug()->getValue() || getTargetMode() == TargetMode::None || !m_distanceHandle->visible() )
 	{
 		return nullptr;
 	}
@@ -875,10 +824,8 @@ bool LightPositionTool::keyPress( const KeyEvent &event )
 {
 	if( activePlug()->getValue() )
 	{
-		if(
-			( event.key == "V" && event.modifiers == KeyEvent::Modifiers::Shift ) ||
-			( event.key == "Shift" && getTargetMode() == TargetMode::Target )
-		)
+		if( ( event.key == "V" && event.modifiers == KeyEvent::Modifiers::Shift ) ||
+			( event.key == "Shift" && getTargetMode() == TargetMode::Target ) )
 		{
 			setTargetMode( TargetMode::Pivot );
 			return true;
@@ -902,10 +849,7 @@ bool LightPositionTool::keyRelease( const KeyEvent &event )
 			setTargetMode( TargetMode::None );
 			return true;
 		}
-		if(
-			event.key == "Shift" &&
-			( getTargetMode() == TargetMode::Pivot )
-		)
+		if( event.key == "Shift" && ( getTargetMode() == TargetMode::Pivot ) )
 		{
 			setTargetMode( TargetMode::Target );
 			return true;
@@ -1006,9 +950,9 @@ bool LightPositionTool::placeTarget( const LineSegment3f &eventLine )
 		const V3f newPivot = gadgetTargetPos * sceneGadget->fullTransform() * sceneToTransformSpace;
 		if( !distanceHandle->getPivot() )
 		{
-			setPivotDistance(
-				( newPivot - ( V3f( 0 ) * ( s.orientedTransform( Orientation::World ) * sceneToTransformSpace ) ) ).length()
-			);
+			setPivotDistance( ( newPivot -
+								( V3f( 0 ) * ( s.orientedTransform( Orientation::World ) * sceneToTransformSpace ) ) )
+								  .length() );
 		}
 		setPivot( newPivot, scriptNode );
 	}
@@ -1016,13 +960,9 @@ bool LightPositionTool::placeTarget( const LineSegment3f &eventLine )
 	{
 		if( !distanceHandle->getRequiresPivot() && !distanceHandle->getTarget() )
 		{
-			setPivotDistance(
-				(
-					( V3f( 0 ) * ( s.orientedTransform( Orientation::World ) * sceneToTransformSpace ) ) -
-					gadgetTargetPos * sceneGadget->fullTransform().inverse()
-				)
-					.length()
-			);
+			setPivotDistance( ( ( V3f( 0 ) * ( s.orientedTransform( Orientation::World ) * sceneToTransformSpace ) ) -
+								gadgetTargetPos * sceneGadget->fullTransform().inverse() )
+								  .length() );
 		}
 		setTarget( gadgetTargetPos * sceneGadget->fullTransform() * sceneToTransformSpace, scriptNode );
 	}
@@ -1055,10 +995,8 @@ bool LightPositionTool::placeTarget( const LineSegment3f &eventLine )
 			sceneGadget->fullTransform().inverse().transpose().multDirMatrix( sceneGadgetNormal.value(), worldNormal );
 
 			positionHighlight(
-				distanceHandle->getTarget().value() * sceneToTransformSpaceInverse,
-				cameraTransform.translation(),
-				worldNormal,
-				distanceHandle->getPivotDistance().value()
+				distanceHandle->getTarget().value() * sceneToTransformSpaceInverse, cameraTransform.translation(),
+				worldNormal, distanceHandle->getPivotDistance().value()
 			);
 		}
 	}
@@ -1076,8 +1014,7 @@ bool LightPositionTool::placeTarget( const LineSegment3f &eventLine )
 			sceneGadget->fullTransform().inverse().transpose().multDirMatrix( sceneGadgetNormal.value(), worldNormal );
 
 			positionAlongNormal(
-				distanceHandle->getTarget().value() * sceneToTransformSpaceInverse,
-				worldNormal,
+				distanceHandle->getTarget().value() * sceneToTransformSpaceInverse, worldNormal,
 				distanceHandle->getPivotDistance().value()
 			);
 		}
@@ -1086,7 +1023,9 @@ bool LightPositionTool::placeTarget( const LineSegment3f &eventLine )
 	return true;
 }
 
-void LightPositionTool::translateAndOrient( const Selection &s, const M44f &localTransform, const V3f &newPosition, const M44f &newOrientation ) const
+void LightPositionTool::translateAndOrient(
+	const Selection &s, const M44f &localTransform, const V3f &newPosition, const M44f &newOrientation
+) const
 {
 	V3f originalRotation;
 	extractEulerXYZ( localTransform, originalRotation );
@@ -1131,9 +1070,7 @@ void LightPositionTool::updatePointer() const
 	else if( m_targetMode == TargetMode::Pivot )
 	{
 		auto distanceHandle = static_cast<DistanceHandle *>( m_distanceHandle.get() );
-		GafferUI::Pointer::setCurrent(
-			distanceHandle->getRequiresPivot() ? "pivot" : "notEditable"
-		);
+		GafferUI::Pointer::setCurrent( distanceHandle->getRequiresPivot() ? "pivot" : "notEditable" );
 	}
 	else if( m_targetMode == TargetMode::Target )
 	{
@@ -1303,7 +1240,9 @@ void LightPositionTool::TranslationRotation::applyTranslation( const V3f &transl
 		FloatPlug *pTranslate = translatePlug->getChild( i );
 		if( canSetValueOrAddKey( pTranslate ) )
 		{
-			setValueOrAddKey( pTranslate, m_selection.context()->getTime(), ( *m_originalTranslation )[i] + offsetInTransformSpace[i] );
+			setValueOrAddKey(
+				pTranslate, m_selection.context()->getTime(), ( *m_originalTranslation )[i] + offsetInTransformSpace[i]
+			);
 		}
 	}
 }
@@ -1322,7 +1261,9 @@ void LightPositionTool::TranslationRotation::applyRotation( const Eulerf &rotati
 	}
 }
 
-V3f LightPositionTool::TranslationRotation::updatedRotateValue( const V3fPlug *rotatePlug, const Eulerf &rotation, const bool maintainRoll, V3f *currentValue ) const
+V3f LightPositionTool::TranslationRotation::updatedRotateValue(
+	const V3fPlug *rotatePlug, const Eulerf &rotation, const bool maintainRoll, V3f *currentValue
+) const
 {
 	if( !m_originalRotation )
 	{
@@ -1358,7 +1299,8 @@ V3f LightPositionTool::TranslationRotation::updatedRotateValue( const V3fPlug *r
 		V3f originalUp = V3f( 0.0f, 1.0f, 0.0f ) * originalMatrix;
 		V3f yUpPerpendicular = ( V3f( 0.0f, 1.0f, 0.0f ) - originalAxis * originalAxis.y ).normalized();
 
-		float axisRollAngle = -asin( std::min( 1.0f, std::max( -1.0f, originalAxis.dot( originalUp.cross( yUpPerpendicular ) ) ) ) );
+		float axisRollAngle =
+			-asin( std::min( 1.0f, std::max( -1.0f, originalAxis.dot( originalUp.cross( yUpPerpendicular ) ) ) ) );
 
 		// Apply the roll angle back to
 		M44f axisRoll;

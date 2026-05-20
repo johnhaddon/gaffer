@@ -65,7 +65,8 @@ ccl::PointCloud *convertPrimary( const IECoreScene::PointsPrimitive *points, ccl
 	const V3fVectorData *p = points->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
 	if( !p )
 	{
-		msg( Msg::Warning, "IECoreCyles::PointsAlgo", "PointsPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
+		msg( Msg::Warning, "IECoreCyles::PointsAlgo",
+			 "PointsPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
 		return nullptr;
 	}
 
@@ -129,12 +130,16 @@ ccl::PointCloud *convertPrimary( const IECoreScene::PointsPrimitive *points, ccl
 		{
 			case PrimitiveVariable::Constant :
 			case PrimitiveVariable::Uniform :
-				GeometryAlgo::convertPrimitiveVariable( name, variable, pointcloud->attributes, ccl::ATTR_ELEMENT_OBJECT );
+				GeometryAlgo::convertPrimitiveVariable(
+					name, variable, pointcloud->attributes, ccl::ATTR_ELEMENT_OBJECT
+				);
 				break;
 			case PrimitiveVariable::Vertex :
 			case PrimitiveVariable::Varying :
 			case PrimitiveVariable::FaceVarying :
-				GeometryAlgo::convertPrimitiveVariable( name, variable, pointcloud->attributes, ccl::ATTR_ELEMENT_VERTEX );
+				GeometryAlgo::convertPrimitiveVariable(
+					name, variable, pointcloud->attributes, ccl::ATTR_ELEMENT_VERTEX
+				);
 				break;
 			default :
 				break;
@@ -144,11 +149,17 @@ ccl::PointCloud *convertPrimary( const IECoreScene::PointsPrimitive *points, ccl
 	return pointcloud;
 }
 
-ccl::Geometry *convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::PointsPrimitive *> &samples, const IECoreScenePreview::Renderer::SampleTimes &times, size_t primarySampleIndex, ccl::Scene *scene )
+ccl::Geometry *convert(
+	const IECoreScenePreview::Renderer::Samples<const IECoreScene::PointsPrimitive *> &samples,
+	const IECoreScenePreview::Renderer::SampleTimes &times, size_t primarySampleIndex, ccl::Scene *scene
+)
 {
 	if( ccl::PointCloud *result = convertPrimary( samples[primarySampleIndex], scene ) )
 	{
-		GeometryAlgo::convertMotion( IECoreScenePreview::Renderer::staticSamplesCast<const IECoreScene::Primitive *>( samples ), primarySampleIndex, *result );
+		GeometryAlgo::convertMotion(
+			IECoreScenePreview::Renderer::staticSamplesCast<const IECoreScene::Primitive *>( samples ),
+			primarySampleIndex, *result
+		);
 		return result;
 	}
 

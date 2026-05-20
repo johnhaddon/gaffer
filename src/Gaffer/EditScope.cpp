@@ -72,14 +72,9 @@ std::vector<std::string> &processorNames()
 
 GAFFER_NODE_DEFINE_TYPE( EditScope );
 
-EditScope::EditScope( const std::string &name )
-	: Box( name )
-{
-}
+EditScope::EditScope( const std::string &name ) : Box( name ) {}
 
-EditScope::~EditScope()
-{
-}
+EditScope::~EditScope() {}
 
 void EditScope::setup( const Plug *plug )
 {
@@ -250,7 +245,9 @@ DependencyNode *EditScope::acquireProcessorInternal( const std::string &type, bo
 
 	Metadata::registerValue( processor.get(), "editScope:processorType", new StringData( type ) );
 	Metadata::registerValue( processor.get(), "icon", new StringData( "editScopeProcessorNode.png" ) );
-	Metadata::registerValue( processor.get(), "nodeGadget:color", new Color3fData( Imath::Color3f( 0.1876, 0.3908, 0.6 ) ) );
+	Metadata::registerValue(
+		processor.get(), "nodeGadget:color", new Color3fData( Imath::Color3f( 0.1876, 0.3908, 0.6 ) )
+	);
 	addChild( processor );
 
 	processorIn->setInput( boxOut()->plug()->getInput() );

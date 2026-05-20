@@ -101,16 +101,10 @@ T vectorAwareMax( const T &v1, const T &v2 )
 }
 
 template<typename T>
-T applyNumericTweak(
-	const T &source,
-	const T &tweak,
-	TweakPlug::Mode mode,
-	const std::string &tweakName
-)
+T applyNumericTweak( const T &source, const T &tweak, TweakPlug::Mode mode, const std::string &tweakName )
 {
 	if constexpr(
-		(std::is_arithmetic_v<T> && !std::is_same_v<T, bool>) ||
-		IECore::TypeTraits::IsVec<T>::value ||
+		(std::is_arithmetic_v<T> && !std::is_same_v<T, bool>) || IECore::TypeTraits::IsVec<T>::value ||
 		IECore::TypeTraits::IsColor<T>::value
 	)
 	{
@@ -137,8 +131,7 @@ T applyNumericTweak(
 			case TweakPlug::SetExpressionExclude :
 				throw IECore::Exception(
 					fmt::format(
-						"Cannot apply tweak with mode {} using applyNumericTweak.",
-						TweakPlug::modeToString( mode )
+						"Cannot apply tweak with mode {} using applyNumericTweak.", TweakPlug::modeToString( mode )
 					)
 				);
 			default :
@@ -181,11 +174,7 @@ std::vector<T> tweakedList( const std::vector<T> &source, const std::vector<T> &
 
 	result.erase(
 		std::remove_if(
-			result.begin(),
-			result.end(),
-			[&tweakSet]( const auto &elem ) {
-				return tweakSet.count( elem );
-			}
+			result.begin(), result.end(), [&tweakSet]( const auto &elem ) { return tweakSet.count( elem ); }
 		),
 		result.end()
 	);
@@ -203,12 +192,7 @@ std::vector<T> tweakedList( const std::vector<T> &source, const std::vector<T> &
 }
 
 template<typename T>
-T applyListTweak(
-	const T &source,
-	const T &tweak,
-	TweakPlug::Mode mode,
-	const std::string &tweakName
-)
+T applyListTweak( const T &source, const T &tweak, TweakPlug::Mode mode, const std::string &tweakName )
 {
 	// \todo - would look cleaner if we had an IsVector in TypeTraits rather than needed to wrap
 	// this is a Data just to check if it's an std::vector
@@ -249,12 +233,7 @@ T applyListTweak(
 }
 
 template<typename T>
-T applySetExpressionTweak(
-	const T &source,
-	const T &tweak,
-	TweakPlug::Mode mode,
-	const std::string &tweakName
-)
+T applySetExpressionTweak( const T &source, const T &tweak, TweakPlug::Mode mode, const std::string &tweakName )
 {
 	if constexpr( std::is_same_v<T, std::string> )
 	{
@@ -277,10 +256,7 @@ T applySetExpressionTweak(
 }
 
 template<typename T>
-T applyReplaceTweak(
-	const T &source,
-	const T &tweak
-)
+T applyReplaceTweak( const T &source, const T &tweak )
 {
 	if constexpr( std::is_same_v<T, std::string> )
 	{
@@ -297,28 +273,14 @@ T applyReplaceTweak(
 }
 
 template<typename T>
-T applyValueTweak(
-	const T &source,
-	const T &tweak,
-	TweakPlug::Mode mode,
-	const std::string &tweakName
-)
+T applyValueTweak( const T &source, const T &tweak, TweakPlug::Mode mode, const std::string &tweakName )
 {
-	if(
-		mode == Gaffer::TweakPlug::Add ||
-		mode == Gaffer::TweakPlug::Subtract ||
-		mode == Gaffer::TweakPlug::Multiply ||
-		mode == Gaffer::TweakPlug::Min ||
-		mode == Gaffer::TweakPlug::Max
-	)
+	if( mode == Gaffer::TweakPlug::Add || mode == Gaffer::TweakPlug::Subtract || mode == Gaffer::TweakPlug::Multiply ||
+		mode == Gaffer::TweakPlug::Min || mode == Gaffer::TweakPlug::Max )
 	{
 		return applyNumericTweak( source, tweak, mode, tweakName );
 	}
-	else if(
-		mode == TweakPlug::ListAppend ||
-		mode == TweakPlug::ListPrepend ||
-		mode == TweakPlug::ListRemove
-	)
+	else if( mode == TweakPlug::ListAppend || mode == TweakPlug::ListPrepend || mode == TweakPlug::ListRemove )
 	{
 		return applyListTweak( source, tweak, mode, tweakName );
 	}
@@ -326,20 +288,14 @@ T applyValueTweak(
 	{
 		return applyReplaceTweak( source, tweak );
 	}
-	else if(
-		mode == TweakPlug::SetExpressionInclude ||
-		mode == TweakPlug::SetExpressionExclude
-	)
+	else if( mode == TweakPlug::SetExpressionInclude || mode == TweakPlug::SetExpressionExclude )
 	{
 		return applySetExpressionTweak( source, tweak, mode, tweakName );
 	}
 	else
 	{
 		throw IECore::Exception(
-			fmt::format(
-				"Cannot apply tweak with mode {} using applyValueTweak.",
-				TweakPlug::modeToString( mode )
-			)
+			fmt::format( "Cannot apply tweak with mode {} using applyValueTweak.", TweakPlug::modeToString( mode ) )
 		);
 	}
 }
@@ -398,10 +354,8 @@ bool constexpr hasZeroConstructor()
 	// types that don't need to be initialized to zero ... my rationale is that if a new
 	// type is added, I would rather get a compile error than get uninitialized memory.
 	return !(
-		IECore::TypeTraits::IsBox<T>::value ||
-		IECore::TypeTraits::IsMatrix<T>::value ||
-		IECore::TypeTraits::IsQuat<T>::value ||
-		std::is_same_v<T, IECore::InternedString> ||
+		IECore::TypeTraits::IsBox<T>::value || IECore::TypeTraits::IsMatrix<T>::value ||
+		IECore::TypeTraits::IsQuat<T>::value || std::is_same_v<T, IECore::InternedString> ||
 		std::is_same_v<T, std::string>
 	);
 }
@@ -433,9 +387,14 @@ typename DestDataType::Ptr convertData( const SrcDataType *srcData )
 			resultData->writable() = convertValueType<typename DestDataType::ValueType>( srcData->readable() );
 			return resultData;
 		}
-		else if constexpr( TypeTraits::IsVectorTypedData<SrcDataType>::value && TypeTraits::IsVectorTypedData<DestDataType>::value )
+		else if constexpr(
+			TypeTraits::IsVectorTypedData<SrcDataType>::value && TypeTraits::IsVectorTypedData<DestDataType>::value
+		)
 		{
-			if constexpr( valueTypesAreConvertible<typename SrcDataType::ValueType::value_type, typename DestDataType::ValueType::value_type>() )
+			if constexpr(
+				valueTypesAreConvertible<
+					typename SrcDataType::ValueType::value_type, typename DestDataType::ValueType::value_type>()
+			)
 			{
 				typename DestDataType::Ptr resultData = new DestDataType();
 				auto &result = resultData->writable();
@@ -459,7 +418,10 @@ typename DestDataType::Ptr convertData( const SrcDataType *srcData )
 
 GAFFER_PLUG_DEFINE_TYPE( TweakPlug );
 
-TweakPlug::TweakPlug( const std::string &name, const std::string &nameDefault, bool enabledDefault, Mode modeDefault, Gaffer::ValuePlugPtr valuePlug, unsigned flags )
+TweakPlug::TweakPlug(
+	const std::string &name, const std::string &nameDefault, bool enabledDefault, Mode modeDefault,
+	Gaffer::ValuePlugPtr valuePlug, unsigned flags
+)
 	: ValuePlug( name, valuePlug->direction(), flags )
 {
 	addChild( new StringPlug( "name", valuePlug->direction(), nameDefault ) );
@@ -553,33 +515,27 @@ bool TweakPlug::acceptsChild( const Gaffer::GraphComponent *potentialChild ) con
 		return false;
 	}
 
-	if(
-		potentialChild->isInstanceOf( StringPlug::staticTypeId() ) &&
-		potentialChild->getName() == "name" &&
-		!getChild<Plug>( "name" )
-	)
+	if( potentialChild->isInstanceOf( StringPlug::staticTypeId() ) && potentialChild->getName() == "name" &&
+		!getChild<Plug>( "name" ) )
 	{
 		return true;
 	}
 	else if(
-		potentialChild->isInstanceOf( BoolPlug::staticTypeId() ) &&
-		potentialChild->getName() == "enabled" &&
+		potentialChild->isInstanceOf( BoolPlug::staticTypeId() ) && potentialChild->getName() == "enabled" &&
 		!getChild<Plug>( "enabled" )
 	)
 	{
 		return true;
 	}
 	else if(
-		potentialChild->isInstanceOf( IntPlug::staticTypeId() ) &&
-		potentialChild->getName() == "mode" &&
+		potentialChild->isInstanceOf( IntPlug::staticTypeId() ) && potentialChild->getName() == "mode" &&
 		!getChild<Plug>( "mode" )
 	)
 	{
 		return true;
 	}
 	else if(
-		potentialChild->isInstanceOf( ValuePlug::staticTypeId() ) &&
-		potentialChild->getName() == "value" &&
+		potentialChild->isInstanceOf( ValuePlug::staticTypeId() ) && potentialChild->getName() == "value" &&
 		!getChild<Plug>( "value" )
 	)
 	{
@@ -591,16 +547,20 @@ bool TweakPlug::acceptsChild( const Gaffer::GraphComponent *potentialChild ) con
 
 Gaffer::PlugPtr TweakPlug::createCounterpart( const std::string &name, Direction direction ) const
 {
-	ValuePlugPtr valueCounterpart = boost::static_pointer_cast<ValuePlug>( valuePlug()->createCounterpart( "value", direction ) );
+	ValuePlugPtr valueCounterpart =
+		boost::static_pointer_cast<ValuePlug>( valuePlug()->createCounterpart( "value", direction ) );
 	return new TweakPlug(
-		name, namePlug()->defaultValue(), enabledPlug()->defaultValue(), (Mode)modePlug()->defaultValue(), valueCounterpart, getFlags()
+		name, namePlug()->defaultValue(), enabledPlug()->defaultValue(), (Mode)modePlug()->defaultValue(),
+		valueCounterpart, getFlags()
 	);
 }
 
 bool TweakPlug::applyTweak( IECore::CompoundData *parameters, MissingMode missingMode ) const
 {
 	return applyTweak(
-		[&parameters]( const std::string &valueName, const bool withFallback ) { return parameters->member( valueName ); },
+		[&parameters]( const std::string &valueName, const bool withFallback ) {
+			return parameters->member( valueName );
+		},
 		[&parameters]( const std::string &valueName, DataPtr newData ) {
 			if( newData == nullptr )
 			{
@@ -723,48 +683,53 @@ bool TweaksPlug::applyTweaks( IECore::CompoundData *parameters, TweakPlug::Missi
 }
 
 
-void TweakPlug::applyTweakInternal( IECore::Data *data, const IECore::Data *tweakData, TweakPlug::Mode mode, const std::string &name )
+void TweakPlug::applyTweakInternal(
+	IECore::Data *data, const IECore::Data *tweakData, TweakPlug::Mode mode, const std::string &name
+)
 {
-	IECore::dispatch(
-		data,
-		[&tweakData, &mode, &name]( auto dataTyped ) {
-			using DataType = typename std::remove_const_t<std::remove_pointer_t<decltype( dataTyped )>>;
-			if constexpr( IECore::TypeTraits::IsTypedData<DataType>::value )
+	IECore::dispatch( data, [&tweakData, &mode, &name]( auto dataTyped ) {
+		using DataType = typename std::remove_const_t<std::remove_pointer_t<decltype( dataTyped )>>;
+		if constexpr( IECore::TypeTraits::IsTypedData<DataType>::value )
+		{
+			const DataType *tweakDataMatchingTyped = IECore::runTimeCast<const DataType>( tweakData );
+			typename DataType::Ptr tweakDataConverted;
+
+			if( !tweakDataMatchingTyped )
 			{
-				const DataType *tweakDataMatchingTyped = IECore::runTimeCast<const DataType>( tweakData );
-				typename DataType::Ptr tweakDataConverted;
-
-				if( !tweakDataMatchingTyped )
-				{
-					tweakDataConverted = IECore::dispatch( tweakData, []( const auto *tweakDataTyped ) {
-						return convertData<DataType>( tweakDataTyped );
-					} );
-					tweakDataMatchingTyped = tweakDataConverted.get();
-				}
-
-				if( !tweakDataMatchingTyped )
-				{
-					throw IECore::Exception(
-						fmt::format( "Cannot apply tweak to \"{}\" : Value of type \"{}\" does not match parameter of type \"{}\"", name, dataTyped->typeName(), tweakData->typeName() )
-					);
-				}
-
-				auto &value = dataTyped->writable();
-				value = applyValueTweak( value, tweakDataMatchingTyped->readable(), mode, name );
+				tweakDataConverted = IECore::dispatch( tweakData, []( const auto *tweakDataTyped ) {
+					return convertData<DataType>( tweakDataTyped );
+				} );
+				tweakDataMatchingTyped = tweakDataConverted.get();
 			}
-			else
+
+			if( !tweakDataMatchingTyped )
 			{
-				throw IECore::Exception( fmt::format( "Cannot apply tweak to \"{}\" of type \"{}\"", name, dataTyped->typeName() ) );
+				throw IECore::Exception(
+					fmt::format(
+						"Cannot apply tweak to \"{}\" : Value of type \"{}\" does not match parameter of type \"{}\"",
+						name, dataTyped->typeName(), tweakData->typeName()
+					)
+				);
 			}
+
+			auto &value = dataTyped->writable();
+			value = applyValueTweak( value, tweakDataMatchingTyped->readable(), mode, name );
 		}
-	);
+		else
+		{
+			throw IECore::Exception(
+				fmt::format( "Cannot apply tweak to \"{}\" of type \"{}\"", name, dataTyped->typeName() )
+			);
+		}
+	} );
 }
 
-IECore::DataPtr TweakPlug::createVectorDataFromElement( const IECore::Data *elementData, size_t size, bool useElementValueAsDefault, const std::string &name )
+IECore::DataPtr TweakPlug::createVectorDataFromElement(
+	const IECore::Data *elementData, size_t size, bool useElementValueAsDefault, const std::string &name
+)
 {
 	return IECore::dispatch(
-		elementData,
-		[&size, &useElementValueAsDefault, &name]( auto elementDataTyped ) -> IECore::DataPtr {
+		elementData, [&size, &useElementValueAsDefault, &name]( auto elementDataTyped ) -> IECore::DataPtr {
 			using DataType = typename std::remove_const_t<std::remove_pointer_t<decltype( elementDataTyped )>>;
 			using ValueType = typename DataType::ValueType;
 
@@ -774,16 +739,13 @@ IECore::DataPtr TweakPlug::createVectorDataFromElement( const IECore::Data *elem
 
 				// A bunch of things we're not allowed to make vectors of
 				!IECore::TypeTraits::IsTransformationMatrix<ValueType>::value &&
-				!IECore::TypeTraits::IsSpline<ValueType>::value &&
-				!IECore::TypeTraits::IsRamp<ValueType>::value &&
-				!std::is_same_v<ValueType, IECore::PathMatcher> &&
-				!std::is_same_v<ValueType, boost::posix_time::ptime>
+				!IECore::TypeTraits::IsSpline<ValueType>::value && !IECore::TypeTraits::IsRamp<ValueType>::value &&
+				!std::is_same_v<ValueType, IECore::PathMatcher> && !std::is_same_v<ValueType, boost::posix_time::ptime>
 			)
 			{
 				constexpr bool isGeometric = IECore::TypeTraits::IsGeometricTypedData<DataType>::value;
 				using VectorDataType = std::conditional_t<
-					isGeometric,
-					IECore::GeometricTypedData<std::vector<ValueType>>,
+					isGeometric, IECore::GeometricTypedData<std::vector<ValueType>>,
 					IECore::TypedData<std::vector<ValueType>>>;
 
 				typename VectorDataType::Ptr vectorData = new VectorDataType();
@@ -818,13 +780,21 @@ IECore::DataPtr TweakPlug::createVectorDataFromElement( const IECore::Data *elem
 			}
 			else
 			{
-				throw IECore::Exception( fmt::format( "Invalid type \"{}\" for non-constant element-wise tweak \"{}\".", elementDataTyped->typeName(), name ) );
+				throw IECore::Exception(
+					fmt::format(
+						"Invalid type \"{}\" for non-constant element-wise tweak \"{}\".", elementDataTyped->typeName(),
+						name
+					)
+				);
 			}
 		}
 	);
 }
 
-void TweakPlug::applyVectorElementTweak( IECore::Data *vectorData, const IECore::Data *tweakData, IECore::IntVectorData *indicesData, TweakPlug::Mode mode, const std::string &name, const boost::dynamic_bitset<> *mask )
+void TweakPlug::applyVectorElementTweak(
+	IECore::Data *vectorData, const IECore::Data *tweakData, IECore::IntVectorData *indicesData, TweakPlug::Mode mode,
+	const std::string &name, const boost::dynamic_bitset<> *mask
+)
 {
 	IECore::dispatch( vectorData, [&tweakData, &indicesData, &mode, &name, &mask]( auto *vectorDataTyped ) {
 		using SourceType = typename std::remove_pointer_t<decltype( vectorDataTyped )>;
@@ -939,7 +909,12 @@ void TweakPlug::applyVectorElementTweak( IECore::Data *vectorData, const IECore:
 		}
 		else
 		{
-			throw IECore::Exception( fmt::format( "Could not apply tweak to \"{}\" : Expected vector typed data, got \"{}\".", name, vectorDataTyped->typeName() ) );
+			throw IECore::Exception(
+				fmt::format(
+					"Could not apply tweak to \"{}\" : Expected vector typed data, got \"{}\".", name,
+					vectorDataTyped->typeName()
+				)
+			);
 		}
 	} );
 }

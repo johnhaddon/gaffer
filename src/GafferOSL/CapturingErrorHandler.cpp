@@ -38,9 +38,7 @@
 
 using namespace GafferOSL::Private;
 
-CapturingErrorHandler::CapturingErrorHandler()
-{
-}
+CapturingErrorHandler::CapturingErrorHandler() {}
 
 void CapturingErrorHandler::operator () ( int errorCode, const std::string &message )
 {

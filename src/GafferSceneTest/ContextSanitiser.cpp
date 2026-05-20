@@ -60,9 +60,7 @@ const InternedString g_sortedChildNames( "__sortedChildNames" );
 
 } // namespace
 
-ContextSanitiser::ContextSanitiser()
-{
-}
+ContextSanitiser::ContextSanitiser() {}
 
 void ContextSanitiser::processStarted( const Gaffer::Process *process )
 {
@@ -81,18 +79,13 @@ void ContextSanitiser::processStarted( const Gaffer::Process *process )
 			}
 		}
 
-		if(
-			process->plug() != scene->boundPlug() &&
-			process->plug() != scene->transformPlug() &&
-			process->plug() != scene->attributesPlug() &&
-			process->plug() != scene->objectPlug() &&
-			process->plug() != scene->childNamesPlug() &&
-			process->plug() != scene->existsPlug() &&
+		if( process->plug() != scene->boundPlug() && process->plug() != scene->transformPlug() &&
+			process->plug() != scene->attributesPlug() && process->plug() != scene->objectPlug() &&
+			process->plug() != scene->childNamesPlug() && process->plug() != scene->existsPlug() &&
 			process->plug() != scene->childBoundsPlug() &&
 			// Private plug, so we have no choice but to test
 			// for it by name.
-			process->plug()->getName() != g_sortedChildNames
-		)
+			process->plug()->getName() != g_sortedChildNames )
 		{
 			if( process->context()->getIfExists<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ) )
 			{
@@ -117,40 +110,28 @@ void ContextSanitiser::processStarted( const Gaffer::Process *process )
 	}
 }
 
-void ContextSanitiser::processFinished( const Gaffer::Process *process )
-{
-}
+void ContextSanitiser::processFinished( const Gaffer::Process *process ) {}
 
 void ContextSanitiser::warn( const Gaffer::Process &process, const IECore::InternedString &contextVariable )
 {
 	const Warning warning(
-		PlugPair( process.plug(), process.parent() ? process.parent()->plug() : nullptr ),
-		contextVariable
+		PlugPair( process.plug(), process.parent() ? process.parent()->plug() : nullptr ), contextVariable
 	);
 
 	if( m_warningsEmitted.insert( warning ).second )
 	{
 		std::string message = fmt::format(
-			"{} in context for {} {}",
-			contextVariable.string(),
-			process.plug()->relativeName(
-				process.plug()->ancestor<ScriptNode>()
-			),
-			process.type().string()
+			"{} in context for {} {}", contextVariable.string(),
+			process.plug()->relativeName( process.plug()->ancestor<ScriptNode>() ), process.type().string()
 		);
 		if( process.parent() )
 		{
 			message += fmt::format(
 				" (called from {} {})",
-				process.parent()->plug()->relativeName(
-					process.parent()->plug()->ancestor<ScriptNode>()
-				),
+				process.parent()->plug()->relativeName( process.parent()->plug()->ancestor<ScriptNode>() ),
 				process.parent()->type().string()
 			);
 		}
-		IECore::msg(
-			IECore::Msg::Warning, "ContextSanitiser",
-			message
-		);
+		IECore::msg( IECore::Msg::Warning, "ContextSanitiser", message );
 	}
 }

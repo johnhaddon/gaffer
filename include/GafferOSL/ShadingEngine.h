@@ -50,7 +50,7 @@ namespace GafferOSL
 class GAFFEROSL_API ShadingEngine : public IECore::RefCounted
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( ShadingEngine )
 
@@ -64,17 +64,17 @@ class GAFFEROSL_API ShadingEngine : public IECore::RefCounted
 	struct Transform
 	{
 
-		Transform()
-		{
-		}
+		Transform() {}
 
 		Transform( Imath::M44f fromObjectSpace )
-			: fromObjectSpace( fromObjectSpace ), toObjectSpace( fromObjectSpace.inverse() )
+			: fromObjectSpace( fromObjectSpace ),
+			  toObjectSpace( fromObjectSpace.inverse() )
 		{
 		}
 
 		Transform( Imath::M44f fromObjectSpace, Imath::M44f toObjectSpace )
-			: fromObjectSpace( fromObjectSpace ), toObjectSpace( toObjectSpace )
+			: fromObjectSpace( fromObjectSpace ),
+			  toObjectSpace( toObjectSpace )
 		{
 		}
 
@@ -87,13 +87,17 @@ class GAFFEROSL_API ShadingEngine : public IECore::RefCounted
 
 	/// Append a unique hash representing this shading engine to `h`.
 	void hash( IECore::MurmurHash &h ) const;
-	IECore::CompoundDataPtr shade( const IECore::CompoundData *points, const Transforms &transforms = Transforms() ) const;
-	IECore::CompoundDataPtr shade( const IECore::CompoundData *points, const Transforms &transforms, const PointClouds &pointClouds ) const;
+	IECore::CompoundDataPtr shade(
+		const IECore::CompoundData *points, const Transforms &transforms = Transforms()
+	) const;
+	IECore::CompoundDataPtr shade(
+		const IECore::CompoundData *points, const Transforms &transforms, const PointClouds &pointClouds
+	) const;
 
 	bool needsAttribute( const std::string &name ) const;
 	bool hasDeformation() const;
 
-	private:
+private:
 
 	void queryShaderGroup();
 

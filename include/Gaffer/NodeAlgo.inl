@@ -170,10 +170,7 @@ template<typename Predicate>
 struct FindVisitor
 {
 
-	FindVisitor( Predicate &predicate )
-		: m_predicate( predicate )
-	{
-	}
+	FindVisitor( Predicate &predicate ) : m_predicate( predicate ) {}
 
 	bool operator () ( Node *node )
 	{
@@ -195,7 +192,7 @@ struct FindVisitor
 
 	Node *result = nullptr;
 
-	private:
+private:
 
 	Predicate &m_predicate;
 };
@@ -204,10 +201,7 @@ template<typename Predicate>
 struct FindAllVisitor
 {
 
-	FindAllVisitor( Predicate &predicate )
-		: m_predicate( predicate )
-	{
-	}
+	FindAllVisitor( Predicate &predicate ) : m_predicate( predicate ) {}
 
 	bool operator () ( Node *node )
 	{
@@ -220,7 +214,7 @@ struct FindAllVisitor
 
 	std::vector<Node *> result;
 
-	private:
+private:
 
 	Predicate &m_predicate;
 };

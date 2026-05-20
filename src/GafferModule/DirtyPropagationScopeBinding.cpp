@@ -51,17 +51,11 @@ namespace
 class DirtyPropagationScopeWrapper : boost::noncopyable
 {
 
-	public:
+public:
 
-	DirtyPropagationScopeWrapper()
-		: m_scope( nullptr )
-	{
-	}
+	DirtyPropagationScopeWrapper() : m_scope( nullptr ) {}
 
-	~DirtyPropagationScopeWrapper()
-	{
-		reset();
-	}
+	~DirtyPropagationScopeWrapper() { reset(); }
 
 	void enter()
 	{
@@ -69,12 +63,9 @@ class DirtyPropagationScopeWrapper : boost::noncopyable
 		m_scope = new DirtyPropagationScope();
 	}
 
-	void exit( object type, object value, object traceback )
-	{
-		reset();
-	}
+	void exit( object type, object value, object traceback ) { reset(); }
 
-	private:
+private:
 
 	void reset()
 	{

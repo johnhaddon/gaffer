@@ -53,7 +53,7 @@ template<typename T>
 class GAFFER_API BoxPlug : public ValuePlug
 {
 
-	public:
+public:
 
 	using ValueType = T;
 	using PointType = typename IECore::BoxTraits<T>::BaseType;
@@ -62,19 +62,13 @@ class GAFFER_API BoxPlug : public ValuePlug
 	GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( BoxPlug<T>, ValuePlug );
 
 	explicit BoxPlug(
-		const std::string &name = defaultName<BoxPlug>(),
-		Direction direction = In,
-		T defaultValue = T(),
+		const std::string &name = defaultName<BoxPlug>(), Direction direction = In, T defaultValue = T(),
 		unsigned flags = Default
 	);
 
 	BoxPlug(
-		const std::string &name,
-		Direction direction,
-		T defaultValue,
-		const PointType &minValue,
-		const PointType &maxValue,
-		unsigned flags = Default
+		const std::string &name, Direction direction, T defaultValue, const PointType &minValue,
+		const PointType &maxValue, unsigned flags = Default
 	);
 
 	~BoxPlug() override;

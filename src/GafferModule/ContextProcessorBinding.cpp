@@ -90,7 +90,9 @@ ContextPtr inPlugContext( const ContextProcessor &n )
 class SetupBasedNodeSerialiser : public NodeSerialiser
 {
 
-	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsConstruction(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override
 	{
 		const Node *node = child->parent<Node>();
 		if( child == node->getChild( g_inPlugName ) || child == node->getChild( g_outPlugName ) )
@@ -101,7 +103,9 @@ class SetupBasedNodeSerialiser : public NodeSerialiser
 		return NodeSerialiser::childNeedsConstruction( child, serialisation );
 	}
 
-	std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
+	std::string postConstructor(
+		const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+	) const override
 	{
 		std::string result = NodeSerialiser::postConstructor( graphComponent, identifier, serialisation );
 
@@ -131,11 +135,7 @@ class SetupBasedNodeSerialiser : public NodeSerialiser
 	}
 };
 
-NameValuePlugPtr addQuery(
-	Gaffer::ContextQuery &query,
-	const ValuePlug &plug,
-	const std::string &variable
-)
+NameValuePlugPtr addQuery( Gaffer::ContextQuery &query, const ValuePlug &plug, const std::string &variable )
 {
 	IECorePython::ScopedGILRelease gilRelease;
 
@@ -172,7 +172,9 @@ const ValuePlugPtr valuePlugFromQueryPlug( Gaffer::ContextQuery &q, const NameVa
 
 class ContextQuerySerialiser : public NodeSerialiser
 {
-	std::string postConstructor( const GraphComponent *component, const std::string &identifier, Serialisation &serialisation ) const override
+	std::string postConstructor(
+		const GraphComponent *component, const std::string &identifier, Serialisation &serialisation
+	) const override
 	{
 		std::string result = NodeSerialiser::postConstructor( component, identifier, serialisation );
 
@@ -182,9 +184,7 @@ class ContextQuerySerialiser : public NodeSerialiser
 		{
 			const Serialisation::Serialiser *serialiser = Serialisation::acquireSerialiser( queryPlug->valuePlug() );
 			result +=
-				identifier + ".addQuery( " +
-				serialiser->constructor( queryPlug->valuePlug(), serialisation ) +
-				" )\n";
+				identifier + ".addQuery( " + serialiser->constructor( queryPlug->valuePlug(), serialisation ) + " )\n";
 		}
 
 		return result;
@@ -196,9 +196,7 @@ class ContextQuerySerialiser : public NodeSerialiser
 void GafferModule::bindContextProcessor()
 {
 
-	DependencyNodeClass<Loop>()
-		.def( "setup", &setupLoop )
-		.def( "previousIteration", &previousIterationWrapper );
+	DependencyNodeClass<Loop>().def( "setup", &setupLoop ).def( "previousIteration", &previousIterationWrapper );
 
 	DependencyNodeClass<ContextProcessor>()
 		.def( "setup", &setupContextProcessor )

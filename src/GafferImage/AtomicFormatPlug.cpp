@@ -58,7 +58,8 @@ Format AtomicFormatPlug::getValue( const IECore::MurmurHash *precomputedHash ) c
 	IECore::ConstObjectPtr owner;
 	const FormatData *d = getObjectValue<FormatData>( owner, precomputedHash );
 	Format result = d->readable();
-	if( result.getDisplayWindow().isEmpty() && ( ( direction() == Plug::In && Process::current() ) || direction() == Plug::Out ) )
+	if( result.getDisplayWindow().isEmpty() &&
+		( ( direction() == Plug::In && Process::current() ) || direction() == Plug::Out ) )
 	{
 		return FormatPlug::getDefaultFormat( Context::current() );
 	}

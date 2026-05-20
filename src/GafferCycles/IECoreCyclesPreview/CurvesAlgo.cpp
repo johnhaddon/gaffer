@@ -64,7 +64,8 @@ ccl::Hair *convertPrimary( const IECoreScene::CurvesPrimitive *curve, ccl::Scene
 	const V3fVectorData *p = curve->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
 	if( !p )
 	{
-		msg( Msg::Warning, "IECoreCyles::CurvesAlgo", "CurvesPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
+		msg( Msg::Warning, "IECoreCyles::CurvesAlgo",
+			 "CurvesPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
 		return nullptr;
 	}
 
@@ -95,7 +96,9 @@ ccl::Hair *convertPrimary( const IECoreScene::CurvesPrimitive *curve, ccl::Scene
 			size_t firstKey = key;
 			for( int j = 0; j < verticesPerCurve[i]; ++j, ++key )
 			{
-				hair->add_curve_key( ccl::make_float3( points[key].x, points[key].y, points[key].z ), width[key] / 2.0f );
+				hair->add_curve_key(
+					ccl::make_float3( points[key].x, points[key].y, points[key].z ), width[key] / 2.0f
+				);
 			}
 
 			hair->add_curve( firstKey, 0 );
@@ -116,7 +119,9 @@ ccl::Hair *convertPrimary( const IECoreScene::CurvesPrimitive *curve, ccl::Scene
 			size_t firstKey = key;
 			for( int j = 0; j < verticesPerCurve[i]; ++j, ++key )
 			{
-				hair->add_curve_key( ccl::make_float3( points[key].x, points[key].y, points[key].z ), constantWidth / 2.0f );
+				hair->add_curve_key(
+					ccl::make_float3( points[key].x, points[key].y, points[key].z ), constantWidth / 2.0f
+				);
 			}
 
 			hair->add_curve( firstKey, 0 );
@@ -150,11 +155,17 @@ ccl::Hair *convertPrimary( const IECoreScene::CurvesPrimitive *curve, ccl::Scene
 	return hair;
 }
 
-ccl::Geometry *convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::CurvesPrimitive *> &curves, const IECoreScenePreview::Renderer::SampleTimes &times, size_t primarySampleIndex, ccl::Scene *scene )
+ccl::Geometry *convert(
+	const IECoreScenePreview::Renderer::Samples<const IECoreScene::CurvesPrimitive *> &curves,
+	const IECoreScenePreview::Renderer::SampleTimes &times, size_t primarySampleIndex, ccl::Scene *scene
+)
 {
 	if( ccl::Hair *result = convertPrimary( curves[primarySampleIndex], scene ) )
 	{
-		GeometryAlgo::convertMotion( IECoreScenePreview::Renderer::staticSamplesCast<const IECoreScene::Primitive *>( curves ), primarySampleIndex, *result );
+		GeometryAlgo::convertMotion(
+			IECoreScenePreview::Renderer::staticSamplesCast<const IECoreScene::Primitive *>( curves ),
+			primarySampleIndex, *result
+		);
 		return result;
 	}
 

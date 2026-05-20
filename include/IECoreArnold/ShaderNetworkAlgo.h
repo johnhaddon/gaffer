@@ -67,7 +67,7 @@ struct NodeParameter
 	/// parameter.
 	void updateParameter() const;
 
-	private:
+private:
 
 	AtNode *m_node;
 	AtString m_parameterName;
@@ -81,14 +81,23 @@ struct NodeParameter
 /// is used, then the output is called `name` and all other nodes will be named
 /// uniquely using `name` as a prefix. If provided, `nodeParameters` is filled
 /// for later resolution.
-IECOREARNOLD_API std::vector<AtNode *> convert( const IECoreScene::ShaderNetwork *shaderNetwork, AtUniverse *universe, const std::string &name, std::vector<NodeParameter> &nodeParameters, const AtNode *parentNode = nullptr );
+IECOREARNOLD_API std::vector<AtNode *> convert(
+	const IECoreScene::ShaderNetwork *shaderNetwork, AtUniverse *universe, const std::string &name,
+	std::vector<NodeParameter> &nodeParameters, const AtNode *parentNode = nullptr
+);
 /// \deprecated
-IECOREARNOLD_API std::vector<AtNode *> convert( const IECoreScene::ShaderNetwork *shaderNetwork, AtUniverse *universe, const std::string &name, const AtNode *parentNode = nullptr );
+IECOREARNOLD_API std::vector<AtNode *> convert(
+	const IECoreScene::ShaderNetwork *shaderNetwork, AtUniverse *universe, const std::string &name,
+	const AtNode *parentNode = nullptr
+);
 /// Updates a previously converted set of nodes to reflect changes in `shaderNetwork`,
 /// reusing AtNodes where possible. The `nodes` vector is updated in place, newly created
 /// nodes use the same parent as the original nodes, and unused nodes are destroyed with
 /// `AiNodeDestroy`. Returns true if the output shader node is reused.
-IECOREARNOLD_API bool update( std::vector<AtNode *> &nodes, std::vector<NodeParameter> &nodeParameters, const IECoreScene::ShaderNetwork *shaderNetwork );
+IECOREARNOLD_API bool update(
+	std::vector<AtNode *> &nodes, std::vector<NodeParameter> &nodeParameters,
+	const IECoreScene::ShaderNetwork *shaderNetwork
+);
 /// \deprecated
 IECOREARNOLD_API bool update( std::vector<AtNode *> &nodes, const IECoreScene::ShaderNetwork *shaderNetwork );
 
@@ -98,21 +107,35 @@ IECOREARNOLD_API bool update( std::vector<AtNode *> &nodes, const IECoreScene::S
 IECOREARNOLD_API void convertUSDShaders( IECoreScene::ShaderNetwork *shaderNetwork );
 
 /// \deprecated Use `IECoreScene::ShaderNetworkAlgo::RenderAdaptorFunction` instead.
-using SubstitutionFunction = void ( * )( IECoreScene::ShaderNetwork *shaderNetwork, IECore::InternedString attributeName, const IECore::CompoundObject *attributes );
+using SubstitutionFunction = void ( * )(
+	IECoreScene::ShaderNetwork *shaderNetwork, IECore::InternedString attributeName,
+	const IECore::CompoundObject *attributes
+);
 /// \deprecated Use `IECoreScene::ShaderNetworkAlgo::RenderAdaptorHashFunction` instead.
-using SubstitutionHashFunction = void ( * )( const IECoreScene::ShaderNetwork *shaderNetwork, IECore::InternedString attributeName, const IECore::CompoundObject *attributes, IECore::MurmurHash &hash );
+using SubstitutionHashFunction = void ( * )(
+	const IECoreScene::ShaderNetwork *shaderNetwork, IECore::InternedString attributeName,
+	const IECore::CompoundObject *attributes, IECore::MurmurHash &hash
+);
 
 /// \deprecated Use `IECoreScene::ShaderNetworkAlgo::registerRenderAdaptor()` instead.
-IECOREARNOLD_API void registerSubstitution( const std::string &name, SubstitutionHashFunction hashFunction, SubstitutionFunction substitutionFunction );
+IECOREARNOLD_API void registerSubstitution(
+	const std::string &name, SubstitutionHashFunction hashFunction, SubstitutionFunction substitutionFunction
+);
 
 /// \deprecated Use `IECoreScene::ShaderNetworkAlgo::deregisterRenderAdaptor()` instead.
 IECOREARNOLD_API void deregisterSubstitution( const std::string &name );
 
 /// \deprecated Use `IECoreScene::ShaderNetworkAlgo::hasRenderAdaptors()` instead.
-IECOREARNOLD_API void hashSubstitutions( const IECoreScene::ShaderNetwork *shaderNetwork, IECore::InternedString attributeName, const IECore::CompoundObject *attributes, IECore::MurmurHash &hash );
+IECOREARNOLD_API void hashSubstitutions(
+	const IECoreScene::ShaderNetwork *shaderNetwork, IECore::InternedString attributeName,
+	const IECore::CompoundObject *attributes, IECore::MurmurHash &hash
+);
 
 /// \deprecated Use `IECoreScene::ShaderNetworkAlgo::applyRenderAdaptors()` instead.
-IECOREARNOLD_API void applySubstitutions( IECoreScene::ShaderNetwork *shaderNetwork, IECore::InternedString attributeName, const IECore::CompoundObject *attributes );
+IECOREARNOLD_API void applySubstitutions(
+	IECoreScene::ShaderNetwork *shaderNetwork, IECore::InternedString attributeName,
+	const IECore::CompoundObject *attributes
+);
 
 } // namespace ShaderNetworkAlgo
 

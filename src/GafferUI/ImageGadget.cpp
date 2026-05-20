@@ -109,12 +109,9 @@ struct TextureCacheKey
 	ImageGadget::TextureParameters parameters;
 	bool operator == ( const TextureCacheKey &other ) const
 	{
-		return fileName == other.fileName &&
-			parameters.minFilter == other.parameters.minFilter &&
-			parameters.magFilter == other.parameters.magFilter &&
-			parameters.lodBias == other.parameters.lodBias &&
-			parameters.wrapS == other.parameters.wrapS &&
-			parameters.wrapT == other.parameters.wrapT;
+		return fileName == other.fileName && parameters.minFilter == other.parameters.minFilter &&
+			parameters.magFilter == other.parameters.magFilter && parameters.lodBias == other.parameters.lodBias &&
+			parameters.wrapS == other.parameters.wrapS && parameters.wrapT == other.parameters.wrapT;
 	}
 };
 
@@ -144,9 +141,8 @@ IECoreGL::ConstTexturePtr textureGetter( const TextureCacheKey &key, size_t &cos
 	}
 
 	static const OIIO::ColorConfig colorConfig( "ocio://default" );
-	static const OIIO::ColorProcessorHandle colorProcessor = colorConfig.createColorProcessor(
-		"sRGB - Texture", "Linear Rec.709 (sRGB)"
-	);
+	static const OIIO::ColorProcessorHandle colorProcessor =
+		colorConfig.createColorProcessor( "sRGB - Texture", "Linear Rec.709 (sRGB)" );
 
 	imageBuf = OIIO::ImageBufAlgo::colorconvert( imageBuf, colorProcessor.get(), true );
 	if( imageBuf.spec().format != OIIO::TypeDesc::UINT8 )
@@ -170,7 +166,9 @@ IECoreGL::ConstTexturePtr textureGetter( const TextureCacheKey &key, size_t &cos
 			pixelFormat = GL_RGBA;
 			break;
 		default :
-			throw IECore::Exception( fmt::format( "Unsupported number of channels ({}) in \"{}\"", imageBuf.nchannels(), fileName ) );
+			throw IECore::Exception(
+				fmt::format( "Unsupported number of channels ({}) in \"{}\"", imageBuf.nchannels(), fileName )
+			);
 	}
 
 	GLuint id;
@@ -179,7 +177,10 @@ IECoreGL::ConstTexturePtr textureGetter( const TextureCacheKey &key, size_t &cos
 	Texture::ScopedBinding binding( *texture );
 
 	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-	glTexImage2D( GL_TEXTURE_2D, /* level = */ 0, pixelFormat, imageBuf.spec().width, imageBuf.spec().height, /* border = */ 0, pixelFormat, GL_UNSIGNED_BYTE, imageBuf.localpixels() );
+	glTexImage2D(
+		GL_TEXTURE_2D, /* level = */ 0, pixelFormat, imageBuf.spec().width, imageBuf.spec().height, /* border = */ 0,
+		pixelFormat, GL_UNSIGNED_BYTE, imageBuf.localpixels()
+	);
 	glGenerateMipmap( GL_TEXTURE_2D );
 
 	applyTextureParameters( texture.get(), key.parameters );
@@ -225,8 +226,7 @@ const IECoreGL::Texture *loadTexture( IECore::ConstRunTimeTypedPtr &imageOrTextu
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ImageGadget );
 
-ImageGadget::ImageGadget( const std::string &fileName )
-	: Gadget( defaultName<ImageGadget>() )
+ImageGadget::ImageGadget( const std::string &fileName ) : Gadget( defaultName<ImageGadget>() )
 {
 
 	// we'll load the actual texture later when we're sure a GL context exists,
@@ -240,16 +240,15 @@ ImageGadget::ImageGadget( const std::string &fileName )
 }
 
 ImageGadget::ImageGadget( IECoreImage::ConstImagePrimitivePtr image )
-	: Gadget( defaultName<ImageGadget>() ), m_imageOrTextureOrFileName( image->copy() )
+	: Gadget( defaultName<ImageGadget>() ),
+	  m_imageOrTextureOrFileName( image->copy() )
 {
 	const V2i pixelSize = image->getDisplayWindow().size() + V2i( 1 );
 	const V3f size( pixelSize.x, pixelSize.y, 0.0f );
 	m_bound = Box3f( -size / 2.0f, size / 2.0f );
 }
 
-ImageGadget::~ImageGadget()
-{
-}
+ImageGadget::~ImageGadget() {}
 
 IECoreGL::ConstTexturePtr ImageGadget::loadTexture( const std::string &fileName, const TextureParameters &parameters )
 {

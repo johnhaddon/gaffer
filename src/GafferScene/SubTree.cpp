@@ -52,8 +52,7 @@ GAFFER_NODE_DEFINE_TYPE( SubTree );
 
 size_t SubTree::g_firstPlugIndex = 0;
 
-SubTree::SubTree( const std::string &name )
-	: SceneProcessor( name )
+SubTree::SubTree( const std::string &name ) : SceneProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "root", Plug::In, "" ) );
@@ -69,9 +68,7 @@ SubTree::SubTree( const std::string &name )
 	outPlug()->setNamesPlug()->setInput( inPlug()->setNamesPlug() );
 }
 
-SubTree::~SubTree()
-{
-}
+SubTree::~SubTree() {}
 
 Gaffer::StringPlug *SubTree::rootPlug()
 {
@@ -129,29 +126,17 @@ void SubTree::affects( const Plug *input, AffectedPlugsContainer &outputs ) cons
 
 	const bool affectsSourcePath = input == rootPlug() || input == includeRootPlug() || input == inPlug()->existsPlug();
 
-	if(
-		affectsSourcePath ||
-		input == inPlug()->boundPlug() ||
-		input == outPlug()->childBoundsPlug()
-	)
+	if( affectsSourcePath || input == inPlug()->boundPlug() || input == outPlug()->childBoundsPlug() )
 	{
 		outputs.push_back( outPlug()->boundPlug() );
 	}
 
-	if(
-		affectsSourcePath ||
-		input == inPlug()->transformPlug() ||
-		input == inheritTransformPlug()
-	)
+	if( affectsSourcePath || input == inPlug()->transformPlug() || input == inheritTransformPlug() )
 	{
 		outputs.push_back( outPlug()->transformPlug() );
 	}
 
-	if(
-		affectsSourcePath ||
-		input == inPlug()->attributesPlug() ||
-		input == inheritAttributesPlug()
-	)
+	if( affectsSourcePath || input == inPlug()->attributesPlug() || input == inheritAttributesPlug() )
 	{
 		outputs.push_back( outPlug()->attributesPlug() );
 	}
@@ -166,18 +151,16 @@ void SubTree::affects( const Plug *input, AffectedPlugsContainer &outputs ) cons
 		outputs.push_back( outPlug()->childNamesPlug() );
 	}
 
-	if(
-		input == inPlug()->setPlug() ||
-		input == rootPlug() ||
-		input == includeRootPlug() ||
-		input == inheritSetMembershipPlug()
-	)
+	if( input == inPlug()->setPlug() || input == rootPlug() || input == includeRootPlug() ||
+		input == inheritSetMembershipPlug() )
 	{
 		outputs.push_back( outPlug()->setPlug() );
 	}
 }
 
-void SubTree::hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void SubTree::hashBound(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	SourceMode sourceMode = Default;
 	ScenePath source = sourcePath( path, sourceMode );
@@ -195,7 +178,9 @@ void SubTree::hashBound( const ScenePath &path, const Gaffer::Context *context, 
 	}
 }
 
-Imath::Box3f SubTree::computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::Box3f SubTree::computeBound(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	SourceMode sourceMode = Default;
 	const ScenePath source = sourcePath( path, sourceMode );
@@ -210,7 +195,9 @@ Imath::Box3f SubTree::computeBound( const ScenePath &path, const Gaffer::Context
 	}
 }
 
-void SubTree::hashTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void SubTree::hashTransform(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	SourceMode sourceMode = Default;
 	ScenePath source = sourcePath( path, sourceMode );
@@ -225,7 +212,9 @@ void SubTree::hashTransform( const ScenePath &path, const Gaffer::Context *conte
 	}
 }
 
-Imath::M44f SubTree::computeTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::M44f SubTree::computeTransform(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	SourceMode sourceMode = Default;
 	const ScenePath source = sourcePath( path, sourceMode );
@@ -240,7 +229,9 @@ Imath::M44f SubTree::computeTransform( const ScenePath &path, const Gaffer::Cont
 	}
 }
 
-void SubTree::hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void SubTree::hashAttributes(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	SourceMode sourceMode = Default;
 	ScenePath source = sourcePath( path, sourceMode );
@@ -255,7 +246,9 @@ void SubTree::hashAttributes( const ScenePath &path, const Gaffer::Context *cont
 	}
 }
 
-IECore::ConstCompoundObjectPtr SubTree::computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstCompoundObjectPtr SubTree::computeAttributes(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	SourceMode sourceMode = Default;
 	const ScenePath source = sourcePath( path, sourceMode );
@@ -270,7 +263,9 @@ IECore::ConstCompoundObjectPtr SubTree::computeAttributes( const ScenePath &path
 	}
 }
 
-void SubTree::hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void SubTree::hashObject(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	SourceMode sourceMode = Default;
 	ScenePath source = sourcePath( path, sourceMode );
@@ -278,7 +273,9 @@ void SubTree::hashObject( const ScenePath &path, const Gaffer::Context *context,
 	h = inPlug()->objectHash( source );
 }
 
-IECore::ConstObjectPtr SubTree::computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstObjectPtr SubTree::computeObject(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	SourceMode sourceMode = Default;
 	const ScenePath source = sourcePath( path, sourceMode );
@@ -286,7 +283,9 @@ IECore::ConstObjectPtr SubTree::computeObject( const ScenePath &path, const Gaff
 	return inPlug()->object( source );
 }
 
-void SubTree::hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void SubTree::hashChildNames(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	SourceMode sourceMode = Default;
 	const ScenePath source = sourcePath( path, sourceMode );
@@ -305,7 +304,9 @@ void SubTree::hashChildNames( const ScenePath &path, const Gaffer::Context *cont
 	}
 }
 
-IECore::ConstInternedStringVectorDataPtr SubTree::computeChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstInternedStringVectorDataPtr SubTree::computeChildNames(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	SourceMode sourceMode = Default;
 	const ScenePath source = sourcePath( path, sourceMode );
@@ -323,7 +324,10 @@ IECore::ConstInternedStringVectorDataPtr SubTree::computeChildNames( const Scene
 	}
 }
 
-void SubTree::hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void SubTree::hashSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent,
+	IECore::MurmurHash &h
+) const
 {
 	SceneProcessor::hashSet( setName, context, parent, h );
 	inPlug()->setPlug()->hash( h );
@@ -333,7 +337,9 @@ void SubTree::hashSet( const IECore::InternedString &setName, const Gaffer::Cont
 	h.append( outPlug()->childNamesHash( {} ) );
 }
 
-IECore::ConstPathMatcherDataPtr SubTree::computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstPathMatcherDataPtr SubTree::computeSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ConstPathMatcherDataPtr inputSetData = inPlug()->setPlug()->getValue();
 	const PathMatcher &inputSet = inputSetData->readable();

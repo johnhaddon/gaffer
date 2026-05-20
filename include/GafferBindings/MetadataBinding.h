@@ -43,6 +43,8 @@
 namespace GafferBindings
 {
 
-GAFFERBINDINGS_API std::string metadataSerialisation( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation );
+GAFFERBINDINGS_API std::string metadataSerialisation(
+	const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+);
 
 } // namespace GafferBindings

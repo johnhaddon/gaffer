@@ -109,7 +109,10 @@ size_t dataSize( const TypedData<T> *data )
 }
 
 template<typename T>
-ccl::Attribute *convertTypedPrimitiveVariable( const std::string &name, const PrimitiveVariable &primitiveVariable, ccl::AttributeSet &attributes, ccl::TypeDesc typeDesc, ccl::AttributeElement attributeElement )
+ccl::Attribute *convertTypedPrimitiveVariable(
+	const std::string &name, const PrimitiveVariable &primitiveVariable, ccl::AttributeSet &attributes,
+	ccl::TypeDesc typeDesc, ccl::AttributeElement attributeElement
+)
 {
 	// Get the data to convert, expanding indexed data if necessary, since Cycles doesn't support it
 	// natively.
@@ -130,7 +133,8 @@ ccl::Attribute *convertTypedPrimitiveVariable( const std::string &name, const Pr
 	const bool isNormal = typeDesc == ccl::TypeNormal;
 	if( isNormal )
 	{
-		attributeElement = attributeElement == ccl::ATTR_ELEMENT_CORNER ? ccl::ATTR_ELEMENT_CORNER_NORMAL : ccl::ATTR_ELEMENT_VERTEX_NORMAL;
+		attributeElement = attributeElement == ccl::ATTR_ELEMENT_CORNER ? ccl::ATTR_ELEMENT_CORNER_NORMAL :
+																		  ccl::ATTR_ELEMENT_VERTEX_NORMAL;
 	}
 
 	// Create attribute. Cycles will allocate a buffer based on `attributeElement` and the information
@@ -146,13 +150,11 @@ ccl::Attribute *convertTypedPrimitiveVariable( const std::string &name, const Pr
 	const size_t allocatedSize = attribute->element_size( attributes.geometry, attributes.prim );
 	if( dataSize( data ) > allocatedSize )
 	{
-		msg(
-			Msg::Warning, "IECoreCyles::GeometryAlgo::convertPrimitiveVariable",
-			fmt::format(
-				"Primitive variable \"{}\" has size {} but Cycles allocated size {}.",
-				name, dataSize( data ), allocatedSize
-			)
-		);
+		msg( Msg::Warning, "IECoreCyles::GeometryAlgo::convertPrimitiveVariable",
+			 fmt::format(
+				 "Primitive variable \"{}\" has size {} but Cycles allocated size {}.", name, dataSize( data ),
+				 allocatedSize
+			 ) );
 		return nullptr;
 	}
 
@@ -170,13 +172,11 @@ ccl::Attribute *convertTypedPrimitiveVariable( const std::string &name, const Pr
 		}
 		else
 		{
-			msg(
-				Msg::Warning, "IECoreCyles::GeometryAlgo::convertPrimitiveVariable",
-				fmt::format(
-					"Primitive variable \"{}\" has unsupported type \"{}\" (expected V3fVectorData).",
-					name, primitiveVariable.data->typeName()
-				)
-			);
+			msg( Msg::Warning, "IECoreCyles::GeometryAlgo::convertPrimitiveVariable",
+				 fmt::format(
+					 "Primitive variable \"{}\" has unsupported type \"{}\" (expected V3fVectorData).", name,
+					 primitiveVariable.data->typeName()
+				 ) );
 			return nullptr;
 		}
 	}
@@ -202,7 +202,7 @@ ccl::Attribute *convertTypedPrimitiveVariable( const std::string &name, const Pr
 // otherwise-protected `precision` member.
 class VolumeLoader : public ccl::VDBImageLoader
 {
-	public:
+public:
 
 	VolumeLoader( openvdb::GridBase::ConstPtr grid, const string &gridName, int precision_, float clipping )
 		: VDBImageLoader( grid, gridName, clipping )
@@ -223,7 +223,10 @@ namespace IECoreCycles
 namespace GeometryAlgo
 {
 
-ccl::Geometry *convert( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times, ccl::Scene *scene )
+ccl::Geometry *convert(
+	const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times,
+	ccl::Scene *scene
+)
 {
 	if( samples.empty() )
 	{
@@ -257,7 +260,10 @@ void registerConverter( IECore::TypeId fromType, Converter converter )
 	registry()[fromType] = converter;
 }
 
-void convertPrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, ccl::AttributeSet &attributes, ccl::AttributeElement attributeElement )
+void convertPrimitiveVariable(
+	const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, ccl::AttributeSet &attributes,
+	ccl::AttributeElement attributeElement
+)
 {
 	ccl::Attribute *attr = nullptr;
 	switch( primitiveVariable.data->typeId() )
@@ -265,10 +271,14 @@ void convertPrimitiveVariable( const std::string &name, const IECoreScene::Primi
 			// Simple int-based data. Cycles doesn't support int attributes, so we promote to the equivalent float types.
 
 		case IntDataTypeId :
-			attr = convertTypedPrimitiveVariable<IntData>( name, primitiveVariable, attributes, ccl::TypeFloat, attributeElement );
+			attr = convertTypedPrimitiveVariable<IntData>(
+				name, primitiveVariable, attributes, ccl::TypeFloat, attributeElement
+			);
 			break;
 		case V2iDataTypeId :
-			attr = convertTypedPrimitiveVariable<V2iData>( name, primitiveVariable, attributes, ccl::TypeFloat2, attributeElement );
+			attr = convertTypedPrimitiveVariable<V2iData>(
+				name, primitiveVariable, attributes, ccl::TypeFloat2, attributeElement
+			);
 			break;
 		case V3iDataTypeId :
 			attr = convertTypedPrimitiveVariable<V3iData>(
@@ -283,10 +293,14 @@ void convertPrimitiveVariable( const std::string &name, const IECoreScene::Primi
 			// Vectors of int-based data. Cycles doesn't support int attributes, so we promote to the equivalent float types.
 
 		case IntVectorDataTypeId :
-			attr = convertTypedPrimitiveVariable<IntVectorData>( name, primitiveVariable, attributes, ccl::TypeFloat, attributeElement );
+			attr = convertTypedPrimitiveVariable<IntVectorData>(
+				name, primitiveVariable, attributes, ccl::TypeFloat, attributeElement
+			);
 			break;
 		case V2iVectorDataTypeId :
-			attr = convertTypedPrimitiveVariable<V2iVectorData>( name, primitiveVariable, attributes, ccl::TypeFloat2, attributeElement );
+			attr = convertTypedPrimitiveVariable<V2iVectorData>(
+				name, primitiveVariable, attributes, ccl::TypeFloat2, attributeElement
+			);
 			break;
 		case V3iVectorDataTypeId :
 			attr = convertTypedPrimitiveVariable<V3iVectorData>(
@@ -301,10 +315,14 @@ void convertPrimitiveVariable( const std::string &name, const IECoreScene::Primi
 			// Simple float-based data.
 
 		case FloatDataTypeId :
-			attr = convertTypedPrimitiveVariable<FloatData>( name, primitiveVariable, attributes, ccl::TypeFloat, attributeElement );
+			attr = convertTypedPrimitiveVariable<FloatData>(
+				name, primitiveVariable, attributes, ccl::TypeFloat, attributeElement
+			);
 			break;
 		case V2fDataTypeId :
-			attr = convertTypedPrimitiveVariable<V2fData>( name, primitiveVariable, attributes, ccl::TypeFloat2, attributeElement );
+			attr = convertTypedPrimitiveVariable<V2fData>(
+				name, primitiveVariable, attributes, ccl::TypeFloat2, attributeElement
+			);
 			break;
 		case V3fDataTypeId :
 			attr = convertTypedPrimitiveVariable<V3fData>(
@@ -316,16 +334,22 @@ void convertPrimitiveVariable( const std::string &name, const IECoreScene::Primi
 			);
 			break;
 		case Color3fDataTypeId :
-			attr = convertTypedPrimitiveVariable<Color3fData>( name, primitiveVariable, attributes, ccl::TypeColor, attributeElement );
+			attr = convertTypedPrimitiveVariable<Color3fData>(
+				name, primitiveVariable, attributes, ccl::TypeColor, attributeElement
+			);
 			break;
 
 			// Vectors of float-based data.
 
 		case FloatVectorDataTypeId :
-			attr = convertTypedPrimitiveVariable<FloatVectorData>( name, primitiveVariable, attributes, ccl::TypeFloat, attributeElement );
+			attr = convertTypedPrimitiveVariable<FloatVectorData>(
+				name, primitiveVariable, attributes, ccl::TypeFloat, attributeElement
+			);
 			break;
 		case V2fVectorDataTypeId :
-			attr = convertTypedPrimitiveVariable<V2fVectorData>( name, primitiveVariable, attributes, ccl::TypeFloat2, attributeElement );
+			attr = convertTypedPrimitiveVariable<V2fVectorData>(
+				name, primitiveVariable, attributes, ccl::TypeFloat2, attributeElement
+			);
 			break;
 		case V3fVectorDataTypeId :
 			attr = convertTypedPrimitiveVariable<V3fVectorData>(
@@ -337,16 +361,15 @@ void convertPrimitiveVariable( const std::string &name, const IECoreScene::Primi
 			);
 			break;
 		case Color3fVectorDataTypeId :
-			attr = convertTypedPrimitiveVariable<Color3fVectorData>( name, primitiveVariable, attributes, ccl::TypeColor, attributeElement );
+			attr = convertTypedPrimitiveVariable<Color3fVectorData>(
+				name, primitiveVariable, attributes, ccl::TypeColor, attributeElement
+			);
 			break;
 		default :
-			msg(
-				Msg::Warning, "IECoreCyles::GeometryAlgo::convertPrimitiveVariable",
-				fmt::format(
-					"Primitive variable \"{}\" has unsupported type \"{}\".",
-					name, primitiveVariable.data->typeName()
-				)
-			);
+			msg( Msg::Warning, "IECoreCyles::GeometryAlgo::convertPrimitiveVariable",
+				 fmt::format(
+					 "Primitive variable \"{}\" has unsupported type \"{}\".", name, primitiveVariable.data->typeName()
+				 ) );
 	};
 
 	if( !attr )
@@ -384,7 +407,10 @@ void convertPrimitiveVariable( const std::string &name, const IECoreScene::Primi
 	}
 }
 
-void convertMotion( const IECoreScenePreview::Renderer::Samples<const IECoreScene::Primitive *> &samples, size_t primarySampleIndex, ccl::Geometry &geometry )
+void convertMotion(
+	const IECoreScenePreview::Renderer::Samples<const IECoreScene::Primitive *> &samples, size_t primarySampleIndex,
+	ccl::Geometry &geometry
+)
 {
 	if( samples.size() < 2 )
 	{
@@ -394,7 +420,8 @@ void convertMotion( const IECoreScenePreview::Renderer::Samples<const IECoreScen
 	geometry.set_use_motion_blur( true );
 	geometry.set_motion_steps( samples.size() );
 
-	ccl::Attribute *positionAttribute = geometry.attributes.add( ccl::ATTR_STD_MOTION_VERTEX_POSITION, ccl::ustring( "motion_P" ) );
+	ccl::Attribute *positionAttribute =
+		geometry.attributes.add( ccl::ATTR_STD_MOTION_VERTEX_POSITION, ccl::ustring( "motion_P" ) );
 	ccl::float4 *positionData = positionAttribute->data_float4();
 
 	const float *radius = nullptr;
@@ -412,7 +439,8 @@ void convertMotion( const IECoreScenePreview::Renderer::Samples<const IECoreScen
 			// stored in ATTR_STD_MOTION_VERTEX_POSITION. So we skip the primary sample here.
 			continue;
 		}
-		const V3fVectorData *pData = samples[sampleIndex]->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
+		const V3fVectorData *pData =
+			samples[sampleIndex]->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
 		if( !pData )
 		{
 			continue;
@@ -425,7 +453,9 @@ void convertMotion( const IECoreScenePreview::Renderer::Samples<const IECoreScen
 	}
 }
 
-void convertVoxelGrids( const IECoreVDB::VDBObject *vdbObject, ccl::Volume *volume, ccl::Scene *scene, int precision, float clipping )
+void convertVoxelGrids(
+	const IECoreVDB::VDBObject *vdbObject, ccl::Volume *volume, ccl::Scene *scene, int precision, float clipping
+)
 {
 	for( const std::string &gridName : vdbObject->gridNames() )
 	{
@@ -509,10 +539,7 @@ void convertVoxelGrids( const IECoreVDB::VDBObject *vdbObject, ccl::Volume *volu
 			{
 				IECore::msg(
 					IECore::Msg::Warning, "VolumeAlgo",
-					fmt::format(
-						"Ignoring grid \"{}\" with unsupported type \"{}\"",
-						gridName, grid->type()
-					)
+					fmt::format( "Ignoring grid \"{}\" with unsupported type \"{}\"", gridName, grid->type() )
 				);
 				continue;
 			}

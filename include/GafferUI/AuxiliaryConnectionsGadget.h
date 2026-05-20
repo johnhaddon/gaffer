@@ -65,11 +65,13 @@ class Nodule;
 class GAFFERUI_API AuxiliaryConnectionsGadget : public Gadget
 {
 
-	public:
+public:
 
 	~AuxiliaryConnectionsGadget() override;
 
-	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::AuxiliaryConnectionsGadget, AuxiliaryConnectionsGadgetTypeId, Gadget );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE(
+		GafferUI::AuxiliaryConnectionsGadget, AuxiliaryConnectionsGadgetTypeId, Gadget
+	);
 
 	/// Gadgets may either be NodeGadgets or Nodules.
 	bool hasConnection( const Gadget *srcGadget, const Gadget *dstGadget ) const;
@@ -81,7 +83,7 @@ class GAFFERUI_API AuxiliaryConnectionsGadget : public Gadget
 	bool acceptsParent( const GraphComponent *potentialParent ) const override;
 	std::string getToolTip( const IECore::LineSegment3f &position ) const override;
 
-	protected:
+protected:
 
 	// Constructor is protected because we only want
 	// GraphGadget to be able to construct these, which
@@ -95,7 +97,7 @@ class GAFFERUI_API AuxiliaryConnectionsGadget : public Gadget
 	unsigned layerMask() const override;
 	Imath::Box3f renderBound() const override;
 
-	private:
+private:
 
 	GraphGadget *graphGadget();
 	const GraphGadget *graphGadget() const;
@@ -150,20 +152,17 @@ class GAFFERUI_API AuxiliaryConnectionsGadget : public Gadget
 		boost::multi_index::indexed_by<
 			// Primary key is the unique pair of endpoint
 			// gadgets the connection represents.
-			boost::multi_index::hashed_unique<
-				boost::multi_index::key<&AuxiliaryConnection::endpoints>>,
+			boost::multi_index::hashed_unique<boost::multi_index::key<&AuxiliaryConnection::endpoints>>,
 			// Access to the range of connections originating
 			// at `srcNodeGadget`. This will include all source
 			// endpoints which are either `srcNodeGadget` itself
 			// or are a nodule belonging to it.
-			boost::multi_index::hashed_non_unique<
-				boost::multi_index::key<&AuxiliaryConnection::srcNodeGadget>>,
+			boost::multi_index::hashed_non_unique<boost::multi_index::key<&AuxiliaryConnection::srcNodeGadget>>,
 			// Access to the range of connections ending at
 			// `dstNodeGadget`. This will include all destination
 			// endpoints which are either `dstNodeGadget` itself or
 			// are a nodule belonging to it.
-			boost::multi_index::hashed_non_unique<
-				boost::multi_index::key<&AuxiliaryConnection::dstNodeGadget>>>>;
+			boost::multi_index::hashed_non_unique<boost::multi_index::key<&AuxiliaryConnection::dstNodeGadget>>>>;
 
 	mutable AuxiliaryConnections m_auxiliaryConnections;
 	mutable bool m_dirty;

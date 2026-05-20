@@ -54,14 +54,11 @@ namespace
 class NameSwitchPlugAdder : public PlugAdder
 {
 
-	public:
+public:
 
-	NameSwitchPlugAdder( ArrayPlugPtr plug )
-		: m_plug( plug )
-	{
-	}
+	NameSwitchPlugAdder( ArrayPlugPtr plug ) : m_plug( plug ) {}
 
-	protected:
+protected:
 
 	bool canCreateConnection( const Plug *endpoint ) const override
 	{
@@ -124,7 +121,7 @@ class NameSwitchPlugAdder : public PlugAdder
 		}
 	}
 
-	private:
+private:
 
 	ArrayPlugPtr m_plug;
 };
@@ -132,12 +129,9 @@ class NameSwitchPlugAdder : public PlugAdder
 struct Registration
 {
 
-	Registration()
-	{
-		NoduleLayout::registerCustomGadget( "GafferUI.NameSwitchUI.PlugAdder", &create );
-	}
+	Registration() { NoduleLayout::registerCustomGadget( "GafferUI.NameSwitchUI.PlugAdder", &create ); }
 
-	private:
+private:
 
 	static GadgetPtr create( GraphComponentPtr parent )
 	{

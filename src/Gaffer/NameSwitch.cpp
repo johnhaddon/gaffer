@@ -47,8 +47,7 @@ size_t NameSwitch::g_firstPlugIndex = 0;
 
 GAFFER_NODE_DEFINE_TYPE( NameSwitch );
 
-NameSwitch::NameSwitch( const std::string &name )
-	: Switch( name )
+NameSwitch::NameSwitch( const std::string &name ) : Switch( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -59,9 +58,7 @@ NameSwitch::NameSwitch( const std::string &name )
 	indexPlug()->setInput( outIndexPlug() );
 }
 
-NameSwitch::~NameSwitch()
-{
-}
+NameSwitch::~NameSwitch() {}
 
 void NameSwitch::setup( const Plug *plug )
 {
@@ -78,17 +75,13 @@ void NameSwitch::setup( const Plug *plug )
 	inElement->setFlags( Plug::Serialisable, true );
 	NameValuePlugPtr element = new NameValuePlug( "", inElement, /* defaultEnabled = */ true, "in0" );
 	ArrayPlugPtr in = new ArrayPlug(
-		"in",
-		Plug::In,
-		element,
-		2,
-		std::numeric_limits<size_t>::max(),
-		Plug::Default,
+		"in", Plug::In, element, 2, std::numeric_limits<size_t>::max(), Plug::Default,
 		/* resizeWhenInputsChange = */ false
 	);
 	addChild( in );
 
-	PlugPtr out = new NameValuePlug( "", plug->createCounterpart( "value", Plug::Out ), /* defaultEnabled = */ true, "out" );
+	PlugPtr out =
+		new NameValuePlug( "", plug->createCounterpart( "value", Plug::Out ), /* defaultEnabled = */ true, "out" );
 	addChild( out );
 
 	inPlugs()->getChild<NameValuePlug>( 0 )->namePlug()->setValue( "*" );
@@ -129,20 +122,15 @@ void NameSwitch::affects( const Plug *input, DependencyNode::AffectedPlugsContai
 	Switch::affects( input, outputs );
 
 	auto nameValuePlug = input->parent<NameValuePlug>();
-	if(
-		input == selectorPlug() ||
+	if( input == selectorPlug() ||
 		( nameValuePlug && nameValuePlug->parent() == inPlugs() &&
-		  ( input == nameValuePlug->namePlug() || input == nameValuePlug->enabledPlug() ) )
-	)
+		  ( input == nameValuePlug->namePlug() || input == nameValuePlug->enabledPlug() ) ) )
 	{
 		outputs.push_back( outIndexPlug() );
 	}
 
-	if(
-		nameValuePlug && nameValuePlug->parent() == inPlugs() &&
-		nameValuePlug != inPlugs()->getChild( 0 ) &&
-		( input == nameValuePlug->namePlug() || input == nameValuePlug->enabledPlug() )
-	)
+	if( nameValuePlug && nameValuePlug->parent() == inPlugs() && nameValuePlug != inPlugs()->getChild( 0 ) &&
+		( input == nameValuePlug->namePlug() || input == nameValuePlug->enabledPlug() ) )
 	{
 		outputs.push_back( enabledNamesPlug() );
 	}

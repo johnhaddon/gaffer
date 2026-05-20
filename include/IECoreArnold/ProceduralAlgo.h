@@ -49,7 +49,10 @@ namespace ProceduralAlgo
 {
 
 using ProceduralSamples = IECoreScenePreview::Renderer::Samples<const IECoreScene::ExternalProcedural *>;
-IECOREARNOLD_API AtNode *convert( const ProceduralSamples &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext = "ProceduralAlgo::convert" );
+IECOREARNOLD_API AtNode *convert(
+	const ProceduralSamples &samples, float motionStart, float motionEnd, AtUniverse *universe,
+	const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext = "ProceduralAlgo::convert"
+);
 
 } // namespace ProceduralAlgo
 

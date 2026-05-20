@@ -51,8 +51,7 @@ GAFFER_NODE_DEFINE_TYPE( MapOffset );
 
 size_t MapOffset::g_firstPlugIndex = 0;
 
-MapOffset::MapOffset( const std::string &name )
-	: ObjectProcessor( name, PathMatcher::EveryMatch )
+MapOffset::MapOffset( const std::string &name ) : ObjectProcessor( name, PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new V2fPlug( "offset" ) );
@@ -60,9 +59,7 @@ MapOffset::MapOffset( const std::string &name )
 	addChild( new StringPlug( "uvSet", Plug::In, "uv" ) );
 }
 
-MapOffset::~MapOffset()
-{
-}
+MapOffset::~MapOffset() {}
 
 Gaffer::V2fPlug *MapOffset::offsetPlug()
 {
@@ -96,13 +93,13 @@ const Gaffer::StringPlug *MapOffset::uvSetPlug() const
 
 bool MapOffset::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return ObjectProcessor::affectsProcessedObject( input ) ||
-		input->parent<Plug>() == offsetPlug() ||
-		input == udimPlug() ||
-		input == uvSetPlug();
+	return ObjectProcessor::affectsProcessedObject( input ) || input->parent<Plug>() == offsetPlug() ||
+		input == udimPlug() || input == uvSetPlug();
 }
 
-void MapOffset::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void MapOffset::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ObjectProcessor::hashProcessedObject( path, context, h );
 	offsetPlug()->hash( h );
@@ -110,7 +107,9 @@ void MapOffset::hashProcessedObject( const ScenePath &path, const Gaffer::Contex
 	uvSetPlug()->hash( h );
 }
 
-IECore::ConstObjectPtr MapOffset::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr MapOffset::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	// early out if it's not a primitive
 	const Primitive *inputPrimitive = runTimeCast<const Primitive>( inputObject );

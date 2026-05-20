@@ -45,7 +45,7 @@ namespace GafferUI
 class GAFFERUI_API LinearContainer : public ContainerGadget
 {
 
-	public:
+public:
 
 	enum Orientation
 	{
@@ -70,7 +70,10 @@ class GAFFERUI_API LinearContainer : public ContainerGadget
 		Decreasing
 	};
 
-	explicit LinearContainer( const std::string &name = defaultName<LinearContainer>(), Orientation orientation = X, Alignment alignment = Centre, float spacing = 0.0f, Direction = Increasing );
+	explicit LinearContainer(
+		const std::string &name = defaultName<LinearContainer>(), Orientation orientation = X,
+		Alignment alignment = Centre, float spacing = 0.0f, Direction = Increasing
+	);
 
 	~LinearContainer() override;
 
@@ -88,7 +91,7 @@ class GAFFERUI_API LinearContainer : public ContainerGadget
 	void setDirection( Direction direction );
 	Direction getDirection() const;
 
-	protected:
+protected:
 
 	void updateLayout() const override;
 

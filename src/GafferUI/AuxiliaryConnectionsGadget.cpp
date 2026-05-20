@@ -119,9 +119,7 @@ void visitAuxiliaryConnections( const GraphGadget *graphGadget, const NodeGadget
 		}
 
 		visitor(
-			srcPlug, dstPlug,
-			srcNodeGadget, dstNodeGadget,
-			endGadget( srcPlug, srcNodeGadget ),
+			srcPlug, dstPlug, srcNodeGadget, dstNodeGadget, endGadget( srcPlug, srcNodeGadget ),
 			endGadget( dstPlug, dstNodeGadget )
 		);
 	}
@@ -130,10 +128,7 @@ void visitAuxiliaryConnections( const GraphGadget *graphGadget, const NodeGadget
 Box2f nodeFrame( const NodeGadget *nodeGadget )
 {
 	const Box3f b = nodeGadget->transformedBound( nullptr );
-	return Box2f(
-		V2f( b.min.x, b.min.y ),
-		V2f( b.max.x, b.max.y )
-	);
+	return Box2f( V2f( b.min.x, b.min.y ), V2f( b.max.x, b.max.y ) );
 }
 
 V2f gadgetCenter( const Gadget *gadget )
@@ -168,14 +163,9 @@ string gadgetName( const Gadget *gadget )
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( AuxiliaryConnectionsGadget );
 
-AuxiliaryConnectionsGadget::AuxiliaryConnectionsGadget()
-	: Gadget( "AuxiliaryConnections" ), m_dirty( false )
-{
-}
+AuxiliaryConnectionsGadget::AuxiliaryConnectionsGadget() : Gadget( "AuxiliaryConnections" ), m_dirty( false ) {}
 
-AuxiliaryConnectionsGadget::~AuxiliaryConnectionsGadget()
-{
-}
+AuxiliaryConnectionsGadget::~AuxiliaryConnectionsGadget() {}
 
 bool AuxiliaryConnectionsGadget::hasConnection( const Gadget *srcGadget, const Gadget *dstGadget ) const
 {
@@ -207,11 +197,14 @@ bool AuxiliaryConnectionsGadget::hasConnection( const Gaffer::Node *srcNode, con
 
 std::pair<Gadget *, Gadget *> AuxiliaryConnectionsGadget::connectionAt( const IECore::LineSegment3f &position )
 {
-	std::pair<const Gadget *, const Gadget *> c = const_cast<const AuxiliaryConnectionsGadget *>( this )->connectionAt( position );
+	std::pair<const Gadget *, const Gadget *> c =
+		const_cast<const AuxiliaryConnectionsGadget *>( this )->connectionAt( position );
 	return { const_cast<Gadget *>( c.first ), const_cast<Gadget *>( c.second ) };
 }
 
-std::pair<const Gadget *, const Gadget *> AuxiliaryConnectionsGadget::connectionAt( const IECore::LineSegment3f &position ) const
+std::pair<const Gadget *, const Gadget *> AuxiliaryConnectionsGadget::connectionAt(
+	const IECore::LineSegment3f &position
+) const
 {
 	updateConnections();
 
@@ -279,18 +272,18 @@ std::string AuxiliaryConnectionsGadget::getToolTip( const IECore::LineSegment3f 
 	auto dstNodeGadget = runTimeCast<const NodeGadget>( connection.second );
 	dstNodeGadget = dstNodeGadget ? dstNodeGadget : connection.second->ancestor<NodeGadget>();
 
-	s += "Auxiliary connections from " + gadgetName( connection.first ) + " to " + gadgetName( connection.second ) + " : \n\n";
+	s += "Auxiliary connections from " + gadgetName( connection.first ) + " to " + gadgetName( connection.second ) +
+		" : \n\n";
 	visitAuxiliaryConnections(
 		graphGadget(), dstNodeGadget,
-		[&s, &connection]( const Plug *srcPlug, const Plug *dstPlug, const NodeGadget *srcNodeGadget, const NodeGadget *dstNodeGadget, const Gadget *srcGadget, const Gadget *dstGadget ) {
+		[&s, &connection](
+			const Plug *srcPlug, const Plug *dstPlug, const NodeGadget *srcNodeGadget, const NodeGadget *dstNodeGadget,
+			const Gadget *srcGadget, const Gadget *dstGadget
+		) {
 			if( srcGadget == connection.first && dstGadget == connection.second )
 			{
-				s +=
-					"\t" +
-					srcPlug->relativeName( srcNodeGadget->node() ) +
-					" -> " +
-					dstPlug->relativeName( dstNodeGadget->node() ) +
-					"\n";
+				s += "\t" + srcPlug->relativeName( srcNodeGadget->node() ) + " -> " +
+					dstPlug->relativeName( dstNodeGadget->node() ) + "\n";
 			}
 		}
 	);
@@ -326,7 +319,9 @@ Box3f AuxiliaryConnectionsGadget::renderBound() const
 
 void AuxiliaryConnectionsGadget::renderConnection( const AuxiliaryConnection &c, const Style *style ) const
 {
-	const Style::State state = c.srcNodeGadget->getHighlighted() || c.dstNodeGadget->getHighlighted() ? Style::HighlightedState : Style::NormalState;
+	const Style::State state = c.srcNodeGadget->getHighlighted() || c.dstNodeGadget->getHighlighted() ?
+		Style::HighlightedState :
+		Style::NormalState;
 	if( c.srcNodeGadget == c.endpoints.first && c.dstNodeGadget == c.endpoints.second )
 	{
 		// Connection between nodes
@@ -490,7 +485,10 @@ void AuxiliaryConnectionsGadget::updateConnections() const
 
 		visitAuxiliaryConnections(
 			graphGadget(), x.first,
-			[this]( const Plug *srcPlug, const Plug *dstPlug, const NodeGadget *srcNodeGadget, const NodeGadget *dstNodeGadget, const Gadget *srcGadget, const Gadget *dstGadget ) {
+			[this](
+				const Plug *srcPlug, const Plug *dstPlug, const NodeGadget *srcNodeGadget,
+				const NodeGadget *dstNodeGadget, const Gadget *srcGadget, const Gadget *dstGadget
+			) {
 				AuxiliaryConnection c = { srcNodeGadget, dstNodeGadget, { srcGadget, dstGadget } };
 				m_auxiliaryConnections.insert( c );
 			}

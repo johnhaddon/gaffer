@@ -72,15 +72,15 @@ struct HistoryCacheKey
 {
 	HistoryCacheKey() {};
 	HistoryCacheKey( const ValuePlug *plug )
-		: plug( plug ), contextHash( Context::current()->hash() ), dirtyCount( plug->dirtyCount() )
+		: plug( plug ),
+		  contextHash( Context::current()->hash() ),
+		  dirtyCount( plug->dirtyCount() )
 	{
 	}
 
 	bool operator == ( const HistoryCacheKey &rhs ) const
 	{
-		return plug == rhs.plug &&
-			contextHash == rhs.contextHash &&
-			dirtyCount == rhs.dirtyCount;
+		return plug == rhs.plug && contextHash == rhs.contextHash && dirtyCount == rhs.dirtyCount;
 	}
 
 	const ValuePlug *plug;
@@ -116,9 +116,7 @@ HistoryCache g_historyCache(
 		// owners. Destroying plugs can trigger dirty propagation, so as a
 		// precaution we destroy the history on the UI thread, where this would
 		// be OK.
-		ParallelAlgo::callOnUIThread(
-			[history]() {}
-		);
+		ParallelAlgo::callOnUIThread( [history]() {} );
 	}
 
 );
@@ -127,7 +125,8 @@ struct PrimitiveVariableHistoryCacheKey : public HistoryCacheKey
 {
 	PrimitiveVariableHistoryCacheKey() {};
 	PrimitiveVariableHistoryCacheKey( const ScenePlug *plug, IECore::InternedString primitiveVariable )
-		: HistoryCacheKey( plug->objectPlug() ), primitiveVariable( primitiveVariable )
+		: HistoryCacheKey( plug->objectPlug() ),
+		  primitiveVariable( primitiveVariable )
 	{
 	}
 
@@ -147,11 +146,13 @@ size_t hash_value( const PrimitiveVariableHistoryCacheKey &key )
 	return result;
 }
 
-using PrimitiveVariableHistoryCache = IECorePreview::LRUCache<PrimitiveVariableHistoryCacheKey, SceneAlgo::History::ConstPtr>;
+using PrimitiveVariableHistoryCache =
+	IECorePreview::LRUCache<PrimitiveVariableHistoryCacheKey, SceneAlgo::History::ConstPtr>;
 
 PrimitiveVariableHistoryCache g_primitiveVariableHistoryCache(
 	// Getter
-	[]( const PrimitiveVariableHistoryCacheKey &key, size_t &cost, const IECore::Canceller *canceller ) -> SceneAlgo::History::ConstPtr {
+	[]( const PrimitiveVariableHistoryCacheKey &key, size_t &cost,
+		const IECore::Canceller *canceller ) -> SceneAlgo::History::ConstPtr {
 		assert( canceller == Context::current()->canceller() );
 		cost = 1;
 		SceneAlgo::History::ConstPtr primitiveVariablesHistory = g_historyCache.get( key, canceller );
@@ -172,32 +173,28 @@ PrimitiveVariableHistoryCache g_primitiveVariableHistoryCache(
 	// Removal callback
 	[]( const PrimitiveVariableHistoryCacheKey &key, const SceneAlgo::History::ConstPtr &history ) {
 		// See comment in g_historyCache
-		ParallelAlgo::callOnUIThread(
-			[history]() {}
-		);
+		ParallelAlgo::callOnUIThread( [history]() {} );
 	}
 
 );
 
 // \todo : Duplicated from src/GafferSceneUIModule/SceneInspectorBinding.cpp
-const boost::container::flat_map<IECoreScene::PrimitiveVariable::Interpolation, IECore::ConstStringDataPtr> g_primitiveVariableInterpolations = {
-	{ PrimitiveVariable::Invalid, new IECore::StringData( "Invalid" ) },
-	{ PrimitiveVariable::Constant, new IECore::StringData( "Constant" ) },
-	{ PrimitiveVariable::Uniform, new IECore::StringData( "Uniform" ) },
-	{ PrimitiveVariable::Vertex, new IECore::StringData( "Vertex" ) },
-	{ PrimitiveVariable::Varying, new IECore::StringData( "Varying" ) },
-	{ PrimitiveVariable::FaceVarying, new IECore::StringData( "FaceVarying" ) }
-};
+const boost::container::flat_map<IECoreScene::PrimitiveVariable::Interpolation, IECore::ConstStringDataPtr>
+	g_primitiveVariableInterpolations = { { PrimitiveVariable::Invalid, new IECore::StringData( "Invalid" ) },
+										  { PrimitiveVariable::Constant, new IECore::StringData( "Constant" ) },
+										  { PrimitiveVariable::Uniform, new IECore::StringData( "Uniform" ) },
+										  { PrimitiveVariable::Vertex, new IECore::StringData( "Vertex" ) },
+										  { PrimitiveVariable::Varying, new IECore::StringData( "Varying" ) },
+										  { PrimitiveVariable::FaceVarying, new IECore::StringData( "FaceVarying" ) } };
 
-const boost::container::flat_map<IECore::GeometricData::Interpretation, IECore::ConstStringDataPtr> g_geometricInterpretations = {
-	{ GeometricData::None, new IECore::StringData( "None" ) },
-	{ GeometricData::Point, new IECore::StringData( "Point" ) },
-	{ GeometricData::Normal, new IECore::StringData( "Normal" ) },
-	{ GeometricData::Vector, new IECore::StringData( "Vector" ) },
-	{ GeometricData::Color, new IECore::StringData( "Color" ) },
-	{ GeometricData::UV, new IECore::StringData( "UV" ) },
-	{ GeometricData::Rational, new IECore::StringData( "Rational" ) }
-};
+const boost::container::flat_map<IECore::GeometricData::Interpretation, IECore::ConstStringDataPtr>
+	g_geometricInterpretations = { { GeometricData::None, new IECore::StringData( "None" ) },
+								   { GeometricData::Point, new IECore::StringData( "Point" ) },
+								   { GeometricData::Normal, new IECore::StringData( "Normal" ) },
+								   { GeometricData::Vector, new IECore::StringData( "Vector" ) },
+								   { GeometricData::Color, new IECore::StringData( "Color" ) },
+								   { GeometricData::UV, new IECore::StringData( "UV" ) },
+								   { GeometricData::Rational, new IECore::StringData( "Rational" ) } };
 
 } // namespace
 
@@ -208,12 +205,8 @@ const boost::container::flat_map<IECore::GeometricData::Interpretation, IECore::
 IE_CORE_DEFINERUNTIMETYPED( PrimitiveVariableInspector )
 
 PrimitiveVariableInspector::PrimitiveVariableInspector(
-	const GafferScene::ScenePlugPtr &scene,
-	const Gaffer::PlugPtr &editScope,
-	IECore::InternedString primitiveVariable,
-	Property property,
-	const std::string &name,
-	const std::string &type
+	const GafferScene::ScenePlugPtr &scene, const Gaffer::PlugPtr &editScope, IECore::InternedString primitiveVariable,
+	Property property, const std::string &name, const std::string &type
 )
 	: Inspector( { scene->objectPlug() }, type, name == "" ? primitiveVariable.string() : name, editScope ),
 	  m_scene( scene ),
@@ -229,7 +222,9 @@ GafferScene::SceneAlgo::History::ConstPtr PrimitiveVariableInspector::history() 
 		return nullptr;
 	}
 
-	return g_primitiveVariableHistoryCache.get( PrimitiveVariableHistoryCacheKey( m_scene.get(), m_primitiveVariable ), Context::current()->canceller() );
+	return g_primitiveVariableHistoryCache.get(
+		PrimitiveVariableHistoryCacheKey( m_scene.get(), m_primitiveVariable ), Context::current()->canceller()
+	);
 }
 
 IECore::ConstObjectPtr PrimitiveVariableInspector::value( const GafferScene::SceneAlgo::History *history ) const
@@ -243,7 +238,8 @@ IECore::ConstObjectPtr PrimitiveVariableInspector::value( const GafferScene::Sce
 
 	if( m_property == Property::Interpolation )
 	{
-		auto it = g_primitiveVariableInterpolations.find( primitiveVariableHistory->primitiveVariableValue.interpolation );
+		auto it =
+			g_primitiveVariableInterpolations.find( primitiveVariableHistory->primitiveVariableValue.interpolation );
 		return it != g_primitiveVariableInterpolations.end() ? it->second : nullptr;
 	}
 	else if( m_property == Property::Type )
@@ -262,7 +258,9 @@ IECore::ConstObjectPtr PrimitiveVariableInspector::value( const GafferScene::Sce
 			return nullptr;
 		}
 
-		auto it = g_geometricInterpretations.find( IECore::getGeometricInterpretation( primitiveVariableHistory->primitiveVariableValue.data.get() ) );
+		auto it = g_geometricInterpretations.find(
+			IECore::getGeometricInterpretation( primitiveVariableHistory->primitiveVariableValue.data.get() )
+		);
 		return it != g_geometricInterpretations.end() ? it->second : nullptr;
 	}
 	else if( m_property == Property::Data )
@@ -277,7 +275,9 @@ IECore::ConstObjectPtr PrimitiveVariableInspector::value( const GafferScene::Sce
 	throw IECore::Exception( fmt::format( "Unsupported primitive variable Property {}.", (int)m_property ) );
 }
 
-Gaffer::ValuePlugPtr PrimitiveVariableInspector::source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const
+Gaffer::ValuePlugPtr PrimitiveVariableInspector::source(
+	const GafferScene::SceneAlgo::History *history, std::string &editWarning
+) const
 {
 	if( m_property != Property::Data )
 	{
@@ -291,24 +291,22 @@ Gaffer::ValuePlugPtr PrimitiveVariableInspector::source( const GafferScene::Scen
 	}
 	else if( auto primitiveVariablesNode = runTimeCast<GafferScene::PrimitiveVariables>( sceneNode ) )
 	{
-		if( !( primitiveVariablesNode->filterPlug()->match( primitiveVariablesNode->inPlug() ) & PathMatcher::ExactMatch ) )
+		if( !( primitiveVariablesNode->filterPlug()->match( primitiveVariablesNode->inPlug() ) &
+			   PathMatcher::ExactMatch ) )
 		{
 			return nullptr;
 		}
 
 		for( const auto &plug : NameValuePlug::Range( *primitiveVariablesNode->primitiveVariablesPlug() ) )
 		{
-			if(
-				plug->namePlug()->getValue() == m_primitiveVariable.string() &&
-				( !plug->enabledPlug() || plug->enabledPlug()->getValue() )
-			)
+			if( plug->namePlug()->getValue() == m_primitiveVariable.string() &&
+				( !plug->enabledPlug() || plug->enabledPlug()->getValue() ) )
 			{
 				/// \todo This is overly conservative. We should test to see if there is more than
 				/// one filter match (but make sure to early-out once two are found, rather than test
 				/// the rest of the scene).
 				editWarning = fmt::format(
-					"Edits to \"{}\" may affect other locations in the scene.",
-					m_primitiveVariable.string()
+					"Edits to \"{}\" may affect other locations in the scene.", m_primitiveVariable.string()
 				);
 				return plug;
 			}
@@ -316,17 +314,15 @@ Gaffer::ValuePlugPtr PrimitiveVariableInspector::source( const GafferScene::Scen
 	}
 	else if( auto primitiveVariableTweaks = runTimeCast<PrimitiveVariableTweaks>( sceneNode ) )
 	{
-		if( !( primitiveVariableTweaks->filterPlug()->match( primitiveVariableTweaks->inPlug() ) & PathMatcher::ExactMatch ) )
+		if( !( primitiveVariableTweaks->filterPlug()->match( primitiveVariableTweaks->inPlug() ) &
+			   PathMatcher::ExactMatch ) )
 		{
 			return nullptr;
 		}
 
 		for( const auto &tweak : TweakPlug::Range( *primitiveVariableTweaks->tweaksPlug() ) )
 		{
-			if(
-				tweak->namePlug()->getValue() == m_primitiveVariable.string() &&
-				tweak->enabledPlug()->getValue()
-			)
+			if( tweak->namePlug()->getValue() == m_primitiveVariable.string() && tweak->enabledPlug()->getValue() )
 			{
 				return tweak;
 			}

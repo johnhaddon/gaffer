@@ -211,10 +211,7 @@ tuple<const Plug *, ConstContextPtr> Gaffer::PlugAlgo::contextSensitiveSource( c
 	const Node *node = plug->node();
 	if( auto sw = IECore::runTimeCast<const Switch>( node ) )
 	{
-		if(
-			sw->outPlug() &&
-			( plug == sw->outPlug() || sw->outPlug()->isAncestorOf( plug ) )
-		)
+		if( sw->outPlug() && ( plug == sw->outPlug() || sw->outPlug()->isAncestorOf( plug ) ) )
 		{
 			if( auto activeInPlug = sw->activeInPlug( plug ) )
 			{
@@ -224,10 +221,8 @@ tuple<const Plug *, ConstContextPtr> Gaffer::PlugAlgo::contextSensitiveSource( c
 	}
 	else if( auto contextProcessor = IECore::runTimeCast<const ContextProcessor>( node ) )
 	{
-		if(
-			contextProcessor->outPlug() &&
-			( plug == contextProcessor->outPlug() || contextProcessor->outPlug()->isAncestorOf( plug ) )
-		)
+		if( contextProcessor->outPlug() &&
+			( plug == contextProcessor->outPlug() || contextProcessor->outPlug()->isAncestorOf( plug ) ) )
 		{
 			ConstContextPtr context = contextProcessor->inPlugContext();
 			Context::Scope scopedContext( context.get() );
@@ -267,48 +262,38 @@ namespace
 template<typename T>
 ValuePlugPtr boxValuePlug( const std::string &name, Plug::Direction direction, unsigned flags, const T *value )
 {
-	return new BoxPlug<typename T::ValueType>(
-		name,
-		direction,
-		value->readable(),
-		flags
-	);
+	return new BoxPlug<typename T::ValueType>( name, direction, value->readable(), flags );
 }
 
 template<typename T>
-ValuePlugPtr compoundNumericValuePlug( const std::string &name, Plug::Direction direction, unsigned flags, const T *value )
+ValuePlugPtr compoundNumericValuePlug(
+	const std::string &name, Plug::Direction direction, unsigned flags, const T *value
+)
 {
 	using ValueType = typename T::ValueType;
 	using BaseType = typename ValueType::BaseType;
 	using PlugType = CompoundNumericPlug<ValueType>;
 
 	typename PlugType::Ptr result = new PlugType(
-		name,
-		direction,
-		value->readable(),
-		ValueType( std::numeric_limits<BaseType>::lowest() ),
-		ValueType( std::numeric_limits<BaseType>::max() ),
-		flags
+		name, direction, value->readable(), ValueType( std::numeric_limits<BaseType>::lowest() ),
+		ValueType( std::numeric_limits<BaseType>::max() ), flags
 	);
 
 	return result;
 }
 
 template<typename T>
-ValuePlugPtr geometricCompoundNumericValuePlug( const std::string &name, Plug::Direction direction, unsigned flags, const T *value )
+ValuePlugPtr geometricCompoundNumericValuePlug(
+	const std::string &name, Plug::Direction direction, unsigned flags, const T *value
+)
 {
 	using ValueType = typename T::ValueType;
 	using BaseType = typename ValueType::BaseType;
 	using PlugType = CompoundNumericPlug<ValueType>;
 
 	typename PlugType::Ptr result = new PlugType(
-		name,
-		direction,
-		value->readable(),
-		ValueType( std::numeric_limits<BaseType>::lowest() ),
-		ValueType( std::numeric_limits<BaseType>::max() ),
-		flags,
-		value->getInterpretation()
+		name, direction, value->readable(), ValueType( std::numeric_limits<BaseType>::lowest() ),
+		ValueType( std::numeric_limits<BaseType>::max() ), flags, value->getInterpretation()
 	);
 
 	return result;
@@ -317,12 +302,7 @@ ValuePlugPtr geometricCompoundNumericValuePlug( const std::string &name, Plug::D
 template<typename T>
 ValuePlugPtr typedObjectValuePlug( const std::string &name, Plug::Direction direction, unsigned flags, const T *value )
 {
-	typename TypedObjectPlug<T>::Ptr result = new TypedObjectPlug<T>(
-		name,
-		direction,
-		value,
-		flags
-	);
+	typename TypedObjectPlug<T>::Ptr result = new TypedObjectPlug<T>( name, direction, value, flags );
 
 	return result;
 }
@@ -335,48 +315,34 @@ namespace Gaffer
 namespace PlugAlgo
 {
 
-ValuePlugPtr createPlugFromData( const std::string &name, Plug::Direction direction, unsigned flags, const IECore::Data *value )
+ValuePlugPtr createPlugFromData(
+	const std::string &name, Plug::Direction direction, unsigned flags, const IECore::Data *value
+)
 {
 	switch( value->typeId() )
 	{
 		case FloatDataTypeId : {
 			FloatPlugPtr valuePlug = new FloatPlug(
-				name,
-				direction,
-				static_cast<const FloatData *>( value )->readable(),
-				std::numeric_limits<float>::lowest(),
-				std::numeric_limits<float>::max(),
-				flags
+				name, direction, static_cast<const FloatData *>( value )->readable(),
+				std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), flags
 			);
 			return valuePlug;
 		}
 		case IntDataTypeId : {
 			IntPlugPtr valuePlug = new IntPlug(
-				name,
-				direction,
-				static_cast<const IntData *>( value )->readable(),
-				std::numeric_limits<int>::lowest(),
-				std::numeric_limits<int>::max(),
-				flags
+				name, direction, static_cast<const IntData *>( value )->readable(), std::numeric_limits<int>::lowest(),
+				std::numeric_limits<int>::max(), flags
 			);
 			return valuePlug;
 		}
 		case StringDataTypeId : {
-			StringPlugPtr valuePlug = new StringPlug(
-				name,
-				direction,
-				static_cast<const StringData *>( value )->readable(),
-				flags
-			);
+			StringPlugPtr valuePlug =
+				new StringPlug( name, direction, static_cast<const StringData *>( value )->readable(), flags );
 			return valuePlug;
 		}
 		case BoolDataTypeId : {
-			BoolPlugPtr valuePlug = new BoolPlug(
-				name,
-				direction,
-				static_cast<const BoolData *>( value )->readable(),
-				flags
-			);
+			BoolPlugPtr valuePlug =
+				new BoolPlug( name, direction, static_cast<const BoolData *>( value )->readable(), flags );
 			return valuePlug;
 		}
 		case V2iDataTypeId : {
@@ -410,12 +376,8 @@ ValuePlugPtr createPlugFromData( const std::string &name, Plug::Direction direct
 			return boxValuePlug( name, direction, flags, static_cast<const Box3iData *>( value ) );
 		}
 		case M44fDataTypeId : {
-			M44fPlugPtr valuePlug = new M44fPlug(
-				name,
-				direction,
-				static_cast<const M44fData *>( value )->readable(),
-				flags
-			);
+			M44fPlugPtr valuePlug =
+				new M44fPlug( name, direction, static_cast<const M44fData *>( value )->readable(), flags );
 			return valuePlug;
 		}
 		case FloatVectorDataTypeId : {
@@ -431,7 +393,9 @@ ValuePlugPtr createPlugFromData( const std::string &name, Plug::Direction direct
 			return typedObjectValuePlug( name, direction, flags, static_cast<const StringVectorData *>( value ) );
 		}
 		case InternedStringVectorDataTypeId : {
-			return typedObjectValuePlug( name, direction, flags, static_cast<const InternedStringVectorData *>( value ) );
+			return typedObjectValuePlug(
+				name, direction, flags, static_cast<const InternedStringVectorData *>( value )
+			);
 		}
 		case BoolVectorDataTypeId : {
 			return typedObjectValuePlug( name, direction, flags, static_cast<const BoolVectorData *>( value ) );
@@ -458,19 +422,17 @@ ValuePlugPtr createPlugFromData( const std::string &name, Plug::Direction direct
 			return typedObjectValuePlug( name, direction, flags, static_cast<const Box2fVectorData *>( value ) );
 		}
 		case PathMatcherDataTypeId : {
-			PathMatcherDataPlugPtr valuePlug = new PathMatcherDataPlug(
-				name,
-				direction,
-				static_cast<const PathMatcherData *>( value ),
-				flags
-			);
+			PathMatcherDataPlugPtr valuePlug =
+				new PathMatcherDataPlug( name, direction, static_cast<const PathMatcherData *>( value ), flags );
 			return valuePlug;
 		}
 		case RampffDataTypeId : {
 			return new RampffPlug( name, direction, static_cast<const RampffData *>( value )->readable(), flags );
 		}
 		case RampfColor3fDataTypeId : {
-			return new RampfColor3fPlug( name, direction, static_cast<const RampfColor3fData *>( value )->readable(), flags );
+			return new RampfColor3fPlug(
+				name, direction, static_cast<const RampfColor3fData *>( value )->readable(), flags
+			);
 		}
 		default :
 			throw IECore::Exception(
@@ -771,7 +733,9 @@ bool setStringPlugValue( StringPlug *plug, const Data *value )
 }
 
 template<typename PlugType, typename ValueType>
-bool setCompoundNumericChildPlugValue( const PlugType *plug, typename PlugType::ChildType *child, const ValueType &value )
+bool setCompoundNumericChildPlugValue(
+	const PlugType *plug, typename PlugType::ChildType *child, const ValueType &value
+)
 {
 	for( size_t i = 0, eI = plug->children().size(); i < eI; ++i )
 	{
@@ -793,7 +757,9 @@ bool setCompoundNumericChildPlugValue( const PlugType *plug, typename PlugType::
 }
 
 template<typename PlugType, typename DataType>
-bool setCompoundNumericChildPlugValueFromVectorData( const PlugType *plug, typename PlugType::ChildType *child, const DataType *data )
+bool setCompoundNumericChildPlugValueFromVectorData(
+	const PlugType *plug, typename PlugType::ChildType *child, const DataType *data
+)
 {
 	if( data->readable().size() != 1 )
 	{
@@ -810,17 +776,29 @@ bool setCompoundNumericPlugValue( const PlugType *plug, Gaffer::ValuePlug *leafP
 	switch( value->typeId() )
 	{
 		case Color4fDataTypeId :
-			return setCompoundNumericChildPlugValue( plug, typedChild, static_cast<const Color4fData *>( value )->readable() );
+			return setCompoundNumericChildPlugValue(
+				plug, typedChild, static_cast<const Color4fData *>( value )->readable()
+			);
 		case Color3fDataTypeId :
-			return setCompoundNumericChildPlugValue( plug, typedChild, static_cast<const Color3fData *>( value )->readable() );
+			return setCompoundNumericChildPlugValue(
+				plug, typedChild, static_cast<const Color3fData *>( value )->readable()
+			);
 		case V3fDataTypeId :
-			return setCompoundNumericChildPlugValue( plug, typedChild, static_cast<const V3fData *>( value )->readable() );
+			return setCompoundNumericChildPlugValue(
+				plug, typedChild, static_cast<const V3fData *>( value )->readable()
+			);
 		case V2fDataTypeId :
-			return setCompoundNumericChildPlugValue( plug, typedChild, static_cast<const V2fData *>( value )->readable() );
+			return setCompoundNumericChildPlugValue(
+				plug, typedChild, static_cast<const V2fData *>( value )->readable()
+			);
 		case V3iDataTypeId :
-			return setCompoundNumericChildPlugValue( plug, typedChild, static_cast<const V3iData *>( value )->readable() );
+			return setCompoundNumericChildPlugValue(
+				plug, typedChild, static_cast<const V3iData *>( value )->readable()
+			);
 		case V2iDataTypeId :
-			return setCompoundNumericChildPlugValue( plug, typedChild, static_cast<const V2iData *>( value )->readable() );
+			return setCompoundNumericChildPlugValue(
+				plug, typedChild, static_cast<const V2iData *>( value )->readable()
+			);
 		case FloatDataTypeId :
 		case IntDataTypeId :
 		case BoolDataTypeId :
@@ -834,17 +812,29 @@ bool setCompoundNumericPlugValue( const PlugType *plug, Gaffer::ValuePlug *leafP
 				return true;
 			}
 		case Color4fVectorDataTypeId :
-			return setCompoundNumericChildPlugValueFromVectorData( plug, typedChild, static_cast<const Color4fVectorData *>( value ) );
+			return setCompoundNumericChildPlugValueFromVectorData(
+				plug, typedChild, static_cast<const Color4fVectorData *>( value )
+			);
 		case Color3fVectorDataTypeId :
-			return setCompoundNumericChildPlugValueFromVectorData( plug, typedChild, static_cast<const Color3fVectorData *>( value ) );
+			return setCompoundNumericChildPlugValueFromVectorData(
+				plug, typedChild, static_cast<const Color3fVectorData *>( value )
+			);
 		case V3fVectorDataTypeId :
-			return setCompoundNumericChildPlugValueFromVectorData( plug, typedChild, static_cast<const V3fVectorData *>( value ) );
+			return setCompoundNumericChildPlugValueFromVectorData(
+				plug, typedChild, static_cast<const V3fVectorData *>( value )
+			);
 		case V2fVectorDataTypeId :
-			return setCompoundNumericChildPlugValueFromVectorData( plug, typedChild, static_cast<const V2fVectorData *>( value ) );
+			return setCompoundNumericChildPlugValueFromVectorData(
+				plug, typedChild, static_cast<const V2fVectorData *>( value )
+			);
 		case V3iVectorDataTypeId :
-			return setCompoundNumericChildPlugValueFromVectorData( plug, typedChild, static_cast<const V3iVectorData *>( value ) );
+			return setCompoundNumericChildPlugValueFromVectorData(
+				plug, typedChild, static_cast<const V3iVectorData *>( value )
+			);
 		case V2iVectorDataTypeId :
-			return setCompoundNumericChildPlugValueFromVectorData( plug, typedChild, static_cast<const V2iVectorData *>( value ) );
+			return setCompoundNumericChildPlugValueFromVectorData(
+				plug, typedChild, static_cast<const V2iVectorData *>( value )
+			);
 		case FloatVectorDataTypeId :
 		case IntVectorDataTypeId :
 		case BoolVectorDataTypeId :
@@ -882,7 +872,9 @@ bool setCompoundNumericPlugValue( PlugType *plug, const Data *value )
 }
 
 template<typename PlugType, typename ValueType>
-bool setBoxChildPlugValue( const PlugType *plug, typename PlugType::ChildType::ChildType *child, const ValueType &value )
+bool setBoxChildPlugValue(
+	const PlugType *plug, typename PlugType::ChildType::ChildType *child, const ValueType &value
+)
 {
 	if( child->parent() == plug->minPlug() )
 	{
@@ -895,7 +887,9 @@ bool setBoxChildPlugValue( const PlugType *plug, typename PlugType::ChildType::C
 }
 
 template<typename PlugType, typename DataType>
-bool setBoxChildPlugValueFromVectorData( const PlugType *plug, typename PlugType::ChildType::ChildType *child, const DataType *data )
+bool setBoxChildPlugValueFromVectorData(
+	const PlugType *plug, typename PlugType::ChildType::ChildType *child, const DataType *data
+)
 {
 	if( data->readable().size() != 1 )
 	{
@@ -1306,8 +1300,7 @@ bool setValueFromData( const ValuePlug *plug, ValuePlug *leafPlug, const IECore:
 		{
 			throw IECore::Exception(
 				fmt::format(
-					"PlugAlgo::setValueFromData : Plug \"{}\" is not a leaf plug",
-					leafPlug->getName().c_str()
+					"PlugAlgo::setValueFromData : Plug \"{}\" is not a leaf plug", leafPlug->getName().c_str()
 				)
 			);
 		}
@@ -1573,7 +1566,8 @@ void applyDynamicFlag( Plug *plug )
 		for( Plug::RecursiveIterator it( plug ); !it.done(); ++it )
 		{
 			( *it )->setFlags( Plug::Dynamic, true );
-			if( find( compoundTypes.begin(), compoundTypes.end(), (Gaffer::TypeId)plug->typeId() ) != compoundTypes.end() )
+			if( find( compoundTypes.begin(), compoundTypes.end(), (Gaffer::TypeId)plug->typeId() ) !=
+				compoundTypes.end() )
 			{
 				it.prune();
 			}
@@ -1618,7 +1612,9 @@ Plug *promote( Plug *plug, Plug *parent, const StringAlgo::MatchPattern &exclude
 	return promoteWithName( plug, promotedName( plug ), parent, excludeMetadata );
 }
 
-Plug *promoteWithName( Plug *plug, const InternedString &name, Plug *parent, const StringAlgo::MatchPattern &excludeMetadata )
+Plug *promoteWithName(
+	Plug *plug, const InternedString &name, Plug *parent, const StringAlgo::MatchPattern &excludeMetadata
+)
 {
 	validatePromotability( plug, parent, /* throwExceptions = */ true );
 
@@ -1716,7 +1712,8 @@ bool isPromoted( const Plug *plug )
 	}
 	else
 	{
-		for( Plug::OutputContainer::const_iterator it = plug->outputs().begin(), eIt = plug->outputs().end(); it != eIt; ++it )
+		for( Plug::OutputContainer::const_iterator it = plug->outputs().begin(), eIt = plug->outputs().end(); it != eIt;
+			 ++it )
 		{
 			if( ( *it )->node() == enclosingNode )
 			{
@@ -1752,7 +1749,8 @@ void unpromote( Plug *plug )
 	}
 	else
 	{
-		for( Plug::OutputContainer::const_iterator it = plug->outputs().begin(), eIt = plug->outputs().end(); it != eIt; ++it )
+		for( Plug::OutputContainer::const_iterator it = plug->outputs().begin(), eIt = plug->outputs().end(); it != eIt;
+			 ++it )
 		{
 			if( ( *it )->node() == externalNode )
 			{
@@ -1773,10 +1771,8 @@ void unpromote( Plug *plug )
 		plugToRemove = plugToRemove->parent<Plug>();
 		for( Plug::Iterator it( plugToRemove ); !it.done(); ++it )
 		{
-			if(
-				( ( *it )->direction() == Plug::In && ( *it )->outputs().size() ) ||
-				( ( *it )->direction() == Plug::Out && ( *it )->getInput() )
-			)
+			if( ( ( *it )->direction() == Plug::In && ( *it )->outputs().size() ) ||
+				( ( *it )->direction() == Plug::Out && ( *it )->getInput() ) )
 			{
 				remove = false;
 				break;

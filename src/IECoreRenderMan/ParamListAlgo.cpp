@@ -147,7 +147,9 @@ struct ParameterConverter
 
 	void operator () ( const Color3fVectorData *data, RtUString name, RtParamList &paramList ) const
 	{
-		paramList.SetColorArray( name, reinterpret_cast<const RtColorRGB *>( data->readable().data() ), data->readable().size() );
+		paramList.SetColorArray(
+			name, reinterpret_cast<const RtColorRGB *>( data->readable().data() ), data->readable().size()
+		);
 	}
 
 	void operator () ( const V3fVectorData *data, RtUString name, RtParamList &paramList ) const
@@ -155,21 +157,26 @@ struct ParameterConverter
 		switch( data->getInterpretation() )
 		{
 			case GeometricData::Vector :
-				paramList.SetVectorArray( name, reinterpret_cast<const RtVector3 *>( data->readable().data() ), data->readable().size() );
+				paramList.SetVectorArray(
+					name, reinterpret_cast<const RtVector3 *>( data->readable().data() ), data->readable().size()
+				);
 				break;
 			case GeometricData::Normal :
-				paramList.SetNormalArray( name, reinterpret_cast<const RtVector3 *>( data->readable().data() ), data->readable().size() );
+				paramList.SetNormalArray(
+					name, reinterpret_cast<const RtVector3 *>( data->readable().data() ), data->readable().size()
+				);
 				break;
 			default :
-				paramList.SetPointArray( name, reinterpret_cast<const RtVector3 *>( data->readable().data() ), data->readable().size() );
+				paramList.SetPointArray(
+					name, reinterpret_cast<const RtVector3 *>( data->readable().data() ), data->readable().size()
+				);
 		}
 	}
 
 	void operator () ( const Data *data, RtUString name, RtParamList &paramList ) const
 	{
 		IECore::msg(
-			IECore::Msg::Warning,
-			"IECoreRenderMan",
+			IECore::Msg::Warning, "IECoreRenderMan",
 			fmt::format( "Unsupported parameter \"{}\" of type \"{}\"", name.CStr(), data->typeName() )
 		);
 	}
@@ -186,7 +193,9 @@ void IECoreRenderMan::ParamListAlgo::convertParameter( const RtUString &name, co
 	dispatch( data, ParameterConverter(), name, paramList );
 }
 
-void IECoreRenderMan::ParamListAlgo::convertParameters( const IECore::CompoundDataMap &parameters, RtParamList &paramList )
+void IECoreRenderMan::ParamListAlgo::convertParameters(
+	const IECore::CompoundDataMap &parameters, RtParamList &paramList
+)
 {
 	for( auto &p : parameters )
 	{

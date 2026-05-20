@@ -168,39 +168,38 @@ DataPtr dataFromValue( const Ort::Value &value )
 	else
 	{
 		DataPtr result;
-		dispatchTensorData(
-			value,
-			[&]( const auto *data ) {
-				using ElementType = remove_const_t<remove_pointer_t<decltype( data )>>;
-				const size_t count = value.GetTensorTypeAndShapeInfo().GetElementCount();
+		dispatchTensorData( value, [&]( const auto *data ) {
+			using ElementType = remove_const_t<remove_pointer_t<decltype( data )>>;
+			const size_t count = value.GetTensorTypeAndShapeInfo().GetElementCount();
 
-				if constexpr( std::is_same_v<ElementType, Ort::Float16_t> )
-				{
-					HalfVectorDataPtr d = new HalfVectorData();
-					auto halfData = reinterpret_cast<const half *>( data );
-					d->writable().insert( d->writable().end(), halfData, halfData + count );
+			if constexpr( std::is_same_v<ElementType, Ort::Float16_t> )
+			{
+				HalfVectorDataPtr d = new HalfVectorData();
+				auto halfData = reinterpret_cast<const half *>( data );
+				d->writable().insert( d->writable().end(), halfData, halfData + count );
 
-					result = d;
-				}
-				else if constexpr( std::is_same_v<ElementType, Ort::BFloat16_t> )
-				{
-					FloatVectorDataPtr d = new FloatVectorData();
-					std::vector<float> &v = d->writable();
-					v.reserve( count );
-					std::transform( data, data + count, std::back_inserter( v ), []( const Ort::BFloat16_t &e ) { return float( e ); } );
-					result = d;
-				}
-				else
-				{
-					using DataType = TypedData<vector<ElementType>>;
-					using PtrType = typename DataType::Ptr;
-
-					PtrType d = new DataType;
-					d->writable().insert( d->writable().end(), data, data + count );
-					result = d;
-				}
+				result = d;
 			}
-		);
+			else if constexpr( std::is_same_v<ElementType, Ort::BFloat16_t> )
+			{
+				FloatVectorDataPtr d = new FloatVectorData();
+				std::vector<float> &v = d->writable();
+				v.reserve( count );
+				std::transform( data, data + count, std::back_inserter( v ), []( const Ort::BFloat16_t &e ) {
+					return float( e );
+				} );
+				result = d;
+			}
+			else
+			{
+				using DataType = TypedData<vector<ElementType>>;
+				using PtrType = typename DataType::Ptr;
+
+				PtrType d = new DataType;
+				d->writable().insert( d->writable().end(), data, data + count );
+				result = d;
+			}
+		} );
 		return result;
 	}
 }
@@ -226,8 +225,7 @@ inline void murmurHashAppend( MurmurHash &h, const Ort::BFloat16_t *data, size_t
 
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Tensor );
 
-Tensor::State::State( Ort::Value &&value, IECore::ConstDataPtr data )
-	: value( std::move( value ) ), data( data )
+Tensor::State::State( Ort::Value &&value, IECore::ConstDataPtr data ) : value( std::move( value ) ), data( data )
 {
 	if( value && !value.IsTensor() )
 	{
@@ -239,89 +237,75 @@ Tensor::State::State( Ort::Value &&value, IECore::ConstDataPtr data )
 	}
 }
 
-Tensor::Tensor()
-	: m_state( new State( Ort::Value( nullptr ) ) )
-{
-}
+Tensor::Tensor() : m_state( new State( Ort::Value( nullptr ) ) ) {}
 
-Tensor::Tensor( Ort::Value &&value )
-	: m_state( new State( std::move( value ) ) )
-{
-}
+Tensor::Tensor( Ort::Value &&value ) : m_state( new State( std::move( value ) ) ) {}
 
 Tensor::Tensor( const IECore::ConstDataPtr &data, std::vector<int64_t> shape )
 {
-	IECore::dispatch(
-		data.get(),
-		[&]( auto typedData ) -> void {
-			using DataType = remove_const_t<remove_pointer_t<decltype( typedData )>>;
-			using BaseType = typename std::conditional_t<
-				std::is_same_v<DataType, HalfVectorData>,
-				Ort::Float16_t,
-				typename DataType::BaseType>;
+	IECore::dispatch( data.get(), [&]( auto typedData ) -> void {
+		using DataType = remove_const_t<remove_pointer_t<decltype( typedData )>>;
+		using BaseType = typename std::conditional_t<
+			std::is_same_v<DataType, HalfVectorData>, Ort::Float16_t, typename DataType::BaseType>;
 
-			if( !shape.size() )
+		if( !shape.size() )
+		{
+			// Automatically infer shape from type.
+			if constexpr( TypeTraits::IsVectorTypedData<DataType>::value )
 			{
-				// Automatically infer shape from type.
-				if constexpr( TypeTraits::IsVectorTypedData<DataType>::value )
-				{
-					shape.push_back( typedData->readable().size() );
-					using ShapeT = ShapeTraits<typename DataType::ValueType::value_type>;
-					shape.insert( shape.end(), begin( ShapeT::shape ), end( ShapeT::shape ) );
-				}
-				else
-				{
-					using ShapeT = ShapeTraits<typename DataType::ValueType>;
-					shape.insert( shape.end(), begin( ShapeT::shape ), end( ShapeT::shape ) );
-				}
-			}
-
-			if constexpr( std::is_same_v<DataType, BoolVectorData> )
-			{
-				// Special case for the vector of bool fiasco.
-				Ort::AllocatorWithDefaultOptions allocator;
-				Ort::Value value = Ort::Value::CreateTensor(
-					allocator, shape.data(), shape.size(), ONNX_TENSOR_ELEMENT_DATA_TYPE_BOOL
-				);
-				std::copy( typedData->readable().begin(), typedData->readable().end(), value.GetTensorMutableData<bool>() );
-				m_state = new State{ std::move( value ), nullptr };
-			}
-			else if constexpr( std::is_same_v<DataType, StringVectorData> )
-			{
-				std::vector<const char *> cStrings;
-				cStrings.reserve( typedData->readable().size() );
-				for( const auto &s : typedData->readable() )
-				{
-					cStrings.push_back( s.c_str() );
-				}
-
-				Ort::AllocatorWithDefaultOptions allocator;
-				Ort::Value value = Ort::Value::CreateTensor(
-					allocator, shape.data(), shape.size(), ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING
-				);
-				value.FillStringTensor( cStrings.data(), cStrings.size() );
-				m_state = new State{ std::move( value ), nullptr };
-			}
-			else if constexpr( HasTensorType<BaseType>::value )
-			{
-				Ort::MemoryInfo memoryInfo = Ort::MemoryInfo::CreateCpu( OrtArenaAllocator, OrtMemTypeDefault );
-				m_state = new State{
-					Ort::Value::CreateTensor(
-						memoryInfo.GetConst(),
-						// `const_cast()` is OK because we only provide const access to the
-						// `Ort::Value` after construction.
-						reinterpret_cast<BaseType *>( const_cast<DataType *>( typedData )->baseWritable() ), typedData->baseSize(),
-						shape.data(), shape.size()
-					),
-					data
-				};
+				shape.push_back( typedData->readable().size() );
+				using ShapeT = ShapeTraits<typename DataType::ValueType::value_type>;
+				shape.insert( shape.end(), begin( ShapeT::shape ), end( ShapeT::shape ) );
 			}
 			else
 			{
-				throw IECore::Exception( fmt::format( "Unsupported data type `{}`", DataType::staticTypeName() ) );
+				using ShapeT = ShapeTraits<typename DataType::ValueType>;
+				shape.insert( shape.end(), begin( ShapeT::shape ), end( ShapeT::shape ) );
 			}
 		}
-	);
+
+		if constexpr( std::is_same_v<DataType, BoolVectorData> )
+		{
+			// Special case for the vector of bool fiasco.
+			Ort::AllocatorWithDefaultOptions allocator;
+			Ort::Value value =
+				Ort::Value::CreateTensor( allocator, shape.data(), shape.size(), ONNX_TENSOR_ELEMENT_DATA_TYPE_BOOL );
+			std::copy( typedData->readable().begin(), typedData->readable().end(), value.GetTensorMutableData<bool>() );
+			m_state = new State{ std::move( value ), nullptr };
+		}
+		else if constexpr( std::is_same_v<DataType, StringVectorData> )
+		{
+			std::vector<const char *> cStrings;
+			cStrings.reserve( typedData->readable().size() );
+			for( const auto &s : typedData->readable() )
+			{
+				cStrings.push_back( s.c_str() );
+			}
+
+			Ort::AllocatorWithDefaultOptions allocator;
+			Ort::Value value =
+				Ort::Value::CreateTensor( allocator, shape.data(), shape.size(), ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING );
+			value.FillStringTensor( cStrings.data(), cStrings.size() );
+			m_state = new State{ std::move( value ), nullptr };
+		}
+		else if constexpr( HasTensorType<BaseType>::value )
+		{
+			Ort::MemoryInfo memoryInfo = Ort::MemoryInfo::CreateCpu( OrtArenaAllocator, OrtMemTypeDefault );
+			m_state =
+				new State{ Ort::Value::CreateTensor(
+							   memoryInfo.GetConst(),
+							   // `const_cast()` is OK because we only provide const access to the
+							   // `Ort::Value` after construction.
+							   reinterpret_cast<BaseType *>( const_cast<DataType *>( typedData )->baseWritable() ),
+							   typedData->baseSize(), shape.data(), shape.size()
+						   ),
+						   data };
+		}
+		else
+		{
+			throw IECore::Exception( fmt::format( "Unsupported data type `{}`", DataType::staticTypeName() ) );
+		}
+	} );
 }
 
 bool Tensor::isEqualTo( const IECore::Object *other ) const
@@ -360,10 +344,8 @@ bool Tensor::isEqualTo( const IECore::Object *other ) const
 
 	// Compare the buffers ourselves.
 
-	if(
-		m_state->value.GetTensorTypeAndShapeInfo().GetElementType() !=
-		otherTensor->m_state->value.GetTensorTypeAndShapeInfo().GetElementType()
-	)
+	if( m_state->value.GetTensorTypeAndShapeInfo().GetElementType() !=
+		otherTensor->m_state->value.GetTensorTypeAndShapeInfo().GetElementType() )
 	{
 		return false;
 	}
@@ -383,15 +365,12 @@ bool Tensor::isEqualTo( const IECore::Object *other ) const
 	else
 	{
 		bool equal;
-		dispatchTensorData(
-			m_state->value,
-			[&]( const auto *data ) {
-				using ElementType = remove_const_t<remove_pointer_t<decltype( data )>>;
-				const auto *otherData = otherTensor->m_state->value.GetTensorData<ElementType>();
-				const size_t count = m_state->value.GetTensorTypeAndShapeInfo().GetElementCount();
-				equal = memcmp( data, otherData, count * sizeof( *data ) ) == 0;
-			}
-		);
+		dispatchTensorData( m_state->value, [&]( const auto *data ) {
+			using ElementType = remove_const_t<remove_pointer_t<decltype( data )>>;
+			const auto *otherData = otherTensor->m_state->value.GetTensorData<ElementType>();
+			const size_t count = m_state->value.GetTensorTypeAndShapeInfo().GetElementCount();
+			equal = memcmp( data, otherData, count * sizeof( *data ) ) == 0;
+		} );
 
 		return equal;
 	}
@@ -416,13 +395,10 @@ void Tensor::hash( IECore::MurmurHash &h ) const
 	}
 	else
 	{
-		dispatchTensorData(
-			m_state->value,
-			[&]( const auto *data ) {
-				const size_t count = m_state->value.GetTensorTypeAndShapeInfo().GetElementCount();
-				h.append( data, count );
-			}
-		);
+		dispatchTensorData( m_state->value, [&]( const auto *data ) {
+			const size_t count = m_state->value.GetTensorTypeAndShapeInfo().GetElementCount();
+			h.append( data, count );
+		} );
 	}
 
 	auto s = shape();
@@ -470,13 +446,10 @@ void Tensor::memoryUsage( IECore::Object::MemoryAccumulator &accumulator ) const
 		}
 		else
 		{
-			dispatchTensorData(
-				m_state->value,
-				[&]( const auto *data ) {
-					const size_t count = m_state->value.GetTensorTypeAndShapeInfo().GetElementCount();
-					accumulator.accumulate( m_state.get(), count * sizeof( *data ) );
-				}
-			);
+			dispatchTensorData( m_state->value, [&]( const auto *data ) {
+				const size_t count = m_state->value.GetTensorTypeAndShapeInfo().GetElementCount();
+				accumulator.accumulate( m_state.get(), count * sizeof( *data ) );
+			} );
 		}
 	}
 }

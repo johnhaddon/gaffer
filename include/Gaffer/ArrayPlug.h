@@ -47,7 +47,7 @@ namespace Gaffer
 class GAFFER_API ArrayPlug : public Plug
 {
 
-	public:
+public:
 
 	/// All array elements are created by calling
 	/// `elementPrototype->createCounterpart()`. Currently the element names
@@ -55,14 +55,11 @@ class GAFFER_API ArrayPlug : public Plug
 	/// the future. It is strongly recommended that ArrayPlug children are
 	/// only accessed through numeric indexing and never via names.
 	explicit ArrayPlug(
-		const std::string &name = defaultName<ArrayPlug>(),
-		Direction direction = In,
+		const std::string &name = defaultName<ArrayPlug>(), Direction direction = In,
 		/// > Caution : `elementPrototype` should not be null. It only defaults
 		/// > that way to support the loading of legacy serialisations.
-		ConstPlugPtr elementPrototype = nullptr,
-		size_t minSize = 1,
-		size_t maxSize = std::numeric_limits<size_t>::max(),
-		unsigned flags = Default,
+		ConstPlugPtr elementPrototype = nullptr, size_t minSize = 1,
+		size_t maxSize = std::numeric_limits<size_t>::max(), unsigned flags = Default,
 		bool resizeWhenInputsChange = true
 	);
 
@@ -86,11 +83,11 @@ class GAFFER_API ArrayPlug : public Plug
 	/// a new element.
 	Gaffer::Plug *next();
 
-	protected:
+protected:
 
 	void parentChanged( GraphComponent *oldParent ) override;
 
-	private:
+private:
 
 	void inputChanged( Gaffer::Plug *plug );
 	void childAdded();

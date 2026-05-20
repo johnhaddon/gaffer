@@ -67,9 +67,14 @@ namespace IECoreArnold
 namespace ProceduralAlgo
 {
 
-AtNode *convert( const ProceduralSamples &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )
+AtNode *convert(
+	const ProceduralSamples &samples, float motionStart, float motionEnd, AtUniverse *universe,
+	const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext
+)
 {
-	AtNode *node = AiNode( universe, AtString( samples.front()->getFileName().c_str() ), AtString( nodeName.c_str() ), parentNode );
+	AtNode *node = AiNode(
+		universe, AtString( samples.front()->getFileName().c_str() ), AtString( nodeName.c_str() ), parentNode
+	);
 	ParameterAlgo::setParameters( node, samples.front()->parameters()->readable(), messageContext );
 
 	return node;

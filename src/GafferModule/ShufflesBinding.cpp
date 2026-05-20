@@ -52,7 +52,9 @@ using namespace GafferBindings;
 namespace
 {
 
-CompoundObjectPtr shuffleCompoundObject( const ShufflesPlug &shufflesPlug, CompoundObject &source, bool ignoreMissingSource )
+CompoundObjectPtr shuffleCompoundObject(
+	const ShufflesPlug &shufflesPlug, CompoundObject &source, bool ignoreMissingSource
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	CompoundObjectPtr result = new CompoundObject;
@@ -60,11 +62,14 @@ CompoundObjectPtr shuffleCompoundObject( const ShufflesPlug &shufflesPlug, Compo
 	return result;
 }
 
-CompoundObjectPtr shuffleCompoundObjectWithExtraSources( const ShufflesPlug &shufflesPlug, CompoundObject &source, CompoundObject &extraSources, bool ignoreMissingSource )
+CompoundObjectPtr shuffleCompoundObjectWithExtraSources(
+	const ShufflesPlug &shufflesPlug, CompoundObject &source, CompoundObject &extraSources, bool ignoreMissingSource
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	CompoundObjectPtr result = new CompoundObject;
-	result->members() = shufflesPlug.shuffleWithExtraSources( source.members(), extraSources.members(), ignoreMissingSource );
+	result->members() =
+		shufflesPlug.shuffleWithExtraSources( source.members(), extraSources.members(), ignoreMissingSource );
 	return result;
 }
 
@@ -74,17 +79,23 @@ CompoundDataPtr shuffleCompoundData( const ShufflesPlug &shufflesPlug, CompoundD
 	return new CompoundData( shufflesPlug.shuffle( source.readable(), ignoreMissingSource ) );
 }
 
-CompoundDataPtr shuffleCompoundDataWithExtraSources( const ShufflesPlug &shufflesPlug, CompoundData &source, CompoundData &extraSources, bool ignoreMissingSource )
+CompoundDataPtr shuffleCompoundDataWithExtraSources(
+	const ShufflesPlug &shufflesPlug, CompoundData &source, CompoundData &extraSources, bool ignoreMissingSource
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
-	return new CompoundData( shufflesPlug.shuffleWithExtraSources( source.readable(), extraSources.readable(), ignoreMissingSource ) );
+	return new CompoundData(
+		shufflesPlug.shuffleWithExtraSources( source.readable(), extraSources.readable(), ignoreMissingSource )
+	);
 }
 
 class ShufflePlugSerialiser : public ValuePlugSerialiser
 {
-	public:
+public:
 
-	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsConstruction(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override
 	{
 		return false;
 	}
@@ -97,22 +108,14 @@ void GafferModule::bindShuffles()
 	PlugClass<ShufflePlug>()
 		.def(
 			init<const std::string &, Plug::Direction, unsigned>(
-				(
-					arg_( "name" ) = GraphComponent::defaultName<ShufflePlug>(),
-					arg_( "direction" ) = Plug::In,
-					arg_( "flags" ) = Plug::Default
-				)
+				( arg_( "name" ) = GraphComponent::defaultName<ShufflePlug>(), arg_( "direction" ) = Plug::In,
+				  arg_( "flags" ) = Plug::Default )
 			)
 		)
 		.def(
 			init<const std::string &, const std::string &, bool, bool, bool>(
-				(
-					arg_( "source" ),
-					arg_( "destination" ),
-					arg_( "deleteSource" ) = false,
-					arg_( "enabled" ) = true,
-					arg_( "replaceDestination" ) = true
-				)
+				( arg_( "source" ), arg_( "destination" ), arg_( "deleteSource" ) = false, arg_( "enabled" ) = true,
+				  arg_( "replaceDestination" ) = true )
 			)
 		);
 
@@ -121,15 +124,18 @@ void GafferModule::bindShuffles()
 	PlugClass<ShufflesPlug>()
 		.def(
 			init<const std::string &, Plug::Direction, unsigned>(
-				(
-					arg_( "name" ) = GraphComponent::defaultName<ShufflesPlug>(),
-					arg_( "direction" ) = Plug::In,
-					arg_( "flags" ) = Plug::Default
-				)
+				( arg_( "name" ) = GraphComponent::defaultName<ShufflesPlug>(), arg_( "direction" ) = Plug::In,
+				  arg_( "flags" ) = Plug::Default )
 			)
 		)
 		.def( "shuffle", &shuffleCompoundObject, ( arg( "sourceContainer" ), arg( "ignoreMissingSource" ) = true ) )
 		.def( "shuffle", &shuffleCompoundData, ( arg( "sourceContainer" ), arg( "ignoreMissingSource" ) = true ) )
-		.def( "shuffleWithExtraSources", &shuffleCompoundObjectWithExtraSources, ( arg( "sourceContainer" ), arg( "extraSources" ), arg( "ignoreMissingSource" ) = true ) )
-		.def( "shuffleWithExtraSources", &shuffleCompoundDataWithExtraSources, ( arg( "sourceContainer" ), arg( "extraSources" ), arg( "ignoreMissingSource" ) = true ) );
+		.def(
+			"shuffleWithExtraSources", &shuffleCompoundObjectWithExtraSources,
+			( arg( "sourceContainer" ), arg( "extraSources" ), arg( "ignoreMissingSource" ) = true )
+		)
+		.def(
+			"shuffleWithExtraSources", &shuffleCompoundDataWithExtraSources,
+			( arg( "sourceContainer" ), arg( "extraSources" ), arg( "ignoreMissingSource" ) = true )
+		);
 }

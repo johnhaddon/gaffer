@@ -115,8 +115,18 @@ const RtUString g_defaultShadowGroup( "defaultShadowGroup" );
 
 } // namespace
 
-Light::Light( const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, MaterialCache *materialCache, LightLinker *lightLinker, Session *session )
-	: m_materialCache( materialCache ), m_session( session ), m_lightLinker( lightLinker ), m_lightInstance( riley::LightInstanceId::InvalidId() ), m_preTransform( preTransform( attributes ) ), m_attributes( attributes ), m_geometryPrototype( geometryPrototype ), m_shadowSubset( g_defaultShadowGroup )
+Light::Light(
+	const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, MaterialCache *materialCache,
+	LightLinker *lightLinker, Session *session
+)
+	: m_materialCache( materialCache ),
+	  m_session( session ),
+	  m_lightLinker( lightLinker ),
+	  m_lightInstance( riley::LightInstanceId::InvalidId() ),
+	  m_preTransform( preTransform( attributes ) ),
+	  m_attributes( attributes ),
+	  m_geometryPrototype( geometryPrototype ),
+	  m_shadowSubset( g_defaultShadowGroup )
 
 {
 	m_allAttributes.SetString( Loader::strings().k_grouping_membership, g_defaultLightGroup );
@@ -133,7 +143,8 @@ Light::Light( const ConstGeometryPrototypePtr &geometryPrototype, const Attribut
 	const Material *material = attributes->lightMaterial();
 	m_lightInstance = m_session->createLightInstance(
 		m_geometryPrototype ? m_geometryPrototype->id() : riley::GeometryPrototypeId(),
-		material ? material->id() : riley::MaterialId(), m_lightShader->id(), { 0, nullptr }, IdentityTransform(), m_allAttributes
+		material ? material->id() : riley::MaterialId(), m_lightShader->id(), { 0, nullptr }, IdentityTransform(),
+		m_allAttributes
 	);
 }
 
@@ -153,7 +164,10 @@ Light::~Light()
 	}
 }
 
-void Light::transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times )
+void Light::transform(
+	const IECoreScenePreview::Renderer::TransformSamples &samples,
+	const IECoreScenePreview::Renderer::SampleTimes &times
+)
 {
 	if( m_lightInstance == riley::LightInstanceId::InvalidId() )
 	{
@@ -171,8 +185,7 @@ void Light::transform( const IECoreScenePreview::Renderer::TransformSamples &sam
 		m_lightInstance,
 		/* material = */ nullptr,
 		/* light shader = */ nullptr,
-		/* coordinateSystems = */ nullptr,
-		&animatedTransform,
+		/* coordinateSystems = */ nullptr, &animatedTransform,
 		/* attributes = */ nullptr
 	);
 
@@ -224,8 +237,7 @@ bool Light::attributes( const IECoreScenePreview::Renderer::AttributesInterface 
 		/* material = */ material ? &material->id() : nullptr,
 		/* light shader = */ &lightShader->id(),
 		/* coordinateSystems = */ nullptr,
-		/* xform = */ nullptr,
-		&m_allAttributes
+		/* xform = */ nullptr, &m_allAttributes
 	);
 
 	m_attributes = renderManAttributes;
@@ -289,8 +301,7 @@ void Light::link( const IECore::InternedString &type, const IECoreScenePreview::
 	m_session->modifyLightInstance(
 		m_lightInstance,
 		/* material = */ nullptr,
-		/* light shader = */ &lightShader->id(),
-		&list,
+		/* light shader = */ &lightShader->id(), &list,
 		/* transform = */ nullptr,
 		/* attributes = */ nullptr
 
@@ -299,13 +310,9 @@ void Light::link( const IECore::InternedString &type, const IECoreScenePreview::
 	m_lightShader = lightShader;
 }
 
-void Light::assignID( uint32_t id )
-{
-}
+void Light::assignID( uint32_t id ) {}
 
-void Light::assignInstanceID( uint32_t id )
-{
-}
+void Light::assignInstanceID( uint32_t id ) {}
 
 void Light::updateLightFilterShader( const IECoreScene::ConstShaderNetworkPtr &lightFilterShader )
 {
@@ -322,8 +329,7 @@ void Light::updateLightFilterShader( const IECoreScene::ConstShaderNetworkPtr &l
 		/* material = */ nullptr,
 		/* light shader = */ &lightShader->id(),
 		/* coordinateSystems = */ nullptr,
-		/* xform = */ nullptr,
-		nullptr
+		/* xform = */ nullptr, nullptr
 	);
 
 	m_lightShader = lightShader;
@@ -349,11 +355,9 @@ void Light::updateLinking( RtUString memberships, RtUString shadowSubset )
 
 	const riley::LightInstanceResult result = m_session->modifyLightInstance(
 		m_lightInstance,
-		/* material = */ nullptr,
-		lightShaderId,
+		/* material = */ nullptr, lightShaderId,
 		/* coordinateSystems = */ nullptr,
-		/* xform = */ nullptr,
-		&m_allAttributes
+		/* xform = */ nullptr, &m_allAttributes
 	);
 
 	if( lightShaderId )

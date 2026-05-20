@@ -99,7 +99,8 @@ ccl::Mesh *convertPrimary( const IECoreScene::MeshPrimitive *mesh, ccl::Scene *s
 	const V3fVectorData *p = mesh->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
 	if( !p )
 	{
-		msg( Msg::Warning, "IECoreCyles::MeshAlgo", "MeshPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
+		msg( Msg::Warning, "IECoreCyles::MeshAlgo",
+			 "MeshPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
 		return nullptr;
 	}
 
@@ -197,7 +198,8 @@ ccl::Mesh *convertPrimary( const IECoreScene::MeshPrimitive *mesh, ccl::Scene *s
 
 	// Convert primitive variables.
 
-	ccl::AttributeSet &attributes = cmesh->get_subdivision_type() != ccl::Mesh::SUBDIVISION_NONE ? cmesh->subd_attributes : cmesh->attributes;
+	ccl::AttributeSet &attributes =
+		cmesh->get_subdivision_type() != ccl::Mesh::SUBDIVISION_NONE ? cmesh->subd_attributes : cmesh->attributes;
 	for( const auto &[name, variable] : mesh->variables )
 	{
 		if( name == "P" )
@@ -237,11 +239,17 @@ ccl::Mesh *convertPrimary( const IECoreScene::MeshPrimitive *mesh, ccl::Scene *s
 	return cmesh;
 }
 
-ccl::Geometry *convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::MeshPrimitive *> &samples, const IECoreScenePreview::Renderer::SampleTimes &times, size_t primarySampleIndex, ccl::Scene *scene )
+ccl::Geometry *convert(
+	const IECoreScenePreview::Renderer::Samples<const IECoreScene::MeshPrimitive *> &samples,
+	const IECoreScenePreview::Renderer::SampleTimes &times, size_t primarySampleIndex, ccl::Scene *scene
+)
 {
 	if( ccl::Mesh *result = convertPrimary( samples[primarySampleIndex], scene ) )
 	{
-		GeometryAlgo::convertMotion( IECoreScenePreview::Renderer::staticSamplesCast<const IECoreScene::Primitive *>( samples ), primarySampleIndex, *result );
+		GeometryAlgo::convertMotion(
+			IECoreScenePreview::Renderer::staticSamplesCast<const IECoreScene::Primitive *>( samples ),
+			primarySampleIndex, *result
+		);
 		return result;
 	}
 

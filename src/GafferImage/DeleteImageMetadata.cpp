@@ -50,17 +50,14 @@ GAFFER_NODE_DEFINE_TYPE( DeleteImageMetadata );
 
 size_t DeleteImageMetadata::g_firstPlugIndex = 0;
 
-DeleteImageMetadata::DeleteImageMetadata( const std::string &name )
-	: MetadataProcessor( name )
+DeleteImageMetadata::DeleteImageMetadata( const std::string &name ) : MetadataProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "names" ) );
 	addChild( new BoolPlug( "invertNames" ) );
 }
 
-DeleteImageMetadata::~DeleteImageMetadata()
-{
-}
+DeleteImageMetadata::~DeleteImageMetadata() {}
 
 Gaffer::StringPlug *DeleteImageMetadata::namesPlug()
 {
@@ -98,7 +95,9 @@ void DeleteImageMetadata::hashProcessedMetadata( const Gaffer::Context *context,
 	invertNamesPlug()->hash( h );
 }
 
-IECore::ConstCompoundDataPtr DeleteImageMetadata::computeProcessedMetadata( const Gaffer::Context *context, const IECore::CompoundData *inputMetadata ) const
+IECore::ConstCompoundDataPtr DeleteImageMetadata::computeProcessedMetadata(
+	const Gaffer::Context *context, const IECore::CompoundData *inputMetadata
+) const
 {
 	if( inputMetadata->readable().empty() )
 	{
@@ -113,7 +112,9 @@ IECore::ConstCompoundDataPtr DeleteImageMetadata::computeProcessedMetadata( cons
 	}
 
 	IECore::CompoundDataPtr result = new IECore::CompoundData;
-	for( IECore::CompoundData::ValueType::const_iterator it = inputMetadata->readable().begin(), eIt = inputMetadata->readable().end(); it != eIt; ++it )
+	for( IECore::CompoundData::ValueType::const_iterator it = inputMetadata->readable().begin(),
+														 eIt = inputMetadata->readable().end();
+		 it != eIt; ++it )
 	{
 		if( StringAlgo::matchMultiple( it->first.c_str(), names.c_str() ) == invert )
 		{

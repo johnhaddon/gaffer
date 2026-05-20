@@ -47,15 +47,12 @@ using namespace boost;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( TextGadget );
 
-TextGadget::TextGadget( const std::string &text )
-	: Gadget( defaultName<TextGadget>() ), m_dimmed( false )
+TextGadget::TextGadget( const std::string &text ) : Gadget( defaultName<TextGadget>() ), m_dimmed( false )
 {
 	setText( text );
 }
 
-TextGadget::~TextGadget()
-{
-}
+TextGadget::~TextGadget() {}
 
 const std::string &TextGadget::getText() const
 {

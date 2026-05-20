@@ -51,15 +51,12 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( CompoundNodule );
 
 Nodule::NoduleTypeDescription<CompoundNodule> CompoundNodule::g_noduleTypeDescription;
 
-CompoundNodule::CompoundNodule( Gaffer::PlugPtr plug )
-	: Nodule( plug )
+CompoundNodule::CompoundNodule( Gaffer::PlugPtr plug ) : Nodule( plug )
 {
 	addChild( new NoduleLayout( plug ) );
 }
 
-CompoundNodule::~CompoundNodule()
-{
-}
+CompoundNodule::~CompoundNodule() {}
 
 bool CompoundNodule::acceptsChild( const Gaffer::GraphComponent *potentialChild ) const
 {
@@ -91,6 +88,4 @@ bool CompoundNodule::canCreateConnection( const Gaffer::Plug *endpoint ) const
 	return false;
 }
 
-void CompoundNodule::createConnection( Gaffer::Plug *endpoint )
-{
-}
+void CompoundNodule::createConnection( Gaffer::Plug *endpoint ) {}

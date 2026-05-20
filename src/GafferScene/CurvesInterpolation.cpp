@@ -48,20 +48,21 @@ GAFFER_NODE_DEFINE_TYPE( CurvesInterpolation );
 
 size_t CurvesInterpolation::g_firstPlugIndex = 0;
 
-CurvesInterpolation::CurvesInterpolation( const std::string &name )
-	: ObjectProcessor( name )
+CurvesInterpolation::CurvesInterpolation( const std::string &name ) : ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	using Basis = IECore::StandardCubicBasis;
-	addChild( new OptionalValuePlug( "basis", new IntPlug( "value", Plug::In, (int)Basis::Linear, (int)Basis::Linear, (int)Basis::CatmullRom ) ) );
+	addChild( new OptionalValuePlug(
+		"basis", new IntPlug( "value", Plug::In, (int)Basis::Linear, (int)Basis::Linear, (int)Basis::CatmullRom )
+	) );
 	using Wrap = IECoreScene::CurvesPrimitive::Wrap;
-	addChild( new OptionalValuePlug( "wrap", new IntPlug( "value", Plug::In, (int)Wrap::NonPeriodic, (int)Wrap::NonPeriodic, (int)Wrap::Pinned ) ) );
+	addChild( new OptionalValuePlug(
+		"wrap", new IntPlug( "value", Plug::In, (int)Wrap::NonPeriodic, (int)Wrap::NonPeriodic, (int)Wrap::Pinned )
+	) );
 	addChild( new BoolPlug( "expandPinned" ) );
 }
 
-CurvesInterpolation::~CurvesInterpolation()
-{
-}
+CurvesInterpolation::~CurvesInterpolation() {}
 
 Gaffer::OptionalValuePlug *CurvesInterpolation::basisPlug()
 {
@@ -95,13 +96,13 @@ const Gaffer::BoolPlug *CurvesInterpolation::expandPinnedPlug() const
 
 bool CurvesInterpolation::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return ObjectProcessor::affectsProcessedObject( input ) ||
-		input->parent() == basisPlug() ||
-		input->parent() == wrapPlug() ||
-		input == expandPinnedPlug();
+	return ObjectProcessor::affectsProcessedObject( input ) || input->parent() == basisPlug() ||
+		input->parent() == wrapPlug() || input == expandPinnedPlug();
 }
 
-void CurvesInterpolation::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CurvesInterpolation::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	const bool basisEnabled = basisPlug()->enabledPlug()->getValue();
 	const bool wrapEnabled = wrapPlug()->enabledPlug()->getValue();
@@ -128,7 +129,9 @@ void CurvesInterpolation::hashProcessedObject( const ScenePath &path, const Gaff
 	}
 }
 
-IECore::ConstObjectPtr CurvesInterpolation::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr CurvesInterpolation::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	const CurvesPrimitive *inputCurves = runTimeCast<const CurvesPrimitive>( inputObject );
 	if( !inputCurves )
@@ -146,9 +149,7 @@ IECore::ConstObjectPtr CurvesInterpolation::computeProcessedObject( const SceneP
 	CubicBasisf basis = inputCurves->basis();
 	if( basisEnabled )
 	{
-		basis = CubicBasisf(
-			(StandardCubicBasis)basisPlug()->valuePlug<IntPlug>()->getValue()
-		);
+		basis = CubicBasisf( (StandardCubicBasis)basisPlug()->valuePlug<IntPlug>()->getValue() );
 	}
 
 	CurvesPrimitive::Wrap wrap = inputCurves->wrap();
@@ -164,11 +165,8 @@ IECore::ConstObjectPtr CurvesInterpolation::computeProcessedObject( const SceneP
 
 	IECoreScene::CurvesPrimitivePtr result = inputCurves->copy();
 
-	if(
-		CurvesAlgo::isPinned( inputCurves ) &&
-		wrap == CurvesPrimitive::Wrap::NonPeriodic &&
-		expandPinnedPlug()->getValue()
-	)
+	if( CurvesAlgo::isPinned( inputCurves ) && wrap == CurvesPrimitive::Wrap::NonPeriodic &&
+		expandPinnedPlug()->getValue() )
 	{
 		CurvesAlgo::convertPinnedToNonPeriodic( result.get(), context->canceller() );
 	}

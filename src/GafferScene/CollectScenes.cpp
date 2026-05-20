@@ -68,7 +68,7 @@ namespace
 class RootTree : public IECore::Data
 {
 
-	public:
+public:
 
 	struct Location;
 	using LocationPtr = std::unique_ptr<Location>;
@@ -77,15 +77,9 @@ class RootTree : public IECore::Data
 	struct Location
 	{
 
-		Location( size_t depth )
-			: depth( depth ), childNames( new InternedStringVectorData() )
-		{
-		}
+		Location( size_t depth ) : depth( depth ), childNames( new InternedStringVectorData() ) {}
 
-		bool isRoot() const
-		{
-			return !rootVariableValue.empty();
-		}
+		bool isRoot() const { return !rootVariableValue.empty(); }
 
 		// The path to this location, but exactly as the user spelled
 		// it in `rootNamesPlug()` (may or may not have a leading or
@@ -118,7 +112,9 @@ class RootTree : public IECore::Data
 				{
 					if( location->isRoot() )
 					{
-						throw IECore::Exception( fmt::format( "\"{}\" contains nested roots", location->rootVariableValue ) );
+						throw IECore::Exception(
+							fmt::format( "\"{}\" contains nested roots", location->rootVariableValue )
+						);
 					}
 					inserted.first->second.reset( new Location( location->depth + 1 ) );
 					location->childNames->writable().push_back( name );
@@ -160,18 +156,12 @@ class RootTree : public IECore::Data
 		return result;
 	}
 
-	const vector<string> &roots() const
-	{
-		return m_roots;
-	}
+	const vector<string> &roots() const { return m_roots; }
 
 	using RootRange = tbb::blocked_range<vector<string>::const_iterator>;
-	RootRange rootRange() const
-	{
-		return RootRange( m_roots.begin(), m_roots.end() );
-	}
+	RootRange rootRange() const { return RootRange( m_roots.begin(), m_roots.end() ); }
 
-	private:
+private:
 
 	LocationPtr m_treeRoot;
 	vector<string> m_roots;
@@ -188,15 +178,17 @@ IE_CORE_DECLAREPTR( RootTree )
 class CollectScenes::SourceScope : public Context::EditableScope
 {
 
-	public:
+public:
 
 	SourceScope( const Context *context, const InternedString &rootVariable )
-		: EditableScope( context ), m_rootVariable( rootVariable )
+		: EditableScope( context ),
+		  m_rootVariable( rootVariable )
 	{
 	}
 
 	SourceScope( const ThreadState &threadState, const InternedString &rootVariable )
-		: EditableScope( threadState ), m_rootVariable( rootVariable )
+		: EditableScope( threadState ),
+		  m_rootVariable( rootVariable )
 	{
 	}
 
@@ -208,7 +200,7 @@ class CollectScenes::SourceScope : public Context::EditableScope
 		}
 	}
 
-	private:
+private:
 
 	InternedString m_rootVariable;
 };
@@ -216,9 +208,11 @@ class CollectScenes::SourceScope : public Context::EditableScope
 class CollectScenes::SourcePathScope : public SourceScope
 {
 
-	public:
+public:
 
-	SourcePathScope( const Context *context, const CollectScenes *collectScenes, const ScenePlug::ScenePath &downstreamPath )
+	SourcePathScope(
+		const Context *context, const CollectScenes *collectScenes, const ScenePlug::ScenePath &downstreamPath
+	)
 		: SourceScope( context, collectScenes->rootNameVariablePlug()->getValue() )
 	{
 		// Evaluate RootTree in global scope.
@@ -232,7 +226,9 @@ class CollectScenes::SourcePathScope : public SourceScope
 			// so that users can use the root name in expressions and
 			// substitutions.
 			ScenePlug::stringToPath( collectScenes->sourceRootPlug()->getValue(), m_upstreamPath );
-			m_upstreamPath.insert( m_upstreamPath.end(), downstreamPath.begin() + m_rootTreeLocation->depth, downstreamPath.end() );
+			m_upstreamPath.insert(
+				m_upstreamPath.end(), downstreamPath.begin() + m_rootTreeLocation->depth, downstreamPath.end()
+			);
 			set( ScenePlug::scenePathContextName, &m_upstreamPath );
 		}
 		else
@@ -241,19 +237,15 @@ class CollectScenes::SourcePathScope : public SourceScope
 		}
 	}
 
-	const RootTree::Location *rootTreeLocation() const
-	{
-		return m_rootTreeLocation;
-	}
+	const RootTree::Location *rootTreeLocation() const { return m_rootTreeLocation; }
 
 	static bool affectedBy( const CollectScenes *collectScenes, const Plug *input )
 	{
-		return input == collectScenes->rootNameVariablePlug() ||
-			input == collectScenes->rootTreePlug() ||
+		return input == collectScenes->rootNameVariablePlug() || input == collectScenes->rootTreePlug() ||
 			input == collectScenes->sourceRootPlug();
 	}
 
-	private:
+private:
 
 	ScenePlug::ScenePath m_upstreamPath;
 	ConstRootTreePtr m_rootTree;
@@ -268,8 +260,7 @@ GAFFER_NODE_DEFINE_TYPE( CollectScenes );
 
 size_t CollectScenes::g_firstPlugIndex = 0;
 
-CollectScenes::CollectScenes( const std::string &name )
-	: SceneProcessor( name )
+CollectScenes::CollectScenes( const std::string &name ) : SceneProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -282,9 +273,7 @@ CollectScenes::CollectScenes( const std::string &name )
 	outPlug()->childBoundsPlug()->setFlags( Plug::AcceptsDependencyCycles, true );
 }
 
-CollectScenes::~CollectScenes()
-{
-}
+CollectScenes::~CollectScenes() {}
 
 Gaffer::StringVectorDataPlug *CollectScenes::rootNamesPlug()
 {
@@ -345,11 +334,8 @@ void CollectScenes::affects( const Gaffer::Plug *input, AffectedPlugsContainer &
 		outputs.push_back( rootTreePlug() );
 	}
 
-	if(
-		input == outPlug()->childBoundsPlug() ||
-		SourcePathScope::affectedBy( this, input ) ||
-		input == inPlug()->boundPlug()
-	)
+	if( input == outPlug()->childBoundsPlug() || SourcePathScope::affectedBy( this, input ) ||
+		input == inPlug()->boundPlug() )
 	{
 		outputs.push_back( outPlug()->boundPlug() );
 	}
@@ -369,40 +355,25 @@ void CollectScenes::affects( const Gaffer::Plug *input, AffectedPlugsContainer &
 		outputs.push_back( outPlug()->objectPlug() );
 	}
 
-	if(
-		SourcePathScope::affectedBy( this, input ) ||
-		input == inPlug()->existsPlug() ||
-		input == inPlug()->childNamesPlug()
-	)
+	if( SourcePathScope::affectedBy( this, input ) || input == inPlug()->existsPlug() ||
+		input == inPlug()->childNamesPlug() )
 	{
 		outputs.push_back( outPlug()->childNamesPlug() );
 	}
 
-	if(
-		input == rootTreePlug() ||
-		input == rootNameVariablePlug() ||
-		input == inPlug()->globalsPlug() ||
-		input == mergeGlobalsPlug()
-	)
+	if( input == rootTreePlug() || input == rootNameVariablePlug() || input == inPlug()->globalsPlug() ||
+		input == mergeGlobalsPlug() )
 	{
 		outputs.push_back( outPlug()->globalsPlug() );
 	}
 
-	if(
-		input == rootTreePlug() ||
-		input == inPlug()->setNamesPlug() ||
-		input == rootNameVariablePlug()
-	)
+	if( input == rootTreePlug() || input == inPlug()->setNamesPlug() || input == rootNameVariablePlug() )
 	{
 		outputs.push_back( outPlug()->setNamesPlug() );
 	}
 
-	if(
-		input == rootTreePlug() ||
-		input == inPlug()->setPlug() ||
-		input == sourceRootPlug() ||
-		input == rootNameVariablePlug()
-	)
+	if( input == rootTreePlug() || input == inPlug()->setPlug() || input == sourceRootPlug() ||
+		input == rootNameVariablePlug() )
 	{
 		outputs.push_back( outPlug()->setPlug() );
 	}
@@ -423,9 +394,7 @@ void CollectScenes::compute( Gaffer::ValuePlug *output, const Gaffer::Context *c
 	if( output == rootTreePlug() )
 	{
 		ConstStringVectorDataPtr roots = rootNamesPlug()->getValue();
-		static_cast<ObjectPlug *>( output )->setValue(
-			new RootTree( roots.get(), context->canceller() )
-		);
+		static_cast<ObjectPlug *>( output )->setValue( new RootTree( roots.get(), context->canceller() ) );
 		return;
 	}
 
@@ -450,7 +419,9 @@ Gaffer::ValuePlug::CachePolicy CollectScenes::computeCachePolicy( const Gaffer::
 	return SceneProcessor::computeCachePolicy( output );
 }
 
-void CollectScenes::hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void CollectScenes::hashBound(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	SourcePathScope sourcePathScope( context, this, path );
 	if( !sourcePathScope.rootTreeLocation()->isRoot() )
@@ -463,7 +434,9 @@ void CollectScenes::hashBound( const ScenePath &path, const Gaffer::Context *con
 	}
 }
 
-Imath::Box3f CollectScenes::computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::Box3f CollectScenes::computeBound(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	SourcePathScope sourcePathScope( context, this, path );
 	if( !sourcePathScope.rootTreeLocation()->isRoot() )
@@ -476,7 +449,9 @@ Imath::Box3f CollectScenes::computeBound( const ScenePath &path, const Gaffer::C
 	}
 }
 
-void CollectScenes::hashTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void CollectScenes::hashTransform(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	SourcePathScope sourcePathScope( context, this, path );
 	if( !sourcePathScope.rootTreeLocation()->isRoot() )
@@ -489,7 +464,9 @@ void CollectScenes::hashTransform( const ScenePath &path, const Gaffer::Context 
 	}
 }
 
-Imath::M44f CollectScenes::computeTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::M44f CollectScenes::computeTransform(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	SourcePathScope sourcePathScope( context, this, path );
 	if( !sourcePathScope.rootTreeLocation()->isRoot() )
@@ -502,7 +479,9 @@ Imath::M44f CollectScenes::computeTransform( const ScenePath &path, const Gaffer
 	}
 }
 
-void CollectScenes::hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void CollectScenes::hashAttributes(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	SourcePathScope sourcePathScope( context, this, path );
 	if( !sourcePathScope.rootTreeLocation()->isRoot() )
@@ -515,7 +494,9 @@ void CollectScenes::hashAttributes( const ScenePath &path, const Gaffer::Context
 	}
 }
 
-IECore::ConstCompoundObjectPtr CollectScenes::computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstCompoundObjectPtr CollectScenes::computeAttributes(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	SourcePathScope sourcePathScope( context, this, path );
 	if( !sourcePathScope.rootTreeLocation()->isRoot() )
@@ -528,7 +509,9 @@ IECore::ConstCompoundObjectPtr CollectScenes::computeAttributes( const ScenePath
 	}
 }
 
-void CollectScenes::hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void CollectScenes::hashObject(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	SourcePathScope sourcePathScope( context, this, path );
 	if( !sourcePathScope.rootTreeLocation()->isRoot() )
@@ -541,7 +524,9 @@ void CollectScenes::hashObject( const ScenePath &path, const Gaffer::Context *co
 	}
 }
 
-IECore::ConstObjectPtr CollectScenes::computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstObjectPtr CollectScenes::computeObject(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	SourcePathScope sourcePathScope( context, this, path );
 	if( !sourcePathScope.rootTreeLocation()->isRoot() )
@@ -554,7 +539,9 @@ IECore::ConstObjectPtr CollectScenes::computeObject( const ScenePath &path, cons
 	}
 }
 
-void CollectScenes::hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void CollectScenes::hashChildNames(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	SourcePathScope sourcePathScope( context, this, path );
 	if( !sourcePathScope.rootTreeLocation()->isRoot() )
@@ -575,7 +562,9 @@ void CollectScenes::hashChildNames( const ScenePath &path, const Gaffer::Context
 	}
 }
 
-IECore::ConstInternedStringVectorDataPtr CollectScenes::computeChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstInternedStringVectorDataPtr CollectScenes::computeChildNames(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	SourcePathScope sourcePathScope( context, this, path );
 	if( !sourcePathScope.rootTreeLocation()->isRoot() )
@@ -622,7 +611,9 @@ void CollectScenes::hashGlobals( const Gaffer::Context *context, const ScenePlug
 	}
 }
 
-IECore::ConstCompoundObjectPtr CollectScenes::computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstCompoundObjectPtr CollectScenes::computeGlobals(
+	const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ConstRootTreePtr rootTree = boost::static_pointer_cast<const RootTree>( rootTreePlug()->getValue() );
 	if( !rootTree->roots().size() )
@@ -668,7 +659,9 @@ void CollectScenes::hashSetNames( const Gaffer::Context *context, const ScenePlu
 	}
 }
 
-IECore::ConstInternedStringVectorDataPtr CollectScenes::computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstInternedStringVectorDataPtr CollectScenes::computeSetNames(
+	const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ConstRootTreePtr rootTree = boost::static_pointer_cast<const RootTree>( rootTreePlug()->getValue() );
 
@@ -694,7 +687,10 @@ IECore::ConstInternedStringVectorDataPtr CollectScenes::computeSetNames( const G
 	return setNamesData;
 }
 
-void CollectScenes::hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void CollectScenes::hashSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent,
+	IECore::MurmurHash &h
+) const
 {
 	SceneProcessor::hashSet( setName, context, parent, h );
 
@@ -745,7 +741,9 @@ void CollectScenes::hashSet( const IECore::InternedString &setName, const Gaffer
 	h.append( setsHash );
 }
 
-IECore::ConstPathMatcherDataPtr CollectScenes::computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstPathMatcherDataPtr CollectScenes::computeSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ConstRootTreePtr rootTree;
 	{

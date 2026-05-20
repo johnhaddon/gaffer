@@ -39,11 +39,6 @@ using namespace GafferImage;
 
 GAFFER_NODE_DEFINE_TYPE( Dilate );
 
-Dilate::Dilate( const std::string &name )
-	: RankFilter( name, DilateRank )
-{
-}
+Dilate::Dilate( const std::string &name ) : RankFilter( name, DilateRank ) {}
 
-Dilate::~Dilate()
-{
-}
+Dilate::~Dilate() {}

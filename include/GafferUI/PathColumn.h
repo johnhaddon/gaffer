@@ -62,7 +62,7 @@ class PathListingWidget;
 class GAFFERUI_API PathColumn : public IECore::RefCounted, public Gaffer::Signals::Trackable
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( PathColumn )
 
@@ -90,13 +90,18 @@ class GAFFERUI_API PathColumn : public IECore::RefCounted, public Gaffer::Signal
 	struct CellData
 	{
 		CellData(
-			const IECore::ConstDataPtr &value = nullptr,
-			const IECore::ConstDataPtr &icon = nullptr,
-			const IECore::ConstDataPtr &background = nullptr,
-			const IECore::ConstDataPtr &toolTip = nullptr,
-			const IECore::ConstDataPtr &sortValue = nullptr,
-			const IECore::ConstDataPtr &foreground = nullptr
-		) : value( value ), icon( icon ), background( background ), toolTip( toolTip ), sortValue( sortValue ), foreground( foreground ) {}
+			const IECore::ConstDataPtr &value = nullptr, const IECore::ConstDataPtr &icon = nullptr,
+			const IECore::ConstDataPtr &background = nullptr, const IECore::ConstDataPtr &toolTip = nullptr,
+			const IECore::ConstDataPtr &sortValue = nullptr, const IECore::ConstDataPtr &foreground = nullptr
+		)
+			: value( value ),
+			  icon( icon ),
+			  background( background ),
+			  toolTip( toolTip ),
+			  sortValue( sortValue ),
+			  foreground( foreground )
+		{
+		}
 
 		CellData( const CellData &other ) = default;
 		CellData &operator = ( const CellData &other ) = default;
@@ -137,7 +142,7 @@ class GAFFERUI_API PathColumn : public IECore::RefCounted, public Gaffer::Signal
 		/// - Color4fData
 		IECore::ConstDataPtr foreground;
 
-		private:
+	private:
 
 		IECore::ConstDataPtr m_reserved1;
 		IECore::ConstDataPtr m_reserved2;
@@ -161,20 +166,26 @@ class GAFFERUI_API PathColumn : public IECore::RefCounted, public Gaffer::Signal
 	/// column. Subclasses may connect to them to implement custom
 	/// behaviours.
 
-	using ButtonSignal = Gaffer::Signals::Signal<bool( Gaffer::Path &path, PathListingWidget &widget, const ButtonEvent &event ), EventSignalCombiner<bool>>;
+	using ButtonSignal = Gaffer::Signals::Signal<
+		bool( Gaffer::Path &path, PathListingWidget &widget, const ButtonEvent &event ), EventSignalCombiner<bool>>;
 	ButtonSignal &buttonPressSignal();
 	ButtonSignal &buttonReleaseSignal();
 	ButtonSignal &buttonDoubleClickSignal();
 
-	using ContextMenuSignal = Gaffer::Signals::Signal<void( PathColumn &column, PathListingWidget &widget, MenuDefinition &menuDefinition ), Gaffer::Signals::CatchingCombiner<void>>;
+	using ContextMenuSignal = Gaffer::Signals::Signal<
+		void( PathColumn &column, PathListingWidget &widget, MenuDefinition &menuDefinition ),
+		Gaffer::Signals::CatchingCombiner<void>>;
 	/// To retain `widget` for use in MenuItem commands, use `PathListingWidgetPtr( &widget )`.
 	ContextMenuSignal &contextMenuSignal();
 
-	using KeySignal = Gaffer::Signals::Signal<bool( PathColumn &column, PathListingWidget &widget, const KeyEvent &key ), EventSignalCombiner<bool>>;
+	using KeySignal = Gaffer::Signals::Signal<
+		bool( PathColumn &column, PathListingWidget &widget, const KeyEvent &key ), EventSignalCombiner<bool>>;
 	KeySignal &keyPressSignal();
 	KeySignal &keyReleaseSignal();
 
-	using DragDropSignal = Gaffer::Signals::Signal<bool( PathColumn &column, Gaffer::Path &path, PathListingWidget &widget, const DragDropEvent &event ), EventSignalCombiner<bool>>;
+	using DragDropSignal = Gaffer::Signals::Signal<
+		bool( PathColumn &column, Gaffer::Path &path, PathListingWidget &widget, const DragDropEvent &event ),
+		EventSignalCombiner<bool>>;
 	DragDropSignal &dragEnterSignal();
 	DragDropSignal &dragMoveSignal();
 	DragDropSignal &dragLeaveSignal();
@@ -188,7 +199,7 @@ class GAFFERUI_API PathColumn : public IECore::RefCounted, public Gaffer::Signal
 	/// they are created or where they are hosted.
 	static PathColumnSignal &instanceCreatedSignal();
 
-	private:
+private:
 
 	PathColumnSignal m_changedSignal;
 
@@ -212,19 +223,23 @@ IE_CORE_DECLAREPTR( PathColumn )
 class GAFFERUI_API StandardPathColumn : public PathColumn
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( StandardPathColumn )
 
-	StandardPathColumn( const std::string &label, IECore::InternedString property, PathColumn::SizeMode sizeMode = Default );
-	StandardPathColumn( const CellData &headerData, IECore::InternedString property, PathColumn::SizeMode sizeMode = Default );
+	StandardPathColumn(
+		const std::string &label, IECore::InternedString property, PathColumn::SizeMode sizeMode = Default
+	);
+	StandardPathColumn(
+		const CellData &headerData, IECore::InternedString property, PathColumn::SizeMode sizeMode = Default
+	);
 
 	IECore::InternedString property() const;
 
 	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override;
 	CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override;
 
-	private:
+private:
 
 	const CellData m_headerData;
 	IECore::InternedString m_property;
@@ -236,7 +251,7 @@ IE_CORE_DECLAREPTR( StandardPathColumn )
 class GAFFERUI_API IconPathColumn : public PathColumn
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( IconPathColumn )
 
@@ -246,8 +261,14 @@ class GAFFERUI_API IconPathColumn : public PathColumn
 	/// - StringData
 	/// - IntData, UInt44Data
 	/// - BoolData
-	IconPathColumn( const std::string &label, const std::string &prefix, IECore::InternedString property, PathColumn::SizeMode sizeMode = Default );
-	IconPathColumn( const CellData &headerData, const std::string &prefix, IECore::InternedString property, PathColumn::SizeMode sizeMode = Default );
+	IconPathColumn(
+		const std::string &label, const std::string &prefix, IECore::InternedString property,
+		PathColumn::SizeMode sizeMode = Default
+	);
+	IconPathColumn(
+		const CellData &headerData, const std::string &prefix, IECore::InternedString property,
+		PathColumn::SizeMode sizeMode = Default
+	);
 
 	const std::string &prefix() const;
 	IECore::InternedString property() const;
@@ -255,7 +276,7 @@ class GAFFERUI_API IconPathColumn : public PathColumn
 	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override;
 	CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override;
 
-	private:
+private:
 
 	const CellData m_headerData;
 	std::string m_prefix;
@@ -269,7 +290,7 @@ IE_CORE_DECLAREPTR( IconPathColumn )
 class GAFFERUI_API FileIconPathColumn : public PathColumn
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( FileIconPathColumn )
 
@@ -278,7 +299,7 @@ class GAFFERUI_API FileIconPathColumn : public PathColumn
 	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override;
 	CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override;
 
-	private:
+private:
 
 	const IECore::StringDataPtr m_label;
 };
@@ -291,7 +312,7 @@ IE_CORE_DECLAREPTR( FileIconPathColumn )
 class PathListingWidget : public IECore::RefCounted
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( PathListingWidget )
 
@@ -313,7 +334,7 @@ IE_CORE_DECLAREPTR( PathListingWidget )
 class MenuDefinition
 {
 
-	public:
+public:
 
 	struct MenuItem
 	{

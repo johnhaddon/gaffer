@@ -53,7 +53,9 @@ std::vector<riley::ShadingNode> convert( const IECoreScene::ShaderNetwork *netwo
 /// to the rules documented for the `combineMode` parameter. The Riley API only
 /// allows a single filter per light, so it becomes the responsibility of every
 /// host to do this combining.
-IECoreScene::ConstShaderNetworkPtr combineLightFilters( const std::vector<const IECoreScene::ShaderNetwork *> networks );
+IECoreScene::ConstShaderNetworkPtr combineLightFilters(
+	const std::vector<const IECoreScene::ShaderNetwork *> networks
+);
 
 /// Converts any UsdPreviewSurface and UsdLux shaders into native RenderMan shaders. This conversion
 /// is performed automatically by `convert()` and is mainly just exposed for the unit tests.
@@ -83,7 +85,10 @@ using ParameterIsConnectedFunction = std::function<bool( IECore::InternedString 
 /// `valueFunction` and `isConnectedFunction` abstract away access to the
 /// ShaderNetwork that would typically back these queries - primarily to
 /// simplify testing.
-IECORERENDERMAN_API VStructAction evaluateVStructConditional( const std::string &expression, const ParameterValueFunction &valueFunction, const ParameterIsConnectedFunction &isConnectedFunction );
+IECORERENDERMAN_API VStructAction evaluateVStructConditional(
+	const std::string &expression, const ParameterValueFunction &valueFunction,
+	const ParameterIsConnectedFunction &isConnectedFunction
+);
 
 /// Resolves connections and values for vstruct members. Exposed primarily for testing,
 /// as `convert()` resolves vstructs internally anyway.

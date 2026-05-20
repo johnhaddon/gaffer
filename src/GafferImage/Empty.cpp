@@ -54,16 +54,13 @@ GAFFER_NODE_DEFINE_TYPE( Empty );
 
 size_t Empty::g_firstPlugIndex = 0;
 
-Empty::Empty( const std::string &name )
-	: ImageNode( name )
+Empty::Empty( const std::string &name ) : ImageNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new FormatPlug( "format" ) );
 }
 
-Empty::~Empty()
-{
-}
+Empty::~Empty() {}
 
 GafferImage::FormatPlug *Empty::formatPlug()
 {
@@ -90,17 +87,23 @@ void Empty::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs 
 	}
 }
 
-void Empty::hashViewNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Empty::hashViewNames(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageNode::hashViewNames( output, context, h );
 }
 
-IECore::ConstStringVectorDataPtr Empty::computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr Empty::computeViewNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	return ImagePlug::defaultViewNames();
 }
 
-void Empty::hashFormat( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Empty::hashFormat(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageNode::hashFormat( output, context, h );
 	h.append( formatPlug()->hash() );
@@ -111,7 +114,9 @@ GafferImage::Format Empty::computeFormat( const Gaffer::Context *context, const 
 	return formatPlug()->getValue();
 }
 
-void Empty::hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Empty::hashDataWindow(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageNode::hashDataWindow( output, context, h );
 	h.append( formatPlug()->hash() );
@@ -132,32 +137,45 @@ bool Empty::computeDeep( const Gaffer::Context *context, const ImagePlug *parent
 	return true;
 }
 
-void Empty::hashSampleOffsets( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Empty::hashSampleOffsets(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = ImagePlug::emptyTileSampleOffsets()->Object::hash();
 }
 
-IECore::ConstIntVectorDataPtr Empty::computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstIntVectorDataPtr Empty::computeSampleOffsets(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	return ImagePlug::emptyTileSampleOffsets();
 }
 
-void Empty::hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Empty::hashChannelNames(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageNode::hashChannelNames( output, context, h );
 }
 
-IECore::ConstStringVectorDataPtr Empty::computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr Empty::computeChannelNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	return new IECore::StringVectorData();
 }
 
-void Empty::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Empty::hashChannelData(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = ImagePlug::emptyTile()->Object::hash();
 }
 
-IECore::ConstFloatVectorDataPtr Empty::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr Empty::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	return ImagePlug::emptyTile();
 }

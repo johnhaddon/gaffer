@@ -57,8 +57,7 @@ GAFFER_NODE_DEFINE_TYPE( UDIMQuery );
 
 size_t UDIMQuery::g_firstPlugIndex = 0;
 
-UDIMQuery::UDIMQuery( const std::string &name )
-	: ComputeNode( name )
+UDIMQuery::UDIMQuery( const std::string &name ) : ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "in", Plug::In ) );
@@ -68,9 +67,7 @@ UDIMQuery::UDIMQuery( const std::string &name )
 	addChild( new CompoundObjectPlug( "out", Plug::Out, new IECore::CompoundObject(), Plug::Flags::Default ) );
 }
 
-UDIMQuery::~UDIMQuery()
-{
-}
+UDIMQuery::~UDIMQuery() {}
 
 GafferScene::ScenePlug *UDIMQuery::inPlug()
 {
@@ -126,14 +123,8 @@ void UDIMQuery::affects( const Plug *input, AffectedPlugsContainer &outputs ) co
 {
 	ComputeNode::affects( input, outputs );
 
-	if(
-		input == uvSetPlug() ||
-		input == attributesPlug() ||
-		input == filterPlug() ||
-		input == inPlug()->objectPlug() ||
-		input == inPlug()->attributesPlug() ||
-		input == inPlug()->childNamesPlug()
-	)
+	if( input == uvSetPlug() || input == attributesPlug() || input == filterPlug() || input == inPlug()->objectPlug() ||
+		input == inPlug()->attributesPlug() || input == inPlug()->childNamesPlug() )
 	{
 		outputs.push_back( outPlug() );
 	}
@@ -197,7 +188,8 @@ struct BakeInfoData
 struct InfoDataAccumulator
 {
 	InfoDataAccumulator( std::string uvSet, std::string attributeNames )
-		: m_uvSet( uvSet ), m_attributeNames( attributeNames )
+		: m_uvSet( uvSet ),
+		  m_attributeNames( attributeNames )
 	{
 	}
 
@@ -214,12 +206,16 @@ struct InfoDataAccumulator
 
 		// First check if there are face-varying UVs
 		bool faceVarying = true;
-		auto uvs = meshPrimitive->variableIndexedView<IECore::V2fVectorData>( m_uvSet, IECoreScene::PrimitiveVariable::FaceVarying );
+		auto uvs = meshPrimitive->variableIndexedView<IECore::V2fVectorData>(
+			m_uvSet, IECoreScene::PrimitiveVariable::FaceVarying
+		);
 		if( !uvs )
 		{
 			// Next check for vertex UVs
 			faceVarying = false;
-			uvs = meshPrimitive->variableIndexedView<IECore::V2fVectorData>( m_uvSet, IECoreScene::PrimitiveVariable::Vertex );
+			uvs = meshPrimitive->variableIndexedView<IECore::V2fVectorData>(
+				m_uvSet, IECoreScene::PrimitiveVariable::Vertex
+			);
 		}
 
 		if( !uvs )
@@ -230,13 +226,15 @@ struct InfoDataAccumulator
 
 		std::string pathString;
 		ScenePlug::pathToString( path, pathString );
-		unsigned int targetSize = meshPrimitive->variableSize( faceVarying ? IECoreScene::PrimitiveVariable::FaceVarying : IECoreScene::PrimitiveVariable::Vertex );
+		unsigned int targetSize = meshPrimitive->variableSize(
+			faceVarying ? IECoreScene::PrimitiveVariable::FaceVarying : IECoreScene::PrimitiveVariable::Vertex
+		);
 		if( uvs->size() != targetSize )
 		{
 			throw IECore::Exception(
 				fmt::format(
-					"Cannot query UDIMs. Bad uvs at location \"{}\". Required count {} but found {}.",
-					pathString, targetSize, uvs->size()
+					"Cannot query UDIMs. Bad uvs at location \"{}\". Required count {} but found {}.", pathString,
+					targetSize, uvs->size()
 				)
 			);
 		}

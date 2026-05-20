@@ -77,16 +77,13 @@ GAFFER_NODE_DEFINE_TYPE( FrameMask )
 
 size_t FrameMask::g_firstPlugIndex;
 
-FrameMask::FrameMask( const std::string &name )
-	: TaskNode( name )
+FrameMask::FrameMask( const std::string &name ) : TaskNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "mask" ) );
 }
 
-FrameMask::~FrameMask()
-{
-}
+FrameMask::~FrameMask() {}
 
 Gaffer::StringPlug *FrameMask::maskPlug()
 {
@@ -112,6 +109,4 @@ IECore::MurmurHash FrameMask::hash( const Context *context ) const
 	return MurmurHash();
 }
 
-void FrameMask::execute() const
-{
-}
+void FrameMask::execute() const {}

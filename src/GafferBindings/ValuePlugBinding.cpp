@@ -66,7 +66,9 @@ namespace
 
 const IECore::InternedString g_omitParentNodePlugValues( "valuePlugSerialiser:omitParentNodePlugValues" );
 
-std::string valueSerialisationWalk( const Gaffer::ValuePlug *plug, const std::string &identifier, Serialisation &serialisation, bool &canCondense )
+std::string valueSerialisationWalk(
+	const Gaffer::ValuePlug *plug, const std::string &identifier, Serialisation &serialisation, bool &canCondense
+)
 {
 	// There's nothing to do if the plug isn't serialisable.
 	if( !plug->getFlags( Plug::Serialisable ) )
@@ -83,7 +85,8 @@ std::string valueSerialisationWalk( const Gaffer::ValuePlug *plug, const std::st
 	for( ValuePlug::Iterator childIt( plug ); !childIt.done(); ++childIt )
 	{
 		const std::string childIdentifier = serialisation.childIdentifier( identifier, childIt.base() );
-		childSerialisations += valueSerialisationWalk( childIt->get(), childIdentifier, serialisation, canCondenseChildren );
+		childSerialisations +=
+			valueSerialisationWalk( childIt->get(), childIdentifier, serialisation, canCondenseChildren );
 	}
 
 	// The child results alone are sufficient for a complete
@@ -159,7 +162,9 @@ std::string compoundObjectRepr( const IECore::CompoundObject &o, Serialisation *
 
 } // namespace
 
-std::string ValuePlugSerialiser::repr( const Gaffer::ValuePlug *plug, const std::string &extraArguments, Serialisation *serialisation )
+std::string ValuePlugSerialiser::repr(
+	const Gaffer::ValuePlug *plug, const std::string &extraArguments, Serialisation *serialisation
+)
 {
 	std::string result = Serialisation::classPath( plug ) + "( \"" + plug->getName().string() + "\", ";
 
@@ -221,12 +226,16 @@ std::string ValuePlugSerialiser::repr( const Gaffer::ValuePlug *plug, const std:
 	return result;
 }
 
-std::string ValuePlugSerialiser::constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const
+std::string ValuePlugSerialiser::constructor(
+	const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation
+) const
 {
 	return repr( static_cast<const ValuePlug *>( graphComponent ), "", &serialisation );
 }
 
-std::string ValuePlugSerialiser::postHierarchy( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const
+std::string ValuePlugSerialiser::postHierarchy(
+	const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+) const
 {
 	std::string result = PlugSerialiser::postHierarchy( graphComponent, identifier, serialisation );
 
@@ -235,7 +244,8 @@ std::string ValuePlugSerialiser::postHierarchy( const Gaffer::GraphComponent *gr
 	{
 		// Top level ValuePlug. We are responsible for emitting the
 		// appropriate `setValue()` calls for this and all descendants.
-		if( plug->node() != serialisation.parent() || !Context::current()->get<bool>( g_omitParentNodePlugValues, false ) )
+		if( plug->node() != serialisation.parent() ||
+			!Context::current()->get<bool>( g_omitParentNodePlugValues, false ) )
 		{
 			bool unused;
 			result = valueSerialisationWalk( plug, identifier, serialisation, unused ) + result;
@@ -284,9 +294,7 @@ std::string ValuePlugSerialiser::valueRepr( const boost::python::object &value, 
 	{
 		// Fall back to base64 encoding
 		IECore::ConstObjectPtr object = objectExtractor();
-		return "Gaffer.Serialisation.objectFromBase64( \"" +
-			Serialisation::objectToBase64( object.get() ) +
-			"\" )";
+		return "Gaffer.Serialisation.objectFromBase64( \"" + Serialisation::objectToBase64( object.get() ) + "\" )";
 	}
 
 	return "";

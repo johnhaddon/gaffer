@@ -43,14 +43,9 @@ using namespace Gaffer;
 
 GAFFER_NODE_DEFINE_TYPE( ComputeNode );
 
-ComputeNode::ComputeNode( const std::string &name )
-	: DependencyNode( name )
-{
-}
+ComputeNode::ComputeNode( const std::string &name ) : DependencyNode( name ) {}
 
-ComputeNode::~ComputeNode()
-{
-}
+ComputeNode::~ComputeNode() {}
 
 void ComputeNode::hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const
 {
@@ -74,9 +69,7 @@ void ComputeNode::hash( const ValuePlug *output, const Context *context, IECore:
 	}
 }
 
-void ComputeNode::compute( ValuePlug *output, const Context *context ) const
-{
-}
+void ComputeNode::compute( ValuePlug *output, const Context *context ) const {}
 
 ValuePlug::CachePolicy ComputeNode::hashCachePolicy( const ValuePlug *output ) const
 {

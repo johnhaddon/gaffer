@@ -62,10 +62,7 @@ namespace
 
 struct NoduleCreator
 {
-	NoduleCreator( object fn )
-		: m_fn( fn )
-	{
-	}
+	NoduleCreator( object fn ) : m_fn( fn ) {}
 
 	NodulePtr operator () ( Gaffer::PlugPtr plug )
 	{
@@ -74,7 +71,7 @@ struct NoduleCreator
 		return result;
 	}
 
-	private:
+private:
 
 	object m_fn;
 };
@@ -115,13 +112,15 @@ void GafferUIModule::bindNodule()
 
 	ConnectionCreatorClass<Nodule>()
 		.def(
-			"plug",
-			( Gaffer::Plug * (Nodule::*)() ) & Nodule::plug,
+			"plug", ( Gaffer::Plug * (Nodule::*)() ) & Nodule::plug,
 			return_value_policy<IECorePython::CastToIntrusivePtr>()
 		)
 		.def( "create", &Nodule::create )
 		.staticmethod( "create" )
-		.def( "registerNodule", &registerNodule, ( arg( "noduleTypeName" ), arg( "creator" ), arg( "plugType" ) = IECore::InvalidTypeId ) )
+		.def(
+			"registerNodule", &registerNodule,
+			( arg( "noduleTypeName" ), arg( "creator" ), arg( "plugType" ) = IECore::InvalidTypeId )
+		)
 		.staticmethod( "registerNodule" );
 
 	ConnectionCreatorClass<StandardNodule>()
@@ -129,16 +128,20 @@ void GafferUIModule::bindNodule()
 		.def( "setLabelVisible", &StandardNodule::setLabelVisible )
 		.def( "getLabelVisible", &StandardNodule::getLabelVisible );
 
-	ConnectionCreatorClass<CompoundNodule>()
-		.def( init<Gaffer::PlugPtr>( ( arg( "plug" ) ) ) );
+	ConnectionCreatorClass<CompoundNodule>().def( init<Gaffer::PlugPtr>( ( arg( "plug" ) ) ) );
 
-	ConnectionCreatorClass<CompoundNumericNodule>()
-		.def( init<Gaffer::PlugPtr>( ( arg( "plug" ) ) ) );
+	ConnectionCreatorClass<CompoundNumericNodule>().def( init<Gaffer::PlugPtr>( ( arg( "plug" ) ) ) );
 
 	GadgetClass<NoduleLayout>()
 		.def( init<GraphComponentPtr, IECore::InternedString>() )
-		.def( "nodule", ( Nodule * (NoduleLayout::*)(const Plug *)) & NoduleLayout::nodule, return_value_policy<CastToIntrusivePtr>() )
-		.def( "customGadget", ( Gadget * (NoduleLayout::*)(const std::string &)) & NoduleLayout::customGadget, return_value_policy<CastToIntrusivePtr>() )
+		.def(
+			"nodule", ( Nodule * (NoduleLayout::*)(const Plug *)) & NoduleLayout::nodule,
+			return_value_policy<CastToIntrusivePtr>()
+		)
+		.def(
+			"customGadget", ( Gadget * (NoduleLayout::*)(const std::string &)) & NoduleLayout::customGadget,
+			return_value_policy<CastToIntrusivePtr>()
+		)
 		.def( "registerCustomGadget", &registerCustomGadget )
 		.staticmethod( "registerCustomGadget" );
 }

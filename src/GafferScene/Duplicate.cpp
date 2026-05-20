@@ -53,7 +53,7 @@ using namespace GafferScene;
 class Duplicate::DuplicatesData : public IECore::Data
 {
 
-	public:
+public:
 
 	DuplicatesData( const Duplicate *node, const Context *context )
 	{
@@ -114,9 +114,7 @@ class Duplicate::DuplicatesData : public IECore::Data
 
 	static bool affectedBy( const Duplicate *node, const Plug *input )
 	{
-		return input == node->copiesPlug() ||
-			input == node->namePlug() ||
-			node->transformPlug()->isAncestorOf( input );
+		return input == node->copiesPlug() || input == node->namePlug() || node->transformPlug()->isAncestorOf( input );
 	}
 
 	static void hash( const Duplicate *node, const Context *context, IECore::MurmurHash &h )
@@ -135,17 +133,11 @@ class Duplicate::DuplicatesData : public IECore::Data
 		node->transformPlug()->hash( h );
 	}
 
-	ConstInternedStringVectorDataPtr names() const
-	{
-		return m_names;
-	}
+	ConstInternedStringVectorDataPtr names() const { return m_names; }
 
-	const Imath::M44f &transform( const IECore::InternedString &name ) const
-	{
-		return m_transforms.at( name );
-	}
+	const Imath::M44f &transform( const IECore::InternedString &name ) const { return m_transforms.at( name ); }
 
-	private:
+private:
 
 	InternedStringVectorDataPtr m_names;
 	unordered_map<InternedString, Imath::M44f> m_transforms;
@@ -155,8 +147,7 @@ GAFFER_NODE_DEFINE_TYPE( Duplicate );
 
 size_t Duplicate::g_firstPlugIndex = 0;
 
-Duplicate::Duplicate( const std::string &name )
-	: BranchCreator( name )
+Duplicate::Duplicate( const std::string &name ) : BranchCreator( name )
 {
 
 	storeIndexOfNextChild( g_firstPlugIndex );
@@ -179,9 +170,7 @@ Duplicate::Duplicate( const std::string &name )
 	outPlug()->setNamesPlug()->setInput( inPlug()->setNamesPlug() );
 }
 
-Duplicate::~Duplicate()
-{
-}
+Duplicate::~Duplicate() {}
 
 Gaffer::StringPlug *Duplicate::targetPlug()
 {
@@ -269,14 +258,18 @@ bool Duplicate::affectsBranchBound( const Gaffer::Plug *input ) const
 	return input == inPlug()->boundPlug();
 }
 
-void Duplicate::hashBranchBound( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Duplicate::hashBranchBound(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ScenePath source;
 	branchSource( sourcePath, branchPath, source );
 	h = inPlug()->boundHash( source );
 }
 
-Imath::Box3f Duplicate::computeBranchBound( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+Imath::Box3f Duplicate::computeBranchBound(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	ScenePath source;
 	branchSource( sourcePath, branchPath, source );
@@ -285,11 +278,12 @@ Imath::Box3f Duplicate::computeBranchBound( const ScenePath &sourcePath, const S
 
 bool Duplicate::affectsBranchTransform( const Gaffer::Plug *input ) const
 {
-	return input == inPlug()->transformPlug() ||
-		input == duplicatesPlug();
+	return input == inPlug()->transformPlug() || input == duplicatesPlug();
 }
 
-void Duplicate::hashBranchTransform( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Duplicate::hashBranchTransform(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	if( branchPath.size() == 1 )
 	{
@@ -306,7 +300,9 @@ void Duplicate::hashBranchTransform( const ScenePath &sourcePath, const ScenePat
 	}
 }
 
-Imath::M44f Duplicate::computeBranchTransform( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+Imath::M44f Duplicate::computeBranchTransform(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	if( branchPath.size() == 1 )
 	{
@@ -327,14 +323,18 @@ bool Duplicate::affectsBranchAttributes( const Gaffer::Plug *input ) const
 	return input == inPlug()->attributesPlug();
 }
 
-void Duplicate::hashBranchAttributes( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Duplicate::hashBranchAttributes(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ScenePath source;
 	branchSource( sourcePath, branchPath, source );
 	h = inPlug()->attributesHash( source );
 }
 
-IECore::ConstCompoundObjectPtr Duplicate::computeBranchAttributes( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+IECore::ConstCompoundObjectPtr Duplicate::computeBranchAttributes(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	ScenePath source;
 	branchSource( sourcePath, branchPath, source );
@@ -346,14 +346,18 @@ bool Duplicate::affectsBranchObject( const Gaffer::Plug *input ) const
 	return input == inPlug()->objectPlug();
 }
 
-void Duplicate::hashBranchObject( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Duplicate::hashBranchObject(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ScenePath source;
 	branchSource( sourcePath, branchPath, source );
 	h = inPlug()->objectHash( source );
 }
 
-IECore::ConstObjectPtr Duplicate::computeBranchObject( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+IECore::ConstObjectPtr Duplicate::computeBranchObject(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	ScenePath source;
 	branchSource( sourcePath, branchPath, source );
@@ -365,7 +369,9 @@ bool Duplicate::affectsBranchChildNames( const Gaffer::Plug *input ) const
 	return input == inPlug()->childNamesPlug() || input == duplicatesPlug();
 }
 
-void Duplicate::hashBranchChildNames( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Duplicate::hashBranchChildNames(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	if( branchPath.size() == 0 )
 	{
@@ -381,7 +387,9 @@ void Duplicate::hashBranchChildNames( const ScenePath &sourcePath, const ScenePa
 	}
 }
 
-IECore::ConstInternedStringVectorDataPtr Duplicate::computeBranchChildNames( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+IECore::ConstInternedStringVectorDataPtr Duplicate::computeBranchChildNames(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	if( branchPath.size() == 0 )
 	{
@@ -402,13 +410,17 @@ bool Duplicate::affectsBranchSetNames( const Gaffer::Plug *input ) const
 	return input == inPlug()->setNamesPlug();
 }
 
-void Duplicate::hashBranchSetNames( const ScenePath &sourcePath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Duplicate::hashBranchSetNames(
+	const ScenePath &sourcePath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	assert( sourcePath.size() == 0 ); // Expectation driven by `constantBranchSetNames() == true`
 	h = inPlug()->setNamesPlug()->hash();
 }
 
-IECore::ConstInternedStringVectorDataPtr Duplicate::computeBranchSetNames( const ScenePath &sourcePath, const Gaffer::Context *context ) const
+IECore::ConstInternedStringVectorDataPtr Duplicate::computeBranchSetNames(
+	const ScenePath &sourcePath, const Gaffer::Context *context
+) const
 {
 	assert( sourcePath.size() == 0 ); // Expectation driven by `constantBranchSetNames() == true`
 	return inPlug()->setNamesPlug()->getValue();
@@ -416,11 +428,13 @@ IECore::ConstInternedStringVectorDataPtr Duplicate::computeBranchSetNames( const
 
 bool Duplicate::affectsBranchSet( const Gaffer::Plug *input ) const
 {
-	return input == inPlug()->setPlug() ||
-		input == duplicatesPlug();
+	return input == inPlug()->setPlug() || input == duplicatesPlug();
 }
 
-void Duplicate::hashBranchSet( const ScenePath &sourcePath, const IECore::InternedString &setName, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Duplicate::hashBranchSet(
+	const ScenePath &sourcePath, const IECore::InternedString &setName, const Gaffer::Context *context,
+	IECore::MurmurHash &h
+) const
 {
 	h.append( inPlug()->setHash( setName ) );
 	h.append( sourcePath.data(), sourcePath.size() );
@@ -428,7 +442,9 @@ void Duplicate::hashBranchSet( const ScenePath &sourcePath, const IECore::Intern
 	duplicatesPlug()->hash( h );
 }
 
-IECore::ConstPathMatcherDataPtr Duplicate::computeBranchSet( const ScenePath &sourcePath, const IECore::InternedString &setName, const Gaffer::Context *context ) const
+IECore::ConstPathMatcherDataPtr Duplicate::computeBranchSet(
+	const ScenePath &sourcePath, const IECore::InternedString &setName, const Gaffer::Context *context
+) const
 {
 	ConstPathMatcherDataPtr inputSetData = inPlug()->set( setName );
 	const PathMatcher &inputSet = inputSetData->readable();

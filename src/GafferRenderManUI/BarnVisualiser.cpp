@@ -77,16 +77,19 @@ void addWireframeCurveState( IECoreGL::Group *group )
 class BarnVisualiser final : public LightFilterVisualiser
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( BarnVisualiser )
 
 	BarnVisualiser();
 	~BarnVisualiser() override;
 
-	Visualisations visualise( const InternedString &attributeName, const ShaderNetwork *filterShaderNetwork, const ShaderNetwork *lightShaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
+	Visualisations visualise(
+		const InternedString &attributeName, const ShaderNetwork *filterShaderNetwork,
+		const ShaderNetwork *lightShaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state
+	) const override;
 
-	protected:
+protected:
 
 	static LightFilterVisualiser::LightFilterVisualiserDescription<BarnVisualiser> g_visualiserDescription;
 };
@@ -94,17 +97,18 @@ class BarnVisualiser final : public LightFilterVisualiser
 IE_CORE_DECLAREPTR( BarnVisualiser )
 
 // Register the new visualiser
-LightFilterVisualiser::LightFilterVisualiserDescription<BarnVisualiser> BarnVisualiser::g_visualiserDescription( "ri:lightFilter", "PxrBarnLightFilter" );
+LightFilterVisualiser::LightFilterVisualiserDescription<BarnVisualiser> BarnVisualiser::g_visualiserDescription(
+	"ri:lightFilter", "PxrBarnLightFilter"
+);
 
-BarnVisualiser::BarnVisualiser()
-{
-}
+BarnVisualiser::BarnVisualiser() {}
 
-BarnVisualiser::~BarnVisualiser()
-{
-}
+BarnVisualiser::~BarnVisualiser() {}
 
-Visualisations BarnVisualiser::visualise( const InternedString &attributeName, const ShaderNetwork *filterShaderNetwork, const ShaderNetwork *lightShaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const
+Visualisations BarnVisualiser::visualise(
+	const InternedString &attributeName, const ShaderNetwork *filterShaderNetwork,
+	const ShaderNetwork *lightShaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state
+) const
 {
 	const CompoundData *barnParameters = filterShaderNetwork->outputShader()->parametersData();
 
@@ -113,31 +117,30 @@ Visualisations BarnVisualiser::visualise( const InternedString &attributeName, c
 	addWireframeCurveState( result.get() );
 
 	CompoundObjectPtr parameters = new CompoundObject();
-	result->getState()->add(
-		new IECoreGL::ShaderStateComponent( ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "", IECoreGL::Shader::constantFragmentSource(), parameters )
-	);
+	result->getState()->add( new IECoreGL::ShaderStateComponent(
+		ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "",
+		IECoreGL::Shader::constantFragmentSource(), parameters
+	) );
 
-	const V2f innerSize = V2f( parameterOrDefault( barnParameters, "width", 1.f ), parameterOrDefault( barnParameters, "height", 1.f ) );
+	const V2f innerSize =
+		V2f( parameterOrDefault( barnParameters, "width", 1.f ), parameterOrDefault( barnParameters, "height", 1.f ) );
 	const float radius = parameterOrDefault( barnParameters, "radius", 0.f );
 	const V2f innerScale(
 		parameterOrDefault( barnParameters, "scaleWidth", 1.f ),
 		parameterOrDefault( barnParameters, "scaleHeight", 1.f )
 	);
 	const V4f innerOffset(
-		parameterOrDefault( barnParameters, "top", 0.f ),
-		parameterOrDefault( barnParameters, "left", 0.f ),
-		parameterOrDefault( barnParameters, "bottom", 0.f ),
-		parameterOrDefault( barnParameters, "right", 0.f )
+		parameterOrDefault( barnParameters, "top", 0.f ), parameterOrDefault( barnParameters, "left", 0.f ),
+		parameterOrDefault( barnParameters, "bottom", 0.f ), parameterOrDefault( barnParameters, "right", 0.f )
 	);
 	const V4f falloffScale(
-		parameterOrDefault( barnParameters, "topEdge", 1.f ),
-		parameterOrDefault( barnParameters, "leftEdge", 1.f ),
-		parameterOrDefault( barnParameters, "bottomEdge", 1.f ),
-		parameterOrDefault( barnParameters, "rightEdge", 1.f )
+		parameterOrDefault( barnParameters, "topEdge", 1.f ), parameterOrDefault( barnParameters, "leftEdge", 1.f ),
+		parameterOrDefault( barnParameters, "bottomEdge", 1.f ), parameterOrDefault( barnParameters, "rightEdge", 1.f )
 	);
 	const float edge = parameterOrDefault( barnParameters, "edge", 0.f );
 
-	IECoreGL::GroupPtr rects = GafferRenderManUI::lightFilterRectangles( innerSize, radius, innerScale, innerOffset, falloffScale, edge );
+	IECoreGL::GroupPtr rects =
+		GafferRenderManUI::lightFilterRectangles( innerSize, radius, innerScale, innerOffset, falloffScale, edge );
 	result->addChild( rects );
 
 	return { Visualisation::createGeometry( result ) };

@@ -50,16 +50,13 @@ GAFFER_NODE_DEFINE_TYPE( MeshToPoints );
 
 size_t MeshToPoints::g_firstPlugIndex = 0;
 
-MeshToPoints::MeshToPoints( const std::string &name )
-	: Deformer( name )
+MeshToPoints::MeshToPoints( const std::string &name ) : Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "type", Plug::In, "particle" ) );
 }
 
-MeshToPoints::~MeshToPoints()
-{
-}
+MeshToPoints::~MeshToPoints() {}
 
 Gaffer::StringPlug *MeshToPoints::typePlug()
 {
@@ -73,17 +70,20 @@ const Gaffer::StringPlug *MeshToPoints::typePlug() const
 
 bool MeshToPoints::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return Deformer::affectsProcessedObject( input ) ||
-		input == typePlug();
+	return Deformer::affectsProcessedObject( input ) || input == typePlug();
 }
 
-void MeshToPoints::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void MeshToPoints::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	Deformer::hashProcessedObject( path, context, h );
 	typePlug()->hash( h );
 }
 
-IECore::ConstObjectPtr MeshToPoints::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr MeshToPoints::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	const MeshPrimitive *mesh = runTimeCast<const MeshPrimitive>( inputObject );
 	if( !mesh )
@@ -92,7 +92,8 @@ IECore::ConstObjectPtr MeshToPoints::computeProcessedObject( const ScenePath &pa
 	}
 
 	IECoreScene::PointsPrimitivePtr result = new PointsPrimitive( mesh->variableSize( PrimitiveVariable::Vertex ) );
-	for( PrimitiveVariableMap::const_iterator it = mesh->variables.begin(), eIt = mesh->variables.end(); it != eIt; ++it )
+	for( PrimitiveVariableMap::const_iterator it = mesh->variables.begin(), eIt = mesh->variables.end(); it != eIt;
+		 ++it )
 	{
 		PrimitiveVariable::Interpolation interpolation = it->second.interpolation;
 		switch( interpolation )
@@ -112,7 +113,8 @@ IECore::ConstObjectPtr MeshToPoints::computeProcessedObject( const ScenePath &pa
 		result->variables[it->first] = PrimitiveVariable( interpolation, it->second.data );
 	}
 
-	result->variables["type"] = PrimitiveVariable( PrimitiveVariable::Constant, new StringData( typePlug()->getValue() ) );
+	result->variables["type"] =
+		PrimitiveVariable( PrimitiveVariable::Constant, new StringData( typePlug()->getValue() ) );
 
 	return result;
 }

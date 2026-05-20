@@ -63,9 +63,7 @@ using NamedOutput = std::pair<std::string, OutputPtr>;
 using OutputMap = multi_index::multi_index_container<
 	NamedOutput,
 	multi_index::indexed_by<
-		multi_index::ordered_unique<
-			multi_index::key<&NamedOutput::first>>,
-		multi_index::sequenced<>>>;
+		multi_index::ordered_unique<multi_index::key<&NamedOutput::first>>, multi_index::sequenced<>>>;
 
 OutputMap &outputMap()
 {
@@ -83,16 +81,13 @@ GAFFER_NODE_DEFINE_TYPE( Outputs );
 
 size_t Outputs::g_firstPlugIndex = 0;
 
-Outputs::Outputs( const std::string &name )
-	: GlobalsProcessor( name )
+Outputs::Outputs( const std::string &name ) : GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ValuePlug( "outputs" ) );
 }
 
-Outputs::~Outputs()
-{
-}
+Outputs::~Outputs() {}
 
 Gaffer::ValuePlug *Outputs::outputsPlug()
 {
@@ -169,7 +164,9 @@ void Outputs::hashProcessedGlobals( const Gaffer::Context *context, IECore::Murm
 	outputsPlug()->hash( h );
 }
 
-IECore::ConstCompoundObjectPtr Outputs::computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const
+IECore::ConstCompoundObjectPtr Outputs::computeProcessedGlobals(
+	const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals
+) const
 {
 	const ValuePlug *dsp = outputsPlug();
 	if( !dsp->children().size() )

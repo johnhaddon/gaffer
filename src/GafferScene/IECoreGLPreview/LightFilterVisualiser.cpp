@@ -74,20 +74,21 @@ LightFilterVisualisers &lightFilterVisualisers()
 //////////////////////////////////////////////////////////////////////////
 
 
-LightFilterVisualiser::LightFilterVisualiser()
-{
-}
+LightFilterVisualiser::LightFilterVisualiser() {}
 
-LightFilterVisualiser::~LightFilterVisualiser()
-{
-}
+LightFilterVisualiser::~LightFilterVisualiser() {}
 
-void LightFilterVisualiser::registerLightFilterVisualiser( const IECore::InternedString &attributeName, const IECore::InternedString &shaderName, ConstLightFilterVisualiserPtr visualiser )
+void LightFilterVisualiser::registerLightFilterVisualiser(
+	const IECore::InternedString &attributeName, const IECore::InternedString &shaderName,
+	ConstLightFilterVisualiserPtr visualiser
+)
 {
 	lightFilterVisualisers()[AttributeAndShaderNames( attributeName, shaderName )] = visualiser;
 }
 
-Visualisations LightFilterVisualiser::allVisualisations( const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state )
+Visualisations LightFilterVisualiser::allVisualisations(
+	const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state
+)
 {
 	Visualisations resultVis;
 
@@ -109,7 +110,8 @@ Visualisations LightFilterVisualiser::allVisualisations( const IECore::CompoundO
 			continue;
 		}
 
-		const IECoreScene::ShaderNetwork *filterShaderNetwork = IECore::runTimeCast<const IECoreScene::ShaderNetwork>( it.second.get() );
+		const IECoreScene::ShaderNetwork *filterShaderNetwork =
+			IECore::runTimeCast<const IECoreScene::ShaderNetwork>( it.second.get() );
 		if( !filterShaderNetwork )
 		{
 			continue;
@@ -130,7 +132,8 @@ Visualisations LightFilterVisualiser::allVisualisations( const IECore::CompoundO
 
 		std::vector<std::string> tokens;
 		boost::split( tokens, attributeName, boost::is_any_of( ":" ) );
-		const IECoreScene::ShaderNetwork *lightShaderNetwork = attributes->member<IECoreScene::ShaderNetwork>( tokens.front() + ":light" );
+		const IECoreScene::ShaderNetwork *lightShaderNetwork =
+			attributes->member<IECoreScene::ShaderNetwork>( tokens.front() + ":light" );
 
 		// If the light is a USD light, the renderer-specific `lightShaderNetwork` won't be valid
 		if( !lightShaderNetwork )
@@ -166,7 +169,8 @@ Visualisations LightFilterVisualiser::allVisualisations( const IECore::CompoundO
 		}
 
 		IECoreGL::ConstStatePtr curState = nullptr;
-		const Visualisations curVis = visualiser->visualise( attributeName, filterShaderNetwork, lightShaderNetwork, attributes, curState );
+		const Visualisations curVis =
+			visualiser->visualise( attributeName, filterShaderNetwork, lightShaderNetwork, attributes, curState );
 
 		if( !curVis.empty() )
 		{

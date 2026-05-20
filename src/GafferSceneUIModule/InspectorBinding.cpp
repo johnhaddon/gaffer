@@ -115,11 +115,13 @@ struct DirtiedSlotCaller
 	}
 };
 
-BasicInspectorPtr constructBasicInspector( const Gaffer::ValuePlugPtr &plug, const Gaffer::PlugPtr &editScope, object valueFunction, const std::string &type, const std::string &name )
+BasicInspectorPtr constructBasicInspector(
+	const Gaffer::ValuePlugPtr &plug, const Gaffer::PlugPtr &editScope, object valueFunction, const std::string &type,
+	const std::string &name
+)
 {
 	auto valueFunctionPtr = std::shared_ptr<boost::python::object>(
-		new boost::python::object( valueFunction ),
-		[]( boost::python::object *o ) {
+		new boost::python::object( valueFunction ), []( boost::python::object *o ) {
 			// Custom deleter. We must hold the GIL when deleting Python
 			// objects.
 			IECorePython::ScopedGILLock gilLock;
@@ -163,25 +165,31 @@ void GafferSceneUIModule::bindInspector()
 								   .def( "dirtiedSignal", &Inspector::dirtiedSignal, return_internal_reference<1>() )
 								   .def( "historyPath", &Inspector::historyPath );
 
-		SignalClass<Inspector::InspectorSignal, DefaultSignalCaller<Inspector::InspectorSignal>, DirtiedSlotCaller>( "ChangedSignal" );
+		SignalClass<Inspector::InspectorSignal, DefaultSignalCaller<Inspector::InspectorSignal>, DirtiedSlotCaller>(
+			"ChangedSignal"
+		);
 
 		PathClass<Inspector::HistoryPath>();
 
-		scope resultScope = RefCountedClass<Inspector::Result, IECore::RefCounted>( "Result" )
-								.def( "value", &valueWrapper, ( arg( "useFallbacks" ) = true ) )
-								.def( "source", &Inspector::Result::source, return_value_policy<CastToIntrusivePtr>() )
-								.def( "editScope", &Inspector::Result::editScope, return_value_policy<CastToIntrusivePtr>() )
-								.def( "sourceType", &Inspector::Result::sourceType )
-								.def( "fallbackDescription", &Inspector::Result::fallbackDescription, return_value_policy<copy_const_reference>() )
-								.def( "editable", &Inspector::Result::editable )
-								.def( "nonEditableReason", &Inspector::Result::nonEditableReason, ( arg( "value" ) = object() ) )
-								.def( "acquireEdit", &acquireEditWrapper, ( arg( "createIfNecessary" ) = true ) )
-								.def( "editWarning", &Inspector::Result::editWarning )
-								.def( "canDisableEdit", &Inspector::Result::canDisableEdit )
-								.def( "nonDisableableReason", &Inspector::Result::nonDisableableReason )
-								.def( "disableEdit", &disableEditWrapper )
-								.def( "canEdit", &canEditWrapper )
-								.def( "edit", &editWrapper, ( arg( "value" ) ) );
+		scope resultScope =
+			RefCountedClass<Inspector::Result, IECore::RefCounted>( "Result" )
+				.def( "value", &valueWrapper, ( arg( "useFallbacks" ) = true ) )
+				.def( "source", &Inspector::Result::source, return_value_policy<CastToIntrusivePtr>() )
+				.def( "editScope", &Inspector::Result::editScope, return_value_policy<CastToIntrusivePtr>() )
+				.def( "sourceType", &Inspector::Result::sourceType )
+				.def(
+					"fallbackDescription", &Inspector::Result::fallbackDescription,
+					return_value_policy<copy_const_reference>()
+				)
+				.def( "editable", &Inspector::Result::editable )
+				.def( "nonEditableReason", &Inspector::Result::nonEditableReason, ( arg( "value" ) = object() ) )
+				.def( "acquireEdit", &acquireEditWrapper, ( arg( "createIfNecessary" ) = true ) )
+				.def( "editWarning", &Inspector::Result::editWarning )
+				.def( "canDisableEdit", &Inspector::Result::canDisableEdit )
+				.def( "nonDisableableReason", &Inspector::Result::nonDisableableReason )
+				.def( "disableEdit", &disableEditWrapper )
+				.def( "canEdit", &canEditWrapper )
+				.def( "edit", &editWrapper, ( arg( "value" ) ) );
 
 		enum_<Inspector::Result::SourceType>( "SourceType" )
 			.value( "Upstream", Inspector::Result::SourceType::Upstream )
@@ -200,7 +208,9 @@ void GafferSceneUIModule::bindInspector()
 
 	RunTimeTypedClass<ParameterInspector>( "ParameterInspector" )
 		.def(
-			init<const ScenePlugPtr &, const PlugPtr &, IECore::InternedString, const ShaderNetwork::Parameter &, const bool>(
+			init<
+				const ScenePlugPtr &, const PlugPtr &, IECore::InternedString, const ShaderNetwork::Parameter &,
+				const bool>(
 				( arg( "scene" ), arg( "attribute" ), arg( "parameter" ), arg( "inheritAttributes" ) = false )
 			)
 		)
@@ -223,12 +233,20 @@ void GafferSceneUIModule::bindInspector()
 		);
 
 	RunTimeTypedClass<BasicInspector>( "BasicInspector" )
-		.def( "__init__", make_constructor( constructBasicInspector, default_call_policies(), ( arg( "plug" ), arg( "editScope" ), arg( "valueFunction" ), arg( "type" ) = "", arg( "name" ) = "" ) ) );
+		.def(
+			"__init__",
+			make_constructor(
+				constructBasicInspector, default_call_policies(),
+				( arg( "plug" ), arg( "editScope" ), arg( "valueFunction" ), arg( "type" ) = "", arg( "name" ) = "" )
+			)
+		);
 
 	{
 		scope scope = RunTimeTypedClass<TransformInspector>( "TransformInspector" )
 						  .def(
-							  init<const ScenePlugPtr &, const PlugPtr &, TransformInspector::Space, TransformInspector::Component>(
+							  init<
+								  const ScenePlugPtr &, const PlugPtr &, TransformInspector::Space,
+								  TransformInspector::Component>(
 								  ( arg( "scene" ), arg( "editScope" ), arg( "space" ), arg( "component" ) )
 							  )
 						  );
@@ -246,12 +264,15 @@ void GafferSceneUIModule::bindInspector()
 	}
 
 	{
-		scope scope = RunTimeTypedClass<PrimitiveVariableInspector>( "PrimitiveVariableInspector" )
-						  .def(
-							  init<const ScenePlugPtr &, const PlugPtr &, IECore::InternedString, PrimitiveVariableInspector::Property, const std::string &>(
-								  ( arg( "scene" ), arg( "editScope" ), arg( "attribute" ), arg( "property" ), arg( "name" ) = "" )
-							  )
-						  );
+		scope scope =
+			RunTimeTypedClass<PrimitiveVariableInspector>( "PrimitiveVariableInspector" )
+				.def(
+					init<
+						const ScenePlugPtr &, const PlugPtr &, IECore::InternedString,
+						PrimitiveVariableInspector::Property, const std::string &>( (
+						arg( "scene" ), arg( "editScope" ), arg( "attribute" ), arg( "property" ), arg( "name" ) = ""
+					) )
+				);
 
 		enum_<PrimitiveVariableInspector::Property>( "Property" )
 			.value( "Interpolation", PrimitiveVariableInspector::Property::Interpolation )

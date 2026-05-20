@@ -52,7 +52,11 @@ namespace
 
 const RtUString g_implOpenVDB( "blobbydso:impl_openvdb" );
 
-RtUString convertVDBObject( const IECoreScenePreview::Renderer::Samples<const IECoreVDB::VDBObject *> &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext )
+RtUString convertVDBObject(
+	const IECoreScenePreview::Renderer::Samples<const IECoreVDB::VDBObject *> &samples,
+	const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars,
+	const std::string &messageContext
+)
 {
 	const IECoreVDB::VDBObject *vdbObject = samples[0];
 
@@ -93,7 +97,8 @@ RtUString convertVDBObject( const IECoreScenePreview::Renderer::Samples<const IE
 				// get converted to fog automatically. But if the grid doesn't have
 				// class metadata, we must apply a suffix to reassure RenderMan that
 				// it can treat it as a fog volume directly.
-				const string classSuffix = grid->getGridClass() == openvdb::GridClass::GRID_LEVEL_SET ? ":levelset" : ":fogvolume";
+				const string classSuffix =
+					grid->getGridClass() == openvdb::GridClass::GRID_LEVEL_SET ? ":levelset" : ":fogvolume";
 				densityName = gridName + classSuffix;
 			}
 			primVars.SetFloatDetail( RtUString( gridName.c_str() ), nullptr, RtDetailType::k_varying );
@@ -112,10 +117,7 @@ RtUString convertVDBObject( const IECoreScenePreview::Renderer::Samples<const IE
 		{
 			IECore::msg(
 				IECore::Msg::Warning, messageContext,
-				fmt::format(
-					"Ignoring grid \"{}\" with unsupported type \"{}\"",
-					gridName, grid->valueType()
-				)
+				fmt::format( "Ignoring grid \"{}\" with unsupported type \"{}\"", gridName, grid->valueType() )
 			);
 		}
 	}
@@ -127,9 +129,7 @@ RtUString convertVDBObject( const IECoreScenePreview::Renderer::Samples<const IE
 	}
 
 	std::array<RtUString, 4> stringArgs = {
-		RtUString( fileName.c_str() ),
-		RtUString( densityName.c_str() ),
-		RtUString( velocityName.c_str() ),
+		RtUString( fileName.c_str() ), RtUString( densityName.c_str() ), RtUString( velocityName.c_str() ),
 		/// \todo It is possible to send additional parameters via a little JSON
 		/// dictionary - `filterWidth`, `velocityScale`, `densityMult` and `densityRolloff`.
 		/// Where would we get those from? Attributes perhaps?

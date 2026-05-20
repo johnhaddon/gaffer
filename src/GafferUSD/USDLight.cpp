@@ -46,11 +46,6 @@ using namespace GafferUSD;
 
 GAFFER_NODE_DEFINE_TYPE( USDLight );
 
-USDLight::USDLight( const std::string &name )
-	: GafferScene::Light( name, new USDShader() )
-{
-}
+USDLight::USDLight( const std::string &name ) : GafferScene::Light( name, new USDShader() ) {}
 
-USDLight::~USDLight()
-{
-}
+USDLight::~USDLight() {}

@@ -76,13 +76,15 @@ namespace
 
 struct SurfaceTextureCacheGetterKey
 {
-	SurfaceTextureCacheGetterKey()
-		: shaderNetwork( nullptr ), resolution( Imath::V2i( 512 ) )
-	{
-	}
+	SurfaceTextureCacheGetterKey() : shaderNetwork( nullptr ), resolution( Imath::V2i( 512 ) ) {}
 
-	SurfaceTextureCacheGetterKey( const IECoreScene::ShaderNetwork::Parameter &out, const IECoreScene::ShaderNetwork *shaderNetwork, const Imath::V2i &resolution )
-		: output( out ), shaderNetwork( shaderNetwork ), resolution( resolution )
+	SurfaceTextureCacheGetterKey(
+		const IECoreScene::ShaderNetwork::Parameter &out, const IECoreScene::ShaderNetwork *shaderNetwork,
+		const Imath::V2i &resolution
+	)
+		: output( out ),
+		  shaderNetwork( shaderNetwork ),
+		  resolution( resolution )
 	{
 		shaderNetwork->hash( hash );
 		hash.append( resolution.x );
@@ -91,10 +93,7 @@ struct SurfaceTextureCacheGetterKey
 		hash.append( output.name );
 	}
 
-	operator const IECore::MurmurHash &() const
-	{
-		return hash;
-	}
+	operator const IECore::MurmurHash &() const { return hash; }
 
 	IECoreScene::ShaderNetwork::Parameter output;
 	const IECoreScene::ShaderNetwork *shaderNetwork;
@@ -102,7 +101,9 @@ struct SurfaceTextureCacheGetterKey
 	MurmurHash hash;
 };
 
-CompoundDataPtr surfaceTextureGetter( const SurfaceTextureCacheGetterKey &key, size_t &cost, const IECore::Canceller *canceller )
+CompoundDataPtr surfaceTextureGetter(
+	const SurfaceTextureCacheGetterKey &key, size_t &cost, const IECore::Canceller *canceller
+)
 {
 	cost = key.resolution.x * key.resolution.y * 3 * 4; // 3 x 32bit float channels;
 
@@ -113,7 +114,8 @@ CompoundDataPtr surfaceTextureGetter( const SurfaceTextureCacheGetterKey &key, s
 	return nullptr;
 }
 
-using SurfaceTextureCache = IECorePreview::LRUCache<IECore::MurmurHash, CompoundDataPtr, IECorePreview::LRUCachePolicy::Parallel, SurfaceTextureCacheGetterKey>;
+using SurfaceTextureCache = IECorePreview::LRUCache<
+	IECore::MurmurHash, CompoundDataPtr, IECorePreview::LRUCachePolicy::Parallel, SurfaceTextureCacheGetterKey>;
 // Cache cost is in bytes
 SurfaceTextureCache g_surfaceTextureCache( surfaceTextureGetter, 1024 * 1024 * 64 );
 
@@ -121,7 +123,10 @@ SurfaceTextureCache g_surfaceTextureCache( surfaceTextureGetter, 1024 * 1024 * 6
 // Surface texture
 //////////////////////////////////////////////////////////////////////////
 
-IECore::DataPtr surfaceTexture( const InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECore::CompoundObject *attributes, int maxTextureResolution )
+IECore::DataPtr surfaceTexture(
+	const InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork,
+	const IECore::CompoundObject *attributes, int maxTextureResolution
+)
 {
 	if( attributeName != "ai:light" && attributeName != "light" )
 	{
@@ -151,7 +156,8 @@ IECore::DataPtr surfaceTexture( const InternedString &attributeName, const IECor
 	}
 
 	// skydome and quad_light may specify a resolution, so use that.
-	const IntData *textureResolutionData = shaderNetwork->outputShader()->parametersData()->member<IntData>( "resolution" );
+	const IntData *textureResolutionData =
+		shaderNetwork->outputShader()->parametersData()->member<IntData>( "resolution" );
 	int textureResolution = textureResolutionData ? textureResolutionData->readable() : 512;
 	Imath::V2i resolution( std::min( textureResolution, maxTextureResolution ) );
 
@@ -164,7 +170,8 @@ IECore::DataPtr surfaceTexture( const InternedString &attributeName, const IECor
 	CompoundDataPtr surfaceTexture = nullptr;
 	try
 	{
-		surfaceTexture = g_surfaceTextureCache.get( SurfaceTextureCacheGetterKey( colorInput, shaderNetwork, resolution ) );
+		surfaceTexture =
+			g_surfaceTextureCache.get( SurfaceTextureCacheGetterKey( colorInput, shaderNetwork, resolution ) );
 	}
 	catch( const Exception &e )
 	{
@@ -232,16 +239,19 @@ IECoreGL::RenderablePtr iesVisualisation( const std::string &filename )
 class ArnoldLightVisualiser : public GafferSceneUI::StandardLightVisualiser
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( ArnoldLightVisualiser )
 
 	ArnoldLightVisualiser();
 	~ArnoldLightVisualiser() override;
 
-	Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
+	Visualisations visualise(
+		const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork,
+		const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state
+	) const override;
 
-	private:
+private:
 
 	static LightVisualiser::LightVisualiserDescription<ArnoldLightVisualiser> g_description;
 };
@@ -249,18 +259,18 @@ class ArnoldLightVisualiser : public GafferSceneUI::StandardLightVisualiser
 IE_CORE_DECLAREPTR( ArnoldLightVisualiser )
 
 
-IECoreGLPreview::LightVisualiser::LightVisualiserDescription<ArnoldLightVisualiser> ArnoldLightVisualiser::g_description( "ai:light", "*" );
+IECoreGLPreview::LightVisualiser::LightVisualiserDescription<ArnoldLightVisualiser> ArnoldLightVisualiser::
+	g_description( "ai:light", "*" );
 
 
-ArnoldLightVisualiser::ArnoldLightVisualiser()
-{
-}
+ArnoldLightVisualiser::ArnoldLightVisualiser() {}
 
-ArnoldLightVisualiser::~ArnoldLightVisualiser()
-{
-}
+ArnoldLightVisualiser::~ArnoldLightVisualiser() {}
 
-Visualisations ArnoldLightVisualiser::visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const
+Visualisations ArnoldLightVisualiser::visualise(
+	const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork,
+	const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state
+) const
 {
 	Visualisations v = StandardLightVisualiser::visualise( attributeName, shaderNetwork, attributes, state );
 
@@ -272,7 +282,8 @@ Visualisations ArnoldLightVisualiser::visualise( const IECore::InternedString &a
 			IECoreGL::RenderablePtr iesVis = iesVisualisation( iesFilenameData->readable() );
 			if( iesVis )
 			{
-				if( ConstM44fDataPtr visOrientationData = Gaffer::Metadata::value<M44fData>( "ai:light:photometric_light", "visualiserOrientation" ) )
+				if( ConstM44fDataPtr visOrientationData =
+						Gaffer::Metadata::value<M44fData>( "ai:light:photometric_light", "visualiserOrientation" ) )
 				{
 					IECoreGL::GroupPtr group = new IECoreGL::Group();
 					group->addChild( iesVis );

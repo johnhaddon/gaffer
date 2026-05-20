@@ -72,11 +72,18 @@ void loadColorManagerWrapper( ArnoldColorManager &c, const std::string &name, bo
 class ArnoldColorManagerSerialiser : public GafferBindings::NodeSerialiser
 {
 
-	std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, GafferBindings::Serialisation &serialisation ) const override
+	std::string postConstructor(
+		const Gaffer::GraphComponent *graphComponent, const std::string &identifier,
+		GafferBindings::Serialisation &serialisation
+	) const override
 	{
-		std::string result = GafferBindings::NodeSerialiser::postConstructor( graphComponent, identifier, serialisation );
+		std::string result =
+			GafferBindings::NodeSerialiser::postConstructor( graphComponent, identifier, serialisation );
 
-		const std::string name = static_cast<const ArnoldColorManager *>( graphComponent )->getChild<ArnoldShader>( "__shader" )->namePlug()->getValue();
+		const std::string name = static_cast<const ArnoldColorManager *>( graphComponent )
+									 ->getChild<ArnoldShader>( "__shader" )
+									 ->namePlug()
+									 ->getValue();
 		if( name.size() )
 		{
 			result += fmt::format( "\n{}.loadColorManager( \"{}\" )\n", identifier, name );
@@ -97,10 +104,13 @@ BOOST_PYTHON_MODULE( _GafferArnold )
 
 	GafferBindings::NodeClass<ArnoldLight>();
 
-	GafferBindings::DependencyNodeClass<ArnoldColorManager>()
-		.def( "loadColorManager", &loadColorManagerWrapper, ( arg( "name" ), arg( "keepExistingValues" ) = false ) );
+	GafferBindings::DependencyNodeClass<ArnoldColorManager>().def(
+		"loadColorManager", &loadColorManagerWrapper, ( arg( "name" ), arg( "keepExistingValues" ) = false )
+	);
 
-	GafferBindings::Serialisation::registerSerialiser( ArnoldColorManager::staticTypeId(), new ArnoldColorManagerSerialiser() );
+	GafferBindings::Serialisation::registerSerialiser(
+		ArnoldColorManager::staticTypeId(), new ArnoldColorManagerSerialiser()
+	);
 
 	GafferBindings::DependencyNodeClass<ArnoldLightFilter>();
 	GafferBindings::DependencyNodeClass<ArnoldOptions>();

@@ -56,7 +56,7 @@ namespace Gaffer
 class GAFFER_API TweakPlug : public Gaffer::ValuePlug
 {
 
-	public:
+public:
 
 	GAFFER_PLUG_DECLARE_TYPE( Gaffer::TweakPlug, TweakPlugTypeId, Gaffer::ValuePlug );
 
@@ -83,7 +83,10 @@ class GAFFER_API TweakPlug : public Gaffer::ValuePlug
 
 	/// Complete constructor, able to specify all relevant properties of the child plugs.
 	/// The `Direction` is taken from `valuePlug`.
-	TweakPlug( const std::string &name, const std::string &nameDefault, bool enabledDefault, Mode modeDefault, Gaffer::ValuePlugPtr valuePlug, unsigned flags );
+	TweakPlug(
+		const std::string &name, const std::string &nameDefault, bool enabledDefault, Mode modeDefault,
+		Gaffer::ValuePlugPtr valuePlug, unsigned flags
+	);
 	/// Convenience constructors. These don't specify the default values for the
 	/// child plugs - they set their values instead.
 	///
@@ -97,7 +100,10 @@ class GAFFER_API TweakPlug : public Gaffer::ValuePlug
 	TweakPlug( const std::string &tweakName, Gaffer::ValuePlugPtr valuePlug, Mode mode = Replace, bool enabled = true );
 	TweakPlug( const std::string &tweakName, const IECore::Data *value, Mode mode = Replace, bool enabled = true );
 	/// Legacy constructor used for compatibility with old serialisations. Do not use.
-	explicit TweakPlug( Gaffer::ValuePlugPtr valuePlug, const std::string &name = defaultName<TweakPlug>(), Direction direction = In, unsigned flags = Default );
+	explicit TweakPlug(
+		Gaffer::ValuePlugPtr valuePlug, const std::string &name = defaultName<TweakPlug>(), Direction direction = In,
+		unsigned flags = Default
+	);
 
 	Gaffer::StringPlug *namePlug();
 	const Gaffer::StringPlug *namePlug() const;
@@ -138,8 +144,7 @@ class GAFFER_API TweakPlug : public Gaffer::ValuePlug
 		/// Signature : bool functor( const std::string &valueName, IECore::DataPtr newData).
 		/// Passing `nullptr` in `newData` removes the entry for `valueName`.
 		/// \returns true if the value was set or erased, false if erasure failed.
-		SetDataFunctor &&setDataFunctor,
-		MissingMode missingMode = MissingMode::Error
+		SetDataFunctor &&setDataFunctor, MissingMode missingMode = MissingMode::Error
 	) const;
 
 
@@ -178,16 +183,23 @@ class GAFFER_API TweakPlug : public Gaffer::ValuePlug
 
 	static const char *modeToString( Gaffer::TweakPlug::Mode mode );
 
-	private:
+private:
 
 	Gaffer::ValuePlug *valuePlugInternal();
 	const Gaffer::ValuePlug *valuePlugInternal() const;
 
-	static void applyTweakInternal( IECore::Data *data, const IECore::Data *tweakData, TweakPlug::Mode mode, const std::string &name );
+	static void applyTweakInternal(
+		IECore::Data *data, const IECore::Data *tweakData, TweakPlug::Mode mode, const std::string &name
+	);
 
-	static IECore::DataPtr createVectorDataFromElement( const IECore::Data *elementData, size_t size, bool useElementValueAsDefault, const std::string &name );
+	static IECore::DataPtr createVectorDataFromElement(
+		const IECore::Data *elementData, size_t size, bool useElementValueAsDefault, const std::string &name
+	);
 
-	static void applyVectorElementTweak( IECore::Data *vectorData, const IECore::Data *tweakData, IECore::IntVectorData *indicesData, TweakPlug::Mode mode, const std::string &name, const boost::dynamic_bitset<> *mask );
+	static void applyVectorElementTweak(
+		IECore::Data *vectorData, const IECore::Data *tweakData, IECore::IntVectorData *indicesData,
+		TweakPlug::Mode mode, const std::string &name, const boost::dynamic_bitset<> *mask
+	);
 };
 
 IE_CORE_DECLAREPTR( TweakPlug )
@@ -199,11 +211,13 @@ IE_CORE_DECLAREPTR( TweakPlug )
 class GAFFER_API TweaksPlug : public Gaffer::ValuePlug
 {
 
-	public:
+public:
 
 	GAFFER_PLUG_DECLARE_TYPE( Gaffer::TweaksPlug, TweaksPlugTypeId, Gaffer::ValuePlug );
 
-	TweaksPlug( const std::string &name = defaultName<TweaksPlug>(), Direction direction = In, unsigned flags = Default );
+	TweaksPlug(
+		const std::string &name = defaultName<TweaksPlug>(), Direction direction = In, unsigned flags = Default
+	);
 
 	bool acceptsChild( const Gaffer::GraphComponent *potentialChild ) const override;
 	bool acceptsInput( const Plug *input ) const override;
@@ -213,7 +227,9 @@ class GAFFER_API TweaksPlug : public Gaffer::ValuePlug
 	/// =================
 	/// Functions return true if any tweaks were applied.
 
-	bool applyTweaks( IECore::CompoundData *parameters, TweakPlug::MissingMode missingMode = TweakPlug::MissingMode::Error ) const;
+	bool applyTweaks(
+		IECore::CompoundData *parameters, TweakPlug::MissingMode missingMode = TweakPlug::MissingMode::Error
+	) const;
 
 	/// Applies the tweak using functors to get and set the data.
 	/// \returns true if any tweaks were applied
@@ -225,8 +241,7 @@ class GAFFER_API TweaksPlug : public Gaffer::ValuePlug
 		/// Signature : bool functor( const std::string &valueName, IECore::DataPtr newData ).
 		/// Passing `nullptr` in `newData` removes the entry for `valueName`.
 		/// \returns true if the value was set or erased, false if erasure failed.
-		SetDataFunctor &&setDataFunctor,
-		TweakPlug::MissingMode missingMode = TweakPlug::MissingMode::Error
+		SetDataFunctor &&setDataFunctor, TweakPlug::MissingMode missingMode = TweakPlug::MissingMode::Error
 	) const;
 };
 

@@ -47,8 +47,7 @@ GAFFER_NODE_DEFINE_TYPE( CDL );
 
 size_t CDL::g_firstPlugIndex = 0;
 
-CDL::CDL( const std::string &name )
-	: OpenColorIOTransform( name )
+CDL::CDL( const std::string &name ) : OpenColorIOTransform( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new Color3fPlug( "slope", Plug::In, Imath::V3f( 1. ) ) );
@@ -56,17 +55,10 @@ CDL::CDL( const std::string &name )
 	addChild( new Color3fPlug( "power", Plug::In, Imath::V3f( 1. ) ) );
 	addChild( new FloatPlug( "saturation", Plug::In, 1., 0. ) );
 
-	addChild( new IntPlug(
-		"direction", Plug::In,
-		Forward,
-		Forward,
-		Inverse
-	) );
+	addChild( new IntPlug( "direction", Plug::In, Forward, Forward, Inverse ) );
 }
 
-CDL::~CDL()
-{
-}
+CDL::~CDL() {}
 
 Gaffer::Color3fPlug *CDL::slopePlug()
 {
@@ -121,11 +113,8 @@ const Gaffer::IntPlug *CDL::directionPlug() const
 bool CDL::affectsTransform( const Gaffer::Plug *input ) const
 {
 	return (
-		slopePlug()->isAncestorOf( input ) ||
-		offsetPlug()->isAncestorOf( input ) ||
-		powerPlug()->isAncestorOf( input ) ||
-		input == saturationPlug() ||
-		input == directionPlug()
+		slopePlug()->isAncestorOf( input ) || offsetPlug()->isAncestorOf( input ) ||
+		powerPlug()->isAncestorOf( input ) || input == saturationPlug() || input == directionPlug()
 	);
 }
 
@@ -147,7 +136,10 @@ OCIO_NAMESPACE::ConstTransformRcPtr CDL::transform() const
 	result->setOffset( Color3d( offsetPlug()->getValue() ).getValue() );
 	result->setPower( Color3d( powerPlug()->getValue() ).getValue() );
 	result->setSat( saturationPlug()->getValue() );
-	result->setDirection( directionPlug()->getValue() == Forward ? OCIO_NAMESPACE::TRANSFORM_DIR_FORWARD : OCIO_NAMESPACE::TRANSFORM_DIR_INVERSE );
+	result->setDirection(
+		directionPlug()->getValue() == Forward ? OCIO_NAMESPACE::TRANSFORM_DIR_FORWARD :
+												 OCIO_NAMESPACE::TRANSFORM_DIR_INVERSE
+	);
 
 	return result;
 }

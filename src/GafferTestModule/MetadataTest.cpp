@@ -85,25 +85,22 @@ void GafferTestModule::testConcurrentAccessToDifferentInstances()
 	);
 
 	const size_t iterations = 100000;
-	parallel_for(
-		blocked_range<size_t>( 0, iterations ),
-		[]( const blocked_range<size_t> &r ) {
-			for( size_t i = r.begin(); i != r.end(); ++i )
-			{
-				NodePtr n = new Node();
-				PlugPtr p = new Plug();
+	parallel_for( blocked_range<size_t>( 0, iterations ), []( const blocked_range<size_t> &r ) {
+		for( size_t i = r.begin(); i != r.end(); ++i )
+		{
+			NodePtr n = new Node();
+			PlugPtr p = new Plug();
 
-				GAFFERTEST_ASSERT( Metadata::value( n.get(), "threadingTest" ) == nullptr );
-				GAFFERTEST_ASSERT( Metadata::value( p.get(), "threadingTest" ) == nullptr );
+			GAFFERTEST_ASSERT( Metadata::value( n.get(), "threadingTest" ) == nullptr );
+			GAFFERTEST_ASSERT( Metadata::value( p.get(), "threadingTest" ) == nullptr );
 
-				Metadata::registerValue( n.get(), "threadingTest", new IECore::IntData( 1 ) );
-				Metadata::registerValue( p.get(), "threadingTest", new IECore::IntData( 2 ) );
+			Metadata::registerValue( n.get(), "threadingTest", new IECore::IntData( 1 ) );
+			Metadata::registerValue( p.get(), "threadingTest", new IECore::IntData( 2 ) );
 
-				GAFFERTEST_ASSERT( Metadata::value<IntData>( n.get(), "threadingTest" )->readable() == 1 );
-				GAFFERTEST_ASSERT( Metadata::value<IntData>( p.get(), "threadingTest" )->readable() == 2 );
-			}
+			GAFFERTEST_ASSERT( Metadata::value<IntData>( n.get(), "threadingTest" )->readable() == 1 );
+			GAFFERTEST_ASSERT( Metadata::value<IntData>( p.get(), "threadingTest" )->readable() == 2 );
 		}
-	);
+	} );
 
 	GAFFERTEST_ASSERTEQUAL( callCount.load(), iterations );
 }
@@ -117,23 +114,20 @@ void GafferTestModule::testConcurrentAccessToSameInstance()
 	ConstStringDataPtr value2 = new StringData( "two" );
 
 	const size_t iterations = 100000;
-	parallel_for(
-		blocked_range<size_t>( 0, iterations ),
-		[&]( const blocked_range<size_t> &r ) {
-			for( size_t i = r.begin(); i != r.end(); ++i )
-			{
-				// Write a value
-				ConstDataPtr value = i % 2 ? value1 : value2;
-				Metadata::registerValue( node.get(), "threadingTest", value );
-				Metadata::registerValue( plug.get(), "threadingTest", value );
-				// And read one back. There is no guarantee about which value
-				// we'll get back is it could have been changed in the interim,
-				// but it should be one of the known valid values.
-				ConstDataPtr nodeValue = Metadata::value<Data>( node.get(), "threadingTest" );
-				GAFFERTEST_ASSERT( nodeValue == value1 || nodeValue == value2 );
-				ConstDataPtr plugValue = Metadata::value<Data>( plug.get(), "threadingTest" );
-				GAFFERTEST_ASSERT( plugValue == value1 || plugValue == value2 );
-			}
+	parallel_for( blocked_range<size_t>( 0, iterations ), [&]( const blocked_range<size_t> &r ) {
+		for( size_t i = r.begin(); i != r.end(); ++i )
+		{
+			// Write a value
+			ConstDataPtr value = i % 2 ? value1 : value2;
+			Metadata::registerValue( node.get(), "threadingTest", value );
+			Metadata::registerValue( plug.get(), "threadingTest", value );
+			// And read one back. There is no guarantee about which value
+			// we'll get back is it could have been changed in the interim,
+			// but it should be one of the known valid values.
+			ConstDataPtr nodeValue = Metadata::value<Data>( node.get(), "threadingTest" );
+			GAFFERTEST_ASSERT( nodeValue == value1 || nodeValue == value2 );
+			ConstDataPtr plugValue = Metadata::value<Data>( plug.get(), "threadingTest" );
+			GAFFERTEST_ASSERT( plugValue == value1 || plugValue == value2 );
 		}
-	);
+	} );
 }

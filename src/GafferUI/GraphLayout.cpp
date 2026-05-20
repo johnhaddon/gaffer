@@ -40,10 +40,6 @@ using namespace GafferUI;
 
 IE_CORE_DEFINERUNTIMETYPED( GraphLayout )
 
-GraphLayout::~GraphLayout()
-{
-}
+GraphLayout::~GraphLayout() {}
 
-GraphLayout::GraphLayout()
-{
-}
+GraphLayout::GraphLayout() {}

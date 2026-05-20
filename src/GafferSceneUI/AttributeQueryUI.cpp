@@ -72,7 +72,10 @@ Gaffer::ConstValuePlugPtr createNumericPlug(
 	const std::string &name, const Gaffer::Plug::Direction direction, const ValueType &value, const unsigned flags
 )
 {
-	const Gaffer::ConstValuePlugPtr plug( new Gaffer::NumericPlug<ValueType>( name, direction, value, ValueType( std::numeric_limits<ValueType>::lowest() ), ValueType( std::numeric_limits<ValueType>::max() ), flags ) );
+	const Gaffer::ConstValuePlugPtr plug( new Gaffer::NumericPlug<ValueType>(
+		name, direction, value, ValueType( std::numeric_limits<ValueType>::lowest() ),
+		ValueType( std::numeric_limits<ValueType>::max() ), flags
+	) );
 	return plug;
 }
 
@@ -81,46 +84,51 @@ Gaffer::ConstValuePlugPtr createCompoundNumericPlug(
 	const std::string &name, const Gaffer::Plug::Direction direction, const ValueType &value, const unsigned flags
 )
 {
-	const Gaffer::ConstValuePlugPtr plug( new Gaffer::CompoundNumericPlug<ValueType>( name, direction, value, ValueType( std::numeric_limits<typename ValueType::BaseType>::lowest() ), ValueType( std::numeric_limits<typename ValueType::BaseType>::max() ), flags ) );
+	const Gaffer::ConstValuePlugPtr plug( new Gaffer::CompoundNumericPlug<ValueType>(
+		name, direction, value, ValueType( std::numeric_limits<typename ValueType::BaseType>::lowest() ),
+		ValueType( std::numeric_limits<typename ValueType::BaseType>::max() ), flags
+	) );
 	return plug;
 }
 
 template<typename ValueType>
 Gaffer::ConstValuePlugPtr createBoxPlug(
-	const std::string &name, const Gaffer::Plug::Direction direction, const Imath::Box<ValueType> &value, const unsigned flags
+	const std::string &name, const Gaffer::Plug::Direction direction, const Imath::Box<ValueType> &value,
+	const unsigned flags
 )
 {
-	const Gaffer::ConstValuePlugPtr plug( new Gaffer::BoxPlug<Imath::Box<ValueType>>( name, direction, value, ValueType( std::numeric_limits<typename ValueType::BaseType>::lowest() ), ValueType( std::numeric_limits<typename ValueType::BaseType>::max() ), flags ) );
+	const Gaffer::ConstValuePlugPtr plug( new Gaffer::BoxPlug<Imath::Box<ValueType>>(
+		name, direction, value, ValueType( std::numeric_limits<typename ValueType::BaseType>::lowest() ),
+		ValueType( std::numeric_limits<typename ValueType::BaseType>::max() ), flags
+	) );
 	return plug;
 }
 
 template<typename ValueType>
 Gaffer::ConstValuePlugPtr createVectorDataPlug(
-	const std::string &name, const Gaffer::Plug::Direction direction, const IECore::TypedData<std::vector<ValueType>> *value, const unsigned flags
+	const std::string &name, const Gaffer::Plug::Direction direction,
+	const IECore::TypedData<std::vector<ValueType>> *value, const unsigned flags
 )
 {
-	const Gaffer::ConstValuePlugPtr plug( new Gaffer::TypedObjectPlug<IECore::TypedData<std::vector<ValueType>>>( name, direction, value, flags ) );
+	const Gaffer::ConstValuePlugPtr plug(
+		new Gaffer::TypedObjectPlug<IECore::TypedData<std::vector<ValueType>>>( name, direction, value, flags )
+	);
 	return plug;
 }
 
 struct MenuItem
 {
 	explicit MenuItem( const std::string &name, Gaffer::ConstValuePlugPtr plug = Gaffer::ConstValuePlugPtr() )
-		: m_name( name ), m_plug( plug )
+		: m_name( name ),
+		  m_plug( plug )
 	{
 	}
 
-	const std::string &getName() const
-	{
-		return m_name;
-	}
+	const std::string &getName() const { return m_name; }
 
-	const Gaffer::ValuePlug *getPlug() const
-	{
-		return m_plug.get();
-	}
+	const Gaffer::ValuePlug *getPlug() const { return m_plug.get(); }
 
-	private:
+private:
 
 	std::string m_name;
 	Gaffer::ConstValuePlugPtr m_plug;
@@ -130,13 +138,11 @@ using MenuItemContainer = boost::multi_index_container<
 	MenuItem,
 	boost::multi_index::indexed_by<
 		boost::multi_index::random_access<>,
-		boost::multi_index::ordered_non_unique<
-			boost::multi_index::key<&MenuItem::getName>>>>;
+		boost::multi_index::ordered_non_unique<boost::multi_index::key<&MenuItem::getName>>>>;
 
 struct PlugAdder : GafferUI::PlugAdder
 {
-	explicit PlugAdder( GafferScene::AttributeQuery &query )
-		: GafferUI::PlugAdder(), m_query( &query )
+	explicit PlugAdder( GafferScene::AttributeQuery &query ) : GafferUI::PlugAdder(), m_query( &query )
 	{
 		m_query->childAddedSignal().connect( boost::bind( &PlugAdder::updateVisibility, this ) );
 		m_query->childRemovedSignal().connect( boost::bind( &PlugAdder::updateVisibility, this ) );
@@ -146,21 +152,17 @@ struct PlugAdder : GafferUI::PlugAdder
 		updateVisibility();
 	}
 
-	~PlugAdder() override
-	{
-	}
+	~PlugAdder() override {}
 
-	protected:
+protected:
 
 	bool canCreateConnection( const Gaffer::Plug *plug ) const override
 	{
 		assert( m_query );
 
 		return (
-			( GafferUI::PlugAdder::canCreateConnection( plug ) ) &&
-			( plug->direction() == Gaffer::Plug::In ) &&
-			( plug->node() != m_query ) &&
-			( m_query->canSetup( IECore::runTimeCast<const Gaffer::ValuePlug>( plug ) ) )
+			( GafferUI::PlugAdder::canCreateConnection( plug ) ) && ( plug->direction() == Gaffer::Plug::In ) &&
+			( plug->node() != m_query ) && ( m_query->canSetup( IECore::runTimeCast<const Gaffer::ValuePlug>( plug ) ) )
 		);
 	}
 
@@ -173,17 +175,14 @@ struct PlugAdder : GafferUI::PlugAdder
 		plug->setInput( m_query->valuePlug() );
 	}
 
-	private:
+private:
 
 	bool buttonRelease( const GafferUI::ButtonEvent &event )
 	{
 		return GafferSceneUI::AttributeQueryUI::showSetupMenu( *m_query );
 	}
 
-	void updateVisibility()
-	{
-		setVisible( !( m_query->isSetup() ) );
-	}
+	void updateVisibility() { setVisible( !( m_query->isSetup() ) ); }
 
 	GafferScene::AttributeQueryPtr m_query;
 };
@@ -192,7 +191,9 @@ struct Registration
 {
 	Registration()
 	{
-		GafferUI::NoduleLayout::registerCustomGadget( "GafferSceneUI.AttributeQueryUI.PlugAdder", &Registration::create );
+		GafferUI::NoduleLayout::registerCustomGadget(
+			"GafferSceneUI.AttributeQueryUI.PlugAdder", &Registration::create
+		);
 	}
 
 	static GafferUI::GadgetPtr create( Gaffer::GraphComponentPtr parent )
@@ -241,21 +242,43 @@ bool showSetupMenu( GafferScene::AttributeQuery &query )
 		items.push_back( MenuItem( "V3i", createCompoundNumericPlug( name, direction, Imath::V3i( 0 ), flags ) ) );
 		items.push_back( MenuItem( "V3f", createCompoundNumericPlug( name, direction, Imath::V3f( 0 ), flags ) ) );
 		items.push_back( MenuItem( "" ) );
-		items.push_back( MenuItem( "Color3f", createCompoundNumericPlug( name, direction, Imath::Color3f( 0 ), flags ) ) );
-		items.push_back( MenuItem( "Color4f", createCompoundNumericPlug( name, direction, Imath::Color4f( 0 ), flags ) ) );
+		items.push_back(
+			MenuItem( "Color3f", createCompoundNumericPlug( name, direction, Imath::Color3f( 0 ), flags ) )
+		);
+		items.push_back(
+			MenuItem( "Color4f", createCompoundNumericPlug( name, direction, Imath::Color4f( 0 ), flags ) )
+		);
 		items.push_back( MenuItem( "" ) );
-		items.push_back( MenuItem( "Box2i", createBoxPlug( name, direction, Imath::Box2i( Imath::V2i( 0 ) ), flags ) ) );
-		items.push_back( MenuItem( "Box2f", createBoxPlug( name, direction, Imath::Box2f( Imath::V2f( 0.f ) ), flags ) ) );
-		items.push_back( MenuItem( "Box3i", createBoxPlug( name, direction, Imath::Box3i( Imath::V3i( 0 ) ), flags ) ) );
-		items.push_back( MenuItem( "Box3f", createBoxPlug( name, direction, Imath::Box3f( Imath::V3f( 0.f ) ), flags ) ) );
+		items.push_back(
+			MenuItem( "Box2i", createBoxPlug( name, direction, Imath::Box2i( Imath::V2i( 0 ) ), flags ) )
+		);
+		items.push_back(
+			MenuItem( "Box2f", createBoxPlug( name, direction, Imath::Box2f( Imath::V2f( 0.f ) ), flags ) )
+		);
+		items.push_back(
+			MenuItem( "Box3i", createBoxPlug( name, direction, Imath::Box3i( Imath::V3i( 0 ) ), flags ) )
+		);
+		items.push_back(
+			MenuItem( "Box3f", createBoxPlug( name, direction, Imath::Box3f( Imath::V3f( 0.f ) ), flags ) )
+		);
 		items.push_back( MenuItem( "" ) );
-		items.push_back( MenuItem( "Object", new Gaffer::ObjectPlug( name, direction, IECore::NullObject::defaultNullObject(), flags ) ) );
+		items.push_back( MenuItem(
+			"Object", new Gaffer::ObjectPlug( name, direction, IECore::NullObject::defaultNullObject(), flags )
+		) );
 		items.push_back( MenuItem( "" ) );
-		items.push_back( MenuItem( "Array/Bool", createVectorDataPlug( name, direction, new IECore::BoolVectorData(), flags ) ) );
-		items.push_back( MenuItem( "Array/Float", createVectorDataPlug( name, direction, new IECore::FloatVectorData(), flags ) ) );
-		items.push_back( MenuItem( "Array/Int", createVectorDataPlug( name, direction, new IECore::IntVectorData(), flags ) ) );
+		items.push_back(
+			MenuItem( "Array/Bool", createVectorDataPlug( name, direction, new IECore::BoolVectorData(), flags ) )
+		);
+		items.push_back(
+			MenuItem( "Array/Float", createVectorDataPlug( name, direction, new IECore::FloatVectorData(), flags ) )
+		);
+		items.push_back(
+			MenuItem( "Array/Int", createVectorDataPlug( name, direction, new IECore::IntVectorData(), flags ) )
+		);
 		items.push_back( MenuItem( "Array/" ) );
-		items.push_back( MenuItem( "Array/String", createVectorDataPlug( name, direction, new IECore::StringVectorData(), flags ) ) );
+		items.push_back(
+			MenuItem( "Array/String", createVectorDataPlug( name, direction, new IECore::StringVectorData(), flags ) )
+		);
 	}
 
 	if( names.empty() )

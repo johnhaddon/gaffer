@@ -80,8 +80,7 @@ void setNumericSocket( ccl::Node *node, const ccl::SocketType &socket, const IEC
 			IECore::msg(
 				IECore::Msg::Warning, "Cycles::SocketAlgo",
 				fmt::format(
-					"Unsupported type `{}` for socket `{}` on node `{}`",
-					value->typeName(), socket.name, node->name
+					"Unsupported type `{}` for socket `{}` on node `{}`", value->typeName(), socket.name, node->name
 				)
 			);
 			break;
@@ -108,8 +107,7 @@ void setFloat2Socket( ccl::Node *node, const ccl::SocketType &socket, const IECo
 			IECore::msg(
 				IECore::Msg::Warning, "Cycles::SocketAlgo",
 				fmt::format(
-					"Unsupported type `{}` for socket `{}` on node `{}`",
-					value->typeName(), socket.name, node->name
+					"Unsupported type `{}` for socket `{}` on node `{}`", value->typeName(), socket.name, node->name
 				)
 			);
 			break;
@@ -141,8 +139,7 @@ void setFloat2ArraySocket( ccl::Node *node, const ccl::SocketType &socket, const
 			IECore::msg(
 				IECore::Msg::Warning, "Cycles::SocketAlgo",
 				fmt::format(
-					"Unsupported type `{}` for socket `{}` on node `{}`",
-					value->typeName(), socket.name, node->name
+					"Unsupported type `{}` for socket `{}` on node `{}`", value->typeName(), socket.name, node->name
 				)
 			);
 			break;
@@ -176,8 +173,7 @@ void setFloat3Socket( ccl::Node *node, const ccl::SocketType &socket, const IECo
 			IECore::msg(
 				IECore::Msg::Warning, "Cycles::SocketAlgo",
 				fmt::format(
-					"Unsupported type `{}` for socket `{}` on node `{}`",
-					value->typeName(), socket.name, node->name
+					"Unsupported type `{}` for socket `{}` on node `{}`", value->typeName(), socket.name, node->name
 				)
 			);
 			break;
@@ -216,8 +212,7 @@ void setFloat3ArraySocket( ccl::Node *node, const ccl::SocketType &socket, const
 			IECore::msg(
 				IECore::Msg::Warning, "Cycles::SocketAlgo",
 				fmt::format(
-					"Unsupported type `{}` for socket `{}` on node `{}`",
-					value->typeName(), socket.name, node->name
+					"Unsupported type `{}` for socket `{}` on node `{}`", value->typeName(), socket.name, node->name
 				)
 			);
 			break;
@@ -238,8 +233,7 @@ void setArraySocket( ccl::Node *node, const ccl::SocketType &socket, const Data 
 		IECore::msg(
 			IECore::Msg::Warning, "Cycles::SocketAlgo::setSocket",
 			fmt::format(
-				"Unsupported data type `{}` for socket `{}` on node `{}`",
-				value->typeName(), socket.name, node->name
+				"Unsupported data type `{}` for socket `{}` on node `{}`", value->typeName(), socket.name, node->name
 			)
 		);
 	}
@@ -269,10 +263,7 @@ void setEnumSocket( ccl::Node *node, const ccl::SocketType &socket, const IECore
 		{
 			IECore::msg(
 				IECore::Msg::Warning, "Cycles::SocketAlgo",
-				fmt::format(
-					"Invalid enum value \"{}\" for socket `{}` on node `{}`",
-					name, socket.name, node->name
-				)
+				fmt::format( "Invalid enum value \"{}\" for socket `{}` on node `{}`", name, socket.name, node->name )
 			);
 		}
 	}
@@ -421,10 +412,8 @@ Imath::Quatf getQuaternion( const ccl::float4 quat )
 Imath::M44f getTransform( const ccl::Transform transform )
 {
 	return Imath::M44f(
-		transform.x.x, transform.y.x, transform.z.x, 0.0f,
-		transform.x.y, transform.y.y, transform.z.y, 0.0f,
-		transform.x.z, transform.y.z, transform.z.z, 0.0f,
-		transform.x.w, transform.y.w, transform.z.w, 1.0f
+		transform.x.x, transform.y.x, transform.z.x, 0.0f, transform.x.y, transform.y.y, transform.z.y, 0.0f,
+		transform.x.z, transform.y.z, transform.z.z, 0.0f, transform.x.w, transform.y.w, transform.z.w, 1.0f
 	);
 }
 

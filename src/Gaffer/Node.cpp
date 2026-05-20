@@ -47,8 +47,7 @@ size_t Node::g_firstPlugIndex;
 
 GAFFER_NODE_DEFINE_TYPE( Node );
 
-Node::Node( const std::string &name )
-	: GraphComponent( name )
+Node::Node( const std::string &name ) : GraphComponent( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new Plug( "user", Plug::In, Plug::Default & ~Plug::AcceptsInputs ) );
@@ -102,7 +101,8 @@ bool Node::acceptsChild( const GraphComponent *potentialChild ) const
 	{
 		return false;
 	}
-	return potentialChild->isInstanceOf( (IECore::TypeId)PlugTypeId ) || potentialChild->isInstanceOf( (IECore::TypeId)NodeTypeId );
+	return potentialChild->isInstanceOf( (IECore::TypeId)PlugTypeId ) ||
+		potentialChild->isInstanceOf( (IECore::TypeId)NodeTypeId );
 }
 
 bool Node::acceptsParent( const GraphComponent *potentialParent ) const
@@ -152,7 +152,9 @@ void Node::parentChanging( Gaffer::GraphComponent *newParent )
 					toDisconnect.push_back( *it );
 				}
 			}
-			for( Plug::OutputContainer::const_iterator oIt = ( *it )->outputs().begin(), oeIt = ( *it )->outputs().end(); oIt != oeIt; ++oIt )
+			for( Plug::OutputContainer::const_iterator oIt = ( *it )->outputs().begin(),
+													   oeIt = ( *it )->outputs().end();
+				 oIt != oeIt; ++oIt )
 			{
 				if( !this->isAncestorOf( *oIt ) )
 				{

@@ -62,23 +62,22 @@ ScenePlug::ScenePath concatScenePath( const ScenePlug::ScenePath &a, const Scene
 
 class CapsuleScope : boost::noncopyable
 {
-	private:
+private:
 
 	// Base constructor used by the two public constructors
-	CapsuleScope(
-		const Gaffer::Context *context, const ScenePlug *inPlug, const ScenePlug::ScenePath &sourcePath
-	)
+	CapsuleScope( const Gaffer::Context *context, const ScenePlug *inPlug, const ScenePlug::ScenePath &sourcePath )
 	{
 		m_object = inPlug->object( sourcePath );
 		m_capsule = IECore::runTimeCast<const Capsule>( m_object.get() );
 	}
 
-	public:
+public:
 
 	CapsuleScope(
-		const Gaffer::Context *context, const ScenePlug *inPlug,
-		const ScenePlug::ScenePath &sourcePath, const ScenePlug::ScenePath &branchPath
-	) : CapsuleScope( context, inPlug, sourcePath )
+		const Gaffer::Context *context, const ScenePlug *inPlug, const ScenePlug::ScenePath &sourcePath,
+		const ScenePlug::ScenePath &branchPath
+	)
+		: CapsuleScope( context, inPlug, sourcePath )
 	{
 		if( m_capsule )
 		{
@@ -90,9 +89,10 @@ class CapsuleScope : boost::noncopyable
 	}
 
 	CapsuleScope(
-		const Gaffer::Context *context, const ScenePlug *inPlug,
-		const ScenePlug::ScenePath &sourcePath, const InternedString *setName
-	) : CapsuleScope( context, inPlug, sourcePath )
+		const Gaffer::Context *context, const ScenePlug *inPlug, const ScenePlug::ScenePath &sourcePath,
+		const InternedString *setName
+	)
+		: CapsuleScope( context, inPlug, sourcePath )
 	{
 		if( m_capsule )
 		{
@@ -102,10 +102,7 @@ class CapsuleScope : boost::noncopyable
 		}
 	}
 
-	const IECore::Object *object() const
-	{
-		return m_object.get();
-	}
+	const IECore::Object *object() const { return m_object.get(); }
 
 	const ScenePlug *scene( bool throwIfNoCapsule ) const
 	{
@@ -129,7 +126,7 @@ class CapsuleScope : boost::noncopyable
 		return m_capsule->root();
 	}
 
-	private:
+private:
 
 	// We use `optional` here to avoid the expense of constructing
 	// an EditableScope when we don't need one.
@@ -145,8 +142,7 @@ GAFFER_NODE_DEFINE_TYPE( Unencapsulate );
 
 size_t Unencapsulate::g_firstPlugIndex = 0;
 
-Unencapsulate::Unencapsulate( const std::string &name )
-	: BranchCreator( name )
+Unencapsulate::Unencapsulate( const std::string &name ) : BranchCreator( name )
 {
 	// Hide `destination` plug until we resolve issues surrounding `processesRootObject()`.
 	// See `BranchCreator::computeObject()`. Or perhaps we would never want to allow a
@@ -157,22 +153,24 @@ Unencapsulate::Unencapsulate( const std::string &name )
 	storeIndexOfNextChild( g_firstPlugIndex );
 }
 
-Unencapsulate::~Unencapsulate()
-{
-}
+Unencapsulate::~Unencapsulate() {}
 
 bool Unencapsulate::affectsBranchBound( const Gaffer::Plug *input ) const
 {
 	return input == inPlug()->objectPlug();
 }
 
-void Unencapsulate::hashBranchBound( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Unencapsulate::hashBranchBound(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	CapsuleScope cs( context, inPlug(), sourcePath, branchPath );
 	h = cs.scene( true )->boundPlug()->hash();
 }
 
-Imath::Box3f Unencapsulate::computeBranchBound( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+Imath::Box3f Unencapsulate::computeBranchBound(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	CapsuleScope cs( context, inPlug(), sourcePath, branchPath );
 	return cs.scene( true )->boundPlug()->getValue();
@@ -183,13 +181,17 @@ bool Unencapsulate::affectsBranchTransform( const Gaffer::Plug *input ) const
 	return input == inPlug()->objectPlug();
 }
 
-void Unencapsulate::hashBranchTransform( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Unencapsulate::hashBranchTransform(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	CapsuleScope cs( context, inPlug(), sourcePath, branchPath );
 	h = cs.scene( true )->transformPlug()->hash();
 }
 
-Imath::M44f Unencapsulate::computeBranchTransform( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+Imath::M44f Unencapsulate::computeBranchTransform(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	CapsuleScope cs( context, inPlug(), sourcePath, branchPath );
 	return cs.scene( true )->transformPlug()->getValue();
@@ -200,13 +202,17 @@ bool Unencapsulate::affectsBranchAttributes( const Gaffer::Plug *input ) const
 	return input == inPlug()->objectPlug();
 }
 
-void Unencapsulate::hashBranchAttributes( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Unencapsulate::hashBranchAttributes(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	CapsuleScope cs( context, inPlug(), sourcePath, branchPath );
 	h = cs.scene( true )->attributesPlug()->hash();
 }
 
-IECore::ConstCompoundObjectPtr Unencapsulate::computeBranchAttributes( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+IECore::ConstCompoundObjectPtr Unencapsulate::computeBranchAttributes(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	CapsuleScope cs( context, inPlug(), sourcePath, branchPath );
 	return cs.scene( true )->attributesPlug()->getValue();
@@ -222,7 +228,9 @@ bool Unencapsulate::processesRootObject() const
 	return true;
 }
 
-void Unencapsulate::hashBranchObject( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Unencapsulate::hashBranchObject(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	CapsuleScope cs( context, inPlug(), sourcePath, branchPath );
 	if( branchPath.size() == 0 && !cs.scene( false ) )
@@ -235,7 +243,9 @@ void Unencapsulate::hashBranchObject( const ScenePath &sourcePath, const ScenePa
 	}
 }
 
-IECore::ConstObjectPtr Unencapsulate::computeBranchObject( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+IECore::ConstObjectPtr Unencapsulate::computeBranchObject(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	CapsuleScope cs( context, inPlug(), sourcePath, branchPath );
 	if( branchPath.size() == 0 && !cs.scene( false ) )
@@ -251,7 +261,9 @@ bool Unencapsulate::affectsBranchChildNames( const Gaffer::Plug *input ) const
 	return input == inPlug()->objectPlug();
 }
 
-void Unencapsulate::hashBranchChildNames( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Unencapsulate::hashBranchChildNames(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	CapsuleScope cs( context, inPlug(), sourcePath, branchPath );
 	if( !cs.scene( false ) )
@@ -264,7 +276,9 @@ void Unencapsulate::hashBranchChildNames( const ScenePath &sourcePath, const Sce
 	}
 }
 
-IECore::ConstInternedStringVectorDataPtr Unencapsulate::computeBranchChildNames( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+IECore::ConstInternedStringVectorDataPtr Unencapsulate::computeBranchChildNames(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	CapsuleScope cs( context, inPlug(), sourcePath, branchPath );
 	if( !cs.scene( false ) )
@@ -282,12 +296,16 @@ bool Unencapsulate::affectsBranchSetNames( const Gaffer::Plug *input ) const
 	return input == inPlug()->objectPlug();
 }
 
-void Unencapsulate::hashBranchSetNames( const ScenePath &sourcePath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Unencapsulate::hashBranchSetNames(
+	const ScenePath &sourcePath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = inPlug()->setNamesPlug()->hash();
 }
 
-IECore::ConstInternedStringVectorDataPtr Unencapsulate::computeBranchSetNames( const ScenePath &sourcePath, const Gaffer::Context *context ) const
+IECore::ConstInternedStringVectorDataPtr Unencapsulate::computeBranchSetNames(
+	const ScenePath &sourcePath, const Gaffer::Context *context
+) const
 {
 	// We have a standard that any scene containing capsules must contain all the sets used in the capsules
 	// in their list of set names, even if those sets are empty until the capsules are expanded
@@ -299,7 +317,10 @@ bool Unencapsulate::affectsBranchSet( const Gaffer::Plug *input ) const
 	return input == inPlug()->objectPlug();
 }
 
-void Unencapsulate::hashBranchSet( const ScenePath &sourcePath, const IECore::InternedString &setName, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Unencapsulate::hashBranchSet(
+	const ScenePath &sourcePath, const IECore::InternedString &setName, const Gaffer::Context *context,
+	IECore::MurmurHash &h
+) const
 {
 	CapsuleScope cs( context, inPlug(), sourcePath, &setName );
 	if( !cs.scene( false ) )
@@ -313,7 +334,9 @@ void Unencapsulate::hashBranchSet( const ScenePath &sourcePath, const IECore::In
 	h.append( cs.root().data(), cs.root().size() );
 }
 
-IECore::ConstPathMatcherDataPtr Unencapsulate::computeBranchSet( const ScenePath &sourcePath, const IECore::InternedString &setName, const Gaffer::Context *context ) const
+IECore::ConstPathMatcherDataPtr Unencapsulate::computeBranchSet(
+	const ScenePath &sourcePath, const IECore::InternedString &setName, const Gaffer::Context *context
+) const
 {
 	CapsuleScope cs( context, inPlug(), sourcePath, &setName );
 	if( !cs.scene( false ) )

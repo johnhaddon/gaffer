@@ -59,9 +59,7 @@ struct StringVectorFromStringVectorData
 	StringVectorFromStringVectorData()
 	{
 		boost::python::converter::registry::push_back(
-			&convertible,
-			nullptr,
-			boost::python::type_id<std::vector<std::string>>()
+			&convertible, nullptr, boost::python::type_id<std::vector<std::string>>()
 		);
 	}
 
@@ -118,7 +116,10 @@ void deleteWithGIL( object *o )
 	delete o;
 }
 
-void parallelGatherTiles1( const GafferImage::ImagePlug &image, object pythonTileFunctor, object pythonGatherFunctor, const Imath::Box2i &window, ImageAlgo::TileOrder tileOrder )
+void parallelGatherTiles1(
+	const GafferImage::ImagePlug &image, object pythonTileFunctor, object pythonGatherFunctor,
+	const Imath::Box2i &window, ImageAlgo::TileOrder tileOrder
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	ImageAlgo::parallelGatherTiles(
@@ -136,13 +137,15 @@ void parallelGatherTiles1( const GafferImage::ImagePlug &image, object pythonTil
 			pythonGatherFunctor( ImagePlugPtr( const_cast<ImagePlug *>( image ) ), tileOrigin, *tile );
 		},
 
-		window,
-		tileOrder
+		window, tileOrder
 
 	);
 }
 
-void parallelGatherTiles2( const GafferImage::ImagePlug &image, object pythonChannelNames, object pythonTileFunctor, object pythonGatherFunctor, const Imath::Box2i &window, ImageAlgo::TileOrder tileOrder )
+void parallelGatherTiles2(
+	const GafferImage::ImagePlug &image, object pythonChannelNames, object pythonTileFunctor,
+	object pythonGatherFunctor, const Imath::Box2i &window, ImageAlgo::TileOrder tileOrder
+)
 {
 	vector<string> channelNames;
 	boost::python::container_utils::extend_container( channelNames, pythonChannelNames );
@@ -154,17 +157,20 @@ void parallelGatherTiles2( const GafferImage::ImagePlug &image, object pythonCha
 
 		[&pythonTileFunctor]( const ImagePlug *image, const std::string &channelName, const Imath::V2i &tileOrigin ) {
 			IECorePython::ScopedGILLock gilLock;
-			object tile = pythonTileFunctor( ImagePlugPtr( const_cast<ImagePlug *>( image ) ), channelName, tileOrigin );
+			object tile =
+				pythonTileFunctor( ImagePlugPtr( const_cast<ImagePlug *>( image ) ), channelName, tileOrigin );
 			return std::shared_ptr<object>( new object( tile ), deleteWithGIL );
 		},
 
-		[&pythonGatherFunctor]( const ImagePlug *image, const std::string &channelName, const Imath::V2i &tileOrigin, std::shared_ptr<object> tile ) {
+		[&pythonGatherFunctor](
+			const ImagePlug *image, const std::string &channelName, const Imath::V2i &tileOrigin,
+			std::shared_ptr<object> tile
+		) {
 			IECorePython::ScopedGILLock gilLock;
 			pythonGatherFunctor( ImagePlugPtr( const_cast<ImagePlug *>( image ) ), channelName, tileOrigin, *tile );
 		},
 
-		window,
-		tileOrder
+		window, tileOrder
 
 	);
 }
@@ -206,7 +212,10 @@ void GafferImageModule::bindImageAlgo()
 	def( "channelName", &GafferImage::ImageAlgo::channelName );
 	def( "colorIndex", &GafferImage::ImageAlgo::colorIndex );
 	def( "channelExists", &channelExistsWrapper );
-	def( "channelExists", (bool ( * )( const std::vector<std::string> &channelNames, const std::string &channelName ))&GafferImage::ImageAlgo::channelExists );
+	def( "channelExists",
+		 (
+			 bool ( * )( const std::vector<std::string> &channelNames, const std::string &channelName )
+		 )&GafferImage::ImageAlgo::channelExists );
 	def( "sortedChannelNames", &sortedChannelNamesWrapper );
 
 	enum_<ImageAlgo::TileOrder>( "TileOrder" )
@@ -214,32 +223,20 @@ void GafferImageModule::bindImageAlgo()
 		.value( "TopToBottom", ImageAlgo::TopToBottom )
 		.value( "BottomToTop", ImageAlgo::BottomToTop );
 
-	def(
-		"parallelGatherTiles", &parallelGatherTiles1,
-		(
-			boost::python::arg( "image" ),
-			boost::python::arg( "tileFunctor" ),
-			boost::python::arg( "gatherFunctor" ),
-			boost::python::arg( "window" ) = Imath::Box2i(),
-			boost::python::arg( "tileOrder" ) = ImageAlgo::Unordered
-		)
-	);
+	def( "parallelGatherTiles", &parallelGatherTiles1,
+		 ( boost::python::arg( "image" ), boost::python::arg( "tileFunctor" ), boost::python::arg( "gatherFunctor" ),
+		   boost::python::arg( "window" ) = Imath::Box2i(),
+		   boost::python::arg( "tileOrder" ) = ImageAlgo::Unordered ) );
 
-	def(
-		"parallelGatherTiles", &parallelGatherTiles2,
-		(
-			boost::python::arg( "image" ),
-			boost::python::arg( "channelNames" ),
-			boost::python::arg( "tileFunctor" ),
-			boost::python::arg( "gatherFunctor" ),
-			boost::python::arg( "window" ) = Imath::Box2i(),
-			boost::python::arg( "tileOrder" ) = ImageAlgo::Unordered
-		)
-	);
+	def( "parallelGatherTiles", &parallelGatherTiles2,
+		 ( boost::python::arg( "image" ), boost::python::arg( "channelNames" ), boost::python::arg( "tileFunctor" ),
+		   boost::python::arg( "gatherFunctor" ), boost::python::arg( "window" ) = Imath::Box2i(),
+		   boost::python::arg( "tileOrder" ) = ImageAlgo::Unordered ) );
 
 	def( "image", &imageWrapper, ( boost::python::arg( "viewName" ) = object() ) );
 	def( "imageHash", &imageHashWrapper, ( boost::python::arg( "viewName" ) = object() ) );
-	def( "tiles", &tilesWrapper, ( boost::python::arg( "_copy" ) = true, boost::python::arg( "viewName" ) = object() ) );
+	def( "tiles", &tilesWrapper,
+		 ( boost::python::arg( "_copy" ) = true, boost::python::arg( "viewName" ) = object() ) );
 
 	StringVectorFromStringVectorData();
 }

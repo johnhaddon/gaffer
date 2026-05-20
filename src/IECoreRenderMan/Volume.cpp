@@ -50,7 +50,10 @@ std::mutex g_geometryPrototypeMutex;
 
 } // namespace
 
-Volume::Volume( const std::string &name, const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes, LightLinker *lightLinker, const Session *session, const IECoreVDB::VDBObject *vdbObject )
+Volume::Volume(
+	const std::string &name, const ConstGeometryPrototypePtr &geometryPrototype, const Attributes *attributes,
+	LightLinker *lightLinker, const Session *session, const IECoreVDB::VDBObject *vdbObject
+)
 	: Object( name, geometryPrototype, attributes, lightLinker, session )
 {
 	// Store the same information that GeometryPrototypeCache will have used
@@ -59,15 +62,16 @@ Volume::Volume( const std::string &name, const ConstGeometryPrototypePtr &geomet
 	m_primVars.RtParamList::Inherit( attributes->prototypeAttributes() );
 }
 
-void Volume::transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times )
+void Volume::transform(
+	const IECoreScenePreview::Renderer::TransformSamples &samples,
+	const IECoreScenePreview::Renderer::SampleTimes &times
+)
 {
 	AnimatedTransform animatedTransform( samples, times );
 	const riley::GeometryInstanceResult result = m_session->riley->ModifyGeometryInstance(
-		/* group = */ riley::GeometryPrototypeId::InvalidId(),
-		m_geometryInstance,
+		/* group = */ riley::GeometryPrototypeId::InvalidId(), m_geometryInstance,
 		/* material = */ nullptr,
-		/* coordsys = */ nullptr,
-		&animatedTransform,
+		/* coordsys = */ nullptr, &animatedTransform,
 		/* attributes = */ nullptr
 	);
 
@@ -88,7 +92,9 @@ void Volume::fixupTransformEdit( riley::GeometryInstanceResult editResult )
 			// the edits.
 			std::lock_guard lock( g_geometryPrototypeMutex );
 			auto d = m_attributes->displacement();
-			m_session->riley->ModifyGeometryPrototype( Loader::strings().k_Ri_Volume, m_geometryPrototype->id(), d ? &d->id() : nullptr, &m_primVars );
+			m_session->riley->ModifyGeometryPrototype(
+				Loader::strings().k_Ri_Volume, m_geometryPrototype->id(), d ? &d->id() : nullptr, &m_primVars
+			);
 			break;
 		}
 		case riley::GeometryInstanceResult::k_Error :

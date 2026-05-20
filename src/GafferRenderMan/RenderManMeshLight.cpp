@@ -60,10 +60,11 @@ const ConstCompoundObjectPtr g_hiddenVisibilityAttributes = [] {
 GAFFER_NODE_DEFINE_TYPE( RenderManMeshLight );
 
 RenderManMeshLight::RenderManMeshLight( const std::string &name )
-	: GafferScene::MeshLight(
-		  name,
-		  [] { RenderManShaderPtr shader = new RenderManShader; shader->loadShader( "PxrMeshLight" ); return shader; }()
-	  )
+	: GafferScene::MeshLight( name, [] {
+		  RenderManShaderPtr shader = new RenderManShader;
+		  shader->loadShader( "PxrMeshLight" );
+		  return shader;
+	  }() )
 {
 
 	// Hide the objects to everything except camera rays, since that seems a
@@ -78,15 +79,12 @@ RenderManMeshLight::RenderManMeshLight( const std::string &name )
 	/// \todo We could promote as OptionalValuePlug to avoid exposing the
 	/// `name` plug unnecessarily.
 
-	NameValuePlugPtr internalCameraVisibilityPlug = new NameValuePlug(
-		"ri:visibility:camera", new BoolPlug( "value", Plug::In, true ), false, "cameraVisibility"
-	);
+	NameValuePlugPtr internalCameraVisibilityPlug =
+		new NameValuePlug( "ri:visibility:camera", new BoolPlug( "value", Plug::In, true ), false, "cameraVisibility" );
 	customAttributes()->attributesPlug()->addChild( internalCameraVisibilityPlug );
 	PlugPtr cameraVisibilityPlug = internalCameraVisibilityPlug->createCounterpart( "cameraVisibility", Plug::In );
 	addChild( cameraVisibilityPlug );
 	internalCameraVisibilityPlug->setInput( cameraVisibilityPlug );
 }
 
-RenderManMeshLight::~RenderManMeshLight()
-{
-}
+RenderManMeshLight::~RenderManMeshLight() {}

@@ -76,9 +76,7 @@ AttributeVisualiser::AttributeVisualiser( const std::string &name )
 	addChild( new StringPlug( "shaderParameter", Plug::In, "Cs" ) );
 }
 
-AttributeVisualiser::~AttributeVisualiser()
-{
-}
+AttributeVisualiser::~AttributeVisualiser() {}
 
 Gaffer::StringPlug *AttributeVisualiser::attributeNamePlug()
 {
@@ -162,15 +160,9 @@ const Gaffer::StringPlug *AttributeVisualiser::shaderParameterPlug() const
 
 bool AttributeVisualiser::affectsProcessedAttributes( const Gaffer::Plug *input ) const
 {
-	return AttributeProcessor::affectsProcessedAttributes( input ) ||
-		input == attributeNamePlug() ||
-		input == modePlug() ||
-		input == minPlug() ||
-		input == maxPlug() ||
-		input == shaderTypePlug() ||
-		input == shaderNamePlug() ||
-		input == shaderParameterPlug() ||
-		rampPlug()->isAncestorOf( input );
+	return AttributeProcessor::affectsProcessedAttributes( input ) || input == attributeNamePlug() ||
+		input == modePlug() || input == minPlug() || input == maxPlug() || input == shaderTypePlug() ||
+		input == shaderNamePlug() || input == shaderParameterPlug() || rampPlug()->isAncestorOf( input );
 }
 
 void AttributeVisualiser::hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -186,7 +178,9 @@ void AttributeVisualiser::hashProcessedAttributes( const Gaffer::Context *contex
 	shaderParameterPlug()->hash( h );
 }
 
-IECore::ConstCompoundObjectPtr AttributeVisualiser::computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const
+IECore::ConstCompoundObjectPtr AttributeVisualiser::computeProcessedAttributes(
+	const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes
+) const
 {
 	const std::string attributeName = attributeNamePlug()->getValue();
 	if( !attributeName.size() )

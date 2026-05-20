@@ -101,10 +101,7 @@ void GafferSceneModule::bindHierarchy()
 	IECorePython::RunTimeTypedClass<Capsule>()
 		.def(
 			init<
-				const ScenePlug *,
-				const ScenePlug::ScenePath &,
-				const Gaffer::Context &,
-				const IECore::MurmurHash &,
+				const ScenePlug *, const ScenePlug::ScenePath &, const Gaffer::Context &, const IECore::MurmurHash &,
 				const Imath::Box3f &>()
 		)
 		.def( "scene", &scene )
@@ -113,8 +110,9 @@ void GafferSceneModule::bindHierarchy()
 		.def( "setRenderOptions", &Capsule::setRenderOptions )
 		.def( "getRenderOptions", &getRenderOptionsWrapper );
 
-	GafferBindings::DependencyNodeClass<Group>()
-		.def( "nextInPlug", ( ScenePlug * (Group::*)() ) & Group::nextInPlug, return_value_policy<CastToIntrusivePtr>() );
+	GafferBindings::DependencyNodeClass<Group>().def(
+		"nextInPlug", ( ScenePlug * (Group::*)() ) & Group::nextInPlug, return_value_policy<CastToIntrusivePtr>()
+	);
 
 	GafferBindings::DependencyNodeClass<BranchCreator>();
 	GafferBindings::DependencyNodeClass<GafferScene::Parent>();
@@ -145,7 +143,13 @@ void GafferSceneModule::bindHierarchy()
 			.value( "RootPerVertex", Instancer::PrototypeMode::RootPerVertex );
 
 		GafferBindings::PlugClass<Instancer::ContextVariablePlug>()
-			.def( init<const char *, Plug::Direction, bool, unsigned>( ( boost::python::arg_( "name" ) = GraphComponent::defaultName<Instancer::ContextVariablePlug>(), boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "defaultEnable" ) = true, boost::python::arg_( "flags" ) = Plug::Default ) ) )
+			.def(
+				init<const char *, Plug::Direction, bool, unsigned>(
+					( boost::python::arg_( "name" ) = GraphComponent::defaultName<Instancer::ContextVariablePlug>(),
+					  boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "defaultEnable" ) = true,
+					  boost::python::arg_( "flags" ) = Plug::Default )
+				)
+			)
 			.attr( "__qualname__" ) = "Instancer.ContextVariablePlug";
 
 		// Expose InstancerCapsules as if they were plain Capsules. We don't
@@ -156,9 +160,7 @@ void GafferSceneModule::bindHierarchy()
 		// See "Boost.Python and slightly more tricky inheritance" at
 		// http://lists.boost.org/Archives/boost/2005/09/93017.php for more details.
 
-		boost::python::objects::copy_class_object(
-			type_id<Capsule>(), Instancer::instancerCapsuleTypeInfo()
-		);
+		boost::python::objects::copy_class_object( type_id<Capsule>(), Instancer::instancerCapsuleTypeInfo() );
 	}
 
 	{

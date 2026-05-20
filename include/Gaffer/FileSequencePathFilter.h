@@ -50,7 +50,7 @@ IE_CORE_FORWARDDECLARE( FileSequencePathFilter )
 class GAFFER_API FileSequencePathFilter : public PathFilter
 {
 
-	public:
+public:
 
 	/// Defines which child paths should remain after the filter runs.
 	enum Keep
@@ -69,16 +69,18 @@ class GAFFER_API FileSequencePathFilter : public PathFilter
 	explicit FileSequencePathFilter( Keep mode = Concise, IECore::CompoundDataPtr userData = nullptr );
 	~FileSequencePathFilter() override;
 
-	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::FileSequencePathFilter, FileSequencePathFilterTypeId, Gaffer::PathFilter );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION(
+		Gaffer::FileSequencePathFilter, FileSequencePathFilterTypeId, Gaffer::PathFilter
+	);
 
 	Keep getMode() const;
 	void setMode( Keep mode );
 
-	protected:
+protected:
 
 	void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const override;
 
-	private:
+private:
 
 	bool remove( PathPtr path ) const;
 

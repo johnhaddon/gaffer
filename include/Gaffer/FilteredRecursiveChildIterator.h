@@ -45,13 +45,17 @@ namespace Gaffer
 {
 
 template<typename Predicate, typename RecursionPredicate = TypePredicate<GraphComponent>>
-class FilteredRecursiveChildIterator : public boost::iterator_adaptor<FilteredRecursiveChildIterator<Predicate, RecursionPredicate>, RecursiveChildIterator, const typename Predicate::ChildType::Ptr>
+class FilteredRecursiveChildIterator : public boost::iterator_adaptor<
+										   FilteredRecursiveChildIterator<Predicate, RecursionPredicate>,
+										   RecursiveChildIterator, const typename Predicate::ChildType::Ptr>
 {
 
-	public:
+public:
 
 	using ChildType = typename Predicate::ChildType;
-	using BaseIterator = boost::iterator_adaptor<FilteredRecursiveChildIterator<Predicate, RecursionPredicate>, RecursiveChildIterator, const typename Predicate::ChildType::Ptr>;
+	using BaseIterator = boost::iterator_adaptor<
+		FilteredRecursiveChildIterator<Predicate, RecursionPredicate>, RecursiveChildIterator,
+		const typename Predicate::ChildType::Ptr>;
 
 	FilteredRecursiveChildIterator()
 		: BaseIterator(),
@@ -62,9 +66,7 @@ class FilteredRecursiveChildIterator : public boost::iterator_adaptor<FilteredRe
 	}
 
 	FilteredRecursiveChildIterator( const GraphComponent *parent )
-		: BaseIterator(
-			  RecursiveChildIterator( parent )
-		  ),
+		: BaseIterator( RecursiveChildIterator( parent ) ),
 		  m_predicate( Predicate() ),
 		  m_recursionPredicate( RecursionPredicate() ),
 		  m_end( RecursiveChildIterator( parent, parent->children().end() ) )
@@ -73,9 +75,7 @@ class FilteredRecursiveChildIterator : public boost::iterator_adaptor<FilteredRe
 	}
 
 	FilteredRecursiveChildIterator( const GraphComponent *parent, const GraphComponent::ChildIterator &it )
-		: BaseIterator(
-			  RecursiveChildIterator( parent, it )
-		  ),
+		: BaseIterator( RecursiveChildIterator( parent, it ) ),
 		  m_predicate( Predicate() ),
 		  m_recursionPredicate( RecursionPredicate() ),
 		  m_end( RecursiveChildIterator( parent, parent->children().end() ) )
@@ -85,17 +85,11 @@ class FilteredRecursiveChildIterator : public boost::iterator_adaptor<FilteredRe
 
 	/// Calling prune() causes the next increment to skip any recursion
 	/// that it would normally perform.
-	void prune()
-	{
-		const_cast<RecursiveChildIterator &>( BaseIterator::base() ).prune();
-	}
+	void prune() { const_cast<RecursiveChildIterator &>( BaseIterator::base() ).prune(); }
 
-	bool done() const
-	{
-		return BaseIterator::base().done();
-	}
+	bool done() const { return BaseIterator::base().done(); }
 
-	private:
+private:
 
 	friend class boost::iterator_core_access;
 
@@ -137,26 +131,17 @@ template<typename Predicate, typename RecursionPredicate = TypePredicate<GraphCo
 class FilteredRecursiveChildRange
 {
 
-	public:
+public:
 
-	FilteredRecursiveChildRange( const GraphComponent &parent )
-		: m_parent( parent )
-	{
-	}
+	FilteredRecursiveChildRange( const GraphComponent &parent ) : m_parent( parent ) {}
 
 	using Iterator = FilteredRecursiveChildIterator<Predicate, RecursionPredicate>;
 
-	Iterator begin() const
-	{
-		return Iterator( &m_parent, m_parent.children().begin() );
-	}
+	Iterator begin() const { return Iterator( &m_parent, m_parent.children().begin() ); }
 
-	Iterator end() const
-	{
-		return Iterator( &m_parent, m_parent.children().end() );
-	}
+	Iterator end() const { return Iterator( &m_parent, m_parent.children().end() ); }
 
-	private:
+private:
 
 	const GraphComponent &m_parent;
 };

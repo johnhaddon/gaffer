@@ -96,7 +96,7 @@ namespace
 {
 class ScopedTransform
 {
-	public:
+public:
 
 	ScopedTransform( const M44f &transform )
 	{
@@ -116,13 +116,16 @@ class ScopedTransform
 		}
 	}
 
-	private:
+private:
 
 	bool m_nonIdentity;
 };
 
 template<class... Vs>
-bool haveMatchingVisualisations( Visualisation::ColorSpace colorSpace, Visualisation::Scale scale, Visualisation::Category category, const Vs &...visualisations )
+bool haveMatchingVisualisations(
+	Visualisation::ColorSpace colorSpace, Visualisation::Scale scale, Visualisation::Category category,
+	const Vs &...visualisations
+)
 {
 	for( auto vs : { visualisations... } )
 	{
@@ -138,7 +141,10 @@ bool haveMatchingVisualisations( Visualisation::ColorSpace colorSpace, Visualisa
 }
 
 template<class... Vs>
-void renderMatchingVisualisations( Visualisation::ColorSpace colorSpace, Visualisation::Scale scale, Visualisation::Category category, IECoreGL::State *state, const Vs &...visualisations )
+void renderMatchingVisualisations(
+	Visualisation::ColorSpace colorSpace, Visualisation::Scale scale, Visualisation::Category category,
+	IECoreGL::State *state, const Vs &...visualisations
+)
 {
 	for( auto vs : { visualisations... } )
 	{
@@ -153,7 +159,10 @@ void renderMatchingVisualisations( Visualisation::ColorSpace colorSpace, Visuali
 }
 
 template<class... Vs>
-void accumulateVisualisationBounds( Box3f &target, Visualisation::Scale scale, Visualisation::Category category, const M44f &transform, const Vs &...visualisations )
+void accumulateVisualisationBounds(
+	Box3f &target, Visualisation::Scale scale, Visualisation::Category category, const M44f &transform,
+	const Vs &...visualisations
+)
 {
 	for( auto vs : { visualisations... } )
 	{
@@ -182,7 +191,10 @@ T *reportedCast( const IECore::RunTimeTyped *v, const char *type, const IECore::
 		return t;
 	}
 
-	IECore::msg( IECore::Msg::Warning, "IECoreGL::Renderer", fmt::format( "Expected {} but got {} for {} \"{}\".", T::staticTypeName(), v->typeName(), type, name.string() ) );
+	IECore::msg(
+		IECore::Msg::Warning, "IECoreGL::Renderer",
+		fmt::format( "Expected {} but got {} for {} \"{}\".", T::staticTypeName(), v->typeName(), type, name.string() )
+	);
 	return nullptr;
 }
 
@@ -292,7 +304,9 @@ const IECoreGL::State &selectedVisualiserDisplayState()
 	return *s;
 }
 
-const IECoreGL::State &selectionState( const IECoreGL::Renderable *renderable, const IECoreGL::State *currentState, Visualisation::ColorSpace colorSpace )
+const IECoreGL::State &selectionState(
+	const IECoreGL::Renderable *renderable, const IECoreGL::State *currentState, Visualisation::ColorSpace colorSpace
+)
 {
 	if( colorSpace == Visualisation::ColorSpace::Display )
 	{
@@ -336,10 +350,11 @@ namespace
 class OpenGLAttributes : public IECoreScenePreview::Renderer::AttributesInterface
 {
 
-	public:
+public:
 
 	OpenGLAttributes( const IECore::CompoundObject *attributes )
-		: m_frustumMode( FrustumMode::WhenSelected ), m_visualisationStateColorSpace( Visualisation::ColorSpace::Display )
+		: m_frustumMode( FrustumMode::WhenSelected ),
+		  m_visualisationStateColorSpace( Visualisation::ColorSpace::Display )
 	{
 		const FloatData *visualiserScaleData = attributes->member<FloatData>( "gl:visualiser:scale" );
 		m_visualiserScale = visualiserScaleData ? visualiserScaleData->readable() : 1.0;
@@ -356,9 +371,7 @@ class OpenGLAttributes : public IECoreScenePreview::Renderer::AttributesInterfac
 			}
 		}
 
-		m_state = static_pointer_cast<const State>(
-			CachedConverter::defaultCachedConverter()->convert( attributes )
-		);
+		m_state = static_pointer_cast<const State>( CachedConverter::defaultCachedConverter()->convert( attributes ) );
 
 		IECoreGL::ConstStatePtr visualisationState;
 		m_visualisations = AttributeVisualiser::allVisualisations( attributes, visualisationState );
@@ -367,7 +380,8 @@ class OpenGLAttributes : public IECoreScenePreview::Renderer::AttributesInterfac
 		m_lightVisualisations = LightVisualiser::allVisualisations( attributes, lightVisualisationState );
 
 		IECoreGL::ConstStatePtr lightFilterVisualisationState;
-		m_lightFilterVisualisations = LightFilterVisualiser::allVisualisations( attributes, lightFilterVisualisationState );
+		m_lightFilterVisualisations =
+			LightFilterVisualiser::allVisualisations( attributes, lightFilterVisualisationState );
 
 		if( !m_lightFilterVisualisations.empty() )
 		{
@@ -376,7 +390,9 @@ class OpenGLAttributes : public IECoreScenePreview::Renderer::AttributesInterfac
 				// Light filter visualisers are in `m_lightFilterVisualisations` and light visualisers are in
 				// `m_lightVisualisations`. Combine them both into `m_lightVisualisations` so that
 				// filters attached to light locations are drawn as expected.
-				m_lightVisualisations.insert( m_lightVisualisations.end(), m_lightFilterVisualisations.begin(), m_lightFilterVisualisations.end() );
+				m_lightVisualisations.insert(
+					m_lightVisualisations.end(), m_lightFilterVisualisations.begin(), m_lightFilterVisualisations.end()
+				);
 			}
 			else
 			{
@@ -421,35 +437,20 @@ class OpenGLAttributes : public IECoreScenePreview::Renderer::AttributesInterfac
 		}
 	}
 
-	const State *state() const
-	{
-		return m_state.get();
-	}
+	const State *state() const { return m_state.get(); }
 
 	const State *visualisationState( Visualisation::ColorSpace colorSpace ) const
 	{
 		return colorSpace == m_visualisationStateColorSpace ? m_visualisationState.get() : nullptr;
 	}
 
-	const IECoreGLPreview::Visualisations &visualisations() const
-	{
-		return m_visualisations;
-	}
+	const IECoreGLPreview::Visualisations &visualisations() const { return m_visualisations; }
 
-	const IECoreGLPreview::Visualisations &lightVisualisations() const
-	{
-		return m_lightVisualisations;
-	}
+	const IECoreGLPreview::Visualisations &lightVisualisations() const { return m_lightVisualisations; }
 
-	const IECoreGLPreview::Visualisations &lightFilterVisualisations() const
-	{
-		return m_lightFilterVisualisations;
-	}
+	const IECoreGLPreview::Visualisations &lightFilterVisualisations() const { return m_lightFilterVisualisations; }
 
-	float visualiserScale() const
-	{
-		return m_visualiserScale;
-	}
+	float visualiserScale() const { return m_visualiserScale; }
 
 	bool drawFrustum( bool isSelected ) const
 	{
@@ -464,7 +465,7 @@ class OpenGLAttributes : public IECoreScenePreview::Renderer::AttributesInterfac
 		}
 	}
 
-	private:
+private:
 
 	ConstStatePtr m_state;
 	ConstStatePtr m_visualisationState;
@@ -501,9 +502,12 @@ using EditQueue = tbb::concurrent_queue<Edit>;
 class OpenGLObject : public IECoreScenePreview::Renderer::ObjectInterface
 {
 
-	public:
+public:
 
-	OpenGLObject( const std::string &name, const IECore::Object *object, const ConstOpenGLAttributesPtr &attributes, EditQueue &editQueue )
+	OpenGLObject(
+		const std::string &name, const IECore::Object *object, const ConstOpenGLAttributesPtr &attributes,
+		EditQueue &editQueue
+	)
 		: m_objectType( object ? object->typeId() : IECore::NullObjectTypeId ),
 		  m_attributes( attributes ),
 		  m_editQueue( editQueue )
@@ -521,7 +525,8 @@ class OpenGLObject : public IECoreScenePreview::Renderer::ObjectInterface
 			{
 				try
 				{
-					IECore::ConstRunTimeTypedPtr glObject = IECoreGL::CachedConverter::defaultCachedConverter()->convert( object );
+					IECore::ConstRunTimeTypedPtr glObject =
+						IECoreGL::CachedConverter::defaultCachedConverter()->convert( object );
 					m_renderable = IECore::runTimeCast<const IECoreGL::Renderable>( glObject.get() );
 				}
 				catch( ... )
@@ -532,7 +537,10 @@ class OpenGLObject : public IECoreScenePreview::Renderer::ObjectInterface
 		}
 	}
 
-	void transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times ) override
+	void transform(
+		const IECoreScenePreview::Renderer::TransformSamples &samples,
+		const IECoreScenePreview::Renderer::SampleTimes &times
+	) override
 	{
 		m_editQueue.push( [this, transform = samples.front()]() {
 			m_transform = transform;
@@ -543,13 +551,13 @@ class OpenGLObject : public IECoreScenePreview::Renderer::ObjectInterface
 	bool attributes( const IECoreScenePreview::Renderer::AttributesInterface *attributes ) override
 	{
 		ConstOpenGLAttributesPtr openGLAttributes = static_cast<const OpenGLAttributes *>( attributes );
-		m_editQueue.push( [this, openGLAttributes]() {
-			m_attributes = openGLAttributes;
-		} );
+		m_editQueue.push( [this, openGLAttributes]() { m_attributes = openGLAttributes; } );
 		return true;
 	}
 
-	void link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects ) override
+	void link(
+		const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects
+	) override
 	{
 	}
 
@@ -592,24 +600,33 @@ class OpenGLObject : public IECoreScenePreview::Renderer::ObjectInterface
 
 		const Visualisations &attrVis = visualisations( *m_attributes );
 
-		accumulateVisualisationBounds( b, Visualisation::Scale::None, categories, m_transformSansScale, attrVis, m_objectVisualisations );
-		accumulateVisualisationBounds( b, Visualisation::Scale::Local, categories, m_transform, attrVis, m_objectVisualisations );
-		accumulateVisualisationBounds( b, Visualisation::Scale::Visualiser, categories, visualiserTransform( false ), attrVis, m_objectVisualisations );
-		accumulateVisualisationBounds( b, Visualisation::Scale::LocalAndVisualiser, categories, visualiserTransform( true ), attrVis, m_objectVisualisations );
+		accumulateVisualisationBounds(
+			b, Visualisation::Scale::None, categories, m_transformSansScale, attrVis, m_objectVisualisations
+		);
+		accumulateVisualisationBounds(
+			b, Visualisation::Scale::Local, categories, m_transform, attrVis, m_objectVisualisations
+		);
+		accumulateVisualisationBounds(
+			b, Visualisation::Scale::Visualiser, categories, visualiserTransform( false ), attrVis,
+			m_objectVisualisations
+		);
+		accumulateVisualisationBounds(
+			b, Visualisation::Scale::LocalAndVisualiser, categories, visualiserTransform( true ), attrVis,
+			m_objectVisualisations
+		);
 		return b;
 	}
 
-	const vector<InternedString> &name() const
-	{
-		return m_name;
-	}
+	const vector<InternedString> &name() const { return m_name; }
 
 	bool selected( const IECore::PathMatcher &selection ) const
 	{
 		return selection.match( m_name ) & ( PathMatcher::AncestorMatch | PathMatcher::ExactMatch );
 	}
 
-	void render( IECoreGL::State *currentState, const IECore::PathMatcher &selection, Visualisation::ColorSpace colorSpace ) const
+	void render(
+		IECoreGL::State *currentState, const IECore::PathMatcher &selection, Visualisation::ColorSpace colorSpace
+	) const
 	{
 		const Visualisations &attrVis = visualisations( *m_attributes );
 		const bool haveVisualisations = attrVis.size() > 0 || m_objectVisualisations.size() > 0;
@@ -628,7 +645,8 @@ class OpenGLObject : public IECoreScenePreview::Renderer::ObjectInterface
 		if( haveVisualisations )
 		{
 			IECoreGL::State::ScopedBinding selectionScope(
-				selectedVisualiserDisplayState(), *currentState, isSelected && colorSpace == Visualisation::ColorSpace::Display
+				selectedVisualiserDisplayState(), *currentState,
+				isSelected && colorSpace == Visualisation::ColorSpace::Display
 			);
 
 			Visualisation::Category categories = Visualisation::Category::Generic;
@@ -639,29 +657,48 @@ class OpenGLObject : public IECoreScenePreview::Renderer::ObjectInterface
 
 			if( m_attributes->visualiserScale() > 0.0f )
 			{
-				if( haveMatchingVisualisations( colorSpace, Visualisation::Scale::Visualiser, categories, attrVis, m_objectVisualisations ) )
+				if( haveMatchingVisualisations(
+						colorSpace, Visualisation::Scale::Visualiser, categories, attrVis, m_objectVisualisations
+					) )
 				{
 					ScopedTransform v( visualiserTransform( false ) );
-					renderMatchingVisualisations( colorSpace, Visualisation::Scale::Visualiser, categories, currentState, attrVis, m_objectVisualisations );
+					renderMatchingVisualisations(
+						colorSpace, Visualisation::Scale::Visualiser, categories, currentState, attrVis,
+						m_objectVisualisations
+					);
 				}
 
-				if( haveMatchingVisualisations( colorSpace, Visualisation::Scale::LocalAndVisualiser, categories, attrVis, m_objectVisualisations ) )
+				if( haveMatchingVisualisations(
+						colorSpace, Visualisation::Scale::LocalAndVisualiser, categories, attrVis,
+						m_objectVisualisations
+					) )
 				{
 					ScopedTransform c( visualiserTransform( true ) );
-					renderMatchingVisualisations( colorSpace, Visualisation::Scale::LocalAndVisualiser, categories, currentState, attrVis, m_objectVisualisations );
+					renderMatchingVisualisations(
+						colorSpace, Visualisation::Scale::LocalAndVisualiser, categories, currentState, attrVis,
+						m_objectVisualisations
+					);
 				}
 			}
 
-			if( haveMatchingVisualisations( colorSpace, Visualisation::Scale::None, categories, attrVis, m_objectVisualisations ) )
+			if( haveMatchingVisualisations(
+					colorSpace, Visualisation::Scale::None, categories, attrVis, m_objectVisualisations
+				) )
 			{
 				ScopedTransform l( m_transformSansScale );
-				renderMatchingVisualisations( colorSpace, Visualisation::Scale::None, categories, currentState, attrVis, m_objectVisualisations );
+				renderMatchingVisualisations(
+					colorSpace, Visualisation::Scale::None, categories, currentState, attrVis, m_objectVisualisations
+				);
 			}
 
-			if( haveMatchingVisualisations( colorSpace, Visualisation::Scale::Local, categories, attrVis, m_objectVisualisations ) )
+			if( haveMatchingVisualisations(
+					colorSpace, Visualisation::Scale::Local, categories, attrVis, m_objectVisualisations
+				) )
 			{
 				ScopedTransform l( m_transform );
-				renderMatchingVisualisations( colorSpace, Visualisation::Scale::Local, categories, currentState, attrVis, m_objectVisualisations );
+				renderMatchingVisualisations(
+					colorSpace, Visualisation::Scale::Local, categories, currentState, attrVis, m_objectVisualisations
+				);
 			}
 		}
 
@@ -678,8 +715,7 @@ class OpenGLObject : public IECoreScenePreview::Renderer::ObjectInterface
 				visualisationStateScope.emplace( *visualisationState, *currentState );
 			}
 			IECoreGL::State::ScopedBinding selectionScope(
-				selectionState( m_renderable.get(), currentState, colorSpace ),
-				*currentState, isSelected
+				selectionState( m_renderable.get(), currentState, colorSpace ), *currentState, isSelected
 			);
 
 			ScopedTransform l( m_transform );
@@ -687,24 +723,18 @@ class OpenGLObject : public IECoreScenePreview::Renderer::ObjectInterface
 		}
 	}
 
-	IECore::TypeId objectType() const
-	{
-		return m_objectType;
-	}
+	IECore::TypeId objectType() const { return m_objectType; }
 
-	protected:
+protected:
 
-	EditQueue &editQueue()
-	{
-		return m_editQueue;
-	}
+	EditQueue &editQueue() { return m_editQueue; }
 
 	virtual const Visualisations &visualisations( const OpenGLAttributes &attributes ) const
 	{
 		return attributes.visualisations();
 	}
 
-	private:
+private:
 
 	// sansScalingAndShear is expensive, so we store that, the other
 	// visualiser scaled variants we compute in transformedBound/render
@@ -741,9 +771,12 @@ namespace
 class OpenGLCamera : public OpenGLObject
 {
 
-	public:
+public:
 
-	OpenGLCamera( const std::string &name, const IECoreScene::Camera *camera, const ConstOpenGLAttributesPtr &attributes, EditQueue &editQueue )
+	OpenGLCamera(
+		const std::string &name, const IECoreScene::Camera *camera, const ConstOpenGLAttributesPtr &attributes,
+		EditQueue &editQueue
+	)
 		: OpenGLObject( name, camera, attributes, editQueue )
 	{
 		if( camera )
@@ -759,25 +792,20 @@ class OpenGLCamera : public OpenGLObject
 		}
 	}
 
-	void transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times ) override
+	void transform(
+		const IECoreScenePreview::Renderer::TransformSamples &samples,
+		const IECoreScenePreview::Renderer::SampleTimes &times
+	) override
 	{
 		OpenGLObject::transform( samples, times );
-		editQueue().push( [this, transform = samples.front()]() {
-			m_camera->setTransform( transform );
-		} );
+		editQueue().push( [this, transform = samples.front()]() { m_camera->setTransform( transform ); } );
 	}
 
-	const IECoreGL::Camera *camera() const
-	{
-		return m_camera.get();
-	}
+	const IECoreGL::Camera *camera() const { return m_camera.get(); }
 
-	const V2i getResolution() const
-	{
-		return m_resolution;
-	}
+	const V2i getResolution() const { return m_resolution; }
 
-	private:
+private:
 
 	IECoreGL::CameraPtr m_camera;
 	V2i m_resolution;
@@ -797,14 +825,17 @@ namespace
 class OpenGLLight : public OpenGLObject
 {
 
-	public:
+public:
 
-	OpenGLLight( const std::string &name, const IECore::Object *light, const ConstOpenGLAttributesPtr &attributes, EditQueue &editQueue )
+	OpenGLLight(
+		const std::string &name, const IECore::Object *light, const ConstOpenGLAttributesPtr &attributes,
+		EditQueue &editQueue
+	)
 		: OpenGLObject( name, light, attributes, editQueue )
 	{
 	}
 
-	protected:
+protected:
 
 	const Visualisations &visualisations( const OpenGLAttributes &attributes ) const override
 	{
@@ -817,14 +848,17 @@ IE_CORE_FORWARDDECLARE( OpenGLLight )
 class OpenGLLightFilter : public OpenGLObject
 {
 
-	public:
+public:
 
-	OpenGLLightFilter( const std::string &name, const IECore::Object *object, const ConstOpenGLAttributesPtr &attributes, EditQueue &editQueue )
+	OpenGLLightFilter(
+		const std::string &name, const IECore::Object *object, const ConstOpenGLAttributesPtr &attributes,
+		EditQueue &editQueue
+	)
 		: OpenGLObject( name, object, attributes, editQueue )
 	{
 	}
 
-	protected:
+protected:
 
 	const Visualisations &visualisations( const OpenGLAttributes &attributes ) const override
 	{
@@ -847,10 +881,15 @@ const std::string g_headerPrefix( "header:" );
 class OpenGLRenderer final : public IECoreScenePreview::Renderer
 {
 
-	public:
+public:
 
-	OpenGLRenderer( RenderType renderType, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler )
-		: m_renderType( renderType ), m_baseStateOptions( new CompoundObject ), m_renderObjects( true ), m_messageHandler( messageHandler )
+	OpenGLRenderer(
+		RenderType renderType, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler
+	)
+		: m_renderType( renderType ),
+		  m_baseStateOptions( new CompoundObject ),
+		  m_renderObjects( true ),
+		  m_messageHandler( messageHandler )
 	{
 		if( renderType == SceneDescription )
 		{
@@ -858,14 +897,9 @@ class OpenGLRenderer final : public IECoreScenePreview::Renderer
 		}
 	}
 
-	~OpenGLRenderer() override
-	{
-	}
+	~OpenGLRenderer() override {}
 
-	IECore::InternedString name() const override
-	{
-		return "OpenGL";
-	}
+	IECore::InternedString name() const override { return "OpenGL"; }
 
 	void option( const IECore::InternedString &name, const IECore::Object *value ) override
 	{
@@ -915,7 +949,10 @@ class OpenGLRenderer final : public IECoreScenePreview::Renderer
 		}
 		else
 		{
-			IECore::msg( IECore::Msg::Warning, "IECoreGL::Renderer::option", fmt::format( "Unknown option \"{}\".", name.string() ) );
+			IECore::msg(
+				IECore::Msg::Warning, "IECoreGL::Renderer::option",
+				fmt::format( "Unknown option \"{}\".", name.string() )
+			);
 		}
 	}
 
@@ -940,7 +977,10 @@ class OpenGLRenderer final : public IECoreScenePreview::Renderer
 		return result;
 	}
 
-	ObjectInterfacePtr camera( const std::string &name, const CameraSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override
+	ObjectInterfacePtr camera(
+		const std::string &name, const CameraSamples &samples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) override
 	{
 		IECore::MessageHandler::Scope s( m_messageHandler.get() );
 
@@ -959,25 +999,40 @@ class OpenGLRenderer final : public IECoreScenePreview::Renderer
 		return result;
 	}
 
-	ObjectInterfacePtr light( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override
+	ObjectInterfacePtr light(
+		const std::string &name, const ObjectSamples &samples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) override
 	{
 		IECore::MessageHandler::Scope s( m_messageHandler.get() );
 
-		OpenGLLightPtr result = new OpenGLLight( name, samples.size() ? samples[0].get() : nullptr, static_cast<const OpenGLAttributes *>( attributes ), m_editQueue );
+		OpenGLLightPtr result = new OpenGLLight(
+			name, samples.size() ? samples[0].get() : nullptr, static_cast<const OpenGLAttributes *>( attributes ),
+			m_editQueue
+		);
 		m_editQueue.push( [this, result]() { m_objects.push_back( result ); } );
 		return result;
 	}
 
-	ObjectInterfacePtr lightFilter( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override
+	ObjectInterfacePtr lightFilter(
+		const std::string &name, const ObjectSamples &samples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) override
 	{
 		IECore::MessageHandler::Scope s( m_messageHandler.get() );
 
-		OpenGLLightFilterPtr result = new OpenGLLightFilter( name, samples.size() ? samples[0].get() : nullptr, static_cast<const OpenGLAttributes *>( attributes ), m_editQueue );
+		OpenGLLightFilterPtr result = new OpenGLLightFilter(
+			name, samples.size() ? samples[0].get() : nullptr, static_cast<const OpenGLAttributes *>( attributes ),
+			m_editQueue
+		);
 		m_editQueue.push( [this, result]() { m_objects.push_back( result ); } );
 		return result;
 	}
 
-	ObjectInterfacePtr object( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override
+	ObjectInterfacePtr object(
+		const std::string &name, const ObjectSamples &samples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) override
 	{
 		const IECore::Object *object = samples.front().get();
 		if( !m_renderObjects && !runTimeCast<const IECoreScenePreview::Placeholder>( object ) )
@@ -987,7 +1042,8 @@ class OpenGLRenderer final : public IECoreScenePreview::Renderer
 
 		IECore::MessageHandler::Scope s( m_messageHandler.get() );
 
-		OpenGLObjectPtr result = new OpenGLObject( name, object, static_cast<const OpenGLAttributes *>( attributes ), m_editQueue );
+		OpenGLObjectPtr result =
+			new OpenGLObject( name, object, static_cast<const OpenGLAttributes *>( attributes ), m_editQueue );
 		m_editQueue.push( [this, result]() { m_objects.push_back( result ); } );
 		return result;
 	}
@@ -1040,18 +1096,22 @@ class OpenGLRenderer final : public IECoreScenePreview::Renderer
 		}
 		else if( boost::starts_with( name.string(), "gl:" ) || name.string().find( ":" ) == string::npos )
 		{
-			IECore::msg( IECore::Msg::Warning, "IECoreGL::Renderer::command", fmt::format( "Unknown command \"{}\".", name.string() ) );
+			IECore::msg(
+				IECore::Msg::Warning, "IECoreGL::Renderer::command",
+				fmt::format( "Unknown command \"{}\".", name.string() )
+			);
 		}
 
 		return nullptr;
 	}
 
-	private:
+private:
 
 	void renderToCurrentContext( const IECore::CompoundDataMap &parameters )
 	{
 		const string colorSpaceString = parameter<string>( parameters, "colorSpace", "scene" );
-		const Visualisation::ColorSpace colorSpace = colorSpaceString == "scene" ? Visualisation::ColorSpace::Scene : Visualisation::ColorSpace::Display;
+		const Visualisation::ColorSpace colorSpace =
+			colorSpaceString == "scene" ? Visualisation::ColorSpace::Scene : Visualisation::ColorSpace::Display;
 
 		processQueue();
 		removeDeletedObjects();
@@ -1088,9 +1148,7 @@ class OpenGLRenderer final : public IECoreScenePreview::Renderer
 			IECoreGL::State::ScopedBinding selectorStateBinding(
 				*selector->baseState(), const_cast<IECoreGL::State &>( *state )
 			);
-			IECoreGL::State::ScopedBinding shapeStateBinding(
-				*shapeState, const_cast<IECoreGL::State &>( *state )
-			);
+			IECoreGL::State::ScopedBinding shapeStateBinding( *shapeState, const_cast<IECoreGL::State &>( *state ) );
 			renderObjects( state, colorSpace );
 		}
 		else
@@ -1197,17 +1255,14 @@ class OpenGLRenderer final : public IECoreScenePreview::Renderer
 
 		m_objects.erase(
 			remove_if(
-				m_objects.begin(),
-				m_objects.end(),
-				[]( const OpenGLObjectPtr &o ) { return o->refCount() == 1; }
+				m_objects.begin(), m_objects.end(), []( const OpenGLObjectPtr &o ) { return o->refCount() == 1; }
 			),
 			m_objects.end()
 		);
 
 		m_attributes.erase(
 			remove_if(
-				m_attributes.begin(),
-				m_attributes.end(),
+				m_attributes.begin(), m_attributes.end(),
 				[]( const OpenGLAttributesPtr &a ) { return a->refCount() == 1; }
 			),
 			m_attributes.end()
@@ -1252,7 +1307,9 @@ class OpenGLRenderer final : public IECoreScenePreview::Renderer
 			}
 			else
 			{
-				IECore::msg( IECore::Msg::Warning, "IECoreGL::Renderer", fmt::format( "Unsupported data format \"{}\".", data ) );
+				IECore::msg(
+					IECore::Msg::Warning, "IECoreGL::Renderer", fmt::format( "Unsupported data format \"{}\".", data )
+				);
 				return;
 			}
 
@@ -1260,7 +1317,8 @@ class OpenGLRenderer final : public IECoreScenePreview::Renderer
 			{
 				if( boost::starts_with( parameterName.string(), g_headerPrefix ) )
 				{
-					image->blindData()->writable()[parameterName.string().substr( g_headerPrefix.size() )] = parameterValue;
+					image->blindData()->writable()[parameterName.string().substr( g_headerPrefix.size() )] =
+						parameterValue;
 				}
 			}
 
@@ -1268,11 +1326,15 @@ class OpenGLRenderer final : public IECoreScenePreview::Renderer
 			IECore::WriterPtr writer = IECore::Writer::create( image, "tmp." + type );
 			if( !writer )
 			{
-				IECore::msg( IECore::Msg::Warning, "IECoreGL::Renderer", fmt::format( "Unsupported display type \"{}\".", type ) );
+				IECore::msg(
+					IECore::Msg::Warning, "IECoreGL::Renderer", fmt::format( "Unsupported display type \"{}\".", type )
+				);
 				return;
 			}
 
-			writer->parameters()->parameter<IECore::FileNameParameter>( "fileName" )->setTypedValue( namedOutput.second->getName() );
+			writer->parameters()
+				->parameter<IECore::FileNameParameter>( "fileName" )
+				->setTypedValue( namedOutput.second->getName() );
 			writer->write();
 		}
 	}
@@ -1290,10 +1352,9 @@ class OpenGLRenderer final : public IECoreScenePreview::Renderer
 		Box3f result;
 		for( const auto &o : m_objects )
 		{
-			if(
-				( selected && !o->selected( m_selection ) ) ||
-				( !omittedEmpty && ( omitted.match( o->name() ) & ( PathMatcher::AncestorMatch | PathMatcher::ExactMatch ) ) )
-			)
+			if( ( selected && !o->selected( m_selection ) ) ||
+				( !omittedEmpty &&
+				  ( omitted.match( o->name() ) & ( PathMatcher::AncestorMatch | PathMatcher::ExactMatch ) ) ) )
 			{
 				continue;
 			}

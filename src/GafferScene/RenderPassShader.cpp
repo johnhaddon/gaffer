@@ -44,17 +44,14 @@ GAFFER_NODE_DEFINE_TYPE( RenderPassShader );
 
 size_t RenderPassShader::g_firstPlugIndex = 0;
 
-RenderPassShader::RenderPassShader( const std::string &name )
-	: GlobalShader( name )
+RenderPassShader::RenderPassShader( const std::string &name ) : GlobalShader( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "renderer", Gaffer::Plug::In, "*" ) );
 	addChild( new StringPlug( "usage", Gaffer::Plug::In, "" ) );
 }
 
-RenderPassShader::~RenderPassShader()
-{
-}
+RenderPassShader::~RenderPassShader() {}
 
 Gaffer::StringPlug *RenderPassShader::rendererPlug()
 {
@@ -78,8 +75,7 @@ const Gaffer::StringPlug *RenderPassShader::usagePlug() const
 
 bool RenderPassShader::affectsOptionName( const Gaffer::Plug *input ) const
 {
-	return input == usagePlug() ||
-		input == rendererPlug();
+	return input == usagePlug() || input == rendererPlug();
 }
 
 void RenderPassShader::hashOptionName( const Gaffer::Context *context, IECore::MurmurHash &h ) const

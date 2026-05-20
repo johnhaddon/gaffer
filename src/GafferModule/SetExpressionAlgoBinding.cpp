@@ -90,19 +90,25 @@ struct SetProviderWrapper : Gaffer::SetExpressionAlgo::SetProvider, wrapper<Gaff
 	}
 };
 
-IECore::PathMatcher evaluateSetExpressionWrapper( const std::string &setExpression, const Gaffer::SetExpressionAlgo::SetProvider &setProvider )
+IECore::PathMatcher evaluateSetExpressionWrapper(
+	const std::string &setExpression, const Gaffer::SetExpressionAlgo::SetProvider &setProvider
+)
 {
 	IECorePython::ScopedGILRelease r;
 	return evaluateSetExpression( setExpression, setProvider );
 }
 
-IECore::MurmurHash setExpressionHashWrapper1( const std::string &setExpression, const Gaffer::SetExpressionAlgo::SetProvider &setProvider )
+IECore::MurmurHash setExpressionHashWrapper1(
+	const std::string &setExpression, const Gaffer::SetExpressionAlgo::SetProvider &setProvider
+)
 {
 	IECorePython::ScopedGILRelease r;
 	return setExpressionHash( setExpression, setProvider );
 }
 
-void setExpressionHashWrapper2( const std::string &setExpression, const Gaffer::SetExpressionAlgo::SetProvider &setProvider, IECore::MurmurHash &h )
+void setExpressionHashWrapper2(
+	const std::string &setExpression, const Gaffer::SetExpressionAlgo::SetProvider &setProvider, IECore::MurmurHash &h
+)
 {
 	IECorePython::ScopedGILRelease r;
 	setExpressionHash( setExpression, setProvider, h );

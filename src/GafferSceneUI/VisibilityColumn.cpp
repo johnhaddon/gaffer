@@ -66,13 +66,18 @@ ConstStringDataPtr g_locationInvisibleConflictIcon = new StringData( "locationIn
 VisibilityColumn::VisibilityColumn( const GafferScene::ScenePlugPtr &scene, const Gaffer::PlugPtr &editScope )
 	: InspectorColumn(
 		  new GafferSceneUI::Private::AttributeInspector( scene, editScope, "scene:visible" ),
-		  CellData( /* value = */ nullptr, /* icon = */ g_locationVisibleIcon, /* background = */ nullptr, /* tooltip = */ new StringData( "Scene Visibility" ) )
+		  CellData(
+			  /* value = */ nullptr, /* icon = */ g_locationVisibleIcon, /* background = */ nullptr,
+			  /* tooltip = */ new StringData( "Scene Visibility" )
+		  )
 	  ),
 	  m_scene( scene )
 {
 }
 
-InspectorColumn::CellData VisibilityColumn::cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const
+InspectorColumn::CellData VisibilityColumn::cellData(
+	const Gaffer::Path &path, const IECore::Canceller *canceller
+) const
 {
 	Inspector::ConstResultPtr inspectorResult = inspect( path, canceller );
 	CellData result = cellDataFromInspection( inspectorResult.get() );
@@ -100,7 +105,9 @@ InspectorColumn::CellData VisibilityColumn::cellData( const Gaffer::Path &path, 
 	if( !inspectorResult->value( /* useFallbacks = */ false ) )
 	{
 		result.icon = visible ? g_locationVisibleTransparentIcon : g_locationInvisibleTransparentIcon;
-		toolTip = visible ? "Location visible by inheritance." : "Location invisible by inheritance. It will not be rendered, and neither will its descendants.";
+		toolTip = visible ?
+			"Location visible by inheritance." :
+			"Location invisible by inheritance. It will not be rendered, and neither will its descendants.";
 	}
 	else if( !visible && visibilityValue && visibilityValue->readable() )
 	{
@@ -111,7 +118,8 @@ InspectorColumn::CellData VisibilityColumn::cellData( const Gaffer::Path &path, 
 	else
 	{
 		result.icon = visible ? g_locationVisibleIcon : g_locationInvisibleIcon;
-		toolTip = visible ? "Location visible." : "Location invisible. It will not be rendered, and neither will its descendants.";
+		toolTip = visible ? "Location visible." :
+							"Location invisible. It will not be rendered, and neither will its descendants.";
 	}
 
 	result.value = nullptr;

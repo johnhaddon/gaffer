@@ -43,16 +43,13 @@
 using namespace boost::placeholders;
 using namespace Gaffer;
 
-ChildSet::ChildSet( GraphComponentPtr parent )
-	: m_parent( parent )
+ChildSet::ChildSet( GraphComponentPtr parent ) : m_parent( parent )
 {
 	parent->childAddedSignal().connect( boost::bind( &ChildSet::childAdded, this, ::_1, ::_2 ) );
 	parent->childRemovedSignal().connect( boost::bind( &ChildSet::childRemoved, this, ::_1, ::_2 ) );
 }
 
-ChildSet::~ChildSet()
-{
-}
+ChildSet::~ChildSet() {}
 
 bool ChildSet::contains( const Member *object ) const
 {

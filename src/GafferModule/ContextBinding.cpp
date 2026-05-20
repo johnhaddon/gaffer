@@ -161,8 +161,7 @@ void GafferModule::bindContext()
 	IECorePython::RefCountedClass<Context, IECore::RefCounted> contextClass( "Context" );
 	scope s = contextClass;
 
-	contextClass
-		.def( init<>() )
+	contextClass.def( init<>() )
 		.def( init<const Context &>( ( arg( "other" ) ) ) )
 		.def( init<const Context &, const IECore::ConstCancellerPtr &>( ( arg( "other" ), arg( "canceller" ) ) ) )
 		.def( init<const Context &, bool>( ( arg( "other" ), arg( "omitCanceller" ) ) ) )
@@ -205,12 +204,17 @@ void GafferModule::bindContext()
 		.def( "variableHash", &Context::variableHash )
 		.def( self == self )
 		.def( self != self )
-		.def( "substitute", &Context::substitute, ( arg( "input" ), arg( "substitutions" ) = IECore::StringAlgo::AllSubstitutions ) )
+		.def(
+			"substitute", &Context::substitute,
+			( arg( "input" ), arg( "substitutions" ) = IECore::StringAlgo::AllSubstitutions )
+		)
 		.def( "canceller", &cancellerWrapper )
 		.def( "current", &current )
 		.staticmethod( "current" );
 
-	SignalClass<Context::ChangedSignal, DefaultSignalCaller<Context::ChangedSignal>, ChangedSlotCaller>( "ChangedSignal" );
+	SignalClass<Context::ChangedSignal, DefaultSignalCaller<Context::ChangedSignal>, ChangedSlotCaller>(
+		"ChangedSignal"
+	);
 
 	class_<Context::Scope, boost::noncopyable>( "_Scope", init<Context *>() );
 }

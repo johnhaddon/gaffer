@@ -49,15 +49,16 @@ GAFFER_NODE_DEFINE_TYPE( FlatToDeep );
 
 size_t FlatToDeep::g_firstPlugIndex = 0;
 
-FlatToDeep::FlatToDeep( const std::string &name )
-	: ImageProcessor( name )
+FlatToDeep::FlatToDeep( const std::string &name ) : ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new IntPlug( "zMode", Plug::In, int( ZMode::Constant ), int( ZMode::Constant ), int( ZMode::Channel ) ) );
 	addChild( new FloatPlug( "depth" ) );
 	addChild( new StringPlug( "zChannel", Plug::In, "Z" ) );
 
-	addChild( new IntPlug( "zBackMode", Plug::In, int( ZBackMode::None ), int( ZBackMode::None ), int( ZBackMode::Channel ) ) );
+	addChild(
+		new IntPlug( "zBackMode", Plug::In, int( ZBackMode::None ), int( ZBackMode::None ), int( ZBackMode::Channel ) )
+	);
 	addChild( new FloatPlug( "thickness", Plug::In, 0.0f, 0.0f ) );
 	addChild( new StringPlug( "zBackChannel", Plug::In, "ZBack" ) );
 
@@ -69,9 +70,7 @@ FlatToDeep::FlatToDeep( const std::string &name )
 	outPlug()->metadataPlug()->setInput( inPlug()->metadataPlug() );
 }
 
-FlatToDeep::~FlatToDeep()
-{
-}
+FlatToDeep::~FlatToDeep() {}
 
 IntPlug *FlatToDeep::zModePlug()
 {
@@ -137,37 +136,31 @@ void FlatToDeep::affects( const Gaffer::Plug *input, AffectedPlugsContainer &out
 {
 	ImageProcessor::affects( input, outputs );
 
-	if(
-		input == inPlug()->channelNamesPlug() ||
-		input == zBackModePlug()
-	)
+	if( input == inPlug()->channelNamesPlug() || input == zBackModePlug() )
 	{
 		outputs.push_back( outPlug()->channelNamesPlug() );
 	}
 
-	if(
-		input == inPlug()->channelDataPlug() ||
-		input == zModePlug() ||
-		input == zChannelPlug() ||
-		input == depthPlug() ||
-		input == inPlug()->channelNamesPlug() ||
-		input == zBackModePlug() ||
-		input == zBackChannelPlug() ||
-		input == thicknessPlug()
-	)
+	if( input == inPlug()->channelDataPlug() || input == zModePlug() || input == zChannelPlug() ||
+		input == depthPlug() || input == inPlug()->channelNamesPlug() || input == zBackModePlug() ||
+		input == zBackChannelPlug() || input == thicknessPlug() )
 	{
 		outputs.push_back( outPlug()->channelDataPlug() );
 	}
 }
 
-void FlatToDeep::hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void FlatToDeep::hashChannelNames(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashChannelNames( output, context, h );
 	inPlug()->channelNamesPlug()->hash( h );
 	zBackModePlug()->hash( h );
 }
 
-IECore::ConstStringVectorDataPtr FlatToDeep::computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr FlatToDeep::computeChannelNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	StringVectorDataPtr resultData = inPlug()->channelNamesPlug()->getValue()->copy();
 	vector<string> &result = resultData->writable();
@@ -186,7 +179,9 @@ IECore::ConstStringVectorDataPtr FlatToDeep::computeChannelNames( const Gaffer::
 	return resultData;
 }
 
-void FlatToDeep::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void FlatToDeep::hashChannelData(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashChannelData( output, context, h );
 	const std::string channelName = context->get<std::string>( ImagePlug::channelNameContextName );
@@ -219,7 +214,9 @@ void FlatToDeep::hashChannelData( const GafferImage::ImagePlug *output, const Ga
 
 			if( find( channelNames.begin(), channelNames.end(), zChannel ) == channelNames.end() )
 			{
-				throw( IECore::Exception( "FlatToDeep : Cannot find requested Z channel - no channel \"" + zChannel + "\" found." ) );
+				throw( IECore::Exception(
+					"FlatToDeep : Cannot find requested Z channel - no channel \"" + zChannel + "\" found."
+				) );
 			}
 
 			reusedScope.setTileOrigin( &tileOrigin );
@@ -246,7 +243,9 @@ void FlatToDeep::hashChannelData( const GafferImage::ImagePlug *output, const Ga
 			{
 				if( find( channelNames.begin(), channelNames.end(), zBackChannel ) == channelNames.end() )
 				{
-					throw( IECore::Exception( "FlatToDeep : Cannot find requested ZBack channel - no channel \"" + zBackChannel + "\" found." ) );
+					throw( IECore::Exception(
+						"FlatToDeep : Cannot find requested ZBack channel - no channel \"" + zBackChannel + "\" found."
+					) );
 				}
 				reusedScope.setTileOrigin( &tileOrigin );
 				reusedScope.setChannelName( &zBackChannel );
@@ -264,7 +263,10 @@ void FlatToDeep::hashChannelData( const GafferImage::ImagePlug *output, const Ga
 	}
 }
 
-IECore::ConstFloatVectorDataPtr FlatToDeep::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr FlatToDeep::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	if( !( channelName == "Z" || channelName == "ZBack" ) )
 	{
@@ -298,7 +300,9 @@ IECore::ConstFloatVectorDataPtr FlatToDeep::computeChannelData( const std::strin
 			// Pass through Z
 			if( find( channelNames.begin(), channelNames.end(), zChannel ) == channelNames.end() )
 			{
-				throw( IECore::Exception( "FlatToDeep : Cannot find requested Z channel - no channel \"" + zChannel + "\" found." ) );
+				throw( IECore::Exception(
+					"FlatToDeep : Cannot find requested Z channel - no channel \"" + zChannel + "\" found."
+				) );
 			}
 
 			reusedScope.setTileOrigin( &tileOrigin );
@@ -331,7 +335,9 @@ IECore::ConstFloatVectorDataPtr FlatToDeep::computeChannelData( const std::strin
 				// Pass through ZBack
 				if( find( channelNames.begin(), channelNames.end(), zBackChannel ) == channelNames.end() )
 				{
-					throw( IECore::Exception( "FlatToDeep : Cannot find requested ZBack channel - no channel \"" + zBackChannel + "\" found." ) );
+					throw( IECore::Exception(
+						"FlatToDeep : Cannot find requested ZBack channel - no channel \"" + zBackChannel + "\" found."
+					) );
 				}
 
 				reusedScope.setTileOrigin( &tileOrigin );
@@ -357,7 +363,9 @@ IECore::ConstFloatVectorDataPtr FlatToDeep::computeChannelData( const std::strin
 	}
 }
 
-void FlatToDeep::hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void FlatToDeep::hashDeep(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashDeep( parent, context, h );
 }
@@ -367,12 +375,16 @@ bool FlatToDeep::computeDeep( const Gaffer::Context *context, const ImagePlug *p
 	return true;
 }
 
-void FlatToDeep::hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void FlatToDeep::hashSampleOffsets(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = ImagePlug::flatTileSampleOffsets()->IECore::Object::hash();
 }
 
-IECore::ConstIntVectorDataPtr FlatToDeep::computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstIntVectorDataPtr FlatToDeep::computeSampleOffsets(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	return ImagePlug::flatTileSampleOffsets();
 }

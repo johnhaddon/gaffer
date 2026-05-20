@@ -45,6 +45,4 @@ RenderManDisplayFilter::RenderManDisplayFilter( const std::string &name )
 {
 }
 
-RenderManDisplayFilter::~RenderManDisplayFilter()
-{
-}
+RenderManDisplayFilter::~RenderManDisplayFilter() {}

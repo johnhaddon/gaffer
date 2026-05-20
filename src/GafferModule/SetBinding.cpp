@@ -158,44 +158,58 @@ void GafferModule::bindSet()
 {
 
 	{
-		boost::python::scope s = IECorePython::RunTimeTypedClass<Set>()
-									 .def( "contains", &Set::contains )
-									 .def( "size", &Set::size )
-									 .def( "__contains__", &Set::contains )
-									 .def( "__len__", &Set::size )
-									 // boost python overload resolution will try the functions in the reverse
-									 // order to which they were def'd. so getItem is bound last as that's the
-									 // one that needs the best performance - there's a small but measurable speed
-									 // hit to indexing if the getSlice binding is tried and rejected before finding the
-									 // getItem binding.
-									 .def( "__getitem__", &getSlice )
-									 .def( "__getitem__", &getItem )
-									 .def( "memberAddedSignal", &Set::memberAddedSignal, boost::python::return_internal_reference<1>() )
-									 .def( "memberRemovedSignal", &Set::memberRemovedSignal, boost::python::return_internal_reference<1>() );
+		boost::python::scope s =
+			IECorePython::RunTimeTypedClass<Set>()
+				.def( "contains", &Set::contains )
+				.def( "size", &Set::size )
+				.def( "__contains__", &Set::contains )
+				.def( "__len__", &Set::size )
+				// boost python overload resolution will try the functions in the reverse
+				// order to which they were def'd. so getItem is bound last as that's the
+				// one that needs the best performance - there's a small but measurable speed
+				// hit to indexing if the getSlice binding is tried and rejected before finding the
+				// getItem binding.
+				.def( "__getitem__", &getSlice )
+				.def( "__getitem__", &getItem )
+				.def( "memberAddedSignal", &Set::memberAddedSignal, boost::python::return_internal_reference<1>() )
+				.def( "memberRemovedSignal", &Set::memberRemovedSignal, boost::python::return_internal_reference<1>() );
 
-		SignalClass<Set::MemberSignal, DefaultSignalCaller<Set::MemberSignal>, MemberSignalSlotCaller>( "MemberSignal" );
+		SignalClass<Set::MemberSignal, DefaultSignalCaller<Set::MemberSignal>, MemberSignalSlotCaller>(
+			"MemberSignal"
+		);
 	}
 
 	{
-		boost::python::scope s = IECorePython::RunTimeTypedClass<StandardSet>()
-									 .def( boost::python::init<bool>( boost::python::arg( "removeOrphans" ) = false ) )
-									 .def( "__init__", boost::python::make_constructor( setConstructor, boost::python::default_call_policies(), ( boost::python::arg( "members" ), boost::python::arg( "removeOrphans" ) = false ) ) )
-									 .def( "add", &addFromSequence )
-									 .def( "add", (bool ( StandardSet::* )( Set::MemberPtr ))&StandardSet::add )
-									 .def( "add", (size_t ( StandardSet::* )( const Set * ))&StandardSet::add )
-									 .def( "remove", &removeFromSequence )
-									 .def( "remove", (bool ( StandardSet::* )( Set::Member * ))&StandardSet::remove )
-									 .def( "remove", (size_t ( StandardSet::* )( const Set * ))&StandardSet::remove )
-									 .def( "clear", &StandardSet::clear )
-									 .def( "memberAcceptanceSignal", &StandardSet::memberAcceptanceSignal, boost::python::return_internal_reference<1>() )
-									 .def( "setRemoveOrphans", &StandardSet::setRemoveOrphans )
-									 .def( "getRemoveOrphans", &StandardSet::getRemoveOrphans );
+		boost::python::scope s =
+			IECorePython::RunTimeTypedClass<StandardSet>()
+				.def( boost::python::init<bool>( boost::python::arg( "removeOrphans" ) = false ) )
+				.def(
+					"__init__",
+					boost::python::make_constructor(
+						setConstructor, boost::python::default_call_policies(),
+						( boost::python::arg( "members" ), boost::python::arg( "removeOrphans" ) = false )
+					)
+				)
+				.def( "add", &addFromSequence )
+				.def( "add", (bool ( StandardSet::* )( Set::MemberPtr ))&StandardSet::add )
+				.def( "add", (size_t ( StandardSet::* )( const Set * ))&StandardSet::add )
+				.def( "remove", &removeFromSequence )
+				.def( "remove", (bool ( StandardSet::* )( Set::Member * ))&StandardSet::remove )
+				.def( "remove", (size_t ( StandardSet::* )( const Set * ))&StandardSet::remove )
+				.def( "clear", &StandardSet::clear )
+				.def(
+					"memberAcceptanceSignal", &StandardSet::memberAcceptanceSignal,
+					boost::python::return_internal_reference<1>()
+				)
+				.def( "setRemoveOrphans", &StandardSet::setRemoveOrphans )
+				.def( "getRemoveOrphans", &StandardSet::getRemoveOrphans );
 
-		SignalClass<StandardSet::MemberAcceptanceSignal, DefaultSignalCaller<StandardSet::MemberAcceptanceSignal>, MemberAcceptanceSlotCaller>( "MemberAcceptanceSignal" );
+		SignalClass<
+			StandardSet::MemberAcceptanceSignal, DefaultSignalCaller<StandardSet::MemberAcceptanceSignal>,
+			MemberAcceptanceSlotCaller>( "MemberAcceptanceSignal" );
 	}
 
-	IECorePython::RunTimeTypedClass<ChildSet>()
-		.def( boost::python::init<GraphComponentPtr>() );
+	IECorePython::RunTimeTypedClass<ChildSet>().def( boost::python::init<GraphComponentPtr>() );
 
 	IECorePython::RunTimeTypedClass<NumericBookmarkSet>()
 		.def( boost::python::init<ScriptNodePtr, int>() )

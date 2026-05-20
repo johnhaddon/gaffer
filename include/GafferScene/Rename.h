@@ -46,7 +46,7 @@ namespace GafferScene
 class GAFFERSCENE_API Rename : public FilteredSceneProcessor
 {
 
-	public:
+public:
 
 	explicit Rename( const std::string &name = defaultName<Rename>() );
 	~Rename() override;
@@ -79,7 +79,7 @@ class GAFFERSCENE_API Rename : public FilteredSceneProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
@@ -87,25 +87,50 @@ class GAFFERSCENE_API Rename : public FilteredSceneProcessor
 	Gaffer::ValuePlug::CachePolicy hashCachePolicy( const Gaffer::ValuePlug *output ) const override;
 	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-	void hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-	Imath::Box3f computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashBound(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+	) const override;
+	Imath::Box3f computeBound(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+	) const override;
 
-	void hashTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-	Imath::M44f computeTransform( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashTransform(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+	) const override;
+	Imath::M44f computeTransform(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+	) const override;
 
-	void hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-	IECore::ConstCompoundObjectPtr computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashAttributes(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstCompoundObjectPtr computeAttributes(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+	) const override;
 
-	void hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-	IECore::ConstObjectPtr computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashObject(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstObjectPtr computeObject(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+	) const override;
 
-	void hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-	IECore::ConstInternedStringVectorDataPtr computeChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashChildNames(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstInternedStringVectorDataPtr computeChildNames(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+	) const override;
 
-	void hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const override;
-	IECore::ConstPathMatcherDataPtr computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const override;
+	void hashSet(
+		const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent,
+		IECore::MurmurHash &h
+	) const override;
+	IECore::ConstPathMatcherDataPtr computeSet(
+		const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent
+	) const override;
 
-	private:
+private:
 
 	// Used to compute a per-location map of renamed children. Must be evaluated
 	// in a context suitable for the _input_ scene.

@@ -56,9 +56,7 @@ ShufflePrimitiveVariables::ShufflePrimitiveVariables( const std::string &name ) 
 	addChild( new ShufflesPlug( "shuffles" ) );
 }
 
-ShufflePrimitiveVariables::~ShufflePrimitiveVariables()
-{
-}
+ShufflePrimitiveVariables::~ShufflePrimitiveVariables() {}
 
 Gaffer::ShufflesPlug *ShufflePrimitiveVariables::shufflesPlug()
 {
@@ -75,14 +73,18 @@ bool ShufflePrimitiveVariables::affectsProcessedObject( const Gaffer::Plug *inpu
 	return Deformer::affectsProcessedObject( input ) || shufflesPlug()->isAncestorOf( input );
 }
 
-void ShufflePrimitiveVariables::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ShufflePrimitiveVariables::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	Deformer::hashProcessedObject( path, context, h );
 
 	shufflesPlug()->hash( h );
 }
 
-IECore::ConstObjectPtr ShufflePrimitiveVariables::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr ShufflePrimitiveVariables::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	auto inputPrimitive = runTimeCast<const Primitive>( inputObject );
 	if( !inputPrimitive )

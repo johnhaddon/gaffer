@@ -59,15 +59,18 @@ GAFFER_NODE_DEFINE_TYPE( DeepToFlat );
 
 size_t DeepToFlat::g_firstPlugIndex = 0;
 
-DeepToFlat::DeepToFlat( const std::string &name )
-	: ImageProcessor( name )
+DeepToFlat::DeepToFlat( const std::string &name ) : ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
 	addChild( new IntPlug( "depthMode", Gaffer::Plug::In, int( DepthMode::Filtered ) ) );
 
-	addChild( new FloatVectorDataPlug( "__intermediateChannelData", Gaffer::Plug::Out, ImagePlug::blackTile(), Plug::Default & ~Plug::Serialisable ) );
-	addChild( new FloatVectorDataPlug( "__flattenedChannelData", Gaffer::Plug::Out, ImagePlug::blackTile(), Plug::Default & ~Plug::Serialisable ) );
+	addChild( new FloatVectorDataPlug(
+		"__intermediateChannelData", Gaffer::Plug::Out, ImagePlug::blackTile(), Plug::Default & ~Plug::Serialisable
+	) );
+	addChild( new FloatVectorDataPlug(
+		"__flattenedChannelData", Gaffer::Plug::Out, ImagePlug::blackTile(), Plug::Default & ~Plug::Serialisable
+	) );
 
 	addChild( new DeepState() );
 
@@ -84,9 +87,7 @@ DeepToFlat::DeepToFlat( const std::string &name )
 	outPlug()->metadataPlug()->setInput( inPlug()->metadataPlug() );
 }
 
-DeepToFlat::~DeepToFlat()
-{
-}
+DeepToFlat::~DeepToFlat() {}
 
 Gaffer::IntPlug *DeepToFlat::depthModePlug()
 {
@@ -234,14 +235,18 @@ void DeepToFlat::compute( Gaffer::ValuePlug *output, const Gaffer::Context *cont
 	}
 }
 
-void DeepToFlat::hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepToFlat::hashChannelNames(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashChannelNames( output, context, h );
 	inPlug()->channelNamesPlug()->hash( h );
 	depthModePlug()->hash( h );
 }
 
-IECore::ConstStringVectorDataPtr DeepToFlat::computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr DeepToFlat::computeChannelNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	DepthMode depthMode = DepthMode( depthModePlug()->getValue() );
 
@@ -258,10 +263,8 @@ IECore::ConstStringVectorDataPtr DeepToFlat::computeChannelNames( const Gaffer::
 	{
 		if( n[0] == 'Z' )
 		{
-			if(
-				( ( depthMode == DepthMode::None || depthMode == DepthMode::Filtered ) && n == "ZBack" ) ||
-				( ( depthMode == DepthMode::None ) && n == "Z" )
-			)
+			if( ( ( depthMode == DepthMode::None || depthMode == DepthMode::Filtered ) && n == "ZBack" ) ||
+				( ( depthMode == DepthMode::None ) && n == "Z" ) )
 			{
 				continue;
 			}
@@ -271,7 +274,9 @@ IECore::ConstStringVectorDataPtr DeepToFlat::computeChannelNames( const Gaffer::
 	return resultData;
 }
 
-void DeepToFlat::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepToFlat::hashChannelData(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	bool needsProcessing = false;
 
@@ -298,7 +303,10 @@ void DeepToFlat::hashChannelData( const GafferImage::ImagePlug *output, const Ga
 	flattenedChannelDataPlug()->hash( h );
 }
 
-IECore::ConstFloatVectorDataPtr DeepToFlat::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr DeepToFlat::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	bool needsProcessing = false;
 
@@ -349,12 +357,16 @@ bool DeepToFlat::computeDeep( const Gaffer::Context *context, const ImagePlug *p
 	return false;
 }
 
-void DeepToFlat::hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepToFlat::hashSampleOffsets(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = ImagePlug::flatTileSampleOffsets()->Object::hash();
 }
 
-IECore::ConstIntVectorDataPtr DeepToFlat::computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstIntVectorDataPtr DeepToFlat::computeSampleOffsets(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	return ImagePlug::flatTileSampleOffsets();
 }

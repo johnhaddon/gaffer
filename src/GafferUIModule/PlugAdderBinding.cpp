@@ -97,7 +97,9 @@ struct PlugMenuSlotCaller
 struct MenuSlotCaller
 {
 
-	std::string operator () ( boost::python::object slot, const std::string &title, const std::vector<std::string> &items )
+	std::string operator () (
+		boost::python::object slot, const std::string &title, const std::vector<std::string> &items
+	)
 	{
 		try
 		{

@@ -55,7 +55,9 @@ void IECoreCycles::CameraAlgo::convert( const IECoreScene::Camera *source, ccl::
 		const BoolData *d = source->parametersData()->member<BoolData>( "depthOfField" );
 		if( d && d->readable() && source->getFStop() > 0.0f )
 		{
-			destination->set_aperturesize( 0.5f * source->getFocalLength() * source->getFocalLengthWorldScale() / source->getFStop() );
+			destination->set_aperturesize(
+				0.5f * source->getFocalLength() * source->getFocalLengthWorldScale() / source->getFStop()
+			);
 			destination->set_focaldistance( source->getFocusDistance() );
 		}
 	}
@@ -80,7 +82,9 @@ void IECoreCycles::CameraAlgo::convert( const IECoreScene::Camera *source, ccl::
 	// Invert the viewplane in Y so Gaffer's aperture offsets and overscan are applied in the correct direction
 	destination->set_viewplane_bottom( -frustum.max.y );
 	destination->set_viewplane_top( -frustum.min.y );
-	destination->set_aperture_ratio( pixelAspectRatio ); // This is more for the bokeh, maybe it should be a separate parameter?
+	destination->set_aperture_ratio(
+		pixelAspectRatio
+	); // This is more for the bokeh, maybe it should be a separate parameter?
 
 	// Clipping planes
 	const Imath::V2f &clippingPlanes = source->getClippingPlanes();
@@ -102,7 +106,8 @@ void IECoreCycles::CameraAlgo::convert( const IECoreScene::Camera *source, ccl::
 
 	// Additional parameters
 
-	for( CompoundDataMap::const_iterator it = source->parameters().begin(), eIt = source->parameters().end(); it != eIt; ++it )
+	for( CompoundDataMap::const_iterator it = source->parameters().begin(), eIt = source->parameters().end(); it != eIt;
+		 ++it )
 	{
 		if( it->first == "panoramaType" )
 		{

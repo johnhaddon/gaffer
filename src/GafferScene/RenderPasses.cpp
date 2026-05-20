@@ -47,16 +47,13 @@ const std::string g_passNamesOptionName = "option:renderPass:names";
 
 size_t RenderPasses::g_firstPlugIndex = 0;
 
-RenderPasses::RenderPasses( const std::string &name )
-	: GlobalsProcessor( name )
+RenderPasses::RenderPasses( const std::string &name ) : GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringVectorDataPlug( "names" ) );
 }
 
-RenderPasses::~RenderPasses()
-{
-}
+RenderPasses::~RenderPasses() {}
 
 Gaffer::StringVectorDataPlug *RenderPasses::namesPlug()
 {
@@ -83,7 +80,9 @@ void RenderPasses::hashProcessedGlobals( const Gaffer::Context *context, IECore:
 	namesPlug()->hash( h );
 }
 
-IECore::ConstCompoundObjectPtr RenderPasses::computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const
+IECore::ConstCompoundObjectPtr RenderPasses::computeProcessedGlobals(
+	const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals
+) const
 {
 	IECore::ConstStringVectorDataPtr namesData = namesPlug()->getValue();
 	const std::vector<std::string> &names = namesData->readable();
@@ -100,15 +99,8 @@ IECore::ConstCompoundObjectPtr RenderPasses::computeProcessedGlobals( const Gaff
 		auto copy = data->copy();
 		copy->writable().erase(
 			std::remove_if(
-				copy->writable().begin(),
-				copy->writable().end(),
-				[&names]( const auto &elem ) {
-					return std::find(
-							   names.begin(),
-							   names.end(),
-							   elem
-						   ) != names.end();
-				}
+				copy->writable().begin(), copy->writable().end(),
+				[&names]( const auto &elem ) { return std::find( names.begin(), names.end(), elem ) != names.end(); }
 			),
 			copy->writable().end()
 		);

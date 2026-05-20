@@ -49,12 +49,14 @@ namespace GafferScene
 class GAFFERSCENE_API Cryptomatte : public GafferImage::FlatImageProcessor
 {
 
-	public:
+public:
 
 	explicit Cryptomatte( const std::string &name = defaultName<Cryptomatte>() );
 	~Cryptomatte() override;
 
-	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferScene::Cryptomatte, CryptomatteTypeId, GafferImage::FlatImageProcessor );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION(
+		GafferScene::Cryptomatte, CryptomatteTypeId, GafferImage::FlatImageProcessor
+	);
 
 	enum class ManifestSource
 	{
@@ -88,22 +90,35 @@ class GAFFERSCENE_API Cryptomatte : public GafferImage::FlatImageProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-	void hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	IECore::ConstStringVectorDataPtr computeViewNames( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
+	void hashViewNames(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstStringVectorDataPtr computeViewNames(
+		const Gaffer::Context *context, const GafferImage::ImagePlug *parent
+	) const override;
 
-	void hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
+	void hashChannelNames(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstStringVectorDataPtr computeChannelNames(
+		const Gaffer::Context *context, const GafferImage::ImagePlug *parent
+	) const override;
 
-	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const override;
+	void hashChannelData(
+		const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData(
+		const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+		const GafferImage::ImagePlug *parent
+	) const override;
 
-	private:
+private:
 
 	Gaffer::FloatVectorDataPlug *matteValuesPlug();
 	const Gaffer::FloatVectorDataPlug *matteValuesPlug() const;

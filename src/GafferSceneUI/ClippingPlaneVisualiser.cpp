@@ -51,7 +51,7 @@ namespace
 class ClippingPlaneVisualiser : public ObjectVisualiser
 {
 
-	public:
+public:
 
 	using ObjectType = IECoreScene::ClippingPlane;
 
@@ -91,21 +91,20 @@ class ClippingPlaneVisualiser : public ObjectVisualiser
 		p.push_back( V3f( 0, 0, 0.5 ) );
 		vertsPerCurve.push_back( 2 );
 
-		IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurveData );
-		curves->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
+		IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive(
+			IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurveData
+		);
+		curves->addPrimitiveVariable(
+			"P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData )
+		);
 		group->addChild( curves );
 	}
 
-	~ClippingPlaneVisualiser() override
-	{
-	}
+	~ClippingPlaneVisualiser() override {}
 
-	Visualisations visualise( const IECore::Object *object ) const override
-	{
-		return m_visualisations;
-	}
+	Visualisations visualise( const IECore::Object *object ) const override { return m_visualisations; }
 
-	protected:
+protected:
 
 	static ObjectVisualiserDescription<ClippingPlaneVisualiser> g_visualiserDescription;
 

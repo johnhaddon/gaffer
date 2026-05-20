@@ -65,17 +65,16 @@ namespace
 class BoxIOPlugAdder : public PlugAdder
 {
 
-	public:
+public:
 
-	BoxIOPlugAdder( BoxIOPtr boxIO )
-		: m_boxIO( boxIO )
+	BoxIOPlugAdder( BoxIOPtr boxIO ) : m_boxIO( boxIO )
 	{
 		m_boxIO->childAddedSignal().connect( boost::bind( &BoxIOPlugAdder::childAdded, this ) );
 		m_boxIO->childRemovedSignal().connect( boost::bind( &BoxIOPlugAdder::childRemoved, this ) );
 		updateVisibility();
 	}
 
-	protected:
+protected:
 
 	bool canCreateConnection( const Plug *endpoint ) const override
 	{
@@ -120,22 +119,13 @@ class BoxIOPlugAdder : public PlugAdder
 		}
 	}
 
-	private:
+private:
 
-	void childAdded()
-	{
-		updateVisibility();
-	}
+	void childAdded() { updateVisibility(); }
 
-	void childRemoved()
-	{
-		updateVisibility();
-	}
+	void childRemoved() { updateVisibility(); }
 
-	void updateVisibility()
-	{
-		setVisible( !m_boxIO->plug() );
-	}
+	void updateVisibility() { setVisible( !m_boxIO->plug() ); }
 
 	BoxIOPtr m_boxIO;
 };
@@ -152,15 +142,14 @@ namespace
 class NameGadget : public TextGadget
 {
 
-	public:
+public:
 
-	NameGadget( BoxIOPtr boxIO )
-		: TextGadget( boxIO->namePlug()->getValue() ), m_boxIO( boxIO )
+	NameGadget( BoxIOPtr boxIO ) : TextGadget( boxIO->namePlug()->getValue() ), m_boxIO( boxIO )
 	{
 		boxIO->plugSetSignal().connect( boost::bind( &NameGadget::plugSet, this, ::_1 ) );
 	}
 
-	private:
+private:
 
 	void plugSet( const Plug *plug )
 	{
@@ -185,10 +174,7 @@ namespace
 struct BoxIONodeGadgetCreator
 {
 
-	BoxIONodeGadgetCreator()
-	{
-		NodeGadget::registerNodeGadget( BoxIO::staticTypeId(), *this );
-	}
+	BoxIONodeGadgetCreator() { NodeGadget::registerNodeGadget( BoxIO::staticTypeId(), *this ); }
 
 	NodeGadgetPtr operator () ( NodePtr node )
 	{

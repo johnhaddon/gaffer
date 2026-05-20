@@ -53,14 +53,9 @@ using namespace boost;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Frame );
 
-Frame::Frame( GadgetPtr child )
-	: IndividualContainer( child ), m_border( 1 )
-{
-}
+Frame::Frame( GadgetPtr child ) : IndividualContainer( child ), m_border( 1 ) {}
 
-Frame::~Frame()
-{
-}
+Frame::~Frame() {}
 
 Imath::Box3f Frame::bound() const
 {

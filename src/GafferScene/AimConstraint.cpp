@@ -46,17 +46,14 @@ GAFFER_NODE_DEFINE_TYPE( AimConstraint );
 
 size_t AimConstraint::g_firstPlugIndex = 0;
 
-AimConstraint::AimConstraint( const std::string &name )
-	: Constraint( name )
+AimConstraint::AimConstraint( const std::string &name ) : Constraint( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new V3fPlug( "aim", Plug::In, V3f( 0, 0, -1 ) ) );
 	addChild( new V3fPlug( "up", Plug::In, V3f( 0, 1, 0 ) ) );
 }
 
-AimConstraint::~AimConstraint()
-{
-}
+AimConstraint::~AimConstraint() {}
 
 Gaffer::V3fPlug *AimConstraint::aimPlug()
 {
@@ -89,7 +86,9 @@ void AimConstraint::hashConstraint( const Gaffer::Context *context, IECore::Murm
 	upPlug()->hash( h );
 }
 
-Imath::M44f AimConstraint::computeConstraint( const Imath::M44f &fullTargetTransform, const Imath::M44f &fullInputTransform, const Imath::M44f &inputTransform ) const
+Imath::M44f AimConstraint::computeConstraint(
+	const Imath::M44f &fullTargetTransform, const Imath::M44f &fullInputTransform, const Imath::M44f &inputTransform
+) const
 {
 	// decompose into scale, shear, rotate and translate
 	V3f s( 1 ), h( 0 ), r( 0 ), t( 0 );

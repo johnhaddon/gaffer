@@ -47,12 +47,14 @@ namespace GafferRenderMan
 class GAFFERRENDERMAN_API RenderManOptions : public GafferScene::Options
 {
 
-	public:
+public:
 
 	RenderManOptions( const std::string &name = defaultName<RenderManOptions>() );
 	~RenderManOptions() override;
 
-	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferRenderMan::RenderManOptions, RenderManOptionsTypeId, GafferScene::Options );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION(
+		GafferRenderMan::RenderManOptions, RenderManOptionsTypeId, GafferScene::Options
+	);
 };
 
 IE_CORE_DECLAREPTR( RenderManOptions );

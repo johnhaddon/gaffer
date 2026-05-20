@@ -53,17 +53,16 @@ GAFFER_NODE_DEFINE_TYPE( MergePoints );
 
 size_t MergePoints::g_firstPlugIndex = 0;
 
-MergePoints::MergePoints( const std::string &name )
-	: MergeObjects( name, "/mergedPoints" )
+MergePoints::MergePoints( const std::string &name ) : MergeObjects( name, "/mergedPoints" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 }
 
-MergePoints::~MergePoints()
-{
-}
+MergePoints::~MergePoints() {}
 
-IECore::ConstObjectPtr MergePoints::computeMergedObject( const std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f>> &sources, const Gaffer::Context *context ) const
+IECore::ConstObjectPtr MergePoints::computeMergedObject(
+	const std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f>> &sources, const Gaffer::Context *context
+) const
 {
 	std::vector<std::pair<const IECoreScene::Primitive *, Imath::M44f>> points;
 

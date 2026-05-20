@@ -79,12 +79,8 @@ bool validName( const std::string &name )
 
 	for( auto c : name )
 	{
-		if(
-			!( c >= 'A' && c <= 'Z' ) &&
-			!( c >= 'a' && c <= 'z' ) &&
-			!( c >= '0' && c <= '9' ) &&
-			c != '_' && c != ':'
-		)
+		if( !( c >= 'A' && c <= 'Z' ) && !( c >= 'a' && c <= 'z' ) && !( c >= '0' && c <= '9' ) && c != '_' &&
+			c != ':' )
 		{
 			return false;
 		}
@@ -143,8 +139,7 @@ struct GraphComponent::MemberSignals : boost::noncopyable
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( GraphComponent );
 
-GraphComponent::GraphComponent( const std::string &name )
-	: m_name( name ), m_parent( nullptr )
+GraphComponent::GraphComponent( const std::string &name ) : m_name( name ), m_parent( nullptr )
 {
 	validateName( m_name );
 }
@@ -161,7 +156,9 @@ GraphComponent::~GraphComponent()
 		( *it )->m_parent = nullptr;
 		( *it )->parentChanging( nullptr );
 		( *it )->parentChanged( nullptr );
-		MemberSignals::emitLazily( ( *it )->m_signals.get(), &MemberSignals::parentChangedSignal, ( *it ).get(), nullptr );
+		MemberSignals::emitLazily(
+			( *it )->m_signals.get(), &MemberSignals::parentChangedSignal, ( *it ).get(), nullptr
+		);
 	}
 	m_children.clear();
 }
@@ -176,7 +173,8 @@ const IECore::InternedString &GraphComponent::setName( const IECore::InternedStr
 	if( m_parent )
 	{
 		bool uniqueAlready = true;
-		for( ChildContainer::const_iterator it = m_parent->m_children.begin(), eIt = m_parent->m_children.end(); it != eIt; it++ )
+		for( ChildContainer::const_iterator it = m_parent->m_children.begin(), eIt = m_parent->m_children.end();
+			 it != eIt; it++ )
 		{
 			if( *it != this && ( *it )->m_name == newName )
 			{
@@ -194,7 +192,8 @@ const IECore::InternedString &GraphComponent::setName( const IECore::InternedStr
 
 			// iterate over all the siblings to find the minimum value for the suffix which
 			// will be greater than any existing suffix.
-			for( ChildContainer::const_iterator it = m_parent->m_children.begin(), eIt = m_parent->m_children.end(); it != eIt; it++ )
+			for( ChildContainer::const_iterator it = m_parent->m_children.begin(), eIt = m_parent->m_children.end();
+				 it != eIt; it++ )
 			{
 				if( *it == this )
 				{
@@ -261,7 +260,8 @@ std::string GraphComponent::relativeName( const GraphComponent *ancestor ) const
 	}
 	if( ancestor && c != ancestor )
 	{
-		string what = fmt::format( "Object \"{}\" is not an ancestor of \"{}\".", ancestor->m_name.value(), m_name.value() );
+		string what =
+			fmt::format( "Object \"{}\" is not an ancestor of \"{}\".", ancestor->m_name.value(), m_name.value() );
 		throw Exception( what );
 	}
 	return fullName;
@@ -308,7 +308,9 @@ void GraphComponent::addChild( GraphComponentPtr child )
 			{
 				// use smart pointer to ensure parent remains alive, even if something unscrupulous
 				// messes it with non-undoable actions that aren't stored in the undo queue.
-				undoFn = boost::bind( &GraphComponent::addChildInternal, GraphComponentPtr( child->m_parent ), child, child->index() );
+				undoFn = boost::bind(
+					&GraphComponent::addChildInternal, GraphComponentPtr( child->m_parent ), child, child->index()
+				);
 			}
 		}
 		else
@@ -320,8 +322,7 @@ void GraphComponent::addChild( GraphComponentPtr child )
 		Action::enact(
 			this,
 			// ok to use raw pointer for this - lifetime of subject guaranteed.
-			boost::bind( &GraphComponent::addChildInternal, this, child, m_children.size() ),
-			undoFn
+			boost::bind( &GraphComponent::addChildInternal, this, child, m_children.size() ), undoFn
 		);
 	}
 	else
@@ -362,19 +363,26 @@ void GraphComponent::throwIfChildRejected( const GraphComponent *potentialChild 
 
 	if( potentialChild->isAncestorOf( this ) )
 	{
-		string what = fmt::format( "Child \"{}\" cannot be parented to parent \"{}\" as it is an ancestor of \"{}\".", potentialChild->m_name.value(), m_name.value(), m_name.value() );
+		string what = fmt::format(
+			"Child \"{}\" cannot be parented to parent \"{}\" as it is an ancestor of \"{}\".",
+			potentialChild->m_name.value(), m_name.value(), m_name.value()
+		);
 		throw Exception( what );
 	}
 
 	if( !acceptsChild( potentialChild ) )
 	{
-		string what = fmt::format( "Parent \"{}\" ( of type {} ) rejects child \"{}\" ( of type {} ).", m_name.value(), typeName(), potentialChild->m_name.value(), potentialChild->typeName() );
+		string what = fmt::format(
+			"Parent \"{}\" ( of type {} ) rejects child \"{}\" ( of type {} ).", m_name.value(), typeName(),
+			potentialChild->m_name.value(), potentialChild->typeName()
+		);
 		throw Exception( what );
 	}
 
 	if( !potentialChild->acceptsParent( this ) )
 	{
-		string what = fmt::format( "Child \"{}\" rejects parent \"{}\".", potentialChild->m_name.value(), m_name.value() );
+		string what =
+			fmt::format( "Child \"{}\" rejects parent \"{}\".", potentialChild->m_name.value(), m_name.value() );
 		throw Exception( what );
 	}
 }
@@ -397,7 +405,9 @@ void GraphComponent::addChildInternal( GraphComponentPtr child, size_t index )
 	child->setName( child->m_name.value() ); // to force uniqueness
 	MemberSignals::emitLazily( m_signals.get(), &MemberSignals::childAddedSignal, this, child.get() );
 	child->parentChanged( previousParent );
-	MemberSignals::emitLazily( child->m_signals.get(), &MemberSignals::parentChangedSignal, child.get(), previousParent );
+	MemberSignals::emitLazily(
+		child->m_signals.get(), &MemberSignals::parentChangedSignal, child.get(), previousParent
+	);
 }
 
 void GraphComponent::removeChild( GraphComponentPtr child )
@@ -445,7 +455,11 @@ void GraphComponent::removeChildInternal( GraphComponentPtr child, bool emitPare
 		// undo queue. the onus is on such slots to not reperform their work when ScriptNode::currentActionStage()
 		// is Action::Redo - instead they should rely on the fact that their actions will have been
 		// recorded and replayed automatically.
-		throw Exception( fmt::format( "GraphComponent::removeChildInternal : \"{}\" is not a child of \"{}\".", child->fullName(), fullName() ) );
+		throw Exception(
+			fmt::format(
+				"GraphComponent::removeChildInternal : \"{}\" is not a child of \"{}\".", child->fullName(), fullName()
+			)
+		);
 	}
 	m_children.erase( it );
 	child->m_parent = nullptr;
@@ -469,7 +483,9 @@ void GraphComponent::reorderChildren( const ChildContainer &newOrder )
 	if( newOrder.size() != m_children.size() )
 	{
 		throw IECore::InvalidArgumentException(
-			fmt::format( "Wrong number of children specified ({} but should be {})", newOrder.size(), m_children.size() )
+			fmt::format(
+				"Wrong number of children specified ({} but should be {})", newOrder.size(), m_children.size()
+			)
 		);
 	}
 
@@ -645,21 +661,13 @@ GraphComponent::ChildrenReorderedSignal &GraphComponent::childrenReorderedSignal
 	return signals()->childrenReorderedSignal;
 }
 
-void GraphComponent::nameChanged( IECore::InternedString oldName )
-{
-}
+void GraphComponent::nameChanged( IECore::InternedString oldName ) {}
 
-void GraphComponent::parentChanging( Gaffer::GraphComponent *newParent )
-{
-}
+void GraphComponent::parentChanging( Gaffer::GraphComponent *newParent ) {}
 
-void GraphComponent::parentChanged( Gaffer::GraphComponent *oldParent )
-{
-}
+void GraphComponent::parentChanged( Gaffer::GraphComponent *oldParent ) {}
 
-void GraphComponent::childrenReordered( const std::vector<size_t> &oldIndices )
-{
-}
+void GraphComponent::childrenReordered( const std::vector<size_t> &oldIndices ) {}
 
 void GraphComponent::storeIndexOfNextChild( size_t &index ) const
 {

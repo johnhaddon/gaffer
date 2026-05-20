@@ -69,7 +69,10 @@ namespace
 {
 
 template<typename T>
-T parameter( InternedString metadataTarget, const IECore::CompoundData *parameters, InternedString parameterNameMetadata, T defaultValue )
+T parameter(
+	InternedString metadataTarget, const IECore::CompoundData *parameters, InternedString parameterNameMetadata,
+	T defaultValue
+)
 {
 	ConstStringDataPtr parameterName = Metadata::value<StringData>( metadataTarget, parameterNameMetadata );
 	if( !parameterName )
@@ -87,7 +90,9 @@ T parameter( InternedString metadataTarget, const IECore::CompoundData *paramete
 }
 
 // Return the first light shader found in attributes
-void light( const CompoundObject *attributes, const IECore::CompoundData *&shaderParameters, std::string &metadataTarget )
+void light(
+	const CompoundObject *attributes, const IECore::CompoundData *&shaderParameters, std::string &metadataTarget
+)
 {
 	for( IECore::CompoundObject::ObjectMap::const_iterator it = attributes->members().begin();
 		 it != attributes->members().end(); it++ )
@@ -98,7 +103,8 @@ void light( const CompoundObject *attributes, const IECore::CompoundData *&shade
 			continue;
 		}
 
-		const IECoreScene::ShaderNetwork *shaderNetwork = IECore::runTimeCast<const IECoreScene::ShaderNetwork>( it->second.get() );
+		const IECoreScene::ShaderNetwork *shaderNetwork =
+			IECore::runTimeCast<const IECoreScene::ShaderNetwork>( it->second.get() );
 		if( !shaderNetwork || !shaderNetwork->size() )
 		{
 			continue;
@@ -215,7 +221,10 @@ M44f lightCameraTransform( const IECore::CompoundData *shaderParameters, const s
 	}
 }
 
-IECoreScene::CameraPtr lightToCamera( const IECore::CompoundData *shaderParameters, Camera::FilmFit filmFit, float distantAperture, V2f clippingPlanes, const std::string &metadataTarget )
+IECoreScene::CameraPtr lightToCamera(
+	const IECore::CompoundData *shaderParameters, Camera::FilmFit filmFit, float distantAperture, V2f clippingPlanes,
+	const std::string &metadataTarget
+)
 {
 	IECoreScene::CameraPtr result = new IECoreScene::Camera();
 	const char *type = lightType( shaderParameters, metadataTarget );
@@ -264,8 +273,7 @@ GAFFER_NODE_DEFINE_TYPE( LightToCamera );
 
 size_t LightToCamera::g_firstPlugIndex = 0;
 
-LightToCamera::LightToCamera( const std::string &name )
-	: SceneElementProcessor( name, IECore::PathMatcher::NoMatch )
+LightToCamera::LightToCamera( const std::string &name ) : SceneElementProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -281,9 +289,7 @@ LightToCamera::LightToCamera( const std::string &name )
 	outPlug()->setPlug()->setInput( nullptr );
 }
 
-LightToCamera::~LightToCamera()
-{
-}
+LightToCamera::~LightToCamera() {}
 
 Gaffer::IntPlug *LightToCamera::filmFitPlug()
 {
@@ -342,7 +348,9 @@ bool LightToCamera::processesObject() const
 	return true;
 }
 
-void LightToCamera::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void LightToCamera::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	filmFitPlug()->hash( h );
 	distantAperturePlug()->hash( h );
@@ -350,7 +358,9 @@ void LightToCamera::hashProcessedObject( const ScenePath &path, const Gaffer::Co
 	inPlug()->attributesPlug()->hash( h );
 }
 
-IECore::ConstObjectPtr LightToCamera::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::ConstObjectPtr inputObject ) const
+IECore::ConstObjectPtr LightToCamera::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::ConstObjectPtr inputObject
+) const
 {
 	const IECore::CompoundData *shaderParameters;
 	std::string metadataTarget;
@@ -360,11 +370,8 @@ IECore::ConstObjectPtr LightToCamera::computeProcessedObject( const ScenePath &p
 	if( shaderParameters )
 	{
 		camera = lightToCamera(
-			shaderParameters,
-			(Camera::FilmFit)filmFitPlug()->getValue(),
-			distantAperturePlug()->getValue(),
-			clippingPlanesPlug()->getValue(),
-			metadataTarget
+			shaderParameters, (Camera::FilmFit)filmFitPlug()->getValue(), distantAperturePlug()->getValue(),
+			clippingPlanesPlug()->getValue(), metadataTarget
 		);
 	}
 
@@ -382,12 +389,16 @@ bool LightToCamera::processesTransform() const
 	return true;
 }
 
-void LightToCamera::hashProcessedTransform( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void LightToCamera::hashProcessedTransform(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	inPlug()->attributesPlug()->hash( h );
 }
 
-M44f LightToCamera::computeProcessedTransform( const ScenePath &path, const Gaffer::Context *context, const M44f &inputTransform ) const
+M44f LightToCamera::computeProcessedTransform(
+	const ScenePath &path, const Gaffer::Context *context, const M44f &inputTransform
+) const
 {
 	const IECore::CompoundData *shaderParameters;
 	std::string metadataTarget;
@@ -406,15 +417,21 @@ bool LightToCamera::processesAttributes() const
 	return true;
 }
 
-void LightToCamera::hashProcessedAttributes( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void LightToCamera::hashProcessedAttributes(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	// Attributes depend only on input attributes
 }
 
-IECore::ConstCompoundObjectPtr LightToCamera::computeProcessedAttributes( const ScenePath &path, const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputAttributes ) const
+IECore::ConstCompoundObjectPtr LightToCamera::computeProcessedAttributes(
+	const ScenePath &path, const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputAttributes
+) const
 {
 	CompoundObjectPtr result = new CompoundObject;
-	for( CompoundObject::ObjectMap::const_iterator it = inputAttributes->members().begin(), eIt = inputAttributes->members().end(); it != eIt; ++it )
+	for( CompoundObject::ObjectMap::const_iterator it = inputAttributes->members().begin(),
+												   eIt = inputAttributes->members().end();
+		 it != eIt; ++it )
 	{
 		const std::string &attributeName = it->first.string();
 		if( !( boost::ends_with( attributeName, ":light" ) || attributeName == "light" ) )
@@ -433,7 +450,9 @@ void LightToCamera::hashSetNames( const Gaffer::Context *context, const ScenePlu
 	// whether it will be non-empty ( usually there will already be a __cameras set anyway )
 }
 
-IECore::ConstInternedStringVectorDataPtr LightToCamera::computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstInternedStringVectorDataPtr LightToCamera::computeSetNames(
+	const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ConstInternedStringVectorDataPtr inputSetNamesData = inPlug()->setNamesPlug()->getValue();
 	const std::vector<InternedString> &inNames = inputSetNamesData->readable();
@@ -448,7 +467,10 @@ IECore::ConstInternedStringVectorDataPtr LightToCamera::computeSetNames( const G
 	return resultData;
 }
 
-void LightToCamera::hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void LightToCamera::hashSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent,
+	IECore::MurmurHash &h
+) const
 {
 	if( setName != g_camerasSetName && setName != g_lightsSetName )
 	{
@@ -477,7 +499,9 @@ void LightToCamera::hashSet( const IECore::InternedString &setName, const Gaffer
 	filterPlug()->hash( h );
 }
 
-IECore::ConstPathMatcherDataPtr LightToCamera::computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstPathMatcherDataPtr LightToCamera::computeSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ConstPathMatcherDataPtr inputSetData = inPlug()->setPlug()->getValue();
 

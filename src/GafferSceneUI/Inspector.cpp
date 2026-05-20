@@ -122,36 +122,29 @@ std::string nonEditableReason( const ValuePlug *plug )
 {
 	if( plug->direction() == Plug::Out )
 	{
-		return fmt::format(
-			"{} is not editable.",
-			plug->relativeName( plug->ancestor<ScriptNode>() )
-		);
+		return fmt::format( "{} is not editable.", plug->relativeName( plug->ancestor<ScriptNode>() ) );
 	}
 
 	const ValuePlug *sourcePlug = ( plug && Animation::isAnimated( plug ) ) ? plug->source<ValuePlug>() : plug;
 	if( !sourcePlug->ancestor<ScriptNode>() )
 	{
-		const GraphComponent *settingsNode = sourcePlug->ancestor( RunTimeTyped::typeIdFromTypeName( "GafferUI::Editor::Settings" ) );
+		const GraphComponent *settingsNode =
+			sourcePlug->ancestor( RunTimeTyped::typeIdFromTypeName( "GafferUI::Editor::Settings" ) );
 		return fmt::format(
-			"{} is external to the script.",
-			MetadataAlgo::firstViewableNode( sourcePlug )->relativeName( settingsNode )
+			"{} is external to the script.", MetadataAlgo::firstViewableNode( sourcePlug )->relativeName( settingsNode )
 		);
 	}
 
 	const GraphComponent *readOnlyReason = MetadataAlgo::readOnlyReason( sourcePlug );
 	if( readOnlyReason )
 	{
-		return fmt::format(
-			"{} is locked.",
-			readOnlyReason->relativeName( readOnlyReason->ancestor<ScriptNode>() )
-		);
+		return fmt::format( "{} is locked.", readOnlyReason->relativeName( readOnlyReason->ancestor<ScriptNode>() ) );
 	}
 
 	if( sourcePlug->getInput() )
 	{
 		return fmt::format(
-			"{} has a non-settable input.",
-			sourcePlug->relativeName( sourcePlug->ancestor<ScriptNode>() )
+			"{} has a non-settable input.", sourcePlug->relativeName( sourcePlug->ancestor<ScriptNode>() )
 		);
 	}
 
@@ -162,8 +155,7 @@ std::string nonEditableReason( const ValuePlug *plug )
 			// Don't want to edit the default row, as that could affect
 			// all sorts of other things.
 			return fmt::format(
-				"{} is a spreadsheet default row.",
-				plug->relativeName( plug->ancestor<ScriptNode>() )
+				"{} is a spreadsheet default row.", plug->relativeName( plug->ancestor<ScriptNode>() )
 			);
 		}
 	}
@@ -274,8 +266,14 @@ void edit( Gaffer::ValuePlug *plug, const IECore::Object *value )
 
 IE_CORE_DEFINERUNTIMETYPED( Inspector )
 
-Inspector::Inspector( const std::vector<Gaffer::PlugPtr> &targets, const std::string &type, const std::string &name, const Gaffer::PlugPtr &editScope )
-	: m_targets( targets ), m_type( type ), m_name( name ), m_editScope( editScope )
+Inspector::Inspector(
+	const std::vector<Gaffer::PlugPtr> &targets, const std::string &type, const std::string &name,
+	const Gaffer::PlugPtr &editScope
+)
+	: m_targets( targets ),
+	  m_type( type ),
+	  m_name( name ),
+	  m_editScope( editScope )
 {
 	assert( !targets.empty() );
 	for( const auto &target : targets )
@@ -284,7 +282,11 @@ Inspector::Inspector( const std::vector<Gaffer::PlugPtr> &targets, const std::st
 		// `HistoryPath::cancellationSubject()`.
 		if( target->node() != targets.front()->node() )
 		{
-			throw IECore::Exception( fmt::format( "Targets {} and {} are not on the same node", target->fullName(), targets.front()->fullName() ) );
+			throw IECore::Exception(
+				fmt::format(
+					"Targets {} and {} are not on the same node", target->fullName(), targets.front()->fullName()
+				)
+			);
 		}
 	}
 }
@@ -303,7 +305,10 @@ Inspector::ResultPtr Inspector::inspect() const
 {
 	if( std::this_thread::get_id() != g_mainThreadId && !Context::current()->canceller() )
 	{
-		IECore::msg( IECore::Msg::Warning, "Inspector::inspect", fmt::format( "No canceller for background inspection of {}", m_targets[0]->fullName() ) );
+		IECore::msg(
+			IECore::Msg::Warning, "Inspector::inspect",
+			fmt::format( "No canceller for background inspection of {}", m_targets[0]->fullName() )
+		);
 	}
 
 	SceneAlgo::History::ConstPtr history = this->history();
@@ -358,9 +363,8 @@ Inspector::ResultPtr Inspector::inspect() const
 			}
 		}
 
-		result->m_editors = {
-			fmt::format( formatString, "edit" ), "", fmt::format( formatString, "disable" ), nullptr, nullptr
-		};
+		result->m_editors = { fmt::format( formatString, "edit" ), "", fmt::format( formatString, "disable" ), nullptr,
+							  nullptr };
 	}
 
 	return result;
@@ -379,9 +383,7 @@ Inspector::InspectorSignal &Inspector::dirtiedSignal()
 		// signals is not allowed, but it fortunately doesn't use
 		// `dirtiedSignal()`.
 
-		m_targets.front()->node()->plugDirtiedSignal().connect(
-			boost::bind( &Inspector::plugDirtied, this, ::_1 )
-		);
+		m_targets.front()->node()->plugDirtiedSignal().connect( boost::bind( &Inspector::plugDirtied, this, ::_1 ) );
 
 		Metadata::plugValueChangedSignal().connect( boost::bind( &Inspector::plugMetadataChanged, this, ::_3, ::_4 ) );
 		Metadata::nodeValueChangedSignal().connect( boost::bind( &Inspector::nodeMetadataChanged, this, ::_2, ::_3 ) );
@@ -396,7 +398,9 @@ Inspector::InspectorSignal &Inspector::dirtiedSignal()
 	return *m_dirtiedSignal;
 }
 
-void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *history, Result *result, const IECore::Canceller *canceller ) const
+void Inspector::inspectHistoryWalk(
+	const GafferScene::SceneAlgo::History *history, Result *result, const IECore::Canceller *canceller
+) const
 {
 	IECore::Canceller::check( canceller );
 	Node *node = history->scene->node();
@@ -406,10 +410,7 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 
 	std::string editWarning;
 	ValuePlugPtr source;
-	if(
-		history->scene->direction() == Plug::Out &&
-		( !result->m_source || !result->m_editors )
-	)
+	if( history->scene->direction() == Plug::Out && ( !result->m_source || !result->m_editors ) )
 	{
 		if( auto dependencyNode = runTimeCast<DependencyNode>( node ) )
 		{
@@ -465,23 +466,21 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 			const std::string nonEditableReason = ::nonEditableReason( source.get() );
 			if( nonEditableReason.empty() )
 			{
-				result->m_editors = {
-					[source = source]( bool unused ) { return source; },
-					editWarning,
-					disableEditFunction( source.get(), history ),
-					canEditFunction( history ),
-					editFunction( history )
-				};
+				result->m_editors = { [source = source]( bool unused ) { return source; }, editWarning,
+									  disableEditFunction( source.get(), history ), canEditFunction( history ),
+									  editFunction( history ) };
 			}
 			else
 			{
-				result->m_editors = { nonEditableReason, "", nonEditableReason, canEditFunction( history ), editFunction( history ) };
+				result->m_editors = { nonEditableReason, "", nonEditableReason, canEditFunction( history ),
+									  editFunction( history ) };
 			}
 		}
 		// Otherwise try to initialise from EditScope if we've hit it.
 		else if( auto editScope = runTimeCast<EditScope>( node ) )
 		{
-			if( !result->m_editScopeInHistory && history->scene == editScope->inPlug() && editScope == result->m_editScope )
+			if( !result->m_editScopeInHistory && history->scene == editScope->inPlug() &&
+				editScope == result->m_editScope )
 			{
 				// We are leaving the target EditScope for the first time. We
 				// consider EditScopes on the way out to allow other nodes within
@@ -504,18 +503,14 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 				else
 				{
 					func = fmt::format(
-						"The target edit scope {} is disabled.",
-						editScope->relativeName( editScope->scriptNode() )
+						"The target edit scope {} is disabled.", editScope->relativeName( editScope->scriptNode() )
 					);
 				}
 
 				result->m_editors = {
 					func, "",
-					fmt::format(
-						"There is no edit in {}.", editScope->relativeName( editScope->scriptNode() )
-					),
-					canEditFunction( history ),
-					editFunction( history )
+					fmt::format( "There is no edit in {}.", editScope->relativeName( editScope->scriptNode() ) ),
+					canEditFunction( history ), editFunction( history )
 				};
 			}
 		}
@@ -527,14 +522,15 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 
 		// If we initialised the acquire edit function, tag on a warning if any edits won't be visible
 		// due to being overridden downstream.
-		if( result->m_editors && std::holds_alternative<AcquireEditFunction>( result->m_editors->acquireEditFunction ) && result->m_sourceType == Result::SourceType::Downstream )
+		if( result->m_editors &&
+			std::holds_alternative<AcquireEditFunction>( result->m_editors->acquireEditFunction ) &&
+			result->m_sourceType == Result::SourceType::Downstream )
 		{
 			const Node *downstreamNode = result->m_source->node();
 			const auto *downstreamEditScope = downstreamNode->ancestor<EditScope>();
 			downstreamNode = downstreamEditScope ? downstreamEditScope : downstreamNode;
 			result->m_editors->editWarning = fmt::format(
-				"{} has edits downstream in {}.",
-				std::string( 1, std::toupper( type()[0] ) ) + type().substr( 1 ),
+				"{} has edits downstream in {}.", std::string( 1, std::toupper( type()[0] ) ) + type().substr( 1 ),
 				downstreamNode->relativeName( downstreamNode->scriptNode() )
 			);
 		}
@@ -558,14 +554,18 @@ Gaffer::ValuePlugPtr Inspector::source( const GafferScene::SceneAlgo::History *h
 	return nullptr;
 }
 
-Inspector::AcquireEditFunctionOrFailure Inspector::acquireEditFunction( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history ) const
+Inspector::AcquireEditFunctionOrFailure Inspector::acquireEditFunction(
+	Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history
+) const
 {
 	return "Editing not supported";
 }
 
 Inspector::CanEditFunction Inspector::canEditFunction( const GafferScene::SceneAlgo::History *history ) const
 {
-	return []( const Gaffer::ValuePlug *plug, const IECore::Object *value, std::string &failureReason ) { return ::canEdit( plug, value, failureReason ); };
+	return []( const Gaffer::ValuePlug *plug, const IECore::Object *value, std::string &failureReason ) {
+		return ::canEdit( plug, value, failureReason );
+	};
 }
 
 Inspector::EditFunction Inspector::editFunction( const GafferScene::SceneAlgo::History *history ) const
@@ -573,7 +573,9 @@ Inspector::EditFunction Inspector::editFunction( const GafferScene::SceneAlgo::H
 	return []( Gaffer::ValuePlug *plug, const IECore::Object *value ) { ::edit( plug, value ); };
 }
 
-Inspector::DisableEditFunctionOrFailure Inspector::disableEditFunction( Gaffer::ValuePlug *plug, const GafferScene::SceneAlgo::History *history ) const
+Inspector::DisableEditFunctionOrFailure Inspector::disableEditFunction(
+	Gaffer::ValuePlug *plug, const GafferScene::SceneAlgo::History *history
+) const
 {
 	Gaffer::BoolPlugPtr enabledPlug;
 	if( auto tweakPlug = runTimeCast<TweakPlug>( plug ) )
@@ -593,15 +595,21 @@ Inspector::DisableEditFunctionOrFailure Inspector::disableEditFunction( Gaffer::
 	{
 		if( const GraphComponent *readOnlyReason = MetadataAlgo::readOnlyReason( enabledPlug.get() ) )
 		{
-			return fmt::format( "{} is locked.", readOnlyReason->relativeName( readOnlyReason->ancestor<ScriptNode>() ) );
+			return fmt::format(
+				"{} is locked.", readOnlyReason->relativeName( readOnlyReason->ancestor<ScriptNode>() )
+			);
 		}
 		else if( !enabledPlug->settable() )
 		{
-			return fmt::format( "{} is not settable.", enabledPlug->relativeName( enabledPlug->ancestor<ScriptNode>() ) );
+			return fmt::format(
+				"{} is not settable.", enabledPlug->relativeName( enabledPlug->ancestor<ScriptNode>() )
+			);
 		}
 		else if( !enabledPlug->getValue() )
 		{
-			return fmt::format( "{} is not enabled.", enabledPlug->relativeName( enabledPlug->ancestor<ScriptNode>() ) );
+			return fmt::format(
+				"{} is not enabled.", enabledPlug->relativeName( enabledPlug->ancestor<ScriptNode>() )
+			);
 		}
 		else
 		{
@@ -614,7 +622,9 @@ Inspector::DisableEditFunctionOrFailure Inspector::disableEditFunction( Gaffer::
 	}
 }
 
-IECore::ConstObjectPtr Inspector::fallbackValue( const GafferScene::SceneAlgo::History *history, std::string &description ) const
+IECore::ConstObjectPtr Inspector::fallbackValue(
+	const GafferScene::SceneAlgo::History *history, std::string &description
+) const
 {
 	return nullptr;
 }
@@ -626,12 +636,9 @@ Gaffer::EditScope *Inspector::targetEditScope() const
 		return nullptr;
 	}
 
-	return PlugAlgo::findSource(
-		m_editScope.get(),
-		[]( Plug *plug ) {
-			return runTimeCast<EditScope>( plug->node() );
-		}
-	);
+	return PlugAlgo::findSource( m_editScope.get(), []( Plug *plug ) {
+		return runTimeCast<EditScope>( plug->node() );
+	} );
 }
 
 
@@ -667,10 +674,8 @@ void Inspector::nodeMetadataChanged( IECore::InternedString key, const Gaffer::N
 		return;
 	}
 
-	if(
-		MetadataAlgo::readOnlyAffectedByChange( scope, node, key ) ||
-		( MetadataAlgo::readOnlyAffectedByChange( key ) && scope->isAncestorOf( node ) )
-	)
+	if( MetadataAlgo::readOnlyAffectedByChange( scope, node, key ) ||
+		( MetadataAlgo::readOnlyAffectedByChange( key ) && scope->isAncestorOf( node ) ) )
 	{
 		// Might affect `EditScopeAlgo::*ReadOnlyReason()` methods which we
 		// expect derived classes to be calling.
@@ -708,7 +713,9 @@ struct Inspector::HistoryPath::HistoryProvider
 {
 
 	HistoryProvider( const ConstInspectorPtr &inspector, const ConstContextPtr &context )
-		: inspector( inspector ), m_context( context ), m_constructorThreadId( std::this_thread::get_id() )
+		: inspector( inspector ),
+		  m_context( context ),
+		  m_constructorThreadId( std::this_thread::get_id() )
 	{
 	}
 
@@ -738,7 +745,7 @@ struct Inspector::HistoryPath::HistoryProvider
 		return m_varyingContextVariables.get();
 	}
 
-	private:
+private:
 
 	const ConstContextPtr m_context;
 	std::thread::id m_constructorThreadId;
@@ -790,7 +797,9 @@ struct Inspector::HistoryPath::HistoryProvider
 
 			ConstObjectPtr currentValue = inspector->value( current );
 
-			const bool currentViewableAncestorInHistory = m_historyVector.size() && MetadataAlgo::firstViewableNode( m_historyVector.back()->scene.get() ) == MetadataAlgo::firstViewableNode( current->scene.get() );
+			const bool currentViewableAncestorInHistory = m_historyVector.size() &&
+				MetadataAlgo::firstViewableNode( m_historyVector.back()->scene.get() ) ==
+					MetadataAlgo::firstViewableNode( current->scene.get() );
 			if( !currentViewableAncestorInHistory )
 			{
 				if( successor && !endsWith( m_historyVector, successor ) )
@@ -799,17 +808,17 @@ struct Inspector::HistoryPath::HistoryProvider
 					// previous (`successor`) iteration. But there may still
 					// have been a value change at that point, in which case the
 					// `successor` belongs in our history.
-					if(
-						(bool)currentValue != (bool)successorValue ||
-						( currentValue && currentValue->isNotEqualTo( successorValue.get() ) )
-					)
+					if( (bool)currentValue != (bool)successorValue ||
+						( currentValue && currentValue->isNotEqualTo( successorValue.get() ) ) )
 					{
 						m_historyVector.push_back( successor );
 					}
 
 					if( *successor->context != *current->context )
 					{
-						addVaryingContextVariables( successor->context.get(), current->context.get(), varyingContextVariables );
+						addVaryingContextVariables(
+							successor->context.get(), current->context.get(), varyingContextVariables
+						);
 						if( !endsWith( m_historyVector, successor ) )
 						{
 							m_historyVector.push_back( successor );
@@ -833,8 +842,7 @@ struct Inspector::HistoryPath::HistoryProvider
 			if( current->predecessors.size() > 1 )
 			{
 				IECore::msg(
-					IECore::Msg::Warning,
-					"Inspector::HistoryPath",
+					IECore::Msg::Warning, "Inspector::HistoryPath",
 					"Branching histories are not supported, using first predecessor history only."
 				);
 			}
@@ -845,20 +853,23 @@ struct Inspector::HistoryPath::HistoryProvider
 		}
 
 		std::reverse( m_historyVector.begin(), m_historyVector.end() );
-		m_contextVariables = new StringVectorData(
-			std::vector<std::string>( contextVariables.begin(), contextVariables.end() )
-		);
+		m_contextVariables =
+			new StringVectorData( std::vector<std::string>( contextVariables.begin(), contextVariables.end() ) );
 		m_varyingContextVariables = new StringVectorData(
 			std::vector<std::string>( varyingContextVariables.begin(), varyingContextVariables.end() )
 		);
 	}
 
-	static bool endsWith( const std::vector<SceneAlgo::History::ConstPtr> historyVector, const SceneAlgo::History *history )
+	static bool endsWith(
+		const std::vector<SceneAlgo::History::ConstPtr> historyVector, const SceneAlgo::History *history
+	)
 	{
 		return historyVector.size() && historyVector.back() == history;
 	}
 
-	static void addVaryingContextVariables( const Context *context0, const Context *context1, std::unordered_set<InternedString> &variables )
+	static void addVaryingContextVariables(
+		const Context *context0, const Context *context1, std::unordered_set<InternedString> &variables
+	)
 	{
 		std::vector<InternedString> variableNames;
 		context0->names( variableNames );
@@ -883,27 +894,22 @@ struct Inspector::HistoryPath::HistoryProvider
 //////////////////////////////////////////////////////////////////////////
 
 Inspector::HistoryPath::HistoryPath(
-	const ConstInspectorPtr &inspector,
-	ConstContextPtr context,
-	const std::string &path,
-	PathFilterPtr filter
+	const ConstInspectorPtr &inspector, ConstContextPtr context, const std::string &path, PathFilterPtr filter
 )
-	: Path( path, filter ), m_historyProvider( std::make_shared<HistoryProvider>( inspector, context ) )
+	: Path( path, filter ),
+	  m_historyProvider( std::make_shared<HistoryProvider>( inspector, context ) )
 {
 }
 
 Inspector::HistoryPath::HistoryPath(
-	const HistoryProviderPtr &historyProvider,
-	const std::string &path,
-	PathFilterPtr filter
+	const HistoryProviderPtr &historyProvider, const std::string &path, PathFilterPtr filter
 )
-	: Path( path, filter ), m_historyProvider( historyProvider )
+	: Path( path, filter ),
+	  m_historyProvider( historyProvider )
 {
 }
 
-Inspector::HistoryPath::~HistoryPath()
-{
-}
+Inspector::HistoryPath::~HistoryPath() {}
 
 void Inspector::HistoryPath::propertyNames( std::vector<InternedString> &names, const Canceller *canceller ) const
 {
@@ -939,12 +945,8 @@ ConstRunTimeTypedPtr Inspector::HistoryPath::property( const InternedString &nam
 		return names().empty() ? m_historyProvider->varyingContextVariables( canceller ) : nullptr;
 	}
 	else if(
-		name == g_nodePropertyName ||
-		name == g_valuePropertyName ||
-		name == g_fallbackValuePropertyName ||
-		name == g_operationPropertyName ||
-		name == g_sourcePropertyName ||
-		name == g_editWarningPropertyName
+		name == g_nodePropertyName || name == g_valuePropertyName || name == g_fallbackValuePropertyName ||
+		name == g_operationPropertyName || name == g_sourcePropertyName || name == g_editWarningPropertyName
 	)
 	{
 		SceneAlgo::History::ConstPtr h = history( canceller );
@@ -1005,7 +1007,9 @@ ConstRunTimeTypedPtr Inspector::HistoryPath::property( const InternedString &nam
 	return Path::property( name, canceller );
 }
 
-Gaffer::ConstContextPtr Inspector::HistoryPath::contextProperty( const InternedString &name, const Canceller *canceller ) const
+Gaffer::ConstContextPtr Inspector::HistoryPath::contextProperty(
+	const InternedString &name, const Canceller *canceller
+) const
 {
 	if( name == g_contextPropertyName )
 	{
@@ -1046,9 +1050,7 @@ void Inspector::HistoryPath::doChildren( std::vector<PathPtr> &children, const C
 	const size_t numChildren = m_historyProvider->historySize( canceller );
 	for( size_t i = 0; i < numChildren; ++i )
 	{
-		children.push_back(
-			new Inspector::HistoryPath( m_historyProvider, fmt::format( "/{}", i ) )
-		);
+		children.push_back( new Inspector::HistoryPath( m_historyProvider, fmt::format( "/{}", i ) ) );
 	}
 }
 
@@ -1082,7 +1084,10 @@ const GafferScene::SceneAlgo::History *Inspector::HistoryPath::history( const IE
 //////////////////////////////////////////////////////////////////////////
 
 Inspector::Result::Result( const IECore::ConstObjectPtr &value, const Gaffer::EditScopePtr &editScope )
-	: m_value( value ), m_sourceType( SourceType::Other ), m_editScope( editScope ), m_editScopeInHistory( false )
+	: m_value( value ),
+	  m_sourceType( SourceType::Other ),
+	  m_editScope( editScope ),
+	  m_editScopeInHistory( false )
 {
 }
 
@@ -1169,7 +1174,9 @@ void Inspector::Result::disableEdit() const
 		return ( *f )();
 	}
 
-	throw IECore::Exception( "Cannot disable edit : " + std::get<std::string>( m_editors.value().disableEditFunction ) );
+	throw IECore::Exception(
+		"Cannot disable edit : " + std::get<std::string>( m_editors.value().disableEditFunction )
+	);
 }
 
 std::string Inspector::Result::editWarning() const

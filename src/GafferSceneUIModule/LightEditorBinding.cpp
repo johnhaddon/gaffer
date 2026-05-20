@@ -85,14 +85,11 @@ const InternedString g_lightFilterSetName( "__lightFilters" );
 class LocationNameColumn : public StandardPathColumn
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( LocationNameColumn )
 
-	LocationNameColumn()
-		: StandardPathColumn( "Name", "name" )
-	{
-	}
+	LocationNameColumn() : StandardPathColumn( "Name", "name" ) {}
 
 	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
 	{
@@ -123,12 +120,8 @@ class LocationNameColumn : public StandardPathColumn
 		{
 			std::vector<InternedString> tokens;
 			StringAlgo::tokenize( attribute.first, ':', tokens );
-			if(
-				attribute.first != "light" &&
-				tokens.back() != "light" &&
-				attribute.first != "lightFilter" &&
-				( tokens.size() < 2 || tokens[1] != "lightFilter" )
-			)
+			if( attribute.first != "light" && tokens.back() != "light" && attribute.first != "lightFilter" &&
+				( tokens.size() < 2 || tokens[1] != "lightFilter" ) )
 			{
 				continue;
 			}
@@ -148,9 +141,11 @@ class LocationNameColumn : public StandardPathColumn
 
 			if( type->readable() == "lightBlocker" )
 			{
-				if( ConstStringDataPtr blockerTypeParameter = Metadata::value<StringData>( metadataTarget, "typeParameter" ) )
+				if( ConstStringDataPtr blockerTypeParameter =
+						Metadata::value<StringData>( metadataTarget, "typeParameter" ) )
 				{
-					if( ConstStringDataPtr blockerType = shader->parametersData()->member<StringData>( blockerTypeParameter->readable() ) )
+					if( ConstStringDataPtr blockerType =
+							shader->parametersData()->member<StringData>( blockerTypeParameter->readable() ) )
 					{
 						result.icon = new StringData( blockerType->readable() + "Blocker.png" );
 					}
@@ -173,7 +168,7 @@ class LocationNameColumn : public StandardPathColumn
 class MuteColumn : public InspectorColumn
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( MuteColumn )
 
@@ -222,7 +217,7 @@ class MuteColumn : public InspectorColumn
 		return result;
 	}
 
-	private:
+private:
 
 	static IECore::CompoundDataPtr m_muteIconData;
 	static IECore::CompoundDataPtr m_unMuteIconData;
@@ -258,12 +253,19 @@ StringDataPtr MuteColumn::m_muteBlankIconName = new StringData( "muteLightUndefi
 class SetMembershipColumn : public InspectorColumn
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( SetMembershipColumn )
 
-	SetMembershipColumn( const GafferScene::ScenePlugPtr &scene, const Gaffer::PlugPtr editScope, const IECore::InternedString &setName, const std::string &columnName )
-		: InspectorColumn( new GafferSceneUI::Private::SetMembershipInspector( scene, editScope, setName ), columnName ), m_setName( setName ), m_scene( scene )
+	SetMembershipColumn(
+		const GafferScene::ScenePlugPtr &scene, const Gaffer::PlugPtr editScope, const IECore::InternedString &setName,
+		const std::string &columnName
+	)
+		: InspectorColumn(
+			  new GafferSceneUI::Private::SetMembershipInspector( scene, editScope, setName ), columnName
+		  ),
+		  m_setName( setName ),
+		  m_scene( scene )
 	{
 	}
 
@@ -321,7 +323,7 @@ class SetMembershipColumn : public InspectorColumn
 		return result;
 	}
 
-	private:
+private:
 
 	const IECore::InternedString m_setName;
 	const GafferScene::ScenePlugPtr m_scene;
@@ -364,8 +366,18 @@ void GafferSceneUIModule::bindLightEditor()
 		.def( init<>() );
 
 	IECorePython::RefCountedClass<MuteColumn, GafferSceneUI::Private::InspectorColumn>( "_LightEditorMuteColumn" )
-		.def( init<const GafferScene::ScenePlugPtr &, const Gaffer::PlugPtr &>( ( arg_( "scene" ), arg_( "editScope" ) ) ) );
+		.def(
+			init<const GafferScene::ScenePlugPtr &, const Gaffer::PlugPtr &>( ( arg_( "scene" ), arg_( "editScope" ) ) )
+		);
 
-	IECorePython::RefCountedClass<SetMembershipColumn, GafferSceneUI::Private::InspectorColumn>( "_LightEditorSetMembershipColumn" )
-		.def( init<const GafferScene::ScenePlugPtr &, const Gaffer::PlugPtr &, const IECore::InternedString &, const std::string &>( ( arg_( "scene" ), arg_( "editScope" ), arg_( "setName" ), arg_( "columnName" ) ) ) );
+	IECorePython::RefCountedClass<SetMembershipColumn, GafferSceneUI::Private::InspectorColumn>(
+		"_LightEditorSetMembershipColumn"
+	)
+		.def(
+			init<
+				const GafferScene::ScenePlugPtr &, const Gaffer::PlugPtr &, const IECore::InternedString &,
+				const std::string &>(
+				( arg_( "scene" ), arg_( "editScope" ), arg_( "setName" ), arg_( "columnName" ) )
+			)
+		);
 }

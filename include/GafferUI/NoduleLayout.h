@@ -76,11 +76,13 @@ IE_CORE_FORWARDDECLARE( Nodule )
 class GAFFERUI_API NoduleLayout : public Gadget
 {
 
-	public:
+public:
 
 	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::NoduleLayout, NoduleLayoutTypeId, Gadget );
 
-	explicit NoduleLayout( Gaffer::GraphComponentPtr parent, IECore::InternedString section = IECore::InternedString() );
+	explicit NoduleLayout(
+		Gaffer::GraphComponentPtr parent, IECore::InternedString section = IECore::InternedString()
+	);
 	~NoduleLayout() override;
 
 	/// \todo These do not need to be virtual, since this is
@@ -96,7 +98,7 @@ class GAFFERUI_API NoduleLayout : public Gadget
 	/// "noduleLayout:customGadget:*"" metadata entries.
 	static void registerCustomGadget( const std::string &gadgetType, CustomGadgetCreator creator );
 
-	private:
+private:
 
 	LinearContainer *noduleContainer();
 	const LinearContainer *noduleContainer() const;

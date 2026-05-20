@@ -134,16 +134,14 @@ struct ThreadablePathAccumulator
 
 	IECore::PathMatcher result()
 	{
-		return m_threadResults.combine(
-			[]( const PathMatcher &a, const PathMatcher &b ) {
-				PathMatcher c = a;
-				c.addPaths( b );
-				return c;
-			}
-		);
+		return m_threadResults.combine( []( const PathMatcher &a, const PathMatcher &b ) {
+			PathMatcher c = a;
+			c.addPaths( b );
+			return c;
+		} );
 	}
 
-	private:
+private:
 
 	tbb::enumerable_thread_specific<PathMatcher> m_threadResults;
 };
@@ -203,7 +201,9 @@ void GafferScene::SceneAlgo::matchingPaths( const FilterPlug *filterPlug, const 
 	paths = f.result();
 }
 
-void GafferScene::SceneAlgo::matchingPaths( const FilterPlug *filterPlug, const ScenePlug *scene, const ScenePlug::ScenePath &root, IECore::PathMatcher &paths )
+void GafferScene::SceneAlgo::matchingPaths(
+	const FilterPlug *filterPlug, const ScenePlug *scene, const ScenePlug::ScenePath &root, IECore::PathMatcher &paths
+)
 {
 	ThreadablePathAccumulator f;
 	GafferScene::SceneAlgo::filteredParallelTraverse( scene, filterPlug, f, root );
@@ -222,14 +222,18 @@ IECore::MurmurHash GafferScene::SceneAlgo::matchingPathsHash( const Filter *filt
 	return matchingPathsHash( filter->outPlug(), scene );
 }
 
-IECore::MurmurHash GafferScene::SceneAlgo::matchingPathsHash( const GafferScene::FilterPlug *filterPlug, const ScenePlug *scene )
+IECore::MurmurHash GafferScene::SceneAlgo::matchingPathsHash(
+	const GafferScene::FilterPlug *filterPlug, const ScenePlug *scene
+)
 {
 	ThreadablePathHashAccumulator f;
 	GafferScene::SceneAlgo::filteredParallelTraverse( scene, filterPlug, f );
 	return IECore::MurmurHash( f.m_h1Accum, f.m_h2Accum );
 }
 
-IECore::MurmurHash GafferScene::SceneAlgo::matchingPathsHash( const GafferScene::FilterPlug *filterPlug, const ScenePlug *scene, const ScenePlug::ScenePath &root )
+IECore::MurmurHash GafferScene::SceneAlgo::matchingPathsHash(
+	const GafferScene::FilterPlug *filterPlug, const ScenePlug *scene, const ScenePlug::ScenePath &root
+)
 {
 	ThreadablePathHashAccumulator f;
 	GafferScene::SceneAlgo::filteredParallelTraverse( scene, filterPlug, f, root );
@@ -247,7 +251,9 @@ IECore::MurmurHash GafferScene::SceneAlgo::matchingPathsHash( const PathMatcher 
 // Searching
 //////////////////////////////////////////////////////////////////////////
 
-IECore::PathMatcher GafferScene::SceneAlgo::findAllWithAttribute( const ScenePlug *scene, IECore::InternedString name, const IECore::Object *value, const ScenePlug::ScenePath &root )
+IECore::PathMatcher GafferScene::SceneAlgo::findAllWithAttribute(
+	const ScenePlug *scene, IECore::InternedString name, const IECore::Object *value, const ScenePlug::ScenePath &root
+)
 {
 	return findAll(
 		scene,
@@ -282,9 +288,7 @@ IECore::ConstCompoundObjectPtr GafferScene::SceneAlgo::globalAttributes( const I
 		}
 		// Cast is justified because we don't modify the data, and will return it
 		// as const from this function.
-		result->members()[it->first.string().substr( prefix.size() )] = boost::const_pointer_cast<Object>(
-			it->second
-		);
+		result->members()[it->first.string().substr( prefix.size() )] = boost::const_pointer_cast<Object>( it->second );
 	}
 
 	return result;
@@ -346,7 +350,9 @@ IECore::ConstCompoundDataPtr GafferScene::SceneAlgo::sets( const ScenePlug *scen
 	return sets( scene, setNamesData->readable() );
 }
 
-IECore::ConstCompoundDataPtr GafferScene::SceneAlgo::sets( const ScenePlug *scene, const std::vector<IECore::InternedString> &setNames )
+IECore::ConstCompoundDataPtr GafferScene::SceneAlgo::sets(
+	const ScenePlug *scene, const std::vector<IECore::InternedString> &setNames
+)
 {
 	std::vector<IECore::ConstPathMatcherDataPtr> setsVector;
 	setsVector.resize( setNames.size(), nullptr );
@@ -413,24 +419,17 @@ const InternedString g_processedObjectPlugName( "__processedObject" );
 class CapturingMonitor : public Monitor
 {
 
-	public:
+public:
 
-	CapturingMonitor( IECore::InternedString scenePlugChildName ) : m_scenePlugChildName( scenePlugChildName )
-	{
-	}
+	CapturingMonitor( IECore::InternedString scenePlugChildName ) : m_scenePlugChildName( scenePlugChildName ) {}
 
-	~CapturingMonitor() override
-	{
-	}
+	~CapturingMonitor() override {}
 
 	IE_CORE_DECLAREMEMBERPTR( CapturingMonitor )
 
-	const CapturedProcess::PtrVector &rootProcesses()
-	{
-		return m_rootProcesses;
-	}
+	const CapturedProcess::PtrVector &rootProcesses() { return m_rootProcesses; }
 
-	protected:
+protected:
 
 	void processStarted( const Process *process ) override
 	{
@@ -493,10 +492,7 @@ class CapturingMonitor : public Monitor
 		m_processMap.erase( process );
 	}
 
-	bool mightForceMonitoring() override
-	{
-		return true;
-	}
+	bool mightForceMonitoring() override { return true; }
 
 	bool forceMonitoring( const Plug *plug, const IECore::InternedString &processType ) override
 	{
@@ -518,12 +514,13 @@ class CapturingMonitor : public Monitor
 		return !m_monitoredSet.count( h );
 	}
 
-	private:
+private:
 
 	bool shouldCapture( const Plug *plug ) const
 	{
 		return ( plug->parent<ScenePlug>() && plug->getName() == m_scenePlugChildName ) ||
-			( (Gaffer::TypeId)plug->typeId() == Gaffer::TypeId::ObjectPlugTypeId && plug->getName() == g_processedObjectPlugName ) ||
+			( (Gaffer::TypeId)plug->typeId() == Gaffer::TypeId::ObjectPlugTypeId &&
+			  plug->getName() == g_processedObjectPlugName ) ||
 			runTimeCast<const Expression>( plug->node() );
 	}
 
@@ -544,7 +541,9 @@ class CapturingMonitor : public Monitor
 
 IE_CORE_DECLAREPTR( CapturingMonitor )
 
-SceneAlgo::History::Ptr historyWalk( const CapturedProcess *process, InternedString scenePlugChildName, SceneAlgo::History *parent )
+SceneAlgo::History::Ptr historyWalk(
+	const CapturedProcess *process, InternedString scenePlugChildName, SceneAlgo::History *parent
+)
 {
 	// Add a history item for each plug in the input chain
 	// between `process->destinationPlug()` and `process->plug()`
@@ -582,7 +581,10 @@ SceneAlgo::History::Ptr historyWalk( const CapturedProcess *process, InternedStr
 	return result;
 }
 
-void addGenericAttributePredecessors( const SceneAlgo::History::Predecessors &source, SceneAlgo::AttributeHistory *destination, const IECore::Canceller *canceller )
+void addGenericAttributePredecessors(
+	const SceneAlgo::History::Predecessors &source, SceneAlgo::AttributeHistory *destination,
+	const IECore::Canceller *canceller
+)
 {
 	for( auto &h : source )
 	{
@@ -593,7 +595,9 @@ void addGenericAttributePredecessors( const SceneAlgo::History::Predecessors &so
 	}
 }
 
-void addGenericOptionPredecessors( const SceneAlgo::History::Predecessors &source, SceneAlgo::OptionHistory *destination )
+void addGenericOptionPredecessors(
+	const SceneAlgo::History::Predecessors &source, SceneAlgo::OptionHistory *destination
+)
 {
 	for( auto &h : source )
 	{
@@ -604,13 +608,14 @@ void addGenericOptionPredecessors( const SceneAlgo::History::Predecessors &sourc
 	}
 }
 
-void addCopyAttributesPredecessors( const CopyAttributes *copyAttributes, const SceneAlgo::History::Predecessors &source, SceneAlgo::AttributeHistory *destination, const IECore::Canceller *canceller )
+void addCopyAttributesPredecessors(
+	const CopyAttributes *copyAttributes, const SceneAlgo::History::Predecessors &source,
+	SceneAlgo::AttributeHistory *destination, const IECore::Canceller *canceller
+)
 {
 	const ScenePlug *sourceScene = copyAttributes->inPlug();
-	if(
-		( copyAttributes->filterPlug()->match( copyAttributes->inPlug() ) & PathMatcher::ExactMatch ) &&
-		StringAlgo::matchMultiple( destination->attributeName, copyAttributes->attributesPlug()->getValue() )
-	)
+	if( ( copyAttributes->filterPlug()->match( copyAttributes->inPlug() ) & PathMatcher::ExactMatch ) &&
+		StringAlgo::matchMultiple( destination->attributeName, copyAttributes->attributesPlug()->getValue() ) )
 	{
 		ConstCompoundObjectPtr sourceAttributes;
 		const std::string sourceLocation = copyAttributes->sourceLocationPlug()->getValue();
@@ -640,12 +645,17 @@ void addCopyAttributesPredecessors( const CopyAttributes *copyAttributes, const 
 	{
 		if( h->scene == sourceScene )
 		{
-			destination->predecessors.push_back( SceneAlgo::attributeHistory( h.get(), destination->attributeName, canceller ) );
+			destination->predecessors.push_back(
+				SceneAlgo::attributeHistory( h.get(), destination->attributeName, canceller )
+			);
 		}
 	}
 }
 
-void addCopyOptionsPredecessors( const CopyOptions *copyOptions, const SceneAlgo::History::Predecessors &source, SceneAlgo::OptionHistory *destination )
+void addCopyOptionsPredecessors(
+	const CopyOptions *copyOptions, const SceneAlgo::History::Predecessors &source,
+	SceneAlgo::OptionHistory *destination
+)
 {
 	const ScenePlug *sourceScene = copyOptions->inPlug();
 	if( StringAlgo::matchMultiple( destination->optionName, copyOptions->optionsPlug()->getValue() ) )
@@ -666,14 +676,18 @@ void addCopyOptionsPredecessors( const CopyOptions *copyOptions, const SceneAlgo
 	}
 }
 
-void addShuffleAttributesPredecessors( const ShuffleAttributes *shuffleAttributes, const SceneAlgo::History::Predecessors &source, SceneAlgo::AttributeHistory *destination, const IECore::Canceller *canceller )
+void addShuffleAttributesPredecessors(
+	const ShuffleAttributes *shuffleAttributes, const SceneAlgo::History::Predecessors &source,
+	SceneAlgo::AttributeHistory *destination, const IECore::Canceller *canceller
+)
 {
 	// We have no way of introspecting the operation of a ShufflePlug, so we resort
 	// to shuffling	`name = name, value = name` pairs to figure out where the attribute
 	// has come from.
 
 	InternedString sourceAttributeName = destination->attributeName;
-	if( !shuffleAttributes->globalPlug()->getValue() && ( shuffleAttributes->filterPlug()->match( shuffleAttributes->inPlug() ) & PathMatcher::ExactMatch ) )
+	if( !shuffleAttributes->globalPlug()->getValue() &&
+		( shuffleAttributes->filterPlug()->match( shuffleAttributes->inPlug() ) & PathMatcher::ExactMatch ) )
 	{
 		auto inputAttributes = shuffleAttributes->inPlug()->attributesPlug()->getValue();
 		map<InternedString, InternedString> shuffledNames;
@@ -688,11 +702,16 @@ void addShuffleAttributesPredecessors( const ShuffleAttributes *shuffleAttribute
 	if( source.size() )
 	{
 		assert( source.size() == 1 );
-		destination->predecessors.push_back( SceneAlgo::attributeHistory( source[0].get(), sourceAttributeName, canceller ) );
+		destination->predecessors.push_back(
+			SceneAlgo::attributeHistory( source[0].get(), sourceAttributeName, canceller )
+		);
 	}
 }
 
-void addLocaliseAttributesPredecessors( const SceneAlgo::History::Predecessors &source, SceneAlgo::AttributeHistory *destination, const IECore::Canceller *canceller )
+void addLocaliseAttributesPredecessors(
+	const SceneAlgo::History::Predecessors &source, SceneAlgo::AttributeHistory *destination,
+	const IECore::Canceller *canceller
+)
 {
 	// No need to check if the node is filtered to this location.
 	// Filtered or unfiltered, it's all the same : the predecessor
@@ -721,17 +740,17 @@ void addLocaliseAttributesPredecessors( const SceneAlgo::History::Predecessors &
 	}
 }
 
-void addAttributeTweaksPredecessors( const AttributeTweaks *attributeTweaks, const SceneAlgo::History::Predecessors &source, SceneAlgo::AttributeHistory *destination, const IECore::Canceller *canceller )
+void addAttributeTweaksPredecessors(
+	const AttributeTweaks *attributeTweaks, const SceneAlgo::History::Predecessors &source,
+	SceneAlgo::AttributeHistory *destination, const IECore::Canceller *canceller
+)
 {
 	if( attributeTweaks->localisePlug()->getValue() )
 	{
 		for( const auto &tweak : TweakPlug::Range( *attributeTweaks->tweaksPlug() ) )
 		{
-			if(
-				tweak->namePlug()->getValue() == destination->attributeName.string() &&
-				tweak->enabledPlug()->getValue() &&
-				tweak->modePlug()->getValue() == TweakPlug::CreateIfMissing
-			)
+			if( tweak->namePlug()->getValue() == destination->attributeName.string() &&
+				tweak->enabledPlug()->getValue() && tweak->modePlug()->getValue() == TweakPlug::CreateIfMissing )
 			{
 				// We don't want to include ancestor predecessors for a localised CreateIfMissing tweak.
 				// If the attribute exists on an ancestor the tweak shouldn't do anything, and if it
@@ -739,7 +758,9 @@ void addAttributeTweaksPredecessors( const AttributeTweaks *attributeTweaks, con
 				// irrelevant to the history.
 				if( source.size() )
 				{
-					destination->predecessors.push_back( attributeHistory( source[0].get(), destination->attributeName, canceller ) );
+					destination->predecessors.push_back(
+						attributeHistory( source[0].get(), destination->attributeName, canceller )
+					);
 				}
 				return;
 			}
@@ -749,7 +770,10 @@ void addAttributeTweaksPredecessors( const AttributeTweaks *attributeTweaks, con
 	addLocaliseAttributesPredecessors( source, destination, canceller );
 }
 
-void addMergeScenesPredecessors( const MergeScenes *mergeScenes, const SceneAlgo::History::Predecessors &source, SceneAlgo::AttributeHistory *destination, const IECore::Canceller *canceller )
+void addMergeScenesPredecessors(
+	const MergeScenes *mergeScenes, const SceneAlgo::History::Predecessors &source,
+	SceneAlgo::AttributeHistory *destination, const IECore::Canceller *canceller
+)
 {
 	// MergeScenes only evaluates input locations that exist, and in an order
 	// whereby the last input with the attribute wins.
@@ -770,7 +794,10 @@ void addMergeScenesPredecessors( const MergeScenes *mergeScenes, const SceneAlgo
 	}
 }
 
-void addMergeScenesPredecessors( const MergeScenes *mergeScenes, const SceneAlgo::History::Predecessors &source, SceneAlgo::OptionHistory *destination )
+void addMergeScenesPredecessors(
+	const MergeScenes *mergeScenes, const SceneAlgo::History::Predecessors &source,
+	SceneAlgo::OptionHistory *destination
+)
 {
 	// MergeScenes evaluates in an order whereby the last input with
 	// the option wins.
@@ -791,7 +818,10 @@ void addMergeScenesPredecessors( const MergeScenes *mergeScenes, const SceneAlgo
 	}
 }
 
-void addMergeScenesPredecessors( const MergeScenes *mergeScenes, const SceneAlgo::History::Predecessors &source, SceneAlgo::PrimitiveVariableHistory *destination )
+void addMergeScenesPredecessors(
+	const MergeScenes *mergeScenes, const SceneAlgo::History::Predecessors &source,
+	SceneAlgo::PrimitiveVariableHistory *destination
+)
 {
 	// MergeScenes only evaluates input locations that exist, and in an order
 	// whereby the last input with the object wins.
@@ -827,7 +857,9 @@ void addMergeScenesPredecessors( const MergeScenes *mergeScenes, const SceneAlgo
 	destination->predecessors.push_back( predecessor );
 }
 
-void addGenericPrimitiveVariablePredecessors( const SceneAlgo::History::Predecessors &source, SceneAlgo::PrimitiveVariableHistory *destination )
+void addGenericPrimitiveVariablePredecessors(
+	const SceneAlgo::History::Predecessors &source, SceneAlgo::PrimitiveVariableHistory *destination
+)
 {
 	for( auto &h : source )
 	{
@@ -838,13 +870,16 @@ void addGenericPrimitiveVariablePredecessors( const SceneAlgo::History::Predeces
 	}
 }
 
-void addCopyPrimitiveVariablesPredecessors( const CopyPrimitiveVariables *copyPrimitiveVariables, const SceneAlgo::History::Predecessors &source, SceneAlgo::PrimitiveVariableHistory *destination )
+void addCopyPrimitiveVariablesPredecessors(
+	const CopyPrimitiveVariables *copyPrimitiveVariables, const SceneAlgo::History::Predecessors &source,
+	SceneAlgo::PrimitiveVariableHistory *destination
+)
 {
 	const ScenePlug *sourceScene = copyPrimitiveVariables->inPlug();
-	if(
-		( copyPrimitiveVariables->filterPlug()->match( copyPrimitiveVariables->inPlug() ) & PathMatcher::ExactMatch ) &&
-		StringAlgo::matchMultiple( destination->primitiveVariableName, copyPrimitiveVariables->primitiveVariablesPlug()->getValue() )
-	)
+	if( ( copyPrimitiveVariables->filterPlug()->match( copyPrimitiveVariables->inPlug() ) & PathMatcher::ExactMatch ) &&
+		StringAlgo::matchMultiple(
+			destination->primitiveVariableName, copyPrimitiveVariables->primitiveVariablesPlug()->getValue()
+		) )
 	{
 		ConstObjectPtr sourceObject;
 		const std::string sourceLocation = copyPrimitiveVariables->sourceLocationPlug()->getValue();
@@ -877,21 +912,28 @@ void addCopyPrimitiveVariablesPredecessors( const CopyPrimitiveVariables *copyPr
 	{
 		if( h->scene == sourceScene )
 		{
-			destination->predecessors.push_back( SceneAlgo::primitiveVariableHistory( h.get(), destination->primitiveVariableName ) );
+			destination->predecessors.push_back(
+				SceneAlgo::primitiveVariableHistory( h.get(), destination->primitiveVariableName )
+			);
 		}
 	}
 }
 
-void addShufflePrimitiveVariablesPredecessors( const ShufflePrimitiveVariables *shufflePrimitiveVariables, const SceneAlgo::History::Predecessors &source, SceneAlgo::PrimitiveVariableHistory *destination )
+void addShufflePrimitiveVariablesPredecessors(
+	const ShufflePrimitiveVariables *shufflePrimitiveVariables, const SceneAlgo::History::Predecessors &source,
+	SceneAlgo::PrimitiveVariableHistory *destination
+)
 {
 	// We have no way of introspecting the operation of a ShufflePlug, so we resort
 	// to shuffling	`name = name, value = name` pairs to figure out where the primitive
 	// variable has come from.
 
 	InternedString sourcePrimitiveVariableName = destination->primitiveVariableName;
-	if( shufflePrimitiveVariables->filterPlug()->match( shufflePrimitiveVariables->inPlug() ) & PathMatcher::ExactMatch )
+	if( shufflePrimitiveVariables->filterPlug()->match( shufflePrimitiveVariables->inPlug() ) &
+		PathMatcher::ExactMatch )
 	{
-		ConstPrimitivePtr primitive = IECore::runTimeCast<const Primitive>( shufflePrimitiveVariables->inPlug()->objectPlug()->getValue() );
+		ConstPrimitivePtr primitive =
+			IECore::runTimeCast<const Primitive>( shufflePrimitiveVariables->inPlug()->objectPlug()->getValue() );
 		if( primitive )
 		{
 			map<InternedString, InternedString> shuffledNames;
@@ -907,7 +949,9 @@ void addShufflePrimitiveVariablesPredecessors( const ShufflePrimitiveVariables *
 	if( source.size() )
 	{
 		assert( source.size() == 1 );
-		destination->predecessors.push_back( SceneAlgo::primitiveVariableHistory( source[0].get(), sourcePrimitiveVariableName ) );
+		destination->predecessors.push_back(
+			SceneAlgo::primitiveVariableHistory( source[0].get(), sourcePrimitiveVariableName )
+		);
 	}
 }
 
@@ -943,10 +987,8 @@ ShaderTweaks *shaderTweaksWalk( const SceneAlgo::AttributeHistory *h )
 		if( h->scene == tweaks->outPlug() )
 		{
 			Context::Scope contextScope( h->context.get() );
-			if(
-				StringAlgo::matchMultiple( h->attributeName, tweaks->shaderPlug()->getValue() ) &&
-				( tweaks->filterPlug()->match( tweaks->inPlug() ) & PathMatcher::ExactMatch )
-			)
+			if( StringAlgo::matchMultiple( h->attributeName, tweaks->shaderPlug()->getValue() ) &&
+				( tweaks->filterPlug()->match( tweaks->inPlug() ) & PathMatcher::ExactMatch ) )
 			{
 				return tweaks;
 			}
@@ -1022,7 +1064,9 @@ SceneAlgo::History::Ptr SceneAlgo::history( const Gaffer::ValuePlug *scenePlugCh
 	return historyWalk( monitor->rootProcesses().front().get(), scenePlugChild->getName(), nullptr );
 }
 
-SceneAlgo::AttributeHistory::Ptr SceneAlgo::attributeHistory( const History *attributesHistory, const IECore::InternedString &attribute, const IECore::Canceller *canceller )
+SceneAlgo::AttributeHistory::Ptr SceneAlgo::attributeHistory(
+	const History *attributesHistory, const IECore::InternedString &attribute, const IECore::Canceller *canceller
+)
 {
 	IECore::Canceller::check( canceller );
 	Context::EditableScope scopedContext( attributesHistory->context.get() );
@@ -1031,10 +1075,8 @@ SceneAlgo::AttributeHistory::Ptr SceneAlgo::attributeHistory( const History *att
 	ConstCompoundObjectPtr attributes = attributesHistory->scene->attributesPlug()->getValue();
 	ConstObjectPtr attributeValue = attributes->member<Object>( attribute );
 
-	SceneAlgo::AttributeHistory::Ptr result = new AttributeHistory(
-		attributesHistory->scene, attributesHistory->context,
-		attribute, attributeValue
-	);
+	SceneAlgo::AttributeHistory::Ptr result =
+		new AttributeHistory( attributesHistory->scene, attributesHistory->context, attribute, attributeValue );
 
 	// Filter the _attributes_ history to include only predecessors which
 	// contribute specifically to our single _attribute_. In the absence of
@@ -1052,7 +1094,9 @@ SceneAlgo::AttributeHistory::Ptr SceneAlgo::attributeHistory( const History *att
 		}
 		else if( auto shuffleAttributes = runTimeCast<const ShuffleAttributes>( node ) )
 		{
-			addShuffleAttributesPredecessors( shuffleAttributes, attributesHistory->predecessors, result.get(), canceller );
+			addShuffleAttributesPredecessors(
+				shuffleAttributes, attributesHistory->predecessors, result.get(), canceller
+			);
 		}
 		else if( runTimeCast<const LocaliseAttributes>( node ) )
 		{
@@ -1083,21 +1127,23 @@ SceneAlgo::AttributeHistory::Ptr SceneAlgo::attributeHistory( const History *att
 	return result;
 }
 
-SceneAlgo::AttributeHistory::Ptr SceneAlgo::attributeHistory( const SceneAlgo::History *attributesHistory, const IECore::InternedString &attribute )
+SceneAlgo::AttributeHistory::Ptr SceneAlgo::attributeHistory(
+	const SceneAlgo::History *attributesHistory, const IECore::InternedString &attribute
+)
 {
 	return attributeHistory( attributesHistory, attribute, nullptr );
 }
 
-SceneAlgo::OptionHistory::Ptr SceneAlgo::optionHistory( const SceneAlgo::History *globalsHistory, const IECore::InternedString &option )
+SceneAlgo::OptionHistory::Ptr SceneAlgo::optionHistory(
+	const SceneAlgo::History *globalsHistory, const IECore::InternedString &option
+)
 {
 	Context::Scope scopedContext( globalsHistory->context.get() );
 	ConstCompoundObjectPtr globals = globalsHistory->scene->globalsPlug()->getValue();
 	ConstObjectPtr optionValue = globals->member<Object>( g_optionPrefix + option.string() );
 
-	SceneAlgo::OptionHistory::Ptr result = new OptionHistory(
-		globalsHistory->scene, globalsHistory->context,
-		option, optionValue
-	);
+	SceneAlgo::OptionHistory::Ptr result =
+		new OptionHistory( globalsHistory->scene, globalsHistory->context, option, optionValue );
 
 	// Filter the _globals_ history to include only predecessors which
 	// contribute specifically to our single _option_. In the absence of
@@ -1130,10 +1176,13 @@ SceneAlgo::OptionHistory::Ptr SceneAlgo::optionHistory( const SceneAlgo::History
 	return result;
 }
 
-SceneAlgo::PrimitiveVariableHistory::Ptr SceneAlgo::primitiveVariableHistory( const SceneAlgo::History *objectHistory, const IECore::InternedString &primitiveVariable )
+SceneAlgo::PrimitiveVariableHistory::Ptr SceneAlgo::primitiveVariableHistory(
+	const SceneAlgo::History *objectHistory, const IECore::InternedString &primitiveVariable
+)
 {
 	Context::Scope scopedContext( objectHistory->context.get() );
-	IECoreScene::ConstPrimitivePtr primitive = IECore::runTimeCast<const Primitive>( objectHistory->scene->objectPlug()->getValue() );
+	IECoreScene::ConstPrimitivePtr primitive =
+		IECore::runTimeCast<const Primitive>( objectHistory->scene->objectPlug()->getValue() );
 
 	if( !primitive )
 	{
@@ -1143,8 +1192,8 @@ SceneAlgo::PrimitiveVariableHistory::Ptr SceneAlgo::primitiveVariableHistory( co
 	auto varIt = primitive->variables.find( primitiveVariable );
 
 	SceneAlgo::PrimitiveVariableHistory::Ptr result = new PrimitiveVariableHistory(
-		objectHistory->scene, objectHistory->context,
-		primitiveVariable, varIt == primitive->variables.end() ? PrimitiveVariable() : varIt->second
+		objectHistory->scene, objectHistory->context, primitiveVariable,
+		varIt == primitive->variables.end() ? PrimitiveVariable() : varIt->second
 	);
 
 	// Filter the object history to include only predecessors which
@@ -1163,7 +1212,9 @@ SceneAlgo::PrimitiveVariableHistory::Ptr SceneAlgo::primitiveVariableHistory( co
 		}
 		else if( auto shufflePrimitiveVariables = runTimeCast<const ShufflePrimitiveVariables>( node ) )
 		{
-			addShufflePrimitiveVariablesPredecessors( shufflePrimitiveVariables, objectHistory->predecessors, result.get() );
+			addShufflePrimitiveVariablesPredecessors(
+				shufflePrimitiveVariables, objectHistory->predecessors, result.get()
+			);
 		}
 		else if( auto mergeScenes = runTimeCast<const MergeScenes>( node ) )
 		{
@@ -1213,7 +1264,9 @@ SceneProcessor *SceneAlgo::objectTweaks( const ScenePlug *scene, const ScenePlug
 	return nullptr;
 }
 
-ShaderTweaks *SceneAlgo::shaderTweaks( const ScenePlug *scene, const ScenePlug::ScenePath &path, const IECore::InternedString &attributeName )
+ShaderTweaks *SceneAlgo::shaderTweaks(
+	const ScenePlug *scene, const ScenePlug::ScenePath &path, const IECore::InternedString &attributeName
+)
 {
 	ScenePlug::ScenePath inheritancePath = path;
 	while( inheritancePath.size() )
@@ -1288,7 +1341,9 @@ struct AttributesFinder
 {
 
 	AttributesFinder( const AttributesPredicate &predicate, tbb::spin_mutex &resultMutex, IECore::PathMatcher &result )
-		: m_predicate( predicate ), m_resultMutex( resultMutex ), m_result( result )
+		: m_predicate( predicate ),
+		  m_resultMutex( resultMutex ),
+		  m_result( result )
 	{
 	}
 
@@ -1340,7 +1395,7 @@ struct AttributesFinder
 		return true;
 	}
 
-	private:
+private:
 
 	const AttributesPredicate &m_predicate;
 
@@ -1371,7 +1426,9 @@ IECore::PathMatcher GafferScene::SceneAlgo::linkedObjects( const ScenePlug *scen
 	return linkedObjects( scene, lights );
 }
 
-GAFFERSCENE_API IECore::PathMatcher GafferScene::SceneAlgo::linkedObjects( const ScenePlug *scene, const IECore::PathMatcher &lights )
+GAFFERSCENE_API IECore::PathMatcher GafferScene::SceneAlgo::linkedObjects(
+	const ScenePlug *scene, const IECore::PathMatcher &lights
+)
 {
 	// We expect many locations to have the exact same expression for `linkedLights`,
 	// and evaluating the expression is fairly expensive. So we cache the results for
@@ -1379,7 +1436,8 @@ GAFFERSCENE_API IECore::PathMatcher GafferScene::SceneAlgo::linkedObjects( const
 	using QueryCache = IECorePreview::LRUCache<std::string, bool, IECorePreview::LRUCachePolicy::TaskParallel>;
 	const Context *context = Context::current();
 	QueryCache queryCache(
-		[&lights, scene, context]( const std::string &setExpression, size_t &cost, const IECore::Canceller *canceller ) {
+		[&lights, scene,
+		 context]( const std::string &setExpression, size_t &cost, const IECore::Canceller *canceller ) {
 			cost = 1;
 			Context::Scope scopedContext( context );
 			const IECore::PathMatcher linkedLights = SetAlgo::evaluateSetExpression( setExpression, scene );
@@ -1395,13 +1453,10 @@ GAFFERSCENE_API IECore::PathMatcher GafferScene::SceneAlgo::linkedObjects( const
 		10000
 	);
 
-	IECore::PathMatcher result = findAttributes(
-		scene,
-		[&queryCache]( const CompoundObject *fullAttributes ) {
-			auto *linkedLights = fullAttributes->member<StringData>( g_linkedLights );
-			return queryCache.get( linkedLights ? linkedLights->readable() : "defaultLights" );
-		}
-	);
+	IECore::PathMatcher result = findAttributes( scene, [&queryCache]( const CompoundObject *fullAttributes ) {
+		auto *linkedLights = fullAttributes->member<StringData>( g_linkedLights );
+		return queryCache.get( linkedLights ? linkedLights->readable() : "defaultLights" );
+	} );
 
 	result.removePaths( scene->set( g_lights )->readable() );
 	return result;
@@ -1447,8 +1502,7 @@ IECore::PathMatcher GafferScene::SceneAlgo::linkedLights( const ScenePlug *scene
 IECore::MurmurHash GafferScene::SceneAlgo::hierarchyHash( const ScenePlug *scene, const ScenePlug::ScenePath &root )
 {
 	return GafferScene::SceneAlgo::parallelReduceLocations(
-		scene,
-		IECore::MurmurHash(),
+		scene, IECore::MurmurHash(),
 		[&]( const ScenePlug *scene, const ScenePlug::ScenePath &path ) {
 			IECore::MurmurHash h;
 			if( path.size() > root.size() )
@@ -1482,10 +1536,7 @@ IECore::MurmurHash GafferScene::SceneAlgo::hierarchyHash( const ScenePlug *scene
 			// paths in the hash, we should not get a matching sum unless the inputs match ( or we experience an
 			// extremely unlikely collision ). See the comment in ThreadablePathHashAccumulator for more
 			// discussion of why we can get away with this.
-			result = IECore::MurmurHash(
-				result.h1() + sibling.h1(),
-				result.h2() + sibling.h2()
-			);
+			result = IECore::MurmurHash( result.h1() + sibling.h1(), result.h2() + sibling.h2() );
 		},
 		root
 	);
@@ -1524,7 +1575,8 @@ bool GafferScene::SceneAlgo::visible( const ScenePlug *scene, const ScenePlug::S
 
 Imath::Box3f GafferScene::SceneAlgo::bound( const IECore::Object *object )
 {
-	if( const IECoreScene::VisibleRenderable *renderable = IECore::runTimeCast<const IECoreScene::VisibleRenderable>( object ) )
+	if( const IECoreScene::VisibleRenderable *renderable =
+			IECore::runTimeCast<const IECoreScene::VisibleRenderable>( object ) )
 	{
 		return renderable->bound();
 	}
@@ -1585,9 +1637,7 @@ void GafferScene::SceneAlgo::validateName( IECore::InternedString name )
 
 	if( invalidReason )
 	{
-		throw IECore::Exception(
-			fmt::format( "Name `{}` is invalid (because {})", name.string(), invalidReason )
-		);
+		throw IECore::Exception( fmt::format( "Name `{}` is invalid (because {})", name.string(), invalidReason ) );
 	}
 }
 
@@ -1668,7 +1718,9 @@ SceneProcessorPtr createRenderAdaptor( const RenderAdaptorRegistration &registra
 
 } // namespace
 
-void GafferScene::SceneAlgo::registerRenderAdaptor( const std::string &name, RenderAdaptor adaptor, const std::string &client, const std::string &renderer )
+void GafferScene::SceneAlgo::registerRenderAdaptor(
+	const std::string &name, RenderAdaptor adaptor, const std::string &client, const std::string &renderer
+)
 {
 	renderAdaptors()[name] = { adaptor, client, renderer };
 }
@@ -1737,7 +1789,9 @@ SceneProcessorPtr GafferScene::SceneAlgo::createRenderAdaptors()
 // Apply Camera Globals
 //////////////////////////////////////////////////////////////////////////
 
-void GafferScene::SceneAlgo::applyCameraGlobals( IECoreScene::Camera *camera, const IECore::CompoundObject *globals, const ScenePlug *scene )
+void GafferScene::SceneAlgo::applyCameraGlobals(
+	IECoreScene::Camera *camera, const IECore::CompoundObject *globals, const ScenePlug *scene
+)
 {
 	// Set any camera-relevant render globals that haven't been overridden on the camera
 	const IntData *filmFitData = globals->member<IntData>( "option:render:filmFit" );

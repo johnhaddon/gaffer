@@ -51,7 +51,9 @@ float ensurePositiveZero( float const value )
 	return ( value == 0.0f ) ? std::fabs( value ) : value;
 }
 
-void setV3fPlugComponentValue( Gaffer::V3fPlug const &parent, Gaffer::NumericPlug<float> &child, Imath::V3f const &value )
+void setV3fPlugComponentValue(
+	Gaffer::V3fPlug const &parent, Gaffer::NumericPlug<float> &child, Imath::V3f const &value
+)
 {
 	float cv;
 
@@ -85,13 +87,14 @@ size_t TransformQuery::g_firstPlugIndex = 0;
 
 GAFFER_NODE_DEFINE_TYPE( TransformQuery );
 
-TransformQuery::TransformQuery( std::string const &name )
-	: Gaffer::ComputeNode( name )
+TransformQuery::TransformQuery( std::string const &name ) : Gaffer::ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "scene" ) );
 	addChild( new Gaffer::StringPlug( "location" ) );
-	addChild( new Gaffer::IntPlug( "space", Gaffer::Plug::In, static_cast<int>( Space::World ), 0, static_cast<int>( Space::Relative ) ) );
+	addChild( new Gaffer::IntPlug(
+		"space", Gaffer::Plug::In, static_cast<int>( Space::World ), 0, static_cast<int>( Space::Relative )
+	) );
 	addChild( new Gaffer::StringPlug( "relativeLocation" ) );
 	addChild( new Gaffer::BoolPlug( "invert" ) );
 	addChild( new Gaffer::M44fPlug( "matrix", Gaffer::Plug::Out ) );
@@ -100,15 +103,11 @@ TransformQuery::TransformQuery( std::string const &name )
 	addChild( new Gaffer::V3fPlug( "scale", Gaffer::Plug::Out ) );
 }
 
-TransformQuery::~TransformQuery()
-{
-}
+TransformQuery::~TransformQuery() {}
 
 ScenePlug *TransformQuery::scenePlug()
 {
-	return const_cast<ScenePlug *>(
-		static_cast<TransformQuery const *>( this )->scenePlug()
-	);
+	return const_cast<ScenePlug *>( static_cast<TransformQuery const *>( this )->scenePlug() );
 }
 
 ScenePlug const *TransformQuery::scenePlug() const
@@ -118,9 +117,7 @@ ScenePlug const *TransformQuery::scenePlug() const
 
 Gaffer::StringPlug *TransformQuery::locationPlug()
 {
-	return const_cast<Gaffer::StringPlug *>(
-		static_cast<TransformQuery const *>( this )->locationPlug()
-	);
+	return const_cast<Gaffer::StringPlug *>( static_cast<TransformQuery const *>( this )->locationPlug() );
 }
 
 Gaffer::StringPlug const *TransformQuery::locationPlug() const
@@ -130,9 +127,7 @@ Gaffer::StringPlug const *TransformQuery::locationPlug() const
 
 Gaffer::IntPlug *TransformQuery::spacePlug()
 {
-	return const_cast<Gaffer::IntPlug *>(
-		static_cast<TransformQuery const *>( this )->spacePlug()
-	);
+	return const_cast<Gaffer::IntPlug *>( static_cast<TransformQuery const *>( this )->spacePlug() );
 }
 
 Gaffer::IntPlug const *TransformQuery::spacePlug() const
@@ -142,9 +137,7 @@ Gaffer::IntPlug const *TransformQuery::spacePlug() const
 
 Gaffer::StringPlug *TransformQuery::relativeLocationPlug()
 {
-	return const_cast<Gaffer::StringPlug *>(
-		static_cast<TransformQuery const *>( this )->relativeLocationPlug()
-	);
+	return const_cast<Gaffer::StringPlug *>( static_cast<TransformQuery const *>( this )->relativeLocationPlug() );
 }
 
 Gaffer::StringPlug const *TransformQuery::relativeLocationPlug() const
@@ -154,9 +147,7 @@ Gaffer::StringPlug const *TransformQuery::relativeLocationPlug() const
 
 Gaffer::BoolPlug *TransformQuery::invertPlug()
 {
-	return const_cast<Gaffer::BoolPlug *>(
-		static_cast<TransformQuery const *>( this )->invertPlug()
-	);
+	return const_cast<Gaffer::BoolPlug *>( static_cast<TransformQuery const *>( this )->invertPlug() );
 }
 
 Gaffer::BoolPlug const *TransformQuery::invertPlug() const
@@ -166,9 +157,7 @@ Gaffer::BoolPlug const *TransformQuery::invertPlug() const
 
 Gaffer::M44fPlug *TransformQuery::matrixPlug()
 {
-	return const_cast<Gaffer::M44fPlug *>(
-		static_cast<TransformQuery const *>( this )->matrixPlug()
-	);
+	return const_cast<Gaffer::M44fPlug *>( static_cast<TransformQuery const *>( this )->matrixPlug() );
 }
 
 Gaffer::M44fPlug const *TransformQuery::matrixPlug() const
@@ -178,9 +167,7 @@ Gaffer::M44fPlug const *TransformQuery::matrixPlug() const
 
 Gaffer::V3fPlug *TransformQuery::translatePlug()
 {
-	return const_cast<Gaffer::V3fPlug *>(
-		static_cast<TransformQuery const *>( this )->translatePlug()
-	);
+	return const_cast<Gaffer::V3fPlug *>( static_cast<TransformQuery const *>( this )->translatePlug() );
 }
 
 Gaffer::V3fPlug const *TransformQuery::translatePlug() const
@@ -190,9 +177,7 @@ Gaffer::V3fPlug const *TransformQuery::translatePlug() const
 
 Gaffer::V3fPlug *TransformQuery::rotatePlug()
 {
-	return const_cast<Gaffer::V3fPlug *>(
-		static_cast<TransformQuery const *>( this )->rotatePlug()
-	);
+	return const_cast<Gaffer::V3fPlug *>( static_cast<TransformQuery const *>( this )->rotatePlug() );
 }
 
 Gaffer::V3fPlug const *TransformQuery::rotatePlug() const
@@ -202,9 +187,7 @@ Gaffer::V3fPlug const *TransformQuery::rotatePlug() const
 
 Gaffer::V3fPlug *TransformQuery::scalePlug()
 {
-	return const_cast<Gaffer::V3fPlug *>(
-		static_cast<TransformQuery const *>( this )->scalePlug()
-	);
+	return const_cast<Gaffer::V3fPlug *>( static_cast<TransformQuery const *>( this )->scalePlug() );
 }
 
 Gaffer::V3fPlug const *TransformQuery::scalePlug() const
@@ -229,11 +212,8 @@ void TransformQuery::affects( Gaffer::Plug const *const input, AffectedPlugsCont
 		outputs.push_back( scalePlug()->getChild( 2 ) );
 	}
 	else if(
-		( input == spacePlug() ) ||
-		( input == invertPlug() ) ||
-		( input == locationPlug() ) ||
-		( input == relativeLocationPlug() ) ||
-		( input == scenePlug()->existsPlug() ) ||
+		( input == spacePlug() ) || ( input == invertPlug() ) || ( input == locationPlug() ) ||
+		( input == relativeLocationPlug() ) || ( input == scenePlug()->existsPlug() ) ||
 		( input == scenePlug()->transformPlug() )
 	)
 	{
@@ -241,7 +221,9 @@ void TransformQuery::affects( Gaffer::Plug const *const input, AffectedPlugsCont
 	}
 }
 
-void TransformQuery::hash( Gaffer::ValuePlug const *const output, Gaffer::Context const *const context, IECore::MurmurHash &h ) const
+void TransformQuery::hash(
+	Gaffer::ValuePlug const *const output, Gaffer::Context const *const context, IECore::MurmurHash &h
+) const
 {
 	ComputeNode::hash( output, context, h );
 
@@ -282,10 +264,7 @@ void TransformQuery::hash( Gaffer::ValuePlug const *const output, Gaffer::Contex
 						{
 							ScenePlug::ScenePath const rpath = ScenePlug::stringToPath( rloc );
 
-							if(
-								( rpath != path ) &&
-								( splug->exists( rpath ) )
-							)
+							if( ( rpath != path ) && ( splug->exists( rpath ) ) )
 							{
 								h.append( splug->fullTransformHash( path ) );
 								h.append( splug->fullTransformHash( rpath ) );
@@ -304,11 +283,7 @@ void TransformQuery::hash( Gaffer::ValuePlug const *const output, Gaffer::Contex
 	{
 		Gaffer::GraphComponent const *const parent = output->parent();
 
-		if(
-			( parent == translatePlug() ) ||
-			( parent == rotatePlug() ) ||
-			( parent == scalePlug() )
-		)
+		if( ( parent == translatePlug() ) || ( parent == rotatePlug() ) || ( parent == scalePlug() ) )
 		{
 			matrixPlug()->hash( h );
 		}
@@ -346,10 +321,7 @@ void TransformQuery::compute( Gaffer::ValuePlug *const output, Gaffer::Context c
 						{
 							ScenePlug::ScenePath const rpath = ScenePlug::stringToPath( rloc );
 
-							if(
-								( rpath != path ) &&
-								( splug->exists( rpath ) )
-							)
+							if( ( rpath != path ) && ( splug->exists( rpath ) ) )
 							{
 								m = splug->fullTransform( path ) * splug->fullTransform( rpath ).inverse();
 							}

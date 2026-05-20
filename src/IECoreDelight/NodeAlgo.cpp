@@ -55,10 +55,7 @@ namespace std
 template<>
 struct hash<IECore::TypeId>
 {
-	size_t operator () ( IECore::TypeId typeId ) const
-	{
-		return hash<size_t>()( typeId );
-	}
+	size_t operator () ( IECore::TypeId typeId ) const { return hash<size_t>()( typeId ); }
 };
 
 } // namespace std
@@ -76,7 +73,10 @@ Registry &registry()
 	return r;
 }
 
-void addPrimitiveVariableParameters( const char *name, const IECoreScene::PrimitiveVariable &value, const IECore::IntVectorData *vertexIndices, ParameterList &parameterList, ParameterList *indicesParameterList )
+void addPrimitiveVariableParameters(
+	const char *name, const IECoreScene::PrimitiveVariable &value, const IECore::IntVectorData *vertexIndices,
+	ParameterList &parameterList, ParameterList *indicesParameterList
+)
 {
 	const char *conformedName = strcmp( name, "uv" ) == 0 ? "st" : name;
 
@@ -113,11 +113,15 @@ void addPrimitiveVariableParameters( const char *name, const IECoreScene::Primit
 
 	const IntVectorData *indices = nullptr;
 
-	if( vertexIndices && ( value.interpolation == PrimitiveVariable::Vertex || value.interpolation == PrimitiveVariable::Varying ) )
+	if( vertexIndices &&
+		( value.interpolation == PrimitiveVariable::Vertex || value.interpolation == PrimitiveVariable::Varying ) )
 	{
 		if( value.indices )
 		{
-			IECore::msg( IECore::Msg::Warning, "IECoreDelight", "Primitive variable indices not supported for Vertex or Varying interpolation" );
+			IECore::msg(
+				IECore::Msg::Warning, "IECoreDelight",
+				"Primitive variable indices not supported for Vertex or Varying interpolation"
+			);
 			return;
 		}
 		indices = vertexIndices;
@@ -132,7 +136,10 @@ void addPrimitiveVariableParameters( const char *name, const IECoreScene::Primit
 		if( indicesParameterList )
 		{
 			const string indicesName = conformedName + string( ".indices" );
-			indicesParameterList->add( { indicesParameterList->allocate( indicesName ), indices->readable().data(), NSITypeInteger, 0, indices->readable().size(), 0 } );
+			indicesParameterList->add(
+				{ indicesParameterList->allocate( indicesName ), indices->readable().data(), NSITypeInteger, 0,
+				  indices->readable().size(), 0 }
+			);
 		}
 	}
 
@@ -151,7 +158,10 @@ namespace IECoreDelight
 namespace NodeAlgo
 {
 
-bool convert( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, NSIContext_t context, const char *handle )
+bool convert(
+	const IECoreScenePreview::Renderer::ObjectSamples &samples,
+	const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, NSIContext_t context, const char *handle
+)
 {
 	Registry &r = registry();
 	auto it = r.find( samples.front()->typeId() );
@@ -167,7 +177,11 @@ void registerConverter( IECore::TypeId fromType, Converter converter )
 	registry()[fromType] = converter;
 }
 
-void primitiveVariableParameterLists( const IECoreScenePreview::Renderer::Samples<const IECoreScene::Primitive *> &primitives, ParameterList &staticParameters, IECoreScenePreview::Renderer::Samples<ParameterList> &animatedParameters, const IECore::IntVectorData *vertexIndices )
+void primitiveVariableParameterLists(
+	const IECoreScenePreview::Renderer::Samples<const IECoreScene::Primitive *> &primitives,
+	ParameterList &staticParameters, IECoreScenePreview::Renderer::Samples<ParameterList> &animatedParameters,
+	const IECore::IntVectorData *vertexIndices
+)
 {
 	for( const auto &variable : primitives.front()->variables )
 	{
@@ -194,7 +208,9 @@ void primitiveVariableParameterLists( const IECoreScenePreview::Renderer::Sample
 
 		if( !moving )
 		{
-			addPrimitiveVariableParameters( variable.first.c_str(), variable.second, vertexIndices, staticParameters, &staticParameters );
+			addPrimitiveVariableParameters(
+				variable.first.c_str(), variable.second, vertexIndices, staticParameters, &staticParameters
+			);
 		}
 		else
 		{
@@ -205,11 +221,8 @@ void primitiveVariableParameterLists( const IECoreScenePreview::Renderer::Sample
 			for( size_t i = 0, e = primitives.size(); i < e; ++i )
 			{
 				addPrimitiveVariableParameters(
-					variable.first.c_str(),
-					primitives[i]->variables.find( variable.first )->second,
-					vertexIndices,
-					animatedParameters[i],
-					i == 0 ? &staticParameters : nullptr
+					variable.first.c_str(), primitives[i]->variables.find( variable.first )->second, vertexIndices,
+					animatedParameters[i], i == 0 ? &staticParameters : nullptr
 				);
 			}
 		}

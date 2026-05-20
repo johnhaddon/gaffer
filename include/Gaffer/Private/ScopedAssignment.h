@@ -48,17 +48,11 @@ namespace Private
 template<typename T>
 struct ScopedAssignment : private boost::noncopyable
 {
-	ScopedAssignment( T &variable, const T &value )
-		: m_value( variable ), m_variable( variable = value )
-	{
-	}
+	ScopedAssignment( T &variable, const T &value ) : m_value( variable ), m_variable( variable = value ) {}
 
-	~ScopedAssignment()
-	{
-		m_variable = m_value;
-	}
+	~ScopedAssignment() { m_variable = m_value; }
 
-	private:
+private:
 
 	T const m_value;
 	T &m_variable;

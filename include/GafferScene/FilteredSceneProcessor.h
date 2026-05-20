@@ -53,9 +53,12 @@ namespace GafferScene
 class GAFFERSCENE_API FilteredSceneProcessor : public SceneProcessor
 {
 
-	public:
+public:
 
-	explicit FilteredSceneProcessor( const std::string &name = defaultName<FilteredSceneProcessor>(), IECore::PathMatcher::Result filterDefault = IECore::PathMatcher::EveryMatch );
+	explicit FilteredSceneProcessor(
+		const std::string &name = defaultName<FilteredSceneProcessor>(),
+		IECore::PathMatcher::Result filterDefault = IECore::PathMatcher::EveryMatch
+	);
 	~FilteredSceneProcessor() override;
 
 	GAFFER_NODE_DECLARE_TYPE( GafferScene::FilteredSceneProcessor, FilteredSceneProcessorTypeId, SceneProcessor );
@@ -65,12 +68,14 @@ class GAFFERSCENE_API FilteredSceneProcessor : public SceneProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
 	/// Constructs with an ArrayPlug called "in". Use inPlug() as a
 	/// convenience for accessing the first child in the array, and use
 	/// inPlugs() to access the array itself.
-	FilteredSceneProcessor( const std::string &name, size_t minInputs, size_t maxInputs = std::numeric_limits<size_t>::max() );
+	FilteredSceneProcessor(
+		const std::string &name, size_t minInputs, size_t maxInputs = std::numeric_limits<size_t>::max()
+	);
 
 	/// Convenience method for appending filterPlug() to a hash. This simply
 	/// calls filterPlug()->hash() using a FilterPlug::SceneScope. Note that

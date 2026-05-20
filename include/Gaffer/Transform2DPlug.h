@@ -44,15 +44,12 @@ namespace Gaffer
 class GAFFER_API Transform2DPlug : public ValuePlug
 {
 
-	public:
+public:
 
 	explicit Transform2DPlug(
-		const std::string &name = defaultName<Transform2DPlug>(),
-		Direction direction = In,
-		const Imath::V2f &defaultTranslate = Imath::V2f( 0 ),
-		float defaultRotate = 0,
-		const Imath::V2f &defaultScale = Imath::V2f( 1 ),
-		const Imath::V2f &defaultPivot = Imath::V2f( 0 ),
+		const std::string &name = defaultName<Transform2DPlug>(), Direction direction = In,
+		const Imath::V2f &defaultTranslate = Imath::V2f( 0 ), float defaultRotate = 0,
+		const Imath::V2f &defaultScale = Imath::V2f( 1 ), const Imath::V2f &defaultPivot = Imath::V2f( 0 ),
 		unsigned flags = Default
 	);
 	~Transform2DPlug() override;
@@ -73,7 +70,7 @@ class GAFFER_API Transform2DPlug : public ValuePlug
 
 	Imath::M33f matrix() const;
 
-	private:
+private:
 
 	static size_t g_firstPlugIndex;
 };

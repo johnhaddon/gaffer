@@ -120,10 +120,16 @@ float pixelAspectFromImageGadget( const ImageGadget *imageGadget )
 class Box2iGadget : public GafferUI::Gadget
 {
 
-	public:
+public:
 
 	Box2iGadget( Box2iPlugPtr plug, std::string id )
-		: Gadget(), m_plug( plug ), m_id( id ), m_editable( true ), m_handleSize( 10 ), m_hover( 0 ), m_deletePressed( false )
+		: Gadget(),
+		  m_plug( plug ),
+		  m_id( id ),
+		  m_editable( true ),
+		  m_handleSize( 10 ),
+		  m_hover( 0 ),
+		  m_deletePressed( false )
 	{
 		enterSignal().connect( boost::bind( &Box2iGadget::enter, this, ::_2 ) );
 		mouseMoveSignal().connect( boost::bind( &Box2iGadget::mouseMove, this, ::_2 ) );
@@ -143,24 +149,15 @@ class Box2iGadget : public GafferUI::Gadget
 	Imath::Box3f bound() const override
 	{
 		Box2i rect = m_plug->getValue();
-		return Box3f(
-			V3f( rect.min.x, rect.min.y, 0 ),
-			V3f( rect.max.x, rect.max.y, 0 )
-		);
+		return Box3f( V3f( rect.min.x, rect.min.y, 0 ), V3f( rect.max.x, rect.max.y, 0 ) );
 	}
 
-	const Box2iPlug *getPlug() const
-	{
-		return m_plug.get();
-	}
+	const Box2iPlug *getPlug() const { return m_plug.get(); }
 
 	using DeleteClickedSignal = Signals::Signal<void( Plug * )>;
-	DeleteClickedSignal &deleteClickedSignal()
-	{
-		return m_deleteClickedSignal;
-	}
+	DeleteClickedSignal &deleteClickedSignal() { return m_deleteClickedSignal; }
 
-	protected:
+protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
 	{
@@ -184,8 +181,7 @@ class Box2iGadget : public GafferUI::Gadget
 		glScalef( pixelAspect, 1, 1 );
 
 		V2f crossHairSize(
-			std::min( threshold.x, rect.size().x * 0.5f ),
-			std::min( threshold.y, rect.size().y * 0.5f )
+			std::min( threshold.x, rect.size().x * 0.5f ), std::min( threshold.y, rect.size().y * 0.5f )
 		);
 
 		V2f rectCenter( 0.5f * ( V2f( rect.min ) + V2f( rect.max ) ) );
@@ -208,7 +204,10 @@ class Box2iGadget : public GafferUI::Gadget
 				style->renderSolidRectangle( Box2f( rect.min - threshold, lowerRight + threshold ) );
 				style->renderSolidRectangle( Box2f( upperLeft - threshold, rect.max + threshold ) );
 				// Delete button
-				style->renderSolidRectangle( Box2f( V2f( deleteButtonCenter.x, deleteButtonCenter.y ) - 0.5f * threshold, V2f( deleteButtonCenter.x, deleteButtonCenter.y ) + 0.5f * threshold ) );
+				style->renderSolidRectangle( Box2f(
+					V2f( deleteButtonCenter.x, deleteButtonCenter.y ) - 0.5f * threshold,
+					V2f( deleteButtonCenter.x, deleteButtonCenter.y ) + 0.5f * threshold
+				) );
 			}
 		}
 		else
@@ -216,31 +215,49 @@ class Box2iGadget : public GafferUI::Gadget
 			glEnable( GL_LINE_SMOOTH );
 			glLineWidth( 2.0f );
 			glColor4f( 0.0f, 0.0f, 0.0f, 1.0f );
-			style->renderRectangle( Box2f( V2f( rect.min ) - 1.0f * screenScale, V2f( rect.max ) + 1.0f * screenScale ) );
+			style->renderRectangle(
+				Box2f( V2f( rect.min ) - 1.0f * screenScale, V2f( rect.max ) + 1.0f * screenScale )
+			);
 			glLineWidth( 1.0f );
 			glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
 			Color4f foreground( 0.8f, 0.8f, 0.8f, 1.0f );
 			style->renderRectangle( Box2f( rect.min, rect.max ) );
-			renderLine2D( style, rectCenter - crossHairSize * V2f( 1, 0 ), rectCenter + crossHairSize * V2f( 1, 0 ), 1 * screenScale.x, foreground );
-			renderLine2D( style, rectCenter - crossHairSize * V2f( 0, 1 ), rectCenter + crossHairSize * V2f( 0, 1 ), 1 * screenScale.x, foreground );
+			renderLine2D(
+				style, rectCenter - crossHairSize * V2f( 1, 0 ), rectCenter + crossHairSize * V2f( 1, 0 ),
+				1 * screenScale.x, foreground
+			);
+			renderLine2D(
+				style, rectCenter - crossHairSize * V2f( 0, 1 ), rectCenter + crossHairSize * V2f( 0, 1 ),
+				1 * screenScale.x, foreground
+			);
 
 			if( m_hover )
 			{
-				renderFilledCircle2D( style, deleteButtonCenter, deleteButtonSize * 1.4f, Color4f( 0.4, 0.4, 0.4, 1.0 ) );
+				renderFilledCircle2D(
+					style, deleteButtonCenter, deleteButtonSize * 1.4f, Color4f( 0.4, 0.4, 0.4, 1.0 )
+				);
 				Color4f buttonCol( 0.0f, 0.0f, 0.0f, 1.0f );
 				if( m_hover == 2 )
 				{
 					buttonCol = Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
 				}
-				renderLine2D( style, deleteButtonCenter - deleteButtonSize, deleteButtonCenter + deleteButtonSize, 4.0 * screenScale.x, buttonCol );
-				renderLine2D( style, deleteButtonCenter + deleteButtonSize * V2f( 1, -1 ), deleteButtonCenter + deleteButtonSize * V2f( -1, 1 ), 4.0 * screenScale.x, buttonCol );
+				renderLine2D(
+					style, deleteButtonCenter - deleteButtonSize, deleteButtonCenter + deleteButtonSize,
+					4.0 * screenScale.x, buttonCol
+				);
+				renderLine2D(
+					style, deleteButtonCenter + deleteButtonSize * V2f( 1, -1 ),
+					deleteButtonCenter + deleteButtonSize * V2f( -1, 1 ), 4.0 * screenScale.x, buttonCol
+				);
 			}
 
 			float textScale = 10;
 			float textLength = style->textBound( Style::LabelText, m_id ).size().x;
 			glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
 			glPushMatrix();
-			glTranslatef( rect.min.x - ( textScale * textLength + 5 ) * screenScale.x, rect.max.y + 5 * screenScale.y, 0.0f );
+			glTranslatef(
+				rect.min.x - ( textScale * textLength + 5 ) * screenScale.x, rect.max.y + 5 * screenScale.y, 0.0f
+			);
 			glScalef( textScale * screenScale.x, textScale * screenScale.y, 1 );
 			style->renderText( Style::LabelText, m_id );
 			glPopMatrix();
@@ -251,10 +268,7 @@ class Box2iGadget : public GafferUI::Gadget
 		glPopMatrix();
 	}
 
-	unsigned layerMask() const override
-	{
-		return (unsigned)Layer::Front;
-	}
+	unsigned layerMask() const override { return (unsigned)Layer::Front; }
 
 	Imath::Box3f renderBound() const override
 	{
@@ -266,7 +280,7 @@ class Box2iGadget : public GafferUI::Gadget
 		return b;
 	}
 
-	private:
+private:
 
 	void plugDirtied( Plug *plug )
 	{
@@ -525,10 +539,16 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( Box2iGadget )
 class V2iGadget : public GafferUI::Gadget
 {
 
-	public:
+public:
 
 	V2iGadget( V2iPlugPtr plug, std::string id )
-		: Gadget(), m_plug( plug ), m_id( id ), m_editable( true ), m_handleSize( 10 ), m_hover( 0 ), m_deletePressed( false )
+		: Gadget(),
+		  m_plug( plug ),
+		  m_id( id ),
+		  m_editable( true ),
+		  m_handleSize( 10 ),
+		  m_hover( 0 ),
+		  m_deletePressed( false )
 	{
 		enterSignal().connect( boost::bind( &V2iGadget::enter, this, ::_2 ) );
 		mouseMoveSignal().connect( boost::bind( &V2iGadget::mouseMove, this, ::_2 ) );
@@ -548,24 +568,15 @@ class V2iGadget : public GafferUI::Gadget
 	Imath::Box3f bound() const override
 	{
 		V2i p = m_plug->getValue();
-		return Box3f(
-			V3f( p.x, p.y, 0 ),
-			V3f( p.x, p.y, 0 )
-		);
+		return Box3f( V3f( p.x, p.y, 0 ), V3f( p.x, p.y, 0 ) );
 	}
 
-	const V2iPlug *getPlug() const
-	{
-		return m_plug.get();
-	}
+	const V2iPlug *getPlug() const { return m_plug.get(); }
 
 	using DeleteClickedSignal = Signals::Signal<void( Plug * )>;
-	DeleteClickedSignal &deleteClickedSignal()
-	{
-		return m_deleteClickedSignal;
-	}
+	DeleteClickedSignal &deleteClickedSignal() { return m_deleteClickedSignal; }
 
-	protected:
+protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override
 	{
@@ -594,7 +605,10 @@ class V2iGadget : public GafferUI::Gadget
 				// Center handle
 				style->renderSolidRectangle( Box2f( point - threshold, point + threshold ) );
 				// Delete button
-				style->renderSolidRectangle( Box2f( V2f( deleteButtonCenter.x, deleteButtonCenter.y ) - 0.5f * threshold, V2f( deleteButtonCenter.x, deleteButtonCenter.y ) + 0.5f * threshold ) );
+				style->renderSolidRectangle( Box2f(
+					V2f( deleteButtonCenter.x, deleteButtonCenter.y ) - 0.5f * threshold,
+					V2f( deleteButtonCenter.x, deleteButtonCenter.y ) + 0.5f * threshold
+				) );
 			}
 		}
 		else
@@ -606,14 +620,22 @@ class V2iGadget : public GafferUI::Gadget
 
 			if( m_hover )
 			{
-				renderFilledCircle2D( style, deleteButtonCenter, deleteButtonSize * 1.4f, Color4f( 0.4, 0.4, 0.4, 1.0 ) );
+				renderFilledCircle2D(
+					style, deleteButtonCenter, deleteButtonSize * 1.4f, Color4f( 0.4, 0.4, 0.4, 1.0 )
+				);
 				Color4f buttonCol( 0.0f, 0.0f, 0.0f, 1.0f );
 				if( m_hover == 2 )
 				{
 					buttonCol = Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
 				}
-				renderLine2D( style, deleteButtonCenter - deleteButtonSize, deleteButtonCenter + deleteButtonSize, 4.0 * screenScale.x, buttonCol );
-				renderLine2D( style, deleteButtonCenter + deleteButtonSize * V2f( 1, -1 ), deleteButtonCenter + deleteButtonSize * V2f( -1, 1 ), 4.0 * screenScale.x, buttonCol );
+				renderLine2D(
+					style, deleteButtonCenter - deleteButtonSize, deleteButtonCenter + deleteButtonSize,
+					4.0 * screenScale.x, buttonCol
+				);
+				renderLine2D(
+					style, deleteButtonCenter + deleteButtonSize * V2f( 1, -1 ),
+					deleteButtonCenter + deleteButtonSize * V2f( -1, 1 ), 4.0 * screenScale.x, buttonCol
+				);
 			}
 
 			float textScale = 10;
@@ -631,10 +653,7 @@ class V2iGadget : public GafferUI::Gadget
 		glPopMatrix();
 	}
 
-	unsigned layerMask() const override
-	{
-		return (unsigned)Layer::Front;
-	}
+	unsigned layerMask() const override { return (unsigned)Layer::Front; }
 
 	Imath::Box3f renderBound() const override
 	{
@@ -646,7 +665,7 @@ class V2iGadget : public GafferUI::Gadget
 		return b;
 	}
 
-	private:
+private:
 
 	void plugDirtied( Plug *plug )
 	{
@@ -812,8 +831,7 @@ class V2iGadget : public GafferUI::Gadget
 		V2f point = V2f( m_plug->getValue() ) + V2f( 0.5 );
 		const V2f screenScale = screenToImageScale();
 		const V2f threshold( screenScale * m_handleSize );
-		return p.x > point.x + 0.5 * threshold.x - screenScale.x &&
-			p.y > point.y + 0.5 * threshold.y - screenScale.y;
+		return p.x > point.x + 0.5 * threshold.x - screenScale.x && p.y > point.y + 0.5 * threshold.y - screenScale.y;
 	}
 
 	V2f eventPosition( const ButtonEvent &event ) const
@@ -857,7 +875,10 @@ ColorInspectorTool::ColorInspectorTool( View *view, const std::string &name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
-	addChild( new ArrayPlug( "inspectors", Plug::In, new ColorInspectorPlug( "defaultInspector" ), 1, 1024, Plug::Default & ~Plug::AcceptsInputs ) );
+	addChild( new ArrayPlug(
+		"inspectors", Plug::In, new ColorInspectorPlug( "defaultInspector" ), 1, 1024,
+		Plug::Default & ~Plug::AcceptsInputs
+	) );
 
 	inspectorsPlug()->getChild<ColorInspectorPlug>( 0 )->modePlug()->setValue( (int)ColorInspectorPlug::Mode::Cursor );
 
@@ -899,14 +920,16 @@ ColorInspectorTool::ColorInspectorTool( View *view, const std::string &name )
 	m_deleteContextVariables->inPlug()->setInput( image );
 	m_sampler->imagePlug()->setInput( m_deleteContextVariables->outPlug() );
 
-	ValuePlugPtr v2iValuePlug = m_contextQuery->valuePlugFromQueryPlug( m_contextQuery->queriesPlug()->getChild<NameValuePlug>( 0 ) );
+	ValuePlugPtr v2iValuePlug =
+		m_contextQuery->valuePlugFromQueryPlug( m_contextQuery->queriesPlug()->getChild<NameValuePlug>( 0 ) );
 	m_sampler->pixelPlug()->setInput( v2iValuePlug );
 	m_sampler->interpolatePlug()->setValue( false );
 
 	evaluatorPlug->getChild<Color4fPlug>( "pixelColor" )->setInput( m_sampler->colorPlug() );
 
 	m_areaSampler->inPlug()->setInput( m_deleteContextVariables->outPlug() );
-	ValuePlugPtr box2iValuePlug = m_contextQuery->valuePlugFromQueryPlug( m_contextQuery->queriesPlug()->getChild<NameValuePlug>( 1 ) );
+	ValuePlugPtr box2iValuePlug =
+		m_contextQuery->valuePlugFromQueryPlug( m_contextQuery->queriesPlug()->getChild<NameValuePlug>( 1 ) );
 	m_areaSampler->areaPlug()->setInput( box2iValuePlug );
 	evaluatorPlug->getChild<Color4fPlug>( "areaColor" )->setInput( m_areaSampler->averagePlug() );
 
@@ -916,14 +939,14 @@ ColorInspectorTool::ColorInspectorTool( View *view, const std::string &name )
 	imageGadget->channelsChangedSignal().connect( boost::bind( &ColorInspectorTool::channelsChanged, this ) );
 
 	inspectorsPlug()->childAddedSignal().connect( boost::bind( &ColorInspectorTool::colorInspectorAdded, this, ::_2 ) );
-	inspectorsPlug()->childRemovedSignal().connect( boost::bind( &ColorInspectorTool::colorInspectorRemoved, this, ::_2 ) );
+	inspectorsPlug()->childRemovedSignal().connect(
+		boost::bind( &ColorInspectorTool::colorInspectorRemoved, this, ::_2 )
+	);
 
 	plugSetSignal().connect( boost::bind( &ColorInspectorTool::plugSet, this, ::_1 ) );
 }
 
-ColorInspectorTool::~ColorInspectorTool()
-{
-}
+ColorInspectorTool::~ColorInspectorTool() {}
 
 Gaffer::ArrayPlug *ColorInspectorTool::inspectorsPlug()
 {
@@ -962,13 +985,15 @@ void ColorInspectorTool::colorInspectorAdded( GraphComponent *colorInspector )
 	ColorInspectorPlug *colorInspectorTyped = static_cast<ColorInspectorPlug *>( colorInspector );
 	if( colorInspectorTyped->modePlug()->getValue() == (int)ColorInspectorPlug::Mode::Pixel )
 	{
-		V2iGadget::Ptr r = new V2iGadget( colorInspectorTyped->pixelPlug(), colorInspector->getName().value().substr( 9 ) );
+		V2iGadget::Ptr r =
+			new V2iGadget( colorInspectorTyped->pixelPlug(), colorInspector->getName().value().substr( 9 ) );
 		r->deleteClickedSignal().connect( boost::bind( &ColorInspectorTool::deleteClicked, this, ::_1 ) );
 		m_gadgets->addChild( r );
 	}
 	else
 	{
-		Box2iGadget::Ptr r = new Box2iGadget( colorInspectorTyped->areaPlug(), colorInspector->getName().value().substr( 9 ) );
+		Box2iGadget::Ptr r =
+			new Box2iGadget( colorInspectorTyped->areaPlug(), colorInspector->getName().value().substr( 9 ) );
 		r->deleteClickedSignal().connect( boost::bind( &ColorInspectorTool::deleteClicked, this, ::_1 ) );
 		m_gadgets->addChild( r );
 	}
@@ -1006,12 +1031,16 @@ void ColorInspectorTool::deleteClicked( Gaffer::Plug *plug )
 void ColorInspectorTool::channelsChanged()
 {
 	ImageGadget *imageGadget = static_cast<ImageGadget *>( view()->viewportGadget()->getPrimaryChild() );
-	StringVectorDataPtr channels = new StringVectorData( std::vector<std::string>( imageGadget->getChannels().begin(), imageGadget->getChannels().end() ) );
+	StringVectorDataPtr channels = new StringVectorData(
+		std::vector<std::string>( imageGadget->getChannels().begin(), imageGadget->getChannels().end() )
+	);
 	m_sampler->channelsPlug()->setValue( channels );
 	m_areaSampler->channelsPlug()->setValue( channels );
 }
 
-ColorInspectorTool::ColorInspectorPlug::ColorInspectorPlug( const std::string &name, Direction direction, unsigned flags )
+ColorInspectorTool::ColorInspectorPlug::ColorInspectorPlug(
+	const std::string &name, Direction direction, unsigned flags
+)
 	: ValuePlug( name, direction, flags )
 {
 	addChild( new IntPlug( "mode", Direction::In, (int)Mode::Pixel, (int)Mode::Cursor, (int)Mode::Area ) );
@@ -1058,7 +1087,9 @@ bool ColorInspectorTool::ColorInspectorPlug::acceptsChild( const Gaffer::GraphCo
 	return children().size() <= 3;
 }
 
-Gaffer::PlugPtr ColorInspectorTool::ColorInspectorPlug::createCounterpart( const std::string &name, Direction direction ) const
+Gaffer::PlugPtr ColorInspectorTool::ColorInspectorPlug::createCounterpart(
+	const std::string &name, Direction direction
+) const
 {
 	return new ColorInspectorPlug( name, direction, getFlags() );
 }

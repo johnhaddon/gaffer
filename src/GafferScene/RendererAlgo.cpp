@@ -207,7 +207,8 @@ void RenderOptions::outputOptions( IECoreScenePreview::Renderer *renderer, const
 		return;
 	}
 
-	for( it = previousRenderOptions->globals->members().begin(), eIt = previousRenderOptions->globals->members().end(); it != eIt; ++it )
+	for( it = previousRenderOptions->globals->members().begin(), eIt = previousRenderOptions->globals->members().end();
+		 it != eIt; ++it )
 	{
 		if( !boost::starts_with( it->first.string(), g_optionPrefix ) )
 		{
@@ -330,7 +331,10 @@ std::string renderManifestFilePath( const IECore::CompoundObject *globals )
 	return renderManifestFilePathData->readable();
 }
 
-bool motionTimes( bool motionBlur, const V2f &shutter, const CompoundObject *attributes, const InternedString &attributeName, const InternedString &segmentsAttributeName, IECoreScenePreview::Renderer::SampleTimes &times )
+bool motionTimes(
+	bool motionBlur, const V2f &shutter, const CompoundObject *attributes, const InternedString &attributeName,
+	const InternedString &segmentsAttributeName, IECoreScenePreview::Renderer::SampleTimes &times
+)
 {
 	unsigned int segments = 0;
 	if( motionBlur )
@@ -368,14 +372,26 @@ bool motionTimes( bool motionBlur, const V2f &shutter, const CompoundObject *att
 	return changed;
 }
 
-bool transformMotionTimes( const RenderOptions &renderOptions, const CompoundObject *attributes, IECoreScenePreview::Renderer::SampleTimes &times )
+bool transformMotionTimes(
+	const RenderOptions &renderOptions, const CompoundObject *attributes,
+	IECoreScenePreview::Renderer::SampleTimes &times
+)
 {
-	return motionTimes( renderOptions.transformBlur, renderOptions.shutter, attributes, g_transformBlurAttributeName, g_transformBlurSegmentsAttributeName, times );
+	return motionTimes(
+		renderOptions.transformBlur, renderOptions.shutter, attributes, g_transformBlurAttributeName,
+		g_transformBlurSegmentsAttributeName, times
+	);
 }
 
-bool deformationMotionTimes( const RenderOptions &renderOptions, const CompoundObject *attributes, IECoreScenePreview::Renderer::SampleTimes &times )
+bool deformationMotionTimes(
+	const RenderOptions &renderOptions, const CompoundObject *attributes,
+	IECoreScenePreview::Renderer::SampleTimes &times
+)
 {
-	return motionTimes( renderOptions.deformationBlur, renderOptions.shutter, attributes, g_deformationBlurAttributeName, g_deformationBlurSegmentsAttributeName, times );
+	return motionTimes(
+		renderOptions.deformationBlur, renderOptions.shutter, attributes, g_deformationBlurAttributeName,
+		g_deformationBlurSegmentsAttributeName, times
+	);
 }
 
 M44f SampledTransform::transformAtTime( float time ) const
@@ -446,7 +462,10 @@ void SampledTransform::concatenate( const SampledTransform &child )
 	}
 }
 
-std::optional<SampledTransform> transformSamples( const M44fPlug *transformPlug, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, IECore::MurmurHash *hash )
+std::optional<SampledTransform> transformSamples(
+	const M44fPlug *transformPlug, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes,
+	IECore::MurmurHash *hash
+)
 {
 	IECoreScenePreview::Renderer::Samples<IECore::MurmurHash> sampleHashes;
 	if( !sampleTimes.size() )
@@ -547,7 +566,10 @@ std::optional<SampledTransform> transformSamples( const M44fPlug *transformPlug,
 	return result;
 }
 
-std::optional<SampledObject> objectSamples( const Gaffer::ObjectPlug *objectPlug, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, IECore::MurmurHash *hash )
+std::optional<SampledObject> objectSamples(
+	const Gaffer::ObjectPlug *objectPlug, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes,
+	IECore::MurmurHash *hash
+)
 {
 	IECoreScenePreview::Renderer::Samples<IECore::MurmurHash> sampleHashes;
 	if( !sampleTimes.size() )
@@ -622,11 +644,8 @@ std::optional<SampledObject> objectSamples( const Gaffer::ObjectPlug *objectPlug
 			sampleTime = sampleTimes[0];
 		}
 
-		if(
-			runTimeCast<const VisibleRenderable>( object.get() ) ||
-			runTimeCast<const Camera>( object.get() ) ||
-			runTimeCast<const CoordinateSystem>( object.get() )
-		)
+		if( runTimeCast<const VisibleRenderable>( object.get() ) || runTimeCast<const Camera>( object.get() ) ||
+			runTimeCast<const CoordinateSystem>( object.get() ) )
 		{
 			result.samples.push_back( object.get() );
 			result.sampleTimes.push_back( sampleTime );
@@ -645,10 +664,7 @@ std::optional<SampledObject> objectSamples( const Gaffer::ObjectPlug *objectPlug
 
 			ConstObjectPtr object = objectPlug->getValue( &sampleHashes[i] );
 
-			if(
-				runTimeCast<const Primitive>( object.get() ) ||
-				runTimeCast<const Camera>( object.get() )
-			)
+			if( runTimeCast<const Primitive>( object.get() ) || runTimeCast<const Camera>( object.get() ) )
 			{
 				result.samples.push_back( object.get() );
 				result.sampleTimes.push_back( sampleTimes[i] );
@@ -737,12 +753,18 @@ struct RenderSets::Updater
 {
 
 	Updater( const ScenePlug *scene, const ThreadState &threadState, RenderSets &renderSets, unsigned changed )
-		: changed( changed ), m_scene( scene ), m_threadState( threadState ), m_renderSets( renderSets )
+		: changed( changed ),
+		  m_scene( scene ),
+		  m_threadState( threadState ),
+		  m_renderSets( renderSets )
 	{
 	}
 
 	Updater( const Updater &updater, tbb::split )
-		: changed( NothingChanged ), m_scene( updater.m_scene ), m_threadState( updater.m_threadState ), m_renderSets( updater.m_renderSets )
+		: changed( NothingChanged ),
+		  m_scene( updater.m_scene ),
+		  m_threadState( updater.m_threadState ),
+		  m_renderSets( updater.m_renderSets )
 	{
 	}
 
@@ -804,23 +826,18 @@ struct RenderSets::Updater
 		}
 	}
 
-	void join( Updater &rhs )
-	{
-		changed |= rhs.changed;
-	}
+	void join( Updater &rhs ) { changed |= rhs.changed; }
 
 	unsigned changed;
 
-	private:
+private:
 
 	const ScenePlug *m_scene;
 	const ThreadState &m_threadState;
 	RenderSets &m_renderSets;
 };
 
-RenderSets::RenderSets()
-{
-}
+RenderSets::RenderSets() {}
 
 RenderSets::RenderSets( const ScenePlug *scene )
 {
@@ -870,9 +887,7 @@ unsigned RenderSets::update( const ScenePlug *scene )
 	Updater updater( scene, ThreadState::current(), *this, changed );
 	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
 	parallel_reduce(
-		tbb::blocked_range<size_t>( 0, m_sets.size() + 4 ),
-		updater,
-		tbb::auto_partitioner(),
+		tbb::blocked_range<size_t>( 0, m_sets.size() + 4 ), updater, tbb::auto_partitioner(),
 		// Prevents outer tasks silently cancelling our tasks
 		taskGroupContext
 	);
@@ -934,7 +949,8 @@ void RenderSets::attributes( CompoundObject::ObjectMap &attributes, const SceneP
 
 	attributes[g_setsAttributeName] = boost::const_pointer_cast<InternedStringVectorData>( setsAttribute );
 
-	if( !soloLightsSet().isEmpty() && lightsSet().match( path ) & ( PathMatcher::ExactMatch | PathMatcher::AncestorMatch ) )
+	if( !soloLightsSet().isEmpty() &&
+		lightsSet().match( path ) & ( PathMatcher::ExactMatch | PathMatcher::AncestorMatch ) )
 	{
 		auto muteData = attributes.find( g_lightMuteAttributeName );
 		if( muteData != attributes.end() )
@@ -1017,7 +1033,9 @@ void LightLinks::removeLight( const std::string &path )
 	clearLightLinks();
 }
 
-void LightLinks::addLightFilter( const IECoreScenePreview::Renderer::ObjectInterfacePtr &lightFilter, const IECore::CompoundObject *attributes )
+void LightLinks::addLightFilter(
+	const IECoreScenePreview::Renderer::ObjectInterfacePtr &lightFilter, const IECore::CompoundObject *attributes
+)
 {
 	FilterMap::accessor a;
 	const bool inserted = m_filters.insert( a, lightFilter );
@@ -1030,7 +1048,9 @@ void LightLinks::addLightFilter( const IECoreScenePreview::Renderer::ObjectInter
 	m_lightFilterLinksDirty = true;
 }
 
-void LightLinks::updateLightFilter( const IECoreScenePreview::Renderer::ObjectInterfacePtr &lightFilter, const IECore::CompoundObject *attributes )
+void LightLinks::updateLightFilter(
+	const IECoreScenePreview::Renderer::ObjectInterfacePtr &lightFilter, const IECore::CompoundObject *attributes
+)
 {
 	FilterMap::accessor a;
 	const bool found = m_filters.find( a, lightFilter );
@@ -1063,7 +1083,9 @@ void LightLinks::removeLightFilter( const IECoreScenePreview::Renderer::ObjectIn
 	m_lightFilterLinksDirty = true;
 }
 
-void LightLinks::addFilterLink( const IECoreScenePreview::Renderer::ObjectInterfacePtr &lightFilter, const std::string &filteredLightsExpression )
+void LightLinks::addFilterLink(
+	const IECoreScenePreview::Renderer::ObjectInterfacePtr &lightFilter, const std::string &filteredLightsExpression
+)
 {
 	if( filteredLightsExpression == "" )
 	{
@@ -1089,7 +1111,9 @@ void LightLinks::addFilterLink( const IECoreScenePreview::Renderer::ObjectInterf
 	a->second.lightFilters->insert( lightFilter );
 }
 
-void LightLinks::removeFilterLink( const IECoreScenePreview::Renderer::ObjectInterfacePtr &lightFilter, const std::string &filteredLightsExpression )
+void LightLinks::removeFilterLink(
+	const IECoreScenePreview::Renderer::ObjectInterfacePtr &lightFilter, const std::string &filteredLightsExpression
+)
 {
 	if( filteredLightsExpression == "" )
 	{
@@ -1156,7 +1180,10 @@ std::string LightLinks::filteredLightsExpression( const IECore::CompoundObject *
 	return d ? d->readable() : "";
 }
 
-void LightLinks::outputLightLinks( const ScenePlug *scene, const IECore::CompoundObject *attributes, IECoreScenePreview::Renderer::ObjectInterface *object, IECore::MurmurHash *hash ) const
+void LightLinks::outputLightLinks(
+	const ScenePlug *scene, const IECore::CompoundObject *attributes,
+	IECoreScenePreview::Renderer::ObjectInterface *object, IECore::MurmurHash *hash
+) const
 {
 	const StringData *linkedLightsExpressionData = attributes->member<StringData>( g_linkedLightsAttributeName );
 	const StringData *shadowedLightsExpressionData = attributes->member<StringData>( g_shadowedLightsAttributeName );
@@ -1164,8 +1191,10 @@ void LightLinks::outputLightLinks( const ScenePlug *scene, const IECore::Compoun
 	{
 		shadowedLightsExpressionData = attributes->member<StringData>( *m_shadowedLightsFallbackAttributeName );
 	}
-	const std::string linkedLightsExpression = linkedLightsExpressionData ? linkedLightsExpressionData->readable() : "defaultLights";
-	const std::string &shadowedLightsExpression = shadowedLightsExpressionData ? shadowedLightsExpressionData->readable() : g_shadowedLightsDefaultValue;
+	const std::string linkedLightsExpression =
+		linkedLightsExpressionData ? linkedLightsExpressionData->readable() : "defaultLights";
+	const std::string &shadowedLightsExpression =
+		shadowedLightsExpressionData ? shadowedLightsExpressionData->readable() : g_shadowedLightsDefaultValue;
 
 	if( hash )
 	{
@@ -1190,7 +1219,9 @@ void LightLinks::outputLightLinks( const ScenePlug *scene, const IECore::Compoun
 	object->link( g_shadowedLightsAttributeName, objectSet );
 }
 
-IECoreScenePreview::Renderer::ConstObjectSetPtr LightLinks::linkedLights( const std::string &linkedLightsExpression, const ScenePlug *scene ) const
+IECoreScenePreview::Renderer::ConstObjectSetPtr LightLinks::linkedLights(
+	const std::string &linkedLightsExpression, const ScenePlug *scene
+) const
 {
 	LightLinkMap::accessor a;
 	if( !m_lightLinks.insert( a, linkedLightsExpression ) )
@@ -1244,8 +1275,7 @@ void LightLinks::outputLightFilterLinks( const ScenePlug *scene )
 				}
 			}
 		},
-		tbb::auto_partitioner(),
-		taskGroupContext
+		tbb::auto_partitioner(), taskGroupContext
 	);
 
 	// Loop over all our lights, outputting filter links as
@@ -1261,12 +1291,13 @@ void LightLinks::outputLightFilterLinks( const ScenePlug *scene )
 				outputLightFilterLinks( l.first, l.second.get() );
 			}
 		},
-		tbb::auto_partitioner(),
-		taskGroupContext
+		tbb::auto_partitioner(), taskGroupContext
 	);
 }
 
-void LightLinks::outputLightFilterLinks( const std::string &lightName, IECoreScenePreview::Renderer::ObjectInterface *light ) const
+void LightLinks::outputLightFilterLinks(
+	const std::string &lightName, IECoreScenePreview::Renderer::ObjectInterface *light
+) const
 {
 	// Find the filter links that apply to this light
 
@@ -1284,7 +1315,8 @@ void LightLinks::outputLightFilterLinks( const std::string &lightName, IECoreSce
 	IECoreScenePreview::Renderer::ObjectSetPtr linkedFilters;
 	if( filterLinks.size() == 0 )
 	{
-		static IECoreScenePreview::Renderer::ObjectSetPtr emptySet = make_shared<IECoreScenePreview::Renderer::ObjectSet>();
+		static IECoreScenePreview::Renderer::ObjectSetPtr emptySet =
+			make_shared<IECoreScenePreview::Renderer::ObjectSet>();
 		linkedFilters = emptySet;
 	}
 	else if( filterLinks.size() == 1 )
@@ -1323,8 +1355,18 @@ InternedString g_visibleAttributeName( "scene:visible" );
 struct LocationOutput
 {
 
-	LocationOutput( IECoreScenePreview::Renderer *renderer, const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions, const GafferScene::Private::RendererAlgo::RenderSets &renderSets, const ScenePlug::ScenePath &root, const ScenePlug *scene )
-		: m_renderer( renderer ), m_options( renderOptions ), m_attributes( root.empty() ? SceneAlgo::globalAttributes( renderOptions.globals.get() ) : new CompoundObject ), m_renderSets( renderSets ), m_root( root )
+	LocationOutput(
+		IECoreScenePreview::Renderer *renderer, const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions,
+		const GafferScene::Private::RendererAlgo::RenderSets &renderSets, const ScenePlug::ScenePath &root,
+		const ScenePlug *scene
+	)
+		: m_renderer( renderer ),
+		  m_options( renderOptions ),
+		  m_attributes(
+			  root.empty() ? SceneAlgo::globalAttributes( renderOptions.globals.get() ) : new CompoundObject
+		  ),
+		  m_renderSets( renderSets ),
+		  m_root( root )
 	{
 	}
 
@@ -1351,17 +1393,11 @@ struct LocationOutput
 		return true;
 	}
 
-	protected:
+protected:
 
-	const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions() const
-	{
-		return m_options;
-	}
+	const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions() const { return m_options; }
 
-	bool purposeIncluded() const
-	{
-		return m_options.purposeIncluded( m_attributes.get() );
-	}
+	bool purposeIncluded() const { return m_options.purposeIncluded( m_attributes.get() ); }
 
 	std::string name( const ScenePlug::ScenePath &path ) const
 	{
@@ -1372,7 +1408,8 @@ struct LocationOutput
 		else
 		{
 			string result;
-			for( ScenePlug::ScenePath::const_iterator it = path.begin() + m_root.size(), eIt = path.end(); it != eIt; ++it )
+			for( ScenePlug::ScenePath::const_iterator it = path.begin() + m_root.size(), eIt = path.end(); it != eIt;
+				 ++it )
 			{
 				result += "/" + it->string();
 			}
@@ -1380,20 +1417,14 @@ struct LocationOutput
 		}
 	}
 
-	IECoreScenePreview::Renderer *renderer()
-	{
-		return m_renderer;
-	}
+	IECoreScenePreview::Renderer *renderer() { return m_renderer; }
 
 	void deformationMotionTimes( IECoreScenePreview::Renderer::SampleTimes &times )
 	{
 		GafferScene::Private::RendererAlgo::deformationMotionTimes( m_options, m_attributes.get(), times );
 	}
 
-	const IECore::CompoundObject *attributes() const
-	{
-		return m_attributes.get();
-	}
+	const IECore::CompoundObject *attributes() const { return m_attributes.get(); }
 
 	IECoreScenePreview::Renderer::AttributesInterfacePtr attributesInterface()
 	{
@@ -1415,7 +1446,7 @@ struct LocationOutput
 		objectInterface->transform( m_fullTransform.samples, m_fullTransform.sampleTimes );
 	}
 
-	private:
+private:
 
 	void updateAttributes( const ScenePlug *scene, const ScenePlug::ScenePath &path )
 	{
@@ -1446,7 +1477,8 @@ struct LocationOutput
 	{
 		IECoreScenePreview::Renderer::SampleTimes sampleTimes;
 		GafferScene::Private::RendererAlgo::transformMotionTimes( m_options, m_attributes.get(), sampleTimes );
-		auto sampledTransform = GafferScene::Private::RendererAlgo::transformSamples( scene->transformPlug(), sampleTimes );
+		auto sampledTransform =
+			GafferScene::Private::RendererAlgo::transformSamples( scene->transformPlug(), sampleTimes );
 		m_fullTransform.concatenate( *sampledTransform );
 	}
 
@@ -1463,8 +1495,14 @@ struct LocationOutput
 struct CameraOutput : public LocationOutput
 {
 
-	CameraOutput( IECoreScenePreview::Renderer *renderer, const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions, const GafferScene::Private::RendererAlgo::RenderSets &renderSets, const ScenePlug::ScenePath &root, const ScenePlug *scene )
-		: LocationOutput( renderer, renderOptions, renderSets, root, scene ), m_globals( renderOptions.globals.get() ), m_cameraSet( renderSets.camerasSet() )
+	CameraOutput(
+		IECoreScenePreview::Renderer *renderer, const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions,
+		const GafferScene::Private::RendererAlgo::RenderSets &renderSets, const ScenePlug::ScenePath &root,
+		const ScenePlug *scene
+	)
+		: LocationOutput( renderer, renderOptions, renderSets, root, scene ),
+		  m_globals( renderOptions.globals.get() ),
+		  m_cameraSet( renderSets.camerasSet() )
 	{
 	}
 
@@ -1483,7 +1521,8 @@ struct CameraOutput : public LocationOutput
 			deformationMotionTimes( sampleTimes );
 
 			IECoreScenePreview::Renderer::ObjectSamples samples;
-			const auto sampledObject = GafferScene::Private::RendererAlgo::objectSamples( scene->objectPlug(), sampleTimes );
+			const auto sampledObject =
+				GafferScene::Private::RendererAlgo::objectSamples( scene->objectPlug(), sampleTimes );
 
 			IECoreScenePreview::Renderer::CameraSamples cameraSamples;
 			cameraSamples.reserve( sampledObject->samples.size() );
@@ -1502,11 +1541,9 @@ struct CameraOutput : public LocationOutput
 			if( !sampledObject->samples.size() || cameraSamples.size() != sampledObject->samples.size() )
 			{
 				IECore::msg(
-					IECore::Msg::Warning,
-					"RendererAlgo::CameraOutput",
+					IECore::Msg::Warning, "RendererAlgo::CameraOutput",
 					fmt::format(
-						"Camera missing for location \"{}\" at frame {}",
-						name( path ), Context::current()->getFrame()
+						"Camera missing for location \"{}\" at frame {}", name( path ), Context::current()->getFrame()
 					)
 				);
 			}
@@ -1526,7 +1563,7 @@ struct CameraOutput : public LocationOutput
 		return cameraMatch & IECore::PathMatcher::DescendantMatch;
 	}
 
-	private:
+private:
 
 	const IECore::CompoundObject *m_globals;
 	const PathMatcher &m_cameraSet;
@@ -1535,8 +1572,15 @@ struct CameraOutput : public LocationOutput
 struct LightOutput : public LocationOutput
 {
 
-	LightOutput( IECoreScenePreview::Renderer *renderer, const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions, const GafferScene::Private::RendererAlgo::RenderSets &renderSets, GafferScene::Private::RendererAlgo::LightLinks *lightLinks, const ScenePlug::ScenePath &root, const ScenePlug *scene )
-		: LocationOutput( renderer, renderOptions, renderSets, root, scene ), m_lightSet( renderSets.lightsSet() ), m_lightLinks( lightLinks )
+	LightOutput(
+		IECoreScenePreview::Renderer *renderer, const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions,
+		const GafferScene::Private::RendererAlgo::RenderSets &renderSets,
+		GafferScene::Private::RendererAlgo::LightLinks *lightLinks, const ScenePlug::ScenePath &root,
+		const ScenePlug *scene
+	)
+		: LocationOutput( renderer, renderOptions, renderSets, root, scene ),
+		  m_lightSet( renderSets.lightsSet() ),
+		  m_lightLinks( lightLinks )
 	{
 	}
 
@@ -1579,8 +1623,15 @@ struct LightOutput : public LocationOutput
 struct LightFiltersOutput : public LocationOutput
 {
 
-	LightFiltersOutput( IECoreScenePreview::Renderer *renderer, const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions, const GafferScene::Private::RendererAlgo::RenderSets &renderSets, GafferScene::Private::RendererAlgo::LightLinks *lightLinks, const ScenePlug::ScenePath &root, const ScenePlug *scene )
-		: LocationOutput( renderer, renderOptions, renderSets, root, scene ), m_lightFiltersSet( renderSets.lightFiltersSet() ), m_lightLinks( lightLinks )
+	LightFiltersOutput(
+		IECoreScenePreview::Renderer *renderer, const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions,
+		const GafferScene::Private::RendererAlgo::RenderSets &renderSets,
+		GafferScene::Private::RendererAlgo::LightLinks *lightLinks, const ScenePlug::ScenePath &root,
+		const ScenePlug *scene
+	)
+		: LocationOutput( renderer, renderOptions, renderSets, root, scene ),
+		  m_lightFiltersSet( renderSets.lightFiltersSet() ),
+		  m_lightLinks( lightLinks )
 	{
 	}
 
@@ -1597,8 +1648,7 @@ struct LightFiltersOutput : public LocationOutput
 			IECore::ConstObjectPtr object = scene->objectPlug()->getValue();
 
 			IECoreScenePreview::Renderer::ObjectInterfacePtr objectInterface = renderer()->lightFilter(
-				name( path ),
-				!runTimeCast<const NullObject>( object.get() ) ? object.get() : nullptr,
+				name( path ), !runTimeCast<const NullObject>( object.get() ) ? object.get() : nullptr,
 				attributesInterface().get()
 			);
 
@@ -1615,7 +1665,7 @@ struct LightFiltersOutput : public LocationOutput
 		return lightFilterMatch & IECore::PathMatcher::DescendantMatch;
 	}
 
-	private:
+private:
 
 	const PathMatcher &m_lightFiltersSet;
 	GafferScene::Private::RendererAlgo::LightLinks *m_lightLinks;
@@ -1624,9 +1674,19 @@ struct LightFiltersOutput : public LocationOutput
 struct ObjectOutput : public LocationOutput
 {
 
-	ObjectOutput( IECoreScenePreview::Renderer *renderer, const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions, const GafferScene::Private::RendererAlgo::RenderSets &renderSets, const GafferScene::Private::RendererAlgo::LightLinks *lightLinks, const ScenePlug::ScenePath &root, const ScenePlug *scene, RenderManifest *renderManifest )
+	ObjectOutput(
+		IECoreScenePreview::Renderer *renderer, const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions,
+		const GafferScene::Private::RendererAlgo::RenderSets &renderSets,
+		const GafferScene::Private::RendererAlgo::LightLinks *lightLinks, const ScenePlug::ScenePath &root,
+		const ScenePlug *scene, RenderManifest *renderManifest
+	)
 
-		: LocationOutput( renderer, renderOptions, renderSets, root, scene ), m_cameraSet( renderSets.camerasSet() ), m_lightSet( renderSets.lightsSet() ), m_lightFiltersSet( renderSets.lightFiltersSet() ), m_lightLinks( lightLinks ), m_renderManifest( renderManifest )
+		: LocationOutput( renderer, renderOptions, renderSets, root, scene ),
+		  m_cameraSet( renderSets.camerasSet() ),
+		  m_lightSet( renderSets.lightsSet() ),
+		  m_lightFiltersSet( renderSets.lightFiltersSet() ),
+		  m_lightLinks( lightLinks ),
+		  m_renderManifest( renderManifest )
 	{
 	}
 
@@ -1637,7 +1697,9 @@ struct ObjectOutput : public LocationOutput
 			return false;
 		}
 
-		if( ( m_cameraSet.match( path ) & IECore::PathMatcher::ExactMatch ) || ( m_lightFiltersSet.match( path ) & IECore::PathMatcher::ExactMatch ) || ( m_lightSet.match( path ) & IECore::PathMatcher::ExactMatch ) )
+		if( ( m_cameraSet.match( path ) & IECore::PathMatcher::ExactMatch ) ||
+			( m_lightFiltersSet.match( path ) & IECore::PathMatcher::ExactMatch ) ||
+			( m_lightSet.match( path ) & IECore::PathMatcher::ExactMatch ) )
 		{
 			return true;
 		}
@@ -1668,7 +1730,9 @@ struct ObjectOutput : public LocationOutput
 			}
 		}
 
-		objectInterface = renderer()->object( name( path ), sampledObject->samples, sampledObject->sampleTimes, attributesInterface.get() );
+		objectInterface = renderer()->object(
+			name( path ), sampledObject->samples, sampledObject->sampleTimes, attributesInterface.get()
+		);
 
 		if( objectInterface )
 		{
@@ -1704,7 +1768,10 @@ struct ObjectOutput : public LocationOutput
 namespace
 {
 
-ConstOutputPtr addGafferOutputParameters( const Output *output, const ScenePlug *scene, const std::string &outputID, const IECoreScenePreview::Renderer *renderer, const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions )
+ConstOutputPtr addGafferOutputParameters(
+	const Output *output, const ScenePlug *scene, const std::string &outputID,
+	const IECoreScenePreview::Renderer *renderer, const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions
+)
 {
 	CompoundDataPtr param = output->parametersData()->copy();
 
@@ -1732,9 +1799,8 @@ ConstOutputPtr addGafferOutputParameters( const Output *output, const ScenePlug 
 	// be output by Render::executeInternal
 	if( GafferScene::Private::RendererAlgo::hasIDOutput( renderOptions.globals.get() ) )
 	{
-		std::string manifestFilePathOption = GafferScene::Private::RendererAlgo::renderManifestFilePath(
-			renderOptions.globals.get()
-		);
+		std::string manifestFilePathOption =
+			GafferScene::Private::RendererAlgo::renderManifestFilePath( renderOptions.globals.get() );
 		if( manifestFilePathOption != "" )
 		{
 			std::string manifestPath = std::filesystem::relative(
@@ -1775,15 +1841,16 @@ ConstOutputPtr addGafferOutputParameters( const Output *output, const ScenePlug 
 				param->writable()["header:gaffer:context:" + name.string()] = data;
 				break;
 			case IECore::StringDataTypeId :
-				param->writable()["header:gaffer:context:" + name.string()] = new StringData(
-					context->substitute( static_cast<const StringData *>( data.get() )->readable() )
-				);
+				param->writable()["header:gaffer:context:" + name.string()] =
+					new StringData( context->substitute( static_cast<const StringData *>( data.get() )->readable() ) );
 				break;
 			default :
 				IECore::msg(
-					IECore::Msg::Debug,
-					"GafferScene::RendererAlgo",
-					fmt::format( "Unsupported data type for Context variable \"{}\" ({}), unable to add this variable to output image header", name.string(), data->typeName() )
+					IECore::Msg::Debug, "GafferScene::RendererAlgo",
+					fmt::format(
+						"Unsupported data type for Context variable \"{}\" ({}), unable to add this variable to output image header",
+						name.string(), data->typeName()
+					)
 				);
 		};
 	}
@@ -1807,7 +1874,10 @@ void outputOutputs( const ScenePlug *scene, const RenderOptions &renderOptions, 
 	outputOutputs( scene, renderOptions, /* previousGlobals = */ nullptr, renderer );
 }
 
-void outputOutputs( const ScenePlug *scene, const RenderOptions &renderOptions, const IECore::CompoundObject *previousGlobals, IECoreScenePreview::Renderer *renderer )
+void outputOutputs(
+	const ScenePlug *scene, const RenderOptions &renderOptions, const IECore::CompoundObject *previousGlobals,
+	IECoreScenePreview::Renderer *renderer
+)
 {
 	static const std::string prefix( "output:" );
 
@@ -1840,7 +1910,8 @@ void outputOutputs( const ScenePlug *scene, const RenderOptions &renderOptions, 
 			if( changedOrAdded )
 			{
 				const string outputID = it->first.string().substr( prefix.size() );
-				ConstOutputPtr updatedOutput = addGafferOutputParameters( output, scene, outputID, renderer, renderOptions );
+				ConstOutputPtr updatedOutput =
+					addGafferOutputParameters( output, scene, outputID, renderer, renderOptions );
 				renderer->output( outputID, updatedOutput.get() );
 			}
 		}
@@ -1873,7 +1944,10 @@ void outputOutputs( const ScenePlug *scene, const RenderOptions &renderOptions, 
 	}
 }
 
-void outputCameras( const ScenePlug *scene, const RenderOptions &renderOptions, const RenderSets &renderSets, IECoreScenePreview::Renderer *renderer )
+void outputCameras(
+	const ScenePlug *scene, const RenderOptions &renderOptions, const RenderSets &renderSets,
+	IECoreScenePreview::Renderer *renderer
+)
 {
 	const StringData *cameraOption = renderOptions.globals->member<StringData>( g_cameraOptionLegacyName );
 	if( cameraOption && !cameraOption->readable().empty() )
@@ -1902,28 +1976,39 @@ void outputCameras( const ScenePlug *scene, const RenderOptions &renderOptions, 
 	{
 		CameraPtr defaultCamera = new IECoreScene::Camera;
 		SceneAlgo::applyCameraGlobals( defaultCamera.get(), renderOptions.globals.get(), scene );
-		IECoreScenePreview::Renderer::AttributesInterfacePtr defaultAttributes = renderer->attributes( scene->attributesPlug()->defaultValue() );
+		IECoreScenePreview::Renderer::AttributesInterfacePtr defaultAttributes =
+			renderer->attributes( scene->attributesPlug()->defaultValue() );
 		ConstStringDataPtr name = new StringData( "gaffer:defaultCamera" );
 		renderer->camera( name->readable(), defaultCamera.get(), defaultAttributes.get() );
 		renderer->option( "camera", name.get() );
 	}
 }
 
-void outputLightFilters( const ScenePlug *scene, const RenderOptions &renderOptions, const RenderSets &renderSets, LightLinks *lightLinks, IECoreScenePreview::Renderer *renderer )
+void outputLightFilters(
+	const ScenePlug *scene, const RenderOptions &renderOptions, const RenderSets &renderSets, LightLinks *lightLinks,
+	IECoreScenePreview::Renderer *renderer
+)
 {
 	const ScenePlug::ScenePath root;
 	LightFiltersOutput output( renderer, renderOptions, renderSets, lightLinks, root, scene );
 	SceneAlgo::parallelProcessLocations( scene, output );
 }
 
-void outputLights( const ScenePlug *scene, const RenderOptions &renderOptions, const RenderSets &renderSets, LightLinks *lightLinks, IECoreScenePreview::Renderer *renderer )
+void outputLights(
+	const ScenePlug *scene, const RenderOptions &renderOptions, const RenderSets &renderSets, LightLinks *lightLinks,
+	IECoreScenePreview::Renderer *renderer
+)
 {
 	const ScenePlug::ScenePath root;
 	LightOutput output( renderer, renderOptions, renderSets, lightLinks, root, scene );
 	SceneAlgo::parallelProcessLocations( scene, output );
 }
 
-void outputObjects( const ScenePlug *scene, const RenderOptions &renderOptions, const RenderSets &renderSets, const LightLinks *lightLinks, IECoreScenePreview::Renderer *renderer, const ScenePlug::ScenePath &root, RenderManifest *renderManifest )
+void outputObjects(
+	const ScenePlug *scene, const RenderOptions &renderOptions, const RenderSets &renderSets,
+	const LightLinks *lightLinks, IECoreScenePreview::Renderer *renderer, const ScenePlug::ScenePath &root,
+	RenderManifest *renderManifest
+)
 {
 	ObjectOutput output( renderer, renderOptions, renderSets, lightLinks, root, scene, renderManifest );
 

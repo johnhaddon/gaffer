@@ -58,15 +58,14 @@ namespace
 class CopyTile
 {
 
-	public:
+public:
 
 	CopyTile(
-		const vector<float *> &imageChannelData,
-		const vector<string> &channelNames,
-		const Imath::Box2i &dataWindow
-	) : m_imageChannelData( imageChannelData ),
-		m_channelNames( channelNames ),
-		m_dataWindow( dataWindow )
+		const vector<float *> &imageChannelData, const vector<string> &channelNames, const Imath::Box2i &dataWindow
+	)
+		: m_imageChannelData( imageChannelData ),
+		  m_channelNames( channelNames ),
+		  m_dataWindow( dataWindow )
 	{
 	}
 
@@ -78,7 +77,8 @@ class CopyTile
 		const size_t imageStride = m_dataWindow.size().x;
 		const size_t tileStrideSize = sizeof( float ) * b.size().x;
 
-		const int channelIndex = std::find( m_channelNames.begin(), m_channelNames.end(), channelName ) - m_channelNames.begin();
+		const int channelIndex =
+			std::find( m_channelNames.begin(), m_channelNames.end(), channelName ) - m_channelNames.begin();
 		float *channelBegin = m_imageChannelData[channelIndex];
 
 		IECore::ConstFloatVectorDataPtr tileData = imagePlug->channelDataPlug()->getValue();
@@ -86,13 +86,16 @@ class CopyTile
 
 		for( int y = b.min.y; y < b.max.y; y++ )
 		{
-			const float *tilePtr = tileDataBegin + ( y - tileOrigin.y ) * ImagePlug::tileSize() + ( b.min.x - tileOrigin.x );
-			float *channelPtr = channelBegin + ( m_dataWindow.size().y - ( 1 + y - m_dataWindow.min.y ) ) * imageStride + ( b.min.x - m_dataWindow.min.x );
+			const float *tilePtr =
+				tileDataBegin + ( y - tileOrigin.y ) * ImagePlug::tileSize() + ( b.min.x - tileOrigin.x );
+			float *channelPtr = channelBegin +
+				( m_dataWindow.size().y - ( 1 + y - m_dataWindow.min.y ) ) * imageStride +
+				( b.min.x - m_dataWindow.min.x );
 			std::memcpy( channelPtr, tilePtr, tileStrideSize );
 		}
 	}
 
-	private:
+private:
 
 	const vector<float *> &m_imageChannelData;
 	const vector<string> &m_channelNames;
@@ -164,7 +167,7 @@ struct NaturalOrder
 		return false;
 	}
 
-	private:
+private:
 
 	int compareToken( const std::smatch &l, const std::smatch &r )
 	{
@@ -367,15 +370,12 @@ IECore::MurmurHash GafferImage::ImageAlgo::imageHash( const ImagePlug *imagePlug
 		ImageAlgo::parallelGatherTiles(
 			imagePlug,
 			// Tile
-			[]( const ImagePlug *imageP, const Imath::V2i &tileOrigin ) {
-				return imageP->sampleOffsetsPlug()->hash();
-			},
+			[]( const ImagePlug *imageP, const Imath::V2i &tileOrigin ) { return imageP->sampleOffsetsPlug()->hash(); },
 			// Gather
 			[&result]( const ImagePlug *imageP, const Imath::V2i &tileOrigin, const IECore::MurmurHash &tileHash ) {
 				result.append( tileHash );
 			},
-			dataWindow,
-			ImageAlgo::BottomToTop
+			dataWindow, ImageAlgo::BottomToTop
 		);
 	}
 
@@ -386,11 +386,11 @@ IECore::MurmurHash GafferImage::ImageAlgo::imageHash( const ImagePlug *imagePlug
 			return imageP->channelDataPlug()->hash();
 		},
 		// Gather
-		[&result]( const ImagePlug *imageP, const string &channelName, const Imath::V2i &tileOrigin, const IECore::MurmurHash &tileHash ) {
-			result.append( tileHash );
-		},
-		dataWindow,
-		ImageAlgo::BottomToTop
+		[&result](
+			const ImagePlug *imageP, const string &channelName, const Imath::V2i &tileOrigin,
+			const IECore::MurmurHash &tileHash
+		) { result.append( tileHash ); },
+		dataWindow, ImageAlgo::BottomToTop
 	);
 	return result;
 }
@@ -437,7 +437,8 @@ IECore::ConstCompoundObjectPtr GafferImage::ImageAlgo::tiles( const ImagePlug *i
 	ImageAlgo::parallelProcessTiles(
 		imagePlug,
 		// Tile
-		[&tileOriginsWritable, &sampleOffsetResults, &channelDataResults, &channelNames, &tileRange, deep]( const ImagePlug *imageP, const Imath::V2i &tileOrigin ) {
+		[&tileOriginsWritable, &sampleOffsetResults, &channelDataResults, &channelNames, &tileRange,
+		 deep]( const ImagePlug *imageP, const Imath::V2i &tileOrigin ) {
 			int tileI = tileIndex( tileOrigin, tileRange );
 			tileOriginsWritable[tileI] = tileOrigin;
 
@@ -465,9 +466,8 @@ IECore::ConstCompoundObjectPtr GafferImage::ImageAlgo::tiles( const ImagePlug *i
 			for( unsigned int i = 0; i < channelNames.size(); i++ )
 			{
 				channelDataScope.setChannelName( &channelNames[i] );
-				channelDataResults[i]->members()[tileI] = const_cast<IECore::FloatVectorData *>(
-					imageP->channelDataPlug()->getValue().get()
-				);
+				channelDataResults[i]->members()[tileI] =
+					const_cast<IECore::FloatVectorData *>( imageP->channelDataPlug()->getValue().get() );
 			}
 		},
 		dataWindow
@@ -488,7 +488,10 @@ IECore::ConstCompoundObjectPtr GafferImage::ImageAlgo::tiles( const ImagePlug *i
 	return result;
 }
 
-void GafferImage::ImageAlgo::throwIfSampleOffsetsMismatch( const IECore::IntVectorData *sampleOffsetsDataA, const IECore::IntVectorData *sampleOffsetsDataB, const Imath::V2i &tileOrigin, const std::string &message )
+void GafferImage::ImageAlgo::throwIfSampleOffsetsMismatch(
+	const IECore::IntVectorData *sampleOffsetsDataA, const IECore::IntVectorData *sampleOffsetsDataB,
+	const Imath::V2i &tileOrigin, const std::string &message
+)
 {
 	if( sampleOffsetsDataA != sampleOffsetsDataB )
 	{
@@ -505,8 +508,7 @@ void GafferImage::ImageAlgo::throwIfSampleOffsetsMismatch( const IECore::IntVect
 
 				throw IECore::Exception(
 					fmt::format(
-						"{} Pixel {},{} received both {} and {} samples",
-						message, x + tileOrigin.x, y + tileOrigin.y,
+						"{} Pixel {},{} received both {} and {} samples", message, x + tileOrigin.x, y + tileOrigin.y,
 						sampleOffsetsA[i] - prevOffset, sampleOffsetsB[i] - prevOffset
 					)
 				);
@@ -517,7 +519,8 @@ void GafferImage::ImageAlgo::throwIfSampleOffsetsMismatch( const IECore::IntVect
 
 bool GafferImage::ImageAlgo::viewIsValid( const Gaffer::Context *context, const std::vector<std::string> &viewNames )
 {
-	const std::string &viewName = context->get<std::string>( ImagePlug::viewNameContextName, ImagePlug::defaultViewName );
+	const std::string &viewName =
+		context->get<std::string>( ImagePlug::viewNameContextName, ImagePlug::defaultViewName );
 
 	if( std::find( viewNames.begin(), viewNames.end(), viewName ) != viewNames.end() )
 	{

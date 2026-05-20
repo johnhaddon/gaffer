@@ -76,15 +76,15 @@ struct HistoryCacheKey
 {
 	HistoryCacheKey() {};
 	HistoryCacheKey( const ValuePlug *plug )
-		: plug( plug ), contextHash( Context::current()->hash() ), dirtyCount( plug->dirtyCount() )
+		: plug( plug ),
+		  contextHash( Context::current()->hash() ),
+		  dirtyCount( plug->dirtyCount() )
 	{
 	}
 
 	bool operator == ( const HistoryCacheKey &rhs ) const
 	{
-		return plug == rhs.plug &&
-			contextHash == rhs.contextHash &&
-			dirtyCount == rhs.dirtyCount;
+		return plug == rhs.plug && contextHash == rhs.contextHash && dirtyCount == rhs.dirtyCount;
 	}
 
 	const ValuePlug *plug;
@@ -120,9 +120,7 @@ HistoryCache g_historyCache(
 		// owners. Destroying plugs can trigger dirty propagation, so as a
 		// precaution we destroy the history on the UI thread, where this would
 		// be OK.
-		ParallelAlgo::callOnUIThread(
-			[history]() {}
-		);
+		ParallelAlgo::callOnUIThread( [history]() {} );
 	}
 
 );
@@ -136,12 +134,12 @@ HistoryCache g_historyCache(
 IE_CORE_DEFINERUNTIMETYPED( TransformInspector )
 
 TransformInspector::TransformInspector(
-	const GafferScene::ScenePlugPtr &scene,
-	const Gaffer::PlugPtr &editScope,
-	Space space,
-	Component component
+	const GafferScene::ScenePlugPtr &scene, const Gaffer::PlugPtr &editScope, Space space, Component component
 )
-	: Inspector( { scene->transformPlug() }, "Transform", fmt::format( "{} {}", toString( space ), toString( component ) ), editScope ),
+	: Inspector(
+		  { scene->transformPlug() }, "Transform", fmt::format( "{} {}", toString( space ), toString( component ) ),
+		  editScope
+	  ),
 	  m_scene( scene ),
 	  m_space( space ),
 	  m_component( component )
@@ -160,10 +158,11 @@ GafferScene::SceneAlgo::History::ConstPtr TransformInspector::history() const
 
 IECore::ConstObjectPtr TransformInspector::value( const GafferScene::SceneAlgo::History *history ) const
 {
-	const M44f matrix =
-		m_space == Space::Local ?
+	const M44f matrix = m_space == Space::Local ?
 		history->scene->transformPlug()->getValue() :
-		history->scene->fullTransform( Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ) );
+		history->scene->fullTransform(
+			Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName )
+		);
 
 	if( m_component == Component::Matrix )
 	{
@@ -185,7 +184,9 @@ IECore::ConstObjectPtr TransformInspector::value( const GafferScene::SceneAlgo::
 	}
 }
 
-Gaffer::ValuePlugPtr TransformInspector::source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const
+Gaffer::ValuePlugPtr TransformInspector::source(
+	const GafferScene::SceneAlgo::History *history, std::string &editWarning
+) const
 {
 	if( m_space == Space::World )
 	{
@@ -247,10 +248,7 @@ Gaffer::ValuePlugPtr TransformInspector::source( const GafferScene::SceneAlgo::H
 			return const_cast<M44fPlug *>( transform->outPlug()->transformPlug() );
 		}
 	}
-	else if(
-		runTimeCast<const Constraint>( sceneNode ) ||
-		runTimeCast<const FramingConstraint>( sceneNode )
-	)
+	else if( runTimeCast<const Constraint>( sceneNode ) || runTimeCast<const FramingConstraint>( sceneNode ) )
 	{
 		return sceneNode->outPlug()->transformPlug();
 	}
@@ -275,7 +273,9 @@ Gaffer::ValuePlugPtr TransformInspector::source( const GafferScene::SceneAlgo::H
 	}
 }
 
-Inspector::AcquireEditFunctionOrFailure TransformInspector::acquireEditFunction( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history ) const
+Inspector::AcquireEditFunctionOrFailure TransformInspector::acquireEditFunction(
+	Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history
+) const
 {
 	if( m_space != Space::Local )
 	{

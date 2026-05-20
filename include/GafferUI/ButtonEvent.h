@@ -67,14 +67,14 @@ struct GAFFERUI_API ButtonEvent : public ModifiableEvent
 	};
 
 	explicit ButtonEvent(
-		Buttons button_ = None,
-		Buttons buttons_ = None,
-		const IECore::LineSegment3f &Line = IECore::LineSegment3f(),
-		float w = 0.0f,
-		Modifiers m = ModifiableEvent::None
+		Buttons button_ = None, Buttons buttons_ = None, const IECore::LineSegment3f &Line = IECore::LineSegment3f(),
+		float w = 0.0f, Modifiers m = ModifiableEvent::None
 	)
-		: ModifiableEvent( m ), button( button_ ), buttons( buttons_ ), line( Line ), wheelRotation( w ) {
-		  };
+		: ModifiableEvent( m ),
+		  button( button_ ),
+		  buttons( buttons_ ),
+		  line( Line ),
+		  wheelRotation( w ) {};
 
 	Buttons button; // the single button that caused the event
 	Buttons buttons; // the button state when the event occurred

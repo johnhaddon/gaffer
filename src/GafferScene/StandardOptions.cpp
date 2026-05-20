@@ -65,13 +65,13 @@ const boost::container::flat_map<IECore::InternedString, IECore::ConstDataPtr> g
 
 GAFFER_NODE_DEFINE_TYPE( StandardOptions );
 
-StandardOptions::StandardOptions( const std::string &name )
-	: Options( name )
+StandardOptions::StandardOptions( const std::string &name ) : Options( name )
 {
 
 	for( const auto &target : Metadata::targetsWithMetadata( "option:render:* option:sampleMotion", g_defaultValue ) )
 	{
-		if( auto valuePlug = MetadataAlgo::createPlugFromMetadata( "value", Plug::Direction::In, Plug::Flags::Default, target ) )
+		if( auto valuePlug =
+				MetadataAlgo::createPlugFromMetadata( "value", Plug::Direction::In, Plug::Flags::Default, target ) )
 		{
 			const std::string optionName = target.string().substr( 7 );
 			NameValuePlugPtr optionPlug = new NameValuePlug( optionName, valuePlug, false, optionName );
@@ -90,6 +90,4 @@ StandardOptions::StandardOptions( const std::string &name )
 	}
 }
 
-StandardOptions::~StandardOptions()
-{
-}
+StandardOptions::~StandardOptions() {}

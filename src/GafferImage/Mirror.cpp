@@ -94,8 +94,7 @@ GAFFER_NODE_DEFINE_TYPE( Mirror );
 
 size_t Mirror::g_firstPlugIndex = 0;
 
-Mirror::Mirror( const std::string &name )
-	: FlatImageProcessor( name )
+Mirror::Mirror( const std::string &name ) : FlatImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new BoolPlug( "horizontal" ) );
@@ -107,9 +106,7 @@ Mirror::Mirror( const std::string &name )
 	outPlug()->channelNamesPlug()->setInput( inPlug()->channelNamesPlug() );
 }
 
-Mirror::~Mirror()
-{
-}
+Mirror::~Mirror() {}
 
 Gaffer::BoolPlug *Mirror::horizontalPlug()
 {
@@ -136,28 +133,22 @@ void Mirror::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs
 	FlatImageProcessor::affects( input, outputs );
 
 	const bool affectsTransform =
-		input == inPlug()->formatPlug() ||
-		input == horizontalPlug() ||
-		input == verticalPlug();
+		input == inPlug()->formatPlug() || input == horizontalPlug() || input == verticalPlug();
 
-	if(
-		affectsTransform ||
-		input == inPlug()->dataWindowPlug()
-	)
+	if( affectsTransform || input == inPlug()->dataWindowPlug() )
 	{
 		outputs.push_back( outPlug()->dataWindowPlug() );
 	}
 
-	if(
-		affectsTransform ||
-		input == inPlug()->channelDataPlug()
-	)
+	if( affectsTransform || input == inPlug()->channelDataPlug() )
 	{
 		outputs.push_back( outPlug()->channelDataPlug() );
 	}
 }
 
-void Mirror::hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Mirror::hashDataWindow(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	const bool horizontal = horizontalPlug()->getValue();
 	const bool vertical = verticalPlug()->getValue();
@@ -190,15 +181,12 @@ Imath::Box2i Mirror::computeDataWindow( const Gaffer::Context *context, const Im
 		return inDataWindow;
 	}
 
-	return mirror(
-		inDataWindow,
-		horizontal,
-		vertical,
-		inPlug()->formatPlug()->getValue().getDisplayWindow()
-	);
+	return mirror( inDataWindow, horizontal, vertical, inPlug()->formatPlug()->getValue().getDisplayWindow() );
 }
 
-void Mirror::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Mirror::hashChannelData(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	const bool horizontal = horizontalPlug()->getValue();
 	const bool vertical = verticalPlug()->getValue();
@@ -220,12 +208,7 @@ void Mirror::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer
 		displayWindow = inPlug()->formatPlug()->getValue().getDisplayWindow();
 	}
 
-	const Box2i sampleWindow = mirror(
-		tileBound,
-		horizontal,
-		vertical,
-		displayWindow
-	);
+	const Box2i sampleWindow = mirror( tileBound, horizontal, vertical, displayWindow );
 
 	Sampler sampler( inPlug(), channelName, sampleWindow );
 	sampler.hash( h );
@@ -234,7 +217,10 @@ void Mirror::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer
 	h.append( vertical );
 }
 
-IECore::ConstFloatVectorDataPtr Mirror::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr Mirror::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	const bool horizontal = horizontalPlug()->getValue();
 	const bool vertical = verticalPlug()->getValue();
@@ -250,12 +236,7 @@ IECore::ConstFloatVectorDataPtr Mirror::computeChannelData( const std::string &c
 		displayWindow = inPlug()->formatPlug()->getValue().getDisplayWindow();
 	}
 	const Box2i tileBound( tileOrigin, tileOrigin + V2i( ImagePlug::tileSize() ) );
-	const Box2i sampleWindow = mirror(
-		tileBound,
-		horizontal,
-		vertical,
-		displayWindow
-	);
+	const Box2i sampleWindow = mirror( tileBound, horizontal, vertical, displayWindow );
 
 	Sampler sampler( inPlug(), channelName, sampleWindow );
 

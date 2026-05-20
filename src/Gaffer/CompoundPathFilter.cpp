@@ -44,14 +44,9 @@ using namespace Gaffer;
 
 IE_CORE_DEFINERUNTIMETYPED( CompoundPathFilter );
 
-CompoundPathFilter::CompoundPathFilter( IECore::CompoundDataPtr userData )
-	: PathFilter( userData )
-{
-}
+CompoundPathFilter::CompoundPathFilter( IECore::CompoundDataPtr userData ) : PathFilter( userData ) {}
 
-CompoundPathFilter::~CompoundPathFilter()
-{
-}
+CompoundPathFilter::~CompoundPathFilter() {}
 
 void CompoundPathFilter::addFilter( PathFilterPtr filter )
 {
@@ -138,7 +133,8 @@ void CompoundPathFilter::addFilterInternal( PathFilterPtr filter )
 	}
 	m_filters.push_back( Filter() );
 	m_filters.back().filter = filter;
-	m_filters.back().filterChangedConnection = filter->changedSignal().connect( boost::bind( &CompoundPathFilter::filterChanged, this ) );
+	m_filters.back().filterChangedConnection =
+		filter->changedSignal().connect( boost::bind( &CompoundPathFilter::filterChanged, this ) );
 }
 
 void CompoundPathFilter::filterChanged()

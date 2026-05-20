@@ -46,16 +46,13 @@ GAFFER_NODE_DEFINE_TYPE( GlobalShader );
 
 size_t GlobalShader::g_firstPlugIndex = 0;
 
-GlobalShader::GlobalShader( const std::string &name )
-	: GlobalsProcessor( name )
+GlobalShader::GlobalShader( const std::string &name ) : GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ShaderPlug( "shader" ) );
 }
 
-GlobalShader::~GlobalShader()
-{
-}
+GlobalShader::~GlobalShader() {}
 
 ShaderPlug *GlobalShader::shaderPlug()
 {
@@ -83,7 +80,9 @@ void GlobalShader::hashProcessedGlobals( const Gaffer::Context *context, IECore:
 	hashOptionName( context, h );
 }
 
-IECore::ConstCompoundObjectPtr GlobalShader::computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const
+IECore::ConstCompoundObjectPtr GlobalShader::computeProcessedGlobals(
+	const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals
+) const
 {
 	ConstCompoundObjectPtr attributes = shaderPlug()->attributes();
 	if( attributes->members().empty() )

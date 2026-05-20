@@ -56,20 +56,17 @@ ContextPtr g_defaultContext = new Context;
 const ThreadState::MonitorSet ThreadState::g_defaultMonitors;
 const ThreadState ThreadState::g_defaultState;
 
-ThreadState::ThreadState()
-	: m_context( g_defaultContext.get() ), m_process( nullptr ), m_monitors( &g_defaultMonitors )
+ThreadState::ThreadState() : m_context( g_defaultContext.get() ), m_process( nullptr ), m_monitors( &g_defaultMonitors )
 {
 }
 
-ThreadState::Scope::Scope( const ThreadState &state )
-	: m_stack( &g_stack.local() )
+ThreadState::Scope::Scope( const ThreadState &state ) : m_stack( &g_stack.local() )
 {
 	m_stack->push( state );
 	m_threadState = &m_stack->top();
 }
 
-ThreadState::Scope::Scope( bool push )
-	: m_threadState( nullptr ), m_stack( nullptr )
+ThreadState::Scope::Scope( bool push ) : m_threadState( nullptr ), m_stack( nullptr )
 {
 	if( push )
 	{

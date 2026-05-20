@@ -65,10 +65,9 @@ namespace
 class OSLObjectPlugAdder : public PlugAdder
 {
 
-	public:
+public:
 
-	OSLObjectPlugAdder( GraphComponentPtr plugsParent )
-		: m_plugsParent( IECore::runTimeCast<Plug>( plugsParent ) )
+	OSLObjectPlugAdder( GraphComponentPtr plugsParent ) : m_plugsParent( IECore::runTimeCast<Plug>( plugsParent ) )
 	{
 		if( !m_plugsParent )
 		{
@@ -77,7 +76,7 @@ class OSLObjectPlugAdder : public PlugAdder
 		buttonReleaseSignal().connect( boost::bind( &OSLObjectPlugAdder::buttonRelease, this, ::_2 ) );
 	}
 
-	protected:
+protected:
 
 	bool canCreateConnection( const Plug *endpoint ) const override
 	{
@@ -91,13 +90,15 @@ class OSLObjectPlugAdder : public PlugAdder
 			return false;
 		}
 
-		IECore::ConstCompoundDataPtr plugAdderOptions = Metadata::value<IECore::CompoundData>( m_plugsParent->node(), "plugAdderOptions" );
+		IECore::ConstCompoundDataPtr plugAdderOptions =
+			Metadata::value<IECore::CompoundData>( m_plugsParent->node(), "plugAdderOptions" );
 		return !availablePrimVars( plugAdderOptions.get(), endpoint ).empty();
 	}
 
 	void createConnection( Plug *endpoint ) override
 	{
-		IECore::ConstCompoundDataPtr plugAdderOptions = Metadata::value<IECore::CompoundData>( m_plugsParent->node(), "plugAdderOptions" );
+		IECore::ConstCompoundDataPtr plugAdderOptions =
+			Metadata::value<IECore::CompoundData>( m_plugsParent->node(), "plugAdderOptions" );
 		vector<std::string> names = availablePrimVars( plugAdderOptions.get(), endpoint );
 
 		std::string picked = menuSignal()( "Connect To", names );
@@ -110,7 +111,7 @@ class OSLObjectPlugAdder : public PlugAdder
 		newPlug->valuePlug()->setInput( endpoint );
 	}
 
-	private:
+private:
 
 	std::set<std::string> usedNames() const
 	{
@@ -146,7 +147,9 @@ class OSLObjectPlugAdder : public PlugAdder
 				}
 				primVarName = newName;
 			}
-			valuePlug = PlugAlgo::createPlugFromData( "value", Plug::In, Plug::Flags::Default | Plug::Flags::Dynamic, defaultData );
+			valuePlug = PlugAlgo::createPlugFromData(
+				"value", Plug::In, Plug::Flags::Default | Plug::Flags::Dynamic, defaultData
+			);
 		}
 		else
 		{
@@ -169,7 +172,8 @@ class OSLObjectPlugAdder : public PlugAdder
 			return false;
 		}
 
-		IECore::ConstCompoundDataPtr plugAdderOptions = Metadata::value<IECore::CompoundData>( m_plugsParent->node(), "plugAdderOptions" );
+		IECore::ConstCompoundDataPtr plugAdderOptions =
+			Metadata::value<IECore::CompoundData>( m_plugsParent->node(), "plugAdderOptions" );
 		vector<std::string> origNames = availablePrimVars( plugAdderOptions.get() );
 		map<std::string, std::string> nameMapping;
 		vector<std::string> standardMenuNames;
@@ -213,7 +217,9 @@ class OSLObjectPlugAdder : public PlugAdder
 	}
 
 	// Which prim vars are available that haven't already been used, and that match the input plug if provided
-	vector<std::string> availablePrimVars( const IECore::CompoundData *plugAdderOptions, const Plug *input = nullptr ) const
+	vector<std::string> availablePrimVars(
+		const IECore::CompoundData *plugAdderOptions, const Plug *input = nullptr
+	) const
 	{
 		if( !plugAdderOptions )
 		{
@@ -278,17 +284,11 @@ class OSLObjectPlugAdder : public PlugAdder
 
 struct Registration
 {
-	Registration()
-	{
-		NoduleLayout::registerCustomGadget( "GafferOSLUI.OSLObjectUI.PlugAdder", &create );
-	}
+	Registration() { NoduleLayout::registerCustomGadget( "GafferOSLUI.OSLObjectUI.PlugAdder", &create ); }
 
-	private:
+private:
 
-	static GadgetPtr create( GraphComponentPtr parent )
-	{
-		return new OSLObjectPlugAdder( parent );
-	}
+	static GadgetPtr create( GraphComponentPtr parent ) { return new OSLObjectPlugAdder( parent ); }
 };
 
 Registration g_registration;

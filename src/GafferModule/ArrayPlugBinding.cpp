@@ -66,7 +66,9 @@ std::string constructor( const ArrayPlug *plug, Serialisation *serialisation = n
 	if( serialisation && plug->elementPrototype() )
 	{
 		const Serialisation::Serialiser *plugSerialiser = Serialisation::acquireSerialiser( plug->elementPrototype() );
-		result += fmt::format( "elementPrototype = {}, ", plugSerialiser->constructor( plug->elementPrototype(), *serialisation ) );
+		result += fmt::format(
+			"elementPrototype = {}, ", plugSerialiser->constructor( plug->elementPrototype(), *serialisation )
+		);
 	}
 
 	if( plug->minSize() != 1 )
@@ -103,9 +105,11 @@ std::string repr( const ArrayPlug &plug )
 class ArrayPlugSerialiser : public PlugSerialiser
 {
 
-	public:
+public:
 
-	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsConstruction(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override
 	{
 		// We'll call `resize()` in our `postConstructor()` to create all
 		// the child elements.
@@ -117,7 +121,9 @@ class ArrayPlugSerialiser : public PlugSerialiser
 		return ::constructor( static_cast<const ArrayPlug *>( graphComponent ), &serialisation );
 	}
 
-	std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
+	std::string postConstructor(
+		const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+	) const override
 	{
 		std::string result = PlugSerialiser::postConstructor( graphComponent, identifier, serialisation );
 
@@ -145,7 +151,9 @@ PlugPtr elementPrototype( ArrayPlug &p, bool copy )
 	{
 		return const_cast<Plug *>( p.elementPrototype() );
 	}
-	return p.elementPrototype()->createCounterpart( p.elementPrototype()->getName(), p.elementPrototype()->direction() );
+	return p.elementPrototype()->createCounterpart(
+		p.elementPrototype()->getName(), p.elementPrototype()->direction()
+	);
 }
 
 void resize( ArrayPlug &p, size_t size )
@@ -165,7 +173,14 @@ PlugPtr next( ArrayPlug &p )
 void GafferModule::bindArrayPlug()
 {
 	PlugClass<ArrayPlug>()
-		.def( init<const std::string &, Plug::Direction, PlugPtr, size_t, size_t, unsigned, bool>( ( arg( "name" ) = GraphComponent::defaultName<ArrayPlug>(), arg( "direction" ) = Plug::In, arg( "elementPrototype" ) = PlugPtr(), arg( "minSize" ) = 1, arg( "maxSize" ) = std::numeric_limits<size_t>::max(), arg( "flags" ) = Plug::Default, arg( "resizeWhenInputsChange" ) = true ) ) )
+		.def(
+			init<const std::string &, Plug::Direction, PlugPtr, size_t, size_t, unsigned, bool>(
+				( arg( "name" ) = GraphComponent::defaultName<ArrayPlug>(), arg( "direction" ) = Plug::In,
+				  arg( "elementPrototype" ) = PlugPtr(), arg( "minSize" ) = 1,
+				  arg( "maxSize" ) = std::numeric_limits<size_t>::max(), arg( "flags" ) = Plug::Default,
+				  arg( "resizeWhenInputsChange" ) = true )
+			)
+		)
 		.def( "elementPrototype", &elementPrototype, ( arg( "_copy" ) = true ) )
 		.def( "minSize", &ArrayPlug::minSize )
 		.def( "maxSize", &ArrayPlug::maxSize )

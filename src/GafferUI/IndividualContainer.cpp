@@ -40,15 +40,12 @@ using namespace GafferUI;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( IndividualContainer );
 
-IndividualContainer::IndividualContainer( GadgetPtr child )
-	: ContainerGadget( defaultName<IndividualContainer>() )
+IndividualContainer::IndividualContainer( GadgetPtr child ) : ContainerGadget( defaultName<IndividualContainer>() )
 {
 	setChild( child );
 }
 
-IndividualContainer::~IndividualContainer()
-{
-}
+IndividualContainer::~IndividualContainer() {}
 
 bool IndividualContainer::acceptsChild( const Gaffer::GraphComponent *potentialChild ) const
 {

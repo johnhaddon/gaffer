@@ -59,7 +59,10 @@ namespace
 
 /// \todo Maybe move this to BufferAlgo.h? It could probably be reused
 /// in Offset::computeChannelData() at least.
-void copyRegion( const float *fromBuffer, const Box2i &fromWindow, const Box2i &fromRegion, float *toBuffer, const Box2i &toWindow, const V2i &toOrigin )
+void copyRegion(
+	const float *fromBuffer, const Box2i &fromWindow, const Box2i &fromRegion, float *toBuffer, const Box2i &toWindow,
+	const V2i &toOrigin
+)
 {
 	const int width = fromRegion.max.x - fromRegion.min.x;
 
@@ -68,8 +71,7 @@ void copyRegion( const float *fromBuffer, const Box2i &fromWindow, const Box2i &
 	for( int maxY = fromRegion.max.y; fromP.y < maxY; ++fromP.y, ++toP.y )
 	{
 		memcpy(
-			toBuffer + BufferAlgo::index( toP, toWindow ),
-			fromBuffer + BufferAlgo::index( fromP, fromWindow ),
+			toBuffer + BufferAlgo::index( toP, toWindow ), fromBuffer + BufferAlgo::index( fromP, fromWindow ),
 			sizeof( float ) * width
 		);
 	}
@@ -85,8 +87,7 @@ GAFFER_NODE_DEFINE_TYPE( CopyChannels );
 
 size_t CopyChannels::g_firstPlugIndex = 0;
 
-CopyChannels::CopyChannels( const std::string &name )
-	: FlatImageProcessor( name, /* minInputs = */ 2 )
+CopyChannels::CopyChannels( const std::string &name ) : FlatImageProcessor( name, /* minInputs = */ 2 )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -98,9 +99,7 @@ CopyChannels::CopyChannels( const std::string &name )
 	outPlug()->metadataPlug()->setInput( inPlug()->metadataPlug() );
 }
 
-CopyChannels::~CopyChannels()
-{
-}
+CopyChannels::~CopyChannels() {}
 
 Gaffer::StringPlug *CopyChannels::channelsPlug()
 {
@@ -144,10 +143,7 @@ void CopyChannels::affects( const Gaffer::Plug *input, AffectedPlugsContainer &o
 		outputs.push_back( outPlug()->dataWindowPlug() );
 	}
 
-	if(
-		( imagePlug && input == imagePlug->channelNamesPlug() ) ||
-		input == channelsPlug()
-	)
+	if( ( imagePlug && input == imagePlug->channelNamesPlug() ) || input == channelsPlug() )
 	{
 		outputs.push_back( mappingPlug() );
 	}
@@ -157,10 +153,7 @@ void CopyChannels::affects( const Gaffer::Plug *input, AffectedPlugsContainer &o
 		outputs.push_back( outPlug()->channelNamesPlug() );
 	}
 
-	if(
-		( imagePlug && input == imagePlug->channelDataPlug() ) ||
-		input == mappingPlug()
-	)
+	if( ( imagePlug && input == imagePlug->channelDataPlug() ) || input == mappingPlug() )
 	{
 		outputs.push_back( outPlug()->channelDataPlug() );
 	}
@@ -207,7 +200,8 @@ void CopyChannels::compute( Gaffer::ValuePlug *output, const Gaffer::Context *co
 			}
 			ConstStringVectorDataPtr inputChannelNamesData = ( *it )->channelNamesPlug()->getValue();
 			const vector<string> &inputChannelNames = inputChannelNamesData->readable();
-			for( vector<string>::const_iterator cIt = inputChannelNames.begin(), ceIt = inputChannelNames.end(); cIt != ceIt; ++cIt )
+			for( vector<string>::const_iterator cIt = inputChannelNames.begin(), ceIt = inputChannelNames.end();
+				 cIt != ceIt; ++cIt )
 			{
 				if( i > 0 && !StringAlgo::matchMultiple( *cIt, channelMatchPatterns ) )
 				{
@@ -228,7 +222,9 @@ void CopyChannels::compute( Gaffer::ValuePlug *output, const Gaffer::Context *co
 }
 
 
-void CopyChannels::hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CopyChannels::hashDataWindow(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageProcessor::hashDataWindow( output, context, h );
 
@@ -255,23 +251,30 @@ Imath::Box2i CopyChannels::computeDataWindow( const Gaffer::Context *context, co
 	return dataWindow;
 }
 
-void CopyChannels::hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CopyChannels::hashChannelNames(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageProcessor::hashChannelNames( output, context, h );
 
 	mappingPlug()->hash( h );
 }
 
-IECore::ConstStringVectorDataPtr CopyChannels::computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr CopyChannels::computeChannelNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	ConstCompoundObjectPtr mapping = mappingPlug()->getValue();
 	return mapping->member<StringVectorData>( "__channelNames" );
 }
 
-void CopyChannels::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CopyChannels::hashChannelData(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	// Fast shortcut when there is a single input
-	if( inPlugs()->children().size() == 2 && inPlugs()->getChild<ImagePlug>( 0 )->getInput() && !inPlugs()->getChild<ImagePlug>( 1 )->getInput() )
+	if( inPlugs()->children().size() == 2 && inPlugs()->getChild<ImagePlug>( 0 )->getInput() &&
+		!inPlugs()->getChild<ImagePlug>( 1 )->getInput() )
 	{
 		h = inPlugs()->getChild<ImagePlug>( 0 )->channelDataPlug()->hash();
 		return;
@@ -321,10 +324,14 @@ void CopyChannels::hashChannelData( const GafferImage::ImagePlug *parent, const 
 	}
 }
 
-IECore::ConstFloatVectorDataPtr CopyChannels::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr CopyChannels::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	// Fast shortcut when there is a single input
-	if( inPlugs()->children().size() == 2 && inPlugs()->getChild<ImagePlug>( 0 )->getInput() && !inPlugs()->getChild<ImagePlug>( 1 )->getInput() )
+	if( inPlugs()->children().size() == 2 && inPlugs()->getChild<ImagePlug>( 0 )->getInput() &&
+		!inPlugs()->getChild<ImagePlug>( 1 )->getInput() )
 	{
 		return inPlugs()->getChild<ImagePlug>( 0 )->channelDataPlug()->getValue();
 	}
@@ -363,12 +370,7 @@ IECore::ConstFloatVectorDataPtr CopyChannels::computeChannelData( const std::str
 			{
 				ConstFloatVectorDataPtr inputData = inputImage->channelDataPlug()->getValue();
 				copyRegion(
-					&inputData->readable().front(),
-					tileBound,
-					validBound,
-					&result.front(),
-					tileBound,
-					validBound.min
+					&inputData->readable().front(), tileBound, validBound, &result.front(), tileBound, validBound.min
 				);
 			}
 			return resultData;

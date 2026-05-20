@@ -41,14 +41,9 @@ using namespace GafferScene;
 
 GAFFER_NODE_DEFINE_TYPE( DeleteOutputs );
 
-DeleteOutputs::DeleteOutputs( const std::string &name )
-	: DeleteGlobals( name )
-{
-}
+DeleteOutputs::DeleteOutputs( const std::string &name ) : DeleteGlobals( name ) {}
 
-DeleteOutputs::~DeleteOutputs()
-{
-}
+DeleteOutputs::~DeleteOutputs() {}
 
 std::string DeleteOutputs::namePrefix() const
 {

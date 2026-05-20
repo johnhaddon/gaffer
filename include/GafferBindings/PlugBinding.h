@@ -52,7 +52,7 @@ namespace GafferBindings
 template<typename T, typename TWrapper = T>
 class PlugClass : public GraphComponentClass<T, TWrapper>
 {
-	public:
+public:
 
 	PlugClass( const char *docString = nullptr );
 };
@@ -60,7 +60,7 @@ class PlugClass : public GraphComponentClass<T, TWrapper>
 template<typename WrappedType>
 class PlugWrapper : public GraphComponentWrapper<WrappedType>
 {
-	public:
+public:
 
 	template<typename... Args>
 	PlugWrapper( PyObject *self, Args &&...args )
@@ -77,12 +77,9 @@ class PlugWrapper : public GraphComponentWrapper<WrappedType>
 		// among types. Entering Python is incredibly costly for such
 		// a simple operation, and we perform these operations often,
 		// so this optimisation is well worth it.
-		if(
-			typeId == (IECore::TypeId)Gaffer::ScriptNodeTypeId ||
-			typeId == (IECore::TypeId)Gaffer::NodeTypeId ||
+		if( typeId == (IECore::TypeId)Gaffer::ScriptNodeTypeId || typeId == (IECore::TypeId)Gaffer::NodeTypeId ||
 			typeId == (IECore::TypeId)Gaffer::DependencyNodeTypeId ||
-			typeId == (IECore::TypeId)Gaffer::ComputeNodeTypeId
-		)
+			typeId == (IECore::TypeId)Gaffer::ComputeNodeTypeId )
 		{
 			return false;
 		}
@@ -158,13 +155,23 @@ class PlugWrapper : public GraphComponentWrapper<WrappedType>
 class GAFFERBINDINGS_API PlugSerialiser : public Serialisation::Serialiser
 {
 
-	public:
+public:
 
-	void moduleDependencies( const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation ) const override;
-	std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const override;
-	std::string postHierarchy( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override;
-	bool childNeedsSerialisation( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override;
-	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override;
+	void moduleDependencies(
+		const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation
+	) const override;
+	std::string constructor(
+		const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation
+	) const override;
+	std::string postHierarchy(
+		const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+	) const override;
+	bool childNeedsSerialisation(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override;
+	bool childNeedsConstruction(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override;
 
 	static std::string directionRepr( Gaffer::Plug::Direction direction );
 	static std::string flagsRepr( unsigned flags );

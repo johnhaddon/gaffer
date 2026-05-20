@@ -59,7 +59,8 @@ struct PathMatcherScope : public ScenePlug::GlobalScope
 {
 
 	PathMatcherScope( const Context *context, const string &setVariable, const InternedString &setName )
-		: ScenePlug::GlobalScope( context ), m_setName( setName )
+		: ScenePlug::GlobalScope( context ),
+		  m_setName( setName )
 	{
 		if( !setVariable.empty() )
 		{
@@ -70,7 +71,7 @@ struct PathMatcherScope : public ScenePlug::GlobalScope
 		}
 	}
 
-	private:
+private:
 
 	const InternedString m_setName;
 };
@@ -87,8 +88,7 @@ GAFFER_NODE_DEFINE_TYPE( Set );
 
 size_t Set::g_firstPlugIndex = 0;
 
-Set::Set( const std::string &name )
-	: FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
+Set::Set( const std::string &name ) : FilteredSceneProcessor( name, IECore::PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new Gaffer::IntPlug( "mode", Gaffer::Plug::In, Create, Create, Remove ) );
@@ -96,13 +96,16 @@ Set::Set( const std::string &name )
 	addChild( new Gaffer::StringPlug( "setVariable" ) );
 	addChild( new Gaffer::StringVectorDataPlug( "paths", Gaffer::Plug::In, new StringVectorData ) );
 
-	addChild( new PathMatcherDataPlug( "__filterResults", Gaffer::Plug::In, new PathMatcherData, Plug::Default & ~Plug::Serialisable ) );
+	addChild( new PathMatcherDataPlug(
+		"__filterResults", Gaffer::Plug::In, new PathMatcherData, Plug::Default & ~Plug::Serialisable
+	) );
 	addChild( new PathMatcherDataPlug( "__pathMatcher", Gaffer::Plug::Out, new PathMatcherData ) );
 
 	// Internal nodes to drive `filterResultsPlug()`, without leaking `setVariable` to
 	// the upstream scene.
 
-	Gaffer::DeleteContextVariablesPtr deleteContextVariables = new Gaffer::DeleteContextVariables( "__DeleteContextVariables" );
+	Gaffer::DeleteContextVariablesPtr deleteContextVariables =
+		new Gaffer::DeleteContextVariables( "__DeleteContextVariables" );
 	deleteContextVariables->setup( inPlug() );
 	deleteContextVariables->inPlug()->setInput( inPlug() );
 	deleteContextVariables->enabledPlug()->setInput( setVariablePlug() );
@@ -125,9 +128,7 @@ Set::Set( const std::string &name )
 	outPlug()->globalsPlug()->setInput( inPlug()->globalsPlug() );
 }
 
-Set::~Set()
-{
-}
+Set::~Set() {}
 
 Gaffer::IntPlug *Set::modePlug()
 {
@@ -193,30 +194,18 @@ void Set::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) 
 {
 	FilteredSceneProcessor::affects( input, outputs );
 
-	if(
-		input == inPlug()->setNamesPlug() ||
-		input == modePlug() ||
-		input == namePlug()
-	)
+	if( input == inPlug()->setNamesPlug() || input == modePlug() || input == namePlug() )
 	{
 		outputs.push_back( outPlug()->setNamesPlug() );
 	}
 
-	if(
-		input == namePlug() ||
-		input == setVariablePlug() ||
-		input == inPlug()->setPlug() ||
-		input == modePlug() ||
-		input == pathMatcherPlug()
-	)
+	if( input == namePlug() || input == setVariablePlug() || input == inPlug()->setPlug() || input == modePlug() ||
+		input == pathMatcherPlug() )
 	{
 		outputs.push_back( outPlug()->setPlug() );
 	}
 
-	if(
-		input == pathsPlug() ||
-		input == filterResultsPlug()
-	)
+	if( input == pathsPlug() || input == filterResultsPlug() )
 	{
 		outputs.push_back( pathMatcherPlug() );
 	}
@@ -252,7 +241,8 @@ void Set::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) c
 			}
 			tokenizedPath.clear();
 			StringAlgo::tokenize( *it, '/', tokenizedPath );
-			for( vector<InternedString>::const_iterator nIt = tokenizedPath.begin(), neIt = tokenizedPath.end(); nIt != neIt; ++nIt )
+			for( vector<InternedString>::const_iterator nIt = tokenizedPath.begin(), neIt = tokenizedPath.end();
+				 nIt != neIt; ++nIt )
 			{
 				if( StringAlgo::hasWildcards( nIt->c_str() ) || *nIt == g_ellipsis )
 				{
@@ -279,7 +269,9 @@ void Set::hashSetNames( const Gaffer::Context *context, const ScenePlug *parent,
 	namePlug()->hash( h );
 }
 
-IECore::ConstInternedStringVectorDataPtr Set::computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstInternedStringVectorDataPtr Set::computeSetNames(
+	const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ConstInternedStringVectorDataPtr inNamesData = inPlug()->setNamesPlug()->getValue();
 
@@ -317,9 +309,7 @@ IECore::ConstInternedStringVectorDataPtr Set::computeSetNames( const Gaffer::Con
 	result.reserve( result.size() + tokenizedNames.size() );
 	std::copy_if(
 		tokenizedNames.begin(), tokenizedNames.end(), std::back_inserter( result ),
-		[]( const InternedString &s ) {
-			return !StringAlgo::hasWildcards( s.string() );
-		}
+		[]( const InternedString &s ) { return !StringAlgo::hasWildcards( s.string() ); }
 	);
 
 	std::sort( result.begin(), result.end() );
@@ -328,7 +318,10 @@ IECore::ConstInternedStringVectorDataPtr Set::computeSetNames( const Gaffer::Con
 	return resultData;
 }
 
-void Set::hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Set::hashSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent,
+	IECore::MurmurHash &h
+) const
 {
 	if( !StringAlgo::matchMultiple( setName.string(), namePlug()->getValue() ) )
 	{
@@ -344,7 +337,9 @@ void Set::hashSet( const IECore::InternedString &setName, const Gaffer::Context 
 	pathMatcherPlug()->hash( h );
 }
 
-IECore::ConstPathMatcherDataPtr Set::computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstPathMatcherDataPtr Set::computeSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( !StringAlgo::matchMultiple( setName.string(), namePlug()->getValue() ) )
 	{

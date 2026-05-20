@@ -48,15 +48,13 @@ GAFFER_NODE_DEFINE_TYPE( FilterProcessor );
 
 size_t FilterProcessor::g_firstPlugIndex = 0;
 
-FilterProcessor::FilterProcessor( const std::string &name )
-	: Filter( name )
+FilterProcessor::FilterProcessor( const std::string &name ) : Filter( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( outPlug()->createCounterpart( "in", Plug::In ) );
 }
 
-FilterProcessor::FilterProcessor( const std::string &name, size_t minInputs, size_t maxInputs )
-	: Filter( name )
+FilterProcessor::FilterProcessor( const std::string &name, size_t minInputs, size_t maxInputs ) : Filter( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild(
@@ -64,9 +62,7 @@ FilterProcessor::FilterProcessor( const std::string &name, size_t minInputs, siz
 	);
 }
 
-FilterProcessor::~FilterProcessor()
-{
-}
+FilterProcessor::~FilterProcessor() {}
 
 FilterPlug *FilterProcessor::inPlug()
 {
@@ -142,7 +138,9 @@ const Gaffer::Plug *FilterProcessor::correspondingInput( const Gaffer::Plug *out
 	return Filter::correspondingInput( output );
 }
 
-void FilterProcessor::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void FilterProcessor::hash(
+	const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	if( output == outPlug() && !enabledPlug()->getValue() )
 	{

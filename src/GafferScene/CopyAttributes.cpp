@@ -46,8 +46,7 @@ GAFFER_NODE_DEFINE_TYPE( CopyAttributes );
 
 size_t CopyAttributes::g_firstPlugIndex = 0;
 
-CopyAttributes::CopyAttributes( const std::string &name )
-	: FilteredSceneProcessor( name, PathMatcher::NoMatch )
+CopyAttributes::CopyAttributes( const std::string &name ) : FilteredSceneProcessor( name, PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "source" ) );
@@ -65,9 +64,7 @@ CopyAttributes::CopyAttributes( const std::string &name )
 	outPlug()->objectPlug()->setInput( inPlug()->objectPlug() );
 }
 
-CopyAttributes::~CopyAttributes()
-{
-}
+CopyAttributes::~CopyAttributes() {}
 
 GafferScene::ScenePlug *CopyAttributes::sourcePlug()
 {
@@ -113,21 +110,17 @@ void CopyAttributes::affects( const Gaffer::Plug *input, AffectedPlugsContainer 
 {
 	FilteredSceneProcessor::affects( input, outputs );
 
-	if(
-		input == inPlug()->attributesPlug() ||
-		input == sourcePlug()->attributesPlug() ||
-		input == filterPlug() ||
-		input == attributesPlug() ||
-		input == sourceLocationPlug() ||
-		input == deleteExistingPlug() ||
-		input == sourcePlug()->existsPlug()
-	)
+	if( input == inPlug()->attributesPlug() || input == sourcePlug()->attributesPlug() || input == filterPlug() ||
+		input == attributesPlug() || input == sourceLocationPlug() || input == deleteExistingPlug() ||
+		input == sourcePlug()->existsPlug() )
 	{
 		outputs.push_back( outPlug()->attributesPlug() );
 	}
 }
 
-void CopyAttributes::hashAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void CopyAttributes::hashAttributes(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	if( !( filterValue( context ) & IECore::PathMatcher::ExactMatch ) )
 	{
@@ -163,7 +156,9 @@ void CopyAttributes::hashAttributes( const ScenePath &path, const Gaffer::Contex
 	attributesPlug()->hash( h );
 }
 
-IECore::ConstCompoundObjectPtr CopyAttributes::computeAttributes( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstCompoundObjectPtr CopyAttributes::computeAttributes(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( !( filterValue( context ) & IECore::PathMatcher::ExactMatch ) )
 	{

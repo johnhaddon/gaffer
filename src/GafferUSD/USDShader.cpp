@@ -139,7 +139,10 @@ PlugPtr acquireTypedPlug( InternedString name, Plug::Direction direction, VtValu
 }
 
 template<typename PlugType>
-PlugPtr acquireCompoundNumericPlug( InternedString name, const SdfValueTypeName &type, Plug::Direction direction, const VtValue &defaultVtValue, Plug *candidate )
+PlugPtr acquireCompoundNumericPlug(
+	InternedString name, const SdfValueTypeName &type, Plug::Direction direction, const VtValue &defaultVtValue,
+	Plug *candidate
+)
 {
 	IECore::GeometricData::Interpretation interpretation = ::interpretation( type.GetRole() );
 
@@ -153,19 +156,15 @@ PlugPtr acquireCompoundNumericPlug( InternedString name, const SdfValueTypeName 
 	}
 
 	PlugType *existingPlug = runTimeCast<PlugType>( candidate );
-	if(
-		existingPlug &&
-		existingPlug->defaultValue() == defaultValue &&
-		existingPlug->interpretation() == interpretation
-	)
+	if( existingPlug && existingPlug->defaultValue() == defaultValue &&
+		existingPlug->interpretation() == interpretation )
 	{
 		return existingPlug;
 	}
 
 	return new PlugType(
-		name, direction, defaultValue,
-		ValueType( std::numeric_limits<float>::lowest() ), ValueType( std::numeric_limits<float>::max() ),
-		Plug::Default, interpretation
+		name, direction, defaultValue, ValueType( std::numeric_limits<float>::lowest() ),
+		ValueType( std::numeric_limits<float>::max() ), Plug::Default, interpretation
 	);
 }
 
@@ -196,7 +195,10 @@ PlugPtr acquirePlug( InternedString name, Plug::Direction direction, Plug *candi
 	return new Plug( name, direction );
 }
 
-Plug *loadParameter( InternedString name, const SdfValueTypeName &type, Plug::Direction direction, const VtValue &defaultValue, Plug *parent, bool optional = false )
+Plug *loadParameter(
+	InternedString name, const SdfValueTypeName &type, Plug::Direction direction, const VtValue &defaultValue,
+	Plug *parent, bool optional = false
+)
 {
 	Plug *candidatePlug = parent->getChild<Plug>( name );
 	if( candidatePlug && optional )
@@ -230,10 +232,8 @@ Plug *loadParameter( InternedString name, const SdfValueTypeName &type, Plug::Di
 		acquiredPlug = acquireCompoundNumericPlug<V2fPlug>( name, type, direction, defaultValue, candidatePlug );
 	}
 	else if(
-		type == SdfValueTypeNames->Point3f ||
-		type == SdfValueTypeNames->Vector3f ||
-		type == SdfValueTypeNames->Normal3f ||
-		type == SdfValueTypeNames->Float3
+		type == SdfValueTypeNames->Point3f || type == SdfValueTypeNames->Vector3f ||
+		type == SdfValueTypeNames->Normal3f || type == SdfValueTypeNames->Float3
 	)
 	{
 		acquiredPlug = acquireCompoundNumericPlug<V3fPlug>( name, type, direction, defaultValue, candidatePlug );
@@ -263,8 +263,7 @@ Plug *loadParameter( InternedString name, const SdfValueTypeName &type, Plug::Di
 		IECore::msg(
 			IECore::Msg::Warning, "USDShader",
 			fmt::format(
-				"Unable to load parameter \"{}\" of type \"{}\"",
-				name.string(), type.GetAsToken().GetString()
+				"Unable to load parameter \"{}\" of type \"{}\"", name.string(), type.GetAsToken().GetString()
 			)
 		);
 		return nullptr;
@@ -280,10 +279,13 @@ Plug *loadParameter( InternedString name, const SdfValueTypeName &type, Plug::Di
 			ValuePlugPtr acquiredValuePlug = runTimeCast<ValuePlug>( acquiredPlug );
 			if( !acquiredValuePlug )
 			{
-				throw IECore::Exception( fmt::format( "Cannot create OptionalValuePlug for parameter `{}`", name.string() ) );
+				throw IECore::Exception(
+					fmt::format( "Cannot create OptionalValuePlug for parameter `{}`", name.string() )
+				);
 			}
 			PlugAlgo::replacePlug(
-				parent, new OptionalValuePlug( name, acquiredValuePlug, /* enabledPlugDefaultValue = */ false, direction )
+				parent,
+				new OptionalValuePlug( name, acquiredValuePlug, /* enabledPlugDefaultValue = */ false, direction )
 			);
 		}
 		else
@@ -302,10 +304,7 @@ Plug *loadShaderProperty( const SdrShaderProperty &property, Plug *parent )
 #else
 	SdfValueTypeName sdfType = property.GetTypeAsSdfType().first;
 #endif
-	if(
-		property.GetType() == SdrPropertyTypes->Terminal ||
-		property.GetType() == SdrPropertyTypes->Vstruct
-	)
+	if( property.GetType() == SdrPropertyTypes->Terminal || property.GetType() == SdrPropertyTypes->Vstruct )
 	{
 		// The Sdf type will be Token, but that doesn't really communicate the
 		// fact that these properties don't actually carry data. We use Opaque
@@ -313,10 +312,14 @@ Plug *loadShaderProperty( const SdrShaderProperty &property, Plug *parent )
 		sdfType = SdfValueTypeNames->Opaque;
 	}
 
-	return loadParameter( property.GetName().GetString(), sdfType, ::direction( property ), property.GetDefaultValue(), parent );
+	return loadParameter(
+		property.GetName().GetString(), sdfType, ::direction( property ), property.GetDefaultValue(), parent
+	);
 }
 
-Plug *loadPrimDefinitionAttribute( const UsdPrimDefinition::Attribute &attribute, InternedString name, Plug *parent, bool optional )
+Plug *loadPrimDefinitionAttribute(
+	const UsdPrimDefinition::Attribute &attribute, InternedString name, Plug *parent, bool optional
+)
 {
 	VtValue defaultValue;
 	attribute.GetFallbackValue( &defaultValue );
@@ -330,15 +333,12 @@ const IECore::InternedString g_displacement( "displacement" );
 
 GAFFER_NODE_DEFINE_TYPE( USDShader );
 
-USDShader::USDShader( const std::string &name )
-	: GafferScene::Shader( name )
+USDShader::USDShader( const std::string &name ) : GafferScene::Shader( name )
 {
 	addChild( new Plug( "out", Plug::Out ) );
 }
 
-USDShader::~USDShader()
-{
-}
+USDShader::~USDShader() {}
 
 void USDShader::loadShader( const std::string &shaderName, bool keepExistingValues )
 {
@@ -365,8 +365,8 @@ void USDShader::loadShader( const std::string &shaderName, bool keepExistingValu
 			{
 				auto apiDefinition = schemaRegistry.FindAppliedAPIPrimDefinition( apiSchema );
 				autoAppliedPropertyNames.insert(
-					autoAppliedPropertyNames.end(),
-					apiDefinition->GetPropertyNames().begin(), apiDefinition->GetPropertyNames().end()
+					autoAppliedPropertyNames.end(), apiDefinition->GetPropertyNames().begin(),
+					apiDefinition->GetPropertyNames().end()
 				);
 			}
 		}
@@ -420,10 +420,12 @@ void USDShader::loadShader( const std::string &shaderName, bool keepExistingValu
 				}
 				if( auto attribute = primDefinitions[i]->GetAttributeDefinition( name ) )
 				{
-					const bool optional = i > 0 || std::find( autoAppliedPropertyNames.begin(), autoAppliedPropertyNames.end(), name ) != autoAppliedPropertyNames.end();
-					validPlugs.insert(
-						loadPrimDefinitionAttribute( attribute, attribute.GetName().GetText() + strlen( "inputs:" ), parametersPlug, optional )
-					);
+					const bool optional = i > 0 ||
+						std::find( autoAppliedPropertyNames.begin(), autoAppliedPropertyNames.end(), name ) !=
+							autoAppliedPropertyNames.end();
+					validPlugs.insert( loadPrimDefinitionAttribute(
+						attribute, attribute.GetName().GetText() + strlen( "inputs:" ), parametersPlug, optional
+					) );
 				}
 			}
 		}

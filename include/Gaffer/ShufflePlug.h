@@ -49,13 +49,18 @@ namespace Gaffer
 class GAFFER_API ShufflePlug : public ValuePlug
 {
 
-	public:
+public:
 
 	GAFFER_PLUG_DECLARE_TYPE( Gaffer::ShufflePlug, ShufflePlugTypeId, ValuePlug );
 
-	ShufflePlug( const std::string &source, const std::string &destination, bool deleteSource = false, bool enabled = true, bool replaceDestination = true );
+	ShufflePlug(
+		const std::string &source, const std::string &destination, bool deleteSource = false, bool enabled = true,
+		bool replaceDestination = true
+	);
 	/// Primarily used for serialisation.
-	explicit ShufflePlug( const std::string &name = defaultName<ShufflePlug>(), Direction direction = In, unsigned flags = Default );
+	explicit ShufflePlug(
+		const std::string &name = defaultName<ShufflePlug>(), Direction direction = In, unsigned flags = Default
+	);
 
 	StringPlug *sourcePlug();
 	const StringPlug *sourcePlug() const;
@@ -83,11 +88,13 @@ IE_CORE_DECLAREPTR( ShufflePlug )
 class GAFFER_API ShufflesPlug : public ValuePlug
 {
 
-	public:
+public:
 
 	GAFFER_PLUG_DECLARE_TYPE( Gaffer::ShufflesPlug, ShufflesPlugTypeId, ValuePlug );
 
-	ShufflesPlug( const std::string &name = defaultName<ShufflesPlug>(), Direction direction = In, unsigned flags = Default );
+	ShufflesPlug(
+		const std::string &name = defaultName<ShufflesPlug>(), Direction direction = In, unsigned flags = Default
+	);
 
 	bool acceptsChild( const GraphComponent *potentialChild ) const override;
 	bool acceptsInput( const Plug *input ) const override;
@@ -107,7 +114,7 @@ class GAFFER_API ShufflesPlug : public ValuePlug
 	template<typename T>
 	T shuffleWithExtraSources( const T &sourceContainer, const T &extraSources, bool ignoreMissingSource = true ) const;
 
-	private:
+private:
 
 	template<typename T>
 	T shuffleInternal( const T &sourceContainer, const T *extraSources, bool ignoreMissingSource ) const;

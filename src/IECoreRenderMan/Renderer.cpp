@@ -81,9 +81,12 @@ const InternedString g_acquireRiley( "ri:acquireRiley" );
 class RenderManRenderer final : public IECoreScenePreview::Renderer
 {
 
-	public:
+public:
 
-	RenderManRenderer( RtUString rileyVariant, RenderType renderType, const std::string &fileName, const MessageHandlerPtr &messageHandler )
+	RenderManRenderer(
+		RtUString rileyVariant, RenderType renderType, const std::string &fileName,
+		const MessageHandlerPtr &messageHandler
+	)
 		: m_messageHandler( messageHandler ),
 		  m_name( rileyVariant == RtUString() ? "RenderMan" : "RenderManXPU" ),
 		  m_session( nullptr )
@@ -110,10 +113,7 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 		m_globals.reset();
 	}
 
-	IECore::InternedString name() const override
-	{
-		return m_name;
-	}
+	IECore::InternedString name() const override { return m_name; }
 
 	void option( const IECore::InternedString &name, const IECore::Object *value ) override
 	{
@@ -132,15 +132,22 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 		return new Attributes( attributes, m_materialCache.get() );
 	}
 
-	ObjectInterfacePtr camera( const std::string &name, const CameraSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override
+	ObjectInterfacePtr camera(
+		const std::string &name, const CameraSamples &samples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) override
 	{
 		const IECore::MessageHandler::Scope messageScope( m_messageHandler.get() );
-		IECoreRenderMan::CameraPtr result = new IECoreRenderMan::Camera( name, samples.front().get(), acquireSession() );
+		IECoreRenderMan::CameraPtr result =
+			new IECoreRenderMan::Camera( name, samples.front().get(), acquireSession() );
 		result->attributes( attributes );
 		return result;
 	}
 
-	ObjectInterfacePtr light( const std::string &name, const ObjectSamples &objectSamples, const SampleTimes &times, const AttributesInterface *attributes ) override
+	ObjectInterfacePtr light(
+		const std::string &name, const ObjectSamples &objectSamples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) override
 	{
 		const IECore::MessageHandler::Scope messageScope( m_messageHandler.get() );
 		acquireSession();
@@ -160,14 +167,21 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 				MeshPrimitivePtr meshCopy = mesh->copy();
 				meshCopy->blindData()->writable().insert( g_forMeshLightBlindData );
 				uniquefiedObjectSamples[0] = meshCopy;
-				geometryPrototype = m_geometryPrototypeCache->get( uniquefiedObjectSamples, times, typedAttributes, /* messageContext = */ name );
+				geometryPrototype = m_geometryPrototypeCache->get(
+					uniquefiedObjectSamples, times, typedAttributes, /* messageContext = */ name
+				);
 			}
 		}
 
-		return new IECoreRenderMan::Light( geometryPrototype, typedAttributes, m_materialCache.get(), m_lightLinker.get(), m_session );
+		return new IECoreRenderMan::Light(
+			geometryPrototype, typedAttributes, m_materialCache.get(), m_lightLinker.get(), m_session
+		);
 	}
 
-	ObjectInterfacePtr lightFilter( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override
+	ObjectInterfacePtr lightFilter(
+		const std::string &name, const ObjectSamples &samples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) override
 	{
 		const IECore::MessageHandler::Scope messageScope( m_messageHandler.get() );
 		acquireSession();
@@ -175,13 +189,17 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 		return new LightFilter( name, typedAttributes, m_session, m_lightLinker.get() );
 	}
 
-	ObjectInterfacePtr object( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override
+	ObjectInterfacePtr object(
+		const std::string &name, const ObjectSamples &samples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) override
 	{
 		const IECore::MessageHandler::Scope messageScope( m_messageHandler.get() );
 		acquireSession();
 
 		auto typedAttributes = static_cast<const Attributes *>( attributes );
-		ConstGeometryPrototypePtr geometryPrototype = m_geometryPrototypeCache->get( samples, times, typedAttributes, /* messageContext = */ name );
+		ConstGeometryPrototypePtr geometryPrototype =
+			m_geometryPrototypeCache->get( samples, times, typedAttributes, /* messageContext = */ name );
 		if( !geometryPrototype )
 		{
 			return nullptr;
@@ -189,11 +207,15 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 
 		if( auto vdbObject = IECore::runTimeCast<const IECoreVDB::VDBObject>( samples[0].get() ) )
 		{
-			return new IECoreRenderMan::Volume( name, geometryPrototype, typedAttributes, m_lightLinker.get(), m_session, vdbObject );
+			return new IECoreRenderMan::Volume(
+				name, geometryPrototype, typedAttributes, m_lightLinker.get(), m_session, vdbObject
+			);
 		}
 		else
 		{
-			return new IECoreRenderMan::Object( name, geometryPrototype, typedAttributes, m_lightLinker.get(), m_session );
+			return new IECoreRenderMan::Object(
+				name, geometryPrototype, typedAttributes, m_lightLinker.get(), m_session
+			);
 		}
 	}
 
@@ -222,12 +244,15 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 		}
 		else if( boost::starts_with( name.string(), "ri:" ) || name.string().find( ":" ) == string::npos )
 		{
-			IECore::msg( IECore::Msg::Warning, "IECoreRenderMan::Renderer::command", fmt::format( "Unknown command \"{}\".", name.c_str() ) );
+			IECore::msg(
+				IECore::Msg::Warning, "IECoreRenderMan::Renderer::command",
+				fmt::format( "Unknown command \"{}\".", name.c_str() )
+			);
 		}
 		return nullptr;
 	}
 
-	private:
+private:
 
 	IECore::MessageHandlerPtr m_messageHandler;
 	std::unique_ptr<Globals> m_globals;
@@ -277,14 +302,16 @@ struct VariantTypeDescriptions
 	{
 		IECoreScenePreview::Renderer::registerType(
 			"RenderMan",
-			[]( IECoreScenePreview::Renderer::RenderType renderType, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler ) {
+			[]( IECoreScenePreview::Renderer::RenderType renderType, const std::string &fileName,
+				const IECore::MessageHandlerPtr &messageHandler ) {
 				return new RenderManRenderer( RtUString(), renderType, fileName, messageHandler );
 			}
 		);
 
 		IECoreScenePreview::Renderer::registerType(
 			"RenderManXPU",
-			[]( IECoreScenePreview::Renderer::RenderType renderType, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler ) -> IECoreScenePreview::RendererPtr {
+			[]( IECoreScenePreview::Renderer::RenderType renderType, const std::string &fileName,
+				const IECore::MessageHandlerPtr &messageHandler ) -> IECoreScenePreview::RendererPtr {
 #if _PRMANAPI_VERSION_MAJOR_ >= 27
 				return new RenderManRenderer( RtUString( "xpu" ), renderType, fileName, messageHandler );
 #else

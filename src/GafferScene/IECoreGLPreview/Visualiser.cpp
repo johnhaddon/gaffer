@@ -38,8 +38,15 @@
 
 using namespace IECoreGLPreview;
 
-Visualisation::Visualisation( const IECoreGL::ConstRenderablePtr &renderable, Scale scale, Category category, bool affectsFramingBound, ColorSpace colorSpace )
-	: renderable( renderable ), scale( scale ), category( category ), affectsFramingBound( affectsFramingBound ), colorSpace( colorSpace )
+Visualisation::Visualisation(
+	const IECoreGL::ConstRenderablePtr &renderable, Scale scale, Category category, bool affectsFramingBound,
+	ColorSpace colorSpace
+)
+	: renderable( renderable ),
+	  scale( scale ),
+	  category( category ),
+	  affectsFramingBound( affectsFramingBound ),
+	  colorSpace( colorSpace )
 {
 }
 
@@ -50,7 +57,9 @@ Visualisation Visualisation::createGeometry( const IECoreGL::ConstRenderablePtr 
 	return v;
 }
 
-Visualisation Visualisation::createOrnament( const IECoreGL::ConstRenderablePtr &renderable, bool affectsFramingBounds, ColorSpace colorSpace )
+Visualisation Visualisation::createOrnament(
+	const IECoreGL::ConstRenderablePtr &renderable, bool affectsFramingBounds, ColorSpace colorSpace
+)
 {
 	Visualisation v( renderable );
 	v.scale = Visualisation::Scale::Visualiser;
@@ -59,7 +68,9 @@ Visualisation Visualisation::createOrnament( const IECoreGL::ConstRenderablePtr 
 	return v;
 }
 
-Visualisation Visualisation::createFrustum( const IECoreGL::ConstRenderablePtr &renderable, Scale scale, ColorSpace colorSpace )
+Visualisation Visualisation::createFrustum(
+	const IECoreGL::ConstRenderablePtr &renderable, Scale scale, ColorSpace colorSpace
+)
 {
 	Visualisation v( renderable );
 	v.affectsFramingBound = false;

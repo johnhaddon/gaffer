@@ -80,14 +80,9 @@ using namespace GafferSceneUI;
 namespace
 {
 
-const boost::container::flat_set<InternedString> g_standardSets = {
-	"__lights",
-	"__lightFilters",
-	"__cameras",
-	"__coordinateSystems",
-	"defaultLights",
-	"soloLights"
-};
+const boost::container::flat_set<InternedString> g_standardSets = { "__lights",		 "__lightFilters",
+																	"__cameras",	 "__coordinateSystems",
+																	"defaultLights", "soloLights" };
 
 Path::Names parent( InternedString setName )
 {
@@ -124,26 +119,23 @@ int numSelected( const PathMatcher &set, const PathMatcher &selectedPaths )
 struct PathMatcherCacheGetterKey
 {
 
-	PathMatcherCacheGetterKey()
-		: setNames( nullptr )
-	{
-	}
+	PathMatcherCacheGetterKey() : setNames( nullptr ) {}
 
 	PathMatcherCacheGetterKey( const IECore::MurmurHash &hash, ConstInternedStringVectorDataPtr setNames )
-		: hash( hash ), setNames( setNames )
+		: hash( hash ),
+		  setNames( setNames )
 	{
 	}
 
-	operator const IECore::MurmurHash &() const
-	{
-		return hash;
-	}
+	operator const IECore::MurmurHash &() const { return hash; }
 
 	const MurmurHash hash;
 	const ConstInternedStringVectorDataPtr setNames;
 };
 
-PathMatcher pathMatcherCacheGetter( const PathMatcherCacheGetterKey &key, size_t &cost, const IECore::Canceller *canceller )
+PathMatcher pathMatcherCacheGetter(
+	const PathMatcherCacheGetterKey &key, size_t &cost, const IECore::Canceller *canceller
+)
 {
 	cost = 1;
 
@@ -159,7 +151,8 @@ PathMatcher pathMatcherCacheGetter( const PathMatcherCacheGetterKey &key, size_t
 	return result;
 }
 
-using PathMatcherCache = IECorePreview::LRUCache<IECore::MurmurHash, IECore::PathMatcher, IECorePreview::LRUCachePolicy::Parallel, PathMatcherCacheGetterKey>;
+using PathMatcherCache = IECorePreview::LRUCache<
+	IECore::MurmurHash, IECore::PathMatcher, IECorePreview::LRUCachePolicy::Parallel, PathMatcherCacheGetterKey>;
 PathMatcherCache g_pathMatcherCache( pathMatcherCacheGetter, 25 );
 
 const InternedString g_setNamePropertyName( "setPath:setName" );
@@ -173,16 +166,18 @@ const InternedString g_setPropertyName( "setPath:set" );
 class SetPath : public Gaffer::Path
 {
 
-	public:
+public:
 
-	SetPath( ScenePlugPtr scene, Gaffer::ContextPtr context, Gaffer::PathFilterPtr filter = nullptr )
-		: Path( filter )
+	SetPath( ScenePlugPtr scene, Gaffer::ContextPtr context, Gaffer::PathFilterPtr filter = nullptr ) : Path( filter )
 	{
 		setScene( scene );
 		setContext( context );
 	}
 
-	SetPath( ScenePlugPtr scene, Gaffer::ContextPtr context, const Names &names, const IECore::InternedString &root = "/", Gaffer::PathFilterPtr filter = nullptr )
+	SetPath(
+		ScenePlugPtr scene, Gaffer::ContextPtr context, const Names &names, const IECore::InternedString &root = "/",
+		Gaffer::PathFilterPtr filter = nullptr
+	)
 		: Path( names, root, filter )
 	{
 		setScene( scene );
@@ -191,9 +186,7 @@ class SetPath : public Gaffer::Path
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SetPath, GafferSceneUI::SetPathTypeId, Gaffer::Path );
 
-	~SetPath() override
-	{
-	}
+	~SetPath() override {}
 
 	void setScene( ScenePlugPtr scene )
 	{
@@ -203,20 +196,15 @@ class SetPath : public Gaffer::Path
 		}
 
 		m_scene = scene;
-		m_plugDirtiedConnection = scene->node()->plugDirtiedSignal().connect( boost::bind( &SetPath::plugDirtied, this, ::_1 ) );
+		m_plugDirtiedConnection =
+			scene->node()->plugDirtiedSignal().connect( boost::bind( &SetPath::plugDirtied, this, ::_1 ) );
 
 		emitPathChanged();
 	}
 
-	ScenePlug *getScene()
-	{
-		return m_scene.get();
-	}
+	ScenePlug *getScene() { return m_scene.get(); }
 
-	const ScenePlug *getScene() const
-	{
-		return m_scene.get();
-	}
+	const ScenePlug *getScene() const { return m_scene.get(); }
 
 	void setContext( Gaffer::ContextPtr context )
 	{
@@ -226,20 +214,15 @@ class SetPath : public Gaffer::Path
 		}
 
 		m_context = context;
-		m_contextChangedConnection = context->changedSignal().connect( boost::bind( &SetPath::contextChanged, this, ::_2 ) );
+		m_contextChangedConnection =
+			context->changedSignal().connect( boost::bind( &SetPath::contextChanged, this, ::_2 ) );
 
 		emitPathChanged();
 	}
 
-	Gaffer::Context *getContext()
-	{
-		return m_context.get();
-	}
+	Gaffer::Context *getContext() { return m_context.get(); }
 
-	const Gaffer::Context *getContext() const
-	{
-		return m_context.get();
-	}
+	const Gaffer::Context *getContext() const { return m_context.get(); }
 
 	bool isValid( const IECore::Canceller *canceller = nullptr ) const override
 	{
@@ -264,7 +247,9 @@ class SetPath : public Gaffer::Path
 		return new SetPath( m_scene, m_context, names(), root(), const_cast<PathFilter *>( getFilter() ) );
 	}
 
-	void propertyNames( std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr ) const override
+	void propertyNames(
+		std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr
+	) const override
 	{
 		Path::propertyNames( names, canceller );
 		names.push_back( g_setNamePropertyName );
@@ -272,7 +257,9 @@ class SetPath : public Gaffer::Path
 		names.push_back( g_setPropertyName );
 	}
 
-	IECore::ConstRunTimeTypedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override
+	IECore::ConstRunTimeTypedPtr property(
+		const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr
+	) const override
 	{
 		if( name == g_setNamePropertyName )
 		{
@@ -306,12 +293,9 @@ class SetPath : public Gaffer::Path
 		return Path::property( name, canceller );
 	}
 
-	const Gaffer::Plug *cancellationSubject() const override
-	{
-		return m_scene.get();
-	}
+	const Gaffer::Plug *cancellationSubject() const override { return m_scene.get(); }
 
-	protected:
+protected:
 
 	void doChildren( std::vector<PathPtr> &children, const IECore::Canceller *canceller ) const override
 	{
@@ -326,21 +310,20 @@ class SetPath : public Gaffer::Path
 		++it;
 		while( it != p.end() && it->size() == names().size() + 1 )
 		{
-			children.push_back( new SetPath( m_scene, m_context, *it, root(), const_cast<PathFilter *>( getFilter() ) ) );
+			children.push_back(
+				new SetPath( m_scene, m_context, *it, root(), const_cast<PathFilter *>( getFilter() ) )
+			);
 			it.prune();
 			++it;
 		}
 
-		std::sort(
-			children.begin(), children.end(),
-			[]( const PathPtr &a, const PathPtr &b ) {
-				return a->names().back().string() < b->names().back().string();
-			}
-		);
+		std::sort( children.begin(), children.end(), []( const PathPtr &a, const PathPtr &b ) {
+			return a->names().back().string() < b->names().back().string();
+		} );
 	}
 
 
-	private:
+private:
 
 	const IECore::PathMatcher pathMatcher( const IECore::Canceller *canceller ) const
 	{
@@ -353,10 +336,7 @@ class SetPath : public Gaffer::Path
 		return g_pathMatcherCache.get( key );
 	}
 
-	void contextChanged( const IECore::InternedString &key )
-	{
-		emitPathChanged();
-	}
+	void contextChanged( const IECore::InternedString &key ) { emitPathChanged(); }
 
 	void plugDirtied( Gaffer::Plug *plug )
 	{
@@ -380,7 +360,10 @@ SetPath::Ptr constructor1( ScenePlug &scene, Context &context, PathFilterPtr fil
 	return new SetPath( &scene, &context, filter );
 }
 
-SetPath::Ptr constructor2( ScenePlug &scene, Context &context, const std::vector<IECore::InternedString> &names, const IECore::InternedString &root, PathFilterPtr filter )
+SetPath::Ptr constructor2(
+	ScenePlug &scene, Context &context, const std::vector<IECore::InternedString> &names,
+	const IECore::InternedString &root, PathFilterPtr filter
+)
 {
 	return new SetPath( &scene, &context, names, root, filter );
 }
@@ -396,14 +379,11 @@ ConstStringDataPtr g_setFolderIcon = new StringData( "setFolder.png" );
 class SetNameColumn : public StandardPathColumn
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( SetNameColumn )
 
-	SetNameColumn()
-		: StandardPathColumn( "Name", "name", GafferUI::PathColumn::SizeMode::Stretch )
-	{
-	}
+	SetNameColumn() : StandardPathColumn( "Name", "name", GafferUI::PathColumn::SizeMode::Stretch ) {}
 
 	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
 	{
@@ -416,7 +396,8 @@ class SetNameColumn : public StandardPathColumn
 		}
 		else
 		{
-			const auto memberCount = runTimeCast<const IECore::IntData>( path.property( g_memberCountPropertyName, canceller ) );
+			const auto memberCount =
+				runTimeCast<const IECore::IntData>( path.property( g_memberCountPropertyName, canceller ) );
 			if( memberCount )
 			{
 				result.icon = memberCount->readable() > 0 ? g_populatedSetIcon : g_emptySetIcon;
@@ -434,24 +415,26 @@ class SetNameColumn : public StandardPathColumn
 class SetMembersColumn : public StandardPathColumn
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( SetMembersColumn )
 
-	SetMembersColumn()
-		: StandardPathColumn( "Members", g_memberCountPropertyName )
-	{
-	}
+	SetMembersColumn() : StandardPathColumn( "Members", g_memberCountPropertyName ) {}
 
 	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
 	{
 		CellData result = StandardPathColumn::cellData( path, canceller );
-		if( const auto setName = runTimeCast<const IECore::StringData>( path.property( g_setNamePropertyName, canceller ) ) )
+		if( const auto setName =
+				runTimeCast<const IECore::StringData>( path.property( g_setNamePropertyName, canceller ) ) )
 		{
-			const auto memberCount = runTimeCast<const IECore::IntData>( path.property( g_memberCountPropertyName, canceller ) );
+			const auto memberCount =
+				runTimeCast<const IECore::IntData>( path.property( g_memberCountPropertyName, canceller ) );
 			const auto count = memberCount ? memberCount->readable() : 0;
 			result.toolTip = new IECore::StringData(
-				fmt::format( "{} scene location{} of {}", count, count == 1 ? " is a member" : "s are members", setName->readable() )
+				fmt::format(
+					"{} scene location{} of {}", count, count == 1 ? " is a member" : "s are members",
+					setName->readable()
+				)
 			);
 		}
 
@@ -474,14 +457,17 @@ class SetMembersColumn : public StandardPathColumn
 class SetSelectionColumn : public PathColumn
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( SetSelectionColumn )
 
 	SetSelectionColumn( ScriptNodePtr script )
-		: PathColumn(), m_script( script ), m_selectedPaths( ScriptNodeAlgo::getSelectedPaths( script.get() ) )
+		: PathColumn(),
+		  m_script( script ),
+		  m_selectedPaths( ScriptNodeAlgo::getSelectedPaths( script.get() ) )
 	{
-		ScriptNodeAlgo::selectedPathsChangedSignal( script.get() ).connect( boost::bind( &SetSelectionColumn::selectedPathsChanged, this ) );
+		ScriptNodeAlgo::selectedPathsChangedSignal( script.get() )
+			.connect( boost::bind( &SetSelectionColumn::selectedPathsChanged, this ) );
 	}
 
 	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
@@ -492,7 +478,11 @@ class SetSelectionColumn : public PathColumn
 			int count = numSelected( set->readable(), m_selectedPaths );
 			result.value = new IntData( count );
 			result.toolTip = new IECore::StringData(
-				fmt::format( "{} selected scene location{} of {}", count, count == 1 ? " is a member or descendant" : "s are members and/or descendants", path.names().back().string() )
+				fmt::format(
+					"{} selected scene location{} of {}", count,
+					count == 1 ? " is a member or descendant" : "s are members and/or descendants",
+					path.names().back().string()
+				)
 			);
 		}
 
@@ -507,7 +497,7 @@ class SetSelectionColumn : public PathColumn
 		return result;
 	}
 
-	private:
+private:
 
 	void selectedPathsChanged()
 	{
@@ -523,7 +513,8 @@ class SetSelectionColumn : public PathColumn
 };
 
 const ConstStringDataPtr SetSelectionColumn::g_headerValue = new StringData( "Selected" );
-const ConstStringDataPtr SetSelectionColumn::g_headerToolTip = new StringData( "The number of selected scene locations that are set members, or their descendants" );
+const ConstStringDataPtr SetSelectionColumn::g_headerToolTip =
+	new StringData( "The number of selected scene locations that are set members, or their descendants" );
 
 //////////////////////////////////////////////////////////////////////////
 // VisibleSetInclusionsColumn - displays and modifies inclusions membership
@@ -533,16 +524,21 @@ const ConstStringDataPtr SetSelectionColumn::g_headerToolTip = new StringData( "
 class VisibleSetInclusionsColumn : public PathColumn
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( VisibleSetInclusionsColumn )
 
 	VisibleSetInclusionsColumn( ScriptNodePtr script )
-		: PathColumn(), m_script( script ), m_visibleSet( ScriptNodeAlgo::getVisibleSet( script.get() ) )
+		: PathColumn(),
+		  m_script( script ),
+		  m_visibleSet( ScriptNodeAlgo::getVisibleSet( script.get() ) )
 	{
 		buttonPressSignal().connect( boost::bind( &VisibleSetInclusionsColumn::buttonPress, this, ::_3 ) );
-		buttonReleaseSignal().connect( boost::bind( &VisibleSetInclusionsColumn::buttonRelease, this, ::_1, ::_2, ::_3 ) );
-		ScriptNodeAlgo::visibleSetChangedSignal( script.get() ).connect( boost::bind( &VisibleSetInclusionsColumn::visibleSetChanged, this ) );
+		buttonReleaseSignal().connect(
+			boost::bind( &VisibleSetInclusionsColumn::buttonRelease, this, ::_1, ::_2, ::_3 )
+		);
+		ScriptNodeAlgo::visibleSetChangedSignal( script.get() )
+			.connect( boost::bind( &VisibleSetInclusionsColumn::visibleSetChanged, this ) );
 	}
 
 	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
@@ -585,7 +581,8 @@ class VisibleSetInclusionsColumn : public PathColumn
 		size_t excludedSetMemberCount = 0;
 		if( !m_visibleSet.exclusions.isEmpty() )
 		{
-			for( IECore::PathMatcher::Iterator it = includedSetMembers.begin(), eIt = includedSetMembers.end(); it != eIt; ++it )
+			for( IECore::PathMatcher::Iterator it = includedSetMembers.begin(), eIt = includedSetMembers.end();
+				 it != eIt; ++it )
 			{
 				const auto visibility = m_visibleSet.visibility( *it );
 				if( visibility.drawMode != GafferScene::VisibleSet::Visibility::Visible )
@@ -599,18 +596,21 @@ class VisibleSetInclusionsColumn : public PathColumn
 		const bool allSetMembersIncluded = includedSetMembers.size() == setMembers->readable().size();
 		if( excludedSetMemberCount == 0 )
 		{
-			iconData->writable()["state:normal"] = allSetMembersIncluded ? g_setIncludedIconName : g_setPartiallyIncludedIconName;
+			iconData->writable()["state:normal"] =
+				allSetMembersIncluded ? g_setIncludedIconName : g_setPartiallyIncludedIconName;
 			result.toolTip = allSetMembersIncluded ? g_setIncludedToolTip : g_setPartiallyIncludedToolTip;
 		}
 		else if( includedSetMembers.size() == excludedSetMemberCount )
 		{
 			iconData->writable()["state:normal"] = g_setIncludedDisabledIconName;
-			result.toolTip = allSetMembersIncluded ? g_setIncludedOverrideToolTip : g_setPartiallyIncludedOverrideToolTip;
+			result.toolTip =
+				allSetMembersIncluded ? g_setIncludedOverrideToolTip : g_setPartiallyIncludedOverrideToolTip;
 		}
 		else
 		{
 			iconData->writable()["state:normal"] = g_setPartiallyDisabledIconName;
-			result.toolTip = allSetMembersIncluded ? g_setIncludedPartialOverrideToolTip : g_setPartiallyIncludedPartialOverrideToolTip;
+			result.toolTip = allSetMembersIncluded ? g_setIncludedPartialOverrideToolTip :
+													 g_setPartiallyIncludedPartialOverrideToolTip;
 		}
 
 		return result;
@@ -618,10 +618,14 @@ class VisibleSetInclusionsColumn : public PathColumn
 
 	CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override
 	{
-		return CellData( /* value = */ nullptr, /* icon = */ m_visibleSet.inclusions.isEmpty() ? g_inclusionsEmptyIconName : g_setIncludedIconName, /* background = */ nullptr, /* tooltip = */ new StringData( "Visible Set Inclusions" ) );
+		return CellData(
+			/* value = */ nullptr,
+			/* icon = */ m_visibleSet.inclusions.isEmpty() ? g_inclusionsEmptyIconName : g_setIncludedIconName,
+			/* background = */ nullptr, /* tooltip = */ new StringData( "Visible Set Inclusions" )
+		);
 	}
 
-	private:
+private:
 
 	void visibleSetChanged()
 	{
@@ -668,10 +672,12 @@ class VisibleSetInclusionsColumn : public PathColumn
 			if( selectedPaths.match( setPath->names() ) & IECore::PathMatcher::Result::ExactMatch )
 			{
 				auto selectedSetPath = setPath->copy();
-				for( IECore::PathMatcher::Iterator it = selectedPaths.begin(), eIt = selectedPaths.end(); it != eIt; ++it )
+				for( IECore::PathMatcher::Iterator it = selectedPaths.begin(), eIt = selectedPaths.end(); it != eIt;
+					 ++it )
 				{
 					selectedSetPath->setFromString( ScenePlug::pathToString( *it ) );
-					const auto selectedSetName = runTimeCast<const IECore::StringData>( selectedSetPath->property( g_setNamePropertyName ) );
+					const auto selectedSetName =
+						runTimeCast<const IECore::StringData>( selectedSetPath->property( g_setNamePropertyName ) );
 					if( selectedSetName && selectedSetName->readable() != setName->readable() )
 					{
 						pathsToInclude.addPaths( setPath->getScene()->set( selectedSetName->readable() )->readable() );
@@ -728,14 +734,21 @@ class VisibleSetInclusionsColumn : public PathColumn
 };
 
 StringDataPtr VisibleSetInclusionsColumn::g_setIncludedIconName = new StringData( "locationIncluded.png" );
-StringDataPtr VisibleSetInclusionsColumn::g_setIncludedDisabledIconName = new StringData( "locationIncludedDisabled.png" );
-StringDataPtr VisibleSetInclusionsColumn::g_setIncludedHighlightedIconName = new StringData( "locationIncludedHighlighted.png" );
-StringDataPtr VisibleSetInclusionsColumn::g_setIncludedHighlightedTransparentIconName = new StringData( "locationIncludedHighlightedTransparent.png" );
+StringDataPtr VisibleSetInclusionsColumn::g_setIncludedDisabledIconName =
+	new StringData( "locationIncludedDisabled.png" );
+StringDataPtr VisibleSetInclusionsColumn::g_setIncludedHighlightedIconName =
+	new StringData( "locationIncludedHighlighted.png" );
+StringDataPtr VisibleSetInclusionsColumn::g_setIncludedHighlightedTransparentIconName =
+	new StringData( "locationIncludedHighlightedTransparent.png" );
 StringDataPtr VisibleSetInclusionsColumn::g_setPartiallyIncludedIconName = new StringData( "descendantIncluded.png" );
-StringDataPtr VisibleSetInclusionsColumn::g_setPartiallyDisabledIconName = new StringData( "descendantIncludedTransparent.png" );
-StringDataPtr VisibleSetInclusionsColumn::g_inclusionsEmptyIconName = new StringData( "locationIncludedTransparent.png" );
+StringDataPtr VisibleSetInclusionsColumn::g_setPartiallyDisabledIconName =
+	new StringData( "descendantIncludedTransparent.png" );
+StringDataPtr VisibleSetInclusionsColumn::g_inclusionsEmptyIconName =
+	new StringData( "locationIncludedTransparent.png" );
 
-StringDataPtr VisibleSetInclusionsColumn::g_inclusionToolTip = new StringData( "Click to include the current members of this set in the Visible Set, causing them to always appear in Viewers." );
+StringDataPtr VisibleSetInclusionsColumn::g_inclusionToolTip = new StringData(
+	"Click to include the current members of this set in the Visible Set, causing them to always appear in Viewers."
+);
 StringDataPtr VisibleSetInclusionsColumn::g_setIncludedToolTip = new StringData(
 	"All members are in the Visible Set, causing them to always appear in Viewers.\n\n"
 	"Click to remove members from the Visible Set."
@@ -772,16 +785,21 @@ StringDataPtr VisibleSetInclusionsColumn::g_setPartiallyIncludedPartialOverrideT
 class VisibleSetExclusionsColumn : public PathColumn
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( VisibleSetExclusionsColumn )
 
 	VisibleSetExclusionsColumn( ScriptNodePtr script )
-		: PathColumn(), m_script( script ), m_visibleSet( ScriptNodeAlgo::getVisibleSet( script.get() ) )
+		: PathColumn(),
+		  m_script( script ),
+		  m_visibleSet( ScriptNodeAlgo::getVisibleSet( script.get() ) )
 	{
 		buttonPressSignal().connect( boost::bind( &VisibleSetExclusionsColumn::buttonPress, this, ::_3 ) );
-		buttonReleaseSignal().connect( boost::bind( &VisibleSetExclusionsColumn::buttonRelease, this, ::_1, ::_2, ::_3 ) );
-		ScriptNodeAlgo::visibleSetChangedSignal( script.get() ).connect( boost::bind( &VisibleSetExclusionsColumn::visibleSetChanged, this ) );
+		buttonReleaseSignal().connect(
+			boost::bind( &VisibleSetExclusionsColumn::buttonRelease, this, ::_1, ::_2, ::_3 )
+		);
+		ScriptNodeAlgo::visibleSetChangedSignal( script.get() )
+			.connect( boost::bind( &VisibleSetExclusionsColumn::visibleSetChanged, this ) );
 	}
 
 	CellData cellData( const Gaffer::Path &path, const IECore::Canceller *canceller ) const override
@@ -823,7 +841,8 @@ class VisibleSetExclusionsColumn : public PathColumn
 
 		const bool allSetMembersExcluded = excludedSetMembers.size() == setMembers->readable().size();
 		iconData->writable()["state:highlighted"] = g_setExcludedHighlightedIconName;
-		iconData->writable()["state:normal"] = allSetMembersExcluded ? g_setExcludedIconName : g_setPartiallyExcludedIconName;
+		iconData->writable()["state:normal"] =
+			allSetMembersExcluded ? g_setExcludedIconName : g_setPartiallyExcludedIconName;
 		result.toolTip = allSetMembersExcluded ? g_setExcludedToolTip : g_setPartiallyExcludedToolTip;
 
 		return result;
@@ -831,10 +850,14 @@ class VisibleSetExclusionsColumn : public PathColumn
 
 	CellData headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const override
 	{
-		return CellData( /* value = */ nullptr, /* icon = */ m_visibleSet.exclusions.isEmpty() ? g_exclusionsEmptyIconName : g_setExcludedIconName, /* background = */ nullptr, /* tooltip = */ new StringData( "Visible Set Exclusions" ) );
+		return CellData(
+			/* value = */ nullptr,
+			/* icon = */ m_visibleSet.exclusions.isEmpty() ? g_exclusionsEmptyIconName : g_setExcludedIconName,
+			/* background = */ nullptr, /* tooltip = */ new StringData( "Visible Set Exclusions" )
+		);
 	}
 
-	private:
+private:
 
 	void visibleSetChanged()
 	{
@@ -881,10 +904,12 @@ class VisibleSetExclusionsColumn : public PathColumn
 			if( selectedPaths.match( setPath->names() ) & IECore::PathMatcher::Result::ExactMatch )
 			{
 				auto selectedSetPath = setPath->copy();
-				for( IECore::PathMatcher::Iterator it = selectedPaths.begin(), eIt = selectedPaths.end(); it != eIt; ++it )
+				for( IECore::PathMatcher::Iterator it = selectedPaths.begin(), eIt = selectedPaths.end(); it != eIt;
+					 ++it )
 				{
 					selectedSetPath->setFromString( ScenePlug::pathToString( *it ) );
-					const auto selectedSetName = runTimeCast<const IECore::StringData>( selectedSetPath->property( g_setNamePropertyName ) );
+					const auto selectedSetName =
+						runTimeCast<const IECore::StringData>( selectedSetPath->property( g_setNamePropertyName ) );
 					if( selectedSetName && selectedSetName->readable() != setName->readable() )
 					{
 						pathsToExclude.addPaths( setPath->getScene()->set( selectedSetName->readable() )->readable() );
@@ -936,11 +961,16 @@ class VisibleSetExclusionsColumn : public PathColumn
 
 StringDataPtr VisibleSetExclusionsColumn::g_setExcludedIconName = new StringData( "locationExcluded.png" );
 StringDataPtr VisibleSetExclusionsColumn::g_setPartiallyExcludedIconName = new StringData( "descendantExcluded.png" );
-StringDataPtr VisibleSetExclusionsColumn::g_setExcludedHighlightedIconName = new StringData( "locationExcludedHighlighted.png" );
-StringDataPtr VisibleSetExclusionsColumn::g_setExcludedHighlightedTransparentIconName = new StringData( "locationExcludedHighlightedTransparent.png" );
-StringDataPtr VisibleSetExclusionsColumn::g_exclusionsEmptyIconName = new StringData( "locationExcludedTransparent.png" );
+StringDataPtr VisibleSetExclusionsColumn::g_setExcludedHighlightedIconName =
+	new StringData( "locationExcludedHighlighted.png" );
+StringDataPtr VisibleSetExclusionsColumn::g_setExcludedHighlightedTransparentIconName =
+	new StringData( "locationExcludedHighlightedTransparent.png" );
+StringDataPtr VisibleSetExclusionsColumn::g_exclusionsEmptyIconName =
+	new StringData( "locationExcludedTransparent.png" );
 
-StringDataPtr VisibleSetExclusionsColumn::g_exclusionToolTip = new StringData( "Click to exclude the current members of this set from the Visible Set, causing them to not appear in Viewers." );
+StringDataPtr VisibleSetExclusionsColumn::g_exclusionToolTip = new StringData(
+	"Click to exclude the current members of this set from the Visible Set, causing them to not appear in Viewers."
+);
 StringDataPtr VisibleSetExclusionsColumn::g_setExcludedToolTip = new StringData(
 	"All members are excluded from the Visible Set, causing them to not appear in Viewers.\n\n"
 	"Click to remove the exclusion."
@@ -960,14 +990,11 @@ StringDataPtr VisibleSetExclusionsColumn::g_setPartiallyExcludedToolTip = new St
 class SetEditorSearchFilter : public Gaffer::PathFilter
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( SetEditorSearchFilter )
 
-	SetEditorSearchFilter( IECore::CompoundDataPtr userData = nullptr )
-		: PathFilter( userData )
-	{
-	}
+	SetEditorSearchFilter( IECore::CompoundDataPtr userData = nullptr ) : PathFilter( userData ) {}
 
 	void setMatchPattern( const string &matchPattern )
 	{
@@ -981,10 +1008,7 @@ class SetEditorSearchFilter : public Gaffer::PathFilter
 		changedSignal()( this );
 	}
 
-	const string &getMatchPattern() const
-	{
-		return m_matchPattern;
-	}
+	const string &getMatchPattern() const { return m_matchPattern; }
 
 	void doFilter( std::vector<PathPtr> &paths, const IECore::Canceller *canceller ) const override
 	{
@@ -994,12 +1018,7 @@ class SetEditorSearchFilter : public Gaffer::PathFilter
 		}
 
 		paths.erase(
-			std::remove_if(
-				paths.begin(),
-				paths.end(),
-				[this]( const auto &p ) { return remove( p ); }
-			),
-			paths.end()
+			std::remove_if( paths.begin(), paths.end(), [this]( const auto &p ) { return remove( p ); } ), paths.end()
 		);
 	}
 
@@ -1024,7 +1043,7 @@ class SetEditorSearchFilter : public Gaffer::PathFilter
 		return leaf && !match;
 	}
 
-	private:
+private:
 
 	std::string m_matchPattern;
 	std::string m_wildcardPattern;
@@ -1039,16 +1058,21 @@ class SetEditorSearchFilter : public Gaffer::PathFilter
 class SetEditorEmptySetFilter : public Gaffer::PathFilter
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( SetEditorEmptySetFilter )
 
-	SetEditorEmptySetFilter( ScriptNodePtr scriptNode, bool useSelection = false, IECore::CompoundDataPtr userData = nullptr )
-		: PathFilter( userData ), m_scriptNode( scriptNode )
+	SetEditorEmptySetFilter(
+		ScriptNodePtr scriptNode, bool useSelection = false, IECore::CompoundDataPtr userData = nullptr
+	)
+		: PathFilter( userData ),
+		  m_scriptNode( scriptNode )
 	{
 		if( useSelection )
 		{
-			m_selectedPathsChangedConnection = ScriptNodeAlgo::selectedPathsChangedSignal( m_scriptNode.get() ).connect( boost::bind( &SetEditorEmptySetFilter::selectedPathsChanged, this ) );
+			m_selectedPathsChangedConnection =
+				ScriptNodeAlgo::selectedPathsChangedSignal( m_scriptNode.get() )
+					.connect( boost::bind( &SetEditorEmptySetFilter::selectedPathsChanged, this ) );
 			m_selectedPaths = ScriptNodeAlgo::getSelectedPaths( scriptNode.get() );
 		}
 	}
@@ -1057,9 +1081,7 @@ class SetEditorEmptySetFilter : public Gaffer::PathFilter
 	{
 		paths.erase(
 			std::remove_if(
-				paths.begin(),
-				paths.end(),
-				[this, canceller]( auto &p ) { return remove( p, canceller ); }
+				paths.begin(), paths.end(), [this, canceller]( auto &p ) { return remove( p, canceller ); }
 			),
 			paths.end()
 		);
@@ -1078,7 +1100,9 @@ class SetEditorEmptySetFilter : public Gaffer::PathFilter
 			std::vector<PathPtr> c;
 			path->children( c );
 
-			leaf = std::all_of( c.begin(), c.end(), [this, canceller]( const auto &p ) { return remove( p, canceller ); } );
+			leaf = std::all_of( c.begin(), c.end(), [this, canceller]( const auto &p ) {
+				return remove( p, canceller );
+			} );
 		}
 
 		bool members = false;
@@ -1097,7 +1121,7 @@ class SetEditorEmptySetFilter : public Gaffer::PathFilter
 		return leaf && !members;
 	}
 
-	private:
+private:
 
 	void selectedPathsChanged()
 	{
@@ -1128,33 +1152,27 @@ void GafferSceneUIModule::bindSetEditor()
 		.def(
 			"__init__",
 			make_constructor(
-				constructor1,
-				default_call_policies(),
-				(
-					boost::python::arg( "scene" ),
-					boost::python::arg( "context" ),
-					boost::python::arg( "filter" ) = object()
-				)
+				constructor1, default_call_policies(),
+				( boost::python::arg( "scene" ), boost::python::arg( "context" ),
+				  boost::python::arg( "filter" ) = object() )
 			)
 		)
 		.def(
 			"__init__",
 			make_constructor(
-				constructor2,
-				default_call_policies(),
-				(
-					boost::python::arg( "scene" ),
-					boost::python::arg( "context" ),
-					boost::python::arg( "names" ),
-					boost::python::arg( "root" ) = "/",
-					boost::python::arg( "filter" ) = object()
-				)
+				constructor2, default_call_policies(),
+				( boost::python::arg( "scene" ), boost::python::arg( "context" ), boost::python::arg( "names" ),
+				  boost::python::arg( "root" ) = "/", boost::python::arg( "filter" ) = object() )
 			)
 		)
 		.def( "setScene", &SetPath::setScene )
-		.def( "getScene", ( ScenePlug * (SetPath::*)() ) & SetPath::getScene, return_value_policy<CastToIntrusivePtr>() )
+		.def(
+			"getScene", ( ScenePlug * (SetPath::*)() ) & SetPath::getScene, return_value_policy<CastToIntrusivePtr>()
+		)
 		.def( "setContext", &SetPath::setContext )
-		.def( "getContext", ( Context * (SetPath::*)() ) & SetPath::getContext, return_value_policy<CastToIntrusivePtr>() );
+		.def(
+			"getContext", ( Context * (SetPath::*)() ) & SetPath::getContext, return_value_policy<CastToIntrusivePtr>()
+		);
 
 	RefCountedClass<SetEditorSearchFilter, PathFilter>( "SearchFilter" )
 		.def( init<IECore::CompoundDataPtr>( ( boost::python::arg( "userData" ) = object() ) ) )
@@ -1162,16 +1180,18 @@ void GafferSceneUIModule::bindSetEditor()
 		.def( "getMatchPattern", &SetEditorSearchFilter::getMatchPattern, return_value_policy<copy_const_reference>() );
 
 	RefCountedClass<SetEditorEmptySetFilter, PathFilter>( "EmptySetFilter" )
-		.def( init<ScriptNodePtr, bool, CompoundDataPtr>( ( boost::python::arg( "scriptNode" ), boost::python::arg( "useSelection" ) = false, boost::python::arg( "userData" ) = object() ) ) );
+		.def(
+			init<ScriptNodePtr, bool, CompoundDataPtr>(
+				( boost::python::arg( "scriptNode" ), boost::python::arg( "useSelection" ) = false,
+				  boost::python::arg( "userData" ) = object() )
+			)
+		);
 
-	RefCountedClass<SetNameColumn, GafferUI::PathColumn>( "SetNameColumn" )
-		.def( init<>() );
+	RefCountedClass<SetNameColumn, GafferUI::PathColumn>( "SetNameColumn" ).def( init<>() );
 
-	RefCountedClass<SetMembersColumn, GafferUI::PathColumn>( "SetMembersColumn" )
-		.def( init<>() );
+	RefCountedClass<SetMembersColumn, GafferUI::PathColumn>( "SetMembersColumn" ).def( init<>() );
 
-	RefCountedClass<SetSelectionColumn, GafferUI::PathColumn>( "SetSelectionColumn" )
-		.def( init<ScriptNodePtr>() );
+	RefCountedClass<SetSelectionColumn, GafferUI::PathColumn>( "SetSelectionColumn" ).def( init<ScriptNodePtr>() );
 
 	RefCountedClass<VisibleSetInclusionsColumn, GafferUI::PathColumn>( "VisibleSetInclusionsColumn" )
 		.def( init<ScriptNodePtr>() );

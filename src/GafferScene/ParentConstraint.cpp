@@ -43,16 +43,13 @@ GAFFER_NODE_DEFINE_TYPE( ParentConstraint );
 
 size_t ParentConstraint::g_firstPlugIndex = 0;
 
-ParentConstraint::ParentConstraint( const std::string &name )
-	: Constraint( name )
+ParentConstraint::ParentConstraint( const std::string &name ) : Constraint( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new TransformPlug( "relativeTransform" ) );
 }
 
-ParentConstraint::~ParentConstraint()
-{
-}
+ParentConstraint::~ParentConstraint() {}
 
 Gaffer::TransformPlug *ParentConstraint::relativeTransformPlug()
 {
@@ -66,8 +63,7 @@ const Gaffer::TransformPlug *ParentConstraint::relativeTransformPlug() const
 
 bool ParentConstraint::affectsConstraint( const Gaffer::Plug *input ) const
 {
-	return input == keepReferencePositionPlug() ||
-		relativeTransformPlug()->isAncestorOf( input );
+	return input == keepReferencePositionPlug() || relativeTransformPlug()->isAncestorOf( input );
 }
 
 void ParentConstraint::hashConstraint( const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -78,7 +74,9 @@ void ParentConstraint::hashConstraint( const Gaffer::Context *context, IECore::M
 	}
 }
 
-Imath::M44f ParentConstraint::computeConstraint( const Imath::M44f &fullTargetTransform, const Imath::M44f &fullInputTransform, const Imath::M44f &inputTransform ) const
+Imath::M44f ParentConstraint::computeConstraint(
+	const Imath::M44f &fullTargetTransform, const Imath::M44f &fullInputTransform, const Imath::M44f &inputTransform
+) const
 {
 	Imath::M44f relativeMatrix;
 	if( !keepReferencePositionPlug()->getValue() )

@@ -76,8 +76,22 @@ void bind()
 	using B = typename P::BaseType;
 
 	scope s = PlugClass<T>()
-				  .def( init<const std::string &, Plug::Direction, const V &, unsigned>( ( boost::python::arg_( "name" ) = GraphComponent::defaultName<T>(), boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "defaultValue" ) = V(), boost::python::arg_( "flags" ) = Plug::Default ) ) )
-				  .def( init<const std::string &, Plug::Direction, const V &, const P &, const P &, unsigned>( ( boost::python::arg_( "name" ) = GraphComponent::defaultName<T>(), boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "defaultValue" ) = V(), boost::python::arg_( "minValue" ) = P( std::numeric_limits<B>::lowest() ), boost::python::arg_( "maxValue" ) = P( std::numeric_limits<B>::max() ), boost::python::arg_( "flags" ) = Plug::Default ) ) )
+				  .def(
+					  init<const std::string &, Plug::Direction, const V &, unsigned>(
+						  ( boost::python::arg_( "name" ) = GraphComponent::defaultName<T>(),
+							boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "defaultValue" ) = V(),
+							boost::python::arg_( "flags" ) = Plug::Default )
+					  )
+				  )
+				  .def(
+					  init<const std::string &, Plug::Direction, const V &, const P &, const P &, unsigned>(
+						  ( boost::python::arg_( "name" ) = GraphComponent::defaultName<T>(),
+							boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "defaultValue" ) = V(),
+							boost::python::arg_( "minValue" ) = P( std::numeric_limits<B>::lowest() ),
+							boost::python::arg_( "maxValue" ) = P( std::numeric_limits<B>::max() ),
+							boost::python::arg_( "flags" ) = Plug::Default )
+					  )
+				  )
 				  .def( "defaultValue", &T::defaultValue )
 				  .def( "hasMinValue", &T::hasMinValue )
 				  .def( "hasMaxValue", &T::hasMaxValue )
@@ -87,13 +101,19 @@ void bind()
 				  .def( "getValue", &getValue<T> );
 
 	const PyTypeObject *valueType = boost::python::to_python_value<const V &>().get_pytype();
-	s.attr( "ValueType" ) = boost::python::object( boost::python::handle<>( boost::python::borrowed( const_cast<PyTypeObject *>( valueType ) ) ) );
+	s.attr( "ValueType" ) = boost::python::object(
+		boost::python::handle<>( boost::python::borrowed( const_cast<PyTypeObject *>( valueType ) ) )
+	);
 
 	const PyTypeObject *pointType = boost::python::to_python_value<const P &>().get_pytype();
-	s.attr( "PointType" ) = boost::python::object( boost::python::handle<>( boost::python::borrowed( const_cast<PyTypeObject *>( pointType ) ) ) );
+	s.attr( "PointType" ) = boost::python::object(
+		boost::python::handle<>( boost::python::borrowed( const_cast<PyTypeObject *>( pointType ) ) )
+	);
 
 	const PyTypeObject *childType = boost::python::to_python_value<const typename T::ChildType &>().get_pytype();
-	s.attr( "ChildType" ) = boost::python::object( boost::python::handle<>( boost::python::borrowed( const_cast<PyTypeObject *>( childType ) ) ) );
+	s.attr( "ChildType" ) = boost::python::object(
+		boost::python::handle<>( boost::python::borrowed( const_cast<PyTypeObject *>( childType ) ) )
+	);
 }
 
 } // namespace

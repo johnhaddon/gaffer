@@ -50,7 +50,7 @@ namespace GafferImage
 
 class GAFFERIMAGE_API SATBlur : public ImageProcessor
 {
-	public:
+public:
 
 	// This is similar to Sampler::BoundingMode, but Normalize isn't supported by the
 	// sampler interface, and we haven't figured out yet how to unify these.
@@ -98,17 +98,22 @@ class GAFFERIMAGE_API SATBlur : public ImageProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
 	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashChannelData(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData(
+		const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+		const ImagePlug *parent
+	) const override;
 
-	private:
+private:
 
 	Gaffer::FloatVectorDataPlug *satPlug();
 	const Gaffer::FloatVectorDataPlug *satPlug() const;

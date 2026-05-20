@@ -54,8 +54,7 @@ __itt_domain *g_domain = NULL;
 
 using namespace Gaffer;
 
-VTuneMonitor::VTuneMonitor( bool monitorHashProcess /* = false */ )
-	: m_monitorHashProcess( monitorHashProcess )
+VTuneMonitor::VTuneMonitor( bool monitorHashProcess /* = false */ ) : m_monitorHashProcess( monitorHashProcess )
 {
 	if( !g_domain )
 	{
@@ -63,9 +62,7 @@ VTuneMonitor::VTuneMonitor( bool monitorHashProcess /* = false */ )
 	}
 }
 
-VTuneMonitor::~VTuneMonitor()
-{
-}
+VTuneMonitor::~VTuneMonitor() {}
 
 void VTuneMonitor::processStarted( const Process *process )
 {

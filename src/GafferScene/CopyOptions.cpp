@@ -47,8 +47,7 @@ GAFFER_NODE_DEFINE_TYPE( CopyOptions );
 
 size_t CopyOptions::g_firstPlugIndex = 0;
 
-CopyOptions::CopyOptions( const std::string &name )
-	: GlobalsProcessor( name )
+CopyOptions::CopyOptions( const std::string &name ) : GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "source", Plug::In ) );
@@ -64,9 +63,7 @@ CopyOptions::CopyOptions( const std::string &name )
 	outPlug()->boundPlug()->setInput( inPlug()->boundPlug() );
 }
 
-CopyOptions::~CopyOptions()
-{
-}
+CopyOptions::~CopyOptions() {}
 
 GafferScene::ScenePlug *CopyOptions::sourcePlug()
 {
@@ -104,7 +101,9 @@ void CopyOptions::hashProcessedGlobals( const Gaffer::Context *context, IECore::
 	optionsPlug()->hash( h );
 }
 
-IECore::ConstCompoundObjectPtr CopyOptions::computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const
+IECore::ConstCompoundObjectPtr CopyOptions::computeProcessedGlobals(
+	const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals
+) const
 {
 
 	IECore::CompoundObjectPtr result = new IECore::CompoundObject;
@@ -119,7 +118,9 @@ IECore::ConstCompoundObjectPtr CopyOptions::computeProcessedGlobals( const Gaffe
 	const std::string names = optionsPlug()->getValue();
 
 	IECore::ConstCompoundObjectPtr sourceGlobals = sourcePlug()->globalsPlug()->getValue();
-	for( IECore::CompoundObject::ObjectMap::const_iterator it = sourceGlobals->members().begin(), eIt = sourceGlobals->members().end(); it != eIt; ++it )
+	for( IECore::CompoundObject::ObjectMap::const_iterator it = sourceGlobals->members().begin(),
+														   eIt = sourceGlobals->members().end();
+		 it != eIt; ++it )
 	{
 		if( boost::starts_with( it->first.c_str(), prefix ) )
 		{

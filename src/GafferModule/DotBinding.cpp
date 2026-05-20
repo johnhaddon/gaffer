@@ -61,7 +61,9 @@ void setup( Dot &dot, const Plug &plug )
 class DotSerialiser : public NodeSerialiser
 {
 
-	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsConstruction(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override
 	{
 		const Dot *dot = child->parent<Dot>();
 		if( child == dot->inPlug() || child == dot->outPlug() )
@@ -72,7 +74,9 @@ class DotSerialiser : public NodeSerialiser
 		return NodeSerialiser::childNeedsConstruction( child, serialisation );
 	}
 
-	std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
+	std::string postConstructor(
+		const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+	) const override
 	{
 		std::string result = NodeSerialiser::postConstructor( graphComponent, identifier, serialisation );
 
@@ -84,7 +88,8 @@ class DotSerialiser : public NodeSerialiser
 		}
 
 		// Only serialise a call to setup() when we need to construct this node
-		if( !Serialisation::acquireSerialiser( graphComponent->parent() )->childNeedsConstruction( graphComponent, serialisation ) )
+		if( !Serialisation::acquireSerialiser( graphComponent->parent() )
+				 ->childNeedsConstruction( graphComponent, serialisation ) )
 		{
 			return result;
 		}
@@ -112,8 +117,7 @@ class DotSerialiser : public NodeSerialiser
 void GafferModule::bindDot()
 {
 
-	scope s = DependencyNodeClass<Dot>()
-				  .def( "setup", &setup );
+	scope s = DependencyNodeClass<Dot>().def( "setup", &setup );
 
 	enum_<Dot::LabelType>( "LabelType" )
 		.value( "None", Dot::None )

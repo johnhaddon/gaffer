@@ -56,22 +56,15 @@ class ScenePlug;
 class GAFFERSCENE_API FilterPlug : public Gaffer::IntPlug
 {
 
-	public:
+public:
 
 	explicit FilterPlug(
-		const std::string &name = defaultName<FilterPlug>(),
-		Direction direction = In,
-		unsigned flags = Default
+		const std::string &name = defaultName<FilterPlug>(), Direction direction = In, unsigned flags = Default
 	);
 
 	/// \deprecated
 	FilterPlug(
-		const std::string &name,
-		Direction direction,
-		int defaultValue,
-		int minValue,
-		int maxValue,
-		unsigned flags
+		const std::string &name, Direction direction, int defaultValue, int minValue, int maxValue, unsigned flags
 	);
 
 	~FilterPlug() override;
@@ -85,7 +78,9 @@ class GAFFERSCENE_API FilterPlug : public Gaffer::IntPlug
 	/// be passed to the filter via SceneScope. This allows the filter to participate fully in
 	/// dirty propagation, despite not having ScenePlug inputs of its own. For an example of
 	/// usage, see `FilteredSceneProcessor::affects()`.
-	void sceneAffects( const Gaffer::Plug *scenePlugChild, Gaffer::DependencyNode::AffectedPlugsContainer &outputs ) const;
+	void sceneAffects(
+		const Gaffer::Plug *scenePlugChild, Gaffer::DependencyNode::AffectedPlugsContainer &outputs
+	) const;
 
 	/// Evaluates the filter for the specified scene plug. Should be used in preference to
 	/// singular calls to getValue(), as it ensures a suitable SceneScope before evaluating the filter.
@@ -100,7 +95,7 @@ class GAFFERSCENE_API FilterPlug : public Gaffer::IntPlug
 	{
 		SceneScope( const Gaffer::Context *context, const ScenePlug *scenePlug );
 
-		private:
+	private:
 
 		const ScenePlug *m_scenePlug;
 	};

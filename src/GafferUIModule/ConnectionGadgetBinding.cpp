@@ -68,10 +68,7 @@ NodulePtr dstNodule( ConnectionGadget &c )
 
 struct ConnectionGadgetCreator
 {
-	ConnectionGadgetCreator( object fn )
-		: m_fn( fn )
-	{
-	}
+	ConnectionGadgetCreator( object fn ) : m_fn( fn ) {}
 
 	ConnectionGadgetPtr operator () ( NodulePtr srcNodule, NodulePtr dstNodule )
 	{
@@ -80,7 +77,7 @@ struct ConnectionGadgetCreator
 		return result;
 	}
 
-	private:
+private:
 
 	object m_fn;
 };
@@ -111,6 +108,5 @@ void GafferUIModule::bindConnectionGadget()
 		.def( "registerConnectionGadget", &registerConnectionGadget2 )
 		.staticmethod( "registerConnectionGadget" );
 
-	ConnectionCreatorClass<StandardConnectionGadget>()
-		.def( init<NodulePtr, NodulePtr>() );
+	ConnectionCreatorClass<StandardConnectionGadget>().def( init<NodulePtr, NodulePtr>() );
 }

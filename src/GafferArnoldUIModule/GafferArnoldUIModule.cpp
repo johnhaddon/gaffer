@@ -45,10 +45,7 @@ using namespace GafferArnoldUI::Private;
 namespace
 {
 
-ShaderNetworkPtr conformToOSLNetwork(
-	const ShaderNetwork::Parameter &output,
-	const ShaderNetwork &shaderNetwork
-)
+ShaderNetworkPtr conformToOSLNetwork( const ShaderNetwork::Parameter &output, const ShaderNetwork &shaderNetwork )
 {
 	return VisualiserAlgo::conformToOSLNetwork( output, &shaderNetwork );
 }

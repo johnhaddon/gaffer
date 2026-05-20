@@ -59,8 +59,7 @@ GAFFER_NODE_DEFINE_TYPE( OSLLight );
 
 size_t OSLLight::g_firstPlugIndex = 0;
 
-OSLLight::OSLLight( const std::string &name )
-	: GafferScene::Light( name, new OSLShader() )
+OSLLight::OSLLight( const std::string &name ) : GafferScene::Light( name, new OSLShader() )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -71,9 +70,7 @@ OSLLight::OSLLight( const std::string &name )
 	addChild( new CompoundDataPlug( "geometryParameters" ) );
 }
 
-OSLLight::~OSLLight()
-{
-}
+OSLLight::~OSLLight() {}
 
 Gaffer::IntPlug *OSLLight::shapePlug()
 {
@@ -129,13 +126,8 @@ void OSLLight::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outpu
 {
 	Light::affects( input, outputs );
 
-	if(
-		input == shapePlug() ||
-		input == radiusPlug() ||
-		input == geometryTypePlug() ||
-		geometryBoundPlug()->isAncestorOf( input ) ||
-		geometryParametersPlug()->isAncestorOf( input )
-	)
+	if( input == shapePlug() || input == radiusPlug() || input == geometryTypePlug() ||
+		geometryBoundPlug()->isAncestorOf( input ) || geometryParametersPlug()->isAncestorOf( input ) )
 	{
 		outputs.push_back( sourcePlug() );
 	}
@@ -162,9 +154,7 @@ IECore::ConstObjectPtr OSLLight::computeSource( const Gaffer::Context *context )
 			CompoundDataPtr parameters = new CompoundData;
 			geometryParametersPlug()->fillCompoundData( parameters->writable() );
 			return new IECoreScenePreview::Geometry(
-				geometryTypePlug()->getValue(),
-				geometryBoundPlug()->getValue(),
-				parameters
+				geometryTypePlug()->getValue(), geometryBoundPlug()->getValue(), parameters
 			);
 		}
 	}

@@ -61,8 +61,7 @@ GAFFER_NODE_DEFINE_TYPE( ContextVariables );
 
 size_t ContextVariables::g_firstPlugIndex;
 
-ContextVariables::ContextVariables( const std::string &name )
-	: ContextProcessor( name )
+ContextVariables::ContextVariables( const std::string &name ) : ContextProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new CompoundDataPlug( "variables" ) );
@@ -70,9 +69,7 @@ ContextVariables::ContextVariables( const std::string &name )
 	addChild( new AtomicCompoundDataPlug( "__combinedVariables", Plug::Out, new IECore::CompoundData ) );
 }
 
-ContextVariables::~ContextVariables()
-{
-}
+ContextVariables::~ContextVariables() {}
 
 CompoundDataPlug *ContextVariables::variablesPlug()
 {

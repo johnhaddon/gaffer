@@ -66,7 +66,7 @@ struct InputScope
 		m_scope->removeMatching( deleteContextVariables );
 	}
 
-	private:
+private:
 
 	std::optional<Context::EditableScope> m_scope;
 };
@@ -112,8 +112,7 @@ GAFFER_NODE_DEFINE_TYPE( Switch );
 
 size_t Switch::g_firstPlugIndex = 0;
 
-Switch::Switch( const std::string &name )
-	: ComputeNode( name )
+Switch::Switch( const std::string &name ) : ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -127,9 +126,7 @@ Switch::Switch( const std::string &name )
 	plugInputChangedSignal().connect( boost::bind( &Switch::plugInputChanged, this, ::_1 ) );
 }
 
-Switch::~Switch()
-{
-}
+Switch::~Switch() {}
 
 void Switch::setup( const Plug *plug )
 {
@@ -145,13 +142,7 @@ void Switch::setup( const Plug *plug )
 	PlugPtr inElement = plug->createCounterpart( "in0", Plug::In );
 	MetadataAlgo::copyColors( plug, inElement.get(), /* overwrite = */ false );
 	inElement->setFlags( Plug::Serialisable, true );
-	ArrayPlugPtr in = new ArrayPlug(
-		g_inPlugsName,
-		Plug::In,
-		inElement,
-		1,
-		std::numeric_limits<size_t>::max()
-	);
+	ArrayPlugPtr in = new ArrayPlug( g_inPlugsName, Plug::In, inElement, 1, std::numeric_limits<size_t>::max() );
 	addChild( in );
 
 	PlugPtr out = plug->createCounterpart( g_outPlugName, Plug::Out );
@@ -244,11 +235,7 @@ void Switch::affects( const Plug *input, DependencyNode::AffectedPlugsContainer 
 {
 	ComputeNode::affects( input, outputs );
 
-	if(
-		input == enabledPlug() ||
-		input == indexPlug() ||
-		input == deleteContextVariablesPlug()
-	)
+	if( input == enabledPlug() || input == indexPlug() || input == deleteContextVariablesPlug() )
 	{
 		if( const Plug *out = outPlug() )
 		{

@@ -58,16 +58,14 @@ namespace GafferImage
 class GAFFERIMAGE_API FormatPlug : public Gaffer::ValuePlug
 {
 
-	public:
+public:
 
 	using ValueType = Format;
 
 	GAFFER_PLUG_DECLARE_TYPE( GafferImage::FormatPlug, FormatPlugTypeId, Gaffer::ValuePlug );
 
 	explicit FormatPlug(
-		const std::string &name = defaultName<FormatPlug>(),
-		Direction direction = In,
-		Format defaultValue = Format(),
+		const std::string &name = defaultName<FormatPlug>(), Direction direction = In, Format defaultValue = Format(),
 		unsigned flags = Default
 	);
 
@@ -123,7 +121,7 @@ class GAFFERIMAGE_API FormatPlug : public Gaffer::ValuePlug
 	static FormatPlug *acquireDefaultFormatPlug( Gaffer::ScriptNode *scriptNode );
 	//@}
 
-	private:
+private:
 
 	void parentChanging( Gaffer::GraphComponent *newParent ) override;
 	void plugDirtied( Gaffer::Plug *plug );

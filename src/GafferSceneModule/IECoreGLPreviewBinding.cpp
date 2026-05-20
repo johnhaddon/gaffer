@@ -83,7 +83,12 @@ void GafferSceneModule::bindIECoreGLPreview()
 			.value( "Scene", Visualisation::ColorSpace::Scene )
 			.value( "Display", Visualisation::ColorSpace::Display );
 	}
-	v.def( init<IECoreGL::ConstRenderablePtr, Visualisation::Scale, Visualisation::Category, bool>( ( arg( "renderable" ), arg( "scale" ) = Visualisation::Scale::Local, arg( "category" ) = Visualisation::Category::Generic, arg( "affectsFramingBound" ) = true ) ) )
+	v.def(
+		 init<IECoreGL::ConstRenderablePtr, Visualisation::Scale, Visualisation::Category, bool>(
+			 ( arg( "renderable" ), arg( "scale" ) = Visualisation::Scale::Local,
+			   arg( "category" ) = Visualisation::Category::Generic, arg( "affectsFramingBound" ) = true )
+		 )
+	)
 		.def_readwrite( "renderable", &Visualisation::renderable )
 		.def_readwrite( "scale", &Visualisation::scale )
 		.def_readwrite( "category", &Visualisation::category )
@@ -96,7 +101,8 @@ void GafferSceneModule::bindIECoreGLPreview()
 		.staticmethod( "createGeometry" )
 		.def(
 			"createOrnament", &Visualisation::createOrnament,
-			( arg( "renderable" ), arg( "affectsFramingBounds" ), arg( "colorSpace" ) = Visualisation::ColorSpace::Display )
+			( arg( "renderable" ), arg( "affectsFramingBounds" ),
+			  arg( "colorSpace" ) = Visualisation::ColorSpace::Display )
 		)
 		.staticmethod( "createOrnament" )
 		.def(

@@ -72,23 +72,19 @@ std::shared_ptr<BackgroundTask> withGILReleaseDeleter( std::unique_ptr<Backgroun
 
 std::shared_ptr<boost::python::object> withGILAcquireDeleter( const boost::python::object &o )
 {
-	return std::shared_ptr<boost::python::object>(
-		new boost::python::object( o ),
-		[]( boost::python::object *o ) {
-			// Custom deleter. We must hold the GIL when deleting Python
-			// objects.
-			IECorePython::ScopedGILLock gilLock;
-			delete o;
-		}
-	);
+	return std::shared_ptr<boost::python::object>( new boost::python::object( o ), []( boost::python::object *o ) {
+		// Custom deleter. We must hold the GIL when deleting Python
+		// objects.
+		IECorePython::ScopedGILLock gilLock;
+		delete o;
+	} );
 }
 
 std::shared_ptr<BackgroundTask> backgroundTaskConstructor( const Plug *subject, object f )
 {
 	auto fPtr = withGILAcquireDeleter( f );
-	auto backgroundTask = std::make_unique<BackgroundTask>(
-		subject,
-		[fPtr]( const IECore::Canceller &canceller ) mutable {
+	auto backgroundTask =
+		std::make_unique<BackgroundTask>( subject, [fPtr]( const IECore::Canceller &canceller ) mutable {
 			IECorePython::ScopedGILLock gilLock;
 			try
 			{
@@ -98,8 +94,7 @@ std::shared_ptr<BackgroundTask> backgroundTaskConstructor( const Plug *subject, 
 			{
 				IECorePython::ExceptionAlgo::translatePythonException();
 			}
-		}
-	);
+		} );
 
 	return withGILReleaseDeleter( backgroundTask );
 }
@@ -137,10 +132,7 @@ BackgroundTask::Status backgroundTaskStatus( const BackgroundTask &b )
 struct GILReleaseUIThreadFunction
 {
 
-	GILReleaseUIThreadFunction( ParallelAlgo::UIThreadFunction function )
-		: m_function( function )
-	{
-	}
+	GILReleaseUIThreadFunction( ParallelAlgo::UIThreadFunction function ) : m_function( function ) {}
 
 	void operator () ()
 	{
@@ -148,7 +140,7 @@ struct GILReleaseUIThreadFunction
 		m_function();
 	}
 
-	private:
+private:
 
 	ParallelAlgo::UIThreadFunction m_function;
 };
@@ -159,24 +151,22 @@ void callOnUIThread( boost::python::object f )
 
 	IECorePython::ScopedGILRelease gilRelease;
 
-	Gaffer::ParallelAlgo::callOnUIThread(
-		[fPtr]() mutable {
-			IECorePython::ScopedGILLock gilLock;
-			try
-			{
-				( *fPtr )();
-				// We are likely to be the last owner of the python
-				// function object. Make sure we release it while we
-				// still hold the GIL.
-				fPtr.reset();
-			}
-			catch( boost::python::error_already_set & )
-			{
-				fPtr.reset();
-				IECorePython::ExceptionAlgo::translatePythonException();
-			}
+	Gaffer::ParallelAlgo::callOnUIThread( [fPtr]() mutable {
+		IECorePython::ScopedGILLock gilLock;
+		try
+		{
+			( *fPtr )();
+			// We are likely to be the last owner of the python
+			// function object. Make sure we release it while we
+			// still hold the GIL.
+			fPtr.reset();
 		}
-	);
+		catch( boost::python::error_already_set & )
+		{
+			fPtr.reset();
+			IECorePython::ExceptionAlgo::translatePythonException();
+		}
+	} );
 }
 
 void pushUIThreadCallHandler( boost::python::object handler )
@@ -185,34 +175,28 @@ void pushUIThreadCallHandler( boost::python::object handler )
 	// and in turn will be owned by the ParallelAlgo C++ API.
 	// Wrap `handler` so we acquire the GIL when the lambda is
 	// destroyed from C++.
-	auto handlerPtr = std::shared_ptr<boost::python::object>(
-		new boost::python::object( handler ),
-		[]( boost::python::object *o ) {
+	auto handlerPtr =
+		std::shared_ptr<boost::python::object>( new boost::python::object( handler ), []( boost::python::object *o ) {
 			IECorePython::ScopedGILLock gilLock;
 			delete o;
-		}
-	);
+		} );
 
 	IECorePython::ScopedGILRelease gilRelease;
 
-	Gaffer::ParallelAlgo::pushUIThreadCallHandler(
-		[handlerPtr]( const ParallelAlgo::UIThreadFunction &function ) {
-			IECorePython::ScopedGILLock gilLock;
-			boost::python::object pythonFunction = make_function(
-				GILReleaseUIThreadFunction( function ),
-				boost::python::default_call_policies(),
-				boost::mpl::vector<void>()
-			);
-			try
-			{
-				( *handlerPtr )( pythonFunction );
-			}
-			catch( boost::python::error_already_set & )
-			{
-				IECorePython::ExceptionAlgo::translatePythonException();
-			}
+	Gaffer::ParallelAlgo::pushUIThreadCallHandler( [handlerPtr]( const ParallelAlgo::UIThreadFunction &function ) {
+		IECorePython::ScopedGILLock gilLock;
+		boost::python::object pythonFunction = make_function(
+			GILReleaseUIThreadFunction( function ), boost::python::default_call_policies(), boost::mpl::vector<void>()
+		);
+		try
+		{
+			( *handlerPtr )( pythonFunction );
 		}
-	);
+		catch( boost::python::error_already_set & )
+		{
+			IECorePython::ExceptionAlgo::translatePythonException();
+		}
+	} );
 }
 
 void popUIThreadCallHandler()
@@ -228,20 +212,17 @@ std::shared_ptr<BackgroundTask> callOnBackgroundThread( const Plug *subject, boo
 	// before the python object is destroyed.
 	auto fPtr = withGILAcquireDeleter( f );
 
-	auto backgroundTask = ParallelAlgo::callOnBackgroundThread(
-		subject,
-		[fPtr]() mutable {
-			IECorePython::ScopedGILLock gilLock;
-			try
-			{
-				( *fPtr )();
-			}
-			catch( boost::python::error_already_set & )
-			{
-				IECorePython::ExceptionAlgo::translatePythonException();
-			}
+	auto backgroundTask = ParallelAlgo::callOnBackgroundThread( subject, [fPtr]() mutable {
+		IECorePython::ScopedGILLock gilLock;
+		try
+		{
+			( *fPtr )();
 		}
-	);
+		catch( boost::python::error_already_set & )
+		{
+			IECorePython::ExceptionAlgo::translatePythonException();
+		}
+	} );
 
 	return withGILReleaseDeleter( backgroundTask );
 }

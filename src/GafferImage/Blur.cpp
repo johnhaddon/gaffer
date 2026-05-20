@@ -51,8 +51,7 @@ const char *g_blurFilterName = "smoothGaussian";
 
 size_t Blur::g_firstPlugIndex = 0;
 
-Blur::Blur( const std::string &name )
-	: FlatImageProcessor( name )
+Blur::Blur( const std::string &name ) : FlatImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -65,7 +64,9 @@ Blur::Blur( const std::string &name )
 	addChild( new V2fPlug( "__filterScale", Plug::Out ) );
 
 	addChild( new AtomicBox2iPlug( "__resampledDataWindow", Plug::In, Box2i(), Plug::Default & ~Plug::Serialisable ) );
-	addChild( new FloatVectorDataPlug( "__resampledChannelData", Plug::In, ImagePlug::blackTile(), Plug::Default & ~Plug::Serialisable ) );
+	addChild( new FloatVectorDataPlug(
+		"__resampledChannelData", Plug::In, ImagePlug::blackTile(), Plug::Default & ~Plug::Serialisable
+	) );
 
 	addChild( resample );
 
@@ -84,9 +85,7 @@ Blur::Blur( const std::string &name )
 	outPlug()->channelNamesPlug()->setInput( inPlug()->channelNamesPlug() );
 }
 
-Blur::~Blur()
-{
-}
+Blur::~Blur() {}
 
 Gaffer::V2fPlug *Blur::radiusPlug()
 {
@@ -162,10 +161,7 @@ void Blur::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs )
 {
 	FlatImageProcessor::affects( input, outputs );
 
-	if(
-		input == expandDataWindowPlug() ||
-		input == resampledDataWindowPlug()
-	)
+	if( input == expandDataWindowPlug() || input == resampledDataWindowPlug() )
 	{
 		outputs.push_back( outPlug()->dataWindowPlug() );
 	}
@@ -175,9 +171,7 @@ void Blur::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs )
 		outputs.push_back( outPlug()->dataWindowPlug() );
 		outputs.push_back( outPlug()->channelDataPlug() );
 	}
-	else if(
-		input == resampledChannelDataPlug()
-	)
+	else if( input == resampledChannelDataPlug() )
 	{
 		outputs.push_back( outPlug()->channelDataPlug() );
 	}
@@ -218,7 +212,9 @@ void Blur::compute( ValuePlug *output, const Context *context ) const
 	FlatImageProcessor::compute( output, context );
 }
 
-void Blur::hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Blur::hashDataWindow(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	if( radiusPlug()->getValue() != V2f( 0 ) && expandDataWindowPlug()->getValue() )
 	{
@@ -242,7 +238,9 @@ Imath::Box2i Blur::computeDataWindow( const Gaffer::Context *context, const Imag
 	}
 }
 
-void Blur::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Blur::hashChannelData(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	if( radiusPlug()->getValue() != V2f( 0 ) )
 	{
@@ -254,7 +252,10 @@ void Blur::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::
 	}
 }
 
-IECore::ConstFloatVectorDataPtr Blur::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr Blur::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	if( radiusPlug()->getValue() != V2f( 0 ) )
 	{

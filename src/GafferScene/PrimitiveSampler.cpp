@@ -88,7 +88,10 @@ M44f matrix( const M44f &transform, GeometricData::Interpretation interpretation
 	}
 }
 
-OutputVariableFunction addPrimitiveVariable( Primitive *outputPrimitive, const std::string &name, const PrimitiveVariable &sourceVariable, PrimitiveVariable::Interpolation outputInterpolation, const M44f &transform )
+OutputVariableFunction addPrimitiveVariable(
+	Primitive *outputPrimitive, const std::string &name, const PrimitiveVariable &sourceVariable,
+	PrimitiveVariable::Interpolation outputInterpolation, const M44f &transform
+)
 {
 	const size_t size = outputPrimitive->variableSize( outputInterpolation );
 	switch( sourceVariable.data->typeId() )
@@ -96,7 +99,8 @@ OutputVariableFunction addPrimitiveVariable( Primitive *outputPrimitive, const s
 		case V3fVectorDataTypeId : {
 			V3fVectorDataPtr data = new V3fVectorData;
 			data->writable().resize( size, V3f( 0 ) );
-			const GeometricData::Interpretation interpretation = static_cast<const V3fVectorData *>( sourceVariable.data.get() )->getInterpretation();
+			const GeometricData::Interpretation interpretation =
+				static_cast<const V3fVectorData *>( sourceVariable.data.get() )->getInterpretation();
 			data->setInterpretation( interpretation );
 			outputPrimitive->variables[name] = PrimitiveVariable( outputInterpolation, data );
 			V3f *d = data->writable().data();
@@ -108,7 +112,9 @@ OutputVariableFunction addPrimitiveVariable( Primitive *outputPrimitive, const s
 		case V2fVectorDataTypeId : {
 			V2fVectorDataPtr data = new V2fVectorData;
 			data->writable().resize( size, V2f( 0 ) );
-			data->setInterpretation( static_cast<const V2fVectorData *>( sourceVariable.data.get() )->getInterpretation() );
+			data->setInterpretation(
+				static_cast<const V2fVectorData *>( sourceVariable.data.get() )->getInterpretation()
+			);
 			outputPrimitive->variables[name] = PrimitiveVariable( outputInterpolation, data );
 			V2f *d = data->writable().data();
 			return [d, &sourceVariable]( size_t index, const PrimitiveEvaluator::Result &result ) {
@@ -158,8 +164,7 @@ GAFFER_NODE_DEFINE_TYPE( PrimitiveSampler );
 
 size_t PrimitiveSampler::g_firstPlugIndex = 0;
 
-PrimitiveSampler::PrimitiveSampler( const std::string &name )
-	: Deformer( name )
+PrimitiveSampler::PrimitiveSampler( const std::string &name ) : Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -170,9 +175,7 @@ PrimitiveSampler::PrimitiveSampler( const std::string &name )
 	addChild( new StringPlug( "status" ) );
 }
 
-PrimitiveSampler::~PrimitiveSampler()
-{
-}
+PrimitiveSampler::~PrimitiveSampler() {}
 
 ScenePlug *PrimitiveSampler::sourcePlug()
 {
@@ -226,19 +229,16 @@ const Gaffer::StringPlug *PrimitiveSampler::statusPlug() const
 
 bool PrimitiveSampler::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return Deformer::affectsProcessedObject( input ) ||
-		input == sourceLocationPlug() ||
-		input == primitiveVariablesPlug() ||
-		input == prefixPlug() ||
-		input == statusPlug() ||
-		input == sourcePlug()->existsPlug() ||
-		input == sourcePlug()->objectPlug() ||
-		input == inPlug()->transformPlug() ||
-		input == sourcePlug()->transformPlug() ||
+	return Deformer::affectsProcessedObject( input ) || input == sourceLocationPlug() ||
+		input == primitiveVariablesPlug() || input == prefixPlug() || input == statusPlug() ||
+		input == sourcePlug()->existsPlug() || input == sourcePlug()->objectPlug() ||
+		input == inPlug()->transformPlug() || input == sourcePlug()->transformPlug() ||
 		affectsSamplingFunction( input );
 }
 
-void PrimitiveSampler::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void PrimitiveSampler::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	Deformer::hashProcessedObject( path, context, h );
 
@@ -266,7 +266,9 @@ void PrimitiveSampler::hashProcessedObject( const ScenePath &path, const Gaffer:
 	hashSamplingFunction( h );
 }
 
-IECore::ConstObjectPtr PrimitiveSampler::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr PrimitiveSampler::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	const Primitive *inputPrimitive = runTimeCast<const Primitive>( inputObject );
 	if( !inputPrimitive )
@@ -330,7 +332,9 @@ IECore::ConstObjectPtr PrimitiveSampler::computeProcessedObject( const ScenePath
 			continue;
 		}
 
-		if( auto o = addPrimitiveVariable( outputPrimitive.get(), prefix + p.first, p.second, outputInterpolation, primitiveVariableTransform ) )
+		if( auto o = addPrimitiveVariable(
+				outputPrimitive.get(), prefix + p.first, p.second, outputInterpolation, primitiveVariableTransform
+			) )
 		{
 			outputVariables.push_back( o );
 		}
@@ -378,8 +382,7 @@ Gaffer::ValuePlug::CachePolicy PrimitiveSampler::processedObjectComputeCachePoli
 
 bool PrimitiveSampler::adjustBounds() const
 {
-	return Deformer::adjustBounds() &&
-		prefixPlug()->getValue().empty() &&
+	return Deformer::adjustBounds() && prefixPlug()->getValue().empty() &&
 		StringAlgo::matchMultiple( "P", primitiveVariablesPlug()->getValue() );
 }
 
@@ -388,6 +391,4 @@ bool PrimitiveSampler::affectsSamplingFunction( const Gaffer::Plug *input ) cons
 	return false;
 }
 
-void PrimitiveSampler::hashSamplingFunction( IECore::MurmurHash &h ) const
-{
-}
+void PrimitiveSampler::hashSamplingFunction( IECore::MurmurHash &h ) const {}

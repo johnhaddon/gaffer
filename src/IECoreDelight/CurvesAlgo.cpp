@@ -90,7 +90,10 @@ void staticParameters( const IECoreScene::CurvesPrimitive *object, ParameterList
 	}
 }
 
-bool convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::CurvesPrimitive *> &objects, const IECoreScenePreview::Renderer::SampleTimes &times, NSIContext_t context, const char *handle )
+bool convert(
+	const IECoreScenePreview::Renderer::Samples<const IECoreScene::CurvesPrimitive *> &objects,
+	const IECoreScenePreview::Renderer::SampleTimes &times, NSIContext_t context, const char *handle
+)
 {
 	NSICreate( context, handle, "cubiccurves", 0, nullptr );
 
@@ -99,8 +102,7 @@ bool convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::Cur
 
 	IECoreScenePreview::Renderer::Samples<ParameterList> animatedParameters;
 	NodeAlgo::primitiveVariableParameterLists(
-		IECoreScenePreview::Renderer::staticSamplesCast<const Primitive *>( objects ),
-		parameters, animatedParameters
+		IECoreScenePreview::Renderer::staticSamplesCast<const Primitive *>( objects ), parameters, animatedParameters
 	);
 
 	NSISetAttribute( context, handle, parameters.size(), parameters.data() );
@@ -109,7 +111,9 @@ bool convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::Cur
 	{
 		for( size_t i = 0, e = animatedParameters.size(); i < e; ++i )
 		{
-			NSISetAttributeAtTime( context, handle, times[i], animatedParameters[i].size(), animatedParameters[i].data() );
+			NSISetAttributeAtTime(
+				context, handle, times[i], animatedParameters[i].size(), animatedParameters[i].data()
+			);
 		}
 	}
 

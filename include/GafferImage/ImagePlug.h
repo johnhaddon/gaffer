@@ -80,9 +80,11 @@ namespace GafferImage
 class GAFFERIMAGE_API ImagePlug : public Gaffer::ValuePlug
 {
 
-	public:
+public:
 
-	explicit ImagePlug( const std::string &name = defaultName<ImagePlug>(), Direction direction = In, unsigned flags = Default );
+	explicit ImagePlug(
+		const std::string &name = defaultName<ImagePlug>(), Direction direction = In, unsigned flags = Default
+	);
 	~ImagePlug() override;
 
 	GAFFER_PLUG_DECLARE_TYPE( GafferImage::ImagePlug, ImagePlugTypeId, ValuePlug );
@@ -207,9 +209,13 @@ class GAFFERIMAGE_API ImagePlug : public Gaffer::ValuePlug
 	////////////////////////////////////////////////////////////////////
 	//@{
 	/// Calls `channelDataPlug()->getValue()` using a ChannelDataScope.
-	IECore::ConstFloatVectorDataPtr channelData( const std::string &channelName, const Imath::V2i &tileOrigin, const std::string *viewName = nullptr ) const;
+	IECore::ConstFloatVectorDataPtr channelData(
+		const std::string &channelName, const Imath::V2i &tileOrigin, const std::string *viewName = nullptr
+	) const;
 	/// Calls `channelDataPlug()->hash()` using a ChannelDataScope.
-	IECore::MurmurHash channelDataHash( const std::string &channelName, const Imath::V2i &tileOrigin, const std::string *viewName = nullptr ) const;
+	IECore::MurmurHash channelDataHash(
+		const std::string &channelName, const Imath::V2i &tileOrigin, const std::string *viewName = nullptr
+	) const;
 	/// Calls `viewNamesPlug()->getValue()` using a GlobalScope.
 	IECore::ConstStringVectorDataPtr viewNames() const;
 	/// Calls `viewNamesPlug()->hash()` using a GlobalScope.
@@ -235,7 +241,9 @@ class GAFFERIMAGE_API ImagePlug : public Gaffer::ValuePlug
 	/// Calls `deepPlug()->hash()` using a GlobalScope.
 	IECore::MurmurHash deepHash( const std::string *viewName = nullptr ) const;
 	/// Calls `sampleOffsetsPlug()->getValue()` using a ChannelDataScope.
-	IECore::ConstIntVectorDataPtr sampleOffsets( const Imath::V2i &tileOrigin, const std::string *viewName = nullptr ) const;
+	IECore::ConstIntVectorDataPtr sampleOffsets(
+		const Imath::V2i &tileOrigin, const std::string *viewName = nullptr
+	) const;
 	/// Calls `sampleOffsetsPlug()->hash()` using a ChannelDataScope.
 	IECore::MurmurHash sampleOffsetsHash( const Imath::V2i &tileOrigin, const std::string *viewName = nullptr ) const;
 	//@}
@@ -267,10 +275,7 @@ class GAFFERIMAGE_API ImagePlug : public Gaffer::ValuePlug
 	};
 
 	/// Returns the origin of the tile that contains the point.
-	static Imath::V2i tileOrigin( const Imath::V2i &point )
-	{
-		return tileIndex( point ) * tileSize();
-	}
+	static Imath::V2i tileOrigin( const Imath::V2i &point ) { return tileIndex( point ) * tileSize(); }
 
 	/// Returns the unwrapped index of a point within a tile
 	static int pixelIndex( const Imath::V2i &point, const Imath::V2i &tileOrigin )
@@ -288,7 +293,7 @@ class GAFFERIMAGE_API ImagePlug : public Gaffer::ValuePlug
 
 	static constexpr int tileSizeLog2() { return 7; };
 
-	private:
+private:
 
 	static void compoundObjectToCompoundData( const IECore::CompoundObject *object, IECore::CompoundData *data );
 

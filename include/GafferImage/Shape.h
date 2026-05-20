@@ -53,7 +53,7 @@ IE_CORE_FORWARDDECLARE( ImageTransform )
 class GAFFERIMAGE_API Shape : public FlatImageProcessor
 {
 
-	public:
+public:
 
 	explicit Shape( const std::string &name = defaultName<Shape>() );
 	~Shape() override;
@@ -77,17 +77,32 @@ class GAFFERIMAGE_API Shape : public FlatImageProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
-	void hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	void hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	void hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashViewNames(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	void hashDataWindow(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	void hashChannelNames(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	void hashChannelData(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
 
-	IECore::ConstStringVectorDataPtr computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstStringVectorDataPtr computeViewNames(
+		const Gaffer::Context *context, const ImagePlug *parent
+	) const override;
 	Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-	IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstStringVectorDataPtr computeChannelNames(
+		const Gaffer::Context *context, const ImagePlug *parent
+	) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData(
+		const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+		const ImagePlug *parent
+	) const override;
 
 	/// Must be implemented to return true if the input plug affects the computation of the
 	/// data window for the shape.
@@ -103,11 +118,15 @@ class GAFFERIMAGE_API Shape : public FlatImageProcessor
 	virtual bool affectsShapeChannelData( const Gaffer::Plug *input ) const = 0;
 	/// Must be implemented to call the base class implementation and then append any
 	/// plugs that will be used in computing the shape channel data.
-	virtual void hashShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h ) const = 0;
+	virtual void hashShapeChannelData(
+		const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const = 0;
 	/// Must be implemented to return the channel data for the shape.
-	virtual IECore::ConstFloatVectorDataPtr computeShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const = 0;
+	virtual IECore::ConstFloatVectorDataPtr computeShapeChannelData(
+		const Imath::V2i &tileOrigin, const Gaffer::Context *context
+	) const = 0;
 
-	private:
+private:
 
 	ImagePlug *shapePlug();
 	const ImagePlug *shapePlug() const;

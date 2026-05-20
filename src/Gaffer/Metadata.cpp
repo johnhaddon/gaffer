@@ -183,7 +183,10 @@ void emitValueChangedSignals( IECore::TypeId typeId, IECore::InternedString key,
 	}
 }
 
-void emitMatchingPlugValueChangedSignals( Metadata::PlugValueChangedSignal &signal, Plug *plug, const vector<InternedString> &path, const StringAlgo::MatchPatternPath &matchPath, IECore::InternedString key, Metadata::ValueChangedReason reason )
+void emitMatchingPlugValueChangedSignals(
+	Metadata::PlugValueChangedSignal &signal, Plug *plug, const vector<InternedString> &path,
+	const StringAlgo::MatchPatternPath &matchPath, IECore::InternedString key, Metadata::ValueChangedReason reason
+)
 {
 	/// \todo There is scope for pruning the recursion here early if we
 	/// reproduce the logic of StringAlgo::match ourselves. We don't
@@ -206,9 +209,16 @@ void emitMatchingPlugValueChangedSignals( Metadata::PlugValueChangedSignal &sign
 
 // The `matchPatternPath` is passed redundantly rather than derived from `plugPath`
 // because in all cases we have already done the work of tokenizing it outside this function.
-void emitPlugValueChangedSignals( IECore::TypeId ancestorTypeId, const StringAlgo::MatchPattern &plugPath, const StringAlgo::MatchPatternPath &matchPatternPath, IECore::InternedString key, Metadata::ValueChangedReason reason )
+void emitPlugValueChangedSignals(
+	IECore::TypeId ancestorTypeId, const StringAlgo::MatchPattern &plugPath,
+	const StringAlgo::MatchPatternPath &matchPatternPath, IECore::InternedString key,
+	Metadata::ValueChangedReason reason
+)
 {
-	assert( reason == Metadata::ValueChangedReason::StaticRegistration || reason == Metadata::ValueChangedReason::StaticDeregistration );
+	assert(
+		reason == Metadata::ValueChangedReason::StaticRegistration ||
+		reason == Metadata::ValueChangedReason::StaticDeregistration
+	);
 
 	Metadata::plugValueChangedSignal()( ancestorTypeId, plugPath, key, nullptr );
 
@@ -219,16 +229,22 @@ void emitPlugValueChangedSignals( IECore::TypeId ancestorTypeId, const StringAlg
 		{
 			for( const auto &plug : Plug::Range( *s.first ) )
 			{
-				emitMatchingPlugValueChangedSignals( s.second->plugSignal, plug.get(), { plug->getName() }, matchPatternPath, key, reason );
+				emitMatchingPlugValueChangedSignals(
+					s.second->plugSignal, plug.get(), { plug->getName() }, matchPatternPath, key, reason
+				);
 			}
 		}
-		else if( ancestorTypeId == Plug::staticTypeId() || RunTimeTyped::inheritsFrom( ancestorTypeId, Plug::staticTypeId() ) )
+		else if(
+			ancestorTypeId == Plug::staticTypeId() || RunTimeTyped::inheritsFrom( ancestorTypeId, Plug::staticTypeId() )
+		)
 		{
 			for( const auto &plug : Plug::RecursiveRange( *s.first ) )
 			{
 				if( plug->isInstanceOf( ancestorTypeId ) )
 				{
-					emitMatchingPlugValueChangedSignals( s.second->plugSignal, plug.get(), {}, matchPatternPath, key, reason );
+					emitMatchingPlugValueChangedSignals(
+						s.second->plugSignal, plug.get(), {}, matchPatternPath, key, reason
+					);
 				}
 			}
 		}
@@ -243,18 +259,14 @@ using NamedValue = std::pair<InternedString, Metadata::ValueFunction>;
 using Values = multi_index::multi_index_container<
 	NamedValue,
 	multi_index::indexed_by<
-		multi_index::ordered_unique<
-			multi_index::key<&NamedValue::first>>,
-		multi_index::sequenced<>>>;
+		multi_index::ordered_unique<multi_index::key<&NamedValue::first>>, multi_index::sequenced<>>>;
 
 using NamedValues = std::pair<InternedString, Values>;
 
 using MetadataMap = multi_index::multi_index_container<
 	NamedValues,
 	multi_index::indexed_by<
-		multi_index::ordered_unique<
-			multi_index::key<&NamedValues::first>>,
-		multi_index::sequenced<>>>;
+		multi_index::ordered_unique<multi_index::key<&NamedValues::first>>, multi_index::sequenced<>>>;
 
 MetadataMap &metadataMap()
 {
@@ -282,16 +294,12 @@ struct GraphComponentMetadata
 	using Values = multi_index::multi_index_container<
 		NamedValue,
 		multi_index::indexed_by<
-			multi_index::ordered_unique<
-				multi_index::key<&NamedValue::first>>,
-			multi_index::sequenced<>>>;
+			multi_index::ordered_unique<multi_index::key<&NamedValue::first>>, multi_index::sequenced<>>>;
 
 	using PlugValues = multi_index::multi_index_container<
 		NamedPlugValue,
 		multi_index::indexed_by<
-			multi_index::ordered_unique<
-				multi_index::key<&NamedPlugValue::first>>,
-			multi_index::sequenced<>>>;
+			multi_index::ordered_unique<multi_index::key<&NamedPlugValue::first>>, multi_index::sequenced<>>>;
 
 	using PlugPathsToValues = map<StringAlgo::MatchPatternPath, PlugValues>;
 
@@ -312,10 +320,7 @@ GraphComponentMetadataMap &graphComponentMetadataMap()
 
 struct NamedInstanceValue
 {
-	NamedInstanceValue( InternedString n, ConstDataPtr v, bool p )
-		: name( n ), value( v ), persistent( p )
-	{
-	}
+	NamedInstanceValue( InternedString n, ConstDataPtr v, bool p ) : name( n ), value( v ), persistent( p ) {}
 
 	InternedString name;
 	ConstDataPtr value;
@@ -325,9 +330,7 @@ struct NamedInstanceValue
 using InstanceValues = multi_index::multi_index_container<
 	NamedInstanceValue,
 	multi_index::indexed_by<
-		multi_index::ordered_unique<
-			multi_index::key<&NamedInstanceValue::name>>,
-		multi_index::sequenced<>>>;
+		multi_index::ordered_unique<multi_index::key<&NamedInstanceValue::name>>, multi_index::sequenced<>>>;
 
 using InstanceMetadataMap = concurrent_hash_map<const GraphComponent *, std::unique_ptr<InstanceValues>>;
 
@@ -405,7 +408,8 @@ void registerInstanceValueAction( GraphComponent *instance, InternedString key, 
 	// to re-enter the Metadata API.
 	accessor.release();
 
-	const Metadata::ValueChangedReason reason = value ? Metadata::ValueChangedReason::InstanceRegistration : Metadata::ValueChangedReason::InstanceDeregistration;
+	const Metadata::ValueChangedReason reason = value ? Metadata::ValueChangedReason::InstanceRegistration :
+														Metadata::ValueChangedReason::InstanceDeregistration;
 
 	if( Node *node = runTimeCast<Node>( instance ) )
 	{
@@ -442,10 +446,7 @@ void registerInstanceValue( GraphComponent *instance, IECore::InternedString key
 	{
 		// if we already had a value, we can early out if it's the same as
 		// the new one.
-		if(
-			( *currentValue == *value ) ||
-			( *currentValue && *value && ( *currentValue )->isEqualTo( value->get() ) )
-		)
+		if( ( *currentValue == *value ) || ( *currentValue && *value && ( *currentValue )->isEqualTo( value->get() ) ) )
 		{
 			return;
 		}
@@ -463,7 +464,9 @@ void registerInstanceValue( GraphComponent *instance, IECore::InternedString key
 	);
 }
 
-void registeredInstanceValues( const GraphComponent *graphComponent, std::vector<IECore::InternedString> &keys, unsigned registrationTypes )
+void registeredInstanceValues(
+	const GraphComponent *graphComponent, std::vector<IECore::InternedString> &keys, unsigned registrationTypes
+)
 {
 	InstanceMetadataMap &m = instanceMetadataMap();
 	InstanceMetadataMap::const_accessor accessor;
@@ -473,12 +476,11 @@ void registeredInstanceValues( const GraphComponent *graphComponent, std::vector
 	}
 
 	const InstanceValues::nth_index<1>::type &index = accessor->second->get<1>();
-	for( InstanceValues::nth_index<1>::type::const_iterator vIt = index.begin(), veIt = index.end(); vIt != veIt; ++vIt )
+	for( InstanceValues::nth_index<1>::type::const_iterator vIt = index.begin(), veIt = index.end(); vIt != veIt;
+		 ++vIt )
 	{
-		if(
-			( vIt->persistent && ( registrationTypes & Metadata::RegistrationTypes::InstancePersistent ) ) ||
-			( !vIt->persistent && ( registrationTypes & Metadata::RegistrationTypes::InstanceNonPersistent ) )
-		)
+		if( ( vIt->persistent && ( registrationTypes & Metadata::RegistrationTypes::InstancePersistent ) ) ||
+			( !vIt->persistent && ( registrationTypes & Metadata::RegistrationTypes::InstanceNonPersistent ) ) )
 		{
 			keys.push_back( vIt->name );
 		}
@@ -641,7 +643,9 @@ IECore::ConstDataPtr Metadata::valueInternal( IECore::InternedString target, IEC
 	return nullptr;
 }
 
-std::vector<IECore::InternedString> Metadata::targetsWithMetadata( const IECore::StringAlgo::MatchPattern &targetPattern, IECore::InternedString key )
+std::vector<IECore::InternedString> Metadata::targetsWithMetadata(
+	const IECore::StringAlgo::MatchPattern &targetPattern, IECore::InternedString key
+)
 {
 	vector<InternedString> result;
 	const auto &orderedIndex = metadataMap().get<1>();
@@ -717,7 +721,9 @@ void Metadata::deregisterValue( IECore::TypeId typeId, IECore::InternedString ke
 	emitValueChangedSignals( typeId, key, Metadata::ValueChangedReason::StaticDeregistration );
 }
 
-void Metadata::deregisterValue( IECore::TypeId ancestorTypeId, const StringAlgo::MatchPattern &plugPath, IECore::InternedString key )
+void Metadata::deregisterValue(
+	IECore::TypeId ancestorTypeId, const StringAlgo::MatchPattern &plugPath, IECore::InternedString key
+)
 {
 	auto &m = graphComponentMetadataMap()[ancestorTypeId];
 	const StringAlgo::MatchPatternPath matchPatternPath = StringAlgo::matchPatternPath( plugPath, '.' );
@@ -731,7 +737,9 @@ void Metadata::deregisterValue( IECore::TypeId ancestorTypeId, const StringAlgo:
 
 	plugValues.erase( it );
 
-	emitPlugValueChangedSignals( ancestorTypeId, plugPath, matchPatternPath, key, Metadata::ValueChangedReason::StaticDeregistration );
+	emitPlugValueChangedSignals(
+		ancestorTypeId, plugPath, matchPatternPath, key, Metadata::ValueChangedReason::StaticDeregistration
+	);
 }
 
 void Metadata::deregisterValue( GraphComponent *target, IECore::InternedString key )
@@ -775,12 +783,18 @@ std::vector<Node *> Metadata::nodesWithMetadata( GraphComponent *root, IECore::I
 	return nodes;
 }
 
-void Metadata::registerValue( IECore::TypeId ancestorTypeId, const StringAlgo::MatchPattern &plugPath, IECore::InternedString key, IECore::ConstDataPtr value )
+void Metadata::registerValue(
+	IECore::TypeId ancestorTypeId, const StringAlgo::MatchPattern &plugPath, IECore::InternedString key,
+	IECore::ConstDataPtr value
+)
 {
 	registerValue( ancestorTypeId, plugPath, key, [value]( const Plug * ) { return value; } );
 }
 
-void Metadata::registerValue( IECore::TypeId ancestorTypeId, const StringAlgo::MatchPattern &plugPath, IECore::InternedString key, PlugValueFunction value )
+void Metadata::registerValue(
+	IECore::TypeId ancestorTypeId, const StringAlgo::MatchPattern &plugPath, IECore::InternedString key,
+	PlugValueFunction value
+)
 {
 	auto &m = graphComponentMetadataMap()[ancestorTypeId];
 	const StringAlgo::MatchPatternPath matchPatternPath = StringAlgo::matchPatternPath( plugPath, '.' );
@@ -798,7 +812,9 @@ void Metadata::registerValue( IECore::TypeId ancestorTypeId, const StringAlgo::M
 		plugValues.replace( it, namedValue );
 	}
 
-	emitPlugValueChangedSignals( ancestorTypeId, plugPath, matchPatternPath, key, Metadata::ValueChangedReason::StaticRegistration );
+	emitPlugValueChangedSignals(
+		ancestorTypeId, plugPath, matchPatternPath, key, Metadata::ValueChangedReason::StaticRegistration
+	);
 }
 
 std::vector<Plug *> Metadata::plugsWithMetadata( GraphComponent *root, IECore::InternedString key, bool instanceOnly )
@@ -840,12 +856,16 @@ std::vector<Plug *> Metadata::plugsWithMetadata( GraphComponent *root, IECore::I
 	return plugs;
 }
 
-void Metadata::registerValue( GraphComponent *target, IECore::InternedString key, IECore::ConstDataPtr value, bool persistent )
+void Metadata::registerValue(
+	GraphComponent *target, IECore::InternedString key, IECore::ConstDataPtr value, bool persistent
+)
 {
 	registerInstanceValue( target, key, value, persistent );
 }
 
-std::vector<IECore::InternedString> Metadata::registeredValues( const GraphComponent *target, unsigned registrationTypes )
+std::vector<IECore::InternedString> Metadata::registeredValues(
+	const GraphComponent *target, unsigned registrationTypes
+)
 {
 	std::vector<IECore::InternedString> keys;
 
@@ -886,7 +906,8 @@ std::vector<IECore::InternedString> Metadata::registeredValues( const GraphCompo
 					auto nIt = graphComponentMetadataMap().find( typeId );
 					if( nIt != graphComponentMetadataMap().end() )
 					{
-						for( auto it = nIt->second.plugPathsToValues.begin(), eIt = nIt->second.plugPathsToValues.end(); it != eIt; ++it )
+						for( auto it = nIt->second.plugPathsToValues.begin(), eIt = nIt->second.plugPathsToValues.end();
+							 it != eIt; ++it )
 						{
 							if( StringAlgo::match( plugPath, it->first ) )
 							{
@@ -936,12 +957,16 @@ std::vector<IECore::InternedString> Metadata::registeredValues( const GraphCompo
 	return keys;
 }
 
-void Metadata::registeredValues( const GraphComponent *target, std::vector<IECore::InternedString> &keys, bool instanceOnly, bool persistentOnly )
+void Metadata::registeredValues(
+	const GraphComponent *target, std::vector<IECore::InternedString> &keys, bool instanceOnly, bool persistentOnly
+)
 {
 	keys = registeredValues( target, registrationTypes( instanceOnly, persistentOnly ) );
 }
 
-IECore::ConstDataPtr Metadata::valueInternal( const GraphComponent *target, IECore::InternedString key, unsigned registrationTypes )
+IECore::ConstDataPtr Metadata::valueInternal(
+	const GraphComponent *target, IECore::InternedString key, unsigned registrationTypes
+)
 {
 	// Look for instance values first. These override
 	// everything else.
@@ -951,10 +976,8 @@ IECore::ConstDataPtr Metadata::valueInternal( const GraphComponent *target, IECo
 		bool persistent;
 		if( OptionalData iv = instanceValue( target, key, &persistent ) )
 		{
-			if(
-				( !persistent && ( registrationTypes & RegistrationTypes::InstanceNonPersistent ) ) ||
-				( persistent && ( registrationTypes & RegistrationTypes::InstancePersistent ) )
-			)
+			if( ( !persistent && ( registrationTypes & RegistrationTypes::InstanceNonPersistent ) ) ||
+				( persistent && ( registrationTypes & RegistrationTypes::InstancePersistent ) ) )
 			{
 				return *iv;
 			}
@@ -1054,7 +1077,9 @@ IECore::ConstDataPtr Metadata::valueInternal( const GraphComponent *target, IECo
 	return nullptr;
 }
 
-IECore::ConstDataPtr Metadata::valueInternal( const GraphComponent *target, IECore::InternedString key, bool instanceOnly )
+IECore::ConstDataPtr Metadata::valueInternal(
+	const GraphComponent *target, IECore::InternedString key, bool instanceOnly
+)
 {
 	return Metadata::valueInternal( target, key, registrationTypes( instanceOnly ) );
 }

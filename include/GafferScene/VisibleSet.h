@@ -78,7 +78,8 @@ struct GAFFERSCENE_API VisibleSet
 		};
 
 		Visibility( DrawMode drawMode = DrawMode::None, bool descendantsVisible = false )
-			: drawMode( drawMode ), descendantsVisible( descendantsVisible )
+			: drawMode( drawMode ),
+			  descendantsVisible( descendantsVisible )
 		{
 		}
 

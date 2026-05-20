@@ -58,8 +58,7 @@ GAFFER_NODE_DEFINE_TYPE( MapProjection );
 
 size_t MapProjection::g_firstPlugIndex = 0;
 
-MapProjection::MapProjection( const std::string &name )
-	: ObjectProcessor( name, PathMatcher::EveryMatch )
+MapProjection::MapProjection( const std::string &name ) : ObjectProcessor( name, PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "camera" ) );
@@ -67,9 +66,7 @@ MapProjection::MapProjection( const std::string &name )
 	addChild( new StringPlug( "uvSet", Plug::In, "uv" ) );
 }
 
-MapProjection::~MapProjection()
-{
-}
+MapProjection::~MapProjection() {}
 
 Gaffer::StringPlug *MapProjection::cameraPlug()
 {
@@ -103,14 +100,13 @@ const Gaffer::StringPlug *MapProjection::uvSetPlug() const
 
 bool MapProjection::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return ObjectProcessor::affectsProcessedObject( input ) ||
-		input == cameraPlug() ||
-		input == positionPlug() ||
-		input == uvSetPlug() ||
-		input == inPlug()->transformPlug();
+	return ObjectProcessor::affectsProcessedObject( input ) || input == cameraPlug() || input == positionPlug() ||
+		input == uvSetPlug() || input == inPlug()->transformPlug();
 }
 
-void MapProjection::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void MapProjection::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ObjectProcessor::hashProcessedObject( path, context, h );
 
@@ -125,7 +121,9 @@ void MapProjection::hashProcessedObject( const ScenePath &path, const Gaffer::Co
 	uvSetPlug()->hash( h );
 }
 
-IECore::ConstObjectPtr MapProjection::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr MapProjection::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	// early out if it's not a primitive with a "P" variable
 	const Primitive *inputPrimitive = runTimeCast<const Primitive>( inputObject );
@@ -152,7 +150,12 @@ IECore::ConstObjectPtr MapProjection::computeProcessedObject( const ScenePath &p
 	{
 		string pathString;
 		ScenePlug::pathToString( path, pathString );
-		throw IECore::Exception( fmt::format( "Position primitive variable \"{}\" on object \"{}\" should be V3fVectorData (but is {})", position, pathString, pPrimVar.data->typeName() ) );
+		throw IECore::Exception(
+			fmt::format(
+				"Position primitive variable \"{}\" on object \"{}\" should be V3fVectorData (but is {})", position,
+				pathString, pPrimVar.data->typeName()
+			)
+		);
 	}
 
 	// early out if the uv set name hasn't been provided
@@ -200,10 +203,8 @@ IECore::ConstObjectPtr MapProjection::computeProcessedObject( const ScenePath &p
 	V2fVectorDataPtr uvData = new V2fVectorData();
 	uvData->setInterpretation( GeometricData::UV );
 
-	result->variables[uvSet] = PrimitiveVariable(
-		pPrimVar.interpolation, uvData,
-		pPrimVar.indices ? pPrimVar.indices->copy() : nullptr
-	);
+	result->variables[uvSet] =
+		PrimitiveVariable( pPrimVar.interpolation, uvData, pPrimVar.indices ? pPrimVar.indices->copy() : nullptr );
 
 	const vector<V3f> &p = pData->readable();
 	vector<V2f> &uv = uvData->writable();
@@ -218,10 +219,8 @@ IECore::ConstObjectPtr MapProjection::computeProcessedObject( const ScenePath &p
 			pScreen /= -pCamera.z;
 		}
 		uv.push_back(
-			V2f(
-				lerpfactor( pScreen.x, normalizedScreenWindow.min.x, normalizedScreenWindow.max.x ),
-				lerpfactor( pScreen.y, normalizedScreenWindow.min.y, normalizedScreenWindow.max.y )
-			)
+			V2f( lerpfactor( pScreen.x, normalizedScreenWindow.min.x, normalizedScreenWindow.max.x ),
+				 lerpfactor( pScreen.y, normalizedScreenWindow.min.y, normalizedScreenWindow.max.y ) )
 		);
 	}
 

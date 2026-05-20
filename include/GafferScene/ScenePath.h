@@ -59,11 +59,16 @@ IE_CORE_FORWARDDECLARE( ScenePlug )
 class GAFFERSCENE_API ScenePath : public Gaffer::Path
 {
 
-	public:
+public:
 
 	explicit ScenePath( ScenePlugPtr scene, Gaffer::ContextPtr context, Gaffer::PathFilterPtr filter = nullptr );
-	ScenePath( ScenePlugPtr scene, Gaffer::ContextPtr context, const std::string &path, Gaffer::PathFilterPtr filter = nullptr );
-	ScenePath( ScenePlugPtr scene, Gaffer::ContextPtr context, const Names &names, const IECore::InternedString &root = "/", Gaffer::PathFilterPtr filter = nullptr );
+	ScenePath(
+		ScenePlugPtr scene, Gaffer::ContextPtr context, const std::string &path, Gaffer::PathFilterPtr filter = nullptr
+	);
+	ScenePath(
+		ScenePlugPtr scene, Gaffer::ContextPtr context, const Names &names, const IECore::InternedString &root = "/",
+		Gaffer::PathFilterPtr filter = nullptr
+	);
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferScene::ScenePath, ScenePathTypeId, Gaffer::Path );
 
@@ -79,20 +84,26 @@ class GAFFERSCENE_API ScenePath : public Gaffer::Path
 
 	bool isValid( const IECore::Canceller *canceller = nullptr ) const override;
 	bool isLeaf( const IECore::Canceller *canceller = nullptr ) const override;
-	void propertyNames( std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr ) const override;
-	Gaffer::ConstContextPtr contextProperty( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override;
+	void propertyNames(
+		std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr
+	) const override;
+	Gaffer::ConstContextPtr contextProperty(
+		const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr
+	) const override;
 	Gaffer::PathPtr copy() const override;
 
 	const Gaffer::Plug *cancellationSubject() const override;
 
-	static Gaffer::PathFilterPtr createStandardFilter( const std::vector<std::string> &setNames = std::vector<std::string>(), const std::string &setsLabel = "" );
+	static Gaffer::PathFilterPtr createStandardFilter(
+		const std::vector<std::string> &setNames = std::vector<std::string>(), const std::string &setsLabel = ""
+	);
 
-	protected:
+protected:
 
 	void doChildren( std::vector<Gaffer::PathPtr> &children, const IECore::Canceller *canceller ) const override;
 	void pathChangedSignalCreated() override;
 
-	private:
+private:
 
 	void contextChanged( const IECore::InternedString &key );
 	void plugDirtied( Gaffer::Plug *plug );

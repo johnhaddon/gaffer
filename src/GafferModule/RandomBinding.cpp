@@ -66,7 +66,9 @@ void setupWrapper( RandomChoice &r, const Gaffer::ValuePlug &p )
 class RandomChoiceSerialiser : public NodeSerialiser
 {
 
-	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsConstruction(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override
 	{
 		const RandomChoice *node = child->parent<RandomChoice>();
 		if( child == node->outPlug() )
@@ -77,7 +79,9 @@ class RandomChoiceSerialiser : public NodeSerialiser
 		return NodeSerialiser::childNeedsConstruction( child, serialisation );
 	}
 
-	std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
+	std::string postConstructor(
+		const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+	) const override
 	{
 		std::string result = NodeSerialiser::postConstructor( graphComponent, identifier, serialisation );
 
@@ -107,8 +111,7 @@ class RandomChoiceSerialiser : public NodeSerialiser
 void GafferModule::bindRandom()
 {
 
-	DependencyNodeClass<Random>()
-		.def( "randomColor", &randomColor );
+	DependencyNodeClass<Random>().def( "randomColor", &randomColor );
 
 	DependencyNodeClass<RandomChoice>()
 		.def( "setup", &setupWrapper )

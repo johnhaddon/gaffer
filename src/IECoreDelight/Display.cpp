@@ -53,7 +53,10 @@ namespace
 // Implementation
 // ==============
 
-PtDspyError imageOpen( PtDspyImageHandle *image, const char *driverName, const char *fileName, int width, int height, int paramcount, const UserParameter *parameters, int formatCount, PtDspyDevFormat *format, PtFlagStuff *flags )
+PtDspyError imageOpen(
+	PtDspyImageHandle *image, const char *driverName, const char *fileName, int width, int height, int paramcount,
+	const UserParameter *parameters, int formatCount, PtDspyDevFormat *format, PtFlagStuff *flags
+)
 {
 	*image = nullptr;
 
@@ -99,12 +102,18 @@ PtDspyError imageOpen( PtDspyImageHandle *image, const char *driverName, const c
 
 	for( int p = 0; p < paramcount; p++ )
 	{
-		if( !strcmp( parameters[p].name, "OriginalSize" ) && parameters[p].valueType == (char)'i' && parameters[p].valueCount == (char)2 && parameters[p].nbytes == (int)( parameters[p].valueCount * sizeof( int ) ) )
+		if( !strcmp( parameters[p].name, "OriginalSize" ) && parameters[p].valueType == (char)'i' &&
+			parameters[p].valueCount == (char)2 &&
+			parameters[p].nbytes == (int)( parameters[p].valueCount * sizeof( int ) ) )
 		{
 			originalSize.x = static_cast<const int *>( parameters[p].value )[0];
 			originalSize.y = static_cast<const int *>( parameters[p].value )[1];
 		}
-		else if( !strcmp( parameters[p].name, "origin" ) && parameters[p].valueType == (char)'i' && parameters[p].valueCount == (char)2 && parameters[p].nbytes == (int)( parameters[p].valueCount * sizeof( int ) ) )
+		else if(
+			!strcmp( parameters[p].name, "origin" ) && parameters[p].valueType == (char)'i' &&
+			parameters[p].valueCount == (char)2 &&
+			parameters[p].nbytes == (int)( parameters[p].valueCount * sizeof( int ) )
+		)
 		{
 			origin.x = static_cast<const int *>( parameters[p].value )[0];
 			origin.y = static_cast<const int *>( parameters[p].value )[1];
@@ -216,23 +225,20 @@ PtDspyError imageOpen( PtDspyImageHandle *image, const char *driverName, const c
 
 	// Calculate display and data windows
 
-	Box2i displayWindow(
-		V2i( 0 ),
-		originalSize - V2i( 1 )
-	);
+	Box2i displayWindow( V2i( 0 ), originalSize - V2i( 1 ) );
 
-	Box2i dataWindow(
-		origin,
-		origin + V2i( width - 1, height - 1 )
-	);
+	Box2i dataWindow( origin, origin + V2i( width - 1, height - 1 ) );
 
 	// Create the display driver
 
 	IECoreImage::DisplayDriverPtr dd = nullptr;
 	try
 	{
-		const StringData *driverType = convertedParameters->member<StringData>( "driverType", true /* throw if missing */ );
-		dd = IECoreImage::DisplayDriver::create( driverType->readable(), displayWindow, dataWindow, channels, convertedParameters );
+		const StringData *driverType =
+			convertedParameters->member<StringData>( "driverType", true /* throw if missing */ );
+		dd = IECoreImage::DisplayDriver::create(
+			driverType->readable(), displayWindow, dataWindow, channels, convertedParameters
+		);
 	}
 	catch( std::exception &e )
 	{
@@ -292,13 +298,19 @@ PtDspyError imageQuery( PtDspyImageHandle image, PtDspyQueryType type, int size,
 	return PkDspyErrorUnsupported;
 }
 
-PtDspyError imageData( PtDspyImageHandle image, int xMin, int xMaxPlusOne, int yMin, int yMaxPlusOne, int entrySize, const unsigned char *data )
+PtDspyError imageData(
+	PtDspyImageHandle image, int xMin, int xMaxPlusOne, int yMin, int yMaxPlusOne, int entrySize,
+	const unsigned char *data
+)
 {
 	IECoreImage::DisplayDriver *dd = static_cast<IECoreImage::DisplayDriver *>( image );
 	Box2i dataWindow = dd->dataWindow();
 
 	// Convert coordinates from cropped image to original image coordinates.
-	Box2i box( V2i( xMin + dataWindow.min.x, yMin + dataWindow.min.y ), V2i( xMaxPlusOne - 1 + dataWindow.min.x, yMaxPlusOne - 1 + dataWindow.min.y ) );
+	Box2i box(
+		V2i( xMin + dataWindow.min.x, yMin + dataWindow.min.y ),
+		V2i( xMaxPlusOne - 1 + dataWindow.min.x, yMaxPlusOne - 1 + dataWindow.min.y )
+	);
 	int channels = dd->channelNames().size();
 	int blockSize = ( xMaxPlusOne - xMin ) * ( yMaxPlusOne - yMin );
 	int bufferSize = channels * blockSize;
@@ -374,12 +386,7 @@ PtDspyError imageClose( PtDspyImageHandle image )
 // ============
 
 const PtDspyDriverFunctionTable g_functionTable = {
-	k_PtDriverCurrentVersion,
-	&imageOpen,
-	&imageData,
-	&imageClose,
-	&imageQuery,
-	nullptr
+	k_PtDriverCurrentVersion, &imageOpen, &imageData, &imageClose, &imageQuery, nullptr
 };
 
 const PtDspyError g_registration = DspyRegisterDriverTable( "ieDisplay", &g_functionTable );

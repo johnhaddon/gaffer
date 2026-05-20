@@ -52,8 +52,7 @@ GAFFER_NODE_DEFINE_TYPE( DeleteViews );
 
 size_t DeleteViews::g_firstPlugIndex = 0;
 
-DeleteViews::DeleteViews( const std::string &name )
-	: ImageProcessor( name )
+DeleteViews::DeleteViews( const std::string &name ) : ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -69,9 +68,7 @@ DeleteViews::DeleteViews( const std::string &name )
 	outPlug()->channelDataPlug()->setInput( inPlug()->channelDataPlug() );
 }
 
-DeleteViews::~DeleteViews()
-{
-}
+DeleteViews::~DeleteViews() {}
 
 Gaffer::IntPlug *DeleteViews::modePlug()
 {
@@ -103,7 +100,9 @@ void DeleteViews::affects( const Gaffer::Plug *input, AffectedPlugsContainer &ou
 	}
 }
 
-void DeleteViews::hashViewNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeleteViews::hashViewNames(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashViewNames( output, context, h );
 	inPlug()->viewNamesPlug()->hash( h );
@@ -111,7 +110,9 @@ void DeleteViews::hashViewNames( const GafferImage::ImagePlug *output, const Gaf
 	viewsPlug()->hash( h );
 }
 
-IECore::ConstStringVectorDataPtr DeleteViews::computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr DeleteViews::computeViewNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	ConstStringVectorDataPtr inViewNamesData = inPlug()->viewNamesPlug()->getValue();
 

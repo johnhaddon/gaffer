@@ -47,16 +47,13 @@ GAFFER_NODE_DEFINE_TYPE( PrimitiveVariables );
 
 size_t PrimitiveVariables::g_firstPlugIndex = 0;
 
-PrimitiveVariables::PrimitiveVariables( const std::string &name )
-	: ObjectProcessor( name, PathMatcher::EveryMatch )
+PrimitiveVariables::PrimitiveVariables( const std::string &name ) : ObjectProcessor( name, PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new CompoundDataPlug( "primitiveVariables" ) );
 }
 
-PrimitiveVariables::~PrimitiveVariables()
-{
-}
+PrimitiveVariables::~PrimitiveVariables() {}
 
 Gaffer::CompoundDataPlug *PrimitiveVariables::primitiveVariablesPlug()
 {
@@ -70,11 +67,12 @@ const Gaffer::CompoundDataPlug *PrimitiveVariables::primitiveVariablesPlug() con
 
 bool PrimitiveVariables::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return ObjectProcessor::affectsProcessedObject( input ) ||
-		primitiveVariablesPlug()->isAncestorOf( input );
+	return ObjectProcessor::affectsProcessedObject( input ) || primitiveVariablesPlug()->isAncestorOf( input );
 }
 
-void PrimitiveVariables::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void PrimitiveVariables::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	if( !primitiveVariablesPlug()->children().size() )
 	{
@@ -87,7 +85,9 @@ void PrimitiveVariables::hashProcessedObject( const ScenePath &path, const Gaffe
 	}
 }
 
-IECore::ConstObjectPtr PrimitiveVariables::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr PrimitiveVariables::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	const Primitive *inputPrimitive = runTimeCast<const Primitive>( inputObject );
 	if( !inputPrimitive )

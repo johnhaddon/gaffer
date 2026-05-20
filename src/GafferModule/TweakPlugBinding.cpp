@@ -53,7 +53,9 @@ using namespace GafferBindings;
 namespace
 {
 
-TweakPlugPtr constructUsingData( const std::string &tweakName, IECore::ConstDataPtr tweakValue, TweakPlug::Mode mode, bool enabled )
+TweakPlugPtr constructUsingData(
+	const std::string &tweakName, IECore::ConstDataPtr tweakValue, TweakPlug::Mode mode, bool enabled
+)
 {
 	return new TweakPlug( tweakName, tweakValue.get(), mode, enabled );
 }
@@ -64,7 +66,9 @@ bool applyTweak( const TweakPlug &plug, IECore::CompoundData &parameters, TweakP
 	return plug.applyTweak( &parameters, missingMode );
 }
 
-bool applyTweaksToParameters( const TweaksPlug &tweaksPlug, IECore::CompoundData &parameters, TweakPlug::MissingMode missingMode )
+bool applyTweaksToParameters(
+	const TweaksPlug &tweaksPlug, IECore::CompoundData &parameters, TweakPlug::MissingMode missingMode
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	return tweaksPlug.applyTweaks( &parameters, missingMode );
@@ -72,7 +76,9 @@ bool applyTweaksToParameters( const TweaksPlug &tweaksPlug, IECore::CompoundData
 
 class TweakPlugSerialiser : public ValuePlugSerialiser
 {
-	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsConstruction(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override
 	{
 		return false;
 	}
@@ -148,62 +154,48 @@ void GafferModule::bindTweakPlugs()
 	tweakPlugClass
 		.def(
 			init<const std::string &, const std::string &, bool, TweakPlug::Mode, ValuePlugPtr, unsigned>(
-				(
-					boost::python::arg( "name" ) = GraphComponent::defaultName<TweakPlug>(),
-					boost::python::arg( "nameDefault" ) = "",
-					boost::python::arg( "enabledDefault" ) = true,
-					boost::python::arg( "modeDefault" ) = TweakPlug::Mode::Replace,
-					boost::python::arg( "valuePlug" ),
-					boost::python::arg( "flags" ) = Plug::Default
-				)
+				( boost::python::arg( "name" ) = GraphComponent::defaultName<TweakPlug>(),
+				  boost::python::arg( "nameDefault" ) = "", boost::python::arg( "enabledDefault" ) = true,
+				  boost::python::arg( "modeDefault" ) = TweakPlug::Mode::Replace, boost::python::arg( "valuePlug" ),
+				  boost::python::arg( "flags" ) = Plug::Default )
 			)
 		)
 		.def(
 			init<ValuePlug *, const char *, Plug::Direction, unsigned>(
-				(
-					boost::python::arg_( "valuePlug" ),
-					boost::python::arg_( "name" ) = GraphComponent::defaultName<TweakPlug>(),
-					boost::python::arg_( "direction" ) = Plug::In,
-					boost::python::arg_( "flags" ) = Plug::Default
-				)
+				( boost::python::arg_( "valuePlug" ),
+				  boost::python::arg_( "name" ) = GraphComponent::defaultName<TweakPlug>(),
+				  boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "flags" ) = Plug::Default )
 			)
 		)
 		.def(
 			"__init__",
 			make_constructor(
-				constructUsingData,
-				default_call_policies(),
-				(
-					boost::python::arg_( "tweakName" ),
-					boost::python::arg_( "valuePlug" ),
-					arg( "mode" ) = TweakPlug::Replace,
-					boost::python::arg_( "enabled" ) = true
-				)
+				constructUsingData, default_call_policies(),
+				( boost::python::arg_( "tweakName" ), boost::python::arg_( "valuePlug" ),
+				  arg( "mode" ) = TweakPlug::Replace, boost::python::arg_( "enabled" ) = true )
 			)
 		)
 		.def(
 			init<const std::string &, const ValuePlugPtr, TweakPlug::Mode, bool>(
-				(
-					boost::python::arg_( "tweakName" ),
-					boost::python::arg_( "value" ),
-					arg( "mode" ) = TweakPlug::Replace,
-					boost::python::arg_( "enabled" ) = true
-				)
+				( boost::python::arg_( "tweakName" ), boost::python::arg_( "value" ),
+				  arg( "mode" ) = TweakPlug::Replace, boost::python::arg_( "enabled" ) = true )
 			)
 		)
-		.def( "applyTweak", &applyTweak, ( arg( "parameters" ), arg( "missingMode" ) = TweakPlug::MissingMode::Error ) );
+		.def(
+			"applyTweak", &applyTweak, ( arg( "parameters" ), arg( "missingMode" ) = TweakPlug::MissingMode::Error )
+		);
 
 	Serialisation::registerSerialiser( TweakPlug::staticTypeId(), new TweakPlugSerialiser );
 
 	PlugClass<TweaksPlug>()
 		.def(
 			init<const std::string &, Plug::Direction, unsigned>(
-				(
-					boost::python::arg_( "name" ) = GraphComponent::defaultName<TweaksPlug>(),
-					boost::python::arg_( "direction" ) = Plug::In,
-					boost::python::arg_( "flags" ) = Plug::Default
-				)
+				( boost::python::arg_( "name" ) = GraphComponent::defaultName<TweaksPlug>(),
+				  boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "flags" ) = Plug::Default )
 			)
 		)
-		.def( "applyTweaks", &applyTweaksToParameters, ( arg( "parameters" ), arg( "missingMode" ) = TweakPlug::MissingMode::Error ) );
+		.def(
+			"applyTweaks", &applyTweaksToParameters,
+			( arg( "parameters" ), arg( "missingMode" ) = TweakPlug::MissingMode::Error )
+		);
 }

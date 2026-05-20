@@ -49,17 +49,14 @@ GAFFER_NODE_DEFINE_TYPE( LookTransform );
 
 size_t LookTransform::g_firstPlugIndex = 0;
 
-LookTransform::LookTransform( const std::string &name )
-	: OpenColorIOTransform( name, true )
+LookTransform::LookTransform( const std::string &name ) : OpenColorIOTransform( name, true )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "look" ) );
 	addChild( new IntPlug( "direction" ) );
 }
 
-LookTransform::~LookTransform()
-{
-}
+LookTransform::~LookTransform() {}
 
 Gaffer::StringPlug *LookTransform::lookPlug()
 {
@@ -107,7 +104,10 @@ OCIO_NAMESPACE::ConstTransformRcPtr LookTransform::transform() const
 	transform->setSrc( workingSpace.c_str() );
 	transform->setLooks( look.c_str() );
 	transform->setDst( workingSpace.c_str() );
-	transform->setDirection( directionPlug()->getValue() == Forward ? OCIO_NAMESPACE::TRANSFORM_DIR_FORWARD : OCIO_NAMESPACE::TRANSFORM_DIR_INVERSE );
+	transform->setDirection(
+		directionPlug()->getValue() == Forward ? OCIO_NAMESPACE::TRANSFORM_DIR_FORWARD :
+												 OCIO_NAMESPACE::TRANSFORM_DIR_INVERSE
+	);
 
 	return transform;
 }

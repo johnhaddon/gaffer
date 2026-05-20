@@ -57,11 +57,16 @@ namespace
 
 struct DriverCreatedSlotCaller
 {
-	void operator () ( boost::python::object slot, IECoreImage::DisplayDriver *driver, const IECore::CompoundData *parameters )
+	void operator () (
+		boost::python::object slot, IECoreImage::DisplayDriver *driver, const IECore::CompoundData *parameters
+	)
 	{
 		try
 		{
-			slot( IECoreImage::DisplayDriverPtr( driver ), IECore::CompoundDataPtr( const_cast<IECore::CompoundData *>( parameters ) ) );
+			slot(
+				IECoreImage::DisplayDriverPtr( driver ),
+				IECore::CompoundDataPtr( const_cast<IECore::CompoundData *>( parameters ) )
+			);
 		}
 		catch( const error_already_set & )
 		{
@@ -73,7 +78,9 @@ struct DriverCreatedSlotCaller
 class CatalogueSerialiser : public NodeSerialiser
 {
 
-	bool childNeedsSerialisation( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsSerialisation(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override
 	{
 		if( child == child->parent<Catalogue>()->outPlug() )
 		{
@@ -125,31 +132,43 @@ void GafferSceneModule::bindCatalogue()
 	{
 		scope s = GafferBindings::DependencyNodeClass<Display>()
 					  .def( "setDriver", &Display::setDriver, ( arg( "driver" ), arg( "copy" ) = false ) )
-					  .def( "getDriver", ( IECoreImage::DisplayDriver * (Display::*)() ) & Display::getDriver, return_value_policy<CastToIntrusivePtr>() )
+					  .def(
+						  "getDriver", ( IECoreImage::DisplayDriver * (Display::*)() ) & Display::getDriver,
+						  return_value_policy<CastToIntrusivePtr>()
+					  )
 					  .def( "driverClosed", &Display::driverClosed )
-					  .def( "driverCreatedSignal", &Display::driverCreatedSignal, return_value_policy<reference_existing_object>() )
+					  .def(
+						  "driverCreatedSignal", &Display::driverCreatedSignal,
+						  return_value_policy<reference_existing_object>()
+					  )
 					  .staticmethod( "driverCreatedSignal" )
-					  .def( "imageReceivedSignal", &Display::imageReceivedSignal, return_value_policy<reference_existing_object>() )
+					  .def(
+						  "imageReceivedSignal", &Display::imageReceivedSignal,
+						  return_value_policy<reference_existing_object>()
+					  )
 					  .staticmethod( "imageReceivedSignal" );
 
-		SignalClass<Display::DriverCreatedSignal, DefaultSignalCaller<Display::DriverCreatedSignal>, DriverCreatedSlotCaller>( "DriverCreated" );
+		SignalClass<
+			Display::DriverCreatedSignal, DefaultSignalCaller<Display::DriverCreatedSignal>, DriverCreatedSlotCaller>(
+			"DriverCreated"
+		);
 	}
 
 	{
 		scope s = GafferBindings::DependencyNodeClass<Catalogue>()
 					  .def( "generateFileName", &generateFileName1 )
 					  .def( "generateFileName", &generateFileName2 )
-					  .def( "displayDriverServer", &Catalogue::displayDriverServer, return_value_policy<IECorePython::CastToIntrusivePtr>() )
+					  .def(
+						  "displayDriverServer", &Catalogue::displayDriverServer,
+						  return_value_policy<IECorePython::CastToIntrusivePtr>()
+					  )
 					  .staticmethod( "displayDriverServer" );
 
 		GafferBindings::PlugClass<Catalogue::Image>()
 			.def(
 				init<const std::string &, Plug::Direction, unsigned>(
-					(
-						boost::python::arg_( "name" ) = GraphComponent::defaultName<Catalogue::Image>(),
-						boost::python::arg_( "direction" ) = Plug::In,
-						boost::python::arg_( "flags" ) = Plug::Default
-					)
+					( boost::python::arg_( "name" ) = GraphComponent::defaultName<Catalogue::Image>(),
+					  boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "flags" ) = Plug::Default )
 				)
 			)
 			.def( "copyFrom", &copyFrom )
@@ -169,7 +188,5 @@ void GafferSceneModule::bindCatalogue()
 	// See "Boost.Python and slightly more tricky inheritance" at
 	// http://lists.boost.org/Archives/boost/2005/09/93017.php for more details.
 
-	boost::python::objects::copy_class_object(
-		type_id<GafferImage::ImageNode>(), Catalogue::internalImageTypeInfo()
-	);
+	boost::python::objects::copy_class_object( type_id<GafferImage::ImageNode>(), Catalogue::internalImageTypeInfo() );
 }

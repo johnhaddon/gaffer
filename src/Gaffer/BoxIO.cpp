@@ -130,7 +130,8 @@ void applyDynamicFlag( Plug *plug )
 		for( Plug::RecursiveIterator it( plug ); !it.done(); ++it )
 		{
 			( *it )->setFlags( Plug::Dynamic, true );
-			if( find( begin( compoundTypes ), end( compoundTypes ), (Gaffer::TypeId)( *it )->typeId() ) == end( compoundTypes ) )
+			if( find( begin( compoundTypes ), end( compoundTypes ), (Gaffer::TypeId)( *it )->typeId() ) ==
+				end( compoundTypes ) )
 			{
 				it.prune();
 			}
@@ -171,13 +172,14 @@ GAFFER_NODE_DEFINE_TYPE( BoxIO );
 
 size_t BoxIO::g_firstPlugIndex = 0;
 
-BoxIO::BoxIO( Plug::Direction direction, const std::string &name )
-	: Node( name ), m_direction( direction )
+BoxIO::BoxIO( Plug::Direction direction, const std::string &name ) : Node( name ), m_direction( direction )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	// Must not accept inputs because the name is syncronised with the promoted
 	// plug name and must therefore not be context-varying.
-	addChild( new StringPlug( "name", Plug::In, direction == Plug::In ? "in" : "out", Plug::Default & ~Plug::AcceptsInputs ) );
+	addChild(
+		new StringPlug( "name", Plug::In, direction == Plug::In ? "in" : "out", Plug::Default & ~Plug::AcceptsInputs )
+	);
 
 	// Connect to the signals we need to syncronise the namePlug() value
 	// with the name of the promotedPlug().
@@ -185,9 +187,7 @@ BoxIO::BoxIO( Plug::Direction direction, const std::string &name )
 	plugInputChangedSignal().connect( boost::bind( &BoxIO::plugInputChanged, this, ::_1 ) );
 }
 
-BoxIO::~BoxIO()
-{
-}
+BoxIO::~BoxIO() {}
 
 StringPlug *BoxIO::namePlug()
 {
@@ -214,8 +214,7 @@ void BoxIO::setup( const Plug *plug )
 	applyDynamicFlag( outPlugInternal() );
 
 	MetadataAlgo::copyIf(
-		plug,
-		m_direction == Plug::In ? inPlugInternal() : outPlugInternal(),
+		plug, m_direction == Plug::In ? inPlugInternal() : outPlugInternal(),
 		[]( const GraphComponent *from, const GraphComponent *to, InternedString name ) {
 			if( StringAlgo::matchMultiple( name.string(), "layout:*" ) )
 			{
@@ -241,10 +240,7 @@ void BoxIO::setup( const Plug *plug )
 		}
 	);
 
-	setupNoduleSectionMetadata(
-		m_direction == Plug::In ? outPlugInternal() : inPlugInternal(),
-		plug
-	);
+	setupNoduleSectionMetadata( m_direction == Plug::In ? outPlugInternal() : inPlugInternal(), plug );
 
 	if( m_direction == Plug::Out )
 	{
@@ -436,9 +432,8 @@ void BoxIO::parentChanged( GraphComponent *oldParent )
 	m_boxPlugInputChangedConnection.disconnect();
 	if( Box *box = parent<Box>() )
 	{
-		m_boxPlugInputChangedConnection = box->plugInputChangedSignal().connect(
-			boost::bind( &BoxIO::plugInputChanged, this, ::_1 )
-		);
+		m_boxPlugInputChangedConnection =
+			box->plugInputChangedSignal().connect( boost::bind( &BoxIO::plugInputChanged, this, ::_1 ) );
 	}
 }
 
@@ -460,23 +455,17 @@ void BoxIO::plugInputChanged( Plug *plug )
 
 	if( promoted )
 	{
-		m_promotedPlugNameChangedConnection = promoted->nameChangedSignal().connect(
-			boost::bind( &BoxIO::promotedPlugNameChanged, this, ::_1 )
-		);
-		m_promotedPlugParentChangedConnection = promoted->parentChangedSignal().connect(
-			boost::bind( &BoxIO::promotedPlugParentChanged, this, ::_1 )
-		);
+		m_promotedPlugNameChangedConnection =
+			promoted->nameChangedSignal().connect( boost::bind( &BoxIO::promotedPlugNameChanged, this, ::_1 ) );
+		m_promotedPlugParentChangedConnection =
+			promoted->parentChangedSignal().connect( boost::bind( &BoxIO::promotedPlugParentChanged, this, ::_1 ) );
 	}
 
 	// Detect manual setups created by legacy scripts from before
 	// we added the pass-through, and fix them to include a pass-through.
 
-	if(
-		m_direction == Plug::Out &&
-		plug == outPlugInternal() &&
-		plug->getInput() == inPlugInternal() &&
-		!passThroughPlugInternal()
-	)
+	if( m_direction == Plug::Out && plug == outPlugInternal() && plug->getInput() == inPlugInternal() &&
+		!passThroughPlugInternal() )
 	{
 		setupPassThrough();
 	}
@@ -505,10 +494,7 @@ void BoxIO::promotedPlugParentChanged( GraphComponent *graphComponent )
 	// ourselves too.
 	if( const ScriptNode *script = scriptNode() )
 	{
-		if(
-			script->currentActionStage() == Action::Undo ||
-			script->currentActionStage() == Action::Redo
-		)
+		if( script->currentActionStage() == Action::Undo || script->currentActionStage() == Action::Redo )
 		{
 			// We don't need to do anything during undo/redo
 			// since in those cases our previous actions are
@@ -697,7 +683,9 @@ void BoxIO::insert( Box *box )
 			box->addChild( boxIn );
 
 			boxIn->inPlugInternal()->setInput( plug );
-			for( std::vector<Plug *>::const_iterator oIt = outputsNeedingBoxIn.begin(), oeIt = outputsNeedingBoxIn.end(); oIt != oeIt; ++oIt )
+			for( std::vector<Plug *>::const_iterator oIt = outputsNeedingBoxIn.begin(),
+													 oeIt = outputsNeedingBoxIn.end();
+				 oIt != oeIt; ++oIt )
 			{
 				( *oIt )->setInput( boxIn->plug() );
 			}

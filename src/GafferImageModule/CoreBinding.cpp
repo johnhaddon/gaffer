@@ -65,7 +65,9 @@ using namespace GafferBindings;
 namespace
 {
 
-IECore::FloatVectorDataPtr channelData( const ImagePlug &plug, const std::string &channelName, const Imath::V2i &tile, const char *viewName, bool copy )
+IECore::FloatVectorDataPtr channelData(
+	const ImagePlug &plug, const std::string &channelName, const Imath::V2i &tile, const char *viewName, bool copy
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	std::string viewNameStr( viewName ? viewName : "" );
@@ -73,7 +75,9 @@ IECore::FloatVectorDataPtr channelData( const ImagePlug &plug, const std::string
 	return copy ? d->copy() : boost::const_pointer_cast<IECore::FloatVectorData>( d );
 }
 
-IECore::MurmurHash channelDataHash( const ImagePlug &plug, const std::string &channelName, const Imath::V2i &tileOrigin, const char *viewName )
+IECore::MurmurHash channelDataHash(
+	const ImagePlug &plug, const std::string &channelName, const Imath::V2i &tileOrigin, const char *viewName
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	std::string viewNameStr( viewName ? viewName : "" );
@@ -242,17 +246,14 @@ std::string formatRepr( const GafferImage::Format &format )
 	else if( format.getDisplayWindow().min == Imath::V2i( 0 ) )
 	{
 		Imath::Box2i box( format.getDisplayWindow() );
-		return fmt::format(
-			"GafferImage.Format( {}, {}, {:.3f} )",
-			box.max.x, box.max.y, format.getPixelAspect()
-		);
+		return fmt::format( "GafferImage.Format( {}, {}, {:.3f} )", box.max.x, box.max.y, format.getPixelAspect() );
 	}
 	else
 	{
 		Imath::Box2i box( format.getDisplayWindow() );
 		return fmt::format(
-			"GafferImage.Format( imath.Box2i( imath.V2i( {}, {} ), imath.V2i( {}, {} ) ), {:.3f} )",
-			box.min.x, box.min.y, box.max.x, box.max.y, format.getPixelAspect()
+			"GafferImage.Format( imath.Box2i( imath.V2i( {}, {} ), imath.V2i( {}, {} ) ), {:.3f} )", box.min.x,
+			box.min.y, box.max.x, box.max.y, format.getPixelAspect()
 		);
 	}
 }
@@ -260,9 +261,11 @@ std::string formatRepr( const GafferImage::Format &format )
 class AtomicFormatPlugSerialiser : public GafferBindings::ValuePlugSerialiser
 {
 
-	public:
+public:
 
-	void moduleDependencies( const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation ) const override
+	void moduleDependencies(
+		const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation
+	) const override
 	{
 		// Imath is needed when reloading Format values which reference Box2i.
 		ValuePlugSerialiser::moduleDependencies( graphComponent, modules, serialisation );
@@ -295,9 +298,11 @@ FormatPlugPtr acquireDefaultFormatPlugWrapper( Gaffer::ScriptNode &scriptNode )
 class FormatPlugSerialiser : public GafferBindings::ValuePlugSerialiser
 {
 
-	public:
+public:
 
-	void moduleDependencies( const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation ) const override
+	void moduleDependencies(
+		const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation
+	) const override
 	{
 		// Imath is needed when reloading Format values which reference Box2i.
 		ValuePlugSerialiser::moduleDependencies( graphComponent, modules, serialisation );
@@ -313,11 +318,8 @@ void GafferImageModule::bindCore()
 	PlugClass<ImagePlug>()
 		.def(
 			init<const std::string &, Gaffer::Plug::Direction, unsigned>(
-				(
-					arg( "name" ) = Gaffer::GraphComponent::defaultName<ImagePlug>(),
-					arg( "direction" ) = Gaffer::Plug::In,
-					arg( "flags" ) = Gaffer::Plug::Default
-				)
+				( arg( "name" ) = Gaffer::GraphComponent::defaultName<ImagePlug>(),
+				  arg( "direction" ) = Gaffer::Plug::In, arg( "flags" ) = Gaffer::Plug::Default )
 			)
 		)
 		.def( "channelData", &channelData, ( arg( "viewName" ) = object(), arg( "_copy" ) = true ) )
@@ -370,20 +372,14 @@ void GafferImageModule::bindCore()
 
 		.def(
 			init<int, int, double>(
-				(
-					boost::python::arg( "width" ),
-					boost::python::arg( "height" ),
-					boost::python::arg( "pixelAspect" ) = 1.0f
-				)
+				( boost::python::arg( "width" ), boost::python::arg( "height" ),
+				  boost::python::arg( "pixelAspect" ) = 1.0f )
 			)
 		)
 		.def(
 			init<const Imath::Box2i &, double, bool>(
-				(
-					boost::python::arg( "displayWindow" ),
-					boost::python::arg( "pixelAspect" ) = 1.0f,
-					boost::python::arg( "fromEXRSpace" ) = false
-				)
+				( boost::python::arg( "displayWindow" ), boost::python::arg( "pixelAspect" ) = 1.0f,
+				  boost::python::arg( "fromEXRSpace" ) = false )
 			)
 		)
 
@@ -428,17 +424,16 @@ void GafferImageModule::bindCore()
 
 	TypedPlugClass<AtomicFormatPlug>();
 
-	Serialisation::registerSerialiser( static_cast<IECore::TypeId>( AtomicFormatPlugTypeId ), new AtomicFormatPlugSerialiser );
+	Serialisation::registerSerialiser(
+		static_cast<IECore::TypeId>( AtomicFormatPlugTypeId ), new AtomicFormatPlugSerialiser
+	);
 
 	PlugClass<FormatPlug>()
 		.def(
 			boost::python::init<const std::string &, Gaffer::Plug::Direction, const Format &, unsigned>(
-				(
-					boost::python::arg_( "name" ) = GraphComponent::defaultName<FormatPlug>(),
-					boost::python::arg_( "direction" ) = Plug::In,
-					boost::python::arg_( "defaultValue" ) = Format(),
-					boost::python::arg_( "flags" ) = Plug::Default
-				)
+				( boost::python::arg_( "name" ) = GraphComponent::defaultName<FormatPlug>(),
+				  boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "defaultValue" ) = Format(),
+				  boost::python::arg_( "flags" ) = Plug::Default )
 			)
 		)
 		.def( "defaultValue", &FormatPlug::defaultValue )
@@ -466,9 +461,7 @@ void GafferImageModule::bindCore()
 
 	cls.def(
 		   init<const GafferImage::ImagePlug *, const std::string &, const Imath::Box2i &, Sampler::BoundingMode>(
-			   (
-				   arg( "boundingMode" ) = Sampler::Black
-			   )
+			   ( arg( "boundingMode" ) = Sampler::Black )
 		   )
 	)
 		.def( "hash", ( IECore::MurmurHash ( Sampler::* )() const ) & Sampler::hash )

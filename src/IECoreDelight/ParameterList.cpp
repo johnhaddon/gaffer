@@ -76,14 +76,9 @@ NSIType_t type( GeometricData::Interpretation interpretation )
 // ParameterList
 //////////////////////////////////////////////////////////////////////////
 
-ParameterList::ParameterList()
-{
-}
+ParameterList::ParameterList() {}
 
-ParameterList::ParameterList( std::initializer_list<NSIParam_t> parameters )
-	: m_params( parameters )
-{
-}
+ParameterList::ParameterList( std::initializer_list<NSIParam_t> parameters ) : m_params( parameters ) {}
 
 ParameterList::ParameterList( const IECore::CompoundDataMap &values )
 {
@@ -238,7 +233,8 @@ NSIParam_t ParameterList::parameter( const char *name, const IECore::Data *value
 		case V2fVectorDataTypeId : {
 			if( isSingleArray )
 			{
-				msg( Msg::Warning, "ParameterList", fmt::format( "Attribute \"{}\" cannot be converted to an array of V2f parameters.", name ) );
+				msg( Msg::Warning, "ParameterList",
+					 fmt::format( "Attribute \"{}\" cannot be converted to an array of V2f parameters.", name ) );
 				break;
 			}
 			const vector<V2f> &v = static_cast<const V2fVectorData *>( value )->readable();
@@ -269,7 +265,8 @@ NSIParam_t ParameterList::parameter( const char *name, const IECore::Data *value
 		}
 		default :
 			result.type = NSITypeInvalid;
-			msg( Msg::Warning, "ParameterList", fmt::format( "Attribute \"{}\" has unsupported datatype \"{}\".", name, value->typeName() ) );
+			msg( Msg::Warning, "ParameterList",
+				 fmt::format( "Attribute \"{}\" has unsupported datatype \"{}\".", name, value->typeName() ) );
 			break;
 	}
 	return result;

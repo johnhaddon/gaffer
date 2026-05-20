@@ -42,14 +42,9 @@
 using namespace boost::placeholders;
 using namespace Gaffer;
 
-StandardSet::StandardSet( bool removeOrphans )
-	: m_removeOrphans( removeOrphans )
-{
-}
+StandardSet::StandardSet( bool removeOrphans ) : m_removeOrphans( removeOrphans ) {}
 
-StandardSet::~StandardSet()
-{
-}
+StandardSet::~StandardSet() {}
 
 StandardSet::MemberAcceptanceSignal &StandardSet::memberAcceptanceSignal()
 {
@@ -70,7 +65,9 @@ bool StandardSet::add( MemberPtr member )
 		{
 			if( GraphComponent *graphComponent = IECore::runTimeCast<GraphComponent>( member.get() ) )
 			{
-				it->parentChangedConnection = graphComponent->parentChangedSignal().connect( boost::bind( &StandardSet::parentChanged, this, ::_1 ) );
+				it->parentChangedConnection = graphComponent->parentChangedSignal().connect(
+					boost::bind( &StandardSet::parentChanged, this, ::_1 )
+				);
 			}
 		}
 		memberAddedSignal()( this, member.get() );
@@ -143,7 +140,8 @@ void StandardSet::setRemoveOrphans( bool removeOrphans )
 		}
 		if( m_removeOrphans )
 		{
-			m.parentChangedConnection = graphComponent->parentChangedSignal().connect( boost::bind( &StandardSet::parentChanged, this, ::_1 ) );
+			m.parentChangedConnection =
+				graphComponent->parentChangedSignal().connect( boost::bind( &StandardSet::parentChanged, this, ::_1 ) );
 		}
 		else
 		{

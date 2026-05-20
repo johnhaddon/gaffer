@@ -63,7 +63,7 @@ IE_CORE_FORWARDDECLARE( ImagePlug )
 class GAFFERIMAGE_API ImageWriter : public GafferDispatch::TaskNode
 {
 
-	public:
+public:
 
 	enum Mode
 	{
@@ -107,16 +107,19 @@ class GAFFERIMAGE_API ImageWriter : public GafferDispatch::TaskNode
 
 	/// Note that this is intentionally identical to the ImageReader's DefaultColorSpaceFunction
 	/// definition, so that the same function can be used with both nodes.
-	using DefaultColorSpaceFunction = std::function<const std::string( const std::string &fileName, const std::string &fileFormat, const std::string &dataType, const IECore::CompoundData *metadata, const OCIO_NAMESPACE::ConstConfigRcPtr &config )>;
+	using DefaultColorSpaceFunction = std::function<const std::string(
+		const std::string &fileName, const std::string &fileFormat, const std::string &dataType,
+		const IECore::CompoundData *metadata, const OCIO_NAMESPACE::ConstConfigRcPtr &config
+	)>;
 	static void setDefaultColorSpaceFunction( DefaultColorSpaceFunction f );
 	static DefaultColorSpaceFunction getDefaultColorSpaceFunction();
 
-	protected:
+protected:
 
 	IECore::MurmurHash hash( const Gaffer::Context *context ) const override;
 	void execute() const override;
 
-	private:
+private:
 
 	std::string colorSpace( const std::string &dataType ) const;
 

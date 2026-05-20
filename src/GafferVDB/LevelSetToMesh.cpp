@@ -82,15 +82,16 @@ void dispatchForVdbType( const openvdb::GridBase *grid, F &&functor, Args &&...a
 	}
 	else
 	{
-		throw IECore::Exception( fmt::format( "Incompatible Grid found name: '{}' type: '{}' ", grid->getName(), grid->type() ) );
+		throw IECore::Exception(
+			fmt::format( "Incompatible Grid found name: '{}' type: '{}' ", grid->getName(), grid->type() )
+		);
 	}
 }
 
 template<typename T>
 openvdb::GridBase::ConstPtr mergeGrids(
 	const std::vector<std::pair<openvdb::GridBase::ConstPtr, Imath::M44f>> &grids,
-	const openvdb::math::Transform &vdbTransform,
-	const IECore::Canceller *canceller
+	const openvdb::math::Transform &vdbTransform, const IECore::Canceller *canceller
 )
 {
 	typename T::ConstPtr resultGrid;
@@ -116,7 +117,13 @@ openvdb::GridBase::ConstPtr mergeGrids(
 		else
 		{
 			openvdb::math::Transform::Ptr toSource = grid->transformPtr()->copy();
-			toSource->postMult( openvdb::math::Mat4d( transform[0][0], transform[0][1], transform[0][2], transform[0][3], transform[1][0], transform[1][1], transform[1][2], transform[1][3], transform[2][0], transform[2][1], transform[2][2], transform[2][3], transform[3][0], transform[3][1], transform[3][2], transform[3][3] ) );
+			toSource->postMult(
+				openvdb::math::Mat4d(
+					transform[0][0], transform[0][1], transform[0][2], transform[0][3], transform[1][0],
+					transform[1][1], transform[1][2], transform[1][3], transform[2][0], transform[2][1],
+					transform[2][2], transform[2][3], transform[3][0], transform[3][1], transform[3][2], transform[3][3]
+				)
+			);
 			gridWithTransform = openvdb::GridBase::constGrid<T>( grid->copyGridReplacingTransform( toSource ) );
 
 			transformMatches = false;
@@ -171,7 +178,9 @@ openvdb::GridBase::ConstPtr mergeGrids(
 			// but noticeably blocky. QuadraticSampler gives higher quality results for smooth surfaces but
 			// is slower, and can make hard edged models look a bit wobbly. BoxSampler is a basic trilinear,
 			// which seems like a reasonable default.
-			openvdb::tools::doResampleToMatch<openvdb::tools::BoxSampler>( *gridWithTransform, *destSpaceGrid, interrupter );
+			openvdb::tools::doResampleToMatch<openvdb::tools::BoxSampler>(
+				*gridWithTransform, *destSpaceGrid, interrupter
+			);
 			// If we've been cancelled, the interrupter will have stopped
 			// `resampleToMatch()` and we'll have a partial result in the grid.
 			// We need to throw rather than allow this partial result to be
@@ -201,12 +210,7 @@ IECoreScene::MeshPrimitivePtr volumeToMesh( openvdb::GridBase::ConstPtr grid, do
 {
 	openvdb::tools::VolumeToMesh mesher( isoValue, adaptivity );
 
-	dispatchForVdbType(
-		grid.get(),
-		[&mesher]( const auto *typedGrid ) {
-			mesher( *typedGrid );
-		}
-	);
+	dispatchForVdbType( grid.get(), [&mesher]( const auto *typedGrid ) { mesher( *typedGrid ); } );
 
 	// Copy out topology
 	IntVectorDataPtr verticesPerFaceData = new IntVectorData;
@@ -274,8 +278,7 @@ GAFFER_NODE_DEFINE_TYPE( LevelSetToMesh );
 
 size_t LevelSetToMesh::g_firstPlugIndex = 0;
 
-LevelSetToMesh::LevelSetToMesh( const std::string &name )
-	: MergeObjects( name, "${scene:path}" )
+LevelSetToMesh::LevelSetToMesh( const std::string &name ) : MergeObjects( name, "${scene:path}" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -284,9 +287,7 @@ LevelSetToMesh::LevelSetToMesh( const std::string &name )
 	addChild( new FloatPlug( "adaptivity", Plug::In, 0.0f, 0.0f, 1.0f ) );
 }
 
-LevelSetToMesh::~LevelSetToMesh()
-{
-}
+LevelSetToMesh::~LevelSetToMesh() {}
 
 Gaffer::StringPlug *LevelSetToMesh::gridPlug()
 {
@@ -320,13 +321,13 @@ const Gaffer::FloatPlug *LevelSetToMesh::adaptivityPlug() const
 
 bool LevelSetToMesh::affectsMergedObject( const Gaffer::Plug *input ) const
 {
-	return MergeObjects::affectsMergedObject( input ) ||
-		input == isoValuePlug() ||
-		input == adaptivityPlug() ||
+	return MergeObjects::affectsMergedObject( input ) || input == isoValuePlug() || input == adaptivityPlug() ||
 		input == gridPlug();
 }
 
-void LevelSetToMesh::hashMergedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void LevelSetToMesh::hashMergedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	MergeObjects::hashMergedObject( path, context, h );
 
@@ -335,7 +336,9 @@ void LevelSetToMesh::hashMergedObject( const ScenePath &path, const Gaffer::Cont
 	adaptivityPlug()->hash( h );
 }
 
-IECore::ConstObjectPtr LevelSetToMesh::computeMergedObject( const std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f>> &sources, const Gaffer::Context *context ) const
+IECore::ConstObjectPtr LevelSetToMesh::computeMergedObject(
+	const std::vector<std::pair<IECore::ConstObjectPtr, Imath::M44f>> &sources, const Gaffer::Context *context
+) const
 {
 	std::string gridName = gridPlug()->getValue();
 
@@ -402,8 +405,7 @@ IECore::ConstObjectPtr LevelSetToMesh::computeMergedObject( const std::vector<st
 
 	openvdb::GridBase::ConstPtr resultGrid;
 	dispatchForVdbType(
-		grids[0].first.get(),
-		[&grids, &mostPreciseIndexing, &context, &resultGrid]( const auto *typedGrid ) {
+		grids[0].first.get(), [&grids, &mostPreciseIndexing, &context, &resultGrid]( const auto *typedGrid ) {
 			using GridType = typename std::remove_const_t<std::remove_pointer_t<decltype( typedGrid )>>;
 			resultGrid = mergeGrids<GridType>( grids, *mostPreciseIndexing, context->canceller() );
 		}

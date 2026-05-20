@@ -68,7 +68,7 @@ ContextPtr contextWrapper( const View &view, bool copy )
 class ViewWrapper : public GafferBindings::NodeWrapper<View>
 {
 
-	public:
+public:
 
 	ViewWrapper( PyObject *self, const std::string &name, ScriptNodePtr scriptNode, PlugPtr input )
 		: GafferBindings::NodeWrapper<View>( self, name, scriptNode, input )
@@ -78,10 +78,7 @@ class ViewWrapper : public GafferBindings::NodeWrapper<View>
 
 struct ViewCreator
 {
-	ViewCreator( object fn )
-		: m_fn( fn )
-	{
-	}
+	ViewCreator( object fn ) : m_fn( fn ) {}
 
 	ViewPtr operator () ( Gaffer::ScriptNodePtr scriptNode )
 	{
@@ -90,7 +87,7 @@ struct ViewCreator
 		return result;
 	}
 
-	private:
+private:
 
 	object m_fn;
 };
@@ -113,22 +110,19 @@ ViewPtr create( Gaffer::PlugPtr input )
 
 void registerDisplayTransformWrapper( const std::string &name, object creator )
 {
-	View::DisplayTransform::registerDisplayTransform(
-		name,
-		[creator]() {
-			IECorePython::ScopedGILLock gilLock;
-			try
-			{
-				object pythonShader = creator();
-				IECoreGL::Shader::SetupPtr shader = extract<IECoreGL::Shader::SetupPtr>( pythonShader );
-				return shader;
-			}
-			catch( error_already_set & )
-			{
-				IECorePython::ExceptionAlgo::translatePythonException();
-			}
+	View::DisplayTransform::registerDisplayTransform( name, [creator]() {
+		IECorePython::ScopedGILLock gilLock;
+		try
+		{
+			object pythonShader = creator();
+			IECoreGL::Shader::SetupPtr shader = extract<IECoreGL::Shader::SetupPtr>( pythonShader );
+			return shader;
 		}
-	);
+		catch( error_already_set & )
+		{
+			IECorePython::ExceptionAlgo::translatePythonException();
+		}
+	} );
 }
 
 list registeredDisplayTransformsWrapper()
@@ -155,11 +149,20 @@ void bindView()
 {
 	scope s = GafferBindings::NodeClass<View, ViewWrapper>( nullptr, no_init )
 				  .def( init<const std::string &, ScriptNodePtr, PlugPtr>() )
-				  .def( "scriptNode", ( ScriptNode * (View::*)() ) & View::scriptNode, return_value_policy<IECorePython::CastToIntrusivePtr>() )
-				  .def( "editScope", ( EditScope * (View::*)() ) & View::editScope, return_value_policy<IECorePython::CastToIntrusivePtr>() )
+				  .def(
+					  "scriptNode", ( ScriptNode * (View::*)() ) & View::scriptNode,
+					  return_value_policy<IECorePython::CastToIntrusivePtr>()
+				  )
+				  .def(
+					  "editScope", ( EditScope * (View::*)() ) & View::editScope,
+					  return_value_policy<IECorePython::CastToIntrusivePtr>()
+				  )
 				  .def( "context", &contextWrapper, ( arg( "_copy" ) = true ) )
 				  .def( "contextChangedSignal", &View::contextChangedSignal, return_internal_reference<1>() )
-				  .def( "viewportGadget", ( ViewportGadget * (View::*)() ) & View::viewportGadget, return_value_policy<IECorePython::CastToIntrusivePtr>() )
+				  .def(
+					  "viewportGadget", ( ViewportGadget * (View::*)() ) & View::viewportGadget,
+					  return_value_policy<IECorePython::CastToIntrusivePtr>()
+				  )
 				  .def( "_setPreprocessor", &View::setPreprocessor )
 				  .def( "_getPreprocessor", &getPreprocessor )
 				  .def( "create", &create )

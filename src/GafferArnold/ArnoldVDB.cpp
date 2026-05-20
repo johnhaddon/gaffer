@@ -83,7 +83,8 @@ Box3f boundAndAutoStepSize( const std::string &fileName, const std::set<std::str
 		result.expand( grid->transform().indexToWorld( openvdb::BBoxd( min - 0.5, max + 0.5 ) ) );
 
 		const openvdb::Vec3d voxelSize = grid->voxelSize();
-		autoStepSize = std::min( std::min( (double)autoStepSize, voxelSize.x() ), std::min( voxelSize.y(), voxelSize.z() ) );
+		autoStepSize =
+			std::min( std::min( (double)autoStepSize, voxelSize.x() ), std::min( voxelSize.y(), voxelSize.z() ) );
 	}
 
 	return Box3f(
@@ -102,8 +103,7 @@ GAFFER_NODE_DEFINE_TYPE( ArnoldVDB );
 
 size_t ArnoldVDB::g_firstPlugIndex = 0;
 
-ArnoldVDB::ArnoldVDB( const std::string &name )
-	: ObjectSource( name, "volume" )
+ArnoldVDB::ArnoldVDB( const std::string &name ) : ObjectSource( name, "volume" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "fileName" ) );
@@ -114,9 +114,7 @@ ArnoldVDB::ArnoldVDB( const std::string &name )
 	addChild( new FloatPlug( "stepScale", Plug::In, 1.0f, 0.0f ) );
 }
 
-ArnoldVDB::~ArnoldVDB()
-{
-}
+ArnoldVDB::~ArnoldVDB() {}
 
 Gaffer::StringPlug *ArnoldVDB::fileNamePlug()
 {
@@ -182,14 +180,8 @@ void ArnoldVDB::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outp
 {
 	ObjectSource::affects( input, outputs );
 
-	if(
-		input == fileNamePlug() ||
-		input == gridsPlug() ||
-		input == velocityGridsPlug() ||
-		input == velocityScalePlug() ||
-		input == stepSizePlug() ||
-		input == stepScalePlug()
-	)
+	if( input == fileNamePlug() || input == gridsPlug() || input == velocityGridsPlug() ||
+		input == velocityScalePlug() || input == stepSizePlug() || input == stepScalePlug() )
 	{
 		outputs.push_back( sourcePlug() );
 	}
@@ -243,9 +235,7 @@ IECore::ConstObjectPtr ArnoldVDB::computeSource( const Context *context ) const
 
 	const float stepSize = stepSizePlug()->getValue();
 	const float stepScale = stepScalePlug()->getValue();
-	parameters["step_size"] = new FloatData(
-		( stepSize <= 0.0f ? autoStepSize : stepSize ) * stepScale
-	);
+	parameters["step_size"] = new FloatData( ( stepSize <= 0.0f ? autoStepSize : stepSize ) * stepScale );
 
 	return result;
 }

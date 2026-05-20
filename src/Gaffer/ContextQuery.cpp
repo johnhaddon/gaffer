@@ -54,9 +54,7 @@ const size_t g_valuePlugIndex = 1;
 /// \todo: Can the next function be move to somewhere to be shared with `AttributeQuery`?
 
 const Gaffer::ValuePlug *correspondingPlug(
-	const Gaffer::ValuePlug *parent,
-	const Gaffer::ValuePlug *child,
-	const Gaffer::ValuePlug *other
+	const Gaffer::ValuePlug *parent, const Gaffer::ValuePlug *child, const Gaffer::ValuePlug *other
 )
 {
 	boost::container::small_vector<const Gaffer::ValuePlug *, 4> path;
@@ -97,7 +95,9 @@ void addChildPlugsToAffectedOutputs( const Gaffer::Plug *plug, Gaffer::Dependenc
 
 /// Returns the child of `parentPlug` that has `descendantPlug` as a descendant or is descendantPlug.
 /// Throws an Exception if the `descendantPlug` is not a descendant of `parentPlug`.
-const Gaffer::ValuePlug *getChildWithDescendant( const Gaffer::Plug *parentPlug, const Gaffer::ValuePlug *descendantPlug )
+const Gaffer::ValuePlug *getChildWithDescendant(
+	const Gaffer::Plug *parentPlug, const Gaffer::ValuePlug *descendantPlug
+)
 {
 	const ValuePlug *p = descendantPlug;
 	while( p )
@@ -126,13 +126,15 @@ ContextQuery::ContextQuery( const std::string &name ) : Gaffer::ComputeNode( nam
 	storeIndexOfNextChild( g_firstPlugIndex );
 
 	/// \todo See notes in `ShaderQuery::ShaderQuery`.
-	addChild( new ArrayPlug( "queries", Plug::Direction::In, nullptr, 1, std::numeric_limits<size_t>::max(), Plug::Flags::Default, false ) );
-	addChild( new ArrayPlug( "out", Plug::Direction::Out, nullptr, 1, std::numeric_limits<size_t>::max(), Plug::Flags::Default, false ) );
+	addChild( new ArrayPlug(
+		"queries", Plug::Direction::In, nullptr, 1, std::numeric_limits<size_t>::max(), Plug::Flags::Default, false
+	) );
+	addChild( new ArrayPlug(
+		"out", Plug::Direction::Out, nullptr, 1, std::numeric_limits<size_t>::max(), Plug::Flags::Default, false
+	) );
 }
 
-ContextQuery::~ContextQuery()
-{
-}
+ContextQuery::~ContextQuery() {}
 
 Gaffer::ArrayPlug *ContextQuery::queriesPlug()
 {
@@ -154,27 +156,15 @@ const Gaffer::ArrayPlug *ContextQuery::outPlug() const
 	return getChild<ArrayPlug>( g_firstPlugIndex + 1 );
 }
 
-Gaffer::NameValuePlug *ContextQuery::addQuery(
-	const Gaffer::ValuePlug *plug,
-	const std::string &variable
-)
+Gaffer::NameValuePlug *ContextQuery::addQuery( const Gaffer::ValuePlug *plug, const std::string &variable )
 {
 	NameValuePlugPtr childQueryPlug = new NameValuePlug(
-		"",
-		plug->createCounterpart( "query", Gaffer::Plug::Direction::In ),
-		"query0",
-		Gaffer::Plug::Flags::Default
+		"", plug->createCounterpart( "query", Gaffer::Plug::Direction::In ), "query0", Gaffer::Plug::Flags::Default
 	);
 	childQueryPlug->namePlug()->setValue( variable );
 
 	ValuePlugPtr newOutPlug = new ValuePlug( "out0", Gaffer::Plug::Direction::Out );
-	newOutPlug->addChild(
-		new BoolPlug(
-			"exists",
-			Gaffer::Plug::Direction::Out,
-			false
-		)
-	);
+	newOutPlug->addChild( new BoolPlug( "exists", Gaffer::Plug::Direction::Out, false ) );
 	newOutPlug->addChild( plug->createCounterpart( "value", Gaffer::Plug::Direction::Out ) );
 
 	outPlug()->addChild( newOutPlug );
@@ -215,13 +205,10 @@ void ContextQuery::affects( const Gaffer::Plug *input, AffectedPlugsContainer &o
 		}
 		else if( childQueryPlug->valuePlug() == input || childQueryPlug->valuePlug()->isAncestorOf( input ) )
 		{
-			outputs.push_back(
-				correspondingPlug(
-					static_cast<const ValuePlug *>( childQueryPlug->valuePlug<ValuePlug>() ),
-					runTimeCast<const ValuePlug>( input ),
-					valuePlug
-				)
-			);
+			outputs.push_back( correspondingPlug(
+				static_cast<const ValuePlug *>( childQueryPlug->valuePlug<ValuePlug>() ),
+				runTimeCast<const ValuePlug>( input ), valuePlug
+			) );
 		}
 	}
 }
@@ -244,11 +231,7 @@ void ContextQuery::hash( const Gaffer::ValuePlug *output, const Gaffer::Context 
 		const ValuePlug *valuePlug = outputPlug->getChild<const ValuePlug>( g_valuePlugIndex );
 		if( valuePlug && ( valuePlug->isAncestorOf( output ) || output == valuePlug ) )
 		{
-			correspondingPlug(
-				valuePlug,
-				output,
-				static_cast<const ValuePlug *>( childQueryPlug->valuePlug() )
-			)
+			correspondingPlug( valuePlug, output, static_cast<const ValuePlug *>( childQueryPlug->valuePlug() ) )
 				->hash( h );
 			h.append( context->variableHash( childQueryPlug->namePlug()->getValue() ) );
 		}
@@ -281,13 +264,9 @@ void ContextQuery::compute( Gaffer::ValuePlug *output, const Gaffer::Context *co
 			}
 
 			output->setFrom(
-				static_cast<const Gaffer::ValuePlug *>(
-					correspondingPlug(
-						valuePlug,
-						output,
-						static_cast<const ValuePlug *>( childQueryPlug->valuePlug() )
-					)
-				)
+				static_cast<const Gaffer::ValuePlug *>( correspondingPlug(
+					valuePlug, output, static_cast<const ValuePlug *>( childQueryPlug->valuePlug() )
+				) )
 			);
 
 			return;

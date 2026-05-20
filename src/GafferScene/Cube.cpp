@@ -53,21 +53,22 @@ namespace
 // See below for more description of perFaceIndices.
 
 void addCorner(
-	const V3i &cornerID, const V3i &vertsPer,
-	std::vector<V3f> &pos, std::vector<std::vector<int>> &perFaceIndices
+	const V3i &cornerID, const V3i &vertsPer, std::vector<V3f> &pos, std::vector<std::vector<int>> &perFaceIndices
 )
 {
 	int vertIndex = pos.size();
 	pos.push_back( V3f( cornerID ) );
 
-	perFaceIndices[4 + !cornerID.x][cornerID.y * ( vertsPer.y - 1 ) + cornerID.z * ( vertsPer.z - 1 ) * vertsPer.y] = vertIndex;
-	perFaceIndices[2 + !cornerID.y][cornerID.x * ( vertsPer.x - 1 ) + cornerID.z * ( vertsPer.z - 1 ) * vertsPer.x] = vertIndex;
-	perFaceIndices[0 + !cornerID.z][cornerID.x * ( vertsPer.x - 1 ) + cornerID.y * ( vertsPer.y - 1 ) * vertsPer.x] = vertIndex;
+	perFaceIndices[4 + !cornerID.x][cornerID.y * ( vertsPer.y - 1 ) + cornerID.z * ( vertsPer.z - 1 ) * vertsPer.y] =
+		vertIndex;
+	perFaceIndices[2 + !cornerID.y][cornerID.x * ( vertsPer.x - 1 ) + cornerID.z * ( vertsPer.z - 1 ) * vertsPer.x] =
+		vertIndex;
+	perFaceIndices[0 + !cornerID.z][cornerID.x * ( vertsPer.x - 1 ) + cornerID.y * ( vertsPer.y - 1 ) * vertsPer.x] =
+		vertIndex;
 }
 
 void addXEdge(
-	const V2i &edgeID, const V3i &vertsPer,
-	std::vector<V3f> &pos, std::vector<std::vector<int>> &perFaceIndices
+	const V2i &edgeID, const V3i &vertsPer, std::vector<V3f> &pos, std::vector<std::vector<int>> &perFaceIndices
 )
 {
 	for( int i = 1; i < vertsPer.x - 1; i++ )
@@ -81,8 +82,7 @@ void addXEdge(
 }
 
 void addYEdge(
-	const V2i &edgeID, const V3i &vertsPer,
-	std::vector<V3f> &pos, std::vector<std::vector<int>> &perFaceIndices
+	const V2i &edgeID, const V3i &vertsPer, std::vector<V3f> &pos, std::vector<std::vector<int>> &perFaceIndices
 )
 {
 	for( int i = 1; i < vertsPer.y - 1; i++ )
@@ -96,8 +96,7 @@ void addYEdge(
 }
 
 void addZEdge(
-	const V2i &edgeID, const V3i &vertsPer,
-	std::vector<V3f> &pos, std::vector<std::vector<int>> &perFaceIndices
+	const V2i &edgeID, const V3i &vertsPer, std::vector<V3f> &pos, std::vector<std::vector<int>> &perFaceIndices
 )
 {
 	for( int i = 1; i < vertsPer.z - 1; i++ )
@@ -110,10 +109,7 @@ void addZEdge(
 	}
 }
 
-void addXFace(
-	int faceID, const V3i &vertsPer,
-	std::vector<V3f> &pos, std::vector<std::vector<int>> &perFaceIndices
-)
+void addXFace( int faceID, const V3i &vertsPer, std::vector<V3f> &pos, std::vector<std::vector<int>> &perFaceIndices )
 {
 	for( int j = 1; j < vertsPer.z - 1; j++ )
 	{
@@ -125,10 +121,7 @@ void addXFace(
 	}
 }
 
-void addYFace(
-	int faceID, const V3i &vertsPer,
-	std::vector<V3f> &pos, std::vector<std::vector<int>> &perFaceIndices
-)
+void addYFace( int faceID, const V3i &vertsPer, std::vector<V3f> &pos, std::vector<std::vector<int>> &perFaceIndices )
 {
 	for( int j = 1; j < vertsPer.z - 1; j++ )
 	{
@@ -140,10 +133,7 @@ void addYFace(
 	}
 }
 
-void addZFace(
-	int faceID, const V3i &vertsPer,
-	std::vector<V3f> &pos, std::vector<std::vector<int>> &perFaceIndices
-)
+void addZFace( int faceID, const V3i &vertsPer, std::vector<V3f> &pos, std::vector<std::vector<int>> &perFaceIndices )
 {
 	for( int j = 1; j < vertsPer.y - 1; j++ )
 	{
@@ -157,9 +147,7 @@ void addZFace(
 
 // Use the indices we've stored for a cube face to output all the vertex ids for that face
 void outputVertexIDsForFace(
-	const V2i &size, const std::vector<int> &indices,
-	bool flipOrder, int rotate,
-	std::vector<int> &vertexIds
+	const V2i &size, const std::vector<int> &indices, bool flipOrder, int rotate, std::vector<int> &vertexIds
 )
 {
 	for( int y = 0; y < size.y - 1; y++ )
@@ -189,7 +177,8 @@ void outputVertexIDsForFace(
 // Output all uvs. Store some indices where faces start, which will be useful for writing UV indices.
 void outputUVs( const V3i &vertsPer, std::vector<V2f> &uvs, int uvFaceIndices[5] )
 {
-	int uvSize = 2 * ( vertsPer.x * vertsPer.y + vertsPer.y * vertsPer.z + vertsPer.z * vertsPer.x ) - vertsPer.x * 3 - vertsPer.y * 2;
+	int uvSize = 2 * ( vertsPer.x * vertsPer.y + vertsPer.y * vertsPer.z + vertsPer.z * vertsPer.x ) - vertsPer.x * 3 -
+		vertsPer.y * 2;
 	uvs.reserve( uvSize );
 
 	auto centralUVScanline = [&uvs, &vertsPer]( float v ) {
@@ -270,8 +259,7 @@ void outputUVIndices( std::vector<int> &uvIndices, int faceIndex, int sizeU, int
 // left and right "wings" of the UV mapping, and need to splice together the left or right
 // column to the central UVs
 void outputSplicedUVIndices(
-	std::vector<int> &uvIndices, const V3i &vertsPer,
-	int faceIndex, int spliceColumn, int spliceSource, bool flipU
+	std::vector<int> &uvIndices, const V3i &vertsPer, int faceIndex, int spliceColumn, int spliceSource, bool flipU
 )
 {
 	auto faceVertex = [&uvIndices, faceIndex, spliceColumn, spliceSource, vertsPer]( int u, int v ) {
@@ -333,8 +321,8 @@ MeshPrimitivePtr createDividedBox( const Box3f &b, const Imath::V3f &divisions )
 		numFaces += ( faceSizes[i].x - 1 ) * ( faceSizes[i].y - 1 );
 	}
 
-	int posSize =
-		2 * ( vertsPer.x * vertsPer.y + vertsPer.y * vertsPer.z + vertsPer.z * vertsPer.x ) - vertsPer.x * 4 - vertsPer.y * 4 - vertsPer.z * 4 + 8;
+	int posSize = 2 * ( vertsPer.x * vertsPer.y + vertsPer.y * vertsPer.z + vertsPer.z * vertsPer.x ) - vertsPer.x * 4 -
+		vertsPer.y * 4 - vertsPer.z * 4 + 8;
 	std::vector<V3f> pos;
 	pos.reserve( posSize );
 
@@ -410,9 +398,7 @@ MeshPrimitivePtr createDividedBox( const Box3f &b, const Imath::V3f &divisions )
 
 	const std::string interpolation = "linear";
 	MeshPrimitivePtr result = new MeshPrimitive(
-		new IntVectorData( std::move( verticesPerFace ) ),
-		new IntVectorData( std::move( vertexIds ) ),
-		interpolation,
+		new IntVectorData( std::move( verticesPerFace ) ), new IntVectorData( std::move( vertexIds ) ), interpolation,
 		new V3fVectorData( std::move( pos ) )
 	);
 
@@ -433,15 +419,16 @@ MeshPrimitivePtr createDividedBox( const Box3f &b, const Imath::V3f &divisions )
 	// * edge sharing on the "wings" on the left and right, where one edge is shared
 	//   with the central column ( uses outputSplicedUVIndices )
 	outputUVIndices( uvIndices, uvFaceIndices[2], vertsPer[0], vertsPer[1], true, 0 );
-	outputSplicedUVIndices( uvIndices, vertsPer, uvFaceIndices[4] + vertsPer[2] - 1, vertsPer[2] - 1, vertsPer[0] - 1, false );
+	outputSplicedUVIndices(
+		uvIndices, vertsPer, uvFaceIndices[4] + vertsPer[2] - 1, vertsPer[2] - 1, vertsPer[0] - 1, false
+	);
 	outputUVIndices( uvIndices, uvFaceIndices[0], vertsPer[0], vertsPer[1], false, 1 );
 	outputSplicedUVIndices( uvIndices, vertsPer, uvFaceIndices[4] - 1, 0, 0, true );
 	outputUVIndices( uvIndices, uvFaceIndices[1], vertsPer[0], vertsPer[2], true, 2 );
 	outputUVIndices( uvIndices, uvFaceIndices[3], vertsPer[0], vertsPer[2], false, 0 );
 
 	result->variables["uv"] = PrimitiveVariable(
-		PrimitiveVariable::FaceVarying,
-		new V2fVectorData( std::move( uvs ), GeometricData::UV ),
+		PrimitiveVariable::FaceVarying, new V2fVectorData( std::move( uvs ), GeometricData::UV ),
 		new IntVectorData( std::move( uvIndices ) )
 	);
 
@@ -449,12 +436,8 @@ MeshPrimitivePtr createDividedBox( const Box3f &b, const Imath::V3f &divisions )
 	// and then output the appropriate number of repeated indices for each face.
 
 	std::vector<Imath::V3f> normals{
-		Imath::V3f( 0, 0, 1 ),
-		Imath::V3f( 0, 0, -1 ),
-		Imath::V3f( 0, 1, 0 ),
-		Imath::V3f( 0, -1, 0 ),
-		Imath::V3f( 1, 0, 0 ),
-		Imath::V3f( -1, 0, 0 ),
+		Imath::V3f( 0, 0, 1 ),	Imath::V3f( 0, 0, -1 ), Imath::V3f( 0, 1, 0 ),
+		Imath::V3f( 0, -1, 0 ), Imath::V3f( 1, 0, 0 ),	Imath::V3f( -1, 0, 0 ),
 	};
 
 	std::vector<int> nIndices;
@@ -471,8 +454,7 @@ MeshPrimitivePtr createDividedBox( const Box3f &b, const Imath::V3f &divisions )
 	};
 
 	result->variables["N"] = PrimitiveVariable(
-		PrimitiveVariable::FaceVarying,
-		new V3fVectorData( std::move( normals ), GeometricData::Normal ),
+		PrimitiveVariable::FaceVarying, new V3fVectorData( std::move( normals ), GeometricData::Normal ),
 		new IntVectorData( std::move( nIndices ) )
 	);
 
@@ -485,17 +467,14 @@ GAFFER_NODE_DEFINE_TYPE( Cube );
 
 size_t Cube::g_firstPlugIndex = 0;
 
-Cube::Cube( const std::string &name )
-	: ObjectSource( name, "cube" )
+Cube::Cube( const std::string &name ) : ObjectSource( name, "cube" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new V3fPlug( "dimensions", Plug::In, V3f( 1.0f ), V3f( 0.0f ) ) );
 	addChild( new V3iPlug( "divisions", Plug::In, V3i( 1 ), V3i( 1 ) ) );
 }
 
-Cube::~Cube()
-{
-}
+Cube::~Cube() {}
 
 Gaffer::V3fPlug *Cube::dimensionsPlug()
 {
@@ -521,10 +500,7 @@ void Cube::affects( const Plug *input, AffectedPlugsContainer &outputs ) const
 {
 	ObjectSource::affects( input, outputs );
 
-	if(
-		input->parent<V3fPlug>() == dimensionsPlug() ||
-		input->parent<V3iPlug>() == divisionsPlug()
-	)
+	if( input->parent<V3fPlug>() == dimensionsPlug() || input->parent<V3iPlug>() == divisionsPlug() )
 	{
 		outputs.push_back( sourcePlug() );
 	}

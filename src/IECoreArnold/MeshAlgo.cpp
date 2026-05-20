@@ -86,7 +86,10 @@ AtArray *identityIndices( size_t size )
 }
 
 template<typename T>
-const T *variableData( const PrimitiveVariableMap &variables, const std::string &name, PrimitiveVariable::Interpolation interpolation = PrimitiveVariable::Invalid )
+const T *variableData(
+	const PrimitiveVariableMap &variables, const std::string &name,
+	PrimitiveVariable::Interpolation interpolation = PrimitiveVariable::Invalid
+)
 {
 	PrimitiveVariableMap::const_iterator it = variables.find( name );
 	if( it == variables.end() )
@@ -100,7 +103,10 @@ const T *variableData( const PrimitiveVariableMap &variables, const std::string 
 	return runTimeCast<T>( it->second.data.get() );
 }
 
-void convertUVSet( const std::string &uvSet, const PrimitiveVariable &uvVariable, const vector<int> &vertexIds, AtNode *node, const std::string &messageContext )
+void convertUVSet(
+	const std::string &uvSet, const PrimitiveVariable &uvVariable, const vector<int> &vertexIds, AtNode *node,
+	const std::string &messageContext
+)
 {
 	const V2fVectorData *uvData = runTimeCast<V2fVectorData>( uvVariable.data.get() );
 
@@ -109,12 +115,12 @@ void convertUVSet( const std::string &uvSet, const PrimitiveVariable &uvVariable
 		return;
 	}
 
-	if( uvVariable.interpolation != PrimitiveVariable::Varying && uvVariable.interpolation != PrimitiveVariable::Vertex && uvVariable.interpolation != PrimitiveVariable::FaceVarying )
+	if( uvVariable.interpolation != PrimitiveVariable::Varying &&
+		uvVariable.interpolation != PrimitiveVariable::Vertex &&
+		uvVariable.interpolation != PrimitiveVariable::FaceVarying )
 	{
-		msg(
-			Msg::Warning, messageContext,
-			fmt::format( "Variable \"{}\" has an invalid interpolation type - not generating uvs.", uvSet )
-		);
+		msg( Msg::Warning, messageContext,
+			 fmt::format( "Variable \"{}\" has an invalid interpolation type - not generating uvs.", uvSet ) );
 		return;
 	}
 
@@ -226,7 +232,10 @@ void convertCornersAndCreases( const IECoreScene::MeshPrimitive *mesh, AtNode *n
 	AiNodeSetArray( node, g_creaseSharpnessArnoldString, sharpnessesArray );
 }
 
-AtNode *convertStatic( const IECoreScene::MeshPrimitive *mesh, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )
+AtNode *convertStatic(
+	const IECoreScene::MeshPrimitive *mesh, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode,
+	const std::string &messageContext
+)
 {
 
 	// Make the result mesh and add topology
@@ -239,16 +248,13 @@ AtNode *convertStatic( const IECoreScene::MeshPrimitive *mesh, AtUniverse *unive
 
 	const std::vector<int> &verticesPerFace = mesh->verticesPerFace()->readable();
 	AiNodeSetArray(
-		result,
-		g_nsidesArnoldString,
+		result, g_nsidesArnoldString,
 		AiArrayConvert( verticesPerFace.size(), 1, AI_TYPE_INT, (void *)&( verticesPerFace[0] ) )
 	);
 
 	const std::vector<int> &vertexIds = mesh->vertexIds()->readable();
 	AiNodeSetArray(
-		result,
-		g_vidxsArnoldString,
-		AiArrayConvert( vertexIds.size(), 1, AI_TYPE_INT, (void *)&( vertexIds[0] ) )
+		result, g_vidxsArnoldString, AiArrayConvert( vertexIds.size(), 1, AI_TYPE_INT, (void *)&( vertexIds[0] ) )
 	);
 
 	// Set subdivision
@@ -288,7 +294,8 @@ AtNode *convertStatic( const IECoreScene::MeshPrimitive *mesh, AtUniverse *unive
 	}
 
 	// Finally, do a generic conversion of anything that remains.
-	for( PrimitiveVariableMap::iterator it = variablesToConvert.begin(), eIt = variablesToConvert.end(); it != eIt; ++it )
+	for( PrimitiveVariableMap::iterator it = variablesToConvert.begin(), eIt = variablesToConvert.end(); it != eIt;
+		 ++it )
 	{
 		ShapeAlgo::convertPrimitiveVariable( mesh, it->second, result, AtString( it->first.c_str() ), messageContext );
 	}
@@ -296,7 +303,10 @@ AtNode *convertStatic( const IECoreScene::MeshPrimitive *mesh, AtUniverse *unive
 	return result;
 }
 
-const V3fVectorData *normal( const IECoreScene::MeshPrimitive *mesh, PrimitiveVariable::Interpolation &interpolation, const std::string &messageContext )
+const V3fVectorData *normal(
+	const IECoreScene::MeshPrimitive *mesh, PrimitiveVariable::Interpolation &interpolation,
+	const std::string &messageContext
+)
 {
 	PrimitiveVariableMap::const_iterator it = mesh->variables.find( "N" );
 	if( it == mesh->variables.end() )
@@ -307,20 +317,26 @@ const V3fVectorData *normal( const IECoreScene::MeshPrimitive *mesh, PrimitiveVa
 	const V3fVectorData *n = runTimeCast<const V3fVectorData>( it->second.data.get() );
 	if( !n )
 	{
-		msg( Msg::Warning, messageContext, fmt::format( "Variable \"N\" has unsupported type \"{}\" (expected V3fVectorData).", it->second.data->typeName() ) );
+		msg( Msg::Warning, messageContext,
+			 fmt::format(
+				 "Variable \"N\" has unsupported type \"{}\" (expected V3fVectorData).", it->second.data->typeName()
+			 ) );
 		return nullptr;
 	}
 
 	const PrimitiveVariable::Interpolation thisInterpolation = it->second.interpolation;
 	if( interpolation != PrimitiveVariable::Invalid && thisInterpolation != interpolation )
 	{
-		msg( Msg::Warning, messageContext, "Variable \"N\" has inconsistent interpolation types - not generating normals." );
+		msg( Msg::Warning, messageContext,
+			 "Variable \"N\" has inconsistent interpolation types - not generating normals." );
 		return nullptr;
 	}
 
-	if( thisInterpolation != PrimitiveVariable::Varying && thisInterpolation != PrimitiveVariable::Vertex && thisInterpolation != PrimitiveVariable::FaceVarying )
+	if( thisInterpolation != PrimitiveVariable::Varying && thisInterpolation != PrimitiveVariable::Vertex &&
+		thisInterpolation != PrimitiveVariable::FaceVarying )
 	{
-		msg( Msg::Warning, messageContext, "Variable \"N\" has unsupported interpolation type - not generating normals." );
+		msg( Msg::Warning, messageContext,
+			 "Variable \"N\" has unsupported interpolation type - not generating normals." );
 		return nullptr;
 	}
 
@@ -328,7 +344,9 @@ const V3fVectorData *normal( const IECoreScene::MeshPrimitive *mesh, PrimitiveVa
 	return n;
 }
 
-void convertNormalIndices( const IECoreScene::MeshPrimitive *mesh, AtNode *node, PrimitiveVariable::Interpolation interpolation )
+void convertNormalIndices(
+	const IECoreScene::MeshPrimitive *mesh, AtNode *node, PrimitiveVariable::Interpolation interpolation
+)
 {
 	const IECore::IntVectorData *nIndices = mesh->variables.find( "N" )->second.indices.get();
 
@@ -337,16 +355,13 @@ void convertNormalIndices( const IECoreScene::MeshPrimitive *mesh, AtNode *node,
 		if( !nIndices )
 		{
 			AiNodeSetArray(
-				node,
-				g_nidxsArnoldString,
-				identityIndices( mesh->variableSize( PrimitiveVariable::FaceVarying ) )
+				node, g_nidxsArnoldString, identityIndices( mesh->variableSize( PrimitiveVariable::FaceVarying ) )
 			);
 		}
 		else
 		{
 			AiNodeSetArray(
-				node,
-				g_nidxsArnoldString,
+				node, g_nidxsArnoldString,
 				AiArrayConvert( nIndices->readable().size(), 1, AI_TYPE_INT, (void *)&( nIndices->readable()[0] ) )
 			);
 		}
@@ -357,9 +372,7 @@ void convertNormalIndices( const IECoreScene::MeshPrimitive *mesh, AtNode *node,
 		if( !nIndices )
 		{
 			AiNodeSetArray(
-				node,
-				g_nidxsArnoldString,
-				AiArrayConvert( vertexIds.size(), 1, AI_TYPE_INT, (void *)&( vertexIds[0] ) )
+				node, g_nidxsArnoldString, AiArrayConvert( vertexIds.size(), 1, AI_TYPE_INT, (void *)&( vertexIds[0] ) )
 			);
 		}
 		else
@@ -374,7 +387,11 @@ void convertNormalIndices( const IECoreScene::MeshPrimitive *mesh, AtNode *node,
 	}
 }
 
-AtNode *convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::MeshPrimitive *> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )
+AtNode *convert(
+	const IECoreScenePreview::Renderer::Samples<const IECoreScene::MeshPrimitive *> &samples, float motionStart,
+	float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode,
+	const std::string &messageContext
+)
 {
 	AtNode *result = convertStatic( samples.front(), universe, nodeName, parentNode, messageContext );
 
@@ -404,11 +421,7 @@ AtNode *convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::
 
 	if( nSamples.size() == samples.size() )
 	{
-		AiNodeSetArray(
-			result,
-			g_nlistArnoldString,
-			ParameterAlgo::dataToArray( nSamples, AI_TYPE_VECTOR )
-		);
+		AiNodeSetArray( result, g_nlistArnoldString, ParameterAlgo::dataToArray( nSamples, AI_TYPE_VECTOR ) );
 		convertNormalIndices( samples.front(), result, nInterpolation );
 		AiNodeSetBool( result, g_smoothingArnoldString, true );
 	}

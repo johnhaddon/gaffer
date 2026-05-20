@@ -75,7 +75,9 @@ void interactiveRenderSetContext( InteractiveRender &r, Context &context )
 	r.setContext( &context );
 }
 
-IECore::DataPtr interactiveRenderCommandWrapper( InteractiveRender &r, const IECore::InternedString name, const IECore::CompoundDataMap &parameters )
+IECore::DataPtr interactiveRenderCommandWrapper(
+	InteractiveRender &r, const IECore::InternedString name, const IECore::CompoundDataMap &parameters
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	return r.command( name, parameters );
@@ -115,7 +117,9 @@ list sampledObjectSampleTimes( const Private::RendererAlgo::SampledObject &sampl
 	return result;
 }
 
-object objectSamplesWrapper( const Gaffer::ObjectPlug &objectPlug, object pythonSampleTimes, IECore::MurmurHash *hash, bool copy )
+object objectSamplesWrapper(
+	const Gaffer::ObjectPlug &objectPlug, object pythonSampleTimes, IECore::MurmurHash *hash, bool copy
+)
 {
 	IECoreScenePreview::Renderer::SampleTimes sampleTimes;
 	boost::python::container_utils::extend_container( sampleTimes, pythonSampleTimes );
@@ -170,7 +174,9 @@ list sampledTransformSampleTimes( const Private::RendererAlgo::SampledTransform 
 	return result;
 }
 
-object transformSamplesWrapper( const Gaffer::M44fPlug &transformPlug, object pythonSampleTimes, IECore::MurmurHash *hash )
+object transformSamplesWrapper(
+	const Gaffer::M44fPlug &transformPlug, object pythonSampleTimes, IECore::MurmurHash *hash
+)
 {
 	IECoreScenePreview::Renderer::SampleTimes sampleTimes;
 	boost::python::container_utils::extend_container( sampleTimes, pythonSampleTimes );
@@ -184,22 +190,36 @@ object transformSamplesWrapper( const Gaffer::M44fPlug &transformPlug, object py
 	return sampledTransform ? object( *sampledTransform ) : object();
 }
 
-void outputCamerasWrapper( const ScenePlug &scene, const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions, const GafferScene::Private::RendererAlgo::RenderSets &renderSets, IECoreScenePreview::Renderer &renderer )
+void outputCamerasWrapper(
+	const ScenePlug &scene, const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions,
+	const GafferScene::Private::RendererAlgo::RenderSets &renderSets, IECoreScenePreview::Renderer &renderer
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	GafferScene::Private::RendererAlgo::outputCameras( &scene, renderOptions, renderSets, &renderer );
 }
 
-void outputLightsWrapper( const ScenePlug &scene, const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions, const GafferScene::Private::RendererAlgo::RenderSets &renderSets, GafferScene::Private::RendererAlgo::LightLinks &lightLinks, IECoreScenePreview::Renderer &renderer )
+void outputLightsWrapper(
+	const ScenePlug &scene, const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions,
+	const GafferScene::Private::RendererAlgo::RenderSets &renderSets,
+	GafferScene::Private::RendererAlgo::LightLinks &lightLinks, IECoreScenePreview::Renderer &renderer
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	GafferScene::Private::RendererAlgo::outputLights( &scene, renderOptions, renderSets, &lightLinks, &renderer );
 }
 
-void outputObjectsWrapper( const ScenePlug &scene, const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions, const GafferScene::Private::RendererAlgo::RenderSets &renderSets, GafferScene::Private::RendererAlgo::LightLinks &lightLinks, IECoreScenePreview::Renderer &renderer, const ScenePlug::ScenePath &root, GafferScene::RenderManifest *renderManifest )
+void outputObjectsWrapper(
+	const ScenePlug &scene, const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions,
+	const GafferScene::Private::RendererAlgo::RenderSets &renderSets,
+	GafferScene::Private::RendererAlgo::LightLinks &lightLinks, IECoreScenePreview::Renderer &renderer,
+	const ScenePlug::ScenePath &root, GafferScene::RenderManifest *renderManifest
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
-	GafferScene::Private::RendererAlgo::outputObjects( &scene, renderOptions, renderSets, &lightLinks, &renderer, root, renderManifest );
+	GafferScene::Private::RendererAlgo::outputObjects(
+		&scene, renderOptions, renderSets, &lightLinks, &renderer, root, renderManifest
+	);
 }
 
 struct RenderSlotCaller
@@ -225,11 +245,12 @@ void GafferSceneModule::bindRender()
 {
 
 	{
-		scope s = GafferBindings::NodeClass<InteractiveRender>()
-					  .def( "getContext", &interactiveRenderGetContext )
-					  .def( "setContext", &interactiveRenderSetContext )
-					  .def( "command", &interactiveRenderCommandWrapper, ( arg( "name" ), arg( "parameters" ) = dict() ) )
-					  .def( "renderManifest", &interactiveRenderRenderManifestWrapper );
+		scope s =
+			GafferBindings::NodeClass<InteractiveRender>()
+				.def( "getContext", &interactiveRenderGetContext )
+				.def( "setContext", &interactiveRenderSetContext )
+				.def( "command", &interactiveRenderCommandWrapper, ( arg( "name" ), arg( "parameters" ) = dict() ) )
+				.def( "renderManifest", &interactiveRenderRenderManifestWrapper );
 
 		enum_<InteractiveRender::State>( "State" )
 			.value( "Stopped", InteractiveRender::Stopped )
@@ -238,16 +259,19 @@ void GafferSceneModule::bindRender()
 	}
 
 	{
-		scope s = TaskNodeClass<GafferScene::Render>()
-					  .def( "preRenderSignal", &Render::preRenderSignal, return_value_policy<reference_existing_object>() )
-					  .def( "postRenderSignal", &Render::postRenderSignal, return_value_policy<reference_existing_object>() )
-					  .staticmethod( "postRenderSignal" );
+		scope s =
+			TaskNodeClass<GafferScene::Render>()
+				.def( "preRenderSignal", &Render::preRenderSignal, return_value_policy<reference_existing_object>() )
+				.def( "postRenderSignal", &Render::postRenderSignal, return_value_policy<reference_existing_object>() )
+				.staticmethod( "postRenderSignal" );
 
 		enum_<GafferScene::Render::Mode>( "Mode" )
 			.value( "RenderMode", GafferScene::Render::RenderMode )
 			.value( "SceneDescriptionMode", GafferScene::Render::SceneDescriptionMode );
 
-		SignalClass<Render::RenderSignal, DefaultSignalCaller<Render::RenderSignal>, RenderSlotCaller>( "RenderSignal" );
+		SignalClass<Render::RenderSignal, DefaultSignalCaller<Render::RenderSignal>, RenderSlotCaller>(
+			"RenderSignal"
+		);
 	}
 
 	{
@@ -266,7 +290,9 @@ void GafferSceneModule::bindRender()
 				.def_readwrite( "transformBlur", &GafferScene::Private::RendererAlgo::RenderOptions::transformBlur )
 				.def_readwrite( "deformationBlur", &GafferScene::Private::RendererAlgo::RenderOptions::deformationBlur )
 				.def_readwrite( "shutter", &GafferScene::Private::RendererAlgo::RenderOptions::shutter )
-				.def_readwrite( "includedPurposes", &GafferScene::Private::RendererAlgo::RenderOptions::includedPurposes )
+				.def_readwrite(
+					"includedPurposes", &GafferScene::Private::RendererAlgo::RenderOptions::includedPurposes
+				)
 				.def( self == self );
 
 			class_<GafferScene::Private::RendererAlgo::SampledTransform>( "SampledTransform" )
@@ -280,8 +306,10 @@ void GafferSceneModule::bindRender()
 				.add_property( "samples", &sampledObjectSamples )
 				.add_property( "sampleTimes", &sampledObjectSampleTimes );
 
-			def( "objectSamples", &objectSamplesWrapper, ( arg( "objectPlug" ), arg( "sampleTimes" ), arg( "hash" ) = object(), arg( "_copy" ) = true ) );
-			def( "transformSamples", &transformSamplesWrapper, ( arg( "transformPlug" ), arg( "sampleTimes" ), arg( "hash" ) = object() ) );
+			def( "objectSamples", &objectSamplesWrapper,
+				 ( arg( "objectPlug" ), arg( "sampleTimes" ), arg( "hash" ) = object(), arg( "_copy" ) = true ) );
+			def( "transformSamples", &transformSamplesWrapper,
+				 ( arg( "transformPlug" ), arg( "sampleTimes" ), arg( "hash" ) = object() ) );
 
 			class_<GafferScene::Private::RendererAlgo::RenderSets, boost::noncopyable>( "RenderSets" )
 				.def( init<const ScenePlug *>() );
@@ -290,7 +318,9 @@ void GafferSceneModule::bindRender()
 
 			def( "outputCameras", &outputCamerasWrapper );
 			def( "outputLights", &outputLightsWrapper );
-			def( "outputObjects", &outputObjectsWrapper, ( arg( "scene" ), arg( "globals" ), arg( "renderSets" ), arg( "lightLinks" ), arg( "renderer" ), arg( "root" ) = "/", arg( "renderManifest" ) = object() ) );
+			def( "outputObjects", &outputObjectsWrapper,
+				 ( arg( "scene" ), arg( "globals" ), arg( "renderSets" ), arg( "lightLinks" ), arg( "renderer" ),
+				   arg( "root" ) = "/", arg( "renderManifest" ) = object() ) );
 		}
 	}
 }

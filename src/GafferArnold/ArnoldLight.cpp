@@ -59,11 +59,6 @@ ArnoldShaderPtr createShader()
 
 GAFFER_NODE_DEFINE_TYPE( ArnoldLight );
 
-ArnoldLight::ArnoldLight( const std::string &name )
-	: GafferScene::Light( name, createShader() )
-{
-}
+ArnoldLight::ArnoldLight( const std::string &name ) : GafferScene::Light( name, createShader() ) {}
 
-ArnoldLight::~ArnoldLight()
-{
-}
+ArnoldLight::~ArnoldLight() {}

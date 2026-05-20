@@ -45,6 +45,4 @@ RenderManSampleFilter::RenderManSampleFilter( const std::string &name )
 {
 }
 
-RenderManSampleFilter::~RenderManSampleFilter()
-{
-}
+RenderManSampleFilter::~RenderManSampleFilter() {}

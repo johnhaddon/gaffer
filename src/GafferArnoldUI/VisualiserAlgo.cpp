@@ -87,7 +87,9 @@ OSLQueryCache g_oslQueryCache( oslQueryGetter, 128 );
 //////////////////////////////////////////////////////////////////////////
 
 // Re-connects any connections from oldName on oldShader to newName on newShader
-void remapOutputConnections( const InternedString &shader, const InternedString &oldName, const InternedString &newName, ShaderNetwork *network )
+void remapOutputConnections(
+	const InternedString &shader, const InternedString &oldName, const InternedString &newName, ShaderNetwork *network
+)
 {
 	ShaderNetwork::Parameter newSource( shader, newName );
 
@@ -113,7 +115,9 @@ void remapOutputConnections( const InternedString &shader, const InternedString 
 	}
 }
 
-void remapInputConnections( const InternedString &shader, const InternedString &oldName, const InternedString &newName, ShaderNetwork *network )
+void remapInputConnections(
+	const InternedString &shader, const InternedString &oldName, const InternedString &newName, ShaderNetwork *network
+)
 {
 	ShaderNetwork::Parameter newDestination( shader, newName );
 
@@ -135,7 +139,10 @@ void remapInputConnections( const InternedString &shader, const InternedString &
 
 // Sets outName in outParams if inName is set in inParams.
 // Arnold data types not representable in OSL will be converted accordingly
-void copyAndConvertIfSet( const InternedString &inName, const CompoundDataMap &inParams, const InternedString &outName, CompoundDataMap &outParams )
+void copyAndConvertIfSet(
+	const InternedString &inName, const CompoundDataMap &inParams, const InternedString &outName,
+	CompoundDataMap &outParams
+)
 {
 	const auto &it = inParams.find( inName );
 	if( it != inParams.end() )
@@ -214,7 +221,9 @@ bool substituteWithOSL( const IECore::InternedString &handle, ShaderNetwork *net
 
 } // namespace
 
-IECoreScene::ShaderNetworkPtr GafferArnoldUI::Private::VisualiserAlgo::conformToOSLNetwork( const IECoreScene::ShaderNetwork::Parameter &output, const IECoreScene::ShaderNetwork *shaderNetwork )
+IECoreScene::ShaderNetworkPtr GafferArnoldUI::Private::VisualiserAlgo::conformToOSLNetwork(
+	const IECoreScene::ShaderNetwork::Parameter &output, const IECoreScene::ShaderNetwork *shaderNetwork
+)
 {
 	ShaderNetworkPtr oslNetwork = shaderNetwork->copy();
 

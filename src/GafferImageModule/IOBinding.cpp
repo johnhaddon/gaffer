@@ -64,18 +64,21 @@ namespace
 
 struct DefaultColorSpaceFunction
 {
-	DefaultColorSpaceFunction( object fn )
-		: m_fn( fn )
-	{
-	}
+	DefaultColorSpaceFunction( object fn ) : m_fn( fn ) {}
 
-	string operator () ( const std::string &fileName, const std::string &fileFormat, const std::string &dataType, const IECore::CompoundData *metadata, const OCIO_NAMESPACE::ConstConfigRcPtr &config )
+	string operator () (
+		const std::string &fileName, const std::string &fileFormat, const std::string &dataType,
+		const IECore::CompoundData *metadata, const OCIO_NAMESPACE::ConstConfigRcPtr &config
+	)
 	{
 
 		IECorePython::ScopedGILLock gilock;
 		try
 		{
-			return extract<string>( m_fn( fileName, fileFormat, dataType, IECore::CompoundDataPtr( const_cast<IECore::CompoundData *>( metadata ) ), config ) );
+			return extract<string>( m_fn(
+				fileName, fileFormat, dataType,
+				IECore::CompoundDataPtr( const_cast<IECore::CompoundData *>( metadata ) ), config
+			) );
 		}
 		catch( const error_already_set & )
 		{
@@ -83,7 +86,7 @@ struct DefaultColorSpaceFunction
 		}
 	}
 
-	private:
+private:
 
 	object m_fn;
 };
@@ -98,9 +101,10 @@ template<typename T>
 object getDefaultColorSpaceFunction()
 {
 	return make_function(
-		T::getDefaultColorSpaceFunction(),
-		default_call_policies(),
-		boost::mpl::vector<string, const string &, const string &, const string &, const IECore::CompoundData *, const OCIO_NAMESPACE::ConstConfigRcPtr &>()
+		T::getDefaultColorSpaceFunction(), default_call_policies(),
+		boost::mpl::vector<
+			string, const string &, const string &, const string &, const IECore::CompoundData *,
+			const OCIO_NAMESPACE::ConstConfigRcPtr &>()
 	);
 }
 

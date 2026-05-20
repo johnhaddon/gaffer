@@ -49,17 +49,14 @@ GAFFER_NODE_DEFINE_TYPE( Unpremultiply );
 
 size_t Unpremultiply::g_firstPlugIndex = 0;
 
-Unpremultiply::Unpremultiply( const std::string &name )
-	: ChannelDataProcessor( name )
+Unpremultiply::Unpremultiply( const std::string &name ) : ChannelDataProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "alphaChannel", Gaffer::Plug::In, "A" ) );
 	addChild( new BoolPlug( "ignoreMissingAlpha", Gaffer::Plug::In, false ) );
 }
 
-Unpremultiply::~Unpremultiply()
-{
-}
+Unpremultiply::~Unpremultiply() {}
 
 Gaffer::StringPlug *Unpremultiply::alphaChannelPlug()
 {
@@ -85,17 +82,15 @@ void Unpremultiply::affects( const Gaffer::Plug *input, AffectedPlugsContainer &
 {
 	ChannelDataProcessor::affects( input, outputs );
 
-	if(
-		input == inPlug()->channelDataPlug() ||
-		input == alphaChannelPlug() ||
-		input == ignoreMissingAlphaPlug()
-	)
+	if( input == inPlug()->channelDataPlug() || input == alphaChannelPlug() || input == ignoreMissingAlphaPlug() )
 	{
 		outputs.push_back( outPlug()->channelDataPlug() );
 	}
 }
 
-void Unpremultiply::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Unpremultiply::hashChannelData(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	std::string alphaChannel;
 	ConstStringVectorDataPtr inChannelNamesPtr;
@@ -136,7 +131,9 @@ void Unpremultiply::hashChannelData( const GafferImage::ImagePlug *output, const
 	inPlug()->channelDataPlug()->hash( h );
 }
 
-void Unpremultiply::processChannelData( const Gaffer::Context *context, const ImagePlug *parent, const std::string &channel, FloatVectorDataPtr outData ) const
+void Unpremultiply::processChannelData(
+	const Gaffer::Context *context, const ImagePlug *parent, const std::string &channel, FloatVectorDataPtr outData
+) const
 {
 	std::string alphaChannel;
 	ConstStringVectorDataPtr inChannelNamesPtr;

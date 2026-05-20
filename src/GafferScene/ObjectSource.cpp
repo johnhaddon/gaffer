@@ -54,8 +54,7 @@ GAFFER_NODE_DEFINE_TYPE( ObjectSource );
 
 size_t ObjectSource::g_firstPlugIndex = 0;
 
-ObjectSource::ObjectSource( const std::string &name, const std::string &namePlugDefaultValue )
-	: SceneNode( name )
+ObjectSource::ObjectSource( const std::string &name, const std::string &namePlugDefaultValue ) : SceneNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new Gaffer::StringPlug( "name", Gaffer::Plug::In, namePlugDefaultValue ) );
@@ -64,9 +63,7 @@ ObjectSource::ObjectSource( const std::string &name, const std::string &namePlug
 	addChild( new Gaffer::ObjectPlug( "__source", Gaffer::Plug::Out, IECore::NullObject::defaultNullObject() ) );
 }
 
-ObjectSource::~ObjectSource()
-{
-}
+ObjectSource::~ObjectSource() {}
 
 Gaffer::StringPlug *ObjectSource::namePlug()
 {
@@ -155,17 +152,23 @@ void ObjectSource::compute( Gaffer::ValuePlug *output, const Gaffer::Context *co
 	return SceneNode::compute( output, context );
 }
 
-void ObjectSource::hashAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void ObjectSource::hashAttributes(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	h = parent->attributesPlug()->defaultValue()->Object::hash();
 }
 
-IECore::ConstCompoundObjectPtr ObjectSource::computeAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstCompoundObjectPtr ObjectSource::computeAttributes(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	return parent->attributesPlug()->defaultValue();
 }
 
-void ObjectSource::hashBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void ObjectSource::hashBound(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	SceneNode::hashBound( path, context, parent, h );
 	sourcePlug()->hash( h );
@@ -175,7 +178,9 @@ void ObjectSource::hashBound( const SceneNode::ScenePath &path, const Gaffer::Co
 	}
 }
 
-Imath::Box3f ObjectSource::computeBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::Box3f ObjectSource::computeBound(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	IECore::ConstObjectPtr object = sourcePlug()->getValue();
 	Imath::Box3f result = SceneAlgo::bound( object.get() );
@@ -187,7 +192,9 @@ Imath::Box3f ObjectSource::computeBound( const SceneNode::ScenePath &path, const
 	return result;
 }
 
-void ObjectSource::hashTransform( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void ObjectSource::hashTransform(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	SceneNode::hashTransform( path, context, parent, h );
 	if( path.size() == 1 )
@@ -196,7 +203,9 @@ void ObjectSource::hashTransform( const SceneNode::ScenePath &path, const Gaffer
 	}
 }
 
-Imath::M44f ObjectSource::computeTransform( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::M44f ObjectSource::computeTransform(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( path.size() == 1 )
 	{
@@ -205,7 +214,9 @@ Imath::M44f ObjectSource::computeTransform( const SceneNode::ScenePath &path, co
 	return Imath::M44f();
 }
 
-void ObjectSource::hashObject( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void ObjectSource::hashObject(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	if( path.size() != 1 )
 	{
@@ -217,7 +228,9 @@ void ObjectSource::hashObject( const SceneNode::ScenePath &path, const Gaffer::C
 	sourcePlug()->hash( h );
 }
 
-IECore::ConstObjectPtr ObjectSource::computeObject( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstObjectPtr ObjectSource::computeObject(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( path.size() != 1 )
 	{
@@ -227,7 +240,9 @@ IECore::ConstObjectPtr ObjectSource::computeObject( const SceneNode::ScenePath &
 	return sourcePlug()->getValue();
 }
 
-void ObjectSource::hashChildNames( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void ObjectSource::hashChildNames(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	if( path.size() == 0 )
 	{
@@ -238,11 +253,11 @@ void ObjectSource::hashChildNames( const SceneNode::ScenePath &path, const Gaffe
 	h = parent->childNamesPlug()->defaultValue()->Object::hash();
 }
 
-void ObjectSource::hashStandardSetNames( const Gaffer::Context *context, IECore::MurmurHash &h ) const
-{
-}
+void ObjectSource::hashStandardSetNames( const Gaffer::Context *context, IECore::MurmurHash &h ) const {}
 
-IECore::ConstInternedStringVectorDataPtr ObjectSource::computeChildNames( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstInternedStringVectorDataPtr ObjectSource::computeChildNames(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( path.size() == 0 )
 	{
@@ -258,7 +273,9 @@ void ObjectSource::hashGlobals( const Gaffer::Context *context, const ScenePlug 
 	h = parent->globalsPlug()->defaultValue()->Object::hash();
 }
 
-IECore::ConstCompoundObjectPtr ObjectSource::computeGlobals( const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstCompoundObjectPtr ObjectSource::computeGlobals(
+	const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	return parent->globalsPlug()->defaultValue();
 }
@@ -270,7 +287,9 @@ void ObjectSource::hashSetNames( const Gaffer::Context *context, const ScenePlug
 	hashStandardSetNames( context, h );
 }
 
-IECore::ConstInternedStringVectorDataPtr ObjectSource::computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstInternedStringVectorDataPtr ObjectSource::computeSetNames(
+	const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	IECore::InternedStringVectorDataPtr result = new IECore::InternedStringVectorData;
 	IECore::StringAlgo::tokenize( setsPlug()->getValue(), ' ', result->writable() );
@@ -282,7 +301,10 @@ IECore::ConstInternedStringVectorDataPtr ObjectSource::computeSetNames( const Ga
 	return result;
 }
 
-void ObjectSource::hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void ObjectSource::hashSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent,
+	IECore::MurmurHash &h
+) const
 {
 	if( setNameValid( setName ) )
 	{
@@ -295,7 +317,9 @@ void ObjectSource::hashSet( const IECore::InternedString &setName, const Gaffer:
 	}
 }
 
-IECore::ConstPathMatcherDataPtr ObjectSource::computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstPathMatcherDataPtr ObjectSource::computeSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	if( setNameValid( setName ) )
 	{
@@ -333,7 +357,8 @@ IECore::InternedString ObjectSource::validatedName() const
 bool ObjectSource::setNameValid( const IECore::InternedString &setName ) const
 {
 	IECore::ConstInternedStringVectorDataPtr standardSets = computeStandardSetNames();
-	if( std::find( standardSets->readable().begin(), standardSets->readable().end(), setName ) != standardSets->readable().end() )
+	if( std::find( standardSets->readable().begin(), standardSets->readable().end(), setName ) !=
+		standardSets->readable().end() )
 	{
 		return true;
 	}

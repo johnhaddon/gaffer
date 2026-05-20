@@ -50,7 +50,7 @@ namespace GafferImage
 class GAFFERIMAGE_API ImageNode : public Gaffer::ComputeNode
 {
 
-	public:
+public:
 
 	explicit ImageNode( const std::string &name = defaultName<ImageNode>() );
 	~ImageNode() override;
@@ -69,7 +69,7 @@ class GAFFERIMAGE_API ImageNode : public Gaffer::ComputeNode
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
 	/// The enabled() and channelEnabled( channel ) methods provide a means to disable the node
 	/// under particular circumstances such as when the input plugs produce no effect.
@@ -107,30 +107,57 @@ class GAFFERIMAGE_API ImageNode : public Gaffer::ComputeNode
 	///
 	///    * Make an input connection into the corresponding plug, so that the hash and compute methods
 	///      are never called for it.
-	virtual void hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-	virtual void hashFormat( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-	virtual void hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-	virtual void hashMetadata( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-	virtual void hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-	virtual void hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-	virtual void hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const;
-	virtual void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const;
+	virtual void hashViewNames(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const;
+	virtual void hashFormat(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const;
+	virtual void hashDataWindow(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const;
+	virtual void hashMetadata(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const;
+	virtual void hashDeep(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const;
+	virtual void hashSampleOffsets(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const;
+	virtual void hashChannelNames(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const;
+	virtual void hashChannelData(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const;
 
 	/// Implemented to call the compute*() methods below whenever output is part of an ImagePlug.
 	/// Derived classes should reimplement the specific compute*() methods rather than compute() itself.
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 	/// Compute methods for the individual children of outPlug() - these must be implemented by derived classes, or
 	/// an input connection must be made to the plug, so that the method is not called.
-	virtual IECore::ConstStringVectorDataPtr computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const;
+	virtual IECore::ConstStringVectorDataPtr computeViewNames(
+		const Gaffer::Context *context, const ImagePlug *parent
+	) const;
 	virtual GafferImage::Format computeFormat( const Gaffer::Context *context, const ImagePlug *parent ) const;
 	virtual Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const;
-	virtual IECore::ConstCompoundDataPtr computeMetadata( const Gaffer::Context *context, const ImagePlug *parent ) const;
+	virtual IECore::ConstCompoundDataPtr computeMetadata(
+		const Gaffer::Context *context, const ImagePlug *parent
+	) const;
 	virtual bool computeDeep( const Gaffer::Context *context, const ImagePlug *parent ) const;
-	virtual IECore::ConstIntVectorDataPtr computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const;
-	virtual IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const;
-	virtual IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const;
+	virtual IECore::ConstIntVectorDataPtr computeSampleOffsets(
+		const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent
+	) const;
+	virtual IECore::ConstStringVectorDataPtr computeChannelNames(
+		const Gaffer::Context *context, const ImagePlug *parent
+	) const;
+	virtual IECore::ConstFloatVectorDataPtr computeChannelData(
+		const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+		const ImagePlug *parent
+	) const;
 
-	private:
+private:
 
 	static size_t g_firstPlugIndex;
 };

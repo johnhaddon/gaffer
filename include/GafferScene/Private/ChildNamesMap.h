@@ -58,7 +58,7 @@ namespace Private
 class ChildNamesMap : public IECore::Data
 {
 
-	public:
+public:
 
 	ChildNamesMap( const std::vector<IECore::ConstInternedStringVectorDataPtr> &inputChildNames );
 
@@ -76,9 +76,11 @@ class ChildNamesMap : public IECore::Data
 	/// Combines multiple input sets, accounting for the name remapping.
 	IECore::PathMatcher set( const std::vector<IECore::ConstPathMatcherDataPtr> &inputSets ) const;
 
-	static IECore::InternedString uniqueName( IECore::InternedString name, const std::unordered_set<IECore::InternedString> &existingNames );
+	static IECore::InternedString uniqueName(
+		IECore::InternedString name, const std::unordered_set<IECore::InternedString> &existingNames
+	);
 
-	private:
+private:
 
 	const IECore::InternedStringVectorDataPtr m_childNames;
 

@@ -69,17 +69,18 @@ class FilteredRecursiveChildRange;
 #define GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( TYPE, TYPEID, BASETYPE ) \
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( TYPE, TYPEID, BASETYPE ) \
 	using Iterator = Gaffer::FilteredChildIterator<Gaffer::TypePredicate<TYPE>>; \
-	using RecursiveIterator = Gaffer::FilteredRecursiveChildIterator<Gaffer::TypePredicate<TYPE>, Gaffer::TypePredicate<GraphComponent>>; \
+	using RecursiveIterator = \
+		Gaffer::FilteredRecursiveChildIterator<Gaffer::TypePredicate<TYPE>, Gaffer::TypePredicate<GraphComponent>>; \
 	using Range = Gaffer::FilteredChildRange<Gaffer::TypePredicate<TYPE>>; \
-	using RecursiveRange = Gaffer::FilteredRecursiveChildRange<Gaffer::TypePredicate<TYPE>, Gaffer::TypePredicate<GraphComponent>>;
+	using RecursiveRange = \
+		Gaffer::FilteredRecursiveChildRange<Gaffer::TypePredicate<TYPE>, Gaffer::TypePredicate<GraphComponent>>;
 
-#define GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( TYPE ) \
-	IE_CORE_DEFINERUNTIMETYPED( TYPE )
+#define GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( TYPE ) IE_CORE_DEFINERUNTIMETYPED( TYPE )
 
 class GAFFER_API GraphComponent : public IECore::RunTimeTyped, public Signals::Trackable
 {
 
-	public:
+public:
 
 	explicit GraphComponent( const std::string &name = GraphComponent::defaultName<GraphComponent>() );
 	~GraphComponent() override;
@@ -87,9 +88,11 @@ class GAFFER_API GraphComponent : public IECore::RunTimeTyped, public Signals::T
 	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( Gaffer::GraphComponent, GraphComponentTypeId, IECore::RunTimeTyped );
 
 	using UnarySignal = Signals::Signal<void( GraphComponent * ), Signals::CatchingCombiner<void>>;
-	using NameChangedSignal = Signals::Signal<void( GraphComponent *, IECore::InternedString ), Signals::CatchingCombiner<void>>;
+	using NameChangedSignal =
+		Signals::Signal<void( GraphComponent *, IECore::InternedString ), Signals::CatchingCombiner<void>>;
 	using BinarySignal = Signals::Signal<void( GraphComponent *, GraphComponent * ), Signals::CatchingCombiner<void>>;
-	using ChildrenReorderedSignal = Signals::Signal<void( GraphComponent *, const std::vector<size_t> &originalIndices ), Signals::CatchingCombiner<void>>;
+	using ChildrenReorderedSignal = Signals::Signal<
+		void( GraphComponent *, const std::vector<size_t> &originalIndices ), Signals::CatchingCombiner<void>>;
 
 	/// @name Naming
 	/// All GraphComponents have a name, which must be unique among
@@ -231,7 +234,7 @@ class GAFFER_API GraphComponent : public IECore::RunTimeTyped, public Signals::T
 	ChildrenReorderedSignal &childrenReorderedSignal();
 	//@}
 
-	protected:
+protected:
 
 	/// Called by `setName()` immediately prior to emitting
 	/// `nameChangedSignal()`. This provides an opportunity to respond to
@@ -292,7 +295,7 @@ class GAFFER_API GraphComponent : public IECore::RunTimeTyped, public Signals::T
 	/// if it discovers that not to be the case.
 	void storeIndexOfNextChild( size_t &index ) const;
 
-	private:
+private:
 
 	static std::string unprefixedTypeName( const char *typeName );
 

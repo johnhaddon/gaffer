@@ -86,7 +86,9 @@ inline float filteredStripes( float x, float period, float filterWidth )
 	float xp = x / ( period * 0.5f );
 	float nearestBoundary = round( xp );
 	float boundaryDirection = ( ( (int)nearestBoundary ) % 2 ) == 0 ? -1.0f : 1.0f;
-	return max( 0.0f, min( 1.0f, ( ( xp - nearestBoundary ) * ( period * 0.5f ) / filterWidth * boundaryDirection + 0.5f ) ) );
+	return max(
+		0.0f, min( 1.0f, ( ( xp - nearestBoundary ) * ( period * 0.5f ) / filterWidth * boundaryDirection + 0.5f ) )
+	);
 }
 
 } // namespace
@@ -99,8 +101,7 @@ GAFFER_NODE_DEFINE_TYPE( Checkerboard );
 
 size_t Checkerboard::g_firstPlugIndex = 0;
 
-Checkerboard::Checkerboard( const std::string &name )
-	: FlatImageSource( name )
+Checkerboard::Checkerboard( const std::string &name ) : FlatImageSource( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new FormatPlug( "format" ) );
@@ -111,9 +112,7 @@ Checkerboard::Checkerboard( const std::string &name )
 	addChild( new Transform2DPlug( "transform" ) );
 }
 
-Checkerboard::~Checkerboard()
-{
-}
+Checkerboard::~Checkerboard() {}
 
 GafferImage::FormatPlug *Checkerboard::formatPlug()
 {
@@ -179,12 +178,8 @@ void Checkerboard::affects( const Gaffer::Plug *input, AffectedPlugsContainer &o
 {
 	FlatImageSource::affects( input, outputs );
 
-	if(
-		input->parent<Plug>() == colorAPlug() ||
-		input->parent<Plug>() == colorBPlug() ||
-		input->parent<V2fPlug>() == sizePlug() ||
-		transformPlug()->isAncestorOf( input )
-	)
+	if( input->parent<Plug>() == colorAPlug() || input->parent<Plug>() == colorBPlug() ||
+		input->parent<V2fPlug>() == sizePlug() || transformPlug()->isAncestorOf( input ) )
 	{
 		outputs.push_back( outPlug()->channelDataPlug() );
 	}
@@ -206,7 +201,9 @@ void Checkerboard::affects( const Gaffer::Plug *input, AffectedPlugsContainer &o
 	}
 }
 
-void Checkerboard::hashFormat( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Checkerboard::hashFormat(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageSource::hashFormat( output, context, h );
 	h.append( formatPlug()->hash() );
@@ -217,7 +214,9 @@ GafferImage::Format Checkerboard::computeFormat( const Gaffer::Context *context,
 	return formatPlug()->getValue();
 }
 
-void Checkerboard::hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Checkerboard::hashDataWindow(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageSource::hashDataWindow( output, context, h );
 	h.append( formatPlug()->hash() );
@@ -228,18 +227,24 @@ Imath::Box2i Checkerboard::computeDataWindow( const Gaffer::Context *context, co
 	return formatPlug()->getValue().getDisplayWindow();
 }
 
-IECore::ConstCompoundDataPtr Checkerboard::computeMetadata( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstCompoundDataPtr Checkerboard::computeMetadata(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	return outPlug()->metadataPlug()->defaultValue();
 }
 
-void Checkerboard::hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Checkerboard::hashChannelNames(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageSource::hashChannelNames( output, context, h );
 	layerPlug()->hash( h );
 }
 
-IECore::ConstStringVectorDataPtr Checkerboard::computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr Checkerboard::computeChannelNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	std::string channelNamePrefix = layerPlug()->getValue();
 	if( !channelNamePrefix.empty() )
@@ -258,7 +263,9 @@ IECore::ConstStringVectorDataPtr Checkerboard::computeChannelNames( const Gaffer
 	return resultData;
 }
 
-void Checkerboard::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Checkerboard::hashChannelData(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageSource::hashChannelData( output, context, h );
 
@@ -271,7 +278,9 @@ void Checkerboard::hashChannelData( const GafferImage::ImagePlug *output, const 
 	const int channelIndex = ImageAlgo::colorIndex( channelName );
 	if( channelIndex == -1 )
 	{
-		throw IECore::Exception( "Evaluated with invalid channel name: \"" + channelName + "\". This indicates a bug in a downstream node." );
+		throw IECore::Exception(
+			"Evaluated with invalid channel name: \"" + channelName + "\". This indicates a bug in a downstream node."
+		);
 	}
 	colorAPlug()->getChild( channelIndex )->hash( h );
 	colorBPlug()->getChild( channelIndex )->hash( h );
@@ -280,12 +289,17 @@ void Checkerboard::hashChannelData( const GafferImage::ImagePlug *output, const 
 	transformPlug()->hash( h );
 }
 
-IECore::ConstFloatVectorDataPtr Checkerboard::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr Checkerboard::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	const int channelIndex = ImageAlgo::colorIndex( context->get<std::string>( ImagePlug::channelNameContextName ) );
 	if( channelIndex == -1 )
 	{
-		throw IECore::Exception( "Evaluated with invalid channel name: \"" + channelName + "\". This indicates a bug in a downstream node." );
+		throw IECore::Exception(
+			"Evaluated with invalid channel name: \"" + channelName + "\". This indicates a bug in a downstream node."
+		);
 	}
 
 	const float valueA = colorAPlug()->getChild( channelIndex )->getValue();

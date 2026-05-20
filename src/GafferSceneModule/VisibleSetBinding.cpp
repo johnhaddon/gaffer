@@ -66,8 +66,8 @@ std::string visibilityRepr( const VisibleSet::Visibility &visibility )
 {
 	const std::string drawMode = extract<std::string>( object( visibility.drawMode ).attr( "__str__" )() );
 	return fmt::format(
-		"GafferScene.VisibleSet.Visibility( GafferScene.VisibleSet.Visibility.DrawMode.{}, {} )",
-		drawMode, visibility.descendantsVisible ? "True" : "False"
+		"GafferScene.VisibleSet.Visibility( GafferScene.VisibleSet.Visibility.DrawMode.{}, {} )", drawMode,
+		visibility.descendantsVisible ? "True" : "False"
 	);
 }
 
@@ -86,9 +86,22 @@ void GafferSceneModule::bindVisibleSet()
 	IECorePython::TypedDataFromType<VisibleSetData>();
 
 	scope s = class_<VisibleSet>( "VisibleSet" )
-				  .def( "__init__", make_constructor( constructor, default_call_policies(), ( arg( "expansions" ) = PathMatcher(), arg( "inclusions" ) = PathMatcher(), arg( "exclusions" ) = PathMatcher() ) ) )
+				  .def(
+					  "__init__",
+					  make_constructor(
+						  constructor, default_call_policies(),
+						  ( arg( "expansions" ) = PathMatcher(), arg( "inclusions" ) = PathMatcher(),
+							arg( "exclusions" ) = PathMatcher() )
+					  )
+				  )
 				  .def( init<const VisibleSet &>() )
-				  .def( "visibility", ( VisibleSet::Visibility ( VisibleSet ::* )( const std::vector<InternedString> &, const size_t ) const ) & VisibleSet::visibility, arg( "minimumExpansionDepth" ) = 0 )
+				  .def(
+					  "visibility",
+					  ( VisibleSet::Visibility ( VisibleSet ::* )( const std::vector<InternedString> &, const size_t )
+							const ) &
+						  VisibleSet::visibility,
+					  arg( "minimumExpansionDepth" ) = 0
+				  )
 				  .def_readwrite( "expansions", &VisibleSet::expansions )
 				  .def_readwrite( "inclusions", &VisibleSet::inclusions )
 				  .def_readwrite( "exclusions", &VisibleSet::exclusions )

@@ -115,7 +115,9 @@ std::string getCurrentRenderPassWrapper( ScriptNode &script )
 	return getCurrentRenderPass( &script );
 }
 
-void addVisibleSetBookmarkWrapper( ScriptNode &script, const std::string &name, const GafferScene::VisibleSet &visibleSet, bool persistent )
+void addVisibleSetBookmarkWrapper(
+	ScriptNode &script, const std::string &name, const GafferScene::VisibleSet &visibleSet, bool persistent
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	addVisibleSetBookmark( &script, name, visibleSet, persistent );
@@ -150,7 +152,8 @@ void GafferSceneUIModule::bindScriptNodeAlgo()
 	def( "visibleSetChangedSignal", &visibleSetChangedSignal, return_value_policy<reference_existing_object>() );
 
 	def( "expandInVisibleSet", &expandInVisibleSetWrapper, ( arg( "expandAncestors" ) = true ) );
-	def( "expandDescendantsInVisibleSet", &expandDescendantsInVisibleSetWrapper, ( arg( "script" ), arg( "paths" ), arg( "scene" ), arg( "depth" ) = std::numeric_limits<int>::max() ) );
+	def( "expandDescendantsInVisibleSet", &expandDescendantsInVisibleSetWrapper,
+		 ( arg( "script" ), arg( "paths" ), arg( "scene" ), arg( "depth" ) = std::numeric_limits<int>::max() ) );
 	def( "setSelectedPaths", &setSelectedPathsWrapper );
 	def( "getSelectedPaths", &getSelectedPaths );
 	def( "setLastSelectedPath", &setLastSelectedPathWrapper );
@@ -160,7 +163,8 @@ void GafferSceneUIModule::bindScriptNodeAlgo()
 	def( "setCurrentRenderPass", &setCurrentRenderPassWrapper );
 	def( "getCurrentRenderPass", &getCurrentRenderPassWrapper );
 
-	def( "addVisibleSetBookmark", &addVisibleSetBookmarkWrapper, ( arg( "script" ), arg( "name" ), arg( "visibleSet" ), arg( "persistent" ) = true ) );
+	def( "addVisibleSetBookmark", &addVisibleSetBookmarkWrapper,
+		 ( arg( "script" ), arg( "name" ), arg( "visibleSet" ), arg( "persistent" ) = true ) );
 	def( "getVisibleSetBookmark", getVisibleSetBookmark, ( arg( "script" ), arg( "name" ) ) );
 	def( "removeVisibleSetBookmark", &removeVisibleSetBookmarkWrapper, ( arg( "script" ), arg( "name" ) ) );
 	def( "visibleSetBookmarks", &visibleSetBookmarksWrapper, ( arg( "script" ) ) );

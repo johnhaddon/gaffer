@@ -78,7 +78,7 @@ IE_CORE_FORWARDDECLARE( ViewportGadget );
 class GAFFERUI_API Gadget : public Gaffer::GraphComponent
 {
 
-	public:
+public:
 
 	explicit Gadget( const std::string &name = defaultName<Gadget>() );
 	~Gadget() override;
@@ -218,7 +218,8 @@ class GAFFERUI_API Gadget : public Gaffer::GraphComponent
 	/// The signal triggered by the mouse wheel.
 	ButtonSignal &wheelSignal();
 
-	using EnterLeaveSignal = Gaffer::Signals::Signal<void( Gadget *, const ButtonEvent &event ), Gaffer::Signals::CatchingCombiner<void>>;
+	using EnterLeaveSignal =
+		Gaffer::Signals::Signal<void( Gadget *, const ButtonEvent &event ), Gaffer::Signals::CatchingCombiner<void>>;
 	/// The signal triggered when the mouse enters the Gadget.
 	EnterLeaveSignal &enterSignal();
 	/// The signal triggered when the mouse leaves the Gadget.
@@ -226,8 +227,10 @@ class GAFFERUI_API Gadget : public Gaffer::GraphComponent
 	/// A signal emitted whenever the mouse moves within a Gadget.
 	ButtonSignal &mouseMoveSignal();
 
-	using DragBeginSignal = Gaffer::Signals::Signal<IECore::RunTimeTypedPtr( Gadget *, const DragDropEvent &event ), EventSignalCombiner<IECore::RunTimeTypedPtr>>;
-	using DragDropSignal = Gaffer::Signals::Signal<bool( Gadget *, const DragDropEvent &event ), EventSignalCombiner<bool>>;
+	using DragBeginSignal = Gaffer::Signals::Signal<
+		IECore::RunTimeTypedPtr( Gadget *, const DragDropEvent &event ), EventSignalCombiner<IECore::RunTimeTypedPtr>>;
+	using DragDropSignal =
+		Gaffer::Signals::Signal<bool( Gadget *, const DragDropEvent &event ), EventSignalCombiner<bool>>;
 
 	/// This signal is emitted if a previous buttonPressSignal() returned true, and the
 	/// user has subsequently moved the mouse with the button down. To initiate a drag
@@ -263,7 +266,7 @@ class GAFFERUI_API Gadget : public Gaffer::GraphComponent
 	static IdleSignal &idleSignal();
 	//@}
 
-	protected:
+protected:
 
 	enum class DirtyType
 	{
@@ -321,7 +324,7 @@ class GAFFERUI_API Gadget : public Gaffer::GraphComponent
 	/// Implemented to dirty the layout for both the old and the new parent.
 	void parentChanged( GraphComponent *oldParent ) override;
 
-	private:
+private:
 
 	void styleChanged();
 	void emitDescendantVisibilityChanged();

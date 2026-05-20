@@ -51,11 +51,14 @@ namespace GafferBindings
 class GAFFERBINDINGS_API Serialisation : boost::noncopyable
 {
 
-	public:
+public:
 
 	/// Supports cancellation via the usual mechanism of scoping a Context
 	/// containing an `IECore::Canceller`.
-	Serialisation( const Gaffer::GraphComponent *parent, const std::string &parentName = "parent", const Gaffer::Set *filter = nullptr );
+	Serialisation(
+		const Gaffer::GraphComponent *parent, const std::string &parentName = "parent",
+		const Gaffer::Set *filter = nullptr
+	);
 
 	/// Returns the parent passed to the constructor.
 	const Gaffer::GraphComponent *parent() const;
@@ -71,7 +74,9 @@ class GAFFERBINDINGS_API Serialisation : boost::noncopyable
 	/// \todo This overload provides improved performance in some situations,
 	/// but we should instead optimise GraphComponent storage so that it is not
 	/// necessary.
-	std::string childIdentifier( const std::string &parentIdentifier, Gaffer::GraphComponent::ChildIterator child ) const;
+	std::string childIdentifier(
+		const std::string &parentIdentifier, Gaffer::GraphComponent::ChildIterator child
+	) const;
 
 	/// Ensures that `import moduleName` is included in the result.
 	void addModule( const std::string &moduleName );
@@ -114,7 +119,7 @@ class GAFFERBINDINGS_API Serialisation : boost::noncopyable
 	class GAFFERBINDINGS_API Serialiser : public IECore::RefCounted
 	{
 
-		public:
+	public:
 
 		IE_CORE_DECLAREMEMBERPTR( Serialiser );
 
@@ -122,29 +127,44 @@ class GAFFERBINDINGS_API Serialisation : boost::noncopyable
 		/// into the modules set. The default implementation returns modulePath( graphComponent ).
 		/// > Note : It is often more convenient to call `serialisation.addModule()` from one of
 		/// > the other virtual methods.
-		virtual void moduleDependencies( const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation ) const;
+		virtual void moduleDependencies(
+			const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules,
+			const Serialisation &serialisation
+		) const;
 		/// Should be implemented to return a string which when executed will reconstruct the specified object.
 		/// The default implementation uses repr().
-		virtual std::string constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const;
+		virtual std::string constructor(
+			const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation
+		) const;
 		/// May be implemented to return a string which will be executed immediately after the object has been constructed and
 		/// parented. identifier is the name of a variable which refers to the object. The Serialisation may be used to query
 		/// the identifiers for other objects, but note that at this stage those objects may not have been constructed so it
 		/// is not safe to use them directly. Default implementation returns the empty string.
-		virtual std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const;
+		virtual std::string postConstructor(
+			const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+		) const;
 		/// May be implemented to return a string which will be executed once all objects have been constructed and parented.
 		/// At this point it is possible to request the identifiers of other objects via the Serialisation and refer to them in the result.
 		/// Typically this would be used for forming connections between plugs. The default implementation returns the empty string.
-		virtual std::string postHierarchy( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const;
+		virtual std::string postHierarchy(
+			const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+		) const;
 		/// May be implemented to return a string to be executed after all the postHierarchy strings. This
 		/// can be used to perform a final setup step. The default implementation returns an empty string.
-		virtual std::string postScript( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const;
+		virtual std::string postScript(
+			const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+		) const;
 		/// May be implemented to say whether or not the child needs to be serialised. The default
 		/// implementation returns true.
-		virtual bool childNeedsSerialisation( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const;
+		virtual bool childNeedsSerialisation(
+			const Gaffer::GraphComponent *child, const Serialisation &serialisation
+		) const;
 		/// May be implemented to say whether or not the child needs to be constructed explicitly by the serialisation,
 		/// or it will be created by the parent automatically on construction of the parent. Default
 		/// implementation returns false.
-		virtual bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const;
+		virtual bool childNeedsConstruction(
+			const Gaffer::GraphComponent *child, const Serialisation &serialisation
+		) const;
 	};
 
 	IE_CORE_DECLAREPTR( Serialiser );
@@ -155,7 +175,7 @@ class GAFFERBINDINGS_API Serialisation : boost::noncopyable
 	/// different calls even when the objects are different.
 	static const Serialiser *acquireSerialiser( const Gaffer::GraphComponent *graphComponent );
 
-	private:
+private:
 
 	const Gaffer::GraphComponent *m_parent;
 	const std::string m_parentName;
@@ -168,7 +188,10 @@ class GAFFERBINDINGS_API Serialisation : boost::noncopyable
 
 	std::set<std::string> m_modules;
 
-	void walk( const Gaffer::GraphComponent *parent, const std::string &parentIdentifier, const Serialiser *parentSerialiser, const IECore::Canceller *canceller );
+	void walk(
+		const Gaffer::GraphComponent *parent, const std::string &parentIdentifier, const Serialiser *parentSerialiser,
+		const IECore::Canceller *canceller
+	);
 
 	using SerialiserMap = std::map<IECore::TypeId, SerialiserPtr>;
 	static SerialiserMap &serialiserMap();

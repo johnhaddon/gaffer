@@ -54,12 +54,9 @@ namespace
 struct ProcessorProcess : public Process
 {
 
-	public:
+public:
 
-	ProcessorProcess( InternedString type, const OpenColorIOTransform *node )
-		: Process( type, node->outPlug() )
-	{
-	}
+	ProcessorProcess( InternedString type, const OpenColorIOTransform *node ) : Process( type, node->outPlug() ) {}
 
 	static InternedString processorProcessType;
 	static InternedString processorHashProcessType;
@@ -75,7 +72,8 @@ GAFFER_NODE_DEFINE_TYPE( OpenColorIOTransform );
 size_t OpenColorIOTransform::g_firstPlugIndex = 0;
 
 OpenColorIOTransform::OpenColorIOTransform( const std::string &name, bool withContextPlug )
-	: ColorProcessor( name ), m_hasContextPlug( withContextPlug )
+	: ColorProcessor( name ),
+	  m_hasContextPlug( withContextPlug )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	if( m_hasContextPlug )
@@ -84,9 +82,7 @@ OpenColorIOTransform::OpenColorIOTransform( const std::string &name, bool withCo
 	}
 }
 
-OpenColorIOTransform::~OpenColorIOTransform()
-{
-}
+OpenColorIOTransform::~OpenColorIOTransform() {}
 
 Gaffer::CompoundDataPlug *OpenColorIOTransform::contextPlug()
 {
@@ -155,7 +151,9 @@ void OpenColorIOTransform::hashColorProcessor( const Gaffer::Context *context, I
 	h.append( processorHash() );
 }
 
-OCIO_NAMESPACE::ConstContextRcPtr OpenColorIOTransform::modifiedOCIOContext( OCIO_NAMESPACE::ConstContextRcPtr context ) const
+OCIO_NAMESPACE::ConstContextRcPtr OpenColorIOTransform::modifiedOCIOContext(
+	OCIO_NAMESPACE::ConstContextRcPtr context
+) const
 {
 
 	const CompoundDataPlug *p = contextPlug();
@@ -217,9 +215,7 @@ ColorProcessor::ColorProcessorFunction OpenColorIOTransform::colorProcessor( con
 		}
 
 		OCIO_NAMESPACE::PlanarImageDesc image(
-			r->baseWritable(),
-			g->baseWritable(),
-			b->baseWritable(),
+			r->baseWritable(), g->baseWritable(), b->baseWritable(),
 			nullptr, // alpha
 			r->readable().size(), // Treat all pixels as a single line, since geometry doesn't affect OCIO
 			1 // height

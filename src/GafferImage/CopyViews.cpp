@@ -52,8 +52,7 @@ GAFFER_NODE_DEFINE_TYPE( CopyViews );
 
 size_t CopyViews::g_firstPlugIndex = 0;
 
-CopyViews::CopyViews( const std::string &name )
-	: ImageProcessor( name, /* minInputs = */ 1 )
+CopyViews::CopyViews( const std::string &name ) : ImageProcessor( name, /* minInputs = */ 1 )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -61,9 +60,7 @@ CopyViews::CopyViews( const std::string &name )
 	addChild( new CompoundObjectPlug( "__mapping", Plug::Out, new CompoundObject() ) );
 }
 
-CopyViews::~CopyViews()
-{
-}
+CopyViews::~CopyViews() {}
 
 Gaffer::StringPlug *CopyViews::viewsPlug()
 {
@@ -187,7 +184,8 @@ const ImagePlug *CopyViews::inputImage( const Gaffer::Context *context ) const
 		return inPlugs()->getChild<ImagePlug>( 0 );
 	}
 
-	const std::string &viewName = context->get<std::string>( ImagePlug::viewNameContextName, ImagePlug::defaultViewName );
+	const std::string &viewName =
+		context->get<std::string>( ImagePlug::viewNameContextName, ImagePlug::defaultViewName );
 
 	ConstCompoundObjectPtr mapping;
 	{
@@ -201,56 +199,76 @@ const ImagePlug *CopyViews::inputImage( const Gaffer::Context *context ) const
 		i = mapping->member<const IntData>( ImagePlug::defaultViewName );
 		if( !i )
 		{
-			throw IECore::Exception( "CopyViews : Incorrect request from downstream node, view \"" + viewName + "\" does not exist" );
+			throw IECore::Exception(
+				"CopyViews : Incorrect request from downstream node, view \"" + viewName + "\" does not exist"
+			);
 		}
 	}
 
 	return inPlugs()->getChild<ImagePlug>( i->readable() );
 }
 
-void CopyViews::hashViewNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CopyViews::hashViewNames(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashViewNames( output, context, h );
 
 	mappingPlug()->hash( h );
 }
 
-void CopyViews::hashFormat( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CopyViews::hashFormat(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = inputImage( context )->formatPlug()->hash();
 }
 
-void CopyViews::hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CopyViews::hashDataWindow(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = inputImage( context )->dataWindowPlug()->hash();
 }
 
-void CopyViews::hashMetadata( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CopyViews::hashMetadata(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = inputImage( context )->metadataPlug()->hash();
 }
 
-void CopyViews::hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CopyViews::hashDeep(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = inputImage( context )->deepPlug()->hash();
 }
 
-void CopyViews::hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CopyViews::hashSampleOffsets(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = inputImage( context )->sampleOffsetsPlug()->hash();
 }
 
-void CopyViews::hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CopyViews::hashChannelNames(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = inputImage( context )->channelNamesPlug()->hash();
 }
 
-void CopyViews::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CopyViews::hashChannelData(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = inputImage( context )->channelDataPlug()->hash();
 }
 
-IECore::ConstStringVectorDataPtr CopyViews::computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr CopyViews::computeViewNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	ConstCompoundObjectPtr mapping = mappingPlug()->getValue();
 	return mapping->member<StringVectorData>( "__viewNames" );
@@ -276,17 +294,24 @@ bool CopyViews::computeDeep( const Gaffer::Context *context, const ImagePlug *pa
 	return inputImage( context )->deepPlug()->getValue();
 }
 
-IECore::ConstIntVectorDataPtr CopyViews::computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstIntVectorDataPtr CopyViews::computeSampleOffsets(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	return inputImage( context )->sampleOffsetsPlug()->getValue();
 }
 
-IECore::ConstStringVectorDataPtr CopyViews::computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr CopyViews::computeChannelNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	return inputImage( context )->channelNamesPlug()->getValue();
 }
 
-IECore::ConstFloatVectorDataPtr CopyViews::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr CopyViews::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	return inputImage( context )->channelDataPlug()->getValue();
 }

@@ -62,14 +62,15 @@ GAFFER_NODE_DEFINE_TYPE( CollectTransforms );
 
 size_t CollectTransforms::g_firstPlugIndex = 0;
 
-CollectTransforms::CollectTransforms( const std::string &name )
-	: AttributeProcessor( name )
+CollectTransforms::CollectTransforms( const std::string &name ) : AttributeProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
 	addChild( new StringVectorDataPlug( "attributes", Plug::In, new StringVectorData() ) );
 	addChild( new StringPlug( "attributeContextVariable", Plug::In, "collect:transformName" ) );
-	addChild( new IntPlug( "space", Plug::In, GafferScene::Transform::Local, GafferScene::Transform::Local, GafferScene::Transform::World ) );
+	addChild( new IntPlug(
+		"space", Plug::In, GafferScene::Transform::Local, GafferScene::Transform::Local, GafferScene::Transform::World
+	) );
 	addChild( new BoolPlug( "requireVariation", Plug::In, false ) );
 
 	addChild( new CompoundObjectPlug( "transforms", Plug::Out, new CompoundObject() ) );
@@ -79,9 +80,7 @@ CollectTransforms::CollectTransforms( const std::string &name )
 	globalPlug()->setName( "__global" );
 }
 
-CollectTransforms::~CollectTransforms()
-{
-}
+CollectTransforms::~CollectTransforms() {}
 
 Gaffer::StringVectorDataPlug *CollectTransforms::attributesPlug()
 {
@@ -137,19 +136,16 @@ void CollectTransforms::affects( const Gaffer::Plug *input, AffectedPlugsContain
 {
 	AttributeProcessor::affects( input, outputs );
 
-	if(
-		input == inPlug()->transformPlug() ||
-		input == attributesPlug() ||
-		input == attributeContextVariablePlug() ||
-		input == spacePlug() ||
-		input == requireVariationPlug()
-	)
+	if( input == inPlug()->transformPlug() || input == attributesPlug() || input == attributeContextVariablePlug() ||
+		input == spacePlug() || input == requireVariationPlug() )
 	{
 		outputs.push_back( transformsPlug() );
 	}
 }
 
-void CollectTransforms::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CollectTransforms::hash(
+	const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	AttributeProcessor::hash( output, context, h );
 	if( output == transformsPlug() )
@@ -324,7 +320,9 @@ void CollectTransforms::hashProcessedAttributes( const Gaffer::Context *context,
 	h.append( transformsHash );
 }
 
-IECore::ConstCompoundObjectPtr CollectTransforms::computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const
+IECore::ConstCompoundObjectPtr CollectTransforms::computeProcessedAttributes(
+	const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes
+) const
 {
 	IECore::ConstCompoundObjectPtr collectedTransforms = transformsPlug()->getValue();
 	if( collectedTransforms->members().size() == 0 )

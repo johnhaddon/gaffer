@@ -50,8 +50,7 @@ GAFFER_NODE_DEFINE_TYPE( PrimitiveVariableExists );
 
 size_t PrimitiveVariableExists::g_firstPlugIndex = 0;
 
-PrimitiveVariableExists::PrimitiveVariableExists( const std::string &name )
-	: ComputeNode( name )
+PrimitiveVariableExists::PrimitiveVariableExists( const std::string &name ) : ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "in", Gaffer::Plug::In ) );
@@ -59,9 +58,7 @@ PrimitiveVariableExists::PrimitiveVariableExists( const std::string &name )
 	addChild( new BoolPlug( "out", Gaffer::Plug::Out ) );
 }
 
-PrimitiveVariableExists::~PrimitiveVariableExists()
-{
-}
+PrimitiveVariableExists::~PrimitiveVariableExists() {}
 
 ScenePlug *PrimitiveVariableExists::inPlug()
 {

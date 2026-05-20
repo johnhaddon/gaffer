@@ -153,8 +153,12 @@ void GafferTest::testEditableScope()
 	testEditableScopeTyped<IECore::StringData>( std::string( "a" ), std::string( "b" ) );
 	testEditableScopeTyped<IECore::InternedStringData>( IECore::InternedString( "a" ), IECore::InternedString( "b" ) );
 	testEditableScopeTyped<IECore::FloatVectorData>( std::vector<float>{ 1, 2, 3, 4 }, std::vector<float>{ 5, 6, 7 } );
-	testEditableScopeTyped<IECore::StringVectorData>( std::vector<std::string>{ "a", "AA" }, std::vector<std::string>{ "bbbbbbb" } );
-	testEditableScopeTyped<IECore::InternedStringVectorData>( std::vector<IECore::InternedString>{ "a", "AA" }, std::vector<IECore::InternedString>{ "bbbbbbb" } );
+	testEditableScopeTyped<IECore::StringVectorData>(
+		std::vector<std::string>{ "a", "AA" }, std::vector<std::string>{ "bbbbbbb" }
+	);
+	testEditableScopeTyped<IECore::InternedStringVectorData>(
+		std::vector<IECore::InternedString>{ "a", "AA" }, std::vector<IECore::InternedString>{ "bbbbbbb" }
+	);
 
 	PathMatcher a;
 	a.addPath( "/a/y" );
@@ -285,16 +289,18 @@ void GafferTest::testContextHashPerformance( int numEntries, int entrySize, bool
 
 	const ThreadState &threadState = ThreadState::current();
 
-	tbb::parallel_for( tbb::blocked_range<int>( 0, 10000000 ), [&threadState, &varyingVarName]( const tbb::blocked_range<int> &r ) {
-		for( int i = r.begin(); i != r.end(); ++i )
-		{
-			Context::EditableScope scope( threadState );
-			scope.set( varyingVarName, &i );
+	tbb::parallel_for(
+		tbb::blocked_range<int>( 0, 10000000 ), [&threadState, &varyingVarName]( const tbb::blocked_range<int> &r ) {
+			for( int i = r.begin(); i != r.end(); ++i )
+			{
+				Context::EditableScope scope( threadState );
+				scope.set( varyingVarName, &i );
 
-			// This call is relied on by ValuePlug's HashCacheKey, so it is crucial that it be fast
-			scope.context()->hash();
+				// This call is relied on by ValuePlug's HashCacheKey, so it is crucial that it be fast
+				scope.context()->hash();
+			}
 		}
-	} );
+	);
 }
 
 void GafferTest::testContextCopyPerformance( int numEntries, int entrySize )
@@ -307,15 +313,12 @@ void GafferTest::testContextCopyPerformance( int numEntries, int entrySize )
 		baseContext->set( InternedString( i ), std::string( entrySize, 'x' ) );
 	}
 
-	tbb::parallel_for(
-		tbb::blocked_range<int>( 0, 1000000 ),
-		[&baseContext]( const tbb::blocked_range<int> &r ) {
-			for( int i = r.begin(); i != r.end(); ++i )
-			{
-				ContextPtr copy = new Context( *baseContext );
-			}
+	tbb::parallel_for( tbb::blocked_range<int>( 0, 1000000 ), [&baseContext]( const tbb::blocked_range<int> &r ) {
+		for( int i = r.begin(); i != r.end(); ++i )
+		{
+			ContextPtr copy = new Context( *baseContext );
 		}
-	);
+	} );
 }
 
 void GafferTest::testCopyEditableScope()

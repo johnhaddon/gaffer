@@ -61,7 +61,7 @@ namespace
 class ApplicationRootWrapper : public IECorePython::RunTimeTypedWrapper<ApplicationRoot>
 {
 
-	public:
+public:
 
 	ApplicationRootWrapper( PyObject *self, const std::string &name = defaultName<ApplicationRoot>() )
 		: IECorePython::RunTimeTypedWrapper<ApplicationRoot>( self, name )
@@ -127,17 +127,27 @@ struct ClipboardSlotCaller
 void GafferModule::bindApplicationRoot()
 {
 	{
-		scope s = IECorePython::RunTimeTypedClass<ApplicationRoot, ApplicationRootWrapper>()
-					  .def( init<>() )
-					  .def( init<const std::string &>() )
-					  .def( "getClipboardContents", &getClipboardContents )
-					  .def( "setClipboardContents", &ApplicationRoot::setClipboardContents )
-					  .def( "clipboardContentsChangedSignal", &ApplicationRoot::clipboardContentsChangedSignal, return_internal_reference<1>() )
-					  .def( "savePreferences", ( void ( ApplicationRoot::* )() const ) & ApplicationRoot::savePreferences )
-					  .def( "savePreferences", ( void ( ApplicationRoot::* )( const std::filesystem::path & ) const ) & ApplicationRoot::savePreferences )
-					  .def( "preferencesLocation", &ApplicationRoot::preferencesLocation );
+		scope s =
+			IECorePython::RunTimeTypedClass<ApplicationRoot, ApplicationRootWrapper>()
+				.def( init<>() )
+				.def( init<const std::string &>() )
+				.def( "getClipboardContents", &getClipboardContents )
+				.def( "setClipboardContents", &ApplicationRoot::setClipboardContents )
+				.def(
+					"clipboardContentsChangedSignal", &ApplicationRoot::clipboardContentsChangedSignal,
+					return_internal_reference<1>()
+				)
+				.def( "savePreferences", ( void ( ApplicationRoot::* )() const ) & ApplicationRoot::savePreferences )
+				.def(
+					"savePreferences",
+					( void ( ApplicationRoot::* )( const std::filesystem::path & ) const ) &
+						ApplicationRoot::savePreferences
+				)
+				.def( "preferencesLocation", &ApplicationRoot::preferencesLocation );
 
-		SignalClass<ApplicationRoot::ClipboardSignal, DefaultSignalCaller<ApplicationRoot::ClipboardSignal>, ClipboardSlotCaller>( "ClipboardSignal" );
+		SignalClass<
+			ApplicationRoot::ClipboardSignal, DefaultSignalCaller<ApplicationRoot::ClipboardSignal>,
+			ClipboardSlotCaller>( "ClipboardSignal" );
 	}
 
 	GafferBindings::NodeClass<Preferences>();

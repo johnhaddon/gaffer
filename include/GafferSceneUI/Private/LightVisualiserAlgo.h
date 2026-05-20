@@ -53,7 +53,10 @@ GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr pointRays( float radius = 0, bool
 GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr distantRays( bool muted = false );
 
 /// Returns an OpenGL renderable pair of wireframe frustums.
-GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr spotlightCone( float innerAngle, float outerAngle, float lensRadius, float length = 1.0f, float lineWidthScale = 1.0f, bool muted = false );
+GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr spotlightCone(
+	float innerAngle, float outerAngle, float lensRadius, float length = 1.0f, float lineWidthScale = 1.0f,
+	bool muted = false
+);
 
 /// Returns an OpenGL renderable wireframe point.
 GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr pointShape( float radius, bool muted = false );
@@ -62,7 +65,9 @@ GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr pointShape( float radius, bool mu
 GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr pointSurface( float radius, const Imath::Color3f &color );
 
 /// Returns an OpenGL renderable wireframe rectangle with rounded corners and color according to the `mute` state.
-GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr roundedQuadWireframe( const Imath::V2f &size, const Imath::V2f &radii, float lineWidthScale, bool muted = false );
+GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr roundedQuadWireframe(
+	const Imath::V2f &size, const Imath::V2f &radii, float lineWidthScale, bool muted = false
+);
 
 /// Returns an OpenGL renderable solid rectangle with optional rounded corners and texture map. If `textureData`
 /// is `nullptr`, a solid color of `fallbackColor` will be used. `tint`, is applied to both the texture map and
@@ -75,12 +80,15 @@ GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr roundedQuadWireframe( const Imath
 /// renderer-specific, so it should be the job of the visualiser implementations to decide how to shade lights.
 /// This applies to the other `*Surface` methods as well.
 GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr roundedQuadSurface(
-	const Imath::V2f &size, const Imath::V2f &radii, IECore::ConstDataPtr textureData, const Imath::Color3f &tint, const float saturation,
-	const Imath::Color3f &gamma, int textureMaxResolution, const Imath::Color3f &fallbackColor, const Imath::M33f &uvOrientation
+	const Imath::V2f &size, const Imath::V2f &radii, IECore::ConstDataPtr textureData, const Imath::Color3f &tint,
+	const float saturation, const Imath::Color3f &gamma, int textureMaxResolution, const Imath::Color3f &fallbackColor,
+	const Imath::M33f &uvOrientation
 );
 
 /// Returns an OpenGL renderable wireframe rectangle with outer hatching.
-GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr quadPortal( const Imath::V2f &size, float hatchingScale = 1.0f, bool muted = false );
+GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr quadPortal(
+	const Imath::V2f &size, float hatchingScale = 1.0f, bool muted = false
+);
 
 /// Returns an OpenGL renderable set of wireframe circles, one per axis for `true` values of `axisRings`.
 GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr sphereWireframe(
@@ -96,8 +104,8 @@ GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr colorIndicator( const Imath::Colo
 /// `gamma` are only applied to the texture map, if present.
 /// `textureData` should be as per return type of `StandardLightVisualiser::surfaceTexture()`.
 GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr environmentSphereSurface(
-	IECore::ConstDataPtr textureData, const Imath::Color3f &tint, const float saturation,
-	const Imath::Color3f &gamma, const int maxTextureResolution, const Imath::Color3f &fallbackColor
+	IECore::ConstDataPtr textureData, const Imath::Color3f &tint, const float saturation, const Imath::Color3f &gamma,
+	const int maxTextureResolution, const Imath::Color3f &fallbackColor
 );
 
 /// Returns an OpenGL renderable circle wireframe.
@@ -117,13 +125,20 @@ GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr diskSurface(
 GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr cylinderRays( float radius, bool muted );
 
 /// Returns an OpenGL renderable wireframe cylinder.
-GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr cylinderWireframe( float radius, float length, float lineWidthScale, bool muted );
+GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr cylinderWireframe(
+	float radius, float length, float lineWidthScale, bool muted
+);
 
 /// Returns an OpenGL renderable solid cylinder, with end caps.
-GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr cylinderSurface( float radius, float length, const Imath::Color3f &color );
+GAFFERSCENEUI_API IECoreGL::ConstRenderablePtr cylinderSurface(
+	float radius, float length, const Imath::Color3f &color
+);
 
 /// Adds a wireframe arrow to the given point vectors.
-GAFFERSCENEUI_API void addRay( const Imath::V3f &start, const Imath::V3f &end, std::vector<int> &vertsPerCurve, std::vector<Imath::V3f> &p, float arrowScale = 0.05f );
+GAFFERSCENEUI_API void addRay(
+	const Imath::V3f &start, const Imath::V3f &end, std::vector<int> &vertsPerCurve, std::vector<Imath::V3f> &p,
+	float arrowScale = 0.05f
+);
 
 /// Adds wireframe arrows diverging by 45 degrees as spread approaches 1.
 GAFFERSCENEUI_API void addAreaSpread( float spread, std::vector<int> &vertsPerCurve, std::vector<Imath::V3f> &p );

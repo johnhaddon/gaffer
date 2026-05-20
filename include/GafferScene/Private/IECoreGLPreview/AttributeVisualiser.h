@@ -52,14 +52,13 @@ IE_CORE_FORWARDDECLARE( AttributeVisualiser )
 class GAFFERSCENE_API AttributeVisualiser : public IECore::RefCounted
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( AttributeVisualiser )
 	~AttributeVisualiser() override;
 
 	virtual Visualisations visualise(
-		const IECore::CompoundObject *attributes,
-		IECoreGL::ConstStatePtr &state
+		const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state
 	) const = 0;
 
 	/// Registers an attribute visualiser
@@ -69,12 +68,9 @@ class GAFFERSCENE_API AttributeVisualiser : public IECore::RefCounted
 	/// returning a map of renderable groups and some extra state. The
 	/// return value may be left empty and/or the state may left null if no
 	/// registered visualisers do anything with these attributes.
-	static Visualisations allVisualisations(
-		const IECore::CompoundObject *attributes,
-		IECoreGL::ConstStatePtr &state
-	);
+	static Visualisations allVisualisations( const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state );
 
-	protected:
+protected:
 
 	AttributeVisualiser();
 
@@ -82,10 +78,7 @@ class GAFFERSCENE_API AttributeVisualiser : public IECore::RefCounted
 	struct AttributeVisualiserDescription
 	{
 
-		AttributeVisualiserDescription()
-		{
-			registerVisualiser( new VisualiserType );
-		}
+		AttributeVisualiserDescription() { registerVisualiser( new VisualiserType ); }
 	};
 };
 

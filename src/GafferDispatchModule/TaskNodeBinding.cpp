@@ -148,7 +148,12 @@ void GafferDispatchModule::bindTaskNode()
 			.def( "__eq__", &TaskNode::Task::operator == );
 
 		PlugClass<TaskNode::TaskPlug>()
-			.def( init<const char *, Plug::Direction, unsigned>( ( boost::python::arg_( "name" ) = GraphComponent::defaultName<TaskNode::TaskPlug>(), boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "flags" ) = Plug::Default ) ) )
+			.def(
+				init<const char *, Plug::Direction, unsigned>(
+					( boost::python::arg_( "name" ) = GraphComponent::defaultName<TaskNode::TaskPlug>(),
+					  boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "flags" ) = Plug::Default )
+				)
+			)
 			.def( "hash", &taskPlugHash )
 			.def( "execute", &taskPlugExecute )
 			.def( "executeSequence", &taskPlugExecuteSequence )

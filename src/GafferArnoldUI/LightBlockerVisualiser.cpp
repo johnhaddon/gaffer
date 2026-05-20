@@ -58,7 +58,10 @@ using namespace Gaffer;
 namespace
 {
 
-const IECore::CompoundData *parametersAndMetadataTarget( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *filterShaderNetwork, InternedString &metadataTarget )
+const IECore::CompoundData *parametersAndMetadataTarget(
+	const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *filterShaderNetwork,
+	InternedString &metadataTarget
+)
 {
 	const IECoreScene::Shader *shader = filterShaderNetwork->outputShader();
 	metadataTarget = attributeName.string() + ":" + shader->getName();
@@ -66,7 +69,10 @@ const IECore::CompoundData *parametersAndMetadataTarget( const IECore::InternedS
 }
 
 template<typename T>
-T parameter( InternedString metadataTarget, const IECore::CompoundData *parameters, InternedString parameterNameMetadata, T defaultValue )
+T parameter(
+	InternedString metadataTarget, const IECore::CompoundData *parameters, InternedString parameterNameMetadata,
+	T defaultValue
+)
 {
 	ConstStringDataPtr parameterName = Metadata::value<StringData>( metadataTarget, parameterNameMetadata );
 	if( !parameterName )
@@ -162,7 +168,9 @@ void setFalloffGroupSettings( IECoreGL::Group *group, const IECore::CompoundData
 	ConstFloatDataPtr widthData = shaderParameters->member<FloatData>( "width_edge" );
 	ConstFloatDataPtr heightData = shaderParameters->member<FloatData>( "height_edge" );
 
-	falloffScale.setScale( V3f( 1 + widthData->readable() * 2, 1 + heightData->readable() * 2, 1 + widthData->readable() * 2 ) );
+	falloffScale.setScale(
+		V3f( 1 + widthData->readable() * 2, 1 + heightData->readable() * 2, 1 + widthData->readable() * 2 )
+	);
 	group->setTransform( falloffScale );
 
 	// Falloff visualisation uses half the line width
@@ -176,20 +184,24 @@ void setFalloffGroupSettings( IECoreGL::Group *group, const IECore::CompoundData
 class LightBlockerVisualiser : public LightFilterVisualiser
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( LightBlockerVisualiser )
 
 	LightBlockerVisualiser();
 	~LightBlockerVisualiser() override;
 
-	Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *filterShaderNetwork, const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
+	Visualisations visualise(
+		const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *filterShaderNetwork,
+		const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes,
+		IECoreGL::ConstStatePtr &state
+	) const override;
 
-	protected:
+protected:
 
 	static LightFilterVisualiser::LightFilterVisualiserDescription<LightBlockerVisualiser> g_visualiserDescription;
 
-	private:
+private:
 
 	/// \todo: can this be consolidated with the StandardLightVisualiser?
 	static IECoreGL::ConstRenderablePtr boxShape( const IECore::CompoundData *shaderParameters );
@@ -201,20 +213,22 @@ class LightBlockerVisualiser : public LightFilterVisualiser
 IE_CORE_DECLAREPTR( LightBlockerVisualiser )
 
 // register the new visualiser
-LightFilterVisualiser::LightFilterVisualiserDescription<LightBlockerVisualiser> LightBlockerVisualiser::g_visualiserDescription( "ai:lightFilter", "light_blocker" );
+LightFilterVisualiser::LightFilterVisualiserDescription<LightBlockerVisualiser> LightBlockerVisualiser::
+	g_visualiserDescription( "ai:lightFilter", "light_blocker" );
 
-LightBlockerVisualiser::LightBlockerVisualiser()
-{
-}
+LightBlockerVisualiser::LightBlockerVisualiser() {}
 
-LightBlockerVisualiser::~LightBlockerVisualiser()
-{
-}
+LightBlockerVisualiser::~LightBlockerVisualiser() {}
 
-Visualisations LightBlockerVisualiser::visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *filterShaderNetwork, const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const
+Visualisations LightBlockerVisualiser::visualise(
+	const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *filterShaderNetwork,
+	const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes,
+	IECoreGL::ConstStatePtr &state
+) const
 {
 	InternedString metadataTarget;
-	const IECore::CompoundData *shaderParameters = parametersAndMetadataTarget( attributeName, filterShaderNetwork, metadataTarget );
+	const IECore::CompoundData *shaderParameters =
+		parametersAndMetadataTarget( attributeName, filterShaderNetwork, metadataTarget );
 
 	ConstStringDataPtr type = Metadata::value<StringData>( metadataTarget, "type" );
 	ConstM44fDataPtr orientation = Metadata::value<M44fData>( metadataTarget, "visualiserOrientation" );
@@ -261,9 +275,10 @@ IECoreGL::ConstRenderablePtr LightBlockerVisualiser::boxShape( const IECore::Com
 	addWireframeCurveState( group.get() );
 
 	IECore::CompoundObjectPtr parameters = new CompoundObject;
-	group->getState()->add(
-		new IECoreGL::ShaderStateComponent( ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "", IECoreGL::Shader::constantFragmentSource(), parameters )
-	);
+	group->getState()->add( new IECoreGL::ShaderStateComponent(
+		ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "",
+		IECoreGL::Shader::constantFragmentSource(), parameters
+	) );
 
 	// Add main visualisation
 
@@ -275,17 +290,34 @@ IECoreGL::ConstRenderablePtr LightBlockerVisualiser::boxShape( const IECore::Com
 
 	addCube( /* origin */ { 0, 0, 0 }, /* size */ 1.0, vertsPerCurve, p );
 
-	IECoreGL::CurvesPrimitivePtr cube = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::Periodic, vertsPerCurveData );
+	IECoreGL::CurvesPrimitivePtr cube = new IECoreGL::CurvesPrimitive(
+		IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::Periodic, vertsPerCurveData
+	);
 	cube->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
-	cube->addPrimitiveVariable( "Cs", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, new Color3fData( Color3f( 255 / 255.0f, 171 / 255.0f, 15 / 255.0f ) ) ) );
+	cube->addPrimitiveVariable(
+		"Cs",
+		IECoreScene::PrimitiveVariable(
+			IECoreScene::PrimitiveVariable::Constant,
+			new Color3fData( Color3f( 255 / 255.0f, 171 / 255.0f, 15 / 255.0f ) )
+		)
+	);
 
 	group->addChild( cube );
 
 	// Add falloff visualisation
 
-	IECoreGL::CurvesPrimitivePtr falloff = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::Periodic, vertsPerCurveData );
-	falloff->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
-	falloff->addPrimitiveVariable( "Cs", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, new Color3fData( Color3f( 0.0f, 0.0f, 0.0f ) ) ) );
+	IECoreGL::CurvesPrimitivePtr falloff = new IECoreGL::CurvesPrimitive(
+		IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::Periodic, vertsPerCurveData
+	);
+	falloff->addPrimitiveVariable(
+		"P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData )
+	);
+	falloff->addPrimitiveVariable(
+		"Cs",
+		IECoreScene::PrimitiveVariable(
+			IECoreScene::PrimitiveVariable::Constant, new Color3fData( Color3f( 0.0f, 0.0f, 0.0f ) )
+		)
+	);
 
 	IECoreGL::GroupPtr falloffGroup = new IECoreGL::Group();
 	setFalloffGroupSettings( falloffGroup.get(), shaderParameters );
@@ -302,9 +334,10 @@ IECoreGL::ConstRenderablePtr LightBlockerVisualiser::sphereShape( const IECore::
 	addWireframeCurveState( group.get() );
 
 	IECore::CompoundObjectPtr parameters = new CompoundObject;
-	group->getState()->add(
-		new IECoreGL::ShaderStateComponent( ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "", IECoreGL::Shader::constantFragmentSource(), parameters )
-	);
+	group->getState()->add( new IECoreGL::ShaderStateComponent(
+		ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "",
+		IECoreGL::Shader::constantFragmentSource(), parameters
+	) );
 
 	// Add main visualisation
 
@@ -316,18 +349,38 @@ IECoreGL::ConstRenderablePtr LightBlockerVisualiser::sphereShape( const IECore::
 
 	addCircle( { 0, 0, 0 }, 0.5, vertsPerCurve, p );
 
-	IECoreGL::CurvesPrimitivePtr circleXY = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::Periodic, vertsPerCurveData );
-	circleXY->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
-	circleXY->addPrimitiveVariable( "Cs", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, new Color3fData( Color3f( 255 / 255.0f, 171 / 255.0f, 15 / 255.0f ) ) ) );
+	IECoreGL::CurvesPrimitivePtr circleXY = new IECoreGL::CurvesPrimitive(
+		IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::Periodic, vertsPerCurveData
+	);
+	circleXY->addPrimitiveVariable(
+		"P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData )
+	);
+	circleXY->addPrimitiveVariable(
+		"Cs",
+		IECoreScene::PrimitiveVariable(
+			IECoreScene::PrimitiveVariable::Constant,
+			new Color3fData( Color3f( 255 / 255.0f, 171 / 255.0f, 15 / 255.0f ) )
+		)
+	);
 
 	IECoreGL::GroupPtr xy = new IECoreGL::Group();
 	xy->addChild( circleXY );
 	group->addChild( xy );
 
 
-	IECoreGL::CurvesPrimitivePtr circleYZ = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::Periodic, vertsPerCurveData );
-	circleYZ->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
-	circleYZ->addPrimitiveVariable( "Cs", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, new Color3fData( Color3f( 255 / 255.0f, 171 / 255.0f, 15 / 255.0f ) ) ) );
+	IECoreGL::CurvesPrimitivePtr circleYZ = new IECoreGL::CurvesPrimitive(
+		IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::Periodic, vertsPerCurveData
+	);
+	circleYZ->addPrimitiveVariable(
+		"P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData )
+	);
+	circleYZ->addPrimitiveVariable(
+		"Cs",
+		IECoreScene::PrimitiveVariable(
+			IECoreScene::PrimitiveVariable::Constant,
+			new Color3fData( Color3f( 255 / 255.0f, 171 / 255.0f, 15 / 255.0f ) )
+		)
+	);
 
 	IECoreGL::GroupPtr yz = new IECoreGL::Group();
 	yz->addChild( circleYZ );
@@ -338,9 +391,19 @@ IECoreGL::ConstRenderablePtr LightBlockerVisualiser::sphereShape( const IECore::
 	yz->setTransform( yzRotation );
 
 
-	IECoreGL::CurvesPrimitivePtr circleXZ = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::Periodic, vertsPerCurveData );
-	circleXZ->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
-	circleXZ->addPrimitiveVariable( "Cs", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, new Color3fData( Color3f( 255 / 255.0f, 171 / 255.0f, 15 / 255.0f ) ) ) );
+	IECoreGL::CurvesPrimitivePtr circleXZ = new IECoreGL::CurvesPrimitive(
+		IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::Periodic, vertsPerCurveData
+	);
+	circleXZ->addPrimitiveVariable(
+		"P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData )
+	);
+	circleXZ->addPrimitiveVariable(
+		"Cs",
+		IECoreScene::PrimitiveVariable(
+			IECoreScene::PrimitiveVariable::Constant,
+			new Color3fData( Color3f( 255 / 255.0f, 171 / 255.0f, 15 / 255.0f ) )
+		)
+	);
 
 	IECoreGL::GroupPtr xz = new IECoreGL::Group();
 	xz->addChild( circleXZ );
@@ -364,9 +427,10 @@ IECoreGL::ConstRenderablePtr LightBlockerVisualiser::cylinderShape( const IECore
 
 	CompoundObjectPtr parameters = new CompoundObject;
 	parameters->members()["aimType"] = new IntData( 0 );
-	group->getState()->add(
-		new IECoreGL::ShaderStateComponent( ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "", IECoreGL::Shader::constantFragmentSource(), parameters )
-	);
+	group->getState()->add( new IECoreGL::ShaderStateComponent(
+		ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "",
+		IECoreGL::Shader::constantFragmentSource(), parameters
+	) );
 
 	// Add main visualisation
 
@@ -383,9 +447,19 @@ IECoreGL::ConstRenderablePtr LightBlockerVisualiser::cylinderShape( const IECore
 	addLine( { 0, radius, -radius }, { 0, radius, radius }, vertsPerCurve, p );
 	addLine( { 0, -radius, -radius }, { 0, -radius, radius }, vertsPerCurve, p );
 
-	IECoreGL::CurvesPrimitivePtr cylinder = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurveData );
-	cylinder->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
-	cylinder->addPrimitiveVariable( "Cs", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, new Color3fData( Color3f( 255 / 255.0f, 171 / 255.0f, 15 / 255.0f ) ) ) );
+	IECoreGL::CurvesPrimitivePtr cylinder = new IECoreGL::CurvesPrimitive(
+		IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurveData
+	);
+	cylinder->addPrimitiveVariable(
+		"P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData )
+	);
+	cylinder->addPrimitiveVariable(
+		"Cs",
+		IECoreScene::PrimitiveVariable(
+			IECoreScene::PrimitiveVariable::Constant,
+			new Color3fData( Color3f( 255 / 255.0f, 171 / 255.0f, 15 / 255.0f ) )
+		)
+	);
 
 	IECoreGL::GroupPtr cylinderGroup = new IECoreGL::Group();
 	cylinderGroup->addChild( cylinder );
@@ -399,9 +473,18 @@ IECoreGL::ConstRenderablePtr LightBlockerVisualiser::cylinderShape( const IECore
 
 	// Add falloff visualisation
 
-	IECoreGL::CurvesPrimitivePtr falloff = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::Periodic, vertsPerCurveData );
-	falloff->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
-	falloff->addPrimitiveVariable( "Cs", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, new Color3fData( Color3f( 0.0f, 0.0f, 0.0f ) ) ) );
+	IECoreGL::CurvesPrimitivePtr falloff = new IECoreGL::CurvesPrimitive(
+		IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::Periodic, vertsPerCurveData
+	);
+	falloff->addPrimitiveVariable(
+		"P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData )
+	);
+	falloff->addPrimitiveVariable(
+		"Cs",
+		IECoreScene::PrimitiveVariable(
+			IECoreScene::PrimitiveVariable::Constant, new Color3fData( Color3f( 0.0f, 0.0f, 0.0f ) )
+		)
+	);
 
 	IECoreGL::GroupPtr falloffGroup = new IECoreGL::Group();
 	falloffGroup->setTransform( rotation );
@@ -423,9 +506,10 @@ IECoreGL::ConstRenderablePtr LightBlockerVisualiser::planeShape( const IECore::C
 	addWireframeCurveState( group.get() );
 
 	IECore::CompoundObjectPtr parameters = new CompoundObject;
-	group->getState()->add(
-		new IECoreGL::ShaderStateComponent( ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "", IECoreGL::Shader::constantFragmentSource(), parameters )
-	);
+	group->getState()->add( new IECoreGL::ShaderStateComponent(
+		ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "",
+		IECoreGL::Shader::constantFragmentSource(), parameters
+	) );
 
 	// Add main visualisation
 
@@ -437,17 +521,34 @@ IECoreGL::ConstRenderablePtr LightBlockerVisualiser::planeShape( const IECore::C
 
 	addQuad( /* origin */ { 0, 0, 0 }, /* size */ 1.0, vertsPerCurve, p );
 
-	IECoreGL::CurvesPrimitivePtr quad = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::Periodic, vertsPerCurveData );
+	IECoreGL::CurvesPrimitivePtr quad = new IECoreGL::CurvesPrimitive(
+		IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::Periodic, vertsPerCurveData
+	);
 	quad->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
-	quad->addPrimitiveVariable( "Cs", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, new Color3fData( Color3f( 255 / 255.0f, 171 / 255.0f, 15 / 255.0f ) ) ) );
+	quad->addPrimitiveVariable(
+		"Cs",
+		IECoreScene::PrimitiveVariable(
+			IECoreScene::PrimitiveVariable::Constant,
+			new Color3fData( Color3f( 255 / 255.0f, 171 / 255.0f, 15 / 255.0f ) )
+		)
+	);
 
 	group->addChild( quad );
 
 	// Add falloff visualisation
 
-	IECoreGL::CurvesPrimitivePtr falloff = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::Periodic, vertsPerCurveData );
-	falloff->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
-	falloff->addPrimitiveVariable( "Cs", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, new Color3fData( Color3f( 0.0f, 0.0f, 0.0f ) ) ) );
+	IECoreGL::CurvesPrimitivePtr falloff = new IECoreGL::CurvesPrimitive(
+		IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::Periodic, vertsPerCurveData
+	);
+	falloff->addPrimitiveVariable(
+		"P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData )
+	);
+	falloff->addPrimitiveVariable(
+		"Cs",
+		IECoreScene::PrimitiveVariable(
+			IECoreScene::PrimitiveVariable::Constant, new Color3fData( Color3f( 0.0f, 0.0f, 0.0f ) )
+		)
+	);
 
 	IECoreGL::GroupPtr falloffGroup = new IECoreGL::Group();
 	setFalloffGroupSettings( falloffGroup.get(), shaderParameters );

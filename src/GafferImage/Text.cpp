@@ -183,10 +183,7 @@ int width( const u32string &word, FT_FaceRec *face )
 
 struct Word
 {
-	Word( const u32string &text, int x )
-		: text( text ), x( x )
-	{
-	}
+	Word( const u32string &text, int x ) : text( text ), x( x ) {}
 
 	u32string text;
 	int x;
@@ -194,10 +191,7 @@ struct Word
 
 struct Line
 {
-	Line( int y )
-		: y( y ), width( 0 )
-	{
-	}
+	Line( int y ) : y( y ), width( 0 ) {}
 
 	vector<Word> words;
 	int y;
@@ -214,8 +208,7 @@ GAFFER_NODE_DEFINE_TYPE( Text );
 
 size_t Text::g_firstPlugIndex = 0;
 
-Text::Text( const std::string &name )
-	: Shape( name )
+Text::Text( const std::string &name ) : Shape( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "text", Plug::In, "Hello World" ) );
@@ -228,9 +221,7 @@ Text::Text( const std::string &name )
 	addChild( new CompoundObjectPlug( "__layout", Plug::Out, new CompoundObject ) );
 }
 
-Text::~Text()
-{
-}
+Text::~Text() {}
 
 Gaffer::StringPlug *Text::textPlug()
 {
@@ -336,9 +327,7 @@ void Text::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) 
 {
 	if( output == layoutPlug() )
 	{
-		static_cast<CompoundObjectPlug *>( output )->setValue(
-			computeLayout( context )
-		);
+		static_cast<CompoundObjectPlug *>( output )->setValue( computeLayout( context ) );
 		return;
 	}
 	else
@@ -349,14 +338,9 @@ void Text::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) 
 
 bool Text::affectsLayout( const Gaffer::Plug *input ) const
 {
-	return input == textPlug() ||
-		input == fontPlug() ||
-		input->parent<V2iPlug>() == sizePlug() ||
-		areaPlug()->isAncestorOf( input ) ||
-		input == inPlug()->formatPlug() ||
-		input == horizontalAlignmentPlug() ||
-		input == verticalAlignmentPlug() ||
-		transformPlug()->isAncestorOf( input );
+	return input == textPlug() || input == fontPlug() || input->parent<V2iPlug>() == sizePlug() ||
+		areaPlug()->isAncestorOf( input ) || input == inPlug()->formatPlug() || input == horizontalAlignmentPlug() ||
+		input == verticalAlignmentPlug() || transformPlug()->isAncestorOf( input );
 }
 
 void Text::hashLayout( const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -580,7 +564,9 @@ bool Text::affectsShapeChannelData( const Gaffer::Plug *input ) const
 	return input == layoutPlug();
 }
 
-void Text::hashShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Text::hashShapeChannelData(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	Shape::hashShapeChannelData( tileOrigin, context, h );
 	{
@@ -590,7 +576,9 @@ void Text::hashShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Con
 	h.append( tileOrigin );
 }
 
-IECore::ConstFloatVectorDataPtr Text::computeShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const
+IECore::ConstFloatVectorDataPtr Text::computeShapeChannelData(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context
+) const
 {
 	ConstCompoundObjectPtr layout;
 	{
@@ -602,7 +590,8 @@ IECore::ConstFloatVectorDataPtr Text::computeShapeChannelData( const Imath::V2i 
 	const vector<M33f> &transforms = layout->member<M33fVectorData>( "transforms" )->readable();
 	const vector<Box2i> &bounds = layout->member<Box2iVectorData>( "bounds" )->readable();
 
-	FacePtr face = ::face( layout->member<StringData>( "font" )->readable(), layout->member<V2iData>( "size" )->readable() );
+	FacePtr face =
+		::face( layout->member<StringData>( "font" )->readable(), layout->member<V2iData>( "size" )->readable() );
 	FT_GlyphSlot slot = face->glyph;
 
 	FloatVectorDataPtr resultData = new FloatVectorData();
@@ -635,8 +624,10 @@ IECore::ConstFloatVectorDataPtr Text::computeShapeChannelData( const Imath::V2i 
 		V2i p;
 		for( p.y = validBound.min.y; p.y < validBound.max.y; ++p.y )
 		{
-			const unsigned char *src = bitmap.buffer + ( bitmapBound.max.y - 1 - p.y ) * bitmap.pitch + validBound.min.x - bitmapBound.min.x;
-			vector<float>::iterator dst = result.begin() + ( p.y - tileBound.min.y ) * ImagePlug::tileSize() + validBound.min.x - tileBound.min.x;
+			const unsigned char *src =
+				bitmap.buffer + ( bitmapBound.max.y - 1 - p.y ) * bitmap.pitch + validBound.min.x - bitmapBound.min.x;
+			vector<float>::iterator dst =
+				result.begin() + ( p.y - tileBound.min.y ) * ImagePlug::tileSize() + validBound.min.x - tileBound.min.x;
 			for( p.x = validBound.min.x; p.x < validBound.max.x; ++p.x )
 			{
 				// FreeType gives us linear coverage values suitable

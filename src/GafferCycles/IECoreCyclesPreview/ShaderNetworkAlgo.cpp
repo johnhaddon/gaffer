@@ -121,7 +121,10 @@ ccl::SocketType::Type getSocketType( const std::string &name )
 
 using ShaderMap = boost::unordered_map<ShaderNetwork::Parameter, ccl::ShaderNode *>;
 
-ccl::ShaderNode *convertWalk( const ShaderNetwork::Parameter &outputParameter, const IECoreScene::ShaderNetwork *shaderNetwork, const std::string &namePrefix, ccl::Scene *scene, ccl::ShaderGraph *shaderGraph, ShaderMap &converted )
+ccl::ShaderNode *convertWalk(
+	const ShaderNetwork::Parameter &outputParameter, const IECoreScene::ShaderNetwork *shaderNetwork,
+	const std::string &namePrefix, ccl::Scene *scene, ccl::ShaderGraph *shaderGraph, ShaderMap &converted
+)
 {
 	// Reuse previously created node if we can.
 	const IECoreScene::Shader *shader = shaderNetwork->getShader( outputParameter.shader );
@@ -144,10 +147,10 @@ ccl::ShaderNode *convertWalk( const ShaderNetwork::Parameter &outputParameter, c
 		}
 		else
 		{
-			msg(
-				Msg::Warning, "IECoreCycles::ShaderNetworkAlgo",
-				fmt::format( "Couldn't load OSL shader \"{}\" as the shading system is not set to OSL.", shader->getName() )
-			);
+			msg( Msg::Warning, "IECoreCycles::ShaderNetworkAlgo",
+				 fmt::format(
+					 "Couldn't load OSL shader \"{}\" as the shading system is not set to OSL.", shader->getName()
+				 ) );
 			return node;
 		}
 	}
@@ -161,7 +164,9 @@ ccl::ShaderNode *convertWalk( const ShaderNetwork::Parameter &outputParameter, c
 		boost::split( split, shader->getName(), boost::is_any_of( "_" ) );
 		if( split.size() >= 4 ) // should be 4 eg. "convert, X, to, Y"
 		{
-			node = shaderGraph->create_node<ccl::ConvertNode>( getSocketType( split[1] ), getSocketType( split[3] ), true );
+			node = shaderGraph->create_node<ccl::ConvertNode>(
+				getSocketType( split[1] ), getSocketType( split[3] ), true
+			);
 		}
 	}
 	else if( const ccl::NodeType *nodeType = ccl::NodeType::find( ccl::ustring( shader->getName() ) ) )
@@ -174,7 +179,8 @@ ccl::ShaderNode *convertWalk( const ShaderNetwork::Parameter &outputParameter, c
 
 	if( !node )
 	{
-		msg( Msg::Warning, "IECoreCycles::ShaderNetworkAlgo", fmt::format( "Couldn't load shader \"{}\"", shader->getName() ) );
+		msg( Msg::Warning, "IECoreCycles::ShaderNetworkAlgo",
+			 fmt::format( "Couldn't load shader \"{}\"", shader->getName() ) );
 		return node;
 	}
 
@@ -226,7 +232,8 @@ ccl::ShaderNode *convertWalk( const ShaderNetwork::Parameter &outputParameter, c
 					const std::filesystem::path path( ccl::path_dirname( pathFileName ) );
 					for( const auto &d : std::filesystem::directory_iterator( path ) )
 					{
-						if( std::filesystem::is_regular_file( d.status() ) || std::filesystem::is_symlink( d.status() ) )
+						if( std::filesystem::is_regular_file( d.status() ) ||
+							std::filesystem::is_symlink( d.status() ) )
 						{
 							string foundFile = d.path().stem().string();
 							if( baseFileName == ( foundFile.substr( 0, offset ) ) )
@@ -256,7 +263,8 @@ ccl::ShaderNode *convertWalk( const ShaderNetwork::Parameter &outputParameter, c
 
 	for( const auto &connection : shaderNetwork->inputConnections( outputParameter.shader ) )
 	{
-		ccl::ShaderNode *sourceNode = convertWalk( connection.source, shaderNetwork, namePrefix, scene, shaderGraph, converted );
+		ccl::ShaderNode *sourceNode =
+			convertWalk( connection.source, shaderNetwork, namePrefix, scene, shaderGraph, converted );
 		if( !sourceNode )
 		{
 			continue;
@@ -291,7 +299,9 @@ T parameterValue( const IECore::Data *data, const IECore::InternedString &name, 
 
 	IECore::msg(
 		IECore::Msg::Warning, "IECoreCycles::ShaderNetworkAlgo",
-		fmt::format( "Expected {} but got {} for parameter \"{}\".", DataType::staticTypeName(), data->typeName(), name.c_str() )
+		fmt::format(
+			"Expected {} but got {} for parameter \"{}\".", DataType::staticTypeName(), data->typeName(), name.c_str()
+		)
 	);
 	return defaultValue;
 }
@@ -322,9 +332,7 @@ const bool g_useLegacyLights = []() -> bool {
 // intensity, color, exposure.
 bool contributesToLightStrength( InternedString parameterName )
 {
-	return parameterName == "intensity" ||
-		parameterName == "color" ||
-		parameterName == "exposure";
+	return parameterName == "intensity" || parameterName == "color" || parameterName == "exposure";
 }
 
 Imath::Color3f constantLightStrength( const IECoreScene::ShaderNetwork *light )
@@ -346,13 +354,9 @@ Imath::Color3f constantLightStrength( const IECoreScene::ShaderNetwork *light )
 	// you'd want to texture that.
 	strength *= powf( 2.0f, parameterValue<float>( lightShader->parameters(), "exposure", 0.0f ) );
 
-	if(
-		!g_useLegacyLights &&
-		( lightShader->getName() == "disk_light" ||
-		  lightShader->getName() == "point_light" ||
-		  lightShader->getName() == "quad_light" ||
-		  lightShader->getName() == "spot_light" )
-	)
+	if( !g_useLegacyLights &&
+		( lightShader->getName() == "disk_light" || lightShader->getName() == "point_light" ||
+		  lightShader->getName() == "quad_light" || lightShader->getName() == "spot_light" ) )
 	{
 		// Blender/hdCycles scale by `pi` to convert intensity to radiant flux.
 		// We do the same here to ensure lights exported from Blender to USD render
@@ -402,10 +406,8 @@ ccl::ShaderInput *input( ccl::ShaderNode *node, IECore::InternedString name )
 			return socket;
 	}
 
-	msg(
-		Msg::Warning, "IECoreCycles::ShaderNetworkAlgo",
-		fmt::format( "Couldn't find socket input \"{}\" on shaderNode \"{}\"", name.string(), node->name.c_str() )
-	);
+	msg( Msg::Warning, "IECoreCycles::ShaderNetworkAlgo",
+		 fmt::format( "Couldn't find socket input \"{}\" on shaderNode \"{}\"", name.string(), node->name.c_str() ) );
 	return nullptr;
 }
 
@@ -429,19 +431,22 @@ ccl::ShaderOutput *output( ccl::ShaderNode *node, IECore::InternedString name )
 		}
 	}
 
-	msg(
-		Msg::Warning, "IECoreCycles::ShaderNetworkAlgo",
-		fmt::format( "Couldn't find socket output \"{}\" on shaderNode \"{}\"", name.string(), node->name.c_str() )
-	);
+	msg( Msg::Warning, "IECoreCycles::ShaderNetworkAlgo",
+		 fmt::format( "Couldn't find socket output \"{}\" on shaderNode \"{}\"", name.string(), node->name.c_str() ) );
 	return nullptr;
 }
 
-std::unique_ptr<ccl::ShaderGraph> convertGraph( const IECoreScene::ShaderNetwork *surfaceShader, const IECoreScene::ShaderNetwork *displacementShader, const IECoreScene::ShaderNetwork *volumeShader, ccl::Scene *scene, const std::string &namePrefix )
+std::unique_ptr<ccl::ShaderGraph> convertGraph(
+	const IECoreScene::ShaderNetwork *surfaceShader, const IECoreScene::ShaderNetwork *displacementShader,
+	const IECoreScene::ShaderNetwork *volumeShader, ccl::Scene *scene, const std::string &namePrefix
+)
 {
 	std::unique_ptr<ccl::ShaderGraph> graph = std::make_unique<ccl::ShaderGraph>();
 
 	using NamedNetwork = std::pair<std::string, const IECoreScene::ShaderNetwork *>;
-	for( const auto &[name, network] : { NamedNetwork( "surface", surfaceShader ), NamedNetwork( "displacement", displacementShader ), NamedNetwork( "volume", volumeShader ) } )
+	for( const auto &[name, network] :
+		 { NamedNetwork( "surface", surfaceShader ), NamedNetwork( "displacement", displacementShader ),
+		   NamedNetwork( "volume", volumeShader ) } )
 	{
 		if( !network )
 		{
@@ -463,7 +468,8 @@ std::unique_ptr<ccl::ShaderGraph> convertGraph( const IECoreScene::ShaderNetwork
 		// Now add them for native Cycles shaders.
 		IECoreScene::ShaderNetworkAlgo::addComponentConnectionAdapters( toConvert.get() );
 		ShaderMap converted;
-		ccl::ShaderNode *node = convertWalk( toConvert->getOutput(), toConvert.get(), namePrefix, scene, graph.get(), converted );
+		ccl::ShaderNode *node =
+			convertWalk( toConvert->getOutput(), toConvert.get(), namePrefix, scene, graph.get(), converted );
 
 		if( node )
 		{
@@ -479,7 +485,10 @@ std::unique_ptr<ccl::ShaderGraph> convertGraph( const IECoreScene::ShaderNetwork
 	return graph;
 }
 
-void convertAOV( const IECoreScene::ShaderNetwork *shaderNetwork, ccl::ShaderGraph *graph, ccl::Scene *scene, const std::string &namePrefix )
+void convertAOV(
+	const IECoreScene::ShaderNetwork *shaderNetwork, ccl::ShaderGraph *graph, ccl::Scene *scene,
+	const std::string &namePrefix
+)
 {
 	ShaderMap converted;
 	convertWalk( shaderNetwork->getOutput(), shaderNetwork, namePrefix, scene, graph, converted );
@@ -552,10 +561,7 @@ void convertLight( const IECoreScene::ShaderNetwork *light, ccl::Light *cyclesLi
 	{
 		cyclesLight->set_light_type( ccl::LIGHT_BACKGROUND );
 	}
-	else if(
-		lightShader->getName() == "quad_light" ||
-		lightShader->getName() == "portal"
-	)
+	else if( lightShader->getName() == "quad_light" || lightShader->getName() == "portal" )
 	{
 		cyclesLight->set_light_type( ccl::LIGHT_AREA );
 		cyclesLight->set_size( 1.0f );
@@ -594,7 +600,9 @@ void convertLight( const IECoreScene::ShaderNetwork *light, ccl::Light *cyclesLi
 		}
 		else if( name == "spot_angle" )
 		{
-			cyclesLight->set_spot_angle( IECore::degreesToRadians( parameterValue<float>( value.get(), name, 45.0f ) ) );
+			cyclesLight->set_spot_angle(
+				IECore::degreesToRadians( parameterValue<float>( value.get(), name, 45.0f ) )
+			);
 		}
 		else if( name == "spread" )
 		{
@@ -802,9 +810,13 @@ T parameterValue( const Shader *shader, InternedString parameterName, const T &d
 }
 
 template<typename T>
-void transferUSDParameter( ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, InternedString usdName, Shader *shader, InternedString name, const T &defaultValue )
+void transferUSDParameter(
+	ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, InternedString usdName,
+	Shader *shader, InternedString name, const T &defaultValue
+)
 {
-	shader->parameters()[name] = new typename DataTraits<T>::DataType( parameterValue( usdShader, usdName, defaultValue ) );
+	shader->parameters()[name] =
+		new typename DataTraits<T>::DataType( parameterValue( usdShader, usdName, defaultValue ) );
 
 	if( ShaderNetwork::Parameter input = network->input( { shaderHandle, usdName } ) )
 	{
@@ -913,7 +925,9 @@ const InternedString g_USDRayVisibilityBlindDataKey( "__USDRayVisibility" );
 
 const string g_cyclesNamespace( "cycles:" );
 
-void transferUSDLightParameters( ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, Shader *shader )
+void transferUSDLightParameters(
+	ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, Shader *shader
+)
 {
 	Color3f color = parameterValue( usdShader, g_colorParameter, Color3f( 1 ) );
 	if( parameterValue( usdShader, g_enableColorTemperatureParameter, false ) )
@@ -925,7 +939,9 @@ void transferUSDLightParameters( ShaderNetwork *network, InternedString shaderHa
 	transferUSDParameter( network, shaderHandle, usdShader, g_exposureParameter, shader, g_exposureParameter, 0.0f );
 	transferUSDParameter( network, shaderHandle, usdShader, g_intensityParameter, shader, g_intensityParameter, 1.0f );
 	transferUSDParameter( network, shaderHandle, usdShader, g_normalizeParameter, shader, g_normalizeParameter, false );
-	transferUSDParameter( network, shaderHandle, usdShader, g_shadowEnableParameter, shader, g_castShadowParameter, true );
+	transferUSDParameter(
+		network, shaderHandle, usdShader, g_shadowEnableParameter, shader, g_castShadowParameter, true
+	);
 
 	int visibility = (int)ccl::PATH_RAY_ALL_VISIBILITY;
 	if( parameterValue( usdShader, g_diffuseParameter, 1.0f ) == 0.0f )
@@ -949,7 +965,9 @@ void transferUSDLightParameters( ShaderNetwork *network, InternedString shaderHa
 	}
 }
 
-void transferUSDShapingParameters( ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, Shader *shader )
+void transferUSDShapingParameters(
+	ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, Shader *shader
+)
 {
 	if( auto d = usdShader->parametersData()->member<FloatData>( g_shapingConeAngleParameter ) )
 	{
@@ -960,18 +978,25 @@ void transferUSDShapingParameters( ShaderNetwork *network, InternedString shader
 		/// take this at face value now.
 		if( parameterValue( usdShader, g_shapingConeSoftnessParameter, 0.0f ) > 1.0 )
 		{
-			IECore::msg( IECore::Msg::Warning, "transferUSDShapingParameters", "Ignoring `shaping:cone:softness` as it is greater than 1" );
+			IECore::msg(
+				IECore::Msg::Warning, "transferUSDShapingParameters",
+				"Ignoring `shaping:cone:softness` as it is greater than 1"
+			);
 		}
 		else
 		{
-			transferUSDParameter( network, shaderHandle, usdShader, g_shapingConeSoftnessParameter, shader, g_spotSmoothParameter, 0.0f );
+			transferUSDParameter(
+				network, shaderHandle, usdShader, g_shapingConeSoftnessParameter, shader, g_spotSmoothParameter, 0.0f
+			);
 		}
 	}
 }
 
 // Should be called after `transferUSDLightParameters()`, as it needs to examine
 // the transferred `color` parameter.
-void transferUSDTextureFile( ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, const Shader *shader )
+void transferUSDTextureFile(
+	ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, const Shader *shader
+)
 {
 	const string textureFile = parameterValue( usdShader, g_textureFileParameter, string() );
 	if( textureFile.empty() )
@@ -994,7 +1019,10 @@ void transferUSDTextureFile( ShaderNetwork *network, InternedString shaderHandle
 		}
 		else
 		{
-			IECore::msg( IECore::Msg::Warning, "convertUSDShaders", fmt::format( "Unsupported value \"{}\" for DomeLight.format", format ) );
+			IECore::msg(
+				IECore::Msg::Warning, "convertUSDShaders",
+				fmt::format( "Unsupported value \"{}\" for DomeLight.format", format )
+			);
 			format = "equirectangular";
 		}
 		imageShader->parameters()[g_projectionParameter] = new StringData( format );
@@ -1019,14 +1047,21 @@ void transferUSDTextureFile( ShaderNetwork *network, InternedString shaderHandle
 		ShaderPtr multiplyShader = new Shader( "vector_math" );
 		multiplyShader->parameters()[g_mathTypeParameter] = new StringData( "multiply" );
 		multiplyShader->parameters()[g_vector2Parameter] = new Color3fData( color );
-		const InternedString multiplyHandle = network->addShader( shaderHandle.string() + "Multiply", std::move( multiplyShader ) );
-		network->addConnection( ShaderNetwork::Connection( { multiplyHandle, g_vectorParameter }, { shaderHandle, g_colorParameter } ) );
-		network->addConnection( ShaderNetwork::Connection( { imageHandle, g_colorParameter }, { multiplyHandle, g_vector1Parameter } ) );
+		const InternedString multiplyHandle =
+			network->addShader( shaderHandle.string() + "Multiply", std::move( multiplyShader ) );
+		network->addConnection(
+			ShaderNetwork::Connection( { multiplyHandle, g_vectorParameter }, { shaderHandle, g_colorParameter } )
+		);
+		network->addConnection(
+			ShaderNetwork::Connection( { imageHandle, g_colorParameter }, { multiplyHandle, g_vector1Parameter } )
+		);
 	}
 	else
 	{
 		// Connect image directly
-		network->addConnection( ShaderNetwork::Connection( { imageHandle, g_colorParameter }, { shaderHandle, g_colorParameter } ) );
+		network->addConnection(
+			ShaderNetwork::Connection( { imageHandle, g_colorParameter }, { shaderHandle, g_colorParameter } )
+		);
 	}
 
 	if( shader->getName() == "quad_light" )
@@ -1034,8 +1069,11 @@ void transferUSDTextureFile( ShaderNetwork *network, InternedString shaderHandle
 		// For the correct coordinate mapping for quad lights, a geometry
 		// shader with the parametric output is needed.
 		ShaderPtr geometryShader = new Shader( "geometry" );
-		const InternedString geometryHandle = network->addShader( shaderHandle.string() + "Geometry", std::move( geometryShader ) );
-		network->addConnection( ShaderNetwork::Connection( { geometryHandle, g_parametricParameter }, { imageHandle, g_vectorParameter } ) );
+		const InternedString geometryHandle =
+			network->addShader( shaderHandle.string() + "Geometry", std::move( geometryShader ) );
+		network->addConnection(
+			ShaderNetwork::Connection( { geometryHandle, g_parametricParameter }, { imageHandle, g_vectorParameter } )
+		);
 	}
 	else if( shader->getName() == "background_light" )
 	{
@@ -1047,34 +1085,32 @@ void transferUSDTextureFile( ShaderNetwork *network, InternedString shaderHandle
 		// separately.
 		ShaderPtr mappingShader = new Shader( "mapping" );
 		mappingShader->parameters()[g_rotationParameter] = new V3fData( V3f( 0, -M_PI / 2.0, 0 ) );
-		const InternedString mappingHandle = network->addShader( shaderHandle.string() + "Mapping", std::move( mappingShader ) );
-		network->addConnection( ShaderNetwork::Connection( { mappingHandle, g_vectorParameter }, { imageHandle, g_vectorParameter } ) );
+		const InternedString mappingHandle =
+			network->addShader( shaderHandle.string() + "Mapping", std::move( mappingShader ) );
+		network->addConnection(
+			ShaderNetwork::Connection( { mappingHandle, g_vectorParameter }, { imageHandle, g_vectorParameter } )
+		);
 		ShaderPtr geometryShader = new Shader( "geometry" );
-		const InternedString geometryHandle = network->addShader( shaderHandle.string() + "Geometry", std::move( geometryShader ) );
-		network->addConnection( ShaderNetwork::Connection( { geometryHandle, g_positionParameter }, { mappingHandle, g_vectorParameter } ) );
+		const InternedString geometryHandle =
+			network->addShader( shaderHandle.string() + "Geometry", std::move( geometryShader ) );
+		network->addConnection(
+			ShaderNetwork::Connection( { geometryHandle, g_positionParameter }, { mappingHandle, g_vectorParameter } )
+		);
 	}
 }
 
 // Map of USD shader output parameter names to their equivalent Cycles parameter name.
 const std::unordered_map<InternedString, InternedString> g_outputParameterMap = {
-	{ g_surfaceParameter, g_BSDFParameter },
-	{ g_rgbParameter, g_colorParameter },
-	{ g_rParameter, g_colorRParameter },
-	{ g_gParameter, g_colorGParameter },
-	{ g_bParameter, g_colorBParameter },
-	{ g_aParameter, g_alphaParameter },
+	{ g_surfaceParameter, g_BSDFParameter }, { g_rgbParameter, g_colorParameter }, { g_rParameter, g_colorRParameter },
+	{ g_gParameter, g_colorGParameter },	 { g_bParameter, g_colorBParameter },  { g_aParameter, g_alphaParameter },
 };
 
 // Map of USD shaders with `result` parameters to the output of their equivalent Cycles shader.
 const std::unordered_map<std::string, InternedString> g_resultParameterMap = {
-	{ "UsdPrimvarReader_int", g_facParameter },
-	{ "UsdPrimvarReader_float", g_facParameter },
-	{ "UsdPrimvarReader_float2", g_UVParameter },
-	{ "UsdPrimvarReader_float3", g_colorParameter },
-	{ "UsdPrimvarReader_float4", g_colorParameter },
-	{ "UsdPrimvarReader_normal", g_vectorParameter },
-	{ "UsdPrimvarReader_point", g_vectorParameter },
-	{ "UsdPrimvarReader_vector", g_vectorParameter },
+	{ "UsdPrimvarReader_int", g_facParameter },		 { "UsdPrimvarReader_float", g_facParameter },
+	{ "UsdPrimvarReader_float2", g_UVParameter },	 { "UsdPrimvarReader_float3", g_colorParameter },
+	{ "UsdPrimvarReader_float4", g_colorParameter }, { "UsdPrimvarReader_normal", g_vectorParameter },
+	{ "UsdPrimvarReader_point", g_vectorParameter }, { "UsdPrimvarReader_vector", g_vectorParameter },
 	{ "UsdTransform2d", g_vectorParameter },
 };
 
@@ -1146,8 +1182,13 @@ void convertUSDUVTextures( ShaderNetwork *network )
 		}
 
 		ShaderPtr imageShader = new Shader( "image_texture", "cycles:shader" );
-		transferUSDParameter( network, handle, shader.get(), g_fileParameter, imageShader.get(), g_filenameParameter, string() );
-		transferUSDParameter( network, handle, shader.get(), g_sourceColorSpaceParameter, imageShader.get(), g_colorspaceParameter, string() );
+		transferUSDParameter(
+			network, handle, shader.get(), g_fileParameter, imageShader.get(), g_filenameParameter, string()
+		);
+		transferUSDParameter(
+			network, handle, shader.get(), g_sourceColorSpaceParameter, imageShader.get(), g_colorspaceParameter,
+			string()
+		);
 
 		// Cycles has a single "extension" parameter for wrapping a texture in
 		// both directions, so we take the first wrap parameter with a value.
@@ -1170,7 +1211,9 @@ void convertUSDUVTextures( ShaderNetwork *network )
 
 		if( auto input = network->input( { handle, g_stParameter } ) )
 		{
-			transferUSDParameter( network, handle, shader.get(), g_stParameter, imageShader.get(), g_vectorParameter, V3f( 0 ) );
+			transferUSDParameter(
+				network, handle, shader.get(), g_stParameter, imageShader.get(), g_vectorParameter, V3f( 0 )
+			);
 		}
 
 		// The Cycles image_texture shader provides no parameters for colour correction,
@@ -1181,15 +1224,18 @@ void convertUSDUVTextures( ShaderNetwork *network )
 		{
 			ShaderPtr multiplyAddShader = new Shader( "vector_math", "cycles:shader" );
 			multiplyAddShader->parameters()[g_mathTypeParameter] = new StringData( "multiply_add" );
-			multiplyAddShader->parameters()[g_vector2Parameter] = new Color3fData( Color3f( scale.r, scale.g, scale.b ) );
+			multiplyAddShader->parameters()[g_vector2Parameter] =
+				new Color3fData( Color3f( scale.r, scale.g, scale.b ) );
 			multiplyAddShader->parameters()[g_vector3Parameter] = new Color3fData( Color3f( bias.r, bias.g, bias.b ) );
-			const InternedString multiplyAddHandle = network->addShader( handle.string() + "MultiplyAdd", std::move( multiplyAddShader ) );
+			const InternedString multiplyAddHandle =
+				network->addShader( handle.string() + "MultiplyAdd", std::move( multiplyAddShader ) );
 
 			ShaderPtr alphaMultiplyAddShader = new Shader( "math", "cycles:shader" );
 			alphaMultiplyAddShader->parameters()[g_mathTypeParameter] = new StringData( "multiply_add" );
 			alphaMultiplyAddShader->parameters()[g_value2Parameter] = new FloatData( scale.a );
 			alphaMultiplyAddShader->parameters()[g_value3Parameter] = new FloatData( bias.a );
-			const InternedString alphaMultiplyAddHandle = network->addShader( handle.string() + "AlphaMultiplyAdd", std::move( alphaMultiplyAddShader ) );
+			const InternedString alphaMultiplyAddHandle =
+				network->addShader( handle.string() + "AlphaMultiplyAdd", std::move( alphaMultiplyAddShader ) );
 
 			ShaderNetwork::ConnectionRange range = network->outputConnections( handle );
 			vector<ShaderNetwork::Connection> outputConnections( range.begin(), range.end() );
@@ -1219,8 +1265,12 @@ void convertUSDUVTextures( ShaderNetwork *network )
 				network->addConnection( ShaderNetwork::Connection( { sourceHandle, sourceParameter }, c.destination ) );
 			}
 
-			network->addConnection( ShaderNetwork::Connection( { handle, g_colorParameter }, { multiplyAddHandle, g_vector1Parameter } ) );
-			network->addConnection( ShaderNetwork::Connection( { handle, g_alphaParameter }, { alphaMultiplyAddHandle, g_value1Parameter } ) );
+			network->addConnection(
+				ShaderNetwork::Connection( { handle, g_colorParameter }, { multiplyAddHandle, g_vector1Parameter } )
+			);
+			network->addConnection(
+				ShaderNetwork::Connection( { handle, g_alphaParameter }, { alphaMultiplyAddHandle, g_value1Parameter } )
+			);
 		}
 
 		replaceUSDShader( network, handle, std::move( imageShader ) );
@@ -1244,18 +1294,32 @@ void IECoreCycles::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 
 			// Easy stuff with a one-to-one correspondence between `UsdPreviewSurface` and `principled_bsdf`.
 
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_diffuseColorParameter, newShader.get(), g_baseColorParameter, Color3f( 0.18 ) );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_roughnessParameter, newShader.get(), g_roughnessParameter, 0.5f );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_clearcoatParameter, newShader.get(), g_coatWeightParameter, 0.0f );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_clearcoatRoughnessParameter, newShader.get(), g_coatRoughnessParameter, 0.01f );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_iorParameter, newShader.get(), g_iorParameter, 1.5f );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_diffuseColorParameter, newShader.get(), g_baseColorParameter,
+				Color3f( 0.18 )
+			);
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_roughnessParameter, newShader.get(), g_roughnessParameter, 0.5f
+			);
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_clearcoatParameter, newShader.get(), g_coatWeightParameter, 0.0f
+			);
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_clearcoatRoughnessParameter, newShader.get(),
+				g_coatRoughnessParameter, 0.01f
+			);
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_iorParameter, newShader.get(), g_iorParameter, 1.5f
+			);
 
 			// Emission. UsdPreviewSurface only has `emissiveColor`, which we transfer to `emission_color`. But then
 			// we need to turn on Cycles' `emission_strength` to that the `emission_color` is actually used.
 
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_emissiveColorParameter, newShader.get(), g_emissionColorParameter, Color3f( 0 ) );
-			const bool hasEmission =
-				shaderNetwork->input( { handle, g_emissionColorParameter } ) ||
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_emissiveColorParameter, newShader.get(),
+				g_emissionColorParameter, Color3f( 0 )
+			);
+			const bool hasEmission = shaderNetwork->input( { handle, g_emissionColorParameter } ) ||
 				parameterValue( newShader.get(), g_emissionColorParameter, Color3f( 0 ) ) != Color3f( 0 );
 			;
 			newShader->parameters()[g_emissionStrengthParameter] = new FloatData( hasEmission ? 1.0f : 0.0f );
@@ -1266,12 +1330,17 @@ void IECoreCycles::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 			newShader->parameters()[g_specularIORLevelParameter] = new FloatData( 0.5f );
 			if( parameterValue<int>( shader.get(), g_useSpecularWorkflowParameter, 0 ) )
 			{
-				transferUSDParameter( shaderNetwork, handle, shader.get(), g_specularColorParameter, newShader.get(), g_specularTintParameter, Color3f( 0.0f ) );
+				transferUSDParameter(
+					shaderNetwork, handle, shader.get(), g_specularColorParameter, newShader.get(),
+					g_specularTintParameter, Color3f( 0.0f )
+				);
 				removeInput( shaderNetwork, { handle, g_metallicParameter } );
 			}
 			else
 			{
-				transferUSDParameter( shaderNetwork, handle, shader.get(), g_metallicParameter, newShader.get(), g_metallicParameter, 0.0f );
+				transferUSDParameter(
+					shaderNetwork, handle, shader.get(), g_metallicParameter, newShader.get(), g_metallicParameter, 0.0f
+				);
 			}
 
 			removeInput( shaderNetwork, { handle, g_specularColorParameter } );
@@ -1288,19 +1357,35 @@ void IECoreCycles::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 					ShaderPtr compareShader = new Shader( "math", "cycles:shader" );
 					compareShader->parameters()[g_value2Parameter] = new FloatData( opacityThreshold );
 					compareShader->parameters()[g_mathTypeParameter] = new StringData( "greater_than" );
-					const InternedString compareHandle = shaderNetwork->addShader( handle.string() + "OpacityCompare", std::move( compareShader ) );
-					shaderNetwork->addConnection( ShaderNetwork::Connection( opacityInput, { compareHandle, g_value1Parameter } ) );
+					const InternedString compareHandle =
+						shaderNetwork->addShader( handle.string() + "OpacityCompare", std::move( compareShader ) );
+					shaderNetwork->addConnection(
+						ShaderNetwork::Connection( opacityInput, { compareHandle, g_value1Parameter } )
+					);
 					ShaderPtr multiplyShader = new Shader( "math", "cycles:shader" );
 					multiplyShader->parameters()[g_mathTypeParameter] = new StringData( "multiply" );
-					const InternedString multiplyHandle = shaderNetwork->addShader( handle.string() + "OpacityMultiply", std::move( multiplyShader ) );
-					shaderNetwork->addConnection( ShaderNetwork::Connection( opacityInput, { multiplyHandle, g_value1Parameter } ) );
-					shaderNetwork->addConnection( ShaderNetwork::Connection( { compareHandle, g_valueParameter }, { multiplyHandle, g_value2Parameter } ) );
-					shaderNetwork->removeConnection( ShaderNetwork::Connection( opacityInput, { handle, g_opacityParameter } ) );
-					shaderNetwork->addConnection( ShaderNetwork::Connection( { multiplyHandle, g_valueParameter }, { handle, g_alphaParameter } ) );
+					const InternedString multiplyHandle =
+						shaderNetwork->addShader( handle.string() + "OpacityMultiply", std::move( multiplyShader ) );
+					shaderNetwork->addConnection(
+						ShaderNetwork::Connection( opacityInput, { multiplyHandle, g_value1Parameter } )
+					);
+					shaderNetwork->addConnection(
+						ShaderNetwork::Connection(
+							{ compareHandle, g_valueParameter }, { multiplyHandle, g_value2Parameter }
+						)
+					);
+					shaderNetwork->removeConnection(
+						ShaderNetwork::Connection( opacityInput, { handle, g_opacityParameter } )
+					);
+					shaderNetwork->addConnection(
+						ShaderNetwork::Connection( { multiplyHandle, g_valueParameter }, { handle, g_alphaParameter } )
+					);
 				}
 				else
 				{
-					transferUSDParameter( shaderNetwork, handle, shader.get(), g_opacityParameter, newShader.get(), g_alphaParameter, 1.0f );
+					transferUSDParameter(
+						shaderNetwork, handle, shader.get(), g_opacityParameter, newShader.get(), g_alphaParameter, 1.0f
+					);
 				}
 			}
 			else
@@ -1321,7 +1406,9 @@ void IECoreCycles::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 		else if( shader->getName() == "UsdTransform2d" )
 		{
 			newShader = new Shader( "mapping", "cycles:shader" );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_inParameter, newShader.get(), g_vectorParameter, V3f( 0 ) );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_inParameter, newShader.get(), g_vectorParameter, V3f( 0 )
+			);
 			const V2f t = parameterValue( shader.get(), g_translationParameter, V2f( 0 ) );
 			const float r = parameterValue( shader.get(), g_rotationParameter, 0.0f );
 			const V2f s = parameterValue( shader.get(), g_scaleParameter, V2f( 1 ) );
@@ -1329,7 +1416,8 @@ void IECoreCycles::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 			// transforming the texture coordinates, not the textures themselves.
 			newShader->parameters()[g_mappingTypeParameter] = new StringData( "point" );
 			newShader->parameters()[g_locationParameter] = new V3fData( V3f( t.x, t.y, 0.0f ) );
-			newShader->parameters()[g_rotationParameter] = new V3fData( V3f( 0.0f, 0.0f, IECore::degreesToRadians( r ) ) );
+			newShader->parameters()[g_rotationParameter] =
+				new V3fData( V3f( 0.0f, 0.0f, IECore::degreesToRadians( r ) ) );
 			newShader->parameters()[g_scaleParameter] = new V3fData( V3f( s.x, s.y, 1.0f ) );
 		}
 		else if( shader->getName() == "UsdPrimvarReader_float2" )
@@ -1342,29 +1430,32 @@ void IECoreCycles::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 			}
 			else
 			{
-				transferUSDParameter( shaderNetwork, handle, shader.get(), g_varnameParameter, newShader.get(), g_attributeParameter, string() );
+				transferUSDParameter(
+					shaderNetwork, handle, shader.get(), g_varnameParameter, newShader.get(), g_attributeParameter,
+					string()
+				);
 			}
 		}
 		else if(
-			shader->getName() == "UsdPrimvarReader_float" ||
-			shader->getName() == "UsdPrimvarReader_float3" ||
-			shader->getName() == "UsdPrimvarReader_float4" ||
-			shader->getName() == "UsdPrimvarReader_normal" ||
-			shader->getName() == "UsdPrimvarReader_point" ||
-			shader->getName() == "UsdPrimvarReader_vector" ||
-			shader->getName() == "UsdPrimvarReader_int" ||
-			shader->getName() == "UsdPrimvarReader_string"
+			shader->getName() == "UsdPrimvarReader_float" || shader->getName() == "UsdPrimvarReader_float3" ||
+			shader->getName() == "UsdPrimvarReader_float4" || shader->getName() == "UsdPrimvarReader_normal" ||
+			shader->getName() == "UsdPrimvarReader_point" || shader->getName() == "UsdPrimvarReader_vector" ||
+			shader->getName() == "UsdPrimvarReader_int" || shader->getName() == "UsdPrimvarReader_string"
 		)
 		{
 			newShader = new Shader( "attribute", "cycles:shader" );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_varnameParameter, newShader.get(), g_attributeParameter, string() );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_varnameParameter, newShader.get(), g_attributeParameter, string()
+			);
 		}
 		else if( shader->getName() == "SphereLight" )
 		{
 			newShader = new Shader( "point_light", "cycles:light" );
 			transferUSDLightParameters( shaderNetwork, handle, shader.get(), newShader.get() );
 			transferUSDShapingParameters( shaderNetwork, handle, shader.get(), newShader.get() );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_radiusParameter, newShader.get(), g_sizeParameter, 0.5f );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_radiusParameter, newShader.get(), g_sizeParameter, 0.5f
+			);
 			if( parameterValue( shader.get(), g_treatAsPointParameter, false ) )
 			{
 				newShader->parameters()[g_sizeParameter] = new FloatData( 0.0 );
@@ -1388,14 +1479,18 @@ void IECoreCycles::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 			const float radius = parameterValue( shader.get(), g_radiusParameter, 0.5f );
 			const float length = parameterValue( shader.get(), g_lengthParameter, 1.0f );
 			newShader->parameters()[g_sizeParameter] = new FloatData( std::max( radius, length / 2.0f ) );
-			IECore::msg( IECore::Msg::Warning, "ShaderNetworkAlgo", "Converting USD CylinderLight to Cycles point light" );
+			IECore::msg(
+				IECore::Msg::Warning, "ShaderNetworkAlgo", "Converting USD CylinderLight to Cycles point light"
+			);
 		}
 		else if( shader->getName() == "DistantLight" )
 		{
 			newShader = new Shader( "distant_light", "cycles:light" );
 			transferUSDLightParameters( shaderNetwork, handle, shader.get(), newShader.get() );
 			transferUSDShapingParameters( shaderNetwork, handle, shader.get(), newShader.get() );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_angleParameter, newShader.get(), g_angleParameter, 0.53f );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_angleParameter, newShader.get(), g_angleParameter, 0.53f
+			);
 		}
 		else if( shader->getName() == "DomeLight" )
 		{
@@ -1414,8 +1509,12 @@ void IECoreCycles::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 		{
 			newShader = new Shader( "quad_light", "cycles:light" );
 			transferUSDLightParameters( shaderNetwork, handle, shader.get(), newShader.get() );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_widthParameter, newShader.get(), g_widthParameter, 1.0f );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_heightParameter, newShader.get(), g_heightParameter, 1.0f );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_widthParameter, newShader.get(), g_widthParameter, 1.0f
+			);
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_heightParameter, newShader.get(), g_heightParameter, 1.0f
+			);
 			transferUSDTextureFile( shaderNetwork, handle, shader.get(), newShader.get() );
 		}
 

@@ -50,7 +50,7 @@ class Resample;
 class GAFFERIMAGE_API ContactSheetCore : public FlatImageProcessor
 {
 
-	public:
+public:
 
 	explicit ContactSheetCore( const std::string &name = defaultName<ContactSheetCore>() );
 	~ContactSheetCore() override;
@@ -71,7 +71,7 @@ class GAFFERIMAGE_API ContactSheetCore : public FlatImageProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const final;
 
-	private:
+private:
 
 	Gaffer::ObjectPlug *coveragePlug();
 	const Gaffer::ObjectPlug *coveragePlug() const;
@@ -91,23 +91,42 @@ class GAFFERIMAGE_API ContactSheetCore : public FlatImageProcessor
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const final;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const final;
 
-	void hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const final;
-	IECore::ConstStringVectorDataPtr computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const final;
+	void hashViewNames(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const final;
+	IECore::ConstStringVectorDataPtr computeViewNames(
+		const Gaffer::Context *context, const ImagePlug *parent
+	) const final;
 
-	void hashFormat( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const final;
+	void hashFormat(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const final;
 	GafferImage::Format computeFormat( const Gaffer::Context *context, const ImagePlug *parent ) const final;
 
-	void hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const final;
+	void hashDataWindow(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const final;
 	Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const final;
 
-	void hashMetadata( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const final;
+	void hashMetadata(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const final;
 	IECore::ConstCompoundDataPtr computeMetadata( const Gaffer::Context *context, const ImagePlug *parent ) const final;
 
-	void hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const final;
-	IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const final;
+	void hashChannelNames(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const final;
+	IECore::ConstStringVectorDataPtr computeChannelNames(
+		const Gaffer::Context *context, const ImagePlug *parent
+	) const final;
 
-	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const final;
-	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const final;
+	void hashChannelData(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const final;
+	IECore::ConstFloatVectorDataPtr computeChannelData(
+		const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+		const ImagePlug *parent
+	) const final;
 
 	static size_t g_firstPlugIndex;
 };

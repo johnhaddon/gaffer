@@ -86,14 +86,15 @@ struct ViewSpec
 };
 
 template<typename T>
-PrimitiveVariable::IndexedView<T> indexedView( const Primitive *inputPrimitive, Primitive *outputPrimitive, const std::string &name, bool deleteInputs, ViewSpec &spec )
+PrimitiveVariable::IndexedView<T> indexedView(
+	const Primitive *inputPrimitive, Primitive *outputPrimitive, const std::string &name, bool deleteInputs,
+	ViewSpec &spec
+)
 {
 	const auto it = inputPrimitive->variables.find( name );
 	if( it == inputPrimitive->variables.end() )
 	{
-		throw IECore::Exception(
-			fmt::format( "Primitive variable \"{}\" not found", name )
-		);
+		throw IECore::Exception( fmt::format( "Primitive variable \"{}\" not found", name ) );
 	}
 
 	using DataType = IECore::TypedData<vector<T>>;
@@ -102,8 +103,8 @@ PrimitiveVariable::IndexedView<T> indexedView( const Primitive *inputPrimitive, 
 	{
 		throw IECore::Exception(
 			fmt::format(
-				"Primitive variable \"{}\" has wrong type \"{}\" (wanted \"{}\")",
-				name, it->second.data->typeName(), DataType::staticTypeName()
+				"Primitive variable \"{}\" has wrong type \"{}\" (wanted \"{}\")", name, it->second.data->typeName(),
+				DataType::staticTypeName()
 			)
 		);
 	}
@@ -122,8 +123,8 @@ PrimitiveVariable::IndexedView<T> indexedView( const Primitive *inputPrimitive, 
 		{
 			throw IECore::Exception(
 				fmt::format(
-					"Primitive variable \"{}\" has wrong size ({}, but should be {} to match \"{}\")",
-					name, data->readable().size(), spec.size, spec.name
+					"Primitive variable \"{}\" has wrong size ({}, but should be {} to match \"{}\")", name,
+					data->readable().size(), spec.size, spec.name
 				)
 			);
 		}
@@ -140,7 +141,10 @@ PrimitiveVariable::IndexedView<T> indexedView( const Primitive *inputPrimitive, 
 	return PrimitiveVariable::IndexedView<T>( it->second );
 }
 
-PrimitiveVariable inEuler( const Primitive *inputPrimitive, Primitive *outputPrimitive, const std::string &eulerName, const Imath::Eulerf::Order order, bool deleteInputs )
+PrimitiveVariable inEuler(
+	const Primitive *inputPrimitive, Primitive *outputPrimitive, const std::string &eulerName,
+	const Imath::Eulerf::Order order, bool deleteInputs
+)
 {
 	if( eulerName == "" )
 	{
@@ -163,7 +167,10 @@ PrimitiveVariable inEuler( const Primitive *inputPrimitive, Primitive *outputPri
 	return PrimitiveVariable( spec.interpolation, quaternionData );
 }
 
-PrimitiveVariable inQuaternion( const Primitive *inputPrimitive, Primitive *outputPrimitive, const std::string &quaternionName, bool deleteInputs, bool xyzw )
+PrimitiveVariable inQuaternion(
+	const Primitive *inputPrimitive, Primitive *outputPrimitive, const std::string &quaternionName, bool deleteInputs,
+	bool xyzw
+)
 {
 	if( quaternionName == "" )
 	{
@@ -192,7 +199,10 @@ PrimitiveVariable inQuaternion( const Primitive *inputPrimitive, Primitive *outp
 	return PrimitiveVariable( spec.interpolation, quaternionData );
 }
 
-PrimitiveVariable inAxisAngle( const Primitive *inputPrimitive, Primitive *outputPrimitive, const std::string &axisName, const std::string &angleName, bool deleteInputs )
+PrimitiveVariable inAxisAngle(
+	const Primitive *inputPrimitive, Primitive *outputPrimitive, const std::string &axisName,
+	const std::string &angleName, bool deleteInputs
+)
 {
 	if( axisName == "" || angleName == "" )
 	{
@@ -215,7 +225,10 @@ PrimitiveVariable inAxisAngle( const Primitive *inputPrimitive, Primitive *outpu
 	return PrimitiveVariable( spec.interpolation, quaternionData );
 }
 
-PrimitiveVariable inAim( const Primitive *inputPrimitive, Primitive *outputPrimitive, const std::string &xAxisName, const std::string &yAxisName, const std::string &zAxisName, bool deleteInputs )
+PrimitiveVariable inAim(
+	const Primitive *inputPrimitive, Primitive *outputPrimitive, const std::string &xAxisName,
+	const std::string &yAxisName, const std::string &zAxisName, bool deleteInputs
+)
 {
 	ViewSpec spec;
 
@@ -289,7 +302,9 @@ PrimitiveVariable inAim( const Primitive *inputPrimitive, Primitive *outputPrimi
 	return PrimitiveVariable( spec.interpolation, quaternionData );
 }
 
-PrimitiveVariable inMatrix( const Primitive *inputPrimitive, Primitive *outputPrimitive, const std::string &matrixName, bool deleteInputs )
+PrimitiveVariable inMatrix(
+	const Primitive *inputPrimitive, Primitive *outputPrimitive, const std::string &matrixName, bool deleteInputs
+)
 {
 	ViewSpec spec;
 	auto matrixView = indexedView<M33f>( inputPrimitive, outputPrimitive, matrixName, deleteInputs, spec );
@@ -306,7 +321,10 @@ PrimitiveVariable inMatrix( const Primitive *inputPrimitive, Primitive *outputPr
 	return PrimitiveVariable( spec.interpolation, quaternionData );
 }
 
-void outEuler( const PrimitiveVariable &orientations, Primitive *outputPrimitive, const std::string &eulerName, Imath::Eulerf::Order order )
+void outEuler(
+	const PrimitiveVariable &orientations, Primitive *outputPrimitive, const std::string &eulerName,
+	Imath::Eulerf::Order order
+)
 {
 	if( eulerName == "" )
 	{
@@ -328,7 +346,9 @@ void outEuler( const PrimitiveVariable &orientations, Primitive *outputPrimitive
 	outputPrimitive->variables[eulerName] = PrimitiveVariable( orientations.interpolation, eulerData );
 }
 
-void outQuaternion( const PrimitiveVariable &orientations, Primitive *outputPrimitive, const std::string &quaternionName )
+void outQuaternion(
+	const PrimitiveVariable &orientations, Primitive *outputPrimitive, const std::string &quaternionName
+)
 {
 	if( quaternionName == "" )
 	{
@@ -337,7 +357,10 @@ void outQuaternion( const PrimitiveVariable &orientations, Primitive *outputPrim
 	outputPrimitive->variables[quaternionName] = orientations;
 }
 
-void outAxisAngle( const PrimitiveVariable &orientations, Primitive *outputPrimitive, const std::string &axisName, const std::string &angleName )
+void outAxisAngle(
+	const PrimitiveVariable &orientations, Primitive *outputPrimitive, const std::string &axisName,
+	const std::string &angleName
+)
 {
 	const auto &quaternions = static_cast<const QuatfVectorData *>( orientations.data.get() )->readable();
 
@@ -379,7 +402,10 @@ void outAxisAngle( const PrimitiveVariable &orientations, Primitive *outputPrimi
 	}
 }
 
-void outAim( const PrimitiveVariable &orientations, Primitive *outputPrimitive, const std::string &xAxisName, const std::string &yAxisName, const std::string &zAxisName )
+void outAim(
+	const PrimitiveVariable &orientations, Primitive *outputPrimitive, const std::string &xAxisName,
+	const std::string &yAxisName, const std::string &zAxisName
+)
 {
 	const auto &quaternions = static_cast<const QuatfVectorData *>( orientations.data.get() )->readable();
 
@@ -457,7 +483,9 @@ void outMatrix( const PrimitiveVariable &orientations, Primitive *outputPrimitiv
 	outputPrimitive->variables[matrixName] = PrimitiveVariable( orientations.interpolation, matricesData );
 }
 
-void randomise( vector<Quatf> &orientations, const V3f &axis, float spreadMax, float twistMax, Orientation::Space space )
+void randomise(
+	vector<Quatf> &orientations, const V3f &axis, float spreadMax, float twistMax, Orientation::Space space
+)
 {
 	spreadMax = degreesToRadians( spreadMax );
 	twistMax = degreesToRadians( twistMax );
@@ -508,8 +536,7 @@ GAFFER_NODE_DEFINE_TYPE( Orientation );
 
 size_t Orientation::g_firstPlugIndex = 0;
 
-Orientation::Orientation( const std::string &name )
-	: ObjectProcessor( name )
+Orientation::Orientation( const std::string &name ) : ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -559,9 +586,7 @@ Orientation::Orientation( const std::string &name )
 	addChild( new StringPlug( "outMatrix" ) );
 }
 
-Orientation::~Orientation()
-{
-}
+Orientation::~Orientation() {}
 
 Gaffer::IntPlug *Orientation::inModePlug()
 {
@@ -825,36 +850,19 @@ const Gaffer::StringPlug *Orientation::outMatrixPlug() const
 
 bool Orientation::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return ObjectProcessor::affectsProcessedObject( input ) ||
-		input == inModePlug() ||
-		input == deleteInputsPlug() ||
-		input == inEulerPlug() ||
-		input == inOrderPlug() ||
-		input == inQuaternionPlug() ||
-		input == inAxisPlug() ||
-		input == inAnglePlug() ||
-		input == inXAxisPlug() ||
-		input == inYAxisPlug() ||
-		input == inZAxisPlug() ||
-		input == inMatrixPlug() ||
-		input == randomEnabledPlug() ||
-		input->parent() == randomAxisPlug() ||
-		input == randomSpreadPlug() ||
-		input == randomTwistPlug() ||
-		input == randomSpacePlug() ||
-		input == outModePlug() ||
-		input == outEulerPlug() ||
-		input == outOrderPlug() ||
-		input == outQuaternionPlug() ||
-		input == outAxisPlug() ||
-		input == outAnglePlug() ||
-		input == outXAxisPlug() ||
-		input == outYAxisPlug() ||
-		input == outZAxisPlug() ||
-		input == outMatrixPlug();
+	return ObjectProcessor::affectsProcessedObject( input ) || input == inModePlug() || input == deleteInputsPlug() ||
+		input == inEulerPlug() || input == inOrderPlug() || input == inQuaternionPlug() || input == inAxisPlug() ||
+		input == inAnglePlug() || input == inXAxisPlug() || input == inYAxisPlug() || input == inZAxisPlug() ||
+		input == inMatrixPlug() || input == randomEnabledPlug() || input->parent() == randomAxisPlug() ||
+		input == randomSpreadPlug() || input == randomTwistPlug() || input == randomSpacePlug() ||
+		input == outModePlug() || input == outEulerPlug() || input == outOrderPlug() || input == outQuaternionPlug() ||
+		input == outAxisPlug() || input == outAnglePlug() || input == outXAxisPlug() || input == outYAxisPlug() ||
+		input == outZAxisPlug() || input == outMatrixPlug();
 }
 
-void Orientation::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Orientation::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ObjectProcessor::hashProcessedObject( path, context, h );
 
@@ -924,7 +932,9 @@ void Orientation::hashProcessedObject( const ScenePath &path, const Gaffer::Cont
 	}
 }
 
-IECore::ConstObjectPtr Orientation::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr Orientation::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	const Primitive *inputPrimitive = runTimeCast<const Primitive>( inputObject );
 	if( !inputPrimitive )
@@ -943,49 +953,30 @@ IECore::ConstObjectPtr Orientation::computeProcessedObject( const ScenePath &pat
 	{
 		case Mode::Euler :
 			inOrientation = inEuler(
-				inputPrimitive,
-				result.get(),
-				inEulerPlug()->getValue(),
-				(Imath::Eulerf::Order)inOrderPlug()->getValue(),
-				deleteInputs
+				inputPrimitive, result.get(), inEulerPlug()->getValue(),
+				(Imath::Eulerf::Order)inOrderPlug()->getValue(), deleteInputs
 			);
 			break;
 		case Mode::Quaternion :
 		case Mode::QuaternionXYZW :
 			inOrientation = inQuaternion(
-				inputPrimitive,
-				result.get(),
-				inQuaternionPlug()->getValue(),
-				deleteInputs,
+				inputPrimitive, result.get(), inQuaternionPlug()->getValue(), deleteInputs,
 				inMode == Mode::QuaternionXYZW
 			);
 			break;
 		case Mode::AxisAngle :
 			inOrientation = inAxisAngle(
-				inputPrimitive,
-				result.get(),
-				inAxisPlug()->getValue(),
-				inAnglePlug()->getValue(),
-				deleteInputs
+				inputPrimitive, result.get(), inAxisPlug()->getValue(), inAnglePlug()->getValue(), deleteInputs
 			);
 			break;
 		case Mode::Aim :
 			inOrientation = inAim(
-				inputPrimitive,
-				result.get(),
-				inXAxisPlug()->getValue(),
-				inYAxisPlug()->getValue(),
-				inZAxisPlug()->getValue(),
-				deleteInputs
+				inputPrimitive, result.get(), inXAxisPlug()->getValue(), inYAxisPlug()->getValue(),
+				inZAxisPlug()->getValue(), deleteInputs
 			);
 			break;
 		case Mode::Matrix :
-			inOrientation = inMatrix(
-				inputPrimitive,
-				result.get(),
-				inMatrixPlug()->getValue(),
-				deleteInputs
-			);
+			inOrientation = inMatrix( inputPrimitive, result.get(), inMatrixPlug()->getValue(), deleteInputs );
 			break;
 	}
 
@@ -1001,11 +992,8 @@ IECore::ConstObjectPtr Orientation::computeProcessedObject( const ScenePath &pat
 			inOrientation.interpolation = PrimitiveVariable::Vertex;
 		}
 		randomise(
-			static_cast<QuatfVectorData *>( inOrientation.data.get() )->writable(),
-			randomAxisPlug()->getValue(),
-			randomSpreadPlug()->getValue(),
-			randomTwistPlug()->getValue(),
-			(Space)randomSpacePlug()->getValue()
+			static_cast<QuatfVectorData *>( inOrientation.data.get() )->writable(), randomAxisPlug()->getValue(),
+			randomSpreadPlug()->getValue(), randomTwistPlug()->getValue(), (Space)randomSpacePlug()->getValue()
 		);
 	}
 
@@ -1022,42 +1010,24 @@ IECore::ConstObjectPtr Orientation::computeProcessedObject( const ScenePath &pat
 	{
 		case Mode::Euler :
 			outEuler(
-				inOrientation,
-				result.get(),
-				outEulerPlug()->getValue(),
+				inOrientation, result.get(), outEulerPlug()->getValue(),
 				(Imath::Eulerf::Order)outOrderPlug()->getValue()
 			);
 			break;
 		case Mode::Quaternion :
-			outQuaternion(
-				inOrientation,
-				result.get(),
-				outQuaternionPlug()->getValue()
-			);
+			outQuaternion( inOrientation, result.get(), outQuaternionPlug()->getValue() );
 			break;
 		case Mode::AxisAngle :
-			outAxisAngle(
-				inOrientation,
-				result.get(),
-				outAxisPlug()->getValue(),
-				outAnglePlug()->getValue()
-			);
+			outAxisAngle( inOrientation, result.get(), outAxisPlug()->getValue(), outAnglePlug()->getValue() );
 			break;
 		case Mode::Aim :
 			outAim(
-				inOrientation,
-				result.get(),
-				outXAxisPlug()->getValue(),
-				outYAxisPlug()->getValue(),
+				inOrientation, result.get(), outXAxisPlug()->getValue(), outYAxisPlug()->getValue(),
 				outZAxisPlug()->getValue()
 			);
 			break;
 		case Mode::Matrix :
-			outMatrix(
-				inOrientation,
-				result.get(),
-				outMatrixPlug()->getValue()
-			);
+			outMatrix( inOrientation, result.get(), outMatrixPlug()->getValue() );
 			break;
 		case Mode::QuaternionXYZW :
 			// Plug max value should prevent us getting here

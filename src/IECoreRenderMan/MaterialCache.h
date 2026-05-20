@@ -58,19 +58,27 @@ IE_CORE_DECLAREPTR( LightShader );
 class MaterialCache
 {
 
-	public:
+public:
 
 	MaterialCache( Session *session );
 
 	// Can be called concurrently with other calls to `get()`
-	ConstMaterialPtr getMaterial( const IECoreScene::ShaderNetwork *network, IECore::InternedString attributeName, const IECore::CompoundObject *attributes );
-	ConstDisplacementPtr getDisplacement( const IECoreScene::ShaderNetwork *network, IECore::InternedString attributeName, const IECore::CompoundObject *attributes );
-	ConstLightShaderPtr getLightShader( const IECoreScene::ShaderNetwork *network, const IECoreScene::ShaderNetwork *lightFilter, RtUString shadowSubset );
+	ConstMaterialPtr getMaterial(
+		const IECoreScene::ShaderNetwork *network, IECore::InternedString attributeName,
+		const IECore::CompoundObject *attributes
+	);
+	ConstDisplacementPtr getDisplacement(
+		const IECoreScene::ShaderNetwork *network, IECore::InternedString attributeName,
+		const IECore::CompoundObject *attributes
+	);
+	ConstLightShaderPtr getLightShader(
+		const IECoreScene::ShaderNetwork *network, const IECoreScene::ShaderNetwork *lightFilter, RtUString shadowSubset
+	);
 
 	// Must not be called concurrently with anything.
 	void clearUnused();
 
-	private:
+private:
 
 	Session *m_session;
 

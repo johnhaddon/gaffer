@@ -62,9 +62,11 @@ const IECore::InternedString g_omitParentNodePlugValues( "valuePlugSerialiser:om
 class RampPlugSerialiser : public ValuePlugSerialiser
 {
 
-	public:
+public:
 
-	std::string postConstructor( const Gaffer::GraphComponent *plug, const std::string &identifier, Serialisation &serialisation ) const override
+	std::string postConstructor(
+		const Gaffer::GraphComponent *plug, const std::string &identifier, Serialisation &serialisation
+	) const override
 	{
 		std::string result = ValuePlugSerialiser::postConstructor( plug, identifier, serialisation );
 		if( !omitValue( plug, serialisation ) )
@@ -77,7 +79,9 @@ class RampPlugSerialiser : public ValuePlugSerialiser
 		return result;
 	}
 
-	bool childNeedsSerialisation( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsSerialisation(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override
 	{
 		if( child->getName() == g_interpolation )
 		{
@@ -88,7 +92,7 @@ class RampPlugSerialiser : public ValuePlugSerialiser
 		return !omitValue( child, serialisation );
 	}
 
-	private:
+private:
 
 	bool omitValue( const Gaffer::GraphComponent *plug, const Serialisation &serialisation ) const
 	{
@@ -156,7 +160,14 @@ template<typename T>
 void bind()
 {
 	PlugClass<T>()
-		.def( init<const std::string &, Plug::Direction, const typename T::ValueType &, unsigned>( ( boost::python::arg_( "name" ) = GraphComponent::defaultName<T>(), boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "defaultValue" ) = typename T::ValueType(), boost::python::arg_( "flags" ) = Plug::Default ) ) )
+		.def(
+			init<const std::string &, Plug::Direction, const typename T::ValueType &, unsigned>(
+				( boost::python::arg_( "name" ) = GraphComponent::defaultName<T>(),
+				  boost::python::arg_( "direction" ) = Plug::In,
+				  boost::python::arg_( "defaultValue" ) = typename T::ValueType(),
+				  boost::python::arg_( "flags" ) = Plug::Default )
+			)
+		)
 		.def( "defaultValue", &T::defaultValue, return_value_policy<copy_const_reference>() )
 		.def( "setValue", &setValue<T> )
 		.def( "getValue", &getValue<T> )

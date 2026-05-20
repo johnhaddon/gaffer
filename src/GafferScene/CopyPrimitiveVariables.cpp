@@ -54,8 +54,7 @@ GAFFER_NODE_DEFINE_TYPE( CopyPrimitiveVariables );
 
 size_t CopyPrimitiveVariables::g_firstPlugIndex = 0;
 
-CopyPrimitiveVariables::CopyPrimitiveVariables( const std::string &name )
-	: Deformer( name )
+CopyPrimitiveVariables::CopyPrimitiveVariables( const std::string &name ) : Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "source" ) );
@@ -65,9 +64,7 @@ CopyPrimitiveVariables::CopyPrimitiveVariables( const std::string &name )
 	addChild( new BoolPlug( "ignoreIncompatible" ) );
 }
 
-CopyPrimitiveVariables::~CopyPrimitiveVariables()
-{
-}
+CopyPrimitiveVariables::~CopyPrimitiveVariables() {}
 
 GafferScene::ScenePlug *CopyPrimitiveVariables::sourcePlug()
 {
@@ -121,16 +118,14 @@ const Gaffer::BoolPlug *CopyPrimitiveVariables::ignoreIncompatiblePlug() const
 
 bool CopyPrimitiveVariables::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return Deformer::affectsProcessedObject( input ) ||
-		input == sourcePlug()->objectPlug() ||
-		input == primitiveVariablesPlug() ||
-		input == prefixPlug() ||
-		input == sourceLocationPlug() ||
-		input == sourcePlug()->existsPlug() ||
-		input == ignoreIncompatiblePlug();
+	return Deformer::affectsProcessedObject( input ) || input == sourcePlug()->objectPlug() ||
+		input == primitiveVariablesPlug() || input == prefixPlug() || input == sourceLocationPlug() ||
+		input == sourcePlug()->existsPlug() || input == ignoreIncompatiblePlug();
 }
 
-void CopyPrimitiveVariables::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CopyPrimitiveVariables::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	Deformer::hashProcessedObject( path, context, h );
 	primitiveVariablesPlug()->hash( h );
@@ -161,7 +156,9 @@ void CopyPrimitiveVariables::hashProcessedObject( const ScenePath &path, const G
 	}
 }
 
-IECore::ConstObjectPtr CopyPrimitiveVariables::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr CopyPrimitiveVariables::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	auto primitive = runTimeCast<const Primitive>( inputObject );
 	if( !primitive )
@@ -223,10 +220,14 @@ IECore::ConstObjectPtr CopyPrimitiveVariables::computeProcessedObject( const Sce
 			string destinationPath;
 			ScenePlug::pathToString( path, destinationPath );
 			const string &sourcePath = sourceLocation.size() ? sourceLocation : destinationPath;
-			throw IECore::Exception( fmt::format( "Cannot copy \"{}\" from \"{}\" to \"{}\" because source and "
-												  "destination primitives have different topology. Turn on `ignoreIncompatible` "
-												  "to disable this error and ignore invalid primitive variables.",
-												  variable.first, sourcePath, destinationPath ) );
+			throw IECore::Exception(
+				fmt::format(
+					"Cannot copy \"{}\" from \"{}\" to \"{}\" because source and "
+					"destination primitives have different topology. Turn on `ignoreIncompatible` "
+					"to disable this error and ignore invalid primitive variables.",
+					variable.first, sourcePath, destinationPath
+				)
+			);
 		}
 		result->variables[prefix + variable.first] = variable.second;
 	}

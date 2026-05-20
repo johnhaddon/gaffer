@@ -53,7 +53,9 @@ LightLinker::LightLinker()
 	m_shadowSets.groupNamePrefix = "shadowGroup";
 }
 
-IECoreScene::ConstShaderNetworkPtr LightLinker::registerFilterLinks( Light *light, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lightFilters )
+IECoreScene::ConstShaderNetworkPtr LightLinker::registerFilterLinks(
+	Light *light, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lightFilters
+)
 {
 	std::lock_guard lock( m_filterSetsMutex );
 
@@ -77,7 +79,9 @@ IECoreScene::ConstShaderNetworkPtr LightLinker::registerFilterLinks( Light *ligh
 	return it->second.lightFilterShader;
 }
 
-void LightLinker::deregisterFilterLinks( Light *light, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lightFilters )
+void LightLinker::deregisterFilterLinks(
+	Light *light, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lightFilters
+)
 {
 	std::lock_guard lock( m_filterSetsMutex );
 
@@ -101,7 +105,9 @@ void LightLinker::dirtyLightFilter( const LightFilter *lightFilter )
 	m_dirtyFilterSets.insert( lightFilter->setMemberships().begin(), lightFilter->setMemberships().end() );
 }
 
-const RtUString LightLinker::registerLightSet( SetType setType, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lights )
+const RtUString LightLinker::registerLightSet(
+	SetType setType, const IECoreScenePreview::Renderer::ConstObjectSetPtr &lights
+)
 {
 	std::lock_guard lock( m_lightAndShadowSetsMutex );
 	LightSets &lightSets = setType == SetType::Light ? m_lightSets : m_shadowSets;
@@ -165,7 +171,9 @@ void LightLinker::updateDirtyFilterLinks()
 	m_dirtyFilterSets.clear();
 }
 
-IECoreScene::ConstShaderNetworkPtr LightLinker::lightFilterShader( const IECoreScenePreview::Renderer::ObjectSet *filters )
+IECoreScene::ConstShaderNetworkPtr LightLinker::lightFilterShader(
+	const IECoreScenePreview::Renderer::ObjectSet *filters
+)
 {
 	vector<const IECoreScene::ShaderNetwork *> networks;
 	for( const auto &s : *filters )

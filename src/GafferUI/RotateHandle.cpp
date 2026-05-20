@@ -71,9 +71,7 @@ RotateHandle::RotateHandle( Style::Axes axes )
 	mouseMoveSignal().connect( boost::bind( &RotateHandle::mouseMove, this, ::_2 ) );
 }
 
-RotateHandle::~RotateHandle()
-{
-}
+RotateHandle::~RotateHandle() {}
 
 void RotateHandle::setAxes( Style::Axes axes )
 {
@@ -124,7 +122,8 @@ Imath::Eulerf RotateHandle::rotation( const DragDropEvent &event )
 {
 	if( m_axes == Style::XYZ )
 	{
-		const LineSegment3f line = updatedLineFromEvent( event ) * fullTransform() * m_dragBeginWorldTransform.inverse();
+		const LineSegment3f line =
+			updatedLineFromEvent( event ) * fullTransform() * m_dragBeginWorldTransform.inverse();
 		const M44f m = rotationMatrix( m_dragBeginPointOnSphere, pointOnSphere( line ) );
 		Eulerf e;
 		e.extract( m );
@@ -185,10 +184,7 @@ IECore::LineSegment3f RotateHandle::updatedLineFromEvent( const DragDropEvent &e
 		// plane to start with.
 		const V3f dP0 = ( event.line.p0 - m_preciseMotionOriginLine.p0 ) * 0.1f;
 		const V3f dP1 = ( event.line.p1 - m_preciseMotionOriginLine.p1 ) * 0.1f;
-		line = LineSegment3f(
-			V3f( m_preciseMotionOriginLine.p0 + dP0 ),
-			V3f( m_preciseMotionOriginLine.p1 + dP1 )
-		);
+		line = LineSegment3f( V3f( m_preciseMotionOriginLine.p0 + dP0 ), V3f( m_preciseMotionOriginLine.p1 + dP1 ) );
 	}
 
 	return line;

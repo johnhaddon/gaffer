@@ -75,7 +75,8 @@ void shuffleSurfaceAttributes( IECore::CompoundObject::ObjectMap &attributes )
 		// compensate.
 		if( boost::ends_with( it->first.string(), g_surfaceSuffix ) )
 		{
-			const IECore::InternedString newName = boost::algorithm::replace_tail_copy( it->first.string(), g_surfaceSuffix.size(), ":light" );
+			const IECore::InternedString newName =
+				boost::algorithm::replace_tail_copy( it->first.string(), g_surfaceSuffix.size(), ":light" );
 			attributes[newName] = it->second;
 			it = attributes.erase( it );
 		}
@@ -92,8 +93,7 @@ GAFFER_NODE_DEFINE_TYPE( Light );
 
 size_t Light::g_firstPlugIndex = 0;
 
-Light::Light( const std::string &name, const ShaderPtr &shader )
-	: ObjectSource( name, "light" )
+Light::Light( const std::string &name, const ShaderPtr &shader ) : ObjectSource( name, "light" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new CompoundDataPlug( "attributes" ) );
@@ -107,17 +107,30 @@ Light::Light( const std::string &name, const ShaderPtr &shader )
 	visualiserAttr->addChild( new Gaffer::NameValuePlug( "gl:visualiser:scale", scaleValuePlug, false, "scale" ) );
 
 	IntPlugPtr maxResValuePlug = new IntPlug( "value", Gaffer::Plug::Direction::In, 512, 2, 2048 );
-	visualiserAttr->addChild( new Gaffer::NameValuePlug( "gl:visualiser:maxTextureResolution", maxResValuePlug, false, "maxTextureResolution" ) );
+	visualiserAttr->addChild( new Gaffer::NameValuePlug(
+		"gl:visualiser:maxTextureResolution", maxResValuePlug, false, "maxTextureResolution"
+	) );
 
-	visualiserAttr->addChild( new Gaffer::NameValuePlug( "gl:visualiser:frustum", new IECore::StringData( "whenSelected" ), false, "frustum" ) );
+	visualiserAttr->addChild(
+		new Gaffer::NameValuePlug( "gl:visualiser:frustum", new IECore::StringData( "whenSelected" ), false, "frustum" )
+	);
 
 	FloatPlugPtr frustumScaleValuePlug = new FloatPlug( "value", Gaffer::Plug::Direction::In, 1.0f, 0.01f );
-	visualiserAttr->addChild( new Gaffer::NameValuePlug( "gl:light:frustumScale", frustumScaleValuePlug, false, "lightFrustumScale" ) );
+	visualiserAttr->addChild(
+		new Gaffer::NameValuePlug( "gl:light:frustumScale", frustumScaleValuePlug, false, "lightFrustumScale" )
+	);
 
-	visualiserAttr->addChild( new Gaffer::NameValuePlug( "gl:light:drawingMode", new IECore::StringData( "texture" ), false, "lightDrawingMode" ) );
+	visualiserAttr->addChild( new Gaffer::NameValuePlug(
+		"gl:light:drawingMode", new IECore::StringData( "texture" ), false, "lightDrawingMode"
+	) );
 
-	visualiserAttr->addChild( new Gaffer::NameValuePlug( "gl:light:lookThroughAperture", new IECore::FloatData( 2.0f ), false, "lookThroughAperture" ) );
-	visualiserAttr->addChild( new Gaffer::NameValuePlug( "gl:light:lookThroughClippingPlanes", new IECore::V2fData( Imath::V2f( -100000, 100000 ) ), false, "lookThroughClippingPlanes" ) );
+	visualiserAttr->addChild( new Gaffer::NameValuePlug(
+		"gl:light:lookThroughAperture", new IECore::FloatData( 2.0f ), false, "lookThroughAperture"
+	) );
+	visualiserAttr->addChild( new Gaffer::NameValuePlug(
+		"gl:light:lookThroughClippingPlanes", new IECore::V2fData( Imath::V2f( -100000, 100000 ) ), false,
+		"lookThroughClippingPlanes"
+	) );
 
 	addChild( visualiserAttr );
 
@@ -128,9 +141,7 @@ Light::Light( const std::string &name, const ShaderPtr &shader )
 	shaderInPlug()->setInput( shaderNode()->outPlug() );
 }
 
-Light::~Light()
-{
-}
+Light::~Light() {}
 
 Gaffer::CompoundDataPlug *Light::attributesPlug()
 {
@@ -215,9 +226,8 @@ void Light::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs 
 {
 	ObjectSource::affects( input, outputs );
 
-	if(
-		input == shaderInPlug() || attributesPlug()->isAncestorOf( input ) || visualiserAttributesPlug()->isAncestorOf( input ) || mutePlug()->isAncestorOf( input )
-	)
+	if( input == shaderInPlug() || attributesPlug()->isAncestorOf( input ) ||
+		visualiserAttributesPlug()->isAncestorOf( input ) || mutePlug()->isAncestorOf( input ) )
 	{
 		outputs.push_back( outPlug()->attributesPlug() );
 	}
@@ -236,9 +246,7 @@ void Light::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs 
 	}
 }
 
-void Light::hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const
-{
-}
+void Light::hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) const {}
 
 IECore::ConstObjectPtr Light::computeSource( const Context *context ) const
 {
@@ -247,7 +255,9 @@ IECore::ConstObjectPtr Light::computeSource( const Context *context ) const
 	return IECore::NullObject::defaultNullObject();
 }
 
-void Light::hashAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Light::hashAttributes(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	h.append( shaderInPlug()->attributesHash() );
 	attributesPlug()->hash( h );
@@ -255,7 +265,9 @@ void Light::hashAttributes( const SceneNode::ScenePath &path, const Gaffer::Cont
 	mutePlug()->hash( h );
 }
 
-IECore::ConstCompoundObjectPtr Light::computeAttributes( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstCompoundObjectPtr Light::computeAttributes(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	IECore::CompoundObjectPtr result = new IECore::CompoundObject;
 	result->members() = shaderInPlug()->attributes()->members();
@@ -292,7 +304,9 @@ IECore::ConstInternedStringVectorDataPtr Light::computeStandardSetNames() const
 	return result;
 }
 
-void Light::hashBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Light::hashBound(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	SceneNode::hashBound( path, context, parent, h );
 	if( path.size() == 0 )
@@ -301,7 +315,9 @@ void Light::hashBound( const SceneNode::ScenePath &path, const Gaffer::Context *
 	}
 }
 
-Imath::Box3f Light::computeBound( const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::Box3f Light::computeBound(
+	const SceneNode::ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	Imath::Box3f result = Imath::Box3f( Imath::V3f( -.5 ), Imath::V3f( .5 ) );
 	if( path.size() == 0 )

@@ -46,17 +46,14 @@ GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( UVSampler );
 
 size_t UVSampler::g_firstPlugIndex = 0;
 
-UVSampler::UVSampler( const std::string &name )
-	: PrimitiveSampler( name )
+UVSampler::UVSampler( const std::string &name ) : PrimitiveSampler( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
 	addChild( new StringPlug( "uv", Plug::In, "uv" ) );
 }
 
-UVSampler::~UVSampler()
-{
-}
+UVSampler::~UVSampler() {}
 
 Gaffer::StringPlug *UVSampler::uvPlug()
 {
@@ -79,7 +76,9 @@ void UVSampler::hashSamplingFunction( IECore::MurmurHash &h ) const
 	uvPlug()->hash( h );
 }
 
-PrimitiveSampler::SamplingFunction UVSampler::computeSamplingFunction( const IECoreScene::Primitive *primitive, IECoreScene::PrimitiveVariable::Interpolation &interpolation ) const
+PrimitiveSampler::SamplingFunction UVSampler::computeSamplingFunction(
+	const IECoreScene::Primitive *primitive, IECoreScene::PrimitiveVariable::Interpolation &interpolation
+) const
 {
 	const std::string uv = uvPlug()->getValue();
 	if( uv.empty() )
@@ -96,7 +95,8 @@ PrimitiveSampler::SamplingFunction UVSampler::computeSamplingFunction( const IEC
 	interpolation = it->second.interpolation;
 	PrimitiveVariable::IndexedView<V2f> uvView( it->second );
 
-	return [uvView]( const PrimitiveEvaluator &evaluator, size_t index, const M44f &transform, PrimitiveEvaluator::Result &result ) {
-		return evaluator.pointAtUV( uvView[index], &result );
-	};
+	return
+		[uvView](
+			const PrimitiveEvaluator &evaluator, size_t index, const M44f &transform, PrimitiveEvaluator::Result &result
+		) { return evaluator.pointAtUV( uvView[index], &result ); };
 }

@@ -60,9 +60,7 @@ namespace
 
 template<typename T>
 ConstTensorPtr typedImageTensor(
-	const ImagePlug *imagePlug,
-	const std::vector<std::string> &channels,
-	const bool interleaveChannels,
+	const ImagePlug *imagePlug, const std::vector<std::string> &channels, const bool interleaveChannels,
 	const Canceller *canceller
 )
 {
@@ -86,9 +84,8 @@ ConstTensorPtr typedImageTensor(
 		// There is no `IECore::BFloat16Data` type. Create a `Ort::Value` directly and pass
 		// it to `Tensor` after filling the tensor array.
 		Ort::AllocatorWithDefaultOptions allocator;
-		bufferHolder = Ort::Value::CreateTensor(
-			allocator, shape.data(), shape.size(), ONNX_TENSOR_ELEMENT_DATA_TYPE_BFLOAT16
-		);
+		bufferHolder =
+			Ort::Value::CreateTensor( allocator, shape.data(), shape.size(), ONNX_TENSOR_ELEMENT_DATA_TYPE_BFLOAT16 );
 		dstBegin = std::get<Ort::Value>( bufferHolder ).template GetTensorMutableData<Ort::BFloat16_t>();
 	}
 	else
@@ -105,9 +102,7 @@ ConstTensorPtr typedImageTensor(
 	}
 
 	ImageAlgo::parallelProcessTiles(
-		imagePlug,
-		channels,
-		[&]( const ImagePlug *image, const string &channelName, const Imath::V2i &tileOrigin ) {
+		imagePlug, channels, [&]( const ImagePlug *image, const string &channelName, const Imath::V2i &tileOrigin ) {
 			IECore::Canceller::check( canceller );
 
 			ConstFloatVectorDataPtr channelData = image->channelDataPlug()->getValue();
@@ -151,9 +146,8 @@ ConstTensorPtr typedImageTensor(
 	else
 	{
 		// Create and pass the data to `Tensor` so it can hold that pointer for its own uses.
-		typename TypedData<std::vector<T>>::Ptr bufferData = new TypedData<std::vector<T>>(
-			std::move( std::get<std::vector<T>>( bufferHolder ) )
-		);
+		typename TypedData<std::vector<T>>::Ptr bufferData =
+			new TypedData<std::vector<T>>( std::move( std::get<std::vector<T>>( bufferHolder ) ) );
 		tensor = new Tensor( bufferData, shape );
 	}
 
@@ -166,8 +160,7 @@ GAFFER_NODE_DEFINE_TYPE( ImageToTensor );
 
 size_t ImageToTensor::g_firstPlugIndex = 0;
 
-ImageToTensor::ImageToTensor( const std::string &name )
-	: ComputeNode( name )
+ImageToTensor::ImageToTensor( const std::string &name ) : ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "image", Plug::In ) );
@@ -178,9 +171,7 @@ ImageToTensor::ImageToTensor( const std::string &name )
 	addChild( new TensorPlug( "tensor", Plug::Out ) );
 }
 
-ImageToTensor::~ImageToTensor()
-{
-}
+ImageToTensor::~ImageToTensor() {}
 
 GafferImage::ImagePlug *ImageToTensor::imagePlug()
 {
@@ -246,16 +237,9 @@ void ImageToTensor::affects( const Gaffer::Plug *input, AffectedPlugsContainer &
 {
 	ComputeNode::affects( input, outputs );
 
-	if(
-		input == imagePlug()->viewNamesPlug() ||
-		input == imagePlug()->dataWindowPlug() ||
-		input == imagePlug()->channelNamesPlug() ||
-		input == imagePlug()->channelDataPlug() ||
-		input == viewPlug() ||
-		input == channelsPlug() ||
-		input == interleaveChannelsPlug() ||
-		input == tensorElementTypePlug()
-	)
+	if( input == imagePlug()->viewNamesPlug() || input == imagePlug()->dataWindowPlug() ||
+		input == imagePlug()->channelNamesPlug() || input == imagePlug()->channelDataPlug() || input == viewPlug() ||
+		input == channelsPlug() || input == interleaveChannelsPlug() || input == tensorElementTypePlug() )
 	{
 		outputs.push_back( tensorPlug() );
 	}
@@ -287,19 +271,16 @@ void ImageToTensor::hash( const Gaffer::ValuePlug *output, const Gaffer::Context
 		const Box2i dataWindow = imagePlug()->dataWindow();
 
 		ImageAlgo::parallelGatherTiles(
-			imagePlug(),
-			channels->readable(),
+			imagePlug(), channels->readable(),
 			// Tile
 			[&]( const ImagePlug *image, const string &channelName, const Imath::V2i &tileOrigin ) {
 				IECore::Canceller::check( context->canceller() );
 				return image->channelDataPlug()->hash();
 			},
 			// Gather
-			[&]( const ImagePlug *image, const string &channelName, const Imath::V2i &tileOrigin, const IECore::MurmurHash &tileHash ) {
-				h.append( tileHash );
-			},
-			dataWindow,
-			ImageAlgo::TopToBottom
+			[&]( const ImagePlug *image, const string &channelName, const Imath::V2i &tileOrigin,
+				 const IECore::MurmurHash &tileHash ) { h.append( tileHash ); },
+			dataWindow, ImageAlgo::TopToBottom
 		);
 
 		h.append( dataWindow );
@@ -344,7 +325,8 @@ void ImageToTensor::compute( Gaffer::ValuePlug *output, const Gaffer::Context *c
 		}
 		else if( tensorElementType == (int)Tensor::ElementType::BFloat16 )
 		{
-			tensor = typedImageTensor<Ort::BFloat16_t>( imagePlug(), channels, interleaveChannels, context->canceller() );
+			tensor =
+				typedImageTensor<Ort::BFloat16_t>( imagePlug(), channels, interleaveChannels, context->canceller() );
 		}
 		else
 		{

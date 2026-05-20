@@ -52,10 +52,9 @@ namespace
 class ContextProcessorPlugAdder : public PlugAdder
 {
 
-	public:
+public:
 
-	ContextProcessorPlugAdder( ContextProcessorPtr node )
-		: m_node( node )
+	ContextProcessorPlugAdder( ContextProcessorPtr node ) : m_node( node )
 	{
 		node->childAddedSignal().connect( boost::bind( &ContextProcessorPlugAdder::childAdded, this ) );
 		node->childRemovedSignal().connect( boost::bind( &ContextProcessorPlugAdder::childRemoved, this ) );
@@ -88,22 +87,13 @@ class ContextProcessorPlugAdder : public PlugAdder
 		applyEdgeMetadata( m_node->outPlug(), !inOpposite );
 	}
 
-	private:
+private:
 
-	void childAdded()
-	{
-		updateVisibility();
-	}
+	void childAdded() { updateVisibility(); }
 
-	void childRemoved()
-	{
-		updateVisibility();
-	}
+	void childRemoved() { updateVisibility(); }
 
-	void updateVisibility()
-	{
-		setVisible( !m_node->inPlug() );
-	}
+	void updateVisibility() { setVisible( !m_node->inPlug() ); }
 
 	ContextProcessorPtr m_node;
 };
@@ -111,12 +101,9 @@ class ContextProcessorPlugAdder : public PlugAdder
 struct Registration
 {
 
-	Registration()
-	{
-		NoduleLayout::registerCustomGadget( "GafferUI.ContextProcessorUI.PlugAdder", &create );
-	}
+	Registration() { NoduleLayout::registerCustomGadget( "GafferUI.ContextProcessorUI.PlugAdder", &create ); }
 
-	private:
+private:
 
 	static GadgetPtr create( GraphComponentPtr parent )
 	{

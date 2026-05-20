@@ -63,9 +63,11 @@ namespace
 class ImageProcessorSerialiser : public GafferBindings::NodeSerialiser
 {
 
-	public:
+public:
 
-	bool childNeedsSerialisation( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsSerialisation(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override
 	{
 		auto imageProcessor = static_cast<const ImageProcessor *>( child->parent() );
 		if( child == imageProcessor->outPlug() )
@@ -83,8 +85,12 @@ void GafferImageModule::bindImageProcessor()
 {
 
 	using ImageProcessorWrapper = ComputeNodeWrapper<ImageProcessor>;
-	GafferBindings::DependencyNodeClass<ImageProcessor, ImageProcessorWrapper>()
-		.def( init<const std::string &, size_t, size_t>( ( arg( "name" ) = GraphComponent::defaultName<ImageProcessor>(), arg( "minInputs" ), arg( "maxInputs" ) = std::numeric_limits<size_t>::max() ) ) );
+	GafferBindings::DependencyNodeClass<ImageProcessor, ImageProcessorWrapper>().def(
+		init<const std::string &, size_t, size_t>(
+			( arg( "name" ) = GraphComponent::defaultName<ImageProcessor>(), arg( "minInputs" ),
+			  arg( "maxInputs" ) = std::numeric_limits<size_t>::max() )
+		)
+	);
 
 	Serialisation::registerSerialiser( ImageProcessor::staticTypeId(), new ImageProcessorSerialiser );
 

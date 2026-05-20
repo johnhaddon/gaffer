@@ -52,8 +52,7 @@ GAFFER_NODE_DEFINE_TYPE( SetFilter );
 
 size_t SetFilter::g_firstPlugIndex = 0;
 
-SetFilter::SetFilter( const std::string &name )
-	: Filter( name )
+SetFilter::SetFilter( const std::string &name ) : Filter( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -61,9 +60,7 @@ SetFilter::SetFilter( const std::string &name )
 	addChild( new PathMatcherDataPlug( "__expressionResult", Gaffer::Plug::Out, new PathMatcherData ) );
 }
 
-SetFilter::~SetFilter()
-{
-}
+SetFilter::~SetFilter() {}
 
 Gaffer::StringPlug *SetFilter::setExpressionPlug()
 {
@@ -89,10 +86,7 @@ void SetFilter::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outp
 {
 	Filter::affects( input, outputs );
 
-	if(
-		input == setExpressionPlug() ||
-		( input->parent<ScenePlug>() && SetAlgo::affectsSetExpression( input ) )
-	)
+	if( input == setExpressionPlug() || ( input->parent<ScenePlug>() && SetAlgo::affectsSetExpression( input ) ) )
 	{
 		outputs.push_back( expressionResultPlug() );
 	}
@@ -121,7 +115,9 @@ void SetFilter::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 	if( output == expressionResultPlug() )
 	{
 		ScenePlug::GlobalScope globalScope( context ); // Removes `scene:filter:inputScene`
-		PathMatcherDataPtr data = new PathMatcherData( SetAlgo::evaluateSetExpression( setExpressionPlug()->getValue(), getInputScene( context ) ) );
+		PathMatcherDataPtr data = new PathMatcherData(
+			SetAlgo::evaluateSetExpression( setExpressionPlug()->getValue(), getInputScene( context ) )
+		);
 		static_cast<PathMatcherDataPlug *>( output )->setValue( data );
 	}
 }

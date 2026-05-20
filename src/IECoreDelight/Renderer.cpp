@@ -87,7 +87,10 @@ T *reportedCast( const IECore::RunTimeTyped *v, const char *type, const IECore::
 		return t;
 	}
 
-	IECore::msg( IECore::Msg::Warning, "IECoreDelight::Renderer", fmt::format( "Expected {} but got {} for {} \"{}\".", T::staticTypeName(), v->typeName(), type, name.c_str() ) );
+	IECore::msg(
+		IECore::Msg::Warning, "IECoreDelight::Renderer",
+		fmt::format( "Expected {} but got {} for {} \"{}\".", T::staticTypeName(), v->typeName(), type, name.c_str() )
+	);
 	return nullptr;
 }
 
@@ -142,7 +145,7 @@ namespace
 class DelightHandle
 {
 
-	public:
+public:
 
 	enum Ownership
 	{
@@ -150,23 +153,20 @@ class DelightHandle
 		Owned,
 	};
 
-	DelightHandle()
-		: m_context( NSI_BAD_CONTEXT ), m_ownership( Unowned )
-	{
-	}
+	DelightHandle() : m_context( NSI_BAD_CONTEXT ), m_ownership( Unowned ) {}
 
 	DelightHandle( NSIContext_t context, const std::string &name, Ownership ownership )
-		: m_context( context ), m_name( name ), m_ownership( ownership )
+		: m_context( context ),
+		  m_name( name ),
+		  m_ownership( ownership )
 	{
 	}
 
 	DelightHandle(
-		NSIContext_t context,
-		const std::string &name,
-		Ownership ownership,
-		const char *type,
+		NSIContext_t context, const std::string &name, Ownership ownership, const char *type,
 		const ParameterList &parameters = ParameterList()
-	) : DelightHandle( context, name, ownership )
+	)
+		: DelightHandle( context, name, ownership )
 	{
 		NSICreate( context, m_name.c_str(), type, 0, nullptr );
 		if( parameters.size() )
@@ -175,8 +175,7 @@ class DelightHandle
 		}
 	}
 
-	DelightHandle( DelightHandle &&h )
-		: DelightHandle()
+	DelightHandle( DelightHandle &&h ) : DelightHandle()
 	{
 		m_context = h.m_context;
 		m_name = h.m_name;
@@ -184,10 +183,7 @@ class DelightHandle
 		h.release();
 	}
 
-	~DelightHandle()
-	{
-		reset();
-	}
+	~DelightHandle() { reset(); }
 
 	DelightHandle &operator = ( DelightHandle &&h )
 	{
@@ -198,20 +194,11 @@ class DelightHandle
 		return *this;
 	}
 
-	NSIContext_t context() const
-	{
-		return m_context;
-	}
+	NSIContext_t context() const { return m_context; }
 
-	const char *name() const
-	{
-		return m_name.c_str();
-	}
+	const char *name() const { return m_name.c_str(); }
 
-	Ownership ownership() const
-	{
-		return m_ownership;
-	}
+	Ownership ownership() const { return m_ownership; }
 
 	void reset()
 	{
@@ -222,12 +209,9 @@ class DelightHandle
 		release();
 	}
 
-	operator bool() const
-	{
-		return m_context != NSI_BAD_CONTEXT;
-	}
+	operator bool() const { return m_context != NSI_BAD_CONTEXT; }
 
-	private:
+private:
 
 	void release()
 	{
@@ -258,9 +242,12 @@ const std::string g_headerPrefix( "header:" );
 class DelightOutput : public IECore::RefCounted
 {
 
-	public:
+public:
 
-	DelightOutput( NSIContext_t context, const std::string &name, const IECoreScene::Output *output, DelightHandle::Ownership ownership )
+	DelightOutput(
+		NSIContext_t context, const std::string &name, const IECoreScene::Output *output,
+		DelightHandle::Ownership ownership
+	)
 		: m_context( context )
 	{
 		// Driver
@@ -273,12 +260,15 @@ class DelightOutput : public IECore::RefCounted
 		{
 			if( boost::starts_with( parameterName.string(), g_headerPrefix ) && output->getType() == "exr" )
 			{
-				const char *prefixedName = driverParams.allocate(
-					"exrheader_" + parameterName.string().substr( g_headerPrefix.size() )
-				);
+				const char *prefixedName =
+					driverParams.allocate( "exrheader_" + parameterName.string().substr( g_headerPrefix.size() ) );
 				driverParams.add( prefixedName, parameterValue.get() );
 			}
-			else if( parameterName != "filter" && parameterName != "filterwidth" && parameterName != "scalarformat" && parameterName != "colorprofile" && parameterName != "layername" && parameterName != "layerName" && parameterName != "withalpha" && parameterName != "drawoutlines" )
+			else if(
+				parameterName != "filter" && parameterName != "filterwidth" && parameterName != "scalarformat" &&
+				parameterName != "colorprofile" && parameterName != "layername" && parameterName != "layerName" &&
+				parameterName != "withalpha" && parameterName != "drawoutlines"
+			)
 			{
 				driverParams.add( parameterName.c_str(), parameterValue.get() );
 			}
@@ -290,7 +280,8 @@ class DelightOutput : public IECore::RefCounted
 		// Since NSICreate will return an existing node if the handle already exists, we can
 		// render multipart EXRs by constructing the NSI outputdriver node handle from the
 		// output file name parameter and then use the same file name on multiple outputs.
-		m_driverHandle = DelightHandle( context, "outputDriver:" + output->getName(), ownership, "outputdriver", driverParams );
+		m_driverHandle =
+			DelightHandle( context, "outputDriver:" + output->getName(), ownership, "outputdriver", driverParams );
 
 		// Layer
 
@@ -421,7 +412,8 @@ class DelightOutput : public IECore::RefCounted
 
 		for( const auto &[parameterName, parameterValue] : output->parameters() )
 		{
-			if( parameterName != "filter" && parameterName != "filterwidth" && parameterName != "scalarformat" && parameterName != "colorprofile" && parameterName != "layerName" )
+			if( parameterName != "filter" && parameterName != "filterwidth" && parameterName != "scalarformat" &&
+				parameterName != "colorprofile" && parameterName != "layerName" )
 			{
 				layerParams.add( parameterName.c_str(), parameterValue.get() );
 			}
@@ -429,20 +421,12 @@ class DelightOutput : public IECore::RefCounted
 
 		m_layerHandle = DelightHandle( context, "outputLayer:" + name, ownership, "outputlayer", layerParams );
 
-		NSIConnect(
-			m_context,
-			m_driverHandle.name(), "",
-			m_layerHandle.name(), "outputdrivers",
-			0, nullptr
-		);
+		NSIConnect( m_context, m_driverHandle.name(), "", m_layerHandle.name(), "outputdrivers", 0, nullptr );
 	}
 
-	const DelightHandle &layerHandle() const
-	{
-		return m_layerHandle;
-	}
+	const DelightHandle &layerHandle() const { return m_layerHandle; }
 
-	private:
+private:
 
 	const char *scalarFormat( const IECoreScene::Output *output ) const
 	{
@@ -483,11 +467,14 @@ namespace
 
 class DelightShader : public IECore::RefCounted
 {
-	public:
+public:
 
-	DelightShader( NSIContext_t context, const IECoreScene::ShaderNetwork *shaderNetwork, DelightHandle::Ownership ownership )
+	DelightShader(
+		NSIContext_t context, const IECoreScene::ShaderNetwork *shaderNetwork, DelightHandle::Ownership ownership
+	)
 	{
-		ConstShaderNetworkPtr preprocessedNetwork = IECoreDelight::ShaderNetworkAlgo::preprocessedNetwork( shaderNetwork );
+		ConstShaderNetworkPtr preprocessedNetwork =
+			IECoreDelight::ShaderNetworkAlgo::preprocessedNetwork( shaderNetwork );
 
 		const string name = "shader:" + shaderNetwork->Object::hash().toString();
 		IECoreScene::ShaderNetworkAlgo::depthFirstTraverse(
@@ -498,12 +485,7 @@ class DelightShader : public IECore::RefCounted
 				const Shader *shader = shaderNetwork->getShader( handle );
 				const string nodeName = name + ":" + handle.string();
 
-				NSICreate(
-					context,
-					nodeName.c_str(),
-					"shader",
-					0, nullptr
-				);
+				NSICreate( context, nodeName.c_str(), "shader", 0, nullptr );
 
 				m_handles.emplace_back( context, nodeName, ownership );
 
@@ -518,12 +500,7 @@ class DelightShader : public IECore::RefCounted
 					parameterList.add( parameter.first.c_str(), parameter.second.get(), true );
 				}
 
-				NSISetAttribute(
-					context,
-					nodeName.c_str(),
-					parameterList.size(),
-					parameterList.data()
-				);
+				NSISetAttribute( context, nodeName.c_str(), parameterList.size(), parameterList.data() );
 
 				// Make connections
 
@@ -531,24 +508,17 @@ class DelightShader : public IECore::RefCounted
 				{
 					const string sourceHandle = name + ":" + c.source.shader.string();
 					NSIConnect(
-						context,
-						sourceHandle.c_str(),
-						c.source.name.c_str(),
-						nodeName.c_str(),
-						c.destination.name.c_str(),
-						0, nullptr
+						context, sourceHandle.c_str(), c.source.name.c_str(), nodeName.c_str(),
+						c.destination.name.c_str(), 0, nullptr
 					);
 				}
 			}
 		);
 	}
 
-	const DelightHandle &handle() const
-	{
-		return m_handles.back();
-	}
+	const DelightHandle &handle() const { return m_handles.back(); }
 
-	private:
+private:
 
 	std::vector<DelightHandle> m_handles;
 };
@@ -567,10 +537,11 @@ namespace
 class ShaderCache : public IECore::RefCounted
 {
 
-	public:
+public:
 
 	ShaderCache( NSIContext_t context, DelightHandle::Ownership ownership )
-		: m_context( context ), m_ownership( ownership )
+		: m_context( context ),
+		  m_ownership( ownership )
 	{
 	}
 
@@ -623,10 +594,7 @@ class ShaderCache : public IECore::RefCounted
 		return a->second;
 	}
 
-	DelightShaderPtr defaultSurface()
-	{
-		return get( nullptr, nullptr );
-	}
+	DelightShaderPtr defaultSurface() { return get( nullptr, nullptr ); }
 
 	// Must not be called concurrently with anything.
 	void clearUnused()
@@ -648,7 +616,7 @@ class ShaderCache : public IECore::RefCounted
 		}
 	}
 
-	private:
+private:
 
 	NSIContext_t m_context;
 	DelightHandle::Ownership m_ownership;
@@ -684,9 +652,12 @@ const IECore::InternedString g_lightMuteAttributeName( "light:mute" );
 class DelightAttributes : public IECoreScenePreview::Renderer::AttributesInterface
 {
 
-	public:
+public:
 
-	DelightAttributes( NSIContext_t context, const IECore::CompoundObject *attributes, ShaderCache *shaderCache, DelightHandle::Ownership ownership )
+	DelightAttributes(
+		NSIContext_t context, const IECore::CompoundObject *attributes, ShaderCache *shaderCache,
+		DelightHandle::Ownership ownership
+	)
 		: m_handle( context, "attributes:" + attributes->Object::hash().toString(), ownership, "attributes", {} ),
 		  m_lightMute( false )
 	{
@@ -730,7 +701,8 @@ class DelightAttributes : public IECoreScenePreview::Renderer::AttributesInterfa
 		{
 			if( m.first == g_setsAttributeName )
 			{
-				if( const InternedStringVectorData *d = reportedCast<const InternedStringVectorData>( m.second.get(), "attribute", m.first ) )
+				if( const InternedStringVectorData *d =
+						reportedCast<const InternedStringVectorData>( m.second.get(), "attribute", m.first ) )
 				{
 					if( d->readable().size() )
 					{
@@ -747,7 +719,8 @@ class DelightAttributes : public IECoreScenePreview::Renderer::AttributesInterfa
 			}
 			else if( boost::starts_with( m.first.string(), "render:" ) )
 			{
-				msg( Msg::Warning, "DelightRenderer", fmt::format( "Render attribute \"{}\" not supported", m.first.string() ) );
+				msg( Msg::Warning, "DelightRenderer",
+					 fmt::format( "Render attribute \"{}\" not supported", m.first.string() ) );
 			}
 			else if( boost::starts_with( m.first.string(), "user:" ) )
 			{
@@ -756,14 +729,18 @@ class DelightAttributes : public IECoreScenePreview::Renderer::AttributesInterfa
 					params.add( m.first.c_str(), d, true );
 				}
 			}
-			else if( boost::contains( m.first.string(), ":" ) || m.first == g_USDLightAttributeName || m.first == g_USDSurfaceAttributeName )
+			else if(
+				boost::contains( m.first.string(), ":" ) || m.first == g_USDLightAttributeName ||
+				m.first == g_USDSurfaceAttributeName
+			)
 			{
 				// Attribute for another renderer - ignore
 				// Or a USD light/surface, which we've handled above - ignore
 			}
 			else
 			{
-				msg( Msg::Warning, "DelightRenderer", fmt::format( "Attribute \"{}\" not supported", m.first.string() ) );
+				msg( Msg::Warning, "DelightRenderer",
+					 fmt::format( "Attribute \"{}\" not supported", m.first.string() ) );
 			}
 		}
 
@@ -774,29 +751,16 @@ class DelightAttributes : public IECoreScenePreview::Renderer::AttributesInterfa
 			m_surfaceShader = shaderCache->defaultSurface();
 		}
 
-		NSIConnect(
-			context,
-			m_surfaceShader->handle().name(), "",
-			m_handle.name(), "surfaceshader",
-			0, nullptr
-		);
+		NSIConnect( context, m_surfaceShader->handle().name(), "", m_handle.name(), "surfaceshader", 0, nullptr );
 
 		if( m_volumeShader )
 		{
-			NSIConnect(
-				context,
-				m_volumeShader->handle().name(), "",
-				m_handle.name(), "volumeshader",
-				0, nullptr
-			);
+			NSIConnect( context, m_volumeShader->handle().name(), "", m_handle.name(), "volumeshader", 0, nullptr );
 		}
 		if( m_displacementShader )
 		{
 			NSIConnect(
-				context,
-				m_displacementShader->handle().name(), "",
-				m_handle.name(), "displacementshader",
-				0, nullptr
+				context, m_displacementShader->handle().name(), "", m_handle.name(), "displacementshader", 0, nullptr
 			);
 		}
 
@@ -810,24 +774,17 @@ class DelightAttributes : public IECoreScenePreview::Renderer::AttributesInterfa
 		}
 	}
 
-	const ShaderNetwork *usdLightShader() const
-	{
-		return m_usdLightShader.get();
-	}
+	const ShaderNetwork *usdLightShader() const { return m_usdLightShader.get(); }
 
-	const DelightHandle &handle() const
-	{
-		return m_handle;
-	}
+	const DelightHandle &handle() const { return m_handle; }
 
-	bool lightMute() const
-	{
-		return m_lightMute;
-	}
+	bool lightMute() const { return m_lightMute; }
 
-	private:
+private:
 
-	static ConstDelightShaderPtr shader( const IECore::InternedString &name, const IECore::CompoundObject *attributes, ShaderCache *shaderCache )
+	static ConstDelightShaderPtr shader(
+		const IECore::InternedString &name, const IECore::CompoundObject *attributes, ShaderCache *shaderCache
+	)
 	{
 		if( const Object *o = attributes->member<const Object>( name ) )
 		{
@@ -862,10 +819,12 @@ namespace
 class AttributesCache : public IECore::RefCounted
 {
 
-	public:
+public:
 
 	AttributesCache( NSIContext_t context, DelightHandle::Ownership ownership )
-		: m_context( context ), m_ownership( ownership ), m_shaderCache( new ShaderCache( context, ownership ) )
+		: m_context( context ),
+		  m_ownership( ownership ),
+		  m_shaderCache( new ShaderCache( context, ownership ) )
 	{
 	}
 
@@ -903,7 +862,7 @@ class AttributesCache : public IECore::RefCounted
 		m_shaderCache->clearUnused();
 	}
 
-	private:
+private:
 
 	NSIContext_t m_context;
 	DelightHandle::Ownership m_ownership;
@@ -928,15 +887,19 @@ namespace
 class InstanceCache : public IECore::RefCounted
 {
 
-	public:
+public:
 
 	InstanceCache( NSIContext_t context, DelightHandle::Ownership ownership )
-		: m_context( context ), m_ownership( ownership )
+		: m_context( context ),
+		  m_ownership( ownership )
 	{
 	}
 
 	// Can be called concurrently with other get() calls.
-	DelightHandleSharedPtr get( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times )
+	DelightHandleSharedPtr get(
+		const IECoreScenePreview::Renderer::ObjectSamples &samples,
+		const IECoreScenePreview::Renderer::SampleTimes &times
+	)
 	{
 		IECore::MurmurHash hash;
 		for( const auto &sample : samples )
@@ -984,7 +947,7 @@ class InstanceCache : public IECore::RefCounted
 		}
 	}
 
-	private:
+private:
 
 	NSIContext_t m_context;
 	DelightHandle::Ownership m_ownership;
@@ -1007,30 +970,30 @@ namespace
 class DelightObject : public IECoreScenePreview::Renderer::ObjectInterface
 {
 
-	public:
+public:
 
-	DelightObject( NSIContext_t context, const std::string &name, DelightHandleSharedPtr instance, DelightHandle::Ownership ownership )
-		: m_transformHandle( context, name, ownership, "transform", {} ), m_instance( instance ), m_haveTransform( false )
+	DelightObject(
+		NSIContext_t context, const std::string &name, DelightHandleSharedPtr instance,
+		DelightHandle::Ownership ownership
+	)
+		: m_transformHandle( context, name, ownership, "transform", {} ),
+		  m_instance( instance ),
+		  m_haveTransform( false )
 	{
 		if( m_instance )
 		{
 			NSIConnect(
-				m_transformHandle.context(),
-				m_instance->name(), "",
-				m_transformHandle.name(), "objects",
-				0, nullptr
+				m_transformHandle.context(), m_instance->name(), "", m_transformHandle.name(), "objects", 0, nullptr
 			);
 		}
 
-		NSIConnect(
-			m_transformHandle.context(),
-			m_transformHandle.name(), "",
-			NSI_SCENE_ROOT, "objects",
-			0, nullptr
-		);
+		NSIConnect( m_transformHandle.context(), m_transformHandle.name(), "", NSI_SCENE_ROOT, "objects", 0, nullptr );
 	}
 
-	void transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times ) override
+	void transform(
+		const IECoreScenePreview::Renderer::TransformSamples &samples,
+		const IECoreScenePreview::Renderer::SampleTimes &times
+	) override
 	{
 		if( m_haveTransform )
 		{
@@ -1050,7 +1013,8 @@ class DelightObject : public IECoreScenePreview::Renderer::ObjectInterface
 				"transformationmatrix",
 				m.getValue(),
 				NSITypeDoubleMatrix,
-				0, 1, // array length, count
+				0,
+				1, // array length, count
 				0 // flags
 			};
 			NSISetAttribute( m_transformHandle.context(), m_transformHandle.name(), 1, &param );
@@ -1064,7 +1028,8 @@ class DelightObject : public IECoreScenePreview::Renderer::ObjectInterface
 					"transformationmatrix",
 					m.getValue(),
 					NSITypeDoubleMatrix,
-					0, 1, // array length, count
+					0,
+					1, // array length, count
 					0 // flags
 				};
 				NSISetAttributeAtTime( m_transformHandle.context(), m_transformHandle.name(), times[i], 1, &param );
@@ -1084,44 +1049,37 @@ class DelightObject : public IECoreScenePreview::Renderer::ObjectInterface
 			}
 
 			NSIDisconnect(
-				m_transformHandle.context(),
-				m_attributes->handle().name(), "",
-				m_transformHandle.name(), "geometryattributes"
+				m_transformHandle.context(), m_attributes->handle().name(), "", m_transformHandle.name(),
+				"geometryattributes"
 			);
 			NSIDisconnect(
-				m_transformHandle.context(),
-				m_attributes->handle().name(), "",
-				m_transformHandle.name(), "shaderattributes"
+				m_transformHandle.context(), m_attributes->handle().name(), "", m_transformHandle.name(),
+				"shaderattributes"
 			);
 		}
 
 		m_attributes = static_cast<const DelightAttributes *>( attributes );
 		NSIConnect(
-			m_transformHandle.context(),
-			m_attributes->handle().name(), "",
-			m_transformHandle.name(), "geometryattributes",
-			0, nullptr
+			m_transformHandle.context(), m_attributes->handle().name(), "", m_transformHandle.name(),
+			"geometryattributes", 0, nullptr
 
 		);
 		NSIConnect(
-			m_transformHandle.context(),
-			m_attributes->handle().name(), "",
-			m_transformHandle.name(), "shaderattributes",
-			0, nullptr
+			m_transformHandle.context(), m_attributes->handle().name(), "", m_transformHandle.name(),
+			"shaderattributes", 0, nullptr
 
 		);
 
 		return true;
 	}
 
-	void link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects ) override
+	void link(
+		const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects
+	) override
 	{
 	}
 
-	void assignID( uint32_t id ) override
-	{
-		assignIDInternal( id, "cortexID" );
-	}
+	void assignID( uint32_t id ) override { assignIDInternal( id, "cortexID" ); }
 
 	void assignInstanceID( uint32_t instanceID ) override
 	{
@@ -1130,39 +1088,36 @@ class DelightObject : public IECoreScenePreview::Renderer::ObjectInterface
 		assignIDInternal( instanceID, "cortexInstanceID" );
 	}
 
-	protected:
+protected:
 
 	const DelightHandle m_transformHandle;
 	// We keep a reference to the instance and attributes so that they
 	// remain alive for at least as long as the object does.
 	ConstDelightAttributesPtr m_attributes;
 
-	private:
+private:
 
 	void assignIDInternal( uint32_t id, const char *attrName )
 	{
 		if( !m_idAttributesHandle )
 		{
 			m_idAttributesHandle = DelightHandle(
-				m_transformHandle.context(), string( m_transformHandle.name() ) + ":__idAttributes", m_transformHandle.ownership(), "attributes"
+				m_transformHandle.context(), string( m_transformHandle.name() ) + ":__idAttributes",
+				m_transformHandle.ownership(), "attributes"
 			);
 			NSIConnect(
-				m_transformHandle.context(),
-				m_idAttributesHandle.name(), "",
-				m_transformHandle.name(), "shaderattributes",
-				0, nullptr
+				m_transformHandle.context(), m_idAttributesHandle.name(), "", m_transformHandle.name(),
+				"shaderattributes", 0, nullptr
 			);
 		}
 		NSIParam_t param = {
-			attrName,
-			&id,
+			attrName, &id,
 			// Deliberately declaring as `float` even though it is an
 			// integer. This lets us render the full range of integer values
 			// out of a float AOV through type-punning. 3Delight does have
 			// integer AOVs, but they are broken, and don't preserve integer
 			// input values.
-			NSITypeFloat,
-			0, 1, // array length, count
+			NSITypeFloat, 0, 1, // array length, count
 			0 // flags
 		};
 		NSISetAttribute( m_idAttributesHandle.context(), m_idAttributesHandle.name(), 1, &param );
@@ -1186,10 +1141,14 @@ namespace
 class DelightLight : public DelightObject
 {
 
-	public:
+public:
 
-	DelightLight( NSIContext_t context, const std::string &name, DelightHandleSharedPtr instance, DelightHandle::Ownership ownership )
-		: DelightObject( context, name, instance, ownership ), m_lightGeometryType( nullptr )
+	DelightLight(
+		NSIContext_t context, const std::string &name, DelightHandleSharedPtr instance,
+		DelightHandle::Ownership ownership
+	)
+		: DelightObject( context, name, instance, ownership ),
+		  m_lightGeometryType( nullptr )
 	{
 	}
 
@@ -1201,19 +1160,12 @@ class DelightLight : public DelightObject
 		if( wasMuted && !m_attributes->lightMute() )
 		{
 			NSIConnect(
-				m_transformHandle.context(),
-				m_transformHandle.name(), "",
-				NSI_SCENE_ROOT, "objects",
-				0, nullptr
+				m_transformHandle.context(), m_transformHandle.name(), "", NSI_SCENE_ROOT, "objects", 0, nullptr
 			);
 		}
 		else if( !wasMuted && m_attributes->lightMute() )
 		{
-			NSIDisconnect(
-				m_transformHandle.context(),
-				m_transformHandle.name(), "",
-				NSI_SCENE_ROOT, "objects"
-			);
+			NSIDisconnect( m_transformHandle.context(), m_transformHandle.name(), "", NSI_SCENE_ROOT, "objects" );
 		}
 
 		if( const ShaderNetwork *usdLightShader = m_attributes->usdLightShader() )
@@ -1232,26 +1184,19 @@ class DelightLight : public DelightObject
 				if( m_lightGeometry )
 				{
 					NSIDisconnect(
-						m_transformHandle.context(),
-						m_lightGeometry->name(), "",
-						m_transformHandle.name(), "objects"
+						m_transformHandle.context(), m_lightGeometry->name(), "", m_transformHandle.name(), "objects"
 					);
 				}
 
 				m_lightGeometry.reset();
 
 				m_lightGeometry = std::make_shared<DelightHandle>(
-					m_transformHandle.context(),
-					lightName,
-					m_transformHandle.ownership(),
-					geometryType
+					m_transformHandle.context(), lightName, m_transformHandle.ownership(), geometryType
 				);
 
 				NSIConnect(
-					m_transformHandle.context(),
-					m_lightGeometry->name(), "",
-					m_transformHandle.name(), "objects",
-					0, nullptr
+					m_transformHandle.context(), m_lightGeometry->name(), "", m_transformHandle.name(), "objects", 0,
+					nullptr
 				);
 
 				m_lightGeometryType = geometryType;
@@ -1259,17 +1204,14 @@ class DelightLight : public DelightObject
 			}
 
 			IECoreDelight::ShaderNetworkAlgo::updateLightGeometry(
-				usdLightShader,
-				m_transformHandle.context(),
-				m_lightGeometry->name(),
-				m_lightGeometryState
+				usdLightShader, m_transformHandle.context(), m_lightGeometry->name(), m_lightGeometryState
 			);
 		}
 
 		return true;
 	}
 
-	private:
+private:
 
 	const char *m_lightGeometryType;
 	DelightHandleSharedPtr m_lightGeometry;
@@ -1352,10 +1294,14 @@ IE_CORE_FORWARDDECLARE( DelightRenderer )
 class DelightRenderer final : public IECoreScenePreview::Renderer
 {
 
-	public:
+public:
 
-	DelightRenderer( RenderType renderType, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler, bool cloud = false )
-		: m_renderType( renderType ), m_messageHandler( messageHandler )
+	DelightRenderer(
+		RenderType renderType, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler,
+		bool cloud = false
+	)
+		: m_renderType( renderType ),
+		  m_messageHandler( messageHandler )
 	{
 		const IECore::MessageHandler::Scope s( m_messageHandler.get() );
 
@@ -1366,11 +1312,9 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 		const char *fileNamePtr = fileName.c_str();
 		if( renderType == SceneDescription )
 		{
-			params = {
-				{ "type", &apistream, NSITypeString, 0, 1, 0 },
-				{ "streamformat", &streamformat, NSITypeString, 0, 1, 0 },
-				{ "streamfilename", &fileNamePtr, NSITypeString, 0, 1, 0 }
-			};
+			params = { { "type", &apistream, NSITypeString, 0, 1, 0 },
+					   { "streamformat", &streamformat, NSITypeString, 0, 1, 0 },
+					   { "streamfilename", &fileNamePtr, NSITypeString, 0, 1, 0 } };
 		}
 
 		void *handler = reinterpret_cast<void *>( &DelightRenderer::nsiErrorHandler );
@@ -1390,7 +1334,10 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 			}
 			else
 			{
-				IECore::msg( IECore::Msg::Level::Warning, "DelightRenderer", "Cloud rendering is only available for batch renders. Rendering locally instead." );
+				IECore::msg(
+					IECore::Msg::Level::Warning, "DelightRenderer",
+					"Cloud rendering is only available for batch renders. Rendering locally instead."
+				);
 			}
 		}
 
@@ -1414,10 +1361,7 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 		NSIEnd( m_context );
 	}
 
-	IECore::InternedString name() const override
-	{
-		return "3Delight";
-	}
+	IECore::InternedString name() const override { return "3Delight"; }
 
 	void option( const IECore::InternedString &name, const IECore::Object *value ) override
 	{
@@ -1472,12 +1416,9 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 			setNSIScreenOption( m_context, name, value );
 		}
 		else if(
-			name == g_maxLengthDiffuseOptionName ||
-			name == g_maxLengthHairOptionName ||
-			name == g_maxLengthReflectionOptionName ||
-			name == g_maxLengthRefractionOptionName ||
-			name == g_maxLengthSpecularOptionName ||
-			name == g_maxLengthVolumeOptionName ||
+			name == g_maxLengthDiffuseOptionName || name == g_maxLengthHairOptionName ||
+			name == g_maxLengthReflectionOptionName || name == g_maxLengthRefractionOptionName ||
+			name == g_maxLengthSpecularOptionName || name == g_maxLengthVolumeOptionName ||
 			name == g_clampIndirectOptionName
 		)
 		{
@@ -1496,7 +1437,8 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 		}
 		else if( boost::starts_with( name.string(), "user:" ) )
 		{
-			msg( Msg::Warning, "DelightRenderer::option", fmt::format( "User option \"{}\" not supported", name.string() ) );
+			msg( Msg::Warning, "DelightRenderer::option",
+				 fmt::format( "User option \"{}\" not supported", name.string() ) );
 		}
 		else if( boost::contains( name.c_str(), ":" ) )
 		{
@@ -1504,7 +1446,9 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 		}
 		else
 		{
-			IECore::msg( IECore::Msg::Warning, "DelightRenderer::option", fmt::format( "Unknown option \"{}\".", name.string() ) );
+			IECore::msg(
+				IECore::Msg::Warning, "DelightRenderer::option", fmt::format( "Unknown option \"{}\".", name.string() )
+			);
 		}
 	}
 
@@ -1521,12 +1465,7 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 		DelightOutputPtr o = new DelightOutput( m_context, name, output, ownership() );
 		m_outputs[name] = o;
 
-		NSIConnect(
-			m_context,
-			o->layerHandle().name(), "",
-			g_screenHandle, "outputlayers",
-			0, nullptr
-		);
+		NSIConnect( m_context, o->layerHandle().name(), "", g_screenHandle, "outputlayers", 0, nullptr );
 	}
 
 	Renderer::AttributesInterfacePtr attributes( const IECore::CompoundObject *attributes ) override
@@ -1535,12 +1474,17 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 		return m_attributesCache->get( attributes );
 	}
 
-	ObjectInterfacePtr camera( const std::string &name, const CameraSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override
+	ObjectInterfacePtr camera(
+		const std::string &name, const CameraSamples &samples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) override
 	{
 		const IECore::MessageHandler::Scope s( m_messageHandler.get() );
 
 		const string objectHandle = "camera:" + name;
-		if( !NodeAlgo::convert( ObjectSamples( samples.begin(), samples.end() ), times, m_context, objectHandle.c_str() ) )
+		if( !NodeAlgo::convert(
+				ObjectSamples( samples.begin(), samples.end() ), times, m_context, objectHandle.c_str()
+			) )
 		{
 			return nullptr;
 		}
@@ -1560,12 +1504,7 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 			boost::bind( &DelightRenderer::cameraDeleter, DelightRendererPtr( this ), ::_1 )
 		);
 
-		ObjectInterfacePtr result = new DelightObject(
-			m_context,
-			name,
-			cameraHandle,
-			ownership()
-		);
+		ObjectInterfacePtr result = new DelightObject( m_context, name, cameraHandle, ownership() );
 		if( attributes )
 		{
 			result->attributes( attributes );
@@ -1573,7 +1512,10 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 		return result;
 	}
 
-	ObjectInterfacePtr light( const std::string &name, const ObjectSamples &objectSamples, const SampleTimes &times, const AttributesInterface *attributes ) override
+	ObjectInterfacePtr light(
+		const std::string &name, const ObjectSamples &objectSamples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) override
 	{
 		const IECore::MessageHandler::Scope s( m_messageHandler.get() );
 
@@ -1589,12 +1531,18 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 		return result;
 	}
 
-	ObjectInterfacePtr lightFilter( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override
+	ObjectInterfacePtr lightFilter(
+		const std::string &name, const ObjectSamples &samples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) override
 	{
 		return nullptr;
 	}
 
-	ObjectInterfacePtr object( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override
+	ObjectInterfacePtr object(
+		const std::string &name, const ObjectSamples &samples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) override
 	{
 		const IECore::MessageHandler::Scope s( m_messageHandler.get() );
 
@@ -1619,13 +1567,8 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 		if( m_rendering )
 		{
 			const char *synchronize = "synchronize";
-			vector<NSIParam_t> params = {
-				{ "action", &synchronize, NSITypeString, 0, 1, 0 }
-			};
-			NSIRenderControl(
-				m_context,
-				params.size(), params.data()
-			);
+			vector<NSIParam_t> params = { { "action", &synchronize, NSITypeString, 0, 1, 0 } };
+			NSIRenderControl( m_context, params.size(), params.data() );
 			return;
 		}
 
@@ -1642,10 +1585,7 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 			params.push_back( { "interactive", &one, NSITypeInteger, 0, 1, 0 } );
 		}
 
-		NSIRenderControl(
-			m_context,
-			params.size(), params.data()
-		);
+		NSIRenderControl( m_context, params.size(), params.data() );
 
 		m_rendering = true;
 
@@ -1655,14 +1595,9 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 		}
 
 		const char *wait = "wait";
-		params = {
-			{ "action", &wait, NSITypeString, 0, 1, 0 }
-		};
+		params = { { "action", &wait, NSITypeString, 0, 1, 0 } };
 
-		NSIRenderControl(
-			m_context,
-			params.size(), params.data()
-		);
+		NSIRenderControl( m_context, params.size(), params.data() );
 
 		m_rendering = false;
 	}
@@ -1679,13 +1614,16 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 	{
 		if( boost::starts_with( name.string(), "dl:" ) || name.string().find( ":" ) == string::npos )
 		{
-			IECore::msg( IECore::Msg::Warning, "IECoreDelight::Renderer::command", fmt::format( "Unknown command \"{}\".", name.c_str() ) );
+			IECore::msg(
+				IECore::Msg::Warning, "IECoreDelight::Renderer::command",
+				fmt::format( "Unknown command \"{}\".", name.c_str() )
+			);
 		}
 
 		return nullptr;
 	}
 
-	private:
+private:
 
 	DelightHandle::Ownership ownership() const
 	{
@@ -1700,14 +1638,9 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 		}
 
 		const char *stop = "stop";
-		ParameterList params = {
-			{ "action", &stop, NSITypeString, 0, 1, 0 }
-		};
+		ParameterList params = { { "action", &stop, NSITypeString, 0, 1, 0 } };
 
-		NSIRenderControl(
-			m_context,
-			params.size(), params.data()
-		);
+		NSIRenderControl( m_context, params.size(), params.data() );
 
 		m_rendering = false;
 	}
@@ -1725,11 +1658,7 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 			{
 				if( camera.first != cameraHandle )
 				{
-					NSIDisconnect(
-						m_context,
-						g_screenHandle, "",
-						camera.first.c_str(), "screens"
-					);
+					NSIDisconnect( m_context, g_screenHandle, "", camera.first.c_str(), "screens" );
 				}
 			}
 		}
@@ -1744,8 +1673,7 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 			if( !m_camera.empty() )
 			{
 				IECore::msg(
-					IECore::Msg::Warning, "DelightRenderer",
-					fmt::format( "Camera \"{}\" does not exist", m_camera )
+					IECore::Msg::Warning, "DelightRenderer", fmt::format( "Camera \"{}\" does not exist", m_camera )
 				);
 			}
 
@@ -1757,12 +1685,7 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 
 			m_defaultCamera = DelightHandle( m_context, cameraHandle, ownership() );
 
-			NSIConnect(
-				m_context,
-				cameraHandle.c_str(), "",
-				NSI_SCENE_ROOT, "objects",
-				0, nullptr
-			);
+			NSIConnect( m_context, cameraHandle.c_str(), "", NSI_SCENE_ROOT, "objects", 0, nullptr );
 		}
 		else
 		{
@@ -1772,12 +1695,7 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 
 		// Connect the camera to the screen
 
-		NSIConnect(
-			m_context,
-			g_screenHandle, "",
-			cameraHandle.c_str(), "screens",
-			0, nullptr
-		);
+		NSIConnect( m_context, g_screenHandle, "", cameraHandle.c_str(), "screens", 0, nullptr );
 
 		// Update the screen
 
@@ -1793,16 +1711,7 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 		const int overscanRight = static_cast<int>( camera->getOverscanRight() * resolution.x );
 		const int overscanBottom = static_cast<int>( camera->getOverscanBottom() * resolution.y );
 
-		const Box2i overscan(
-			V2i(
-				overscanLeft,
-				overscanTop
-			),
-			V2i(
-				overscanRight,
-				overscanBottom
-			)
-		);
+		const Box2i overscan( V2i( overscanLeft, overscanTop ), V2i( overscanRight, overscanBottom ) );
 
 		if( overscanOn == true )
 		{
@@ -1821,24 +1730,15 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 		renderRegion.min.y = std::max( 0, renderRegion.min.y );
 		renderRegion.max.y = std::min( resolution.y, renderRegion.max.y );
 
-		if(
-			renderRegion.min.x >= renderRegion.max.x ||
-			renderRegion.min.y >= renderRegion.max.y
-		)
+		if( renderRegion.min.x >= renderRegion.max.x || renderRegion.min.y >= renderRegion.max.y )
 		{
 			// 3delight doesn't support an empty crop, so just render as little as possible
 			renderRegion = Box2i( V2i( 0 ), V2i( 1 ) );
 		}
 
 		const Box2f crop(
-			V2f(
-				renderRegion.min.x / float( resolution.x ),
-				1 - renderRegion.max.y / float( resolution.y )
-			),
-			V2f(
-				renderRegion.max.x / float( resolution.x ),
-				1 - renderRegion.min.y / float( resolution.y )
-			)
+			V2f( renderRegion.min.x / float( resolution.x ), 1 - renderRegion.max.y / float( resolution.y ) ),
+			V2f( renderRegion.max.x / float( resolution.x ), 1 - renderRegion.min.y / float( resolution.y ) )
 		);
 		screeenParameters.add( { "crop", crop.min.getValue(), NSITypeFloat, 2, 2, NSIParamIsArray } );
 
@@ -1890,7 +1790,8 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 
 	static void nsiErrorHandler( void *userdata, int level, int code, const char *message )
 	{
-		static_cast<DelightRenderer *>( userdata )->m_messageHandler->handle( g_ieMsgLevels[min( level, 3 )], "3Delight", message );
+		static_cast<DelightRenderer *>( userdata )
+			->m_messageHandler->handle( g_ieMsgLevels[min( level, 3 )], "3Delight", message );
 	}
 
 	// Registration with factory
@@ -1899,9 +1800,7 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 };
 
 const std::vector<IECore::MessageHandler::Level> DelightRenderer::g_ieMsgLevels = {
-	IECore::MessageHandler::Level::Debug,
-	IECore::MessageHandler::Level::Info,
-	IECore::MessageHandler::Level::Warning,
+	IECore::MessageHandler::Level::Debug, IECore::MessageHandler::Level::Info, IECore::MessageHandler::Level::Warning,
 	IECore::MessageHandler::Level::Error
 };
 
@@ -1915,7 +1814,8 @@ struct CloudTypeDescription
 			/// \todo Remove space from name, use label metadata to add it back
 			/// in the UI, and make `registerType()` refuse to accept spaces.
 			"3Delight Cloud",
-			[]( IECoreScenePreview::Renderer::RenderType renderType, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler ) {
+			[]( IECoreScenePreview::Renderer::RenderType renderType, const std::string &fileName,
+				const IECore::MessageHandlerPtr &messageHandler ) {
 				return new DelightRenderer( renderType, fileName, messageHandler, /* cloud = */ true );
 			}
 		);

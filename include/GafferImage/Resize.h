@@ -55,7 +55,7 @@ IE_CORE_FORWARDDECLARE( Resample )
 
 class GAFFERIMAGE_API Resize : public ImageProcessor
 {
-	public:
+public:
 
 	explicit Resize( const std::string &name = defaultName<Resize>() );
 	~Resize() override;
@@ -85,24 +85,37 @@ class GAFFERIMAGE_API Resize : public ImageProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-	void hashFormat( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashFormat(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
 	GafferImage::Format computeFormat( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	void hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashDataWindow(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
 	Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashChannelData(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData(
+		const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+		const ImagePlug *parent
+	) const override;
 
-	void hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	IECore::ConstIntVectorDataPtr computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashSampleOffsets(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstIntVectorDataPtr computeSampleOffsets(
+		const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent
+	) const override;
 
-	private:
+private:
 
 	Gaffer::M33fPlug *matrixPlug();
 	const Gaffer::M33fPlug *matrixPlug() const;

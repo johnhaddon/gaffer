@@ -48,16 +48,14 @@ template<typename T>
 class IECORE_EXPORT TypedPlug : public ValuePlug
 {
 
-	public:
+public:
 
 	using ValueType = T;
 
 	GAFFER_PLUG_DECLARE_TEMPLATE_TYPE( TypedPlug<T>, ValuePlug );
 
 	explicit TypedPlug(
-		const std::string &name = defaultName<TypedPlug>(),
-		Direction direction = In,
-		const T &defaultValue = T(),
+		const std::string &name = defaultName<TypedPlug>(), Direction direction = In, const T &defaultValue = T(),
 		unsigned flags = Default
 	);
 	~TypedPlug() override;
@@ -85,7 +83,7 @@ class IECORE_EXPORT TypedPlug : public ValuePlug
 	/// ValuePlug::hash( h )
 	using ValuePlug::hash;
 
-	private:
+private:
 
 	using DataType = IECore::TypedData<T>;
 	using DataTypePtr = typename DataType::Ptr;

@@ -49,8 +49,7 @@ GAFFER_NODE_DEFINE_TYPE( Resize );
 
 size_t Resize::g_firstPlugIndex = 0;
 
-Resize::Resize( const std::string &name )
-	: ImageProcessor( name )
+Resize::Resize( const std::string &name ) : ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -83,9 +82,7 @@ Resize::Resize( const std::string &name )
 	outPlug()->deepPlug()->setInput( inPlug()->deepPlug() );
 }
 
-Resize::~Resize()
-{
-}
+Resize::~Resize() {}
 
 GafferImage::FormatPlug *Resize::formatPlug()
 {
@@ -151,12 +148,8 @@ void Resize::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs
 {
 	ImageProcessor::affects( input, outputs );
 
-	if(
-		formatPlug()->isAncestorOf( input ) ||
-		input == fitModePlug() ||
-		input == inPlug()->formatPlug() ||
-		input == inPlug()->dataWindowPlug()
-	)
+	if( formatPlug()->isAncestorOf( input ) || input == fitModePlug() || input == inPlug()->formatPlug() ||
+		input == inPlug()->dataWindowPlug() )
 	{
 		outputs.push_back( matrixPlug() );
 	}
@@ -166,23 +159,15 @@ void Resize::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs
 		outputs.push_back( outPlug()->formatPlug() );
 	}
 
-	if(
-		input == inPlug()->dataWindowPlug() ||
-		input == resampledInPlug()->dataWindowPlug() ||
-		input == inPlug()->formatPlug() ||
-		formatPlug()->isAncestorOf( input )
-	)
+	if( input == inPlug()->dataWindowPlug() || input == resampledInPlug()->dataWindowPlug() ||
+		input == inPlug()->formatPlug() || formatPlug()->isAncestorOf( input ) )
 	{
 		outputs.push_back( outPlug()->dataWindowPlug() );
 	}
 
-	if(
-		input == inPlug()->channelDataPlug() ||
-		input == resampledInPlug()->channelDataPlug() ||
-		input == resampledInPlug()->sampleOffsetsPlug() ||
-		input == inPlug()->formatPlug() ||
-		formatPlug()->isAncestorOf( input )
-	)
+	if( input == inPlug()->channelDataPlug() || input == resampledInPlug()->channelDataPlug() ||
+		input == resampledInPlug()->sampleOffsetsPlug() || input == inPlug()->formatPlug() ||
+		formatPlug()->isAncestorOf( input ) )
 	{
 		outputs.push_back( outPlug()->channelDataPlug() );
 		outputs.push_back( outPlug()->sampleOffsetsPlug() );
@@ -252,7 +237,9 @@ void Resize::compute( ValuePlug *output, const Context *context ) const
 	ImageProcessor::compute( output, context );
 }
 
-void Resize::hashFormat( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Resize::hashFormat(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = formatPlug()->hash();
 }
@@ -262,7 +249,9 @@ GafferImage::Format Resize::computeFormat( const Gaffer::Context *context, const
 	return formatPlug()->getValue();
 }
 
-void Resize::hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Resize::hashDataWindow(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = source()->dataWindowPlug()->hash();
 }
@@ -272,22 +261,31 @@ Imath::Box2i Resize::computeDataWindow( const Gaffer::Context *context, const Im
 	return source()->dataWindowPlug()->getValue();
 }
 
-void Resize::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Resize::hashChannelData(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = source()->channelDataPlug()->hash();
 }
 
-IECore::ConstFloatVectorDataPtr Resize::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr Resize::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	return source()->channelDataPlug()->getValue();
 }
 
-void Resize::hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Resize::hashSampleOffsets(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = source()->sampleOffsetsPlug()->hash();
 }
 
-IECore::ConstIntVectorDataPtr Resize::computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstIntVectorDataPtr Resize::computeSampleOffsets(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	return source()->sampleOffsetsPlug()->getValue();
 }

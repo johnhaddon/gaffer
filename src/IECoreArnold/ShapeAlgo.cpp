@@ -122,7 +122,10 @@ const V3fVectorData *checkedP( const IECoreScene::Primitive *primitive, const st
 	const V3fVectorData *result = primitive->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
 	if( !result )
 	{
-		IECore::msg( IECore::Msg::Warning, messageContext, "Primitive does not have \"P\" primitive variable of interpolation type Vertex." );
+		IECore::msg(
+			IECore::Msg::Warning, messageContext,
+			"Primitive does not have \"P\" primitive variable of interpolation type Vertex."
+		);
 		return nullptr;
 	}
 
@@ -147,14 +150,14 @@ namespace IECoreArnold
 namespace ShapeAlgo
 {
 
-bool convertP( const IECoreScene::Primitive *primitive, AtNode *shape, const AtString name, const std::string &messageContext )
+bool convertP(
+	const IECoreScene::Primitive *primitive, AtNode *shape, const AtString name, const std::string &messageContext
+)
 {
 	if( const V3fVectorData *p = checkedP( primitive, messageContext ) )
 	{
 		AiNodeSetArray(
-			shape,
-			name,
-			AiArrayConvert( p->readable().size(), 1, AI_TYPE_VECTOR, (void *)&( p->readable()[0] ) )
+			shape, name, AiArrayConvert( p->readable().size(), 1, AI_TYPE_VECTOR, (void *)&( p->readable()[0] ) )
 		);
 		return true;
 	}
@@ -186,8 +189,7 @@ void convertRadius( const IECoreScene::Primitive *primitive, AtNode *shape, cons
 	ConstFloatVectorDataPtr r = radius( primitive );
 
 	AiNodeSetArray(
-		shape,
-		g_radiusArnoldString,
+		shape, g_radiusArnoldString,
 		AiArrayConvert( r->readable().size(), 1, AI_TYPE_FLOAT, (void *)&( r->readable()[0] ) )
 	);
 }
@@ -210,17 +212,20 @@ void convertRadius( const PrimitiveSamples &samples, AtNode *shape, const std::s
 	AiNodeSetArray( shape, g_radiusArnoldString, array );
 }
 
-void convertPrimitiveVariable( const IECoreScene::Primitive *primitive, const PrimitiveVariable &primitiveVariable, AtNode *shape, const AtString name, const std::string &messageContext )
+void convertPrimitiveVariable(
+	const IECoreScene::Primitive *primitive, const PrimitiveVariable &primitiveVariable, AtNode *shape,
+	const AtString name, const std::string &messageContext
+)
 {
 	// make sure the primitive variable doesn't clash with built-ins
 	const AtNodeEntry *entry = AiNodeGetNodeEntry( shape );
 	if( AiNodeEntryLookUpParameter( entry, name ) != nullptr )
 	{
-		msg(
-			Msg::Warning,
-			messageContext,
-			fmt::format( "Primitive variable \"{}\" will be ignored because it clashes with Arnold's built-in parameters", name.c_str() )
-		);
+		msg( Msg::Warning, messageContext,
+			 fmt::format(
+				 "Primitive variable \"{}\" will be ignored because it clashes with Arnold's built-in parameters",
+				 name.c_str()
+			 ) );
 		return;
 	}
 
@@ -252,7 +257,8 @@ void convertPrimitiveVariable( const IECoreScene::Primitive *primitive, const Pr
 		case PrimitiveVariable::Vertex :
 			// Arnold doesn't appear to have vertex storage, but
 			// fortunately for many primitives it is equivalent to varying.
-			if( primitive->variableSize( primitiveVariable.interpolation ) == primitive->variableSize( PrimitiveVariable::Varying ) )
+			if( primitive->variableSize( primitiveVariable.interpolation ) ==
+				primitive->variableSize( PrimitiveVariable::Varying ) )
 			{
 				arnoldInterpolation = "varying";
 			}
@@ -263,11 +269,10 @@ void convertPrimitiveVariable( const IECoreScene::Primitive *primitive, const Pr
 
 	if( arnoldInterpolation == "" )
 	{
-		msg(
-			Msg::Warning,
-			messageContext,
-			fmt::format( "Unable to create user parameter \"{}\" because primitive variable has unsupported interpolation", name )
-		);
+		msg( Msg::Warning, messageContext,
+			 fmt::format(
+				 "Unable to create user parameter \"{}\" because primitive variable has unsupported interpolation", name
+			 ) );
 		return;
 	}
 
@@ -299,11 +304,11 @@ void convertPrimitiveVariable( const IECoreScene::Primitive *primitive, const Pr
 	int type = ParameterAlgo::parameterType( primitiveVariable.data.get(), isArray );
 	if( type == AI_TYPE_NONE || !isArray )
 	{
-		msg(
-			Msg::Warning,
-			messageContext,
-			fmt::format( "Unable to create user parameter \"{}\" for primitive variable of type \"{}\"", name, primitiveVariable.data->typeName() )
-		);
+		msg( Msg::Warning, messageContext,
+			 fmt::format(
+				 "Unable to create user parameter \"{}\" for primitive variable of type \"{}\"", name,
+				 primitiveVariable.data->typeName()
+			 ) );
 		return;
 	}
 
@@ -327,11 +332,7 @@ void convertPrimitiveVariable( const IECoreScene::Primitive *primitive, const Pr
 				indicesArray = identityIndices( AiArrayGetNumElements( array ) );
 			}
 
-			AiNodeSetArray(
-				shape,
-				AtString( ( name.c_str() + string( "idxs" ) ).c_str() ),
-				indicesArray
-			);
+			AiNodeSetArray( shape, AtString( ( name.c_str() + string( "idxs" ) ).c_str() ), indicesArray );
 			return;
 		}
 	}
@@ -356,16 +357,20 @@ void convertPrimitiveVariable( const IECoreScene::Primitive *primitive, const Pr
 		}
 	}
 
-	msg(
-		Msg::Warning,
-		messageContext,
-		fmt::format( "Failed to create array for parameter \"{}\" from data of type \"{}\"", name, primitiveVariable.data->typeName() )
-	);
+	msg( Msg::Warning, messageContext,
+		 fmt::format(
+			 "Failed to create array for parameter \"{}\" from data of type \"{}\"", name,
+			 primitiveVariable.data->typeName()
+		 ) );
 }
 
-void convertPrimitiveVariables( const IECoreScene::Primitive *primitive, AtNode *shape, const char **namesToIgnore, const std::string &messageContext )
+void convertPrimitiveVariables(
+	const IECoreScene::Primitive *primitive, AtNode *shape, const char **namesToIgnore,
+	const std::string &messageContext
+)
 {
-	for( PrimitiveVariableMap::const_iterator it = primitive->variables.begin(), eIt = primitive->variables.end(); it != eIt; it++ )
+	for( PrimitiveVariableMap::const_iterator it = primitive->variables.begin(), eIt = primitive->variables.end();
+		 it != eIt; it++ )
 	{
 		if( namesToIgnore )
 		{

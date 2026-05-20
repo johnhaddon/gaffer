@@ -79,21 +79,14 @@ ShaderTweakProxy::ShaderLoaderDescription<ArnoldShader> g_arnoldShaderTweakProxy
 
 GAFFER_NODE_DEFINE_TYPE( ArnoldShader );
 
-ArnoldShader::ArnoldShader( const std::string &name )
-	: GafferScene::Shader( name )
-{
-}
+ArnoldShader::ArnoldShader( const std::string &name ) : GafferScene::Shader( name ) {}
 
-ArnoldShader::~ArnoldShader()
-{
-}
+ArnoldShader::~ArnoldShader() {}
 
 Gaffer::Plug *ArnoldShader::correspondingInput( const Gaffer::Plug *output )
 {
 	// better to do a few harmless casts than manage a duplicate implementation
-	return const_cast<Gaffer::Plug *>(
-		const_cast<const ArnoldShader *>( this )->correspondingInput( output )
-	);
+	return const_cast<Gaffer::Plug *>( const_cast<const ArnoldShader *>( this )->correspondingInput( output ) );
 }
 
 const Gaffer::Plug *ArnoldShader::correspondingInput( const Gaffer::Plug *output ) const
@@ -109,7 +102,9 @@ const Gaffer::Plug *ArnoldShader::correspondingInput( const Gaffer::Plug *output
 		return nullptr;
 	}
 
-	const StringData *primaryInput = static_cast<const StringData *>( metadata->member<IECore::CompoundData>( "shader" )->member<IECore::Data>( "primaryInput" ) );
+	const StringData *primaryInput = static_cast<const StringData *>(
+		metadata->member<IECore::CompoundData>( "shader" )->member<IECore::Data>( "primaryInput" )
+	);
 	if( !primaryInput )
 	{
 		return nullptr;
@@ -118,7 +113,10 @@ const Gaffer::Plug *ArnoldShader::correspondingInput( const Gaffer::Plug *output
 	const Plug *result = parametersPlug()->getChild<Plug>( primaryInput->readable() );
 	if( !result )
 	{
-		IECore::msg( IECore::Msg::Error, "ArnoldShader::correspondingInput", fmt::format( "Parameter \"{}\" does not exist", primaryInput->readable() ) );
+		IECore::msg(
+			IECore::Msg::Error, "ArnoldShader::correspondingInput",
+			fmt::format( "Parameter \"{}\" does not exist", primaryInput->readable() )
+		);
 		return nullptr;
 	}
 
@@ -225,8 +223,7 @@ bool ArnoldShader::acceptsInput( const Plug *plug, const Plug *inputPlug ) const
 	{
 		// Imager connections are limited to chaining via the `input`
 		// parameter. Everything else is disallowed.
-		return sourceShader != this &&
-			plug == parametersPlug()->getChild( g_inputParameterName ) &&
+		return sourceShader != this && plug == parametersPlug()->getChild( g_inputParameterName ) &&
 			sourceShader->typePlug()->getValue() == "ai:imager";
 	}
 	else
@@ -248,7 +245,9 @@ const AtString g_primaryInputArnoldString( "primaryInput" );
 const AtString g_shaderTypeArnoldString( "shaderType" );
 } // namespace
 
-static IECore::ConstCompoundDataPtr metadataGetter( const std::string &key, size_t &cost, const IECore::Canceller *canceller )
+static IECore::ConstCompoundDataPtr metadataGetter(
+	const std::string &key, size_t &cost, const IECore::Canceller *canceller
+)
 {
 	IECoreArnold::UniverseBlock arnoldUniverse( /* writable = */ false );
 
@@ -270,13 +269,19 @@ static IECore::ConstCompoundDataPtr metadataGetter( const std::string &key, size
 	metadata->writable()["parameter"] = parameterMetadata;
 
 	AtString value;
-	if( AiMetaDataGetStr( shader, /* look up metadata on node, not on parameter */ g_nullArnoldString, g_primaryInputArnoldString, &value ) )
+	if( AiMetaDataGetStr(
+			shader, /* look up metadata on node, not on parameter */ g_nullArnoldString, g_primaryInputArnoldString,
+			&value
+		) )
 	{
 		shaderMetadata->writable()["primaryInput"] = new StringData( value.c_str() );
 	}
 
 	AtString shaderType;
-	if( AiMetaDataGetStr( shader, /* look up metadata on node, not on parameter */ g_nullArnoldString, g_shaderTypeArnoldString, &shaderType ) )
+	if( AiMetaDataGetStr(
+			shader, /* look up metadata on node, not on parameter */ g_nullArnoldString, g_shaderTypeArnoldString,
+			&shaderType
+		) )
 	{
 		shaderMetadata->writable()["shaderType"] = new StringData( shaderType.c_str() );
 	}

@@ -54,10 +54,7 @@ namespace
 // Rounds min down, and max up, while converting from float to int.
 Box2i box2fToBox2i( const Box2f &b )
 {
-	return Box2i(
-		V2i( floor( b.min.x ), floor( b.min.y ) ),
-		V2i( ceil( b.max.x ), ceil( b.max.y ) )
-	);
+	return Box2i( V2i( floor( b.min.x ), floor( b.min.y ) ), V2i( ceil( b.max.x ), ceil( b.max.y ) ) );
 }
 
 Box2f transform( const Box2f &b, const M33f &m )
@@ -92,8 +89,7 @@ GAFFER_NODE_DEFINE_TYPE( Rectangle );
 
 size_t Rectangle::g_firstPlugIndex = 0;
 
-Rectangle::Rectangle( const std::string &name )
-	: Shape( name )
+Rectangle::Rectangle( const std::string &name ) : Shape( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new Box2fPlug( "area", Plug::In, Box2f( V2f( 0 ), V2f( 100 ) ) ) );
@@ -102,9 +98,7 @@ Rectangle::Rectangle( const std::string &name )
 	addChild( new Transform2DPlug( "transform" ) );
 }
 
-Rectangle::~Rectangle()
-{
-}
+Rectangle::~Rectangle() {}
 
 Gaffer::Box2fPlug *Rectangle::areaPlug()
 {
@@ -153,9 +147,7 @@ bool Rectangle::affectsShapeDataWindow( const Gaffer::Plug *input ) const
 		return true;
 	}
 
-	return areaPlug()->isAncestorOf( input ) ||
-		input == lineWidthPlug() ||
-		transformPlug()->isAncestorOf( input );
+	return areaPlug()->isAncestorOf( input ) || input == lineWidthPlug() || transformPlug()->isAncestorOf( input );
 }
 
 void Rectangle::hashShapeDataWindow( const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -189,13 +181,13 @@ bool Rectangle::affectsShapeChannelData( const Gaffer::Plug *input ) const
 		return true;
 	}
 
-	return areaPlug()->isAncestorOf( input ) ||
-		input == lineWidthPlug() ||
-		input == cornerRadiusPlug() ||
+	return areaPlug()->isAncestorOf( input ) || input == lineWidthPlug() || input == cornerRadiusPlug() ||
 		transformPlug()->isAncestorOf( input );
 }
 
-void Rectangle::hashShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Rectangle::hashShapeChannelData(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	Shape::hashShapeChannelData( tileOrigin, context, h );
 
@@ -206,7 +198,9 @@ void Rectangle::hashShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer
 	transformPlug()->hash( h );
 }
 
-IECore::ConstFloatVectorDataPtr Rectangle::computeShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const
+IECore::ConstFloatVectorDataPtr Rectangle::computeShapeChannelData(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context
+) const
 {
 	// Get our inputs
 
@@ -258,10 +252,7 @@ IECore::ConstFloatVectorDataPtr Rectangle::computeShapeChannelData( const Imath:
 
 			// Flip into positive quadrant, relative
 			// to rectangle center.
-			p = V2f(
-				fabs( p.x - area.center().x ),
-				fabs( p.y - area.center().y )
-			);
+			p = V2f( fabs( p.x - area.center().x ), fabs( p.y - area.center().y ) );
 
 			// Get signed distance for basic rectangle.
 			// We use manhattan distance because it gives

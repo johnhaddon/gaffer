@@ -82,7 +82,7 @@ constexpr Gadget::Layer Overlay = Gadget::Layer::Front;
 class GAFFERUI_API GraphGadget : public ContainerGadget
 {
 
-	public:
+public:
 
 	/// Creates a graph showing the children of root, optionally
 	/// filtered by the specified set. Nodes are only displayed if
@@ -120,15 +120,27 @@ class GAFFERUI_API GraphGadget : public ContainerGadget
 	/// to the specified plug and appends them to the connections vector.
 	/// Returns the new size of the vector. If excludedNodes is specified,
 	/// then connections to any nodes it contains will be ignored.
-	size_t connectionGadgets( const Gaffer::Plug *plug, std::vector<ConnectionGadget *> &connections, const Gaffer::Set *excludedNodes = nullptr );
-	size_t connectionGadgets( const Gaffer::Plug *plug, std::vector<const ConnectionGadget *> &connections, const Gaffer::Set *excludedNodes = nullptr ) const;
+	size_t connectionGadgets(
+		const Gaffer::Plug *plug, std::vector<ConnectionGadget *> &connections,
+		const Gaffer::Set *excludedNodes = nullptr
+	);
+	size_t connectionGadgets(
+		const Gaffer::Plug *plug, std::vector<const ConnectionGadget *> &connections,
+		const Gaffer::Set *excludedNodes = nullptr
+	) const;
 
 	/// Finds all the ConnectionGadgets connected to the specified node and
 	/// appends them to the connections vector. Returns the new size of the
 	/// vector. If excludedNodes is specified, then connections to any
 	/// nodes it contains will be ignored.
-	size_t connectionGadgets( const Gaffer::Node *node, std::vector<ConnectionGadget *> &connections, const Gaffer::Set *excludedNodes = nullptr );
-	size_t connectionGadgets( const Gaffer::Node *node, std::vector<const ConnectionGadget *> &connections, const Gaffer::Set *excludedNodes = nullptr ) const;
+	size_t connectionGadgets(
+		const Gaffer::Node *node, std::vector<ConnectionGadget *> &connections,
+		const Gaffer::Set *excludedNodes = nullptr
+	);
+	size_t connectionGadgets(
+		const Gaffer::Node *node, std::vector<const ConnectionGadget *> &connections,
+		const Gaffer::Set *excludedNodes = nullptr
+	) const;
 
 	/// Returns the Gadget responsible for representing auxiliary connections.
 	AuxiliaryConnectionsGadget *auxiliaryConnectionsGadget();
@@ -143,24 +155,44 @@ class GAFFERUI_API GraphGadget : public ContainerGadget
 	/// \note Here "upstream" nodes are defined as nodes at the end of input
 	/// connections as shown in the graph - auxiliary connections and
 	/// invisible nodes are not considered at all.
-	size_t upstreamNodeGadgets( const Gaffer::Node *node, std::vector<NodeGadget *> &upstreamNodeGadgets, size_t degreesOfSeparation = std::numeric_limits<size_t>::max() );
-	size_t upstreamNodeGadgets( const Gaffer::Node *node, std::vector<const NodeGadget *> &upstreamNodeGadgets, size_t degreesOfSeparation = std::numeric_limits<size_t>::max() ) const;
+	size_t upstreamNodeGadgets(
+		const Gaffer::Node *node, std::vector<NodeGadget *> &upstreamNodeGadgets,
+		size_t degreesOfSeparation = std::numeric_limits<size_t>::max()
+	);
+	size_t upstreamNodeGadgets(
+		const Gaffer::Node *node, std::vector<const NodeGadget *> &upstreamNodeGadgets,
+		size_t degreesOfSeparation = std::numeric_limits<size_t>::max()
+	) const;
 
 	/// Finds all the downstream NodeGadgets connected to the specified node
 	/// and appends them to the specified vector. Returns the new size of the vector.
 	/// \note Here "downstream" nodes are defined as nodes at the end of output
 	/// connections as shown in the graph - auxiliary connections and
 	/// invisible nodes are not considered at all.
-	size_t downstreamNodeGadgets( const Gaffer::Node *node, std::vector<NodeGadget *> &downstreamNodeGadgets, size_t degreesOfSeparation = std::numeric_limits<size_t>::max() );
-	size_t downstreamNodeGadgets( const Gaffer::Node *node, std::vector<const NodeGadget *> &downstreamNodeGadgets, size_t degreesOfSeparation = std::numeric_limits<size_t>::max() ) const;
+	size_t downstreamNodeGadgets(
+		const Gaffer::Node *node, std::vector<NodeGadget *> &downstreamNodeGadgets,
+		size_t degreesOfSeparation = std::numeric_limits<size_t>::max()
+	);
+	size_t downstreamNodeGadgets(
+		const Gaffer::Node *node, std::vector<const NodeGadget *> &downstreamNodeGadgets,
+		size_t degreesOfSeparation = std::numeric_limits<size_t>::max()
+	) const;
 
 	/// Finds all the NodeGadgets connected to the specified node
 	/// and appends them to the specified vector. Returns the new size of the vector.
 	/// \note Here "connected" nodes are defined as nodes at the end of
 	/// connections as shown in the graph - auxiliary connections and
 	/// invisible nodes are not considered at all.
-	size_t connectedNodeGadgets( const Gaffer::Node *node, std::vector<NodeGadget *> &connectedNodeGadgets, Gaffer::Plug::Direction direction = Gaffer::Plug::Invalid, size_t degreesOfSeparation = std::numeric_limits<size_t>::max() );
-	size_t connectedNodeGadgets( const Gaffer::Node *node, std::vector<const NodeGadget *> &connectedNodeGadgets, Gaffer::Plug::Direction direction = Gaffer::Plug::Invalid, size_t degreesOfSeparation = std::numeric_limits<size_t>::max() ) const;
+	size_t connectedNodeGadgets(
+		const Gaffer::Node *node, std::vector<NodeGadget *> &connectedNodeGadgets,
+		Gaffer::Plug::Direction direction = Gaffer::Plug::Invalid,
+		size_t degreesOfSeparation = std::numeric_limits<size_t>::max()
+	);
+	size_t connectedNodeGadgets(
+		const Gaffer::Node *node, std::vector<const NodeGadget *> &connectedNodeGadgets,
+		Gaffer::Plug::Direction direction = Gaffer::Plug::Invalid,
+		size_t degreesOfSeparation = std::numeric_limits<size_t>::max()
+	) const;
 
 	/// Finds all the NodeGadgets which haven't been given an explicit position
 	/// using setNodePosition().
@@ -199,13 +231,13 @@ class GAFFERUI_API GraphGadget : public ContainerGadget
 	/// Returns the connectionGadget under the specified line.
 	ConnectionGadget *connectionGadgetAt( const IECore::LineSegment3f &lineInGadgetSpace ) const;
 
-	protected:
+protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
 	unsigned layerMask() const override;
 	Imath::Box3f renderBound() const override;
 
-	private:
+private:
 
 	const Gaffer::V2fPlug *nodePositionPlug( const Gaffer::Node *node ) const;
 	Gaffer::V2fPlug *nodePositionPlug( Gaffer::Node *node, bool createIfMissing ) const;
@@ -254,10 +286,15 @@ class GAFFERUI_API GraphGadget : public ContainerGadget
 	ConnectionGadget *findConnectionGadget( const Nodule *dstNodule ) const;
 	ConnectionGadget *findConnectionGadget( const Gaffer::Plug *dstPlug ) const;
 	void updateConnectionGadgetMinimisation( ConnectionGadget *gadget );
-	ConnectionGadget *reconnectionGadgetAt( const NodeGadget *gadget, const IECore::LineSegment3f &lineInGadgetSpace ) const;
+	ConnectionGadget *reconnectionGadgetAt(
+		const NodeGadget *gadget, const IECore::LineSegment3f &lineInGadgetSpace
+	) const;
 	void updateDragReconnectCandidate( const DragDropEvent &event );
 
-	void connectedNodeGadgetsWalk( NodeGadget *gadget, std::set<NodeGadget *> &connectedGadgets, Gaffer::Plug::Direction direction, size_t degreesOfSeparation );
+	void connectedNodeGadgetsWalk(
+		NodeGadget *gadget, std::set<NodeGadget *> &connectedGadgets, Gaffer::Plug::Direction direction,
+		size_t degreesOfSeparation
+	);
 
 	Gaffer::NodePtr m_root;
 	Gaffer::ScriptNodePtr m_scriptNode;

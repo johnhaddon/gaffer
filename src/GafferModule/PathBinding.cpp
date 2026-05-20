@@ -71,7 +71,7 @@ template<typename WrappedType>
 class PathWrapper : public IECorePython::RunTimeTypedWrapper<WrappedType>
 {
 
-	public:
+public:
 
 	// At one time, the Path class was implemented in pure Python.
 	// Because Python doesn't allow function overloads, we couldn't
@@ -147,7 +147,9 @@ class PathWrapper : public IECorePython::RunTimeTypedWrapper<WrappedType>
 		return WrappedType::isLeaf( canceller );
 	}
 
-	void propertyNames( std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr ) const override
+	void propertyNames(
+		std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr
+	) const override
 	{
 		if( this->isSubclassed() )
 		{
@@ -158,7 +160,9 @@ class PathWrapper : public IECorePython::RunTimeTypedWrapper<WrappedType>
 				if( f )
 				{
 					WrappedType::propertyNames( names, canceller );
-					boost::python::list pythonNames = extract<boost::python::list>( f( IECore::Canceller::Ptr( const_cast<IECore::Canceller *>( canceller ) ) ) );
+					boost::python::list pythonNames = extract<boost::python::list>(
+						f( IECore::Canceller::Ptr( const_cast<IECore::Canceller *>( canceller ) ) )
+					);
 					boost::python::container_utils::extend_container( names, pythonNames );
 					return;
 				}
@@ -180,7 +184,9 @@ class PathWrapper : public IECorePython::RunTimeTypedWrapper<WrappedType>
 		WrappedType::propertyNames( names, canceller );
 	}
 
-	IECore::ConstRunTimeTypedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override
+	IECore::ConstRunTimeTypedPtr property(
+		const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr
+	) const override
 	{
 		if( this->isSubclassed() )
 		{
@@ -190,7 +196,9 @@ class PathWrapper : public IECorePython::RunTimeTypedWrapper<WrappedType>
 				boost::python::object f = this->methodOverride( "property" );
 				if( f )
 				{
-					return extract<IECore::ConstRunTimeTypedPtr>( f( name.c_str(), IECore::Canceller::Ptr( const_cast<IECore::Canceller *>( canceller ) ) ) );
+					return extract<IECore::ConstRunTimeTypedPtr>(
+						f( name.c_str(), IECore::Canceller::Ptr( const_cast<IECore::Canceller *>( canceller ) ) )
+					);
 				}
 				// fall back to emulating properties using the deprecated python info() method.
 				f = this->methodOverride( "info" );
@@ -213,7 +221,9 @@ class PathWrapper : public IECorePython::RunTimeTypedWrapper<WrappedType>
 		return WrappedType::property( name, canceller );
 	}
 
-	Gaffer::ConstContextPtr contextProperty( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override
+	Gaffer::ConstContextPtr contextProperty(
+		const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr
+	) const override
 	{
 		if( this->isSubclassed() )
 		{
@@ -223,7 +233,9 @@ class PathWrapper : public IECorePython::RunTimeTypedWrapper<WrappedType>
 				boost::python::object f = this->methodOverride( "contextProperty" );
 				if( f )
 				{
-					return extract<Gaffer::ConstContextPtr>( f( name.c_str(), IECore::Canceller::Ptr( const_cast<IECore::Canceller *>( canceller ) ) ) );
+					return extract<Gaffer::ConstContextPtr>(
+						f( name.c_str(), IECore::Canceller::Ptr( const_cast<IECore::Canceller *>( canceller ) ) )
+					);
 				}
 			}
 			catch( const error_already_set & )
@@ -290,7 +302,8 @@ class PathWrapper : public IECorePython::RunTimeTypedWrapper<WrappedType>
 				boost::python::object f = this->methodOverride( "_children" );
 				if( f )
 				{
-					list l = extract<list>( f( IECore::Canceller::Ptr( const_cast<IECore::Canceller *>( canceller ) ) ) );
+					list l =
+						extract<list>( f( IECore::Canceller::Ptr( const_cast<IECore::Canceller *>( canceller ) ) ) );
 					boost::python::container_utils::extend_container( children, l );
 					return;
 				}
@@ -327,10 +340,7 @@ class PathWrapper : public IECorePython::RunTimeTypedWrapper<WrappedType>
 
 	// Defined here rather than in the containing namespace
 	// because it needs access to the protected method.
-	void pathChangedSignalCreatedWrapper()
-	{
-		WrappedType::pathChangedSignalCreated();
-	}
+	void pathChangedSignalCreatedWrapper() { WrappedType::pathChangedSignalCreated(); }
 };
 
 const char *rootWrapper( Path &p )
@@ -444,10 +454,7 @@ void delSlice( Path &p, boost::python::slice s )
 
 struct PathChangedSlotCaller
 {
-	void operator () ( boost::python::object slot, PathPtr p )
-	{
-		slot( p );
-	}
+	void operator () ( boost::python::object slot, PathPtr p ) { slot( p ); }
 };
 
 PathFilterPtr createStandardFilter( object pythonExtensions, const std::string &extensionsLabel, bool includeSequences )
@@ -465,9 +472,7 @@ struct StdPathFromPathlibPath
 	StdPathFromPathlibPath()
 	{
 		boost::python::converter::registry::push_back(
-			&convertible,
-			&construct,
-			boost::python::type_id<std::filesystem::path>()
+			&convertible, &construct, boost::python::type_id<std::filesystem::path>()
 		);
 	}
 
@@ -535,32 +540,29 @@ void GafferModule::bindPath()
 	{
 		scope s = PathClass<Path, Wrapper>()
 					  .def(
-						  init<const object &, object, PathFilterPtr>( (
-							  arg( "path" ) = object(),
-							  arg( "root" ) = "/",
-							  arg( "filter" ) = object()
-						  ) )
+						  init<const object &, object, PathFilterPtr>(
+							  ( arg( "path" ) = object(), arg( "root" ) = "/", arg( "filter" ) = object() )
+						  )
 					  )
 					  .def(
-						  init<const std::string &, object, PathFilterPtr>( (
-							  arg( "path" ),
-							  arg( "root" ) = "/",
-							  arg( "filter" ) = object()
-						  ) )
+						  init<const std::string &, object, PathFilterPtr>(
+							  ( arg( "path" ), arg( "root" ) = "/", arg( "filter" ) = object() )
+						  )
 					  )
 					  .def(
-						  init<boost::python::list, const IECore::InternedString &, PathFilterPtr>( (
-							  arg( "path" ),
-							  arg( "root" ) = "/",
-							  arg( "filter" ) = object()
-						  ) )
+						  init<boost::python::list, const IECore::InternedString &, PathFilterPtr>(
+							  ( arg( "path" ), arg( "root" ) = "/", arg( "filter" ) = object() )
+						  )
 					  )
 					  .def( "root", &rootWrapper )
 					  .def( "isEmpty", &Path::isEmpty )
 					  .def( "parent", &Path::parent )
 					  .def( "children", &childrenWrapper, arg( "canceller" ) = object() )
 					  .def( "setFilter", &Path::setFilter )
-					  .def( "getFilter", ( PathFilter * (Path::*)() ) & Path::getFilter, return_value_policy<CastToIntrusivePtr>() )
+					  .def(
+						  "getFilter", ( PathFilter * (Path::*)() ) & Path::getFilter,
+						  return_value_policy<CastToIntrusivePtr>()
+					  )
 					  .def( "pathChangedSignal", &Path::pathChangedSignal, return_internal_reference<1>() )
 					  .def( "setFromPath", &Path::setFromPath )
 					  .def( "setFromString", &Path::setFromString, return_self<>() )
@@ -581,35 +583,31 @@ void GafferModule::bindPath()
 					  .def( "_pathChangedSignalCreated", &Wrapper::pathChangedSignalCreatedWrapper )
 					  .def( "_havePathChangedSignal", &Path::havePathChangedSignal );
 
-		SignalClass<Path::PathChangedSignal, DefaultSignalCaller<Path::PathChangedSignal>, PathChangedSlotCaller>( "PathChangedSignal" );
+		SignalClass<Path::PathChangedSignal, DefaultSignalCaller<Path::PathChangedSignal>, PathChangedSlotCaller>(
+			"PathChangedSignal"
+		);
 	}
 
 	PathClass<FileSystemPath>()
+		.def( init<PathFilterPtr, bool>( ( arg( "filter" ) = object(), arg( "includeSequences" ) = false ) ) )
 		.def(
-			init<PathFilterPtr, bool>( (
-				arg( "filter" ) = object(),
-				arg( "includeSequences" ) = false
-			) )
+			init<const std::filesystem::path &, PathFilterPtr, bool>(
+				( arg( "path" ), arg( "filter" ) = object(), arg( "includeSequences" ) = false )
+			)
 		)
 		.def(
-			init<const std::filesystem::path &, PathFilterPtr, bool>( (
-				arg( "path" ),
-				arg( "filter" ) = object(),
-				arg( "includeSequences" ) = false
-			) )
-		)
-		.def(
-			init<const std::string &, PathFilterPtr, bool>( (
-				arg( "path" ),
-				arg( "filter" ) = object(),
-				arg( "includeSequences" ) = false
-			) )
+			init<const std::string &, PathFilterPtr, bool>(
+				( arg( "path" ), arg( "filter" ) = object(), arg( "includeSequences" ) = false )
+			)
 		)
 		.def( "getIncludeSequences", &FileSystemPath::getIncludeSequences )
 		.def( "setIncludeSequences", &FileSystemPath::setIncludeSequences )
 		.def( "isFileSequence", &FileSystemPath::isFileSequence )
 		.def( "fileSequence", &FileSystemPath::fileSequence )
-		.def( "createStandardFilter", &createStandardFilter, ( arg( "extensions" ) = list(), arg( "extensionsLabel" ) = "", arg( "includeSequenceFilter" ) = false ) )
+		.def(
+			"createStandardFilter", &createStandardFilter,
+			( arg( "extensions" ) = list(), arg( "extensionsLabel" ) = "", arg( "includeSequenceFilter" ) = false )
+		)
 		.def( "nativeString", &FileSystemPath::nativeString )
 		.def( "standardPath", &FileSystemPath::standardPath )
 		.staticmethod( "createStandardFilter" )

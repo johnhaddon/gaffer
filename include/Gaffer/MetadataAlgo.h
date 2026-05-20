@@ -105,9 +105,19 @@ GAFFER_API bool readOnly( const GraphComponent *graphComponent );
 GAFFER_API const GraphComponent *readOnlyReason( const GraphComponent *graphComponent );
 
 /// Determines if a metadata value change affects the result of `readOnly( graphComponent )`.
-GAFFER_API bool readOnlyAffectedByChange( const GraphComponent *graphComponent, IECore::TypeId changedNodeTypeId, const IECore::StringAlgo::MatchPattern &changedPlugPath, const IECore::InternedString &changedKey, const Gaffer::Plug *changedPlug );
-GAFFER_API bool readOnlyAffectedByChange( const GraphComponent *graphComponent, IECore::TypeId changedNodeTypeId, const IECore::InternedString &changedKey, const Gaffer::Node *changedNode );
-GAFFER_API bool readOnlyAffectedByChange( const GraphComponent *graphComponent, const Gaffer::GraphComponent *changedGraphComponent, const IECore::InternedString &changedKey );
+GAFFER_API bool readOnlyAffectedByChange(
+	const GraphComponent *graphComponent, IECore::TypeId changedNodeTypeId,
+	const IECore::StringAlgo::MatchPattern &changedPlugPath, const IECore::InternedString &changedKey,
+	const Gaffer::Plug *changedPlug
+);
+GAFFER_API bool readOnlyAffectedByChange(
+	const GraphComponent *graphComponent, IECore::TypeId changedNodeTypeId, const IECore::InternedString &changedKey,
+	const Gaffer::Node *changedNode
+);
+GAFFER_API bool readOnlyAffectedByChange(
+	const GraphComponent *graphComponent, const Gaffer::GraphComponent *changedGraphComponent,
+	const IECore::InternedString &changedKey
+);
 GAFFER_API bool readOnlyAffectedByChange( const IECore::InternedString &changedKey );
 
 /// Bookmarks
@@ -172,18 +182,22 @@ struct GAFFER_API Annotation
 	const std::string &text() const { return textData ? textData->readable() : g_defaultText; }
 	const Imath::Color3f &color() const { return colorData ? colorData->readable() : g_defaultColor; }
 
-	private:
+private:
 
 	static std::string g_defaultText;
 	static Imath::Color3f g_defaultColor;
 };
 
-GAFFER_API void addAnnotation( Node *node, const std::string &name, const Annotation &annotation, bool persistent = true );
+GAFFER_API void addAnnotation(
+	Node *node, const std::string &name, const Annotation &annotation, bool persistent = true
+);
 GAFFER_API Annotation getAnnotation( const Node *node, const std::string &name, bool inheritTemplate = false );
 GAFFER_API void removeAnnotation( Node *node, const std::string &name );
 [[deprecated( "Use alternative form with `RegistrationTypes` instead" )]]
 GAFFER_API void annotations( const Node *node, std::vector<std::string> &names );
-GAFFER_API std::vector<std::string> annotations( const Node *node, Metadata::RegistrationTypes types = Metadata::RegistrationTypes::All );
+GAFFER_API std::vector<std::string> annotations(
+	const Node *node, Metadata::RegistrationTypes types = Metadata::RegistrationTypes::All
+);
 
 /// Pass `user = false` for annotations not intended for creation directly by the user.
 GAFFER_API void addAnnotationTemplate( const std::string &name, const Annotation &annotation, bool user = true );
@@ -199,14 +213,27 @@ GAFFER_API bool annotationsAffectedByChange( const IECore::InternedString &chang
 
 /// Determines if a metadata value change (as signalled by `Metadata::plugValueChangedSignal()`
 /// or `Metadata:nodeValueChangedSignal()`) affects a given plug or node.
-GAFFER_API bool affectedByChange( const Plug *plug, IECore::TypeId changedTypeId, const IECore::StringAlgo::MatchPattern &changedPlugPath, const Gaffer::Plug *changedPlug );
+GAFFER_API bool affectedByChange(
+	const Plug *plug, IECore::TypeId changedTypeId, const IECore::StringAlgo::MatchPattern &changedPlugPath,
+	const Gaffer::Plug *changedPlug
+);
 GAFFER_API bool affectedByChange( const Node *node, IECore::TypeId changedNodeTypeId, const Gaffer::Node *changedNode );
 /// As above, but determines if any child will be affected.
-GAFFER_API bool childAffectedByChange( const GraphComponent *parent, IECore::TypeId changedTypeId, const IECore::StringAlgo::MatchPattern &changedPlugPath, const Gaffer::Plug *changedPlug );
-GAFFER_API bool childAffectedByChange( const GraphComponent *parent, IECore::TypeId changedNodeTypeId, const Gaffer::Node *changedNode );
+GAFFER_API bool childAffectedByChange(
+	const GraphComponent *parent, IECore::TypeId changedTypeId, const IECore::StringAlgo::MatchPattern &changedPlugPath,
+	const Gaffer::Plug *changedPlug
+);
+GAFFER_API bool childAffectedByChange(
+	const GraphComponent *parent, IECore::TypeId changedNodeTypeId, const Gaffer::Node *changedNode
+);
 /// As above, but determines if any ancestor will be affected.
-GAFFER_API bool ancestorAffectedByChange( const Plug *plug, IECore::TypeId changedTypeId, const IECore::StringAlgo::MatchPattern &changedPlugPath, const Gaffer::Plug *changedPlug );
-GAFFER_API bool ancestorAffectedByChange( const GraphComponent *graphComponent, IECore::TypeId changedNodeTypeId, const Gaffer::Node *changedNode );
+GAFFER_API bool ancestorAffectedByChange(
+	const Plug *plug, IECore::TypeId changedTypeId, const IECore::StringAlgo::MatchPattern &changedPlugPath,
+	const Gaffer::Plug *changedPlug
+);
+GAFFER_API bool ancestorAffectedByChange(
+	const GraphComponent *graphComponent, IECore::TypeId changedNodeTypeId, const Gaffer::Node *changedNode
+);
 
 /// Copying
 /// =======
@@ -220,7 +247,10 @@ GAFFER_API void copy( const GraphComponent *from, GraphComponent *to, bool persi
 template<typename Predicate>
 void copyIf( const GraphComponent *from, GraphComponent *to, Predicate &&predicate, bool persistent = true );
 /// \deprecated Either use the simpler version of `copy()`, or use `copyIf()` to implement exclusions.
-GAFFER_API void copy( const GraphComponent *from, GraphComponent *to, const IECore::StringAlgo::MatchPattern &exclude = "", bool persistentOnly = true, bool persistent = true );
+GAFFER_API void copy(
+	const GraphComponent *from, GraphComponent *to, const IECore::StringAlgo::MatchPattern &exclude = "",
+	bool persistentOnly = true, bool persistent = true
+);
 
 /// Copy nodule and noodle color meta data from srcPlug to dstPlug
 /// \undoable
@@ -230,7 +260,9 @@ GAFFER_API void copyColors( const Gaffer::Plug *srcPlug, Gaffer::Plug *dstPlug, 
 /// =============
 
 /// Returns true if metadata can be promoted from one plug to another.
-GAFFER_API bool isPromotable( const GraphComponent *from, const GraphComponent *to, const IECore::InternedString &name );
+GAFFER_API bool isPromotable(
+	const GraphComponent *from, const GraphComponent *to, const IECore::InternedString &name
+);
 
 /// Cleanup
 /// =======
@@ -248,7 +280,8 @@ GAFFER_API void deregisterRedundantValues( GraphComponent *graphComponent );
 /// Creates an appropriate plug to hold the data contained within the "defaultValue" metadata
 /// key registered at `target`. Optional "minValue" and "maxValue" metadata registered at
 /// `target` will be used to define the min and max values of the plug.
-GAFFER_API ValuePlugPtr createPlugFromMetadata( const std::string &name, Plug::Direction direction, unsigned flags, const std::string &target );
+GAFFER_API ValuePlugPtr
+createPlugFromMetadata( const std::string &name, Plug::Direction direction, unsigned flags, const std::string &target );
 
 /// Viewability
 /// ===========
@@ -262,7 +295,9 @@ template<typename T = GraphComponent>
 const T *firstViewableAncestor( const GraphComponent *graphComponent );
 /// As above, but taking a TypeId to specify type - this is mainly provided for the binding.
 GAFFER_API GraphComponent *firstViewableAncestor( GraphComponent *graphComponent, IECore::TypeId ancestorType );
-GAFFER_API const GraphComponent *firstViewableAncestor( const GraphComponent *graphComponent, IECore::TypeId ancestorType );
+GAFFER_API const GraphComponent *firstViewableAncestor(
+	const GraphComponent *graphComponent, IECore::TypeId ancestorType
+);
 /// Convenience form of the above that always returns a Node - mainly provided for use in Python.
 GAFFER_API Node *firstViewableNode( GraphComponent *graphComponent );
 GAFFER_API const Node *firstViewableNode( const GraphComponent *graphComponent );

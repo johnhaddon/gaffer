@@ -59,7 +59,7 @@ template<typename T>
 class IECORE_EXPORT TypedObjectPlug : public ValuePlug
 {
 
-	public:
+public:
 
 	using ValueType = T;
 	using ValuePtr = typename ValueType::Ptr;
@@ -69,9 +69,7 @@ class IECORE_EXPORT TypedObjectPlug : public ValuePlug
 
 	/// A copy of defaultValue is taken - it must not be null.
 	explicit TypedObjectPlug(
-		const std::string &name,
-		Direction direction = In,
-		ConstValuePtr defaultValue = new ValueType,
+		const std::string &name, Direction direction = In, ConstValuePtr defaultValue = new ValueType,
 		unsigned flags = Default
 	);
 	~TypedObjectPlug() override;

@@ -51,7 +51,9 @@ namespace SetAlgo
 GAFFERSCENE_API IECore::PathMatcher evaluateSetExpression( const std::string &setExpression, const ScenePlug *scene );
 
 GAFFERSCENE_API IECore::MurmurHash setExpressionHash( const std::string &setExpression, const ScenePlug *scene );
-GAFFERSCENE_API void setExpressionHash( const std::string &setExpression, const ScenePlug *scene, IECore::MurmurHash &h );
+GAFFERSCENE_API void setExpressionHash(
+	const std::string &setExpression, const ScenePlug *scene, IECore::MurmurHash &h
+);
 
 GAFFERSCENE_API bool affectsSetExpression( const Gaffer::Plug *scenePlugChild );
 

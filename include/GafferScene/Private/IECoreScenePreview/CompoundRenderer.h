@@ -43,7 +43,7 @@ namespace IECoreScenePreview
 class GAFFERSCENE_API CompoundRenderer final : public IECoreScenePreview::Renderer
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( CompoundRenderer )
 
@@ -59,15 +59,27 @@ class GAFFERSCENE_API CompoundRenderer final : public IECoreScenePreview::Render
 	void option( const IECore::InternedString &name, const IECore::Object *value ) override;
 	void output( const IECore::InternedString &name, const IECoreScene::Output *output ) override;
 	Renderer::AttributesInterfacePtr attributes( const IECore::CompoundObject *attributes ) override;
-	ObjectInterfacePtr camera( const std::string &name, const CameraSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
-	ObjectInterfacePtr light( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
-	ObjectInterfacePtr lightFilter( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
-	ObjectInterfacePtr object( const std::string &name, const IECoreScenePreview::Renderer::ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override;
+	ObjectInterfacePtr camera(
+		const std::string &name, const CameraSamples &samples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) override;
+	ObjectInterfacePtr light(
+		const std::string &name, const ObjectSamples &samples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) override;
+	ObjectInterfacePtr lightFilter(
+		const std::string &name, const ObjectSamples &samples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) override;
+	ObjectInterfacePtr object(
+		const std::string &name, const IECoreScenePreview::Renderer::ObjectSamples &samples, const SampleTimes &times,
+		const AttributesInterface *attributes
+	) override;
 	void render() override;
 	void pause() override;
 	IECore::DataPtr command( const IECore::InternedString name, const IECore::CompoundDataMap &parameters ) override;
 
-	private:
+private:
 
 	Renderers m_renderers;
 };

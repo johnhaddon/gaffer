@@ -179,8 +179,7 @@ template<typename T>
 inline IECore::InternedString formatAsInternedString( const T &a, std::string &buffer )
 {
 	if constexpr(
-		std::is_integral<T>::value ||
-		std::is_same<T, std::string>::value ||
+		std::is_integral<T>::value || std::is_same<T, std::string>::value ||
 		std::is_same<T, IECore::InternedString>::value
 	)
 	{
@@ -204,9 +203,13 @@ inline IECore::InternedString formatAsInternedString( const T &a, std::string &b
 class MeshSplit::MeshSplitterData : public IECore::Data
 {
 
-	public:
+public:
 
-	MeshSplitterData( ConstMeshPrimitivePtr mesh, const PrimitiveVariable &primitiveVariable, bool nameFromSegment, const IECore::Canceller *canceller ) : m_splitter( mesh, primitiveVariable, canceller )
+	MeshSplitterData(
+		ConstMeshPrimitivePtr mesh, const PrimitiveVariable &primitiveVariable, bool nameFromSegment,
+		const IECore::Canceller *canceller
+	)
+		: m_splitter( mesh, primitiveVariable, canceller )
 	{
 		InternedStringVectorDataPtr namesData = new InternedStringVectorData;
 		std::vector<InternedString> &names = namesData->writable();
@@ -254,10 +257,7 @@ class MeshSplit::MeshSplitterData : public IECore::Data
 		m_names = namesData;
 	}
 
-	ConstInternedStringVectorDataPtr names() const
-	{
-		return m_names;
-	}
+	ConstInternedStringVectorDataPtr names() const { return m_names; }
 
 	MeshPrimitivePtr splitMesh( const IECore::InternedString &name ) const
 	{
@@ -269,7 +269,7 @@ class MeshSplit::MeshSplitterData : public IECore::Data
 		return m_splitter.bound( indexFromName( name ) );
 	}
 
-	private:
+private:
 
 	inline int indexFromName( const IECore::InternedString &name ) const
 	{
@@ -293,8 +293,7 @@ GAFFER_NODE_DEFINE_TYPE( MeshSplit );
 
 size_t MeshSplit::g_firstPlugIndex = 0;
 
-MeshSplit::MeshSplit( const std::string &name )
-	: BranchCreator( name )
+MeshSplit::MeshSplit( const std::string &name ) : BranchCreator( name )
 {
 
 	storeIndexOfNextChild( g_firstPlugIndex );
@@ -317,9 +316,7 @@ MeshSplit::MeshSplit( const std::string &name )
 	outPlug()->setNamesPlug()->setInput( inPlug()->setNamesPlug() );
 }
 
-MeshSplit::~MeshSplit()
-{
-}
+MeshSplit::~MeshSplit() {}
 
 Gaffer::StringPlug *MeshSplit::segmentPlug()
 {
@@ -409,7 +406,9 @@ void MeshSplit::compute( ValuePlug *output, const Context *context ) const
 			splitter = new MeshSplitterData( mesh, varIt->second, nameFromSegment, context->canceller() );
 		}
 
-		static_cast<ObjectPlug *>( output )->setValue( splitter ? (const Object *)splitter.get() : NullObject::defaultNullObject() );
+		static_cast<ObjectPlug *>( output )->setValue(
+			splitter ? (const Object *)splitter.get() : NullObject::defaultNullObject()
+		);
 		return;
 	}
 
@@ -421,7 +420,9 @@ bool MeshSplit::affectsBranchBound( const Gaffer::Plug *input ) const
 	return input == inPlug()->boundPlug() || input == preciseBoundsPlug() || input == meshSplitterPlug();
 }
 
-void MeshSplit::hashBranchBound( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void MeshSplit::hashBranchBound(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	if( !preciseBoundsPlug()->getValue() )
 	{
@@ -436,7 +437,9 @@ void MeshSplit::hashBranchBound( const ScenePath &sourcePath, const ScenePath &b
 	}
 }
 
-Imath::Box3f MeshSplit::computeBranchBound( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+Imath::Box3f MeshSplit::computeBranchBound(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	assert( branchPath.size() == 1 );
 
@@ -447,7 +450,8 @@ Imath::Box3f MeshSplit::computeBranchBound( const ScenePath &sourcePath, const S
 	else
 	{
 		ScenePlug::PathScope s( context, &sourcePath );
-		ConstMeshSplitterDataPtr meshSplitter = static_pointer_cast<const MeshSplitterData>( meshSplitterPlug()->getValue() );
+		ConstMeshSplitterDataPtr meshSplitter =
+			static_pointer_cast<const MeshSplitterData>( meshSplitterPlug()->getValue() );
 		return meshSplitter->splitBound( branchPath[0] );
 	}
 }
@@ -457,22 +461,30 @@ bool MeshSplit::affectsBranchTransform( const Gaffer::Plug *input ) const
 	return false;
 }
 
-void MeshSplit::hashBranchTransform( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void MeshSplit::hashBranchTransform(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	BranchCreator::hashBranchTransform( sourcePath, branchPath, context, h );
 }
 
-Imath::M44f MeshSplit::computeBranchTransform( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+Imath::M44f MeshSplit::computeBranchTransform(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	return Imath::M44f();
 }
 
-void MeshSplit::hashBranchAttributes( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void MeshSplit::hashBranchAttributes(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = inPlug()->attributesPlug()->defaultHash();
 }
 
-IECore::ConstCompoundObjectPtr MeshSplit::computeBranchAttributes( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+IECore::ConstCompoundObjectPtr MeshSplit::computeBranchAttributes(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	return inPlug()->attributesPlug()->defaultValue();
 }
@@ -487,7 +499,9 @@ bool MeshSplit::affectsBranchObject( const Gaffer::Plug *input ) const
 	return input == inPlug()->objectPlug();
 }
 
-void MeshSplit::hashBranchObject( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void MeshSplit::hashBranchObject(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	BranchCreator::hashBranchObject( sourcePath, branchPath, context, h );
 
@@ -504,7 +518,9 @@ void MeshSplit::hashBranchObject( const ScenePath &sourcePath, const ScenePath &
 	h.append( branchPath[0] );
 }
 
-IECore::ConstObjectPtr MeshSplit::computeBranchObject( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+IECore::ConstObjectPtr MeshSplit::computeBranchObject(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	if( branchPath.size() == 0 )
 	{
@@ -525,7 +541,8 @@ IECore::ConstObjectPtr MeshSplit::computeBranchObject( const ScenePath &sourcePa
 	assert( branchPath.size() == 1 );
 
 	ScenePlug::PathScope s( context, &sourcePath );
-	ConstMeshSplitterDataPtr meshSplitter = static_pointer_cast<const MeshSplitterData>( meshSplitterPlug()->getValue() );
+	ConstMeshSplitterDataPtr meshSplitter =
+		static_pointer_cast<const MeshSplitterData>( meshSplitterPlug()->getValue() );
 	return meshSplitter->splitMesh( branchPath[0] );
 }
 
@@ -534,7 +551,9 @@ bool MeshSplit::affectsBranchChildNames( const Gaffer::Plug *input ) const
 	return input == meshSplitterPlug();
 }
 
-void MeshSplit::hashBranchChildNames( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void MeshSplit::hashBranchChildNames(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	if( branchPath.size() == 0 )
 	{
@@ -548,7 +567,9 @@ void MeshSplit::hashBranchChildNames( const ScenePath &sourcePath, const ScenePa
 	}
 }
 
-IECore::ConstInternedStringVectorDataPtr MeshSplit::computeBranchChildNames( const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context ) const
+IECore::ConstInternedStringVectorDataPtr MeshSplit::computeBranchChildNames(
+	const ScenePath &sourcePath, const ScenePath &branchPath, const Gaffer::Context *context
+) const
 {
 	if( branchPath.size() == 0 )
 	{

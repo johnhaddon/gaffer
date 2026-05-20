@@ -95,7 +95,9 @@ struct VStructConditionalExpression
 	using ParameterValueFunction = IECoreRenderMan::ShaderNetworkAlgo::ParameterValueFunction;
 	using ParameterIsConnectedFunction = IECoreRenderMan::ShaderNetworkAlgo::ParameterIsConnectedFunction;
 
-	Action evaluate( const ParameterValueFunction &valueFunction, const ParameterIsConnectedFunction &isConnectedFunction ) const
+	Action evaluate(
+		const ParameterValueFunction &valueFunction, const ParameterIsConnectedFunction &isConnectedFunction
+	) const
 	{
 		// The expression language is simple enough that we don't really need to build
 		// an AST to evaluate it. So we simply evaluate the result while "parsing".
@@ -110,13 +112,16 @@ struct VStructConditionalExpression
 		return result;
 	}
 
-	private:
+private:
 
 	vector<InternedString> m_tokens;
 
 	using TokenSpan = boost::span<const InternedString>;
 
-	static Action evaluateAction( TokenSpan &tokens, const ParameterValueFunction &valueFunction, const ParameterIsConnectedFunction &isConnectedFunction )
+	static Action evaluateAction(
+		TokenSpan &tokens, const ParameterValueFunction &valueFunction,
+		const ParameterIsConnectedFunction &isConnectedFunction
+	)
 	{
 		Action result;
 		if( tokens.empty() )
@@ -160,7 +165,10 @@ struct VStructConditionalExpression
 
 	// Note : this doesn't currently give any thought to operator precedence, but
 	// is still sufficient to deal with all expressions in `Pxr*` shaders.
-	static bool evaluateBooleanExpression( TokenSpan &tokens, const ParameterValueFunction &valueFunction, const ParameterIsConnectedFunction &isConnectedFunction )
+	static bool evaluateBooleanExpression(
+		TokenSpan &tokens, const ParameterValueFunction &valueFunction,
+		const ParameterIsConnectedFunction &isConnectedFunction
+	)
 	{
 		bool operand1;
 		if( tokens.size() && tokens[0] == g_openParenthesisToken )
@@ -214,7 +222,10 @@ struct VStructConditionalExpression
 		}
 	}
 
-	static bool evaluateParameterComparison( TokenSpan &tokens, const ParameterValueFunction &valueFunction, const ParameterIsConnectedFunction &isConnectedFunction )
+	static bool evaluateParameterComparison(
+		TokenSpan &tokens, const ParameterValueFunction &valueFunction,
+		const ParameterIsConnectedFunction &isConnectedFunction
+	)
 	{
 		const InternedString parameter = takeToken( tokens );
 		const InternedString op = takeToken( tokens );
@@ -274,7 +285,10 @@ struct VStructConditionalExpression
 			case FloatDataTypeId :
 				return static_cast<const FloatData *>( data )->readable();
 			default :
-				IECore::msg( IECore::Msg::Warning, "IECoreRenderMan", fmt::format( "VStruct expression referenced unsupported value type \"{}\"", data->typeName() ) );
+				IECore::msg(
+					IECore::Msg::Warning, "IECoreRenderMan",
+					fmt::format( "VStruct expression referenced unsupported value type \"{}\"", data->typeName() )
+				);
 				return 0;
 		}
 	}
@@ -363,7 +377,10 @@ struct ShaderInfo
 
 using ConstShaderInfoPtr = std::shared_ptr<const ShaderInfo>;
 
-void loadVStructMember( ShaderInfo::ParameterMap &parameters, InternedString parameter, const std::string &vStructMember, const std::string &conditionalExpression )
+void loadVStructMember(
+	ShaderInfo::ParameterMap &parameters, InternedString parameter, const std::string &vStructMember,
+	const std::string &conditionalExpression
+)
 {
 	vector<InternedString> tokens;
 	StringAlgo::tokenize( vStructMember, '.', tokens );
@@ -371,7 +388,9 @@ void loadVStructMember( ShaderInfo::ParameterMap &parameters, InternedString par
 	{
 		IECore::msg(
 			IECore::Msg::Warning, "IECoreRenderMan",
-			fmt::format( "Parameter \"{}\" has invalid vstructmember specification \"{}\"", parameter.string(), vStructMember )
+			fmt::format(
+				"Parameter \"{}\" has invalid vstructmember specification \"{}\"", parameter.string(), vStructMember
+			)
 		);
 		return;
 	}
@@ -443,7 +462,10 @@ void loadParameters( const boost::property_tree::ptree &tree, ShaderInfo::Parame
 			}
 			else
 			{
-				IECore::msg( IECore::Msg::Warning, "IECoreRenderMan", fmt::format( "Unknown type `{}` for parameter \"{}\".", type, name ) );
+				IECore::msg(
+					IECore::Msg::Warning, "IECoreRenderMan",
+					fmt::format( "Unknown type `{}` for parameter \"{}\".", type, name )
+				);
 				continue;
 			}
 
@@ -520,7 +542,9 @@ ConstShaderInfoPtr shaderInfoFromArgsFile( const boost::filesystem::path file )
 	return result;
 }
 
-const std::string stringMetadata( const std::string &name, const vector<OSL::OSLQuery::Parameter> &metadata, const std::string &defaultValue = "" )
+const std::string stringMetadata(
+	const std::string &name, const vector<OSL::OSLQuery::Parameter> &metadata, const std::string &defaultValue = ""
+)
 {
 	for( const auto &m : metadata )
 	{
@@ -602,8 +626,8 @@ ConstShaderInfoPtr shaderInfoFromOSLQuery( OSL::OSLQuery &query )
 			IECore::msg(
 				IECore::Msg::Warning, "IECoreRenderMan",
 				fmt::format(
-					"Unknown type `{}` for parameter \"{}\" on shader \"{}\".",
-					parameter.type, parameter.name, query.shadername()
+					"Unknown type `{}` for parameter \"{}\" on shader \"{}\".", parameter.type, parameter.name,
+					query.shadername()
 				)
 			);
 			continue;
@@ -646,7 +670,9 @@ ShaderInfoCache g_shaderInfoCache(
 			return shaderInfoFromOSLQuery( oslQuery );
 		}
 
-		IECore::msg( IECore::Msg::Warning, "IECoreRenderMan", fmt::format( "Unable to find shader \"{}\".", shaderName ) );
+		IECore::msg(
+			IECore::Msg::Warning, "IECoreRenderMan", fmt::format( "Unable to find shader \"{}\".", shaderName )
+		);
 		return nullptr;
 	},
 
@@ -666,7 +692,10 @@ namespace
 using ArrayConnections = std::unordered_map<InternedString, vector<RtUString>>;
 const std::regex g_arrayIndexRegex( R"((\w+)\[([0-9]+)\])" );
 
-void convertConnection( const IECoreScene::ShaderNetwork::Connection &connection, const ShaderInfo *shaderInfo, RtParamList &paramList, ArrayConnections &arrayConnections )
+void convertConnection(
+	const IECoreScene::ShaderNetwork::Connection &connection, const ShaderInfo *shaderInfo, RtParamList &paramList,
+	ArrayConnections &arrayConnections
+)
 {
 	InternedString destination;
 	std::optional<size_t> destinationIndex;
@@ -696,15 +725,12 @@ void convertConnection( const IECoreScene::ShaderNetwork::Connection &connection
 	}
 
 	std::string reference = connection.source.shader;
-	if(
-		connection.source.name.string().size() &&
+	if( connection.source.name.string().size() &&
 		// Several node types don't have named outputs, and
 		// connections will silently fail if we include a name.
 		parameterInfo->type != pxrcore::DataType::k_displayfilter &&
-		parameterInfo->type != pxrcore::DataType::k_samplefilter &&
-		parameterInfo->type != pxrcore::DataType::k_bxdf &&
-		parameterInfo->type != pxrcore::DataType::k_lightfilter
-	)
+		parameterInfo->type != pxrcore::DataType::k_samplefilter && parameterInfo->type != pxrcore::DataType::k_bxdf &&
+		parameterInfo->type != pxrcore::DataType::k_lightfilter )
 	{
 		reference += ":" + connection.source.name.string();
 	}
@@ -712,15 +738,13 @@ void convertConnection( const IECoreScene::ShaderNetwork::Connection &connection
 
 	if( !destinationIndex )
 	{
-		RtParamList::ParamInfo const info = {
-			RtUString( destination.c_str() ),
-			parameterInfo->type,
-			pxrcore::DetailType::k_reference,
-			1,
-			false,
-			false,
-			false
-		};
+		RtParamList::ParamInfo const info = { RtUString( destination.c_str() ),
+											  parameterInfo->type,
+											  pxrcore::DetailType::k_reference,
+											  1,
+											  false,
+											  false,
+											  false };
 
 		paramList.SetParam( info, &referenceU );
 	}
@@ -736,7 +760,10 @@ void convertConnection( const IECoreScene::ShaderNetwork::Connection &connection
 
 using HandleSet = std::unordered_set<InternedString>;
 
-void convertShaderNetworkWalk( const ShaderNetwork::Parameter &outputParameter, const IECoreScene::ShaderNetwork *shaderNetwork, vector<riley::ShadingNode> &shadingNodes, HandleSet &visited )
+void convertShaderNetworkWalk(
+	const ShaderNetwork::Parameter &outputParameter, const IECoreScene::ShaderNetwork *shaderNetwork,
+	vector<riley::ShadingNode> &shadingNodes, HandleSet &visited
+)
 {
 	if( !visited.insert( outputParameter.shader ).second )
 	{
@@ -750,12 +777,8 @@ void convertShaderNetworkWalk( const ShaderNetwork::Parameter &outputParameter, 
 		return;
 	}
 
-	riley::ShadingNode node = {
-		shaderInfo->type,
-		RtUString( shader->getName().c_str() ),
-		RtUString( outputParameter.shader.c_str() ),
-		RtParamList()
-	};
+	riley::ShadingNode node = { shaderInfo->type, RtUString( shader->getName().c_str() ),
+								RtUString( outputParameter.shader.c_str() ), RtParamList() };
 
 	for( const auto &[parameterName, parameterValue] : shader->parameters() )
 	{
@@ -782,15 +805,13 @@ void convertShaderNetworkWalk( const ShaderNetwork::Parameter &outputParameter, 
 
 	for( const auto &[destination, references] : arrayConnections )
 	{
-		RtParamList::ParamInfo const info = {
-			RtUString( destination.c_str() ),
-			shaderInfo->parameters.at( destination ).type,
-			pxrcore::DetailType::k_reference,
-			(uint32_t)references.size(),
-			true,
-			false,
-			false
-		};
+		RtParamList::ParamInfo const info = { RtUString( destination.c_str() ),
+											  shaderInfo->parameters.at( destination ).type,
+											  pxrcore::DetailType::k_reference,
+											  (uint32_t)references.size(),
+											  true,
+											  false,
+											  false };
 
 		node.params.SetParam( info, references.data() );
 	}
@@ -895,7 +916,9 @@ std::vector<riley::ShadingNode> IECoreRenderMan::ShaderNetworkAlgo::convert( con
 // `ShaderNetworkAlgo::combineLightFilters()` implementation
 //////////////////////////////////////////////////////////////////////////
 
-IECoreScene::ConstShaderNetworkPtr IECoreRenderMan::ShaderNetworkAlgo::combineLightFilters( const std::vector<const IECoreScene::ShaderNetwork *> networks )
+IECoreScene::ConstShaderNetworkPtr IECoreRenderMan::ShaderNetworkAlgo::combineLightFilters(
+	const std::vector<const IECoreScene::ShaderNetwork *> networks
+)
 {
 	if( networks.empty() )
 	{
@@ -910,9 +933,8 @@ IECoreScene::ConstShaderNetworkPtr IECoreRenderMan::ShaderNetworkAlgo::combineLi
 	unordered_map<string, size_t> numConnections;
 
 	ShaderNetworkPtr combinedNetwork = new ShaderNetwork;
-	auto combinerHandle = combinedNetwork->addShader(
-		"combiner", new Shader( "PxrCombinerLightFilter", "lightFilter" )
-	);
+	auto combinerHandle =
+		combinedNetwork->addShader( "combiner", new Shader( "PxrCombinerLightFilter", "lightFilter" ) );
 	combinedNetwork->setOutput( { combinerHandle, "out" } );
 
 	for( auto network : networks )
@@ -929,11 +951,14 @@ IECoreScene::ConstShaderNetworkPtr IECoreRenderMan::ShaderNetworkAlgo::combineLi
 			combineMode = combineModeData->readable();
 		}
 
-		ShaderNetwork::Parameter filterHandle = IECoreScene::ShaderNetworkAlgo::addShaders( combinedNetwork.get(), network );
+		ShaderNetwork::Parameter filterHandle =
+			IECoreScene::ShaderNetworkAlgo::addShaders( combinedNetwork.get(), network );
 
 		const size_t connectionIndex = numConnections[combineMode]++;
 		combinedNetwork->addConnection(
-			ShaderNetwork::Connection( filterHandle, { combinerHandle, fmt::format( "{}[{}]", combineMode, connectionIndex ) } )
+			ShaderNetwork::Connection(
+				filterHandle, { combinerHandle, fmt::format( "{}[{}]", combineMode, connectionIndex ) }
+			)
 		);
 	}
 
@@ -970,9 +995,13 @@ struct DataTraits<Vec3<T>>
 };
 
 template<typename T>
-void transferUSDParameter( ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, InternedString usdName, Shader *shader, InternedString name, const T &defaultValue )
+void transferUSDParameter(
+	ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, InternedString usdName,
+	Shader *shader, InternedString name, const T &defaultValue
+)
 {
-	shader->parameters()[name] = new typename DataTraits<T>::DataType( parameterValue( usdShader, usdName, defaultValue ) );
+	shader->parameters()[name] =
+		new typename DataTraits<T>::DataType( parameterValue( usdShader, usdName, defaultValue ) );
 
 	if( ShaderNetwork::Parameter input = network->input( { shaderHandle, usdName } ) )
 	{
@@ -1069,49 +1098,61 @@ const InternedString g_widthParameter( "width" );
 const std::string g_renderManLightNamespace( "ri:light:" );
 
 const std::vector<InternedString> g_pxrSurfaceParameters = {
-	g_diffuseGainParameter,
-	g_diffuseColorParameter,
-	g_specularFaceColorParameter,
-	g_specularEdgeColorParameter,
-	g_specularRoughnessParameter,
-	g_specularIorParameter,
-	g_clearcoatFaceColorParameter,
-	g_clearcoatEdgeColorParameter,
-	g_clearcoatRoughnessParameter,
-	g_glowGainParameter,
-	g_glowColorParameter,
-	g_bumpNormalParameter,
-	g_glassIorParameter,
-	g_glassRoughnessParameter,
-	g_refractionGainParameter,
-	g_presenceParameter
+	g_diffuseGainParameter,		   g_diffuseColorParameter,
+	g_specularFaceColorParameter,  g_specularEdgeColorParameter,
+	g_specularRoughnessParameter,  g_specularIorParameter,
+	g_clearcoatFaceColorParameter, g_clearcoatEdgeColorParameter,
+	g_clearcoatRoughnessParameter, g_glowGainParameter,
+	g_glowColorParameter,		   g_bumpNormalParameter,
+	g_glassIorParameter,		   g_glassRoughnessParameter,
+	g_refractionGainParameter,	   g_presenceParameter
 };
 
-const std::unordered_map<std::string, std::tuple<std::string, InternedString, std::variant<float, V3f, int>>> g_primVarMap = {
-	{ "UsdPrimvarReader_float", { "float", g_defaultFloatParameter, 0.f } },
-	{ "UsdPrimvarReader_float2", { "float2", g_defaultFloat3Parameter, V3f( 0.f ) } },
-	{ "UsdPrimvarReader_float3", { "vector", g_defaultFloat3Parameter, V3f( 0.f ) } },
-	{ "UsdPrimvarReader_normal", { "normal", g_defaultFloat3Parameter, V3f( 0.f ) } },
-	{ "UsdPrimvarReader_point", { "point", g_defaultFloat3Parameter, V3f( 0.f ) } },
-	{ "UsdPrimvarReader_vector", { "vector", g_defaultFloat3Parameter, V3f( 0.f ) } },
-	{ "UsdPrimvarReader_int", { "int", g_defaultIntParameter, 0 } }
-};
+const std::unordered_map<std::string, std::tuple<std::string, InternedString, std::variant<float, V3f, int>>>
+	g_primVarMap = { { "UsdPrimvarReader_float", { "float", g_defaultFloatParameter, 0.f } },
+					 { "UsdPrimvarReader_float2", { "float2", g_defaultFloat3Parameter, V3f( 0.f ) } },
+					 { "UsdPrimvarReader_float3", { "vector", g_defaultFloat3Parameter, V3f( 0.f ) } },
+					 { "UsdPrimvarReader_normal", { "normal", g_defaultFloat3Parameter, V3f( 0.f ) } },
+					 { "UsdPrimvarReader_point", { "point", g_defaultFloat3Parameter, V3f( 0.f ) } },
+					 { "UsdPrimvarReader_vector", { "vector", g_defaultFloat3Parameter, V3f( 0.f ) } },
+					 { "UsdPrimvarReader_int", { "int", g_defaultIntParameter, 0 } } };
 
-void transferUSDLightParameters( ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, Shader *shader, const float defaultIntensity = 1.f )
+void transferUSDLightParameters(
+	ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, Shader *shader,
+	const float defaultIntensity = 1.f
+)
 {
-	transferUSDParameter( network, shaderHandle, usdShader, g_colorParameter, shader, g_lightColorParameter, Color3f( 1.f, 1.f, 1.f ) );
+	transferUSDParameter(
+		network, shaderHandle, usdShader, g_colorParameter, shader, g_lightColorParameter, Color3f( 1.f, 1.f, 1.f )
+	);
 	transferUSDParameter( network, shaderHandle, usdShader, g_diffuseParameter, shader, g_diffuseParameter, 1.0f );
 	transferUSDParameter( network, shaderHandle, usdShader, g_exposureParameter, shader, g_exposureParameter, 0.0f );
-	transferUSDParameter( network, shaderHandle, usdShader, g_intensityParameter, shader, g_intensityParameter, defaultIntensity );
+	transferUSDParameter(
+		network, shaderHandle, usdShader, g_intensityParameter, shader, g_intensityParameter, defaultIntensity
+	);
 	transferUSDParameter( network, shaderHandle, usdShader, g_specularParameter, shader, g_specularParameter, 1.0f );
-	transferUSDParameter( network, shaderHandle, usdShader, g_enableColorTemperatureParameter, shader, g_enableTemperatureParameter, false );
-	transferUSDParameter( network, shaderHandle, usdShader, g_colorTemperatureParameter, shader, g_temperatureParameter, 6500.f );
+	transferUSDParameter(
+		network, shaderHandle, usdShader, g_enableColorTemperatureParameter, shader, g_enableTemperatureParameter, false
+	);
+	transferUSDParameter(
+		network, shaderHandle, usdShader, g_colorTemperatureParameter, shader, g_temperatureParameter, 6500.f
+	);
 
-	transferUSDParameter( network, shaderHandle, usdShader, g_shadowEnableParameter, shader, g_enableShadowsParameter, true );
-	transferUSDParameter( network, shaderHandle, usdShader, g_shadowColorUSDParameter, shader, g_shadowColorParameter, Color3f( 0 ) );
-	transferUSDParameter( network, shaderHandle, usdShader, g_shadowDistanceUSDParameter, shader, g_shadowDistanceParameter, -1.f );
-	transferUSDParameter( network, shaderHandle, usdShader, g_shadowFalloffUSDParameter, shader, g_shadowFalloffParameter, -1.f );
-	transferUSDParameter( network, shaderHandle, usdShader, g_shadowFalloffGammaUSDParameter, shader, g_shadowFalloffGammaParameter, 1.f );
+	transferUSDParameter(
+		network, shaderHandle, usdShader, g_shadowEnableParameter, shader, g_enableShadowsParameter, true
+	);
+	transferUSDParameter(
+		network, shaderHandle, usdShader, g_shadowColorUSDParameter, shader, g_shadowColorParameter, Color3f( 0 )
+	);
+	transferUSDParameter(
+		network, shaderHandle, usdShader, g_shadowDistanceUSDParameter, shader, g_shadowDistanceParameter, -1.f
+	);
+	transferUSDParameter(
+		network, shaderHandle, usdShader, g_shadowFalloffUSDParameter, shader, g_shadowFalloffParameter, -1.f
+	);
+	transferUSDParameter(
+		network, shaderHandle, usdShader, g_shadowFalloffGammaUSDParameter, shader, g_shadowFalloffGammaParameter, 1.f
+	);
 
 	for( const auto &[name, value] : usdShader->parameters() )
 	{
@@ -1122,15 +1163,23 @@ void transferUSDLightParameters( ShaderNetwork *network, InternedString shaderHa
 	}
 }
 
-void transferUSDShapingParameters( ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, Shader *shader )
+void transferUSDShapingParameters(
+	ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, Shader *shader
+)
 {
 	if( auto dFile = usdShader->parametersData()->member<StringData>( g_shapingIesFileParameter ) )
 	{
 		if( !dFile->readable().empty() )
 		{
 			shader->parameters()[g_iesProfileParameter] = new StringData( dFile->readable() );
-			transferUSDParameter( network, shaderHandle, usdShader, g_shapingIesAngleScaleParameter, shader, g_iesProfileScaleParameter, 0.f );
-			transferUSDParameter( network, shaderHandle, usdShader, g_shapingIesNormalizeParameter, shader, g_iesProfileNormalizeParameter, false );
+			transferUSDParameter(
+				network, shaderHandle, usdShader, g_shapingIesAngleScaleParameter, shader, g_iesProfileScaleParameter,
+				0.f
+			);
+			transferUSDParameter(
+				network, shaderHandle, usdShader, g_shapingIesNormalizeParameter, shader,
+				g_iesProfileNormalizeParameter, false
+			);
 		}
 	}
 
@@ -1217,11 +1266,16 @@ void IECoreRenderMan::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shade
 			pxrSurfaceShader->parameters()[g_roughSpecularDoubleSidedParameter] = new IECore::IntData( 1 );
 			pxrSurfaceShader->parameters()[g_clearcoatDoubleSidedParameter] = new IECore::IntData( 1 );
 
-			const InternedString pxrSurfaceHandle = shaderNetwork->addShader( handle.string() + "PxrSurface", std::move( pxrSurfaceShader ) );
+			const InternedString pxrSurfaceHandle =
+				shaderNetwork->addShader( handle.string() + "PxrSurface", std::move( pxrSurfaceShader ) );
 
 			for( const auto &p : g_pxrSurfaceParameters )
 			{
-				shaderNetwork->addConnection( ShaderNetwork::Connection( { handle, InternedString( p.string() + "Out" ) }, { pxrSurfaceHandle, p } ) );
+				shaderNetwork->addConnection(
+					ShaderNetwork::Connection(
+						{ handle, InternedString( p.string() + "Out" ) }, { pxrSurfaceHandle, p }
+					)
+				);
 			}
 
 			shaderNetwork->setOutput( { pxrSurfaceHandle, "" } );
@@ -1231,7 +1285,10 @@ void IECoreRenderMan::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shade
 			newShader = new Shader( "PxrSphereLight", "ri:light" );
 			transferUSDLightParameters( shaderNetwork, handle, shader.get(), newShader.get() );
 			transferUSDShapingParameters( shaderNetwork, handle, shader.get(), newShader.get() );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_normalizeParameter, newShader.get(), g_areaNormalizeParameter, false );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_normalizeParameter, newShader.get(), g_areaNormalizeParameter,
+				false
+			);
 
 			if( parameterValue( shader.get(), g_treatAsPointParameter, false ) )
 			{
@@ -1243,14 +1300,20 @@ void IECoreRenderMan::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shade
 			newShader = new Shader( "PxrDiskLight", "ri:light" );
 			transferUSDLightParameters( shaderNetwork, handle, shader.get(), newShader.get() );
 			transferUSDShapingParameters( shaderNetwork, handle, shader.get(), newShader.get() );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_normalizeParameter, newShader.get(), g_areaNormalizeParameter, false );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_normalizeParameter, newShader.get(), g_areaNormalizeParameter,
+				false
+			);
 		}
 		else if( shader->getName() == "RectLight" )
 		{
 			newShader = new Shader( "PxrRectLight", "ri:light" );
 			transferUSDLightParameters( shaderNetwork, handle, shader.get(), newShader.get() );
 			transferUSDShapingParameters( shaderNetwork, handle, shader.get(), newShader.get() );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_normalizeParameter, newShader.get(), g_areaNormalizeParameter, false );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_normalizeParameter, newShader.get(), g_areaNormalizeParameter,
+				false
+			);
 
 			const std::string textureFile = parameterValue( shader.get(), g_textureFileParameter, std::string() );
 			if( !textureFile.empty() )
@@ -1263,7 +1326,10 @@ void IECoreRenderMan::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shade
 			newShader = new Shader( "PxrDistantLight", "ri:light" );
 			transferUSDLightParameters( shaderNetwork, handle, shader.get(), newShader.get(), 50000.f );
 			transferUSDShapingParameters( shaderNetwork, handle, shader.get(), newShader.get() );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_normalizeParameter, newShader.get(), g_areaNormalizeParameter, false );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_normalizeParameter, newShader.get(), g_areaNormalizeParameter,
+				false
+			);
 
 			const float angle = parameterValue( shader.get(), g_angleParameter, 0.53f );
 			newShader->parameters()[g_angleExtentParameter] = new FloatData( angle );
@@ -1283,9 +1349,11 @@ void IECoreRenderMan::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shade
 			if( textureFormat != "automatic" )
 			{
 				IECore::msg(
-					IECore::Msg::Warning,
-					"convertUSDShaders",
-					fmt::format( "Unsupported value \"{}\" for DomeLight.format. Only \"automatic\" is supported. Format will be read from texture file.", textureFormat )
+					IECore::Msg::Warning, "convertUSDShaders",
+					fmt::format(
+						"Unsupported value \"{}\" for DomeLight.format. Only \"automatic\" is supported. Format will be read from texture file.",
+						textureFormat
+					)
 				);
 			}
 		}
@@ -1294,7 +1362,10 @@ void IECoreRenderMan::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shade
 			newShader = new Shader( "PxrCylinderLight", "ri:light" );
 			transferUSDLightParameters( shaderNetwork, handle, shader.get(), newShader.get() );
 			transferUSDShapingParameters( shaderNetwork, handle, shader.get(), newShader.get() );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_normalizeParameter, newShader.get(), g_areaNormalizeParameter, false );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_normalizeParameter, newShader.get(), g_areaNormalizeParameter,
+				false
+			);
 
 			if( parameterValue( shader.get(), g_treatAsLineParameter, false ) )
 			{
@@ -1309,10 +1380,15 @@ void IECoreRenderMan::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shade
 			const auto &[typeName, defaultParameter, defaultValue] = it->second;
 
 			newShader->parameters()[g_typeParameter] = new StringData( typeName );
-			transferUSDParameter( shaderNetwork, handle, shader.get(), g_varnameParameter, newShader.get(), g_varnameParameter, string() );
+			transferUSDParameter(
+				shaderNetwork, handle, shader.get(), g_varnameParameter, newShader.get(), g_varnameParameter, string()
+			);
 			std::visit(
-				[&shaderNetwork, &handle = handle, &shader = shader, &newShader, &defaultParameter = defaultParameter]( auto &&v ) {
-					transferUSDParameter( shaderNetwork, handle, shader.get(), g_fallbackParameter, newShader.get(), defaultParameter, v );
+				[&shaderNetwork, &handle = handle, &shader = shader, &newShader,
+				 &defaultParameter = defaultParameter]( auto &&v ) {
+					transferUSDParameter(
+						shaderNetwork, handle, shader.get(), g_fallbackParameter, newShader.get(), defaultParameter, v
+					);
 				},
 				defaultValue
 			);
@@ -1369,7 +1445,10 @@ M44f IECoreRenderMan::ShaderNetworkAlgo::usdLightTransform( const Shader *lightS
 // `ShaderNetworkAlgo::evaluateVStructConditional()` implementation
 //////////////////////////////////////////////////////////////////////////
 
-IECoreRenderMan::ShaderNetworkAlgo::VStructAction IECoreRenderMan::ShaderNetworkAlgo::evaluateVStructConditional( const std::string &expression, const ShaderNetworkAlgo::ParameterValueFunction &valueFunction, const ShaderNetworkAlgo::ParameterIsConnectedFunction &isConnectedFunction )
+IECoreRenderMan::ShaderNetworkAlgo::VStructAction IECoreRenderMan::ShaderNetworkAlgo::evaluateVStructConditional(
+	const std::string &expression, const ShaderNetworkAlgo::ParameterValueFunction &valueFunction,
+	const ShaderNetworkAlgo::ParameterIsConnectedFunction &isConnectedFunction
+)
 {
 	VStructConditionalExpression evaluator( expression );
 	return evaluator.evaluate( valueFunction, isConnectedFunction );
@@ -1382,7 +1461,9 @@ IECoreRenderMan::ShaderNetworkAlgo::VStructAction IECoreRenderMan::ShaderNetwork
 namespace
 {
 
-void resolveVStructsWalk( IECoreScene::ShaderNetwork *shaderNetwork, InternedString shaderHandle, unordered_set<InternedString> &visited )
+void resolveVStructsWalk(
+	IECoreScene::ShaderNetwork *shaderNetwork, InternedString shaderHandle, unordered_set<InternedString> &visited
+)
 {
 	if( !visited.insert( shaderHandle ).second )
 	{
@@ -1439,34 +1520,41 @@ void resolveVStructsWalk( IECoreScene::ShaderNetwork *shaderNetwork, InternedStr
 				continue;
 			}
 
-			const IECoreRenderMan::ShaderNetworkAlgo::VStructAction action = sourceMemberIt->second.conditionalExpression.evaluate(
-				// ParameterValueFunction
-				[&]( InternedString parameterName ) -> ConstDataPtr {
-					if( auto d = sourceShader->parametersData()->member( parameterName ) )
-					{
-						return d;
-					}
-					// Fall back to default value.
-					if( auto parameterInfo = sourceShaderInfo->parameterInfo( parameterName ) )
-					{
-						if( parameterInfo->defaultValue )
+			const IECoreRenderMan::ShaderNetworkAlgo::VStructAction action =
+				sourceMemberIt->second.conditionalExpression.evaluate(
+					// ParameterValueFunction
+					[&]( InternedString parameterName ) -> ConstDataPtr {
+						if( auto d = sourceShader->parametersData()->member( parameterName ) )
 						{
-							return parameterInfo->defaultValue;
+							return d;
 						}
+						// Fall back to default value.
+						if( auto parameterInfo = sourceShaderInfo->parameterInfo( parameterName ) )
+						{
+							if( parameterInfo->defaultValue )
+							{
+								return parameterInfo->defaultValue;
+							}
+						}
+						IECore::msg(
+							IECore::Msg::Warning, "IECoreRenderMan",
+							fmt::format(
+								"Couldn't find default value for \"{}.{}\"", sourceShader->getName(), parameterName
+							)
+						);
+						return nullptr;
+					},
+					// IsConnectedFunction
+					[&]( InternedString parameterName ) -> bool {
+						return shaderNetwork->input( { connection.source.shader, parameterName } );
 					}
-					IECore::msg( IECore::Msg::Warning, "IECoreRenderMan", fmt::format( "Couldn't find default value for \"{}.{}\"", sourceShader->getName(), parameterName ) );
-					return nullptr;
-				},
-				// IsConnectedFunction
-				[&]( InternedString parameterName ) -> bool {
-					return shaderNetwork->input( { connection.source.shader, parameterName } );
-				}
-			);
+				);
 
 			if( action.type == IECoreRenderMan::ShaderNetworkAlgo::VStructAction::Type::Connect )
 			{
 				shaderNetwork->addConnection(
-					{ { connection.source.shader, sourceMemberIt->second.parameterName }, { shaderHandle, vStructMember.parameterName } }
+					{ { connection.source.shader, sourceMemberIt->second.parameterName },
+					  { shaderHandle, vStructMember.parameterName } }
 				);
 			}
 			else if( action.type == IECoreRenderMan::ShaderNetworkAlgo::VStructAction::Type::Set )
@@ -1487,7 +1575,13 @@ void resolveVStructsWalk( IECoreScene::ShaderNetwork *shaderNetwork, InternedStr
 						modifiedShader->parameters()[vStructMember.parameterName] = new IntData( action.value );
 						break;
 					default :
-						IECore::msg( IECore::Msg::Warning, "IECoreRenderMan", fmt::format( "Vstruct member \"{}.{}\" has unsupported value type", shader->getName(), vStructMember.parameterName.string() ) );
+						IECore::msg(
+							IECore::Msg::Warning, "IECoreRenderMan",
+							fmt::format(
+								"Vstruct member \"{}.{}\" has unsupported value type", shader->getName(),
+								vStructMember.parameterName.string()
+							)
+						);
 				}
 			}
 		}

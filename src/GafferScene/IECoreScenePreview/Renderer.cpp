@@ -67,20 +67,20 @@ CreatorMap &creators()
 // Renderer
 //////////////////////////////////////////////////////////////////////////
 
-Renderer::Renderer()
-{
-}
+Renderer::Renderer() {}
 
-Renderer::~Renderer()
-{
-}
+Renderer::~Renderer() {}
 
-Renderer::ObjectInterfacePtr Renderer::camera( const std::string &name, const IECoreScene::Camera *camera, const AttributesInterface *attributes )
+Renderer::ObjectInterfacePtr Renderer::camera(
+	const std::string &name, const IECoreScene::Camera *camera, const AttributesInterface *attributes
+)
 {
 	return this->camera( name, { camera }, { 0.0f }, attributes );
 }
 
-Renderer::ObjectInterfacePtr Renderer::light( const std::string &name, const IECore::Object *object, const AttributesInterface *attributes )
+Renderer::ObjectInterfacePtr Renderer::light(
+	const std::string &name, const IECore::Object *object, const AttributesInterface *attributes
+)
 {
 	if( object )
 	{
@@ -92,7 +92,9 @@ Renderer::ObjectInterfacePtr Renderer::light( const std::string &name, const IEC
 	}
 }
 
-Renderer::ObjectInterfacePtr Renderer::lightFilter( const std::string &name, const IECore::Object *object, const AttributesInterface *attributes )
+Renderer::ObjectInterfacePtr Renderer::lightFilter(
+	const std::string &name, const IECore::Object *object, const AttributesInterface *attributes
+)
 {
 	if( object )
 	{
@@ -104,7 +106,9 @@ Renderer::ObjectInterfacePtr Renderer::lightFilter( const std::string &name, con
 	}
 }
 
-Renderer::ObjectInterfacePtr Renderer::object( const std::string &name, const IECore::Object *object, const AttributesInterface *attributes )
+Renderer::ObjectInterfacePtr Renderer::object(
+	const std::string &name, const IECore::Object *object, const AttributesInterface *attributes
+)
 {
 	return this->object( name, { object }, { 0.0f }, attributes );
 }
@@ -114,13 +118,9 @@ IECore::DataPtr Renderer::command( const IECore::InternedString name, const IECo
 	throw IECore::NotImplementedException( "Renderer::command" );
 }
 
-Renderer::AttributesInterface::~AttributesInterface()
-{
-}
+Renderer::AttributesInterface::~AttributesInterface() {}
 
-Renderer::ObjectInterface::~ObjectInterface()
-{
-}
+Renderer::ObjectInterface::~ObjectInterface() {}
 
 void Renderer::ObjectInterface::transform( const Imath::M44f &transform )
 {
@@ -132,7 +132,10 @@ const std::vector<IECore::InternedString> &Renderer::types()
 	return ::types();
 }
 
-Renderer::Ptr Renderer::create( const IECore::InternedString &type, RenderType renderType, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler )
+Renderer::Ptr Renderer::create(
+	const IECore::InternedString &type, RenderType renderType, const std::string &fileName,
+	const IECore::MessageHandlerPtr &messageHandler
+)
 {
 	const CreatorMap &c = creators();
 	CreatorMap::const_iterator it = c.find( type );
@@ -156,8 +159,5 @@ void Renderer::deregisterType( const IECore::InternedString &typeName )
 {
 	creators().erase( typeName );
 	auto &t = ::types();
-	t.erase(
-		std::remove( t.begin(), t.end(), typeName ),
-		t.end()
-	);
+	t.erase( std::remove( t.begin(), t.end(), typeName ), t.end() );
 }

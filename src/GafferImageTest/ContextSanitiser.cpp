@@ -50,9 +50,7 @@ using namespace Gaffer;
 using namespace GafferImage;
 using namespace GafferImageTest;
 
-ContextSanitiser::ContextSanitiser()
-{
-}
+ContextSanitiser::ContextSanitiser() {}
 
 void ContextSanitiser::processStarted( const Gaffer::Process *process )
 {
@@ -87,40 +85,28 @@ void ContextSanitiser::processStarted( const Gaffer::Process *process )
 	}
 }
 
-void ContextSanitiser::processFinished( const Gaffer::Process *process )
-{
-}
+void ContextSanitiser::processFinished( const Gaffer::Process *process ) {}
 
 void ContextSanitiser::warn( const Gaffer::Process &process, const IECore::InternedString &contextVariable )
 {
 	const Warning warning(
-		PlugPair( process.plug(), process.parent() ? process.parent()->plug() : nullptr ),
-		contextVariable
+		PlugPair( process.plug(), process.parent() ? process.parent()->plug() : nullptr ), contextVariable
 	);
 
 	if( m_warningsEmitted.insert( warning ).second )
 	{
 		std::string message = fmt::format(
-			"{} in context for {} {}",
-			contextVariable.string(),
-			process.plug()->relativeName(
-				process.plug()->ancestor<ScriptNode>()
-			),
-			process.type().string()
+			"{} in context for {} {}", contextVariable.string(),
+			process.plug()->relativeName( process.plug()->ancestor<ScriptNode>() ), process.type().string()
 		);
 		if( process.parent() )
 		{
 			message += fmt::format(
 				" (called from {} {})",
-				process.parent()->plug()->relativeName(
-					process.parent()->plug()->ancestor<ScriptNode>()
-				),
+				process.parent()->plug()->relativeName( process.parent()->plug()->ancestor<ScriptNode>() ),
 				process.parent()->type().string()
 			);
 		}
-		IECore::msg(
-			IECore::Msg::Warning, "ContextSanitiser",
-			message
-		);
+		IECore::msg( IECore::Msg::Warning, "ContextSanitiser", message );
 	}
 }

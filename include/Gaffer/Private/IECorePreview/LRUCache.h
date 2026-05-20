@@ -93,10 +93,11 @@ class TaskParallel;
 /// which yield the same Key must also yield the same results from the GetterFunction.
 ///
 /// \ingroup utilityGroup
-template<typename Key, typename Value, template<typename> class Policy = LRUCachePolicy::Parallel, typename GetterKey = Key>
+template<
+	typename Key, typename Value, template<typename> class Policy = LRUCachePolicy::Parallel, typename GetterKey = Key>
 class LRUCache : private boost::noncopyable
 {
-	public:
+public:
 
 	using Cost = size_t;
 	using KeyType = Key;
@@ -105,11 +106,15 @@ class LRUCache : private boost::noncopyable
 	/// when given the key. It should throw a descriptive exception if it can't get the data for
 	/// any reason. Cancellation support requires that `IECore::Canceller::check( canceller )`
 	/// is called periodically.
-	using GetterFunction = boost::function<Value( const GetterKey &key, Cost &cost, const IECore::Canceller *canceller )>;
+	using GetterFunction =
+		boost::function<Value( const GetterKey &key, Cost &cost, const IECore::Canceller *canceller )>;
 	/// The optional RemovalCallback is called whenever an item is discarded from the cache.
 	using RemovalCallback = boost::function<void( const Key &key, const Value &data )>;
 
-	LRUCache( GetterFunction getter, Cost maxCost, RemovalCallback removalCallback = RemovalCallback(), bool cacheErrors = true );
+	LRUCache(
+		GetterFunction getter, Cost maxCost, RemovalCallback removalCallback = RemovalCallback(),
+		bool cacheErrors = true
+	);
 	virtual ~LRUCache();
 
 	/// Retrieves an item from the cache, computing it if necessary.
@@ -163,7 +168,7 @@ class LRUCache : private boost::noncopyable
 	/// Returns the current cost of all cached items.
 	Cost currentCost() const;
 
-	private:
+private:
 
 	// Data
 	//////////////////////////////////////////////////////////////////////////

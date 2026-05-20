@@ -50,7 +50,7 @@ IE_CORE_FORWARDDECLARE( StringPlug )
 class GAFFER_API Expression : public ComputeNode
 {
 
-	public:
+public:
 
 	explicit Expression( const std::string &name = defaultName<Expression>() );
 	~Expression() override;
@@ -92,11 +92,11 @@ class GAFFER_API Expression : public ComputeNode
 	class GAFFER_API Engine : public IECore::RefCounted
 	{
 
-		public:
+	public:
 
 		IE_CORE_DECLAREMEMBERPTR( Engine );
 
-		protected:
+	protected:
 
 		/// @name Parsing and execution
 		///
@@ -112,13 +112,18 @@ class GAFFER_API Expression : public ComputeNode
 		/// that are read from and written to by the expression, and the
 		/// contextVariables array with the names of context variables the
 		/// expression will access.
-		virtual void parse( Expression *node, const std::string &expression, std::vector<ValuePlug *> &inputs, std::vector<ValuePlug *> &outputs, std::vector<IECore::InternedString> &contextVariables ) = 0;
+		virtual void parse(
+			Expression *node, const std::string &expression, std::vector<ValuePlug *> &inputs,
+			std::vector<ValuePlug *> &outputs, std::vector<IECore::InternedString> &contextVariables
+		) = 0;
 		/// Executes the last parsed expression in the specified context, using the values
 		/// provided by proxyInputs and returning an array containing a value for
 		/// each output plug. The results returned will later be passed to apply()
 		/// to apply them to each of the individual output plugs.
 		/// \threading This function may be called concurrently.
-		virtual IECore::ConstObjectVectorPtr execute( const Context *context, const std::vector<const ValuePlug *> &proxyInputs ) const = 0;
+		virtual IECore::ConstObjectVectorPtr execute(
+			const Context *context, const std::vector<const ValuePlug *> &proxyInputs
+		) const = 0;
 		/// What cache policy should be used for executing the expression.
 		virtual Gaffer::ValuePlug::CachePolicy executeCachePolicy() const = 0;
 		//@}
@@ -138,14 +143,19 @@ class GAFFER_API Expression : public ComputeNode
 		/// suitably. In this case the `topLevelProxyOutput` argument provides the
 		/// proxy for the compound plug itself.
 		/// \threading This function may be called concurrently.
-		virtual void apply( ValuePlug *proxyOutput, const ValuePlug *topLevelProxyOutput, const IECore::Object *value ) const = 0;
+		virtual void apply(
+			ValuePlug *proxyOutput, const ValuePlug *topLevelProxyOutput, const IECore::Object *value
+		) const = 0;
 		/// Used to implement Expression::identifier.
 		virtual std::string identifier( const Expression *node, const ValuePlug *plug ) const = 0;
 		/// Returns a new expression, equivalent to the original but now acting on the
 		/// new plugs rather than the old ones. New plugs may be null in the event that
 		/// a user has manually disconnected plugs. Note that this should not modify
 		/// the current engine in any way, but just return a new expression.
-		virtual std::string replace( const Expression *node, const std::string &expression, const std::vector<const ValuePlug *> &oldPlugs, const std::vector<const ValuePlug *> &newPlugs ) const = 0;
+		virtual std::string replace(
+			const Expression *node, const std::string &expression, const std::vector<const ValuePlug *> &oldPlugs,
+			const std::vector<const ValuePlug *> &newPlugs
+		) const = 0;
 		/// Used to implement Expression::defaultExpression().
 		virtual std::string defaultExpression( const ValuePlug *output ) const = 0;
 		//@}
@@ -164,7 +174,7 @@ class GAFFER_API Expression : public ComputeNode
 			static EnginePtr creator() { return new T; };
 		};
 
-		private:
+	private:
 
 		friend class Expression;
 
@@ -174,14 +184,14 @@ class GAFFER_API Expression : public ComputeNode
 
 	void affects( const Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
 	void hash( const ValuePlug *output, const Context *context, IECore::MurmurHash &h ) const override;
 	void compute( ValuePlug *output, const Context *context ) const override;
 
 	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-	private:
+private:
 
 	static size_t g_firstPlugIndex;
 

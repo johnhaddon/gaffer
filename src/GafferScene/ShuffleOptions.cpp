@@ -47,16 +47,13 @@ GAFFER_NODE_DEFINE_TYPE( ShuffleOptions );
 
 size_t ShuffleOptions::g_firstPlugIndex = 0;
 
-ShuffleOptions::ShuffleOptions( const std::string &name )
-	: GlobalsProcessor( name )
+ShuffleOptions::ShuffleOptions( const std::string &name ) : GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ShufflesPlug( "shuffles" ) );
 }
 
-ShuffleOptions::~ShuffleOptions()
-{
-}
+ShuffleOptions::~ShuffleOptions() {}
 
 Gaffer::ShufflesPlug *ShuffleOptions::shufflesPlug()
 {
@@ -83,7 +80,9 @@ void ShuffleOptions::hashProcessedGlobals( const Gaffer::Context *context, IECor
 	shufflesPlug()->hash( h );
 }
 
-IECore::ConstCompoundObjectPtr ShuffleOptions::computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const
+IECore::ConstCompoundObjectPtr ShuffleOptions::computeProcessedGlobals(
+	const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals
+) const
 {
 	// Get options from input globals into a separate map with the prefix removed
 	// from the name. At the same time, pass through other globals which aren't options.

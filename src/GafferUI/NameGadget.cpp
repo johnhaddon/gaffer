@@ -44,15 +44,12 @@ using namespace GafferUI;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( NameGadget );
 
-NameGadget::NameGadget( Gaffer::GraphComponentPtr object )
-	: TextGadget( object->getName() )
+NameGadget::NameGadget( Gaffer::GraphComponentPtr object ) : TextGadget( object->getName() )
 {
 	object->nameChangedSignal().connect( boost::bind( &NameGadget::graphComponentNameChanged, this, ::_1 ) );
 }
 
-NameGadget::~NameGadget()
-{
-}
+NameGadget::~NameGadget() {}
 
 void NameGadget::graphComponentNameChanged( Gaffer::GraphComponentPtr object )
 {

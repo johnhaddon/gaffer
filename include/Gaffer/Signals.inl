@@ -51,10 +51,7 @@ namespace Gaffer::Signals
 // Connection
 //////////////////////////////////////////////////////////////////////////
 
-inline Connection::Connection( const Private::SlotBase::Ptr &slot )
-	: m_slot( slot )
-{
-}
+inline Connection::Connection( const Private::SlotBase::Ptr &slot ) : m_slot( slot ) {}
 
 inline void Connection::setBlocked( bool blocked )
 {
@@ -121,8 +118,7 @@ struct DefaultCombiner
 //////////////////////////////////////////////////////////////////////////
 
 template<typename Result, typename... Args, typename Combiner>
-Signal<Result( Args... ), Combiner>::Signal( const Combiner &combiner )
-	: m_lastSlotAndCombiner( nullptr, combiner )
+Signal<Result( Args... ), Combiner>::Signal( const Combiner &combiner ) : m_lastSlotAndCombiner( nullptr, combiner )
 {
 }
 
@@ -156,9 +152,7 @@ Connection Signal<Result( Args... ), Combiner>::connectInternal( const SlotFunct
 		lastSlot() = new Slot( m_firstSlot );
 	}
 
-	Private::SlotBase::Ptr s = new Slot(
-		front ? m_firstSlot : *( lastSlot()->previous ), slot
-	);
+	Private::SlotBase::Ptr s = new Slot( front ? m_firstSlot : *( lastSlot()->previous ), slot );
 
 	const Connection result = Connection( s );
 	Trackable::trackConnection( slot, result );
@@ -169,10 +163,7 @@ template<typename Result, typename... Args, typename Combiner>
 Result Signal<Result( Args... ), Combiner>::operator () ( Args... args ) const
 {
 	ArgsTuple argsTuple( args... ); /// \todo : Capture by reference? Or forward_as_tuple?
-	return combiner()(
-		SlotCallIterator( m_firstSlot, argsTuple ),
-		SlotCallIterator( nullptr, argsTuple )
-	);
+	return combiner()( SlotCallIterator( m_firstSlot, argsTuple ), SlotCallIterator( nullptr, argsTuple ) );
 }
 
 template<typename Result, typename... Args, typename Combiner>
@@ -233,7 +224,8 @@ struct Signal<Result( Args... ), Combiner>::Slot : public Private::SlotBase
 	using FunctionType = std::function<Result( Args... )>;
 
 	Slot( Private::SlotBase::Ptr &previous, const FunctionType &function = FunctionType() )
-		: SlotBase( previous ), function( function )
+		: SlotBase( previous ),
+		  function( function )
 	{
 	}
 
@@ -263,8 +255,7 @@ struct Signal<Result( Args... ), Combiner>::Slot : public Private::SlotBase
 
 	struct CallScope : private boost::noncopyable
 	{
-		CallScope( Slot &slot )
-			: slot( slot )
+		CallScope( Slot &slot ) : slot( slot )
 		{
 			// Slot can't be called if not connected
 			assert( slot.previous );
@@ -292,21 +283,18 @@ struct Signal<Result( Args... ), Combiner>::Slot : public Private::SlotBase
 //////////////////////////////////////////////////////////////////////////
 
 template<typename Result, typename... Args, typename Combiner>
-class Signal<Result( Args... ), Combiner>::SlotCallIterator : public boost::iterator_facade<
-																  SlotCallIterator,
-																  SlotCallIteratorValueType,
-																  boost::single_pass_traversal_tag>
+class Signal<Result( Args... ), Combiner>::SlotCallIterator
+	: public boost::iterator_facade<SlotCallIterator, SlotCallIteratorValueType, boost::single_pass_traversal_tag>
 {
 
-	public:
+public:
 
-	SlotCallIterator( const Private::SlotBase::Ptr &slot, const ArgsTuple &args )
-		: m_slot( slot ), m_args( args )
+	SlotCallIterator( const Private::SlotBase::Ptr &slot, const ArgsTuple &args ) : m_slot( slot ), m_args( args )
 	{
 		skipBlocked();
 	}
 
-	private:
+private:
 
 	friend class boost::iterator_core_access;
 
@@ -335,10 +323,7 @@ class Signal<Result( Args... ), Combiner>::SlotCallIterator : public boost::iter
 		skipBlocked();
 	}
 
-	bool atEnd() const
-	{
-		return !m_slot || !m_slot->next;
-	}
+	bool atEnd() const { return !m_slot || !m_slot->next; }
 
 	bool equal( const SlotCallIterator &other ) const
 	{
@@ -469,11 +454,7 @@ void Trackable::trackConnection( const SlotFunctor &slotFunctor, const Connectio
 	// `visit_each` allows us to discover Trackable objects inside callables
 	// such as `boost::bind()`. Note that `std::bind()` is _not_ supported.
 	TrackableVisitor visitor( connection );
-	visit_each(
-		visitor,
-		slotFunctor,
-		0
-	);
+	visit_each( visitor, slotFunctor, 0 );
 }
 
 inline void Trackable::disconnectTrackedConnections()
@@ -491,13 +472,9 @@ inline void Trackable::disconnectTrackedConnections()
 // ScopedConnection
 //////////////////////////////////////////////////////////////////////////
 
-inline ScopedConnection::ScopedConnection( const Connection &connection )
-	: Connection( connection )
-{
-}
+inline ScopedConnection::ScopedConnection( const Connection &connection ) : Connection( connection ) {}
 
-inline ScopedConnection::ScopedConnection( ScopedConnection &&scopedConnection )
-	: Connection( scopedConnection )
+inline ScopedConnection::ScopedConnection( ScopedConnection &&scopedConnection ) : Connection( scopedConnection )
 {
 	scopedConnection.Connection::operator = ( Connection() );
 }
@@ -527,7 +504,8 @@ inline ScopedConnection &ScopedConnection::operator = ( ScopedConnection &&scope
 //////////////////////////////////////////////////////////////////////////
 
 inline BlockedConnection::BlockedConnection( Signals::Connection &connection, bool block )
-	: m_connection( nullptr ), m_previouslyBlocked( false )
+	: m_connection( nullptr ),
+	  m_previouslyBlocked( false )
 {
 	if( block && connection.connected() )
 	{

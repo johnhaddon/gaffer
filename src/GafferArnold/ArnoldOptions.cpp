@@ -42,11 +42,6 @@ using namespace GafferArnold;
 
 GAFFER_NODE_DEFINE_TYPE( ArnoldOptions );
 
-ArnoldOptions::ArnoldOptions( const std::string &name )
-	: GafferScene::Options( name, "ai" )
-{
-}
+ArnoldOptions::ArnoldOptions( const std::string &name ) : GafferScene::Options( name, "ai" ) {}
 
-ArnoldOptions::~ArnoldOptions()
-{
-}
+ArnoldOptions::~ArnoldOptions() {}

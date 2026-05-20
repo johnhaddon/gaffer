@@ -72,10 +72,9 @@ std::string cleanupChannelName( std::string s )
 class OSLImagePlugAdder : public PlugAdder
 {
 
-	public:
+public:
 
-	OSLImagePlugAdder( GraphComponentPtr plugsParent )
-		: m_plugsParent( IECore::runTimeCast<Plug>( plugsParent ) )
+	OSLImagePlugAdder( GraphComponentPtr plugsParent ) : m_plugsParent( IECore::runTimeCast<Plug>( plugsParent ) )
 	{
 		if( !m_plugsParent )
 		{
@@ -84,7 +83,7 @@ class OSLImagePlugAdder : public PlugAdder
 		buttonReleaseSignal().connect( boost::bind( &OSLImagePlugAdder::buttonRelease, this, ::_2 ) );
 	}
 
-	protected:
+protected:
 
 	bool canCreateConnection( const Plug *endpoint ) const override
 	{
@@ -98,13 +97,15 @@ class OSLImagePlugAdder : public PlugAdder
 			return false;
 		}
 
-		IECore::ConstCompoundDataPtr plugAdderOptions = Metadata::value<IECore::CompoundData>( m_plugsParent->node(), "plugAdderOptions" );
+		IECore::ConstCompoundDataPtr plugAdderOptions =
+			Metadata::value<IECore::CompoundData>( m_plugsParent->node(), "plugAdderOptions" );
 		return !availableChannels( plugAdderOptions.get(), endpoint ).empty();
 	}
 
 	void createConnection( Plug *endpoint ) override
 	{
-		IECore::ConstCompoundDataPtr plugAdderOptions = Metadata::value<IECore::CompoundData>( m_plugsParent->node(), "plugAdderOptions" );
+		IECore::ConstCompoundDataPtr plugAdderOptions =
+			Metadata::value<IECore::CompoundData>( m_plugsParent->node(), "plugAdderOptions" );
 		vector<std::string> names = availableChannels( plugAdderOptions.get(), endpoint );
 
 		std::string picked = menuSignal()( "Connect To", names );
@@ -113,11 +114,12 @@ class OSLImagePlugAdder : public PlugAdder
 			return;
 		}
 
-		NameValuePlug *newPlug = addPlug( cleanupChannelName( picked ), plugAdderOptions->member<IECore::Data>( picked ) );
+		NameValuePlug *newPlug =
+			addPlug( cleanupChannelName( picked ), plugAdderOptions->member<IECore::Data>( picked ) );
 		newPlug->valuePlug()->setInput( endpoint );
 	}
 
-	private:
+private:
 
 	std::set<std::string> usedNames() const
 	{
@@ -141,11 +143,15 @@ class OSLImagePlugAdder : public PlugAdder
 		FloatPlugPtr alphaValuePlug;
 		if( defaultData )
 		{
-			const IECore::Color4fData *color4fDefaultData = IECore::runTimeCast<const IECore::Color4fData>( defaultData );
+			const IECore::Color4fData *color4fDefaultData =
+				IECore::runTimeCast<const IECore::Color4fData>( defaultData );
 			if( color4fDefaultData )
 			{
 				const Imath::Color4f &default4 = color4fDefaultData->readable();
-				alphaValuePlug = new FloatPlug( "value", Plug::In, default4[3], std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), Plug::Flags::Default | Plug::Flags::Dynamic );
+				alphaValuePlug = new FloatPlug(
+					"value", Plug::In, default4[3], std::numeric_limits<float>::lowest(),
+					std::numeric_limits<float>::max(), Plug::Flags::Default | Plug::Flags::Dynamic
+				);
 				defaultData = new IECore::Color3fData( Imath::Color3f( default4[0], default4[1], default4[2] ) );
 			}
 
@@ -162,7 +168,9 @@ class OSLImagePlugAdder : public PlugAdder
 				}
 				channelName = newName;
 			}
-			valuePlug = PlugAlgo::createPlugFromData( "value", Plug::In, Plug::Flags::Default | Plug::Flags::Dynamic, defaultData );
+			valuePlug = PlugAlgo::createPlugFromData(
+				"value", Plug::In, Plug::Flags::Default | Plug::Flags::Dynamic, defaultData
+			);
 		}
 		else
 		{
@@ -194,7 +202,8 @@ class OSLImagePlugAdder : public PlugAdder
 			return false;
 		}
 
-		IECore::ConstCompoundDataPtr plugAdderOptions = Metadata::value<IECore::CompoundData>( m_plugsParent->node(), "plugAdderOptions" );
+		IECore::ConstCompoundDataPtr plugAdderOptions =
+			Metadata::value<IECore::CompoundData>( m_plugsParent->node(), "plugAdderOptions" );
 		vector<std::string> origNames = availableChannels( plugAdderOptions.get() );
 		map<std::string, std::string> nameMapping;
 		vector<std::string> standardMenuNames;
@@ -238,7 +247,9 @@ class OSLImagePlugAdder : public PlugAdder
 	}
 
 	// Which channels are available that haven't already been used, and that match the input plug if provided
-	vector<std::string> availableChannels( const IECore::CompoundData *plugAdderOptions, const Plug *input = nullptr ) const
+	vector<std::string> availableChannels(
+		const IECore::CompoundData *plugAdderOptions, const Plug *input = nullptr
+	) const
 	{
 		if( !plugAdderOptions )
 		{
@@ -319,17 +330,11 @@ class OSLImagePlugAdder : public PlugAdder
 
 struct Registration
 {
-	Registration()
-	{
-		NoduleLayout::registerCustomGadget( "GafferOSLUI.OSLImageUI.PlugAdder", &create );
-	}
+	Registration() { NoduleLayout::registerCustomGadget( "GafferOSLUI.OSLImageUI.PlugAdder", &create ); }
 
-	private:
+private:
 
-	static GadgetPtr create( GraphComponentPtr parent )
-	{
-		return new OSLImagePlugAdder( parent );
-	}
+	static GadgetPtr create( GraphComponentPtr parent ) { return new OSLImagePlugAdder( parent ); }
 };
 
 Registration g_registration;

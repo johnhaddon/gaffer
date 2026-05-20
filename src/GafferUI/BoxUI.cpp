@@ -57,14 +57,11 @@ namespace
 class BoxPlugAdder : public PlugAdder
 {
 
-	public:
+public:
 
-	BoxPlugAdder( BoxPtr box )
-		: m_box( box )
-	{
-	}
+	BoxPlugAdder( BoxPtr box ) : m_box( box ) {}
 
-	protected:
+protected:
 
 	bool canCreateConnection( const Plug *endpoint ) const override
 	{
@@ -114,7 +111,7 @@ class BoxPlugAdder : public PlugAdder
 		applyEdgeMetadata( boxIO->plug(), /* opposite = */ true );
 	}
 
-	private:
+private:
 
 	BoxPtr m_box;
 };
@@ -122,12 +119,9 @@ class BoxPlugAdder : public PlugAdder
 struct Registration
 {
 
-	Registration()
-	{
-		NoduleLayout::registerCustomGadget( "GafferUI.BoxUI.PlugAdder", &create );
-	}
+	Registration() { NoduleLayout::registerCustomGadget( "GafferUI.BoxUI.PlugAdder", &create ); }
 
-	private:
+private:
 
 	static GadgetPtr create( GraphComponentPtr parent )
 	{

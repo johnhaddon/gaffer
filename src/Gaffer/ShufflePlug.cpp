@@ -46,7 +46,9 @@ using namespace Gaffer;
 
 GAFFER_PLUG_DEFINE_TYPE( ShufflePlug );
 
-ShufflePlug::ShufflePlug( const std::string &source, const std::string &destination, bool deleteSource, bool enabled, bool replaceDestination )
+ShufflePlug::ShufflePlug(
+	const std::string &source, const std::string &destination, bool deleteSource, bool enabled, bool replaceDestination
+)
 	: ShufflePlug( "shuffle", In, Default | Dynamic )
 {
 	sourcePlug()->setValue( source );
@@ -126,41 +128,34 @@ bool ShufflePlug::acceptsChild( const Gaffer::GraphComponent *potentialChild ) c
 		return false;
 	}
 
-	if(
-		potentialChild->isInstanceOf( StringPlug::staticTypeId() ) &&
-		potentialChild->getName() == "source" &&
-		!getChild<Plug>( "source" )
-	)
+	if( potentialChild->isInstanceOf( StringPlug::staticTypeId() ) && potentialChild->getName() == "source" &&
+		!getChild<Plug>( "source" ) )
 	{
 		return true;
 	}
 	else if(
-		potentialChild->isInstanceOf( BoolPlug::staticTypeId() ) &&
-		potentialChild->getName() == "enabled" &&
+		potentialChild->isInstanceOf( BoolPlug::staticTypeId() ) && potentialChild->getName() == "enabled" &&
 		!getChild<Plug>( "enabled" )
 	)
 	{
 		return true;
 	}
 	else if(
-		potentialChild->isInstanceOf( StringPlug::staticTypeId() ) &&
-		potentialChild->getName() == "destination" &&
+		potentialChild->isInstanceOf( StringPlug::staticTypeId() ) && potentialChild->getName() == "destination" &&
 		!getChild<Plug>( "destination" )
 	)
 	{
 		return true;
 	}
 	else if(
-		potentialChild->isInstanceOf( BoolPlug::staticTypeId() ) &&
-		potentialChild->getName() == "deleteSource" &&
+		potentialChild->isInstanceOf( BoolPlug::staticTypeId() ) && potentialChild->getName() == "deleteSource" &&
 		!getChild<Plug>( "deleteSource" )
 	)
 	{
 		return true;
 	}
 	else if(
-		potentialChild->isInstanceOf( BoolPlug::staticTypeId() ) &&
-		potentialChild->getName() == "replaceDestination" &&
+		potentialChild->isInstanceOf( BoolPlug::staticTypeId() ) && potentialChild->getName() == "replaceDestination" &&
 		!getChild<Plug>( "replaceDestination" )
 	)
 	{
@@ -181,7 +176,8 @@ Gaffer::PlugPtr ShufflePlug::createCounterpart( const std::string &name, Directi
 
 GAFFER_PLUG_DEFINE_TYPE( ShufflesPlug );
 
-ShufflesPlug::ShufflesPlug( const std::string &name, Direction direction, unsigned flags ) : ValuePlug( name, direction, flags )
+ShufflesPlug::ShufflesPlug( const std::string &name, Direction direction, unsigned flags )
+	: ValuePlug( name, direction, flags )
 {
 }
 

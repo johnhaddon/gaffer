@@ -45,7 +45,7 @@ namespace GafferImage
 
 class GAFFERIMAGE_API Offset : public ImageProcessor
 {
-	public:
+public:
 
 	explicit Offset( const std::string &name = defaultName<Offset>() );
 	~Offset() override;
@@ -57,17 +57,28 @@ class GAFFERIMAGE_API Offset : public ImageProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
-	void hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	void hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashDataWindow(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	void hashSampleOffsets(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	void hashChannelData(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
 
 	Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-	IECore::ConstIntVectorDataPtr computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
-	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstIntVectorDataPtr computeSampleOffsets(
+		const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent
+	) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData(
+		const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+		const ImagePlug *parent
+	) const override;
 
-	private:
+private:
 
 	static size_t g_firstPlugIndex;
 };

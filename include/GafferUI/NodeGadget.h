@@ -55,7 +55,7 @@ IE_CORE_FORWARDDECLARE( ConnectionCreator )
 class GAFFERUI_API NodeGadget : public Gadget
 {
 
-	public:
+public:
 
 	~NodeGadget() override;
 
@@ -95,14 +95,16 @@ class GAFFERUI_API NodeGadget : public Gadget
 	/// creator for a particular type of node. The nodeGadgetType may subsequently be
 	/// used in a "nodeGadget:type" metadata registration to register the creator with
 	/// other nodes or node instances.
-	static void registerNodeGadget( const std::string &nodeGadgetType, NodeGadgetCreator creator, IECore::TypeId nodeType = IECore::InvalidTypeId );
+	static void registerNodeGadget(
+		const std::string &nodeGadgetType, NodeGadgetCreator creator, IECore::TypeId nodeType = IECore::InvalidTypeId
+	);
 
 	/// \deprecated Use the function above, or register "nodeGadget:type" metadata instead.
 	static void registerNodeGadget( IECore::TypeId nodeType, NodeGadgetCreator creator );
 
 	std::string getToolTip( const IECore::LineSegment3f &line ) const override;
 
-	protected:
+protected:
 
 	explicit NodeGadget( Gaffer::NodePtr node );
 
@@ -110,7 +112,10 @@ class GAFFERUI_API NodeGadget : public Gadget
 	template<class T>
 	struct NodeGadgetTypeDescription
 	{
-		NodeGadgetTypeDescription( IECore::TypeId nodeType ) { NodeGadget::registerNodeGadget( T::staticTypeName(), &creator, nodeType ); };
+		NodeGadgetTypeDescription( IECore::TypeId nodeType )
+		{
+			NodeGadget::registerNodeGadget( T::staticTypeName(), &creator, nodeType );
+		};
 		static NodeGadgetPtr creator( Gaffer::NodePtr node ) { return new T( node ); };
 	};
 
@@ -123,7 +128,7 @@ class GAFFERUI_API NodeGadget : public Gadget
 
 	bool m_active;
 
-	private:
+private:
 
 	Gaffer::Node *m_node;
 	NoduleSignal m_noduleAddedSignal;

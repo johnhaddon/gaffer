@@ -64,7 +64,9 @@ Spreadsheet::RowPlugPtr row( Spreadsheet::RowsPlug &rowsPlug, const std::string 
 	return rowsPlug.row( name );
 }
 
-size_t addColumn( Spreadsheet::RowsPlug &rowsPlug, ValuePlug &value, IECore::InternedString name, bool adoptEnabledPlug )
+size_t addColumn(
+	Spreadsheet::RowsPlug &rowsPlug, ValuePlug &value, IECore::InternedString name, bool adoptEnabledPlug
+)
 {
 	ScopedGILRelease gilRelease;
 	return rowsPlug.addColumn( &value, name, adoptEnabledPlug );
@@ -108,9 +110,11 @@ ValuePlugPtr activeInPlug( Spreadsheet &s, const ValuePlug &outPlug )
 class RowsPlugSerialiser : public ValuePlugSerialiser
 {
 
-	public:
+public:
 
-	std::string postConstructor( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
+	std::string postConstructor(
+		const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+	) const override
 	{
 		std::string result = ValuePlugSerialiser::postConstructor( graphComponent, identifier, serialisation );
 		const auto *plug = static_cast<const Spreadsheet::RowsPlug *>( graphComponent );
@@ -118,7 +122,8 @@ class RowsPlugSerialiser : public ValuePlugSerialiser
 
 		// Serialise columns
 
-		IECore::ConstBoolDataPtr columnsNeedSerialisation = Metadata::value<IECore::BoolData>( plug, "spreadsheet:columnsNeedSerialisation" );
+		IECore::ConstBoolDataPtr columnsNeedSerialisation =
+			Metadata::value<IECore::BoolData>( plug, "spreadsheet:columnsNeedSerialisation" );
 
 		if( reference )
 		{
@@ -138,7 +143,8 @@ class RowsPlugSerialiser : public ValuePlugSerialiser
 		else
 		{
 			// Standard case. Serialise an `addColumn()` call for each column.
-			for( const auto &cell : Spreadsheet::CellPlug::Range( *plug->getChild<Spreadsheet::RowPlug>( 0 )->cellsPlug() ) )
+			for( const auto &cell :
+				 Spreadsheet::CellPlug::Range( *plug->getChild<Spreadsheet::RowPlug>( 0 )->cellsPlug() ) )
 			{
 				PlugPtr p = cell->valuePlug()->createCounterpart( cell->getName(), Plug::In );
 				const Serialiser *plugSerialiser = Serialisation::acquireSerialiser( p.get() );
@@ -193,13 +199,15 @@ class RowsPlugSerialiser : public ValuePlugSerialiser
 		return result;
 	}
 
-	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
+	bool childNeedsConstruction(
+		const Gaffer::GraphComponent *child, const Serialisation &serialisation
+	) const override
 	{
 		// We can serialise much more compactly via the `addRows()` call made by `postConstructor()`.
 		return false;
 	}
 
-	private:
+private:
 
 	// Fills `result` with calls to restore default values that have been modified from those of the
 	// default row. We must fit the following constraints :
@@ -214,7 +222,9 @@ class RowsPlugSerialiser : public ValuePlugSerialiser
 	//
 	// The strategy is a recursion where each child returns `true` if it needs the caller
 	// the emit a serialisation on its behalf and `false` otherwise.
-	bool defaultValueSerialisationsWalk( const ValuePlug *plug, const ValuePlug *defaultPlug, Serialisation &serialisation, std::string &result ) const
+	bool defaultValueSerialisationsWalk(
+		const ValuePlug *plug, const ValuePlug *defaultPlug, Serialisation &serialisation, std::string &result
+	) const
 	{
 		const size_t numChildren = plug->children().size();
 		assert( defaultPlug->children().size() == numChildren );
@@ -281,11 +291,15 @@ class RowsPlugSerialiser : public ValuePlugSerialiser
 void GafferModule::bindSpreadsheet()
 {
 
-	scope s = DependencyNodeClass<Spreadsheet>()
-				  .def( "activeInPlug", &activeInPlug );
+	scope s = DependencyNodeClass<Spreadsheet>().def( "activeInPlug", &activeInPlug );
 
 	PlugClass<Spreadsheet::RowsPlug>()
-		.def( init<std::string, Plug::Direction, unsigned>( ( arg( "name" ) = GraphComponent::defaultName<Spreadsheet::RowsPlug>(), arg( "direction" ) = Plug::In, arg( "flags" ) = Plug::Default ) ) )
+		.def(
+			init<std::string, Plug::Direction, unsigned>(
+				( arg( "name" ) = GraphComponent::defaultName<Spreadsheet::RowsPlug>(), arg( "direction" ) = Plug::In,
+				  arg( "flags" ) = Plug::Default )
+			)
+		)
 		.def( "defaultRow", &defaultRow )
 		.def( "row", &row )
 		.def( "addColumn", &addColumn, ( arg( "value" ), arg( "name" ) = "", arg( "adoptEnabledPlug" ) = false ) )
@@ -295,12 +309,10 @@ void GafferModule::bindSpreadsheet()
 		.def( "removeRow", &removeRow )
 		.attr( "__qualname__" ) = "Spreadsheet.RowsPlug";
 
-	PlugClass<Spreadsheet::RowPlug>()
-		.attr( "__qualname__" ) = "Spreadsheet.RowPlug";
+	PlugClass<Spreadsheet::RowPlug>().attr( "__qualname__" ) = "Spreadsheet.RowPlug";
 
-	PlugClass<Spreadsheet::CellPlug>()
-		.def( "enabledPlug", &cellPlugEnabledPlug )
-		.attr( "__qualname__" ) = "Spreadsheet.CellPlug";
+	PlugClass<Spreadsheet::CellPlug>().def( "enabledPlug", &cellPlugEnabledPlug ).attr( "__qualname__" ) =
+		"Spreadsheet.CellPlug";
 
 	Serialisation::registerSerialiser( Gaffer::Spreadsheet::RowsPlug::staticTypeId(), new RowsPlugSerialiser );
 }

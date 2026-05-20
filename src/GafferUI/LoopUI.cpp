@@ -52,10 +52,9 @@ namespace
 class LoopPlugAdder : public PlugAdder
 {
 
-	public:
+public:
 
-	LoopPlugAdder( LoopPtr node )
-		: m_node( node )
+	LoopPlugAdder( LoopPtr node ) : m_node( node )
 	{
 		node->childAddedSignal().connect( boost::bind( &LoopPlugAdder::childAdded, this ) );
 		node->childRemovedSignal().connect( boost::bind( &LoopPlugAdder::childRemoved, this ) );
@@ -63,7 +62,7 @@ class LoopPlugAdder : public PlugAdder
 		updateVisibility();
 	}
 
-	protected:
+protected:
 
 	bool canCreateConnection( const Plug *endpoint ) const override
 	{
@@ -102,22 +101,13 @@ class LoopPlugAdder : public PlugAdder
 		applyEdgeMetadata( m_node->previousPlug(), !inOpposite );
 	}
 
-	private:
+private:
 
-	void childAdded()
-	{
-		updateVisibility();
-	}
+	void childAdded() { updateVisibility(); }
 
-	void childRemoved()
-	{
-		updateVisibility();
-	}
+	void childRemoved() { updateVisibility(); }
 
-	void updateVisibility()
-	{
-		setVisible( !m_node->inPlug() );
-	}
+	void updateVisibility() { setVisible( !m_node->inPlug() ); }
 
 	LoopPtr m_node;
 };
@@ -125,12 +115,9 @@ class LoopPlugAdder : public PlugAdder
 struct Registration
 {
 
-	Registration()
-	{
-		NoduleLayout::registerCustomGadget( "GafferUI.LoopUI.PlugAdder", &create );
-	}
+	Registration() { NoduleLayout::registerCustomGadget( "GafferUI.LoopUI.PlugAdder", &create ); }
 
-	private:
+private:
 
 	static GadgetPtr create( GraphComponentPtr parent )
 	{

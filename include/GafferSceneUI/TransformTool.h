@@ -56,7 +56,7 @@ IE_CORE_FORWARDDECLARE( SceneView )
 class GAFFERSCENEUI_API TransformTool : public GafferSceneUI::SelectionTool
 {
 
-	public:
+public:
 
 	~TransformTool() override;
 
@@ -81,10 +81,8 @@ class GAFFERSCENEUI_API TransformTool : public GafferSceneUI::SelectionTool
 		// Constructs a selection for the specified
 		// viewed scene.
 		Selection(
-			const GafferScene::ConstScenePlugPtr scene,
-			const GafferScene::ScenePlug::ScenePath &path,
-			const Gaffer::ConstContextPtr &context,
-			const Gaffer::EditScopePtr &editScope
+			const GafferScene::ConstScenePlugPtr scene, const GafferScene::ScenePlug::ScenePath &path,
+			const Gaffer::ConstContextPtr &context, const Gaffer::EditScopePtr &editScope
 		);
 
 		/// Viewed scene
@@ -166,14 +164,13 @@ class GAFFERSCENEUI_API TransformTool : public GafferSceneUI::SelectionTool
 		/// Throws if `!editable()`.
 		Imath::M44f orientedTransform( Orientation orientation ) const;
 
-		private:
+	private:
 
 		void initFromHistory( const GafferScene::SceneAlgo::History *history );
 		void initFromSceneNode( const GafferScene::SceneAlgo::History *history );
 		void initFromEditScope( const GafferScene::SceneAlgo::History *history );
 		void initWalk(
-			const GafferScene::SceneAlgo::History *history,
-			bool &editScopeFound,
+			const GafferScene::SceneAlgo::History *history, bool &editScopeFound,
 			const GafferScene::SceneAlgo::History *editScopeOutHistory = nullptr
 		);
 		bool initRequirementsSatisfied( bool editScopeFound );
@@ -214,7 +211,7 @@ class GAFFERSCENEUI_API TransformTool : public GafferSceneUI::SelectionTool
 	/// exposed primarily for the unit tests.
 	Imath::M44f handlesTransform();
 
-	protected:
+protected:
 
 	TransformTool( SceneView *view, const std::string &name );
 
@@ -252,7 +249,7 @@ class GAFFERSCENEUI_API TransformTool : public GafferSceneUI::SelectionTool
 	static bool canSetValueOrAddKey( const Gaffer::FloatPlug *plug );
 	static void setValueOrAddKey( Gaffer::FloatPlug *plug, float time, float value );
 
-	private:
+private:
 
 	void contextChanged();
 	void selectedPathsChanged();

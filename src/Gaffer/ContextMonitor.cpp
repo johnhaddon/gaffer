@@ -76,7 +76,9 @@ size_t ContextMonitor::Statistics::numUniqueValues( IECore::InternedString varia
 	return 0;
 }
 
-const ContextMonitor::Statistics::CountingMap &ContextMonitor::Statistics::variableHashes( IECore::InternedString variableName ) const
+const ContextMonitor::Statistics::CountingMap &ContextMonitor::Statistics::variableHashes(
+	IECore::InternedString variableName
+) const
 {
 	VariableMap::const_iterator it = m_variables.find( variableName );
 	if( it != m_variables.end() )
@@ -126,14 +128,9 @@ bool ContextMonitor::Statistics::operator != ( const Statistics &rhs )
 // PerformanceMonitor
 //////////////////////////////////////////////////////////////////////////
 
-ContextMonitor::ContextMonitor( const GraphComponent *root )
-	: m_root( root )
-{
-}
+ContextMonitor::ContextMonitor( const GraphComponent *root ) : m_root( root ) {}
 
-ContextMonitor::~ContextMonitor()
-{
-}
+ContextMonitor::~ContextMonitor() {}
 
 const ContextMonitor::StatisticsMap &ContextMonitor::allStatistics() const
 {
@@ -168,13 +165,13 @@ void ContextMonitor::processStarted( const Process *process )
 	threadData.statistics[process->plug()] += process->context();
 }
 
-void ContextMonitor::processFinished( const Process *process )
-{
-}
+void ContextMonitor::processFinished( const Process *process ) {}
 
 void ContextMonitor::collate() const
 {
-	tbb::enumerable_thread_specific<ThreadData, tbb::cache_aligned_allocator<ThreadData>, tbb::ets_key_per_instance>::iterator it, eIt;
+	tbb::enumerable_thread_specific<
+		ThreadData, tbb::cache_aligned_allocator<ThreadData>, tbb::ets_key_per_instance>::iterator it,
+		eIt;
 	for( it = m_threadData.begin(), eIt = m_threadData.end(); it != eIt; ++it )
 	{
 		StatisticsMap &m = it->statistics;

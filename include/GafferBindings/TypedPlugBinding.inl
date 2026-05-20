@@ -65,28 +65,30 @@ static typename T::ValueType getValue( const T *plug, const IECore::MurmurHash *
 } // namespace Detail
 
 template<typename T, typename TWrapper>
-TypedPlugClass<T, TWrapper>::TypedPlugClass( const char *docString )
-	: PlugClass<T, TWrapper>( docString )
+TypedPlugClass<T, TWrapper>::TypedPlugClass( const char *docString ) : PlugClass<T, TWrapper>( docString )
 {
 	using V = typename T::ValueType;
 
 	this->def(
 		boost::python::init<const std::string &, Gaffer::Plug::Direction, const V &, unsigned>(
-			(
-				boost::python::arg_( "name" ) = Gaffer::GraphComponent::defaultName<T>(),
-				boost::python::arg_( "direction" ) = Gaffer::Plug::In,
-				boost::python::arg_( "defaultValue" ) = V(),
-				boost::python::arg_( "flags" ) = Gaffer::Plug::Default
-			)
+			( boost::python::arg_( "name" ) = Gaffer::GraphComponent::defaultName<T>(),
+			  boost::python::arg_( "direction" ) = Gaffer::Plug::In, boost::python::arg_( "defaultValue" ) = V(),
+			  boost::python::arg_( "flags" ) = Gaffer::Plug::Default )
 		)
 	);
-	this->def( "defaultValue", &T::defaultValue, boost::python::return_value_policy<boost::python::copy_const_reference>() );
+	this->def(
+		"defaultValue", &T::defaultValue, boost::python::return_value_policy<boost::python::copy_const_reference>()
+	);
 	this->def( "setValue", &Detail::setValue<T> );
-	this->def( "getValue", &Detail::getValue<T>, ( boost::python::arg( "_precomputedHash" ) = boost::python::object() ) );
+	this->def(
+		"getValue", &Detail::getValue<T>, ( boost::python::arg( "_precomputedHash" ) = boost::python::object() )
+	);
 
 	boost::python::scope s = *this;
 	const PyTypeObject *valueType = boost::python::to_python_value<const V &>().get_pytype();
-	s.attr( "ValueType" ) = boost::python::object( boost::python::handle<>( boost::python::borrowed( const_cast<PyTypeObject *>( valueType ) ) ) );
+	s.attr( "ValueType" ) = boost::python::object(
+		boost::python::handle<>( boost::python::borrowed( const_cast<PyTypeObject *>( valueType ) ) )
+	);
 }
 
 } // namespace GafferBindings

@@ -67,7 +67,10 @@ RixContext *IECoreRenderMan::Loader::context()
 		HMODULE handle = LoadLibrary( libPath.generic_string().c_str() );
 		if( !handle )
 		{
-			IECore::msg( IECore::Msg::Error, "IECoreRenderMan::Loader", fmt::format( "Unable to load \"{}\"", libPath.generic_string() ) );
+			IECore::msg(
+				IECore::Msg::Error, "IECoreRenderMan::Loader",
+				fmt::format( "Unable to load \"{}\"", libPath.generic_string() )
+			);
 			return nullptr;
 		}
 

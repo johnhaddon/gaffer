@@ -99,16 +99,11 @@ constexpr bool supportsVectorTypedData()
 	// This should probably be a whitelist, not a blacklist. But also it should be defined somewhere
 	// central, not here.
 	return !(
-		std::is_same_v<T, IECore::TransformationMatrixd> ||
-		std::is_same_v<T, IECore::TransformationMatrixf> ||
-		std::is_same_v<T, IECore::Splineff> ||
-		std::is_same_v<T, IECore::SplinefColor3f> ||
-		std::is_same_v<T, IECore::SplinefColor4f> ||
-		std::is_same_v<T, IECore::Splinedd> ||
-		std::is_same_v<T, IECore::Rampff> ||
-		std::is_same_v<T, IECore::RampfColor3f> ||
-		std::is_same_v<T, IECore::RampfColor4f> ||
-		std::is_same_v<T, IECore::PathMatcher> ||
+		std::is_same_v<T, IECore::TransformationMatrixd> || std::is_same_v<T, IECore::TransformationMatrixf> ||
+		std::is_same_v<T, IECore::Splineff> || std::is_same_v<T, IECore::SplinefColor3f> ||
+		std::is_same_v<T, IECore::SplinefColor4f> || std::is_same_v<T, IECore::Splinedd> ||
+		std::is_same_v<T, IECore::Rampff> || std::is_same_v<T, IECore::RampfColor3f> ||
+		std::is_same_v<T, IECore::RampfColor4f> || std::is_same_v<T, IECore::PathMatcher> ||
 		std::is_same_v<T, boost::posix_time::ptime>
 	);
 }
@@ -163,8 +158,8 @@ void dataResize( Data *data, size_t size )
 }
 
 inline void transformPrimVarValue(
-	const Imath::V3f *source, Imath::V3f *dest, int numElements,
-	const Imath::M44f &matrix, const Imath::M44f &normalMatrix, GeometricData::Interpretation interpretation
+	const Imath::V3f *source, Imath::V3f *dest, int numElements, const Imath::M44f &matrix,
+	const Imath::M44f &normalMatrix, GeometricData::Interpretation interpretation
 )
 {
 	if( interpretation == GeometricData::Point )
@@ -198,7 +193,10 @@ inline void transformPrimVarValue(
 }
 
 
-inline void copyElements( const Data *sourceData, size_t sourceIndex, Data *destData, size_t destIndex, size_t num, const Imath::M44f &matrix, const Imath::M44f &normalMatrix )
+inline void copyElements(
+	const Data *sourceData, size_t sourceIndex, Data *destData, size_t destIndex, size_t num, const Imath::M44f &matrix,
+	const Imath::M44f &normalMatrix
+)
 {
 	IECore::dispatch( destData, [&]( auto *typedDestData ) {
 		using DataType = std::remove_pointer_t<decltype( typedDestData )>;
@@ -222,8 +220,8 @@ inline void copyElements( const Data *sourceData, size_t sourceIndex, Data *dest
 						// Fairly weird corner case, but technically Constant primvars could need transforming too
 						GeometricData::Interpretation interp = singleElementTypedSourceData->getInterpretation();
 						transformPrimVarValue(
-							&singleElementTypedSourceData->readable(), &typedDest[destIndex], 1,
-							matrix, normalMatrix, interp
+							&singleElementTypedSourceData->readable(), &typedDest[destIndex], 1, matrix, normalMatrix,
+							interp
 						);
 					}
 					else
@@ -234,7 +232,12 @@ inline void copyElements( const Data *sourceData, size_t sourceIndex, Data *dest
 				}
 				else
 				{
-					throw IECore::Exception( fmt::format( "Can't copy element of type {} to destination of type: {}", sourceData->typeName(), destData->typeName() ) );
+					throw IECore::Exception(
+						fmt::format(
+							"Can't copy element of type {} to destination of type: {}", sourceData->typeName(),
+							destData->typeName()
+						)
+					);
 				}
 			}
 			const auto &typedSource = typedSourceData->readable();
@@ -259,7 +262,9 @@ inline void copyElements( const Data *sourceData, size_t sourceIndex, Data *dest
 		}
 		else
 		{
-			throw IECore::Exception( fmt::format( "Can't copy elements, not a vector data type: {}", typedDestData->typeName() ) );
+			throw IECore::Exception(
+				fmt::format( "Can't copy elements, not a vector data type: {}", typedDestData->typeName() )
+			);
 		}
 	} );
 }
@@ -271,10 +276,7 @@ IECore::TypeId vectorDataTypeFromDataType( const Data *data )
 		if constexpr( TypeTraits::HasValueType<DataType>::value )
 		{
 			using ValueType = typename DataType::ValueType;
-			if constexpr(
-				!TypeTraits::IsVectorTypedData<DataType>::value &&
-				supportsVectorTypedData<ValueType>()
-			)
+			if constexpr( !TypeTraits::IsVectorTypedData<DataType>::value && supportsVectorTypedData<ValueType>() )
 			{
 				return DataTraits<std::vector<ValueType>>::DataType::staticTypeId();
 			}
@@ -310,7 +312,8 @@ bool interpolationMatches(
 	{
 		assert( primType == IECoreScene::PointsPrimitiveTypeId );
 		auto isVertex = []( PrimitiveVariable::Interpolation x ) {
-			return x == PrimitiveVariable::Vertex || x == PrimitiveVariable::Varying || x == PrimitiveVariable::FaceVarying;
+			return x == PrimitiveVariable::Vertex || x == PrimitiveVariable::Varying ||
+				x == PrimitiveVariable::FaceVarying;
 		};
 		return isVertex( a ) && isVertex( b );
 	}
@@ -320,11 +323,9 @@ bool interpolationMatches(
 // Note that this only handles interpolations used by mergePrimitives ( ie. only promotion to more specific
 // interpolations, like Vertex -> FaceVarying, but it can't do averaging ).
 void copyIndices(
-	const std::vector<int> *sourceIndices, int *destIndices,
-	IECoreScene::TypeId primTypeId,
-	PrimitiveVariable::Interpolation sourceInterp, PrimitiveVariable::Interpolation destInterp,
-	size_t numIndices, size_t dataStart,
-	const Primitive *sourcePrim
+	const std::vector<int> *sourceIndices, int *destIndices, IECoreScene::TypeId primTypeId,
+	PrimitiveVariable::Interpolation sourceInterp, PrimitiveVariable::Interpolation destInterp, size_t numIndices,
+	size_t dataStart, const Primitive *sourcePrim
 )
 {
 	// Helper function that translates from an index in the source data to an index in the destination
@@ -435,7 +436,7 @@ void copyIndices(
 
 class MergePrimitivesMeshResult
 {
-	public:
+public:
 
 	using PrimitiveType = IECoreScene::MeshPrimitive;
 
@@ -508,9 +509,8 @@ class MergePrimitivesMeshResult
 
 	// This must be called once for each source primitive
 	void copyFromSource(
-		const MeshPrimitive *mesh, int i,
-		std::vector<std::vector<int>> &countInterpolation, std::vector<std::vector<int>> &accumInterpolation,
-		const IECore::Canceller *canceller
+		const MeshPrimitive *mesh, int i, std::vector<std::vector<int>> &countInterpolation,
+		std::vector<std::vector<int>> &accumInterpolation, const IECore::Canceller *canceller
 	)
 	{
 		int startUniform = accumInterpolation[PrimitiveVariable::Uniform][i];
@@ -575,7 +575,9 @@ class MergePrimitivesMeshResult
 	// This must be called after all calls to copyFromSource
 	void finalize()
 	{
-		result->setTopologyUnchecked( m_resultVerticesPerFaceData, m_resultVertexIdsData, m_numVertices, result->interpolation() );
+		result->setTopologyUnchecked(
+			m_resultVerticesPerFaceData, m_resultVertexIdsData, m_numVertices, result->interpolation()
+		);
 
 		if( m_resultCornerIdsData )
 		{
@@ -603,10 +605,8 @@ class MergePrimitivesMeshResult
 		// special cases to clean things up.
 		result = std::max( a, b );
 
-		if(
-			result >= PrimitiveVariable::Vertex &&
-			( a == PrimitiveVariable::Uniform || b == PrimitiveVariable::Uniform )
-		)
+		if( result >= PrimitiveVariable::Vertex &&
+			( a == PrimitiveVariable::Uniform || b == PrimitiveVariable::Uniform ) )
 		{
 			// On meshes, if you mix Uniform and Vertex, we need to use FaceVarying to represent both
 			result = PrimitiveVariable::FaceVarying;
@@ -623,11 +623,10 @@ class MergePrimitivesMeshResult
 
 	IECoreScene::MeshPrimitivePtr result;
 
-	private:
+private:
 
 	static void setMeshGlobals(
-		MeshPrimitive *result,
-		const std::vector<std::pair<const IECoreScene::Primitive *, Imath::M44f>> &primitives
+		MeshPrimitive *result, const std::vector<std::pair<const IECoreScene::Primitive *, Imath::M44f>> &primitives
 	)
 	{
 		const MeshPrimitive *firstMesh = static_cast<const MeshPrimitive *>( primitives[0].first );
@@ -639,10 +638,7 @@ class MergePrimitivesMeshResult
 		for( const auto &[prim, matrix] : primitives )
 		{
 			const MeshPrimitive *mesh = static_cast<const MeshPrimitive *>( prim );
-			if(
-				meshInterpolation != "" &&
-				mesh->interpolation() != meshInterpolation
-			)
+			if( meshInterpolation != "" && mesh->interpolation() != meshInterpolation )
 			{
 				msg( Msg::Warning, "mergePrimitives",
 					 fmt::format(
@@ -652,10 +648,7 @@ class MergePrimitivesMeshResult
 				meshInterpolation = "";
 			}
 
-			if(
-				interpolateBound != "" &&
-				mesh->getInterpolateBoundary() != interpolateBound
-			)
+			if( interpolateBound != "" && mesh->getInterpolateBoundary() != interpolateBound )
 			{
 				msg( Msg::Warning, "mergePrimitives",
 					 fmt::format(
@@ -665,29 +658,27 @@ class MergePrimitivesMeshResult
 				interpolateBound = "";
 			}
 
-			if(
-				faceVaryingLI != "" &&
-				mesh->getFaceVaryingLinearInterpolation() != faceVaryingLI
-			)
+			if( faceVaryingLI != "" && mesh->getFaceVaryingLinearInterpolation() != faceVaryingLI )
 			{
-				msg( Msg::Warning, "mergePrimitives",
-					 fmt::format(
-						 "Ignoring mismatch between mesh face varying linear interpolation {} and {} and defaulting to cornersPlus1",
-						 faceVaryingLI.string(), mesh->getFaceVaryingLinearInterpolation().string()
-					 ) );
+				msg(
+					Msg::Warning, "mergePrimitives",
+					fmt::format(
+						"Ignoring mismatch between mesh face varying linear interpolation {} and {} and defaulting to cornersPlus1",
+						faceVaryingLI.string(), mesh->getFaceVaryingLinearInterpolation().string()
+					)
+				);
 				faceVaryingLI = "";
 			}
 
-			if(
-				triangleSub != "" &&
-				mesh->getTriangleSubdivisionRule() != triangleSub
-			)
+			if( triangleSub != "" && mesh->getTriangleSubdivisionRule() != triangleSub )
 			{
-				msg( Msg::Warning, "mergePrimitives",
-					 fmt::format(
-						 "Ignoring mismatch between mesh triangle subdivision rule {} and {} and defaulting to catmullClark",
-						 triangleSub.string(), mesh->getTriangleSubdivisionRule().string()
-					 ) );
+				msg(
+					Msg::Warning, "mergePrimitives",
+					fmt::format(
+						"Ignoring mismatch between mesh triangle subdivision rule {} and {} and defaulting to catmullClark",
+						triangleSub.string(), mesh->getTriangleSubdivisionRule().string()
+					)
+				);
 				triangleSub = "";
 			}
 		}
@@ -738,7 +729,7 @@ class MergePrimitivesMeshResult
 
 class MergePrimitivesCurvesResult
 {
-	public:
+public:
 
 	using PrimitiveType = IECoreScene::CurvesPrimitive;
 
@@ -758,9 +749,8 @@ class MergePrimitivesCurvesResult
 
 	// This must be called once for each source primitive
 	void copyFromSource(
-		const CurvesPrimitive *curves, int i,
-		std::vector<std::vector<int>> &countInterpolation, std::vector<std::vector<int>> &accumInterpolation,
-		const IECore::Canceller *canceller
+		const CurvesPrimitive *curves, int i, std::vector<std::vector<int>> &countInterpolation,
+		std::vector<std::vector<int>> &accumInterpolation, const IECore::Canceller *canceller
 	)
 	{
 		int startUniform = accumInterpolation[PrimitiveVariable::Uniform][i];
@@ -776,10 +766,7 @@ class MergePrimitivesCurvesResult
 	}
 
 	// This must be called after all calls to copyFromSource
-	void finalize()
-	{
-		result->setTopology( m_resultVerticesPerCurveData.get(), result->basis(), result->wrap() );
-	}
+	void finalize() { result->setTopology( m_resultVerticesPerCurveData.get(), result->basis(), result->wrap() ); }
 
 	// Return an interpolation adequate to store data of either input interpolation
 	static PrimitiveVariable::Interpolation mergeInterpolations(
@@ -793,10 +780,8 @@ class MergePrimitivesCurvesResult
 		// special cases to clean things up.
 		result = std::max( a, b );
 
-		if(
-			result >= PrimitiveVariable::Varying &&
-			( a == PrimitiveVariable::Vertex || b == PrimitiveVariable::Vertex )
-		)
+		if( result >= PrimitiveVariable::Varying &&
+			( a == PrimitiveVariable::Vertex || b == PrimitiveVariable::Vertex ) )
 		{
 			// Mixing Vertex/Varying on curves requires a lossy resample that would make things more complex.
 			msg( Msg::Warning, "mergePrimitives",
@@ -818,11 +803,10 @@ class MergePrimitivesCurvesResult
 
 	IECoreScene::CurvesPrimitivePtr result;
 
-	private:
+private:
 
 	static void setCurvesGlobals(
-		CurvesPrimitive *result,
-		const std::vector<std::pair<const IECoreScene::Primitive *, Imath::M44f>> &primitives
+		CurvesPrimitive *result, const std::vector<std::pair<const IECoreScene::Primitive *, Imath::M44f>> &primitives
 	)
 	{
 		const CurvesPrimitive *firstCurves = static_cast<const CurvesPrimitive *>( primitives[0].first );
@@ -839,13 +823,9 @@ class MergePrimitivesCurvesResult
 				throw IECore::Exception( "Cannot merge curves with mismatched wrap" );
 			}
 
-			if(
-				basis != invalidBasis &&
-				curves->basis() != basis
-			)
+			if( basis != invalidBasis && curves->basis() != basis )
 			{
-				msg( Msg::Warning, "mergePrimitives",
-					 "Ignoring mismatch in curve basis and defaulting to linear" );
+				msg( Msg::Warning, "mergePrimitives", "Ignoring mismatch in curve basis and defaulting to linear" );
 				basis = invalidBasis;
 			}
 		}
@@ -866,7 +846,7 @@ const std::string pointTypeName = "type";
 
 class MergePrimitivesPointsResult
 {
-	public:
+public:
 
 	using PrimitiveType = IECoreScene::PointsPrimitive;
 
@@ -888,8 +868,8 @@ class MergePrimitivesPointsResult
 			{
 				msg( Msg::Warning, "mergePrimitives",
 					 fmt::format(
-						 "Ignoring mismatch in point type between {} and {} and defaulting to {}",
-						 type, curType, defaultPointType
+						 "Ignoring mismatch in point type between {} and {} and defaulting to {}", type, curType,
+						 defaultPointType
 					 ) );
 				type = defaultPointType;
 				break;
@@ -898,22 +878,21 @@ class MergePrimitivesPointsResult
 
 		if( hasType )
 		{
-			result->variables.emplace( pointTypeName, PrimitiveVariable( PrimitiveVariable::Constant, new IECore::StringData( type ) ) );
+			result->variables.emplace(
+				pointTypeName, PrimitiveVariable( PrimitiveVariable::Constant, new IECore::StringData( type ) )
+			);
 		}
 	}
 
 	void copyFromSource(
-		const PointsPrimitive *curves, int i,
-		std::vector<std::vector<int>> &countInterpolation, std::vector<std::vector<int>> &accumInterpolation,
-		const IECore::Canceller *canceller
+		const PointsPrimitive *curves, int i, std::vector<std::vector<int>> &countInterpolation,
+		std::vector<std::vector<int>> &accumInterpolation, const IECore::Canceller *canceller
 	)
 	{
 		// Points don't have any topology to copy
 	}
 
-	void finalize()
-	{
-	}
+	void finalize() {}
 
 	// Return an interpolation adequate to store data of either input interpolation
 	static PrimitiveVariable::Interpolation mergeInterpolations(
@@ -926,7 +905,7 @@ class MergePrimitivesPointsResult
 
 	IECoreScene::PointsPrimitivePtr result;
 
-	private:
+private:
 
 	const std::string &pointsType( const IECoreScene::Primitive *points, bool &hasType )
 	{
@@ -959,7 +938,10 @@ IECoreScene::PrimitivePtr mergePrimitivesInternal(
 	// Data we need to store for each primvar we output
 	struct PrimVarInfo
 	{
-		PrimVarInfo( PrimitiveVariable::Interpolation interpol, IECore::TypeId t, GeometricData::Interpretation interpretation, int numPrimitives )
+		PrimVarInfo(
+			PrimitiveVariable::Interpolation interpol, IECore::TypeId t, GeometricData::Interpretation interpretation,
+			int numPrimitives
+		)
 			: interpolation( interpol ),
 			  typeId( t ),
 			  interpretation( interpretation ),
@@ -999,7 +981,12 @@ IECoreScene::PrimitivePtr mergePrimitivesInternal(
 		// We already have a primitive, so the types must match
 		if( !IECore::runTimeCast<const typename ResultStruct::PrimitiveType>( prim ) )
 		{
-			throw IECore::Exception( fmt::format( "Primitive type mismatch: Cannot merge {} with {}", prim->typeName(), ResultStruct::PrimitiveType::staticTypeName() ) );
+			throw IECore::Exception(
+				fmt::format(
+					"Primitive type mismatch: Cannot merge {} with {}", prim->typeName(),
+					ResultStruct::PrimitiveType::staticTypeName()
+				)
+			);
 		}
 	}
 
@@ -1023,7 +1010,9 @@ IECoreScene::PrimitivePtr mergePrimitivesInternal(
 				varTypeId = vectorDataTypeFromDataType( var.data.get() );
 			}
 
-			PrimVarInfo &varInfo = varInfos.try_emplace( name, var.interpolation, varTypeId, interpretation, primitives.size() ).first->second;
+			PrimVarInfo &varInfo =
+				varInfos.try_emplace( name, var.interpolation, varTypeId, interpretation, primitives.size() )
+					.first->second;
 
 			if( varInfo.interpolation == PrimitiveVariable::Invalid )
 			{
@@ -1045,8 +1034,7 @@ IECoreScene::PrimitivePtr mergePrimitivesInternal(
 			{
 				msg( Msg::Warning, "mergePrimitives",
 					 fmt::format(
-						 "Discarding variable \"{}\" - types don't match: \"{}\" and \"{}\"",
-						 name,
+						 "Discarding variable \"{}\" - types don't match: \"{}\" and \"{}\"", name,
 						 IECore::RunTimeTyped::typeNameFromTypeId( varInfo.typeId ),
 						 IECore::RunTimeTyped::typeNameFromTypeId( var.data->typeId() )
 					 ) );
@@ -1126,7 +1114,8 @@ IECoreScene::PrimitivePtr mergePrimitivesInternal(
 
 			// Only if everything is simple and matches can we skip outputting indices ( though this
 			// is hopefully the most common case )
-			if( it->second.indices || !interpolationMatches( resultTypeId, it->second.interpolation, varInfo.interpolation ) )
+			if( it->second.indices ||
+				!interpolationMatches( resultTypeId, it->second.interpolation, varInfo.interpolation ) )
 			{
 				varInfo.indexed = true;
 			}
@@ -1169,7 +1158,9 @@ IECoreScene::PrimitivePtr mergePrimitivesInternal(
 		accumInterpolation[interpolation].reserve( primitives.size() );
 		for( unsigned int i = 0; i < primitives.size(); i++ )
 		{
-			countInterpolation[interpolation].push_back( primitives[i].first->variableSize( ( (PrimitiveVariable::Interpolation)interpolation ) ) );
+			countInterpolation[interpolation].push_back(
+				primitives[i].first->variableSize( ( (PrimitiveVariable::Interpolation)interpolation ) )
+			);
 			accumInterpolation[interpolation][i] = accum;
 			accum += countInterpolation[interpolation].back();
 		}
@@ -1282,7 +1273,10 @@ IECoreScene::PrimitivePtr mergePrimitivesInternal(
 						const PrimitiveVariable &sourceVar = it->second;
 
 						Canceller::check( canceller );
-						copyElements( sourceVar.data.get(), 0, destVar.data.get(), dataStart, varInfo.numData[i], matrix, normalMatrix );
+						copyElements(
+							sourceVar.data.get(), 0, destVar.data.get(), dataStart, varInfo.numData[i], matrix,
+							normalMatrix
+						);
 
 						if( varInfo.indexed )
 						{
@@ -1290,10 +1284,8 @@ IECoreScene::PrimitivePtr mergePrimitivesInternal(
 							int *destIndices = &destVar.indices->writable()[startIndex];
 
 							copyIndices(
-								sourceVar.indices ? &sourceVar.indices->readable() : nullptr, destIndices,
-								resultTypeId, sourceVar.interpolation, varInfo.interpolation,
-								numIndices, dataStart,
-								&sourcePrim
+								sourceVar.indices ? &sourceVar.indices->readable() : nullptr, destIndices, resultTypeId,
+								sourceVar.interpolation, varInfo.interpolation, numIndices, dataStart, &sourcePrim
 							);
 						}
 					}
@@ -1308,8 +1300,7 @@ IECoreScene::PrimitivePtr mergePrimitivesInternal(
 				);
 			}
 		},
-		tbb::auto_partitioner(),
-		taskGroupContext
+		tbb::auto_partitioner(), taskGroupContext
 	);
 
 	// Set topology and other primitive type specific globals
@@ -1328,8 +1319,7 @@ bool isInstanceOf( IECore::TypeId type, IECore::TypeId baseType )
 
 
 void PrimitiveAlgo::transformPrimitive(
-	IECoreScene::Primitive &primitive, Imath::M44f matrix,
-	const IECore::Canceller *canceller
+	IECoreScene::Primitive &primitive, Imath::M44f matrix, const IECore::Canceller *canceller
 )
 {
 	if( matrix == Imath::M44f() )
@@ -1354,11 +1344,8 @@ void PrimitiveAlgo::transformPrimitive(
 		}
 
 		GeometricData::Interpretation interp = vecVar ? vecVar->getInterpretation() : vecConstVar->getInterpretation();
-		if( !(
-				interp == GeometricData::Interpretation::Point ||
-				interp == GeometricData::Interpretation::Vector ||
-				interp == GeometricData::Interpretation::Normal
-			) )
+		if( !( interp == GeometricData::Interpretation::Point || interp == GeometricData::Interpretation::Vector ||
+			   interp == GeometricData::Interpretation::Normal ) )
 		{
 			continue;
 		}
@@ -1375,12 +1362,11 @@ void PrimitiveAlgo::transformPrimitive(
 			std::vector<Imath::V3f> &writable = vecVar->writable();
 
 			tbb::parallel_for(
-				tbb::blocked_range<size_t>( 0, writable.size(), 10000 ),
-				[&]( tbb::blocked_range<size_t> &range ) {
+				tbb::blocked_range<size_t>( 0, writable.size(), 10000 ), [&]( tbb::blocked_range<size_t> &range ) {
 					Canceller::check( canceller );
 					transformPrimVarValue(
-						&writable[range.begin()], &writable[range.begin()], range.end() - range.begin(),
-						matrix, normalMatrix, interp
+						&writable[range.begin()], &writable[range.begin()], range.end() - range.begin(), matrix,
+						normalMatrix, interp
 					);
 				}
 			);
@@ -1388,7 +1374,9 @@ void PrimitiveAlgo::transformPrimitive(
 		else
 		{
 			// Fairly weird corner case, but technically Constant primvars could need transforming too
-			transformPrimVarValue( &vecConstVar->writable(), &vecConstVar->writable(), 1, matrix, normalMatrix, interp );
+			transformPrimVarValue(
+				&vecConstVar->writable(), &vecConstVar->writable(), 1, matrix, normalMatrix, interp
+			);
 		}
 	}
 }
@@ -1423,6 +1411,8 @@ IECoreScene::PrimitivePtr PrimitiveAlgo::mergePrimitives(
 	}
 	else
 	{
-		throw IECore::Exception( fmt::format( "Unsupported Primitive type for merging: {}", primitives[0].first->typeId() ) );
+		throw IECore::Exception(
+			fmt::format( "Unsupported Primitive type for merging: {}", primitives[0].first->typeId() )
+		);
 	}
 }

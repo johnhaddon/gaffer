@@ -73,10 +73,7 @@ namespace
 struct ShadingModeCreator
 {
 
-	ShadingModeCreator( object fn )
-		: m_fn( fn )
-	{
-	}
+	ShadingModeCreator( object fn ) : m_fn( fn ) {}
 
 	SceneProcessorPtr operator () ()
 	{
@@ -85,7 +82,7 @@ struct ShadingModeCreator
 		return result;
 	}
 
-	private:
+private:
 
 	object m_fn;
 };
@@ -170,10 +167,7 @@ template<typename T>
 struct CreatorWrapper
 {
 
-	CreatorWrapper( object fn )
-		: m_fn( fn )
-	{
-	}
+	CreatorWrapper( object fn ) : m_fn( fn ) {}
 
 	typename T::Ptr operator () ()
 	{
@@ -182,7 +176,7 @@ struct CreatorWrapper
 		return result;
 	}
 
-	private:
+private:
 
 	object m_fn;
 };
@@ -201,10 +195,7 @@ struct CreatorWrapper
 struct ReferenceCreator
 {
 
-	ReferenceCreator( const std::filesystem::path &referenceFileName )
-		: m_referenceFileName( referenceFileName )
-	{
-	}
+	ReferenceCreator( const std::filesystem::path &referenceFileName ) : m_referenceFileName( referenceFileName ) {}
 
 	NodePtr operator () ()
 	{
@@ -220,7 +211,7 @@ struct ReferenceCreator
 		return reference;
 	}
 
-	private:
+private:
 
 	std::filesystem::path m_referenceFileName;
 };
@@ -240,7 +231,9 @@ void registerScene( const std::string &shaderPrefix, const std::string &name, ob
 	ShaderView::registerScene( shaderPrefix, name, CreatorWrapper<Node>( creator ) );
 }
 
-void registerReferenceScene( const std::string &shaderPrefix, const std::string &name, const std::filesystem::path &referenceFileName )
+void registerReferenceScene(
+	const std::string &shaderPrefix, const std::string &name, const std::filesystem::path &referenceFileName
+)
 {
 	ShaderView::registerScene( shaderPrefix, name, ReferenceCreator( referenceFileName ) );
 }
@@ -314,7 +307,10 @@ void GafferSceneUIModule::bindViews()
 
 	GafferBindings::NodeClass<SceneView>( nullptr, no_init )
 		.def( init<ScriptNodePtr>() )
-		.def( "frame", &frame, ( boost::python::arg_( "filter" ), boost::python::arg_( "direction" ) = Imath::V3f( -0.64, -0.422, -0.64 ) ) )
+		.def(
+			"frame", &frame,
+			( boost::python::arg_( "filter" ), boost::python::arg_( "direction" ) = Imath::V3f( -0.64, -0.422, -0.64 ) )
+		)
 		.def( "resolutionGate", &resolutionGateWrapper )
 		.def( "expandSelection", &expandSelection, ( boost::python::arg_( "depth" ) = 1 ) )
 		.def( "collapseSelection", &collapseSelection )
@@ -330,7 +326,9 @@ void GafferSceneUIModule::bindViews()
 	GafferBindings::NodeClass<ShaderView>( nullptr, no_init )
 		.def( init<ScriptNodePtr>() )
 		.def( "shaderPrefix", &ShaderView::shaderPrefix )
-		.def( "scene", ( Gaffer::Node * (ShaderView::*)() ) & ShaderView::scene, return_value_policy<CastToIntrusivePtr>() )
+		.def(
+			"scene", ( Gaffer::Node * (ShaderView::*)() ) & ShaderView::scene, return_value_policy<CastToIntrusivePtr>()
+		)
 		.def( "sceneChangedSignal", &ShaderView::sceneChangedSignal, return_internal_reference<1>() )
 		.def( "registerRenderer", &registerRenderer )
 		.staticmethod( "registerRenderer" )
@@ -342,7 +340,10 @@ void GafferSceneUIModule::bindViews()
 		.def( "registeredScenes", &registeredScenes )
 		.staticmethod( "registeredScenes" );
 
-	SignalClass<ShaderView::SceneChangedSignal, DefaultSignalCaller<ShaderView::SceneChangedSignal>, SceneChangedSlotCaller>( "SceneChangedSignal" );
+	SignalClass<
+		ShaderView::SceneChangedSignal, DefaultSignalCaller<ShaderView::SceneChangedSignal>, SceneChangedSlotCaller>(
+		"SceneChangedSignal"
+	);
 
 	{
 		scope s = GafferBindings::NodeClass<UVView>( nullptr, no_init )
@@ -357,6 +358,8 @@ void GafferSceneUIModule::bindViews()
 			.value( "Running", UVView::Running )
 			.value( "Complete", UVView::Complete );
 
-		SignalClass<UVView::UVViewSignal, DefaultSignalCaller<UVView::UVViewSignal>, UVViewSlotCaller>( "UVViewSignal" );
+		SignalClass<UVView::UVViewSignal, DefaultSignalCaller<UVView::UVViewSignal>, UVViewSlotCaller>(
+			"UVViewSignal"
+		);
 	}
 }

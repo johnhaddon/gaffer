@@ -40,16 +40,11 @@
 
 using namespace Gaffer;
 
-Monitor::Monitor()
-{
-}
+Monitor::Monitor() {}
 
-Monitor::~Monitor()
-{
-}
+Monitor::~Monitor() {}
 
-Monitor::Scope::Scope( const MonitorPtr &monitor, bool active )
-	: ThreadState::Scope( (bool)monitor )
+Monitor::Scope::Scope( const MonitorPtr &monitor, bool active ) : ThreadState::Scope( (bool)monitor )
 {
 	if( !m_threadState )
 	{
@@ -71,8 +66,7 @@ Monitor::Scope::Scope( const MonitorPtr &monitor, bool active )
 	initializeMightForce();
 }
 
-Monitor::Scope::Scope( const MonitorSet &monitors, bool active )
-	: ThreadState::Scope( !monitors.empty() )
+Monitor::Scope::Scope( const MonitorSet &monitors, bool active ) : ThreadState::Scope( !monitors.empty() )
 {
 	if( !m_threadState )
 	{
@@ -110,9 +104,7 @@ void Monitor::Scope::initializeMightForce()
 	m_threadState->m_mightForceMonitoring = mightForceMonitoring;
 }
 
-Monitor::Scope::~Scope()
-{
-}
+Monitor::Scope::~Scope() {}
 
 const Monitor::MonitorSet &Monitor::current()
 {

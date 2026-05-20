@@ -51,8 +51,12 @@ using namespace IECoreScenePreview;
 
 IECoreScenePreview::Renderer::TypeDescription<CapturingRenderer> CapturingRenderer::g_typeDescription( "Capturing" );
 
-CapturingRenderer::CapturingRenderer( RenderType type, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler )
-	: m_messageHandler( messageHandler ), m_renderType( type ), m_rendering( false )
+CapturingRenderer::CapturingRenderer(
+	RenderType type, const std::string &fileName, const IECore::MessageHandlerPtr &messageHandler
+)
+	: m_messageHandler( messageHandler ),
+	  m_renderType( type ),
+	  m_rendering( false )
 {
 }
 
@@ -115,22 +119,34 @@ Renderer::AttributesInterfacePtr CapturingRenderer::attributes( const IECore::Co
 	return new CapturedAttributes( ConstCompoundObjectPtr( attributes ) );
 }
 
-Renderer::ObjectInterfacePtr CapturingRenderer::camera( const std::string &name, const CameraSamples &samples, const SampleTimes &times, const AttributesInterface *attributes )
+Renderer::ObjectInterfacePtr CapturingRenderer::camera(
+	const std::string &name, const CameraSamples &samples, const SampleTimes &times,
+	const AttributesInterface *attributes
+)
 {
 	return this->object( name, ObjectSamples( samples.begin(), samples.end() ), times, attributes );
 }
 
-Renderer::ObjectInterfacePtr CapturingRenderer::light( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes )
+Renderer::ObjectInterfacePtr CapturingRenderer::light(
+	const std::string &name, const ObjectSamples &samples, const SampleTimes &times,
+	const AttributesInterface *attributes
+)
 {
 	return this->object( name, samples, times, attributes );
 }
 
-Renderer::ObjectInterfacePtr CapturingRenderer::lightFilter( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes )
+Renderer::ObjectInterfacePtr CapturingRenderer::lightFilter(
+	const std::string &name, const ObjectSamples &samples, const SampleTimes &times,
+	const AttributesInterface *attributes
+)
 {
 	return this->object( name, samples, times, attributes );
 }
 
-Renderer::ObjectInterfacePtr CapturingRenderer::object( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes )
+Renderer::ObjectInterfacePtr CapturingRenderer::object(
+	const std::string &name, const ObjectSamples &samples, const SampleTimes &times,
+	const AttributesInterface *attributes
+)
 {
 	IECore::MessageHandler::Scope s( m_messageHandler.get() );
 
@@ -140,8 +156,8 @@ Renderer::ObjectInterfacePtr CapturingRenderer::object( const std::string &name,
 	{
 		IECore::msg(
 			IECore::Msg::Warning, "CapturingRenderer::object",
-			"Number of object samples ({}) doesn't match number of time samples ({}) for object \"{}\"",
-			samples.size(), times.size(), name
+			"Number of object samples ({}) doesn't match number of time samples ({}) for object \"{}\"", samples.size(),
+			times.size(), name
 		);
 	}
 
@@ -155,7 +171,9 @@ Renderer::ObjectInterfacePtr CapturingRenderer::object( const std::string &name,
 	ObjectMap::accessor a;
 	if( !m_capturedObjects.insert( a, name ) )
 	{
-		IECore::msg( IECore::Msg::Warning, "CapturingRenderer::object", fmt::format( "Object named \"{}\" already exists", name ) );
+		IECore::msg(
+			IECore::Msg::Warning, "CapturingRenderer::object", fmt::format( "Object named \"{}\" already exists", name )
+		);
 		return nullptr;
 	}
 
@@ -234,8 +252,16 @@ bool CapturingRenderer::CapturedAttributes::unrenderableAttributeValue( const Ca
 // CapturedObject
 //////////////////////////////////////////////////////////////////////////
 
-CapturingRenderer::CapturedObject::CapturedObject( CapturingRenderer *renderer, const std::string &name, const ObjectSamples &samples, const SampleTimes &times )
-	: m_renderer( renderer ), m_name( name ), m_capturedSamples( samples.begin(), samples.end() ), m_capturedSampleTimes( times ), m_numAttributeEdits( 0 ), m_id( 0 ), m_instanceID( 0 )
+CapturingRenderer::CapturedObject::CapturedObject(
+	CapturingRenderer *renderer, const std::string &name, const ObjectSamples &samples, const SampleTimes &times
+)
+	: m_renderer( renderer ),
+	  m_name( name ),
+	  m_capturedSamples( samples.begin(), samples.end() ),
+	  m_capturedSampleTimes( times ),
+	  m_numAttributeEdits( 0 ),
+	  m_id( 0 ),
+	  m_instanceID( 0 )
 {
 }
 
@@ -326,7 +352,9 @@ uint32_t CapturingRenderer::CapturedObject::instanceID() const
 	return m_instanceID;
 }
 
-void CapturingRenderer::CapturedObject::transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const SampleTimes &times )
+void CapturingRenderer::CapturedObject::transform(
+	const IECoreScenePreview::Renderer::TransformSamples &samples, const SampleTimes &times
+)
 {
 	m_renderer->checkPaused();
 	if( samples.size() != times.size() )
@@ -351,7 +379,9 @@ bool CapturingRenderer::CapturedObject::attributes( const AttributesInterface *a
 		return false;
 	}
 
-	if( m_numAttributeEdits && CapturedAttributes::uneditableAttributeValue( m_capturedAttributes.get() ) != CapturedAttributes::uneditableAttributeValue( capturedAttributes ) )
+	if( m_numAttributeEdits &&
+		CapturedAttributes::uneditableAttributeValue( m_capturedAttributes.get() ) !=
+			CapturedAttributes::uneditableAttributeValue( capturedAttributes ) )
 	{
 		return false;
 	}

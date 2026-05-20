@@ -56,10 +56,7 @@ namespace
 {
 
 template<typename PlugType>
-Plug *setupPlug(
-	const InternedString &parameterName,
-	Plug *plugParent
-)
+Plug *setupPlug( const InternedString &parameterName, Plug *plugParent )
 {
 	PlugType *existingPlug = plugParent->getChild<PlugType>( parameterName );
 	if( existingPlug )
@@ -75,9 +72,7 @@ Plug *setupPlug(
 
 template<typename PlugType>
 Plug *setupTypedPlug(
-	const InternedString &parameterName,
-	Plug *plugParent,
-	const typename PlugType::ValueType &defaultValue
+	const InternedString &parameterName, Plug *plugParent, const typename PlugType::ValueType &defaultValue
 )
 {
 	PlugType *existingPlug = plugParent->getChild<PlugType>( parameterName );
@@ -94,9 +89,7 @@ Plug *setupTypedPlug(
 
 template<typename ValuePlugType>
 Plug *setupOptionalValuePlug(
-	const InternedString &parameterName,
-	GraphComponent *plugParent,
-	const ValuePlugPtr &valuePlug
+	const InternedString &parameterName, GraphComponent *plugParent, const ValuePlugPtr &valuePlug
 )
 {
 	OptionalValuePlug *existingPlug = plugParent->getChild<OptionalValuePlug>( parameterName );
@@ -122,8 +115,7 @@ GafferScene::ShaderTweakProxy::ShaderLoaderDescription<TestShader> g_testShaderT
 
 GAFFER_NODE_DEFINE_TYPE( TestShader )
 
-TestShader::TestShader( const std::string &name )
-	: Shader( name )
+TestShader::TestShader( const std::string &name ) : Shader( name )
 {
 	// The base class expects `loadShader()` to set `type`, but
 	// we don't want to make assumptions for the purposes of testing.
@@ -133,9 +125,7 @@ TestShader::TestShader( const std::string &name )
 	addChild( new Plug( "out", Plug::Out ) );
 }
 
-TestShader::~TestShader()
-{
-}
+TestShader::~TestShader() {}
 
 void TestShader::loadShader( const std::string &shaderName, bool keepExistingValues )
 {

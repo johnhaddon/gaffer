@@ -54,8 +54,7 @@ GAFFER_NODE_DEFINE_TYPE( DeleteCurves );
 
 size_t DeleteCurves::g_firstPlugIndex = 0;
 
-DeleteCurves::DeleteCurves( const std::string &name )
-	: Deformer( name )
+DeleteCurves::DeleteCurves( const std::string &name ) : Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -64,9 +63,7 @@ DeleteCurves::DeleteCurves( const std::string &name )
 	addChild( new BoolPlug( "ignoreMissingVariable", Plug::In, false ) );
 }
 
-DeleteCurves::~DeleteCurves()
-{
-}
+DeleteCurves::~DeleteCurves() {}
 
 Gaffer::StringPlug *DeleteCurves::curvesPlug()
 {
@@ -100,14 +97,14 @@ const Gaffer::BoolPlug *DeleteCurves::ignoreMissingVariablePlug() const
 
 bool DeleteCurves::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return Deformer::affectsProcessedObject( input ) ||
-		input == curvesPlug() ||
-		input == invertPlug() ||
+	return Deformer::affectsProcessedObject( input ) || input == curvesPlug() || input == invertPlug() ||
 		input == ignoreMissingVariablePlug();
 }
 
 
-void DeleteCurves::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeleteCurves::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	Deformer::hashProcessedObject( path, context, h );
 	curvesPlug()->hash( h );
@@ -115,7 +112,9 @@ void DeleteCurves::hashProcessedObject( const ScenePath &path, const Gaffer::Con
 	ignoreMissingVariablePlug()->hash( h );
 }
 
-IECore::ConstObjectPtr DeleteCurves::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr DeleteCurves::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	const CurvesPrimitive *curves = runTimeCast<const CurvesPrimitive>( inputObject );
 	if( !curves )
@@ -138,7 +137,9 @@ IECore::ConstObjectPtr DeleteCurves::computeProcessedObject( const ScenePath &pa
 			return inputObject;
 		}
 
-		throw InvalidArgumentException( fmt::format( "DeleteCurves : No primitive variable \"{}\" found", deletePrimVarName ) );
+		throw InvalidArgumentException(
+			fmt::format( "DeleteCurves : No primitive variable \"{}\" found", deletePrimVarName )
+		);
 	}
 
 	return CurvesAlgo::deleteCurves( curves, it->second, invertPlug()->getValue() );

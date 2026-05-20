@@ -128,9 +128,7 @@ const ChildNamesMap::Input &ChildNamesMap::input( IECore::InternedString outputN
 	auto it = m_map.find( outputName );
 	if( it == m_map.end() )
 	{
-		throw IECore::Exception(
-			fmt::format( "Invalid child name \"{}\"", outputName.string() )
-		);
+		throw IECore::Exception( fmt::format( "Invalid child name \"{}\"", outputName.string() ) );
 	}
 
 	return it->input;

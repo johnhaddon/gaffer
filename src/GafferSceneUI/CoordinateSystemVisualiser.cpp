@@ -51,7 +51,7 @@ namespace
 class CoordinateSystemVisualiser : public ObjectVisualiser
 {
 
-	public:
+public:
 
 	using ObjectType = IECoreScene::CoordinateSystem;
 
@@ -79,27 +79,27 @@ class CoordinateSystemVisualiser : public ObjectVisualiser
 		IECore::IntVectorDataPtr vertsPerCurve = new IECore::IntVectorData;
 		vertsPerCurve->writable().resize( 3, 2 );
 
-		IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurve );
-		curves->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
+		IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive(
+			IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurve
+		);
+		curves->addPrimitiveVariable(
+			"P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData )
+		);
 		group->addChild( curves );
 	}
 
-	~CoordinateSystemVisualiser() override
-	{
-	}
+	~CoordinateSystemVisualiser() override {}
 
-	Visualisations visualise( const IECore::Object *object ) const override
-	{
-		return m_visualisations;
-	}
+	Visualisations visualise( const IECore::Object *object ) const override { return m_visualisations; }
 
-	protected:
+protected:
 
 	static ObjectVisualiserDescription<CoordinateSystemVisualiser> g_visualiserDescription;
 
 	Visualisations m_visualisations;
 };
 
-ObjectVisualiser::ObjectVisualiserDescription<CoordinateSystemVisualiser> CoordinateSystemVisualiser::g_visualiserDescription;
+ObjectVisualiser::ObjectVisualiserDescription<CoordinateSystemVisualiser>
+	CoordinateSystemVisualiser::g_visualiserDescription;
 
 } // namespace

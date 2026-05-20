@@ -60,17 +60,14 @@ GAFFER_NODE_DEFINE_TYPE( SelectView );
 
 size_t SelectView::g_firstPlugIndex = 0;
 
-SelectView::SelectView( const std::string &name )
-	: ImageProcessor( name )
+SelectView::SelectView( const std::string &name ) : ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
 	addChild( new StringPlug( "view", Plug::In, "left" ) );
 }
 
-SelectView::~SelectView()
-{
-}
+SelectView::~SelectView() {}
 
 Gaffer::StringPlug *SelectView::viewPlug()
 {
@@ -109,7 +106,9 @@ std::string SelectView::selectViewName( const Gaffer::Context *context ) const
 	return viewPlug()->getValue();
 }
 
-void SelectView::hashFormat( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void SelectView::hashFormat(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	std::string v = selectViewName( context );
 	ImagePlug::ViewScope s( context );
@@ -118,7 +117,9 @@ void SelectView::hashFormat( const GafferImage::ImagePlug *parent, const Gaffer:
 	h = inPlug()->formatPlug()->hash();
 }
 
-void SelectView::hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void SelectView::hashDataWindow(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	std::string v = selectViewName( context );
 	ImagePlug::ViewScope s( context );
@@ -126,7 +127,9 @@ void SelectView::hashDataWindow( const GafferImage::ImagePlug *parent, const Gaf
 	h = inPlug()->dataWindowPlug()->hash();
 }
 
-void SelectView::hashMetadata( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void SelectView::hashMetadata(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	std::string v = selectViewName( context );
 	ImagePlug::ViewScope s( context );
@@ -134,7 +137,9 @@ void SelectView::hashMetadata( const GafferImage::ImagePlug *parent, const Gaffe
 	h = inPlug()->metadataPlug()->hash();
 }
 
-void SelectView::hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void SelectView::hashDeep(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	std::string v = selectViewName( context );
 	ImagePlug::ViewScope s( context );
@@ -142,7 +147,9 @@ void SelectView::hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::C
 	h = inPlug()->deepPlug()->hash();
 }
 
-void SelectView::hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void SelectView::hashSampleOffsets(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	std::string v = selectViewName( context );
 	ImagePlug::ViewScope s( context );
@@ -150,7 +157,9 @@ void SelectView::hashSampleOffsets( const GafferImage::ImagePlug *parent, const 
 	h = inPlug()->sampleOffsetsPlug()->hash();
 }
 
-void SelectView::hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void SelectView::hashChannelNames(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	std::string v = selectViewName( context );
 	ImagePlug::ViewScope s( context );
@@ -158,12 +167,16 @@ void SelectView::hashChannelNames( const GafferImage::ImagePlug *parent, const G
 	h = inPlug()->channelNamesPlug()->hash();
 }
 
-void SelectView::hashViewNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void SelectView::hashViewNames(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashViewNames( output, context, h );
 }
 
-void SelectView::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void SelectView::hashChannelData(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	std::string v = selectViewName( context );
 	ImagePlug::ViewScope s( context );
@@ -187,7 +200,9 @@ Imath::Box2i SelectView::computeDataWindow( const Gaffer::Context *context, cons
 	return inPlug()->dataWindowPlug()->getValue();
 }
 
-IECore::ConstCompoundDataPtr SelectView::computeMetadata( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstCompoundDataPtr SelectView::computeMetadata(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	std::string v = selectViewName( context );
 	ImagePlug::ViewScope s( context );
@@ -203,7 +218,9 @@ bool SelectView::computeDeep( const Gaffer::Context *context, const ImagePlug *p
 	return inPlug()->deepPlug()->getValue();
 }
 
-IECore::ConstIntVectorDataPtr SelectView::computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstIntVectorDataPtr SelectView::computeSampleOffsets(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	std::string v = selectViewName( context );
 	ImagePlug::ViewScope s( context );
@@ -211,7 +228,9 @@ IECore::ConstIntVectorDataPtr SelectView::computeSampleOffsets( const Imath::V2i
 	return inPlug()->sampleOffsetsPlug()->getValue();
 }
 
-IECore::ConstStringVectorDataPtr SelectView::computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr SelectView::computeChannelNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	std::string v = selectViewName( context );
 	ImagePlug::ViewScope s( context );
@@ -219,12 +238,17 @@ IECore::ConstStringVectorDataPtr SelectView::computeChannelNames( const Gaffer::
 	return inPlug()->channelNamesPlug()->getValue();
 }
 
-IECore::ConstStringVectorDataPtr SelectView::computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr SelectView::computeViewNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	return ImagePlug::defaultViewNames();
 }
 
-IECore::ConstFloatVectorDataPtr SelectView::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr SelectView::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	std::string v = selectViewName( context );
 	ImagePlug::ViewScope s( context );

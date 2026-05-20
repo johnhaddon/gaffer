@@ -48,7 +48,7 @@ namespace GafferImage
 class GAFFERIMAGE_API RankFilter : public FlatImageProcessor
 {
 
-	public:
+public:
 
 	~RankFilter() override;
 
@@ -68,7 +68,7 @@ class GAFFERIMAGE_API RankFilter : public FlatImageProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
 	enum Mode
 	{
@@ -82,13 +82,20 @@ class GAFFERIMAGE_API RankFilter : public FlatImageProcessor
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-	void hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashDataWindow(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
 	Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 
-	void hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	void hashChannelData(
+		const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData(
+		const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+		const ImagePlug *parent
+	) const override;
 
-	private:
+private:
 
 	// This private plug stores an offset for each pixel to where the rank is located
 	// It should only be evaluated if masterChannelPlug is set, and it should only be evaluated

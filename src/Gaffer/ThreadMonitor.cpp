@@ -49,19 +49,11 @@ ThreadMonitor::ProcessesPerThread g_emptyStatistics;
 
 } // namespace
 
-ThreadMonitor::ThreadData::ThreadData()
-	: id( thisThreadId() )
-{
-}
+ThreadMonitor::ThreadData::ThreadData() : id( thisThreadId() ) {}
 
-ThreadMonitor::ThreadMonitor( const std::vector<IECore::InternedString> &processMask )
-	: m_processMask( processMask )
-{
-}
+ThreadMonitor::ThreadMonitor( const std::vector<IECore::InternedString> &processMask ) : m_processMask( processMask ) {}
 
-ThreadMonitor::~ThreadMonitor()
-{
-}
+ThreadMonitor::~ThreadMonitor() {}
 
 ThreadMonitor::ThreadId ThreadMonitor::thisThreadId()
 {
@@ -103,9 +95,7 @@ void ThreadMonitor::processStarted( const Process *process )
 	threadData.processesPerPlug[process->plug()]++;
 }
 
-void ThreadMonitor::processFinished( const Process *process )
-{
-}
+void ThreadMonitor::processFinished( const Process *process ) {}
 
 void ThreadMonitor::collate() const
 {

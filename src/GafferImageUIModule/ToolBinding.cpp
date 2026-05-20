@@ -52,8 +52,13 @@ void GafferImageUIModule::bindTools()
 	{
 		scope s = GafferBindings::NodeClass<GafferImageUI::ColorInspectorTool>( nullptr, no_init );
 
-		scope ci = GafferBindings::PlugClass<GafferImageUI::ColorInspectorTool::ColorInspectorPlug>()
-					   .def( init<const char *, Plug::Direction, unsigned>( ( boost::python::arg_( "name" ) = GraphComponent::defaultName<GafferImageUI::ColorInspectorTool::ColorInspectorPlug>(), boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "flags" ) = Plug::Default ) ) );
+		scope ci = GafferBindings::PlugClass<GafferImageUI::ColorInspectorTool::ColorInspectorPlug>().def(
+			init<const char *, Plug::Direction, unsigned>(
+				( boost::python::arg_( "name" ) =
+					  GraphComponent::defaultName<GafferImageUI::ColorInspectorTool::ColorInspectorPlug>(),
+				  boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "flags" ) = Plug::Default )
+			)
+		);
 
 		enum_<GafferImageUI::ColorInspectorTool::ColorInspectorPlug::Mode>( "Mode" )
 			.value( "Cursor", GafferImageUI::ColorInspectorTool::ColorInspectorPlug::Mode::Cursor )

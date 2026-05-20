@@ -59,12 +59,13 @@ FormatPlug::FormatPlug( const std::string &name, Direction direction, Format def
 {
 	const unsigned childFlags = flags & ~Dynamic;
 	addChild( new Box2iPlug( "displayWindow", direction, defaultValue.getDisplayWindow(), childFlags ) );
-	addChild( new FloatPlug( "pixelAspect", direction, defaultValue.getPixelAspect(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::max(), childFlags ) );
+	addChild( new FloatPlug(
+		"pixelAspect", direction, defaultValue.getPixelAspect(), std::numeric_limits<float>::lowest(),
+		std::numeric_limits<float>::max(), childFlags
+	) );
 }
 
-FormatPlug::~FormatPlug()
-{
-}
+FormatPlug::~FormatPlug() {}
 
 bool FormatPlug::acceptsChild( const GraphComponent *potentialChild ) const
 {
@@ -158,7 +159,8 @@ FormatPlug *FormatPlug::acquireDefaultFormatPlug( Gaffer::ScriptNode *scriptNode
 		return p;
 	}
 
-	FormatPlugPtr p = new FormatPlug( g_defaultFormatPlugName, Plug::In, g_defaultFormatFallback, Plug::Default | Plug::Dynamic );
+	FormatPlugPtr p =
+		new FormatPlug( g_defaultFormatPlugName, Plug::In, g_defaultFormatFallback, Plug::Default | Plug::Dynamic );
 	scriptNode->setChild( g_defaultFormatPlugName, p );
 	return p.get();
 }
@@ -180,9 +182,8 @@ void FormatPlug::parentChanging( Gaffer::GraphComponent *newParent )
 		// script's context, and arrange to transfer it again later if
 		// it changes.
 		setDefaultFormat( scriptNode->context(), getValue() );
-		m_plugDirtiedConnection = scriptNode->plugDirtiedSignal().connect(
-			boost::bind( &FormatPlug::plugDirtied, this, ::_1 )
-		);
+		m_plugDirtiedConnection =
+			scriptNode->plugDirtiedSignal().connect( boost::bind( &FormatPlug::plugDirtied, this, ::_1 ) );
 	}
 }
 

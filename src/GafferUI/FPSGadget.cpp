@@ -45,17 +45,14 @@ using namespace GafferUI;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( FPSGadget );
 
-FPSGadget::FPSGadget( Imath::V3f defaultPosition )
-	: Gadget( defaultName<FPSGadget>() )
+FPSGadget::FPSGadget( Imath::V3f defaultPosition ) : Gadget( defaultName<FPSGadget>() )
 {
 	Imath::M44f m;
 	m.setTranslation( defaultPosition );
 	setTransform( m );
 }
 
-FPSGadget::~FPSGadget()
-{
-}
+FPSGadget::~FPSGadget() {}
 
 void FPSGadget::renderLayer( Gadget::Layer layer, const Style *style, Gadget::RenderReason reason ) const
 {
@@ -80,7 +77,8 @@ void FPSGadget::renderLayer( Gadget::Layer layer, const Style *style, Gadget::Re
 	int64_t elapsed = 0;
 	while( true )
 	{
-		elapsed = std::chrono::duration_cast<std::chrono::microseconds>( m_timeBuffer.back() - m_timeBuffer.front() ).count();
+		elapsed =
+			std::chrono::duration_cast<std::chrono::microseconds>( m_timeBuffer.back() - m_timeBuffer.front() ).count();
 
 		// Discard any time samples older than a second
 		if( m_timeBuffer.size() > 2 && elapsed > 1000000 )

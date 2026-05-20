@@ -57,7 +57,10 @@ const AtString g_pointsArnoldString( "points" );
 const AtString g_quadArnoldString( "quad" );
 const AtString g_sphereArnoldString( "sphere" );
 
-AtNode *convertStatic( const IECoreScene::PointsPrimitive *points, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )
+AtNode *convertStatic(
+	const IECoreScene::PointsPrimitive *points, AtUniverse *universe, const std::string &nodeName,
+	const AtNode *parentNode, const std::string &messageContext
+)
 {
 
 	AtNode *result = AiNode( universe, g_pointsArnoldString, AtString( nodeName.c_str() ), parentNode );
@@ -81,7 +84,10 @@ AtNode *convertStatic( const IECoreScene::PointsPrimitive *points, AtUniverse *u
 		}
 		else
 		{
-			IECore::msg( IECore::Msg::Warning, messageContext, fmt::format( "Unknown type \"{}\" - reverting to disk mode.", t->readable() ) );
+			IECore::msg(
+				IECore::Msg::Warning, messageContext,
+				fmt::format( "Unknown type \"{}\" - reverting to disk mode.", t->readable() )
+			);
 		}
 	}
 
@@ -93,7 +99,11 @@ AtNode *convertStatic( const IECoreScene::PointsPrimitive *points, AtUniverse *u
 	return result;
 }
 
-AtNode *convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::PointsPrimitive *> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode, const std::string &messageContext )
+AtNode *convert(
+	const IECoreScenePreview::Renderer::Samples<const IECoreScene::PointsPrimitive *> &samples, float motionStart,
+	float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode,
+	const std::string &messageContext
+)
 {
 	AtNode *result = convertStatic( samples.front(), universe, nodeName, parentNode, messageContext );
 

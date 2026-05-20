@@ -73,16 +73,23 @@ IECore::ConstObjectPtr parameterData( const Object *attribute, const ShaderNetwo
 		return nullptr;
 	}
 
-	const IECoreScene::Shader *shader = parameter.shader.string().empty() ? shaderNetwork->outputShader() : shaderNetwork->getShader( parameter.shader );
+	const IECoreScene::Shader *shader = parameter.shader.string().empty() ?
+		shaderNetwork->outputShader() :
+		shaderNetwork->getShader( parameter.shader );
 	if( !shader )
 	{
 		return nullptr;
 	}
 
-	const ShaderNetwork::Parameter input = parameter.shader.string().empty() ? shaderNetwork->input( { shaderNetwork->getOutput().shader, parameter.name } ) : shaderNetwork->input( parameter );
+	const ShaderNetwork::Parameter input = parameter.shader.string().empty() ?
+		shaderNetwork->input( { shaderNetwork->getOutput().shader, parameter.name } ) :
+		shaderNetwork->input( parameter );
 	if( input )
 	{
-		return new CompoundData( { { g_shaderConnectionShader, new InternedStringData( input.shader ) }, { g_shaderConnectionParameter, new InternedStringData( input.name ) } } );
+		return new CompoundData(
+			{ { g_shaderConnectionShader, new InternedStringData( input.shader ) },
+			  { g_shaderConnectionParameter, new InternedStringData( input.name ) } }
+		);
 	}
 
 	return shader->parametersData()->member( parameter.name );
@@ -93,11 +100,12 @@ IECore::ConstObjectPtr parameterData( const Object *attribute, const ShaderNetwo
 IE_CORE_DEFINERUNTIMETYPED( ParameterInspector )
 
 ParameterInspector::ParameterInspector(
-	const GafferScene::ScenePlugPtr &scene, const Gaffer::PlugPtr &editScope,
-	IECore::InternedString attribute, const IECoreScene::ShaderNetwork::Parameter &parameter,
-	const bool inheritAttributes
+	const GafferScene::ScenePlugPtr &scene, const Gaffer::PlugPtr &editScope, IECore::InternedString attribute,
+	const IECoreScene::ShaderNetwork::Parameter &parameter, const bool inheritAttributes
 )
-	: AttributeInspector( scene, editScope, attribute, parameter.name.string(), "parameter" ), m_parameter( parameter ), m_inheritAttributes( inheritAttributes )
+	: AttributeInspector( scene, editScope, attribute, parameter.name.string(), "parameter" ),
+	  m_parameter( parameter ),
+	  m_inheritAttributes( inheritAttributes )
 {
 }
 
@@ -142,7 +150,9 @@ IECore::ConstObjectPtr ParameterInspector::value( const GafferScene::SceneAlgo::
 	return parameterData( attribute.get(), m_parameter );
 }
 
-IECore::ConstObjectPtr ParameterInspector::fallbackValue( const GafferScene::SceneAlgo::History *history, std::string &description ) const
+IECore::ConstObjectPtr ParameterInspector::fallbackValue(
+	const GafferScene::SceneAlgo::History *history, std::string &description
+) const
 {
 	if( auto fallbackAttribute = AttributeInspector::fallbackValue( history, description ) )
 	{
@@ -152,7 +162,9 @@ IECore::ConstObjectPtr ParameterInspector::fallbackValue( const GafferScene::Sce
 	return nullptr;
 }
 
-Gaffer::ValuePlugPtr ParameterInspector::source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const
+Gaffer::ValuePlugPtr ParameterInspector::source(
+	const GafferScene::SceneAlgo::History *history, std::string &editWarning
+) const
 {
 	auto sceneNode = runTimeCast<SceneNode>( history->scene->node() );
 	if( !sceneNode || history->scene != sceneNode->outPlug() )
@@ -186,7 +198,8 @@ Gaffer::ValuePlugPtr ParameterInspector::source( const GafferScene::SceneAlgo::H
 	}
 	else if( auto shaderAssignment = runTimeCast<ShaderAssignment>( sceneNode ) )
 	{
-		if( shaderAssignment->globalPlug()->getValue() || !( shaderAssignment->filterPlug()->match( shaderAssignment->inPlug() ) & PathMatcher::ExactMatch ) )
+		if( shaderAssignment->globalPlug()->getValue() ||
+			!( shaderAssignment->filterPlug()->match( shaderAssignment->inPlug() ) & PathMatcher::ExactMatch ) )
 		{
 			return nullptr;
 		}
@@ -206,12 +219,15 @@ Gaffer::ValuePlugPtr ParameterInspector::source( const GafferScene::SceneAlgo::H
 	}
 	else if( auto shaderTweaks = runTimeCast<ShaderTweaks>( sceneNode ) )
 	{
-		if( shaderTweaks->globalPlug()->getValue() || !( shaderTweaks->filterPlug()->match( shaderTweaks->inPlug() ) & PathMatcher::ExactMatch ) )
+		if( shaderTweaks->globalPlug()->getValue() ||
+			!( shaderTweaks->filterPlug()->match( shaderTweaks->inPlug() ) & PathMatcher::ExactMatch ) )
 		{
 			return nullptr;
 		}
 
-		const std::string tweakName = ( m_parameter.shader.string() + ( m_parameter.shader.string().empty() ? "" : "." ) + m_parameter.name.string() );
+		const std::string tweakName =
+			( m_parameter.shader.string() + ( m_parameter.shader.string().empty() ? "" : "." ) +
+			  m_parameter.name.string() );
 
 		for( const auto &tweak : TweakPlug::Range( *shaderTweaks->tweaksPlug() ) )
 		{
@@ -225,7 +241,9 @@ Gaffer::ValuePlugPtr ParameterInspector::source( const GafferScene::SceneAlgo::H
 	return nullptr;
 }
 
-Inspector::AcquireEditFunctionOrFailure ParameterInspector::acquireEditFunction( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history ) const
+Inspector::AcquireEditFunctionOrFailure ParameterInspector::acquireEditFunction(
+	Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history
+) const
 {
 	auto attributeHistory = static_cast<const SceneAlgo::AttributeHistory *>( history );
 
@@ -236,10 +254,8 @@ Inspector::AcquireEditFunctionOrFailure ParameterInspector::acquireEditFunction(
 	}
 
 	const GraphComponent *readOnlyReason = EditScopeAlgo::parameterEditReadOnlyReason(
-		editScope,
-		history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ),
-		attributeHistory->attributeName,
-		m_parameter
+		editScope, history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ),
+		attributeHistory->attributeName, m_parameter
 	);
 
 	if( readOnlyReason )
@@ -247,24 +263,16 @@ Inspector::AcquireEditFunctionOrFailure ParameterInspector::acquireEditFunction(
 		// If we don't have an edit and the scope is locked, we error,
 		// as we can't add an edit. Other cases where we already _have_
 		// an edit will have been found by `source()`.
-		return fmt::format(
-			"{} is locked.",
-			readOnlyReason->relativeName( readOnlyReason->ancestor<ScriptNode>() )
-		);
+		return fmt::format( "{} is locked.", readOnlyReason->relativeName( readOnlyReason->ancestor<ScriptNode>() ) );
 	}
 	else
 	{
-		return [editScope = EditScopePtr( editScope ),
-				attributeName = attributeHistory->attributeName,
-				context = attributeHistory->context,
-				parameter = m_parameter]( bool createIfNecessary ) {
+		return [editScope = EditScopePtr( editScope ), attributeName = attributeHistory->attributeName,
+				context = attributeHistory->context, parameter = m_parameter]( bool createIfNecessary ) {
 			Context::Scope scope( context.get() );
 			return EditScopeAlgo::acquireParameterEdit(
-				editScope.get(),
-				context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ),
-				attributeName,
-				parameter,
-				createIfNecessary
+				editScope.get(), context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ), attributeName,
+				parameter, createIfNecessary
 			);
 		};
 	}

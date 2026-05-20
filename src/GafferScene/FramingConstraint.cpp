@@ -77,9 +77,7 @@ FramingConstraint::FramingConstraint( const std::string &name )
 	outPlug()->attributesPlug()->setInput( inPlug()->attributesPlug() );
 }
 
-FramingConstraint::~FramingConstraint()
-{
-}
+FramingConstraint::~FramingConstraint() {}
 
 ScenePlug *FramingConstraint::targetScenePlug()
 {
@@ -175,23 +173,12 @@ void FramingConstraint::affects( const Gaffer::Plug *input, AffectedPlugsContain
 {
 	SceneElementProcessor::affects( input, outputs );
 
-	if(
-		input == targetScenePlug()->transformPlug() ||
-		input == targetScenePlug()->boundPlug() ||
-		input == targetScenePlug()->existsPlug() ||
-		input == inPlug()->transformPlug() ||
-		input == inPlug()->boundPlug() ||
-		input == inPlug()->existsPlug() ||
-		input == inPlug()->objectPlug() ||
-		input == inPlug()->globalsPlug() ||
-		input == targetPlug() ||
-		input == ignoreMissingTargetPlug() ||
-		input == boundModePlug() ||
-		input == paddingPlug() ||
-		input == extendFarClipPlug() ||
-		input == useTargetFramePlug() ||
-		input == targetFramePlug()
-	)
+	if( input == targetScenePlug()->transformPlug() || input == targetScenePlug()->boundPlug() ||
+		input == targetScenePlug()->existsPlug() || input == inPlug()->transformPlug() ||
+		input == inPlug()->boundPlug() || input == inPlug()->existsPlug() || input == inPlug()->objectPlug() ||
+		input == inPlug()->globalsPlug() || input == targetPlug() || input == ignoreMissingTargetPlug() ||
+		input == boundModePlug() || input == paddingPlug() || input == extendFarClipPlug() ||
+		input == useTargetFramePlug() || input == targetFramePlug() )
 	{
 		outputs.push_back( transformAndObjectPlug() );
 	}
@@ -233,7 +220,12 @@ std::optional<FramingConstraint::Target> FramingConstraint::target() const
 		}
 		else
 		{
-			throw IECore::Exception( fmt::format( "FramingConstraint target does not exist: \"{}\". Use 'ignoreMissingTarget' option if you want to just skip this constraint", targetPathAsString ) );
+			throw IECore::Exception(
+				fmt::format(
+					"FramingConstraint target does not exist: \"{}\". Use 'ignoreMissingTarget' option if you want to just skip this constraint",
+					targetPathAsString
+				)
+			);
 		}
 	}
 
@@ -249,8 +241,7 @@ namespace
 V3f multDirM44fTransposed( const M44f &m, const V3f &v )
 {
 	return V3f(
-		m[0][0] * v[0] + m[0][1] * v[1] + m[0][2] * v[2],
-		m[1][0] * v[0] + m[1][1] * v[1] + m[1][2] * v[2],
+		m[0][0] * v[0] + m[0][1] * v[1] + m[0][2] * v[2], m[1][0] * v[0] + m[1][1] * v[1] + m[1][2] * v[2],
 		m[2][0] * v[0] + m[2][1] * v[1] + m[2][2] * v[2]
 	);
 }
@@ -260,8 +251,7 @@ V3f multDirM44fTransposed( const M44f &m, const V3f &v )
 // Can return the minimum and/or maximum distances from each planes depending on which
 // result pointer is non-null
 inline void planeDistsFromBox(
-	const Box3f &box, const M44f &boxTransform,
-	const V3f &planeOrigin, std::vector<V3f> &planeNormals,
+	const Box3f &box, const M44f &boxTransform, const V3f &planeOrigin, std::vector<V3f> &planeNormals,
 	std::vector<float> *minDists, std::vector<float> *maxDists
 )
 {
@@ -290,9 +280,7 @@ inline void planeDistsFromBox(
 	for( int c = 0; c < 8; c++ )
 	{
 		V3f corner(
-			( c & 1 ) ? box.min.x : box.max.x,
-			( c & 2 ) ? box.min.y : box.max.y,
-			( c & 4 ) ? box.min.z : box.max.z
+			( c & 1 ) ? box.min.x : box.max.x, ( c & 2 ) ? box.min.y : box.max.y, ( c & 4 ) ? box.min.z : box.max.z
 		);
 
 		for( unsigned int i = 0; i < planeNormals.size(); i++ )
@@ -331,9 +319,8 @@ inline void planeDistsFromBox(
 // The same signature as planeDistsFromBox, except for a sphere specified by a center point and a
 // a point on the surface of the sphere
 inline void planeDistsFromSphere(
-	const V3f &center, const V3f &pointOnSurface, const M44f &sphereTransform,
-	const V3f &planeOrigin, std::vector<V3f> &planeNormals,
-	std::vector<float> *minDists, std::vector<float> *maxDists
+	const V3f &center, const V3f &pointOnSurface, const M44f &sphereTransform, const V3f &planeOrigin,
+	std::vector<V3f> &planeNormals, std::vector<float> *minDists, std::vector<float> *maxDists
 )
 {
 	V3f worldCenter = center * sphereTransform;
@@ -381,7 +368,9 @@ void setTransformAndObject( Gaffer::ValuePlug *output, const M44f &transform, co
 
 } // namespace
 
-void FramingConstraint::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void FramingConstraint::hash(
+	const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	SceneElementProcessor::hash( output, context, h );
 	if( output != transformAndObjectPlug() )
@@ -515,28 +504,28 @@ void FramingConstraint::compute( Gaffer::ValuePlug *output, const Gaffer::Contex
 		std::vector<float> frustumDistances;
 		if( sphereMode )
 		{
-			planeDistsFromSphere( targetBound.center(), targetBound.max, targetTransform, cameraOriginWorld, frustumPlanesWorld, &frustumDistances, nullptr );
+			planeDistsFromSphere(
+				targetBound.center(), targetBound.max, targetTransform, cameraOriginWorld, frustumPlanesWorld,
+				&frustumDistances, nullptr
+			);
 		}
 		else
 		{
-			planeDistsFromBox( targetBound, targetTransform, cameraOriginWorld, frustumPlanesWorld, &frustumDistances, nullptr );
+			planeDistsFromBox(
+				targetBound, targetTransform, cameraOriginWorld, frustumPlanesWorld, &frustumDistances, nullptr
+			);
 		}
 
 		// Now that we have distances from each frustum plane, we can compute a point in camera space where the
 		// x frustum planes intersect, and another point where the y frustum planes intersect
 		const V2f frustumSize = frustum.size();
-		const V3f xFrustumIntersect = V3f(
-										  frustumDistances[1] * frustum.min.x + frustumDistances[0] * frustum.max.x,
-										  0.0f,
-										  -frustumDistances[1] - frustumDistances[0]
-									  ) /
+		const V3f xFrustumIntersect = V3f( frustumDistances[1] * frustum.min.x + frustumDistances[0] * frustum.max.x,
+										   0.0f, -frustumDistances[1] - frustumDistances[0] ) /
 			frustumSize.x;
 
-		const V3f yFrustumIntersect = V3f(
-										  0.0f,
-										  frustumDistances[3] * frustum.min.y + frustumDistances[2] * frustum.max.y,
-										  -frustumDistances[3] - frustumDistances[2]
-									  ) /
+		const V3f yFrustumIntersect =
+			V3f( 0.0f, frustumDistances[3] * frustum.min.y + frustumDistances[2] * frustum.max.y,
+				 -frustumDistances[3] - frustumDistances[2] ) /
 			frustumSize.y;
 
 		// Minimum distance needed to make sure target is at least nearClip away
@@ -553,8 +542,7 @@ void FramingConstraint::compute( Gaffer::ValuePlug *output, const Gaffer::Contex
 		// offset.
 		const V3f result(
 			xFrustumIntersect.x + frustum.center().x * ( xFrustumIntersect.z - resultZ ),
-			yFrustumIntersect.y + frustum.center().y * ( yFrustumIntersect.z - resultZ ),
-			resultZ
+			yFrustumIntersect.y + frustum.center().y * ( yFrustumIntersect.z - resultZ ), resultZ
 		);
 
 		// Compute an updated camera world transform
@@ -590,22 +578,25 @@ void FramingConstraint::compute( Gaffer::ValuePlug *output, const Gaffer::Contex
 		std::vector<float> distancesMax;
 		if( sphereMode )
 		{
-			planeDistsFromSphere( targetBound.center(), targetBound.max, targetTransform, cameraOriginWorld, camDirsWorld, &distancesMin, &distancesMax );
+			planeDistsFromSphere(
+				targetBound.center(), targetBound.max, targetTransform, cameraOriginWorld, camDirsWorld, &distancesMin,
+				&distancesMax
+			);
 		}
 		else
 		{
-			planeDistsFromBox( targetBound, targetTransform, cameraOriginWorld, camDirsWorld, &distancesMin, &distancesMax );
+			planeDistsFromBox(
+				targetBound, targetTransform, cameraOriginWorld, camDirsWorld, &distancesMin, &distancesMax
+			);
 		}
 
 		// Compute an updated camera world transform based on the center of the frustum required
-		worldCameraTransform = M44f(
-								   M33f(),
-								   V3f(
-									   ( distancesMin[0] + distancesMax[0] ) * 0.5f,
-									   ( distancesMin[1] + distancesMax[1] ) * 0.5f,
-									   distancesMax[2] + camera->getClippingPlanes().x
-								   )
-							   ) *
+		worldCameraTransform =
+			M44f(
+				M33f(),
+				V3f( ( distancesMin[0] + distancesMax[0] ) * 0.5f, ( distancesMin[1] + distancesMax[1] ) * 0.5f,
+					 distancesMax[2] + camera->getClippingPlanes().x )
+			) *
 			worldCameraTransform;
 
 		// Compute how much larger the frustum needs to be. Handling this as an isotropic scaling factor
@@ -640,12 +631,16 @@ bool FramingConstraint::processesTransform() const
 	return true;
 }
 
-void FramingConstraint::hashProcessedTransform( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void FramingConstraint::hashProcessedTransform(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	transformAndObjectPlug()->hash( h );
 }
 
-Imath::M44f FramingConstraint::computeProcessedTransform( const ScenePath &path, const Gaffer::Context *context, const Imath::M44f &inputTransform ) const
+Imath::M44f FramingConstraint::computeProcessedTransform(
+	const ScenePath &path, const Gaffer::Context *context, const Imath::M44f &inputTransform
+) const
 {
 	// Just pull the transform from our cache plug
 	ConstObjectVectorPtr transformAndObject = transformAndObjectPlug()->getValue();
@@ -661,12 +656,16 @@ bool FramingConstraint::processesObject() const
 	return true;
 }
 
-void FramingConstraint::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void FramingConstraint::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	transformAndObjectPlug()->hash( h );
 }
 
-IECore::ConstObjectPtr FramingConstraint::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::ConstObjectPtr inputObject ) const
+IECore::ConstObjectPtr FramingConstraint::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::ConstObjectPtr inputObject
+) const
 {
 	// Just pull the object from our cache plug
 	ConstObjectVectorPtr transformAndObject = transformAndObjectPlug()->getValue();

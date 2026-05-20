@@ -66,9 +66,7 @@ namespace
 
 template<typename T>
 using ValuesDataType = std::conditional_t<
-	IECore::TypeTraits::IsVec<T>::value,
-	IECore::GeometricTypedData<vector<T>>,
-	IECore::TypedData<vector<T>>>;
+	IECore::TypeTraits::IsVec<T>::value, IECore::GeometricTypedData<vector<T>>, IECore::TypedData<vector<T>>>;
 
 template<typename T>
 using ValuesPlugType = Gaffer::TypedObjectPlug<ValuesDataType<T>>;
@@ -129,7 +127,9 @@ void setValue( const PlugType *plug, const typename PlugType::ValueType &value, 
 }
 
 template<typename T>
-void setValue( const CompoundNumericPlug<T> *plug, const typename CompoundNumericPlug<T>::ValueType &value, ValuePlug *leafPlug )
+void setValue(
+	const CompoundNumericPlug<T> *plug, const typename CompoundNumericPlug<T>::ValueType &value, ValuePlug *leafPlug
+)
 {
 	assert( leafPlug->parent() == plug );
 	for( size_t i = 0, e = plug->children().size(); i < e; ++i )
@@ -154,8 +154,7 @@ GAFFER_NODE_DEFINE_TYPE( RandomChoice );
 
 size_t RandomChoice::g_firstPlugIndex = 0;
 
-RandomChoice::RandomChoice( const std::string &name )
-	: ComputeNode( name )
+RandomChoice::RandomChoice( const std::string &name ) : ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -165,9 +164,7 @@ RandomChoice::RandomChoice( const std::string &name )
 	choicesPlug()->addChild( new FloatVectorDataPlug( "weights", Plug::In, new FloatVectorData ) );
 }
 
-RandomChoice::~RandomChoice()
-{
-}
+RandomChoice::~RandomChoice() {}
 
 void RandomChoice::setup( const ValuePlug *plug )
 {
@@ -176,15 +173,12 @@ void RandomChoice::setup( const ValuePlug *plug )
 		throw IECore::Exception( "Already set up" );
 	}
 
-	dispatchPlugFunction(
-		plug,
-		[this]( const auto plug ) {
-			using ValueType = typename remove_pointer_t<decltype( plug )>::ValueType;
-			ValuePlugPtr valuesPlug = new ValuesPlugType<ValueType>( "values", Plug::In, new ValuesDataType<ValueType> );
-			this->choicesPlug()->addChild( valuesPlug );
-			this->addChild( plug->createCounterpart( g_outPlugName, Plug::Out ) );
-		}
-	);
+	dispatchPlugFunction( plug, [this]( const auto plug ) {
+		using ValueType = typename remove_pointer_t<decltype( plug )>::ValueType;
+		ValuePlugPtr valuesPlug = new ValuesPlugType<ValueType>( "values", Plug::In, new ValuesDataType<ValueType> );
+		this->choicesPlug()->addChild( valuesPlug );
+		this->addChild( plug->createCounterpart( g_outPlugName, Plug::Out ) );
+	} );
 
 	if( !outPlug() )
 	{
@@ -195,12 +189,7 @@ void RandomChoice::setup( const ValuePlug *plug )
 bool RandomChoice::canSetup( const ValuePlug *plug )
 {
 	bool result = false;
-	dispatchPlugFunction(
-		plug,
-		[&result]( const auto plug ) {
-			result = true;
-		}
-	);
+	dispatchPlugFunction( plug, [&result]( const auto plug ) { result = true; } );
 	return result;
 }
 
@@ -258,12 +247,8 @@ void RandomChoice::affects( const Plug *input, AffectedPlugsContainer &outputs )
 {
 	ComputeNode::affects( input, outputs );
 
-	if(
-		input == seedPlug() ||
-		input == seedVariablePlug() ||
-		input == choicesWeightsPlug() ||
-		input == choicesValuesPlug()
-	)
+	if( input == seedPlug() || input == seedVariablePlug() || input == choicesWeightsPlug() ||
+		input == choicesValuesPlug() )
 	{
 		if( const Plug *p = outPlug() )
 		{
@@ -321,56 +306,55 @@ void RandomChoice::compute( ValuePlug *output, const Context *context ) const
 		}
 		Imath::Rand48 random( seed );
 
-		dispatchPlugFunction(
-			outPlug(),
-			[this, output, &weights, &random]( auto plug ) {
-				using PlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
-				using ValueType = typename PlugType::ValueType;
+		dispatchPlugFunction( outPlug(), [this, output, &weights, &random]( auto plug ) {
+			using PlugType = remove_const_t<remove_pointer_t<decltype( plug )>>;
+			using ValueType = typename PlugType::ValueType;
 
-				auto choicesData = this->choicesValuesPlug<ValuesPlugType<ValueType>>()->getValue();
-				const auto &choices = choicesData->readable();
-				if( !choices.size() )
-				{
-					output->setToDefault();
-					return;
-				}
+			auto choicesData = this->choicesValuesPlug<ValuesPlugType<ValueType>>()->getValue();
+			const auto &choices = choicesData->readable();
+			if( !choices.size() )
+			{
+				output->setToDefault();
+				return;
+			}
 
-				if( weights.size() != choices.size() )
-				{
-					throw IECore::Exception( fmt::format( "Length of `choices.weights` does not match length of `choices.values` "
-														  "({} but should be {}).",
-														  weights.size(), choices.size() ) );
-				}
-
-				const float weightsSum = accumulate(
-					weights.begin(), weights.end(), 0.0f
+			if( weights.size() != choices.size() )
+			{
+				throw IECore::Exception(
+					fmt::format(
+						"Length of `choices.weights` does not match length of `choices.values` "
+						"({} but should be {}).",
+						weights.size(), choices.size()
+					)
 				);
-				if( weightsSum == 0.0f )
+			}
+
+			const float weightsSum = accumulate( weights.begin(), weights.end(), 0.0f );
+			if( weightsSum == 0.0f )
+			{
+				output->setToDefault();
+				return;
+			}
+
+			const float r = random.nextf( 0, weightsSum );
+
+			// We currently do a simple linear search until the summed
+			// weight exceeds `r`. Theoretically this could be improved by
+			// storing a vector of cumulative weights on an internal plug
+			// and doing a binary search on that. But in practice, for the
+			// sizes we expect to be dealing with (10s most commonly, perhaps
+			// 1000s in the extreme), this appears not to be a win.
+			float s = 0;
+			for( size_t i = 0; i < choices.size(); ++i )
+			{
+				s += weights[i];
+				if( s >= r )
 				{
-					output->setToDefault();
+					setValue( plug, choices[i], output );
 					return;
-				}
-
-				const float r = random.nextf( 0, weightsSum );
-
-				// We currently do a simple linear search until the summed
-				// weight exceeds `r`. Theoretically this could be improved by
-				// storing a vector of cumulative weights on an internal plug
-				// and doing a binary search on that. But in practice, for the
-				// sizes we expect to be dealing with (10s most commonly, perhaps
-				// 1000s in the extreme), this appears not to be a win.
-				float s = 0;
-				for( size_t i = 0; i < choices.size(); ++i )
-				{
-					s += weights[i];
-					if( s >= r )
-					{
-						setValue( plug, choices[i], output );
-						return;
-					}
 				}
 			}
-		);
+		} );
 	}
 	ComputeNode::compute( output, context );
 }

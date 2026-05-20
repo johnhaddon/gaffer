@@ -85,9 +85,13 @@ IECore::PathMatcher pathsForIDsWrapper( const RenderManifest &manifest, object &
 	return manifest.pathsForIDs( ids );
 }
 
-std::shared_ptr<RenderManifest> loadFromImageMetadataWrapper( const IECore::CompoundData *metadata, const std::string &cryptomatteLayerName )
+std::shared_ptr<RenderManifest> loadFromImageMetadataWrapper(
+	const IECore::CompoundData *metadata, const std::string &cryptomatteLayerName
+)
 {
-	return std::const_pointer_cast<RenderManifest>( RenderManifest::loadFromImageMetadata( metadata, cryptomatteLayerName ) );
+	return std::const_pointer_cast<RenderManifest>(
+		RenderManifest::loadFromImageMetadata( metadata, cryptomatteLayerName )
+	);
 }
 
 } // namespace

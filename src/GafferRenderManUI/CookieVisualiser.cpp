@@ -60,7 +60,9 @@ namespace
 /// \todo We have similar methods in several places. Can we consolidate them all somewhere? Perhaps a new
 /// method of CompoundData?
 template<typename T>
-T parameterOrDefault( const IECore::CompoundData *parameters, const IECore::InternedString &name, const T &defaultValue )
+T parameterOrDefault(
+	const IECore::CompoundData *parameters, const IECore::InternedString &name, const T &defaultValue
+)
 {
 	if( const auto d = parameters->member<TypedData<T>>( name ) )
 	{
@@ -135,9 +137,10 @@ void addWireframeCurveState( IECoreGL::Group *group )
 // Customized IECoreGL primitive supporting `uvOrientation`
 class UVOrientedQuadPrimitive : public IECoreGL::QuadPrimitive
 {
-	public:
+public:
 
-	UVOrientedQuadPrimitive( float width, float height, const M33f &uvOrientation ) : IECoreGL::QuadPrimitive( width, height )
+	UVOrientedQuadPrimitive( float width, float height, const M33f &uvOrientation )
+		: IECoreGL::QuadPrimitive( width, height )
 	{
 		IECore::V2fVectorDataPtr uvData = new IECore::V2fVectorData;
 
@@ -151,9 +154,7 @@ class UVOrientedQuadPrimitive : public IECoreGL::QuadPrimitive
 		addVertexAttribute( "uv", uvData );
 	}
 
-	~UVOrientedQuadPrimitive() override
-	{
-	}
+	~UVOrientedQuadPrimitive() override {}
 };
 
 using AspectRatioQueryCache = IECorePreview::LRUCache<std::string, float, IECorePreview::LRUCachePolicy::Parallel>;
@@ -184,16 +185,19 @@ AspectRatioQueryCache g_aspectRatioQueryCache(
 class CookieVisualiser final : public LightFilterVisualiser
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( CookieVisualiser )
 
 	CookieVisualiser();
 	~CookieVisualiser() override;
 
-	Visualisations visualise( const InternedString &attributeName, const ShaderNetwork *filterShaderNetwork, const ShaderNetwork *lightShaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
+	Visualisations visualise(
+		const InternedString &attributeName, const ShaderNetwork *filterShaderNetwork,
+		const ShaderNetwork *lightShaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state
+	) const override;
 
-	protected:
+protected:
 
 	static LightFilterVisualiser::LightFilterVisualiserDescription<CookieVisualiser> g_visualiserDescription;
 };
@@ -201,28 +205,32 @@ class CookieVisualiser final : public LightFilterVisualiser
 IE_CORE_DECLAREPTR( CookieVisualiser )
 
 // Register the new visualiser
-LightFilterVisualiser::LightFilterVisualiserDescription<CookieVisualiser> CookieVisualiser::g_visualiserDescription( "ri:lightFilter", "PxrCookieLightFilter" );
+LightFilterVisualiser::LightFilterVisualiserDescription<CookieVisualiser> CookieVisualiser::g_visualiserDescription(
+	"ri:lightFilter", "PxrCookieLightFilter"
+);
 
-CookieVisualiser::CookieVisualiser()
-{
-}
+CookieVisualiser::CookieVisualiser() {}
 
-CookieVisualiser::~CookieVisualiser()
-{
-}
+CookieVisualiser::~CookieVisualiser() {}
 
-Visualisations CookieVisualiser::visualise( const InternedString &attributeName, const ShaderNetwork *filterShaderNetwork, const ShaderNetwork *lightShaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const
+Visualisations CookieVisualiser::visualise(
+	const InternedString &attributeName, const ShaderNetwork *filterShaderNetwork,
+	const ShaderNetwork *lightShaderNetwork, const CompoundObject *attributes, IECoreGL::ConstStatePtr &state
+) const
 {
 	IECoreGL::GroupPtr result = new IECoreGL::Group();
 
 	const StringData *visualiserDrawingModeData = attributes->member<StringData>( "gl:light:drawingMode" );
-	const std::string visualiserDrawingMode = visualiserDrawingModeData ? visualiserDrawingModeData->readable() : "texture";
+	const std::string visualiserDrawingMode =
+		visualiserDrawingModeData ? visualiserDrawingModeData->readable() : "texture";
 
 	const CompoundData *filterParameters = filterShaderNetwork->outputShader()->parametersData();
 
 	CompoundObjectPtr shaderParameters = new CompoundObject();
 
-	const V2f size( parameterOrDefault( filterParameters, "width", 1.f ), parameterOrDefault( filterParameters, "height", 1.f ) );
+	const V2f size(
+		parameterOrDefault( filterParameters, "width", 1.f ), parameterOrDefault( filterParameters, "height", 1.f )
+	);
 
 	if( visualiserDrawingMode != "wireframe" )
 	{
@@ -231,16 +239,10 @@ Visualisations CookieVisualiser::visualise( const InternedString &attributeName,
 		IECoreGL::PrimitivePtr quadPrimitive;
 		if( map.empty() || visualiserDrawingMode == "color" )
 		{
-			result->getState()->add(
-				new IECoreGL::ShaderStateComponent(
-					ShaderLoader::defaultShaderLoader(),
-					TextureLoader::defaultTextureLoader(),
-					"",
-					"",
-					IECoreGL::Shader::constantFragmentSource(),
-					shaderParameters
-				)
-			);
+			result->getState()->add( new IECoreGL::ShaderStateComponent(
+				ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "",
+				IECoreGL::Shader::constantFragmentSource(), shaderParameters
+			) );
 
 			quadPrimitive = new IECoreGL::QuadPrimitive( size.x, size.y );
 			quadPrimitive->addPrimitiveVariable(
@@ -255,20 +257,18 @@ Visualisations CookieVisualiser::visualise( const InternedString &attributeName,
 		{
 			shaderParameters->members()["texture"] = new StringData( map );
 
-			const IntData *maxTextureResolutionData = attributes->member<IntData>( "gl:visualiser:maxTextureResolution" );
+			const IntData *maxTextureResolutionData =
+				attributes->member<IntData>( "gl:visualiser:maxTextureResolution" );
 			const int resolution = maxTextureResolutionData ? maxTextureResolutionData->readable() : 512;
 			shaderParameters->members()["texture:maxResolution"] = new IntData( resolution );
 
-			shaderParameters->members()["tint"] = new Color3fData(
-				parameterOrDefault( filterParameters, "tint", Color3f( 1.f ) )
-			);
-			shaderParameters->members()["saturation"] = new FloatData(
-				parameterOrDefault( filterParameters, "saturation", 1.f )
-			);
+			shaderParameters->members()["tint"] =
+				new Color3fData( parameterOrDefault( filterParameters, "tint", Color3f( 1.f ) ) );
+			shaderParameters->members()["saturation"] =
+				new FloatData( parameterOrDefault( filterParameters, "saturation", 1.f ) );
 
-			shaderParameters->members()["tileMode"] = new IntData(
-				parameterOrDefault( filterParameters, "tileMode", 0 )
-			);
+			shaderParameters->members()["tileMode"] =
+				new IntData( parameterOrDefault( filterParameters, "tileMode", 0 ) );
 
 			shaderParameters->members()["aspectRatio"] = new FloatData( g_aspectRatioQueryCache.get( map ) );
 
@@ -302,16 +302,10 @@ Visualisations CookieVisualiser::visualise( const InternedString &attributeName,
 
 			quadPrimitive = new UVOrientedQuadPrimitive( size.x, size.y, textureTransform );
 
-			result->getState()->add(
-				new IECoreGL::ShaderStateComponent(
-					ShaderLoader::defaultShaderLoader(),
-					TextureLoader::defaultTextureLoader(),
-					"",
-					"",
-					texturedFragSource(),
-					shaderParameters
-				)
-			);
+			result->getState()->add( new IECoreGL::ShaderStateComponent(
+				ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "",
+				texturedFragSource(), shaderParameters
+			) );
 		}
 
 		result->addChild( quadPrimitive );
@@ -319,12 +313,12 @@ Visualisations CookieVisualiser::visualise( const InternedString &attributeName,
 
 	IECoreGL::GroupPtr outlineResult = new IECoreGL::Group();
 	addWireframeCurveState( outlineResult.get() );
-	outlineResult->addChild( GafferRenderManUI::lightFilterRectangles( size, 0, V2f( 1.f ), V4f( 0.f ), V4f( 0.f ), 0.f ) );
+	outlineResult->addChild(
+		GafferRenderManUI::lightFilterRectangles( size, 0, V2f( 1.f ), V4f( 0.f ), V4f( 0.f ), 0.f )
+	);
 
-	return {
-		Visualisation::createGeometry( result, IECoreGLPreview::Visualisation::ColorSpace::Scene ),
-		Visualisation::createGeometry( outlineResult )
-	};
+	return { Visualisation::createGeometry( result, IECoreGLPreview::Visualisation::ColorSpace::Scene ),
+			 Visualisation::createGeometry( outlineResult ) };
 }
 
 } // namespace

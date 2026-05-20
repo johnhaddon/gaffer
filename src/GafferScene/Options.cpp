@@ -59,32 +59,30 @@ GAFFER_NODE_DEFINE_TYPE( Options );
 
 size_t Options::g_firstPlugIndex = 0;
 
-Options::Options( const std::string &name )
-	: GlobalsProcessor( name )
+Options::Options( const std::string &name ) : GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new CompoundDataPlug( "options" ) );
 	addChild( new CompoundObjectPlug( "extraOptions", Plug::In, new IECore::CompoundObject ) );
 }
 
-Options::Options( const std::string &name, const std::string &rendererPrefix )
-	: Options( name )
+Options::Options( const std::string &name, const std::string &rendererPrefix ) : Options( name )
 {
 	const string targetPattern = fmt::format( "option:{}:*", rendererPrefix );
 	for( const auto &target : Metadata::targetsWithMetadata( targetPattern, g_defaultValue ) )
 	{
-		if( auto valuePlug = MetadataAlgo::createPlugFromMetadata( "value", Plug::Direction::In, Plug::Flags::Default, target ) )
+		if( auto valuePlug =
+				MetadataAlgo::createPlugFromMetadata( "value", Plug::Direction::In, Plug::Flags::Default, target ) )
 		{
 			const std::string optionName = target.string().substr( 7 );
-			NameValuePlugPtr optionPlug = new NameValuePlug( optionName, valuePlug, false, boost::replace_all_copy( optionName, ".", "_" ) );
+			NameValuePlugPtr optionPlug =
+				new NameValuePlug( optionName, valuePlug, false, boost::replace_all_copy( optionName, ".", "_" ) );
 			optionsPlug()->addChild( optionPlug );
 		}
 	}
 }
 
-Options::~Options()
-{
-}
+Options::~Options() {}
 
 Gaffer::CompoundDataPlug *Options::optionsPlug()
 {
@@ -110,10 +108,7 @@ void Options::affects( const Plug *input, AffectedPlugsContainer &outputs ) cons
 {
 	GlobalsProcessor::affects( input, outputs );
 
-	if(
-		optionsPlug()->isAncestorOf( input ) ||
-		input == extraOptionsPlug()
-	)
+	if( optionsPlug()->isAncestorOf( input ) || input == extraOptionsPlug() )
 	{
 		outputs.push_back( outPlug()->globalsPlug() );
 	}
@@ -126,7 +121,9 @@ void Options::hashProcessedGlobals( const Gaffer::Context *context, IECore::Murm
 	hashPrefix( context, h );
 }
 
-IECore::ConstCompoundObjectPtr Options::computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const
+IECore::ConstCompoundObjectPtr Options::computeProcessedGlobals(
+	const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals
+) const
 {
 	const CompoundDataPlug *p = optionsPlug();
 	IECore::ConstCompoundObjectPtr extraOptions = extraOptionsPlug()->getValue();
@@ -161,9 +158,7 @@ IECore::ConstCompoundObjectPtr Options::computeProcessedGlobals( const Gaffer::C
 	return result;
 }
 
-void Options::hashPrefix( const Gaffer::Context *context, IECore::MurmurHash &h ) const
-{
-}
+void Options::hashPrefix( const Gaffer::Context *context, IECore::MurmurHash &h ) const {}
 
 std::string Options::computePrefix( const Gaffer::Context *context ) const
 {

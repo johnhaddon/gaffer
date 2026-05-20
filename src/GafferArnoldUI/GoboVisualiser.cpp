@@ -86,9 +86,18 @@ IECoreGL::RenderablePtr quadWireframe( const V2f &size )
 	p.push_back( V3f( size.x / 2, size.y / 2, 0 ) );
 	p.push_back( V3f( -size.x / 2, size.y / 2, 0 ) );
 
-	IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::Periodic, vertsPerCurveData );
-	curves->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
-	curves->addPrimitiveVariable( "Cs", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, new Color3fData( Color3f( 1.0f, 0.835f, 0.07f ) ) ) );
+	IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive(
+		IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::Periodic, vertsPerCurveData
+	);
+	curves->addPrimitiveVariable(
+		"P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData )
+	);
+	curves->addPrimitiveVariable(
+		"Cs",
+		IECoreScene::PrimitiveVariable(
+			IECoreScene::PrimitiveVariable::Constant, new Color3fData( Color3f( 1.0f, 0.835f, 0.07f ) )
+		)
+	);
 
 	return curves;
 }
@@ -96,7 +105,9 @@ IECoreGL::RenderablePtr quadWireframe( const V2f &size )
 /// \todo We have similar methods in several places. Can we consolidate them all somewhere? Perhaps a new
 /// method of CompoundData?
 template<typename T>
-T parameterOrDefault( const IECore::CompoundData *parameters, const IECore::InternedString &name, const T &defaultValue )
+T parameterOrDefault(
+	const IECore::CompoundData *parameters, const IECore::InternedString &name, const T &defaultValue
+)
 {
 	using DataType = IECore::TypedData<T>;
 	if( const DataType *d = parameters->member<DataType>( name ) )
@@ -112,13 +123,15 @@ T parameterOrDefault( const IECore::CompoundData *parameters, const IECore::Inte
 struct OSLTextureCacheGetterKey
 {
 
-	OSLTextureCacheGetterKey()
-		: shaderNetwork( nullptr ), resolution( 512 )
-	{
-	}
+	OSLTextureCacheGetterKey() : shaderNetwork( nullptr ), resolution( 512 ) {}
 
-	OSLTextureCacheGetterKey( const IECoreScene::ShaderNetwork::Parameter &out, const IECoreScene::ShaderNetwork *shaderNetwork, int resolution )
-		: output( out ), shaderNetwork( shaderNetwork ), resolution( resolution )
+	OSLTextureCacheGetterKey(
+		const IECoreScene::ShaderNetwork::Parameter &out, const IECoreScene::ShaderNetwork *shaderNetwork,
+		int resolution
+	)
+		: output( out ),
+		  shaderNetwork( shaderNetwork ),
+		  resolution( resolution )
 	{
 		shaderNetwork->hash( hash );
 		hash.append( resolution );
@@ -126,10 +139,7 @@ struct OSLTextureCacheGetterKey
 		hash.append( output.name );
 	}
 
-	operator const IECore::MurmurHash &() const
-	{
-		return hash;
-	}
+	operator const IECore::MurmurHash &() const { return hash; }
 
 	IECoreScene::ShaderNetwork::Parameter output;
 	const IECoreScene::ShaderNetwork *shaderNetwork;
@@ -149,7 +159,8 @@ CompoundDataPtr getter( const OSLTextureCacheGetterKey &key, size_t &cost, const
 	return nullptr;
 }
 
-using OSLTextureCache = IECorePreview::LRUCache<IECore::MurmurHash, CompoundDataPtr, IECorePreview::LRUCachePolicy::Parallel, OSLTextureCacheGetterKey>;
+using OSLTextureCache = IECorePreview::LRUCache<
+	IECore::MurmurHash, CompoundDataPtr, IECorePreview::LRUCachePolicy::Parallel, OSLTextureCacheGetterKey>;
 OSLTextureCache g_oslTextureCache( getter, 1024 * 1024 * 64 );
 
 const char *texturedFragSource()
@@ -180,16 +191,20 @@ const char *constantFragSource()
 class GoboVisualiser final : public LightFilterVisualiser
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( GoboVisualiser )
 
 	GoboVisualiser();
 	~GoboVisualiser() override;
 
-	Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
+	Visualisations visualise(
+		const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork,
+		const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes,
+		IECoreGL::ConstStatePtr &state
+	) const override;
 
-	protected:
+protected:
 
 	static LightFilterVisualiser::LightFilterVisualiserDescription<GoboVisualiser> g_visualiserDescription;
 };
@@ -197,17 +212,19 @@ class GoboVisualiser final : public LightFilterVisualiser
 IE_CORE_DECLAREPTR( GoboVisualiser )
 
 // register the new visualiser
-LightFilterVisualiser::LightFilterVisualiserDescription<GoboVisualiser> GoboVisualiser::g_visualiserDescription( "ai:lightFilter", "gobo" );
+LightFilterVisualiser::LightFilterVisualiserDescription<GoboVisualiser> GoboVisualiser::g_visualiserDescription(
+	"ai:lightFilter", "gobo"
+);
 
-GoboVisualiser::GoboVisualiser()
-{
-}
+GoboVisualiser::GoboVisualiser() {}
 
-GoboVisualiser::~GoboVisualiser()
-{
-}
+GoboVisualiser::~GoboVisualiser() {}
 
-Visualisations GoboVisualiser::visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const
+Visualisations GoboVisualiser::visualise(
+	const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork,
+	const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes,
+	IECoreGL::ConstStatePtr &state
+) const
 {
 	if( !lightShaderNetwork )
 	{
@@ -217,7 +234,8 @@ Visualisations GoboVisualiser::visualise( const IECore::InternedString &attribut
 	IECoreGL::GroupPtr result = new IECoreGL::Group();
 
 	const StringData *visualiserDrawingModeData = attributes->member<StringData>( "gl:light:drawingMode" );
-	const std::string visualiserDrawingMode = visualiserDrawingModeData ? visualiserDrawingModeData->readable() : "texture";
+	const std::string visualiserDrawingMode =
+		visualiserDrawingModeData ? visualiserDrawingModeData->readable() : "texture";
 
 	const CompoundData *filterParameters = shaderNetwork->outputShader()->parametersData();
 
@@ -233,11 +251,13 @@ Visualisations GoboVisualiser::visualise( const IECore::InternedString &attribut
 
 		if( visualiserDrawingMode == "texture" )
 		{
-			const ShaderNetwork::Parameter slideMapInput = shaderNetwork->input( ShaderNetwork::Parameter( shaderNetwork->getOutput().shader, "slidemap" ) );
+			const ShaderNetwork::Parameter slideMapInput =
+				shaderNetwork->input( ShaderNetwork::Parameter( shaderNetwork->getOutput().shader, "slidemap" ) );
 
 			if( slideMapInput )
 			{
-				const IntData *maxTextureResolutionData = attributes->member<IntData>( "gl:visualiser:maxTextureResolution" );
+				const IntData *maxTextureResolutionData =
+					attributes->member<IntData>( "gl:visualiser:maxTextureResolution" );
 				const int resolution = maxTextureResolutionData ? maxTextureResolutionData->readable() : 512;
 
 				try
@@ -277,23 +297,19 @@ Visualisations GoboVisualiser::visualise( const IECore::InternedString &attribut
 		result->addChild( new IECoreGL::QuadPrimitive( 1.0f, 1.0f ) );
 	}
 
-	result->getState()->add(
-		new IECoreGL::ShaderStateComponent(
-			ShaderLoader::defaultShaderLoader(),
-			TextureLoader::defaultTextureLoader(),
-			"",
-			"",
-			visualiserDrawingMode == "wireframe" ? constantFragSource() : texturedFragSource(),
-			shaderParameters
-		)
-	);
+	result->getState()->add( new IECoreGL::ShaderStateComponent(
+		ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), "", "",
+		visualiserDrawingMode == "wireframe" ? constantFragSource() : texturedFragSource(), shaderParameters
+	) );
 
 	float innerAngle;
 	float coneAngle;
 	float radius;
 	float lensRadius;
 
-	StandardLightVisualiser::spotlightParameters( "ai:light", lightShaderNetwork, innerAngle, coneAngle, radius, lensRadius );
+	StandardLightVisualiser::spotlightParameters(
+		"ai:light", lightShaderNetwork, innerAngle, coneAngle, radius, lensRadius
+	);
 
 	float halfPi = 0.5 * M_PI;
 
@@ -315,7 +331,9 @@ Visualisations GoboVisualiser::visualise( const IECore::InternedString &attribut
 
 	result->setTransform( goboTrans );
 
-	return { Visualisation::createOrnament( result, /* affectsFramingBounds = */ true, Visualisation::ColorSpace::Scene ) };
+	return {
+		Visualisation::createOrnament( result, /* affectsFramingBounds = */ true, Visualisation::ColorSpace::Scene )
+	};
 }
 
 } // namespace

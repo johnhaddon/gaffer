@@ -40,11 +40,6 @@ using namespace GafferDelight;
 
 GAFFER_NODE_DEFINE_TYPE( DelightOptions );
 
-DelightOptions::DelightOptions( const std::string &name )
-	: GafferScene::Options( name, "dl" )
-{
-}
+DelightOptions::DelightOptions( const std::string &name ) : GafferScene::Options( name, "dl" ) {}
 
-DelightOptions::~DelightOptions()
-{
-}
+DelightOptions::~DelightOptions() {}

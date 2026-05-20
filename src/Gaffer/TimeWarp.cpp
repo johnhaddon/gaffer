@@ -45,17 +45,14 @@ GAFFER_NODE_DEFINE_TYPE( TimeWarp );
 
 size_t TimeWarp::g_firstPlugIndex;
 
-TimeWarp::TimeWarp( const std::string &name )
-	: ContextProcessor( name )
+TimeWarp::TimeWarp( const std::string &name ) : ContextProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new FloatPlug( "speed", Plug::In, 1.0f ) );
 	addChild( new FloatPlug( "offset" ) );
 }
 
-TimeWarp::~TimeWarp()
-{
-}
+TimeWarp::~TimeWarp() {}
 
 FloatPlug *TimeWarp::speedPlug()
 {
@@ -84,7 +81,5 @@ bool TimeWarp::affectsContext( const Plug *input ) const
 
 void TimeWarp::processContext( Context::EditableScope &scope, IECore::ConstRefCountedPtr &storage ) const
 {
-	scope.setFrame(
-		scope.context()->getFrame() * speedPlug()->getValue() + offsetPlug()->getValue()
-	);
+	scope.setFrame( scope.context()->getFrame() * speedPlug()->getValue() + offsetPlug()->getValue() );
 }

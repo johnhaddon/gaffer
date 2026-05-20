@@ -49,8 +49,7 @@ GAFFER_NODE_DEFINE_TYPE( DisplayTransform );
 
 size_t DisplayTransform::g_firstPlugIndex = 0;
 
-DisplayTransform::DisplayTransform( const std::string &name )
-	: OpenColorIOTransform( name, true )
+DisplayTransform::DisplayTransform( const std::string &name ) : OpenColorIOTransform( name, true )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "inputColorSpace" ) );
@@ -58,9 +57,7 @@ DisplayTransform::DisplayTransform( const std::string &name )
 	addChild( new StringPlug( "view" ) );
 }
 
-DisplayTransform::~DisplayTransform()
-{
-}
+DisplayTransform::~DisplayTransform() {}
 
 Gaffer::StringPlug *DisplayTransform::inputColorSpacePlug()
 {

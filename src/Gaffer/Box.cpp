@@ -93,14 +93,9 @@ std::unordered_set<const Node *> boxOutPassThroughSources( const Node *parent )
 
 GAFFER_NODE_DEFINE_TYPE( Box );
 
-Box::Box( const std::string &name )
-	: SubGraph( name )
-{
-}
+Box::Box( const std::string &name ) : SubGraph( name ) {}
 
-Box::~Box()
-{
-}
+Box::~Box() {}
 
 void Box::exportForReference( const std::filesystem::path &fileName ) const
 {
@@ -123,9 +118,7 @@ void Box::exportForReference( const std::filesystem::path &fileName ) const
 		}
 		else if( const Plug *plug = IECore::runTimeCast<Plug>( it->get() ) )
 		{
-			if(
-				!boost::regex_match( plug->getName().c_str(), invisiblePlug ) && plug != userPlug()
-			)
+			if( !boost::regex_match( plug->getName().c_str(), invisiblePlug ) && plug != userPlug() )
 			{
 				toExport->add( *it );
 			}

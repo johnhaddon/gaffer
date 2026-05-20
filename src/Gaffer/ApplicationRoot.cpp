@@ -45,8 +45,7 @@ using namespace Gaffer;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( ApplicationRoot );
 
-ApplicationRoot::ApplicationRoot( const std::string &name )
-	: GraphComponent( name )
+ApplicationRoot::ApplicationRoot( const std::string &name ) : GraphComponent( name )
 {
 	ScriptContainerPtr s = new ScriptContainer;
 	setChild( "scripts", s );
@@ -54,9 +53,7 @@ ApplicationRoot::ApplicationRoot( const std::string &name )
 	setChild( "preferences", p );
 }
 
-ApplicationRoot::~ApplicationRoot()
-{
-}
+ApplicationRoot::~ApplicationRoot() {}
 
 bool ApplicationRoot::acceptsChild( const GraphComponent *potentialChild ) const
 {

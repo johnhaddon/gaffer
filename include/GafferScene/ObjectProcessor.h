@@ -49,7 +49,7 @@ namespace GafferScene
 class GAFFERSCENE_API ObjectProcessor : public FilteredSceneProcessor
 {
 
-	public:
+public:
 
 	~ObjectProcessor() override;
 
@@ -57,7 +57,7 @@ class GAFFERSCENE_API ObjectProcessor : public FilteredSceneProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
 	/// Constructs with a single input ScenePlug named "in". Use inPlug()
 	/// to access this plug.
@@ -76,9 +76,13 @@ class GAFFERSCENE_API ObjectProcessor : public FilteredSceneProcessor
 	/// - Call `ObjectProcessor::hashProcessedObject()` and then append to the hash with all plugs used in `computeProcessedObject()`.
 	/// - Assign `h = inPlug()->objectPlug()->hash()` to signify that `computeProcessedObject()` will pass through `inputObject`
 	///   unchanged.
-	virtual void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const = 0;
+	virtual void hashProcessedObject(
+		const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const = 0;
 	/// Must be implemented by derived classes to return the processed object.
-	virtual IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const = 0;
+	virtual IECore::ConstObjectPtr computeProcessedObject(
+		const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+	) const = 0;
 	/// Must be implemented to return `ValuePlug::CachePolicy::TaskCollaboration` if `computeProcessedObject()` spawns
 	/// TBB tasks. The default implementation returns `ValuePlug::CachePolicy::Default`.
 	virtual Gaffer::ValuePlug::CachePolicy processedObjectComputeCachePolicy() const;
@@ -87,7 +91,7 @@ class GAFFERSCENE_API ObjectProcessor : public FilteredSceneProcessor
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 	Gaffer::ValuePlug::CachePolicy computeCachePolicy( const Gaffer::ValuePlug *output ) const override;
 
-	private:
+private:
 
 	void init();
 
@@ -98,8 +102,12 @@ class GAFFERSCENE_API ObjectProcessor : public FilteredSceneProcessor
 	Gaffer::ObjectPlug *processedObjectPlug();
 	const Gaffer::ObjectPlug *processedObjectPlug() const;
 
-	void hashObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const final;
-	IECore::ConstObjectPtr computeObject( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const final;
+	void hashObject(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+	) const final;
+	IECore::ConstObjectPtr computeObject(
+		const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+	) const final;
 
 	/// Private constructor and friendship for old nodes which are filtered to everything
 	/// by default. This was a mistake, and we want to ensure that we don't repeat the mistake

@@ -39,6 +39,9 @@
 namespace GafferRenderManUI
 {
 
-IECoreGL::GroupPtr lightFilterRectangles( const Imath::V2f &innerSize, const float radius, const Imath::V2f &innerScale, const Imath::V4f &innerOffset, const Imath::V4f &falloffScale, const float edge );
+IECoreGL::GroupPtr lightFilterRectangles(
+	const Imath::V2f &innerSize, const float radius, const Imath::V2f &innerScale, const Imath::V4f &innerOffset,
+	const Imath::V4f &falloffScale, const float edge
+);
 
 } // namespace GafferRenderManUI

@@ -107,7 +107,9 @@ struct Filters
 // - Objects with identical hashes will be included in `Filter::deleteObject`.
 // - Attributes with identical hashes will be included in `Filter::deleteAttributes`.
 // - Subtrees which are identical in all properties will be included in `Filter::prune`.
-Filters buildFilters( const GafferScene::ScenePlug *baseScene, const GafferScene::ScenePlug *layerScene, const std::vector<float> &frames )
+Filters buildFilters(
+	const GafferScene::ScenePlug *baseScene, const GafferScene::ScenePlug *layerScene, const std::vector<float> &frames
+)
 {
 	Context::EditableScope childNamesScope( Context::current() );
 
@@ -115,8 +117,7 @@ Filters buildFilters( const GafferScene::ScenePlug *baseScene, const GafferScene
 	childNamesScope.setFrame( frames[0] );
 
 	return GafferScene::SceneAlgo::parallelReduceLocations(
-		baseScene,
-		Filters(),
+		baseScene, Filters(),
 		[&]( const ScenePlug *scene, const ScenePlug::ScenePath &path ) -> Filters {
 			bool attributesMatch = true;
 			bool objectsMatch = true;
@@ -129,7 +130,8 @@ Filters buildFilters( const GafferScene::ScenePlug *baseScene, const GafferScene
 
 				if( !layerScene->existsPlug()->getValue() )
 				{
-					return { false, g_emptyPathMatcher, g_emptyPathMatcher, g_emptyPathMatcher, ScenePlug::ScenePath() };
+					return { false, g_emptyPathMatcher, g_emptyPathMatcher, g_emptyPathMatcher,
+							 ScenePlug::ScenePath() };
 				}
 
 				if( attributesMatch )
@@ -182,29 +184,20 @@ Filters buildFilters( const GafferScene::ScenePlug *baseScene, const GafferScene
 				result.prune.addPath( result.localPath );
 			}
 		},
-		[]( Filters &result, const Filters &siblingResult ) {
-			result.mergeSibling( siblingResult );
-		}
+		[]( Filters &result, const Filters &siblingResult ) { result.mergeSibling( siblingResult ); }
 	);
 }
 
 class ScopedDirectory : boost::noncopyable
 {
 
-	public:
+public:
 
-	ScopedDirectory( const std::filesystem::path &p )
-		: m_path( p )
-	{
-		std::filesystem::create_directories( m_path );
-	}
+	ScopedDirectory( const std::filesystem::path &p ) : m_path( p ) { std::filesystem::create_directories( m_path ); }
 
-	~ScopedDirectory()
-	{
-		std::filesystem::remove_all( m_path );
-	}
+	~ScopedDirectory() { std::filesystem::remove_all( m_path ); }
 
-	private:
+private:
 
 	std::filesystem::path m_path;
 };
@@ -221,7 +214,9 @@ void createDirectories( const std::string &fileName )
 
 // Returns `true` if this prim should be retained, or `false` if it should be
 // removed from its parent.
-bool createDiff( const SdfPrimSpecHandle &prim, SdfLayer &layer, const SdfPrimSpecHandle &basePrim, SdfLayer &baseLayer )
+bool createDiff(
+	const SdfPrimSpecHandle &prim, SdfLayer &layer, const SdfPrimSpecHandle &basePrim, SdfLayer &baseLayer
+)
 {
 
 	// Author an inactive prim for any children in `basePrim` that are not in
@@ -244,7 +239,8 @@ bool createDiff( const SdfPrimSpecHandle &prim, SdfLayer &layer, const SdfPrimSp
 
 	for( const auto &childPrim : childPrims )
 	{
-		if( auto baseChildPrim = basePrim->GetPrimAtPath( SdfPath::ReflexiveRelativePath().AppendChild( childPrim->GetNameToken() ) ) )
+		if( auto baseChildPrim =
+				basePrim->GetPrimAtPath( SdfPath::ReflexiveRelativePath().AppendChild( childPrim->GetNameToken() ) ) )
 		{
 			if( createDiff( childPrim, layer, baseChildPrim, baseLayer ) )
 			{
@@ -266,11 +262,13 @@ bool createDiff( const SdfPrimSpecHandle &prim, SdfLayer &layer, const SdfPrimSp
 
 	for( const auto &baseAttribute : basePrim->GetAttributes() )
 	{
-		if( !prim->GetAttributeAtPath( SdfPath::ReflexiveRelativePath().AppendProperty( baseAttribute->GetNameToken() ) ) )
+		if( !prim->GetAttributeAtPath(
+				SdfPath::ReflexiveRelativePath().AppendProperty( baseAttribute->GetNameToken() )
+			) )
 		{
 			SdfAttributeSpecHandle attribute = SdfAttributeSpec::New(
-				prim, baseAttribute->GetName(), baseAttribute->GetTypeName(),
-				baseAttribute->GetVariability(), baseAttribute->IsCustom()
+				prim, baseAttribute->GetName(), baseAttribute->GetTypeName(), baseAttribute->GetVariability(),
+				baseAttribute->IsCustom()
 			);
 			attribute->SetDefaultValue( VtValue( SdfValueBlock() ) );
 			keepThisPrim = true;
@@ -282,7 +280,8 @@ bool createDiff( const SdfPrimSpecHandle &prim, SdfLayer &layer, const SdfPrimSp
 	for( const auto &property : prim->GetProperties().values() )
 	{
 		bool keepThisProperty = false;
-		SdfPropertySpecHandle baseProperty = basePrim->GetPropertyAtPath( SdfPath::ReflexiveRelativePath().AppendProperty( property->GetNameToken() ) );
+		SdfPropertySpecHandle baseProperty =
+			basePrim->GetPropertyAtPath( SdfPath::ReflexiveRelativePath().AppendProperty( property->GetNameToken() ) );
 		if( baseProperty )
 		{
 			for( auto &field : property->ListFields() )
@@ -346,8 +345,7 @@ GAFFER_NODE_DEFINE_TYPE( USDLayerWriter );
 
 size_t USDLayerWriter::g_firstPlugIndex = 0;
 
-USDLayerWriter::USDLayerWriter( const std::string &name )
-	: TaskNode( name )
+USDLayerWriter::USDLayerWriter( const std::string &name ) : TaskNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "base", Plug::In ) );
@@ -377,8 +375,10 @@ USDLayerWriter::USDLayerWriter( const std::string &name )
 	ConstValuePlugPtr queryPrototype = new StringVectorDataPlug( "queryPrototype" );
 	ContextQueryPtr contextQuery = new ContextQuery( "__contextQuery" );
 	const NameValuePlug *pruneQuery = contextQuery->addQuery( queryPrototype.get(), "usdLayerWriter:pruneFilter" );
-	const NameValuePlug *deleteObjectQuery = contextQuery->addQuery( queryPrototype.get(), "usdLayerWriter:deleteObjectFilter" );
-	const NameValuePlug *deleteAttributesQuery = contextQuery->addQuery( queryPrototype.get(), "usdLayerWriter:deleteAttributesFilter" );
+	const NameValuePlug *deleteObjectQuery =
+		contextQuery->addQuery( queryPrototype.get(), "usdLayerWriter:deleteObjectFilter" );
+	const NameValuePlug *deleteAttributesQuery =
+		contextQuery->addQuery( queryPrototype.get(), "usdLayerWriter:deleteAttributesFilter" );
 	addChild( contextQuery );
 
 	PathFilterPtr pruneFilter = new PathFilter( "__pruneFilter" );
@@ -418,9 +418,7 @@ USDLayerWriter::USDLayerWriter( const std::string &name )
 	outPlug()->setInput( layerPlug() );
 }
 
-USDLayerWriter::~USDLayerWriter()
-{
-}
+USDLayerWriter::~USDLayerWriter() {}
 
 GafferScene::ScenePlug *USDLayerWriter::basePlug()
 {
@@ -535,7 +533,8 @@ void USDLayerWriter::executeSequence( const std::vector<float> &frames ) const
 	// a ScopedDirectory so that the files are cleaned up no matter how we exit
 	// this function.
 
-	const std::filesystem::path tempDirectory = std::filesystem::temp_directory_path() / boost::filesystem::unique_path().string();
+	const std::filesystem::path tempDirectory =
+		std::filesystem::temp_directory_path() / boost::filesystem::unique_path().string();
 	ScopedDirectory scopedTempDirectory( tempDirectory );
 
 	const string baseFileName = ( tempDirectory / "base.usdc" ).generic_string();

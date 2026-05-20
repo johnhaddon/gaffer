@@ -66,25 +66,21 @@ Gaffer::Context *capsuleContext( const Context &context )
 
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Capsule );
 
-Capsule::Capsule()
-	: m_scene( nullptr )
-{
-}
+Capsule::Capsule() : m_scene( nullptr ) {}
 
 Capsule::Capsule(
-	const ScenePlug *scene,
-	const ScenePlug::ScenePath &root,
-	const Gaffer::Context &context,
-	const IECore::MurmurHash &hash,
-	const Imath::Box3f &bound
+	const ScenePlug *scene, const ScenePlug::ScenePath &root, const Gaffer::Context &context,
+	const IECore::MurmurHash &hash, const Imath::Box3f &bound
 )
-	: m_hash( hash ), m_bound( bound ), m_scene( scene ), m_root( root ), m_context( capsuleContext( context ) )
+	: m_hash( hash ),
+	  m_bound( bound ),
+	  m_scene( scene ),
+	  m_root( root ),
+	  m_context( capsuleContext( context ) )
 {
 }
 
-Capsule::~Capsule()
-{
-}
+Capsule::~Capsule() {}
 
 bool Capsule::isEqualTo( const IECore::Object *other ) const
 {
@@ -159,7 +155,9 @@ void Capsule::render( IECoreScenePreview::Renderer *renderer ) const
 	ScenePlug::GlobalScope scope( m_context.get() );
 	const GafferScene::Private::RendererAlgo::RenderOptions renderOpts = renderOptions();
 	GafferScene::Private::RendererAlgo::RenderSets renderSets( m_scene );
-	GafferScene::Private::RendererAlgo::outputObjects( m_scene, renderOpts, renderSets, /* lightLinks = */ nullptr, renderer, m_root );
+	GafferScene::Private::RendererAlgo::outputObjects(
+		m_scene, renderOpts, renderSets, /* lightLinks = */ nullptr, renderer, m_root
+	);
 }
 
 const ScenePlug *Capsule::scene() const

@@ -49,8 +49,14 @@ static PerformanceMonitor::Statistics g_emptyStatistics;
 // PerformanceMonitor::Statistics
 //////////////////////////////////////////////////////////////////////////
 
-PerformanceMonitor::Statistics::Statistics( size_t hashCount, size_t computeCount, boost::chrono::nanoseconds hashDuration, boost::chrono::nanoseconds computeDuration )
-	: hashCount( hashCount ), computeCount( computeCount ), hashDuration( hashDuration ), computeDuration( computeDuration )
+PerformanceMonitor::Statistics::Statistics(
+	size_t hashCount, size_t computeCount, boost::chrono::nanoseconds hashDuration,
+	boost::chrono::nanoseconds computeDuration
+)
+	: hashCount( hashCount ),
+	  computeCount( computeCount ),
+	  hashDuration( hashDuration ),
+	  computeDuration( computeDuration )
 {
 }
 
@@ -65,9 +71,7 @@ PerformanceMonitor::Statistics &PerformanceMonitor::Statistics::operator += ( co
 
 bool PerformanceMonitor::Statistics::operator == ( const Statistics &rhs )
 {
-	return hashCount == rhs.hashCount &&
-		computeCount == rhs.computeCount &&
-		hashDuration == rhs.hashDuration &&
+	return hashCount == rhs.hashCount && computeCount == rhs.computeCount && hashDuration == rhs.hashDuration &&
 		computeDuration == rhs.computeDuration;
 }
 
@@ -80,13 +84,9 @@ bool PerformanceMonitor::Statistics::operator != ( const Statistics &rhs )
 // PerformanceMonitor
 //////////////////////////////////////////////////////////////////////////
 
-PerformanceMonitor::PerformanceMonitor()
-{
-}
+PerformanceMonitor::PerformanceMonitor() {}
 
-PerformanceMonitor::~PerformanceMonitor()
-{
-}
+PerformanceMonitor::~PerformanceMonitor() {}
 
 const PerformanceMonitor::StatisticsMap &PerformanceMonitor::allStatistics() const
 {
@@ -159,7 +159,9 @@ void PerformanceMonitor::processFinished( const Process *process )
 
 void PerformanceMonitor::collate() const
 {
-	tbb::enumerable_thread_specific<ThreadData, tbb::cache_aligned_allocator<ThreadData>, tbb::ets_key_per_instance>::iterator it, eIt;
+	tbb::enumerable_thread_specific<
+		ThreadData, tbb::cache_aligned_allocator<ThreadData>, tbb::ets_key_per_instance>::iterator it,
+		eIt;
 	for( it = m_threadData.begin(), eIt = m_threadData.end(); it != eIt; ++it )
 	{
 		StatisticsMap &m = it->statistics;

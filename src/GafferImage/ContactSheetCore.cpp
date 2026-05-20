@@ -75,8 +75,7 @@ struct CoverageData : public IECore::Data
 		for( size_t cellIndex = 0; cellIndex < cells.size(); ++cellIndex )
 		{
 			Box2i cell(
-				ImagePlug::tileIndex( cells[cellIndex].min ),
-				ImagePlug::tileIndex( cells[cellIndex].max ) + V2i( 1 )
+				ImagePlug::tileIndex( cells[cellIndex].min ), ImagePlug::tileIndex( cells[cellIndex].max ) + V2i( 1 )
 			);
 			cell = BufferAlgo::intersection( cell, m_tileWindow );
 
@@ -95,10 +94,7 @@ struct CoverageData : public IECore::Data
 		}
 	}
 
-	const Format &format() const
-	{
-		return m_format;
-	}
+	const Format &format() const { return m_format; }
 
 	const vector<int> &tileCells( const V2i &tileOrigin ) const
 	{
@@ -106,7 +102,7 @@ struct CoverageData : public IECore::Data
 		return m_coverage[BufferAlgo::index( tileIndex, m_tileWindow )];
 	}
 
-	private:
+private:
 
 	const Format m_format;
 	const Box2i m_tileWindow; // Tile indices, not pixel indices
@@ -121,8 +117,7 @@ GAFFER_NODE_DEFINE_TYPE( ContactSheetCore );
 
 size_t ContactSheetCore::g_firstPlugIndex = 0;
 
-ContactSheetCore::ContactSheetCore( const std::string &name )
-	: FlatImageProcessor( name )
+ContactSheetCore::ContactSheetCore( const std::string &name ) : FlatImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new FormatPlug( "format" ) );
@@ -143,9 +138,7 @@ ContactSheetCore::ContactSheetCore( const std::string &name )
 	resampledInPlug()->setInput( resample()->outPlug() );
 }
 
-ContactSheetCore::~ContactSheetCore()
-{
-}
+ContactSheetCore::~ContactSheetCore() {}
 
 FormatPlug *ContactSheetCore::formatPlug()
 {
@@ -251,12 +244,8 @@ void ContactSheetCore::affects( const Gaffer::Plug *input, AffectedPlugsContaine
 		outputs.push_back( outPlug()->dataWindowPlug() );
 	}
 
-	if(
-		input == inPlug()->viewNamesPlug() ||
-		input == inPlug()->channelNamesPlug() ||
-		input == tilesPlug() ||
-		input == tileVariablePlug()
-	)
+	if( input == inPlug()->viewNamesPlug() || input == inPlug()->channelNamesPlug() || input == tilesPlug() ||
+		input == tileVariablePlug() )
 	{
 		outputs.push_back( outPlug()->channelNamesPlug() );
 	}
@@ -271,18 +260,16 @@ void ContactSheetCore::affects( const Gaffer::Plug *input, AffectedPlugsContaine
 		outputs.push_back( resampleMatrixPlug() );
 	}
 
-	if(
-		input == coveragePlug() ||
-		input == resampledInPlug()->viewNamesPlug() ||
-		input == resampledInPlug()->channelNamesPlug() ||
-		input == resampledInPlug()->channelDataPlug()
-	)
+	if( input == coveragePlug() || input == resampledInPlug()->viewNamesPlug() ||
+		input == resampledInPlug()->channelNamesPlug() || input == resampledInPlug()->channelDataPlug() )
 	{
 		outputs.push_back( outPlug()->channelDataPlug() );
 	}
 }
 
-void ContactSheetCore::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ContactSheetCore::hash(
+	const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageProcessor::hash( output, context, h );
 
@@ -345,17 +332,23 @@ void ContactSheetCore::compute( Gaffer::ValuePlug *output, const Gaffer::Context
 	FlatImageProcessor::compute( output, context );
 }
 
-void ContactSheetCore::hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ContactSheetCore::hashViewNames(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageProcessor::hashViewNames( parent, context, h );
 }
 
-IECore::ConstStringVectorDataPtr ContactSheetCore::computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr ContactSheetCore::computeViewNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	return ImagePlug::defaultViewNames();
 }
 
-void ContactSheetCore::hashFormat( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ContactSheetCore::hashFormat(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageProcessor::hashFormat( parent, context, h );
 	formatPlug()->hash( h );
@@ -366,7 +359,9 @@ GafferImage::Format ContactSheetCore::computeFormat( const Gaffer::Context *cont
 	return formatPlug()->getValue();
 }
 
-void ContactSheetCore::hashDataWindow( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ContactSheetCore::hashDataWindow(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageProcessor::hashDataWindow( parent, context, h );
 	outPlug()->formatPlug()->hash( h );
@@ -377,17 +372,23 @@ Imath::Box2i ContactSheetCore::computeDataWindow( const Gaffer::Context *context
 	return outPlug()->formatPlug()->getValue().getDisplayWindow();
 }
 
-void ContactSheetCore::hashMetadata( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ContactSheetCore::hashMetadata(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	h = outPlug()->metadataPlug()->defaultHash();
 }
 
-IECore::ConstCompoundDataPtr ContactSheetCore::computeMetadata( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstCompoundDataPtr ContactSheetCore::computeMetadata(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	return outPlug()->metadataPlug()->defaultValue();
 }
 
-void ContactSheetCore::hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ContactSheetCore::hashChannelNames(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageProcessor::hashChannelNames( parent, context, h );
 
@@ -406,7 +407,9 @@ void ContactSheetCore::hashChannelNames( const GafferImage::ImagePlug *parent, c
 	}
 }
 
-IECore::ConstStringVectorDataPtr ContactSheetCore::computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr ContactSheetCore::computeChannelNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	const int numTiles = tilesPlug()->getValue()->readable().size();
 	const InternedString tileVariable = tileVariablePlug()->getValue();
@@ -435,7 +438,9 @@ IECore::ConstStringVectorDataPtr ContactSheetCore::computeChannelNames( const Ga
 	return resultData;
 }
 
-void ContactSheetCore::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ContactSheetCore::hashChannelData(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageProcessor::hashChannelData( parent, context, h );
 
@@ -460,10 +465,8 @@ void ContactSheetCore::hashChannelData( const GafferImage::ImagePlug *parent, co
 		Box2i inDataWindow;
 		{
 			ImagePlug::GlobalScope globalScope( scope.context() );
-			if(
-				!ImageAlgo::viewIsValid( context, resampledInPlug()->viewNames()->readable() ) ||
-				!ImageAlgo::channelExists( resampledInPlug(), channelName )
-			)
+			if( !ImageAlgo::viewIsValid( context, resampledInPlug()->viewNames()->readable() ) ||
+				!ImageAlgo::channelExists( resampledInPlug(), channelName ) )
 			{
 				continue;
 			}
@@ -480,7 +483,10 @@ void ContactSheetCore::hashChannelData( const GafferImage::ImagePlug *parent, co
 	}
 }
 
-IECore::ConstFloatVectorDataPtr ContactSheetCore::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr ContactSheetCore::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	ConstCoverageDataPtr coverage;
 	{
@@ -505,10 +511,8 @@ IECore::ConstFloatVectorDataPtr ContactSheetCore::computeChannelData( const std:
 		Box2i inDataWindow;
 		{
 			ImagePlug::GlobalScope globalScope( scope.context() );
-			if(
-				!ImageAlgo::viewIsValid( context, resampledInPlug()->viewNames()->readable() ) ||
-				!ImageAlgo::channelExists( resampledInPlug(), channelName )
-			)
+			if( !ImageAlgo::viewIsValid( context, resampledInPlug()->viewNames()->readable() ) ||
+				!ImageAlgo::channelExists( resampledInPlug(), channelName ) )
 			{
 				continue;
 			}

@@ -53,7 +53,7 @@ namespace GafferImage
 class GAFFERIMAGE_API Rectangle : public Shape
 {
 
-	public:
+public:
 
 	explicit Rectangle( const std::string &name = defaultName<Rectangle>() );
 	~Rectangle() override;
@@ -72,17 +72,21 @@ class GAFFERIMAGE_API Rectangle : public Shape
 	Gaffer::Transform2DPlug *transformPlug();
 	const Gaffer::Transform2DPlug *transformPlug() const;
 
-	protected:
+protected:
 
 	bool affectsShapeDataWindow( const Gaffer::Plug *input ) const override;
 	void hashShapeDataWindow( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	Imath::Box2i computeShapeDataWindow( const Gaffer::Context *context ) const override;
 
 	bool affectsShapeChannelData( const Gaffer::Plug *input ) const override;
-	void hashShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	IECore::ConstFloatVectorDataPtr computeShapeChannelData( const Imath::V2i &tileOrigin, const Gaffer::Context *context ) const override;
+	void hashShapeChannelData(
+		const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstFloatVectorDataPtr computeShapeChannelData(
+		const Imath::V2i &tileOrigin, const Gaffer::Context *context
+	) const override;
 
-	private:
+private:
 
 	static size_t g_firstPlugIndex;
 };

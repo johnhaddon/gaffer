@@ -49,7 +49,7 @@ namespace GafferUI
 class GAFFERUI_API Handle : public Gadget
 {
 
-	public:
+public:
 
 	~Handle() override;
 
@@ -65,7 +65,7 @@ class GAFFERUI_API Handle : public Gadget
 
 	Imath::Box3f bound() const override;
 
-	protected:
+protected:
 
 	explicit Handle( const std::string &name = defaultName<Handle>() );
 
@@ -93,15 +93,21 @@ class GAFFERUI_API Handle : public Gadget
 		LinearDrag( bool processModifiers = true );
 		// Line is parallel to the camera plane, centered on gadget, and
 		// with unit length axes in gadget space.
-		LinearDrag( const Gadget *gadget, const Imath::V2f &line, const DragDropEvent &dragBeginEvent, bool processModifiers = true );
+		LinearDrag(
+			const Gadget *gadget, const Imath::V2f &line, const DragDropEvent &dragBeginEvent,
+			bool processModifiers = true
+		);
 		// Line is specified in Gadget space.
-		LinearDrag( const Gadget *gadget, const IECore::LineSegment3f &line, const DragDropEvent &dragBeginEvent, bool processModifiers = true );
+		LinearDrag(
+			const Gadget *gadget, const IECore::LineSegment3f &line, const DragDropEvent &dragBeginEvent,
+			bool processModifiers = true
+		);
 
 		// Positions are measured from 0 at line.p0 to 1 at line.p1.
 		float startPosition() const;
 		float updatedPosition( const DragDropEvent &event );
 
-		private:
+	private:
 
 		const Gadget *m_gadget;
 		// We store the line of the drag in world space so that
@@ -128,7 +134,10 @@ class GAFFERUI_API Handle : public Gadget
 		PlanarDrag( const Gadget *gadget, const DragDropEvent &dragBeginEvent, bool processModifiers = true );
 		// Origin and axes are in gadget space. Axes are assumed to be orthogonal
 		// but may have any length.
-		PlanarDrag( const Gadget *gadget, const Imath::V3f &origin, const Imath::V3f &axis0, const Imath::V3f &axis1, const DragDropEvent &dragBeginEvent, bool processModifiers = true );
+		PlanarDrag(
+			const Gadget *gadget, const Imath::V3f &origin, const Imath::V3f &axis0, const Imath::V3f &axis1,
+			const DragDropEvent &dragBeginEvent, bool processModifiers = true
+		);
 
 		// The axes of the plane in Gadget space.
 		const Imath::V3f &axis0() const;
@@ -139,9 +148,12 @@ class GAFFERUI_API Handle : public Gadget
 		Imath::V2f startPosition() const;
 		Imath::V2f updatedPosition( const DragDropEvent &event );
 
-		private:
+	private:
 
-		void init( const Gadget *gadget, const Imath::V3f &origin, const Imath::V3f &axis0, const Imath::V3f &axis1, const DragDropEvent &dragBeginEvent );
+		void init(
+			const Gadget *gadget, const Imath::V3f &origin, const Imath::V3f &axis0, const Imath::V3f &axis1,
+			const DragDropEvent &dragBeginEvent
+		);
 
 		const Gadget *m_gadget;
 
@@ -177,7 +189,10 @@ class GAFFERUI_API Handle : public Gadget
 		// Origin, normal and axis0 are in gadget space. Rotations will be around
 		// normal, with 0 rotation along axis0. Axes are assumed to be
 		// orthogonal, but may have any length.
-		AngularDrag( const Gadget *gadget, const Imath::V3f &origin, const Imath::V3f &normal, const Imath::V3f &axis0, const DragDropEvent &dragBeginEvent, bool processModifiers = true );
+		AngularDrag(
+			const Gadget *gadget, const Imath::V3f &origin, const Imath::V3f &normal, const Imath::V3f &axis0,
+			const DragDropEvent &dragBeginEvent, bool processModifiers = true
+		);
 
 		// The axis of rotation in Gadget space.
 		const Imath::V3f &normal() const;
@@ -190,7 +205,7 @@ class GAFFERUI_API Handle : public Gadget
 
 		bool isLinearDrag() const;
 
-		private:
+	private:
 
 		float closestRotation( const Imath::V2f &p, float targetRotation );
 
@@ -211,7 +226,7 @@ class GAFFERUI_API Handle : public Gadget
 		float m_preciseMotionOrigin;
 	};
 
-	private:
+private:
 
 	void enter();
 	void leave();

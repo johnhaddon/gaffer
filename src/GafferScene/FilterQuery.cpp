@@ -48,8 +48,7 @@ size_t FilterQuery::g_firstPlugIndex = 0;
 
 GAFFER_NODE_DEFINE_TYPE( FilterQuery )
 
-FilterQuery::FilterQuery( const std::string &name )
-	: ComputeNode( name )
+FilterQuery::FilterQuery( const std::string &name ) : ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "scene" ) );
@@ -63,9 +62,7 @@ FilterQuery::FilterQuery( const std::string &name )
 	addChild( new StringPlug( "__closestAncestorInternal", Gaffer::Plug::Out ) );
 }
 
-FilterQuery::~FilterQuery()
-{
-}
+FilterQuery::~FilterQuery() {}
 
 ScenePlug *FilterQuery::scenePlug()
 {
@@ -166,11 +163,7 @@ void FilterQuery::affects( const Gaffer::Plug *input, AffectedPlugsContainer &ou
 		filterPlug()->sceneAffects( input, outputs );
 	}
 
-	if(
-		input == locationPlug() ||
-		input == scenePlug()->existsPlug() ||
-		input == filterPlug()
-	)
+	if( input == locationPlug() || input == scenePlug()->existsPlug() || input == filterPlug() )
 	{
 		outputs.push_back( matchPlug() );
 	}
@@ -182,18 +175,12 @@ void FilterQuery::affects( const Gaffer::Plug *input, AffectedPlugsContainer &ou
 		outputs.push_back( ancestorMatchPlug() );
 	}
 
-	if(
-		input == filterPlug()
-	)
+	if( input == filterPlug() )
 	{
 		outputs.push_back( closestAncestorInternalPlug() );
 	}
 
-	if(
-		input == locationPlug() ||
-		input == scenePlug()->existsPlug() ||
-		input == closestAncestorInternalPlug()
-	)
+	if( input == locationPlug() || input == scenePlug()->existsPlug() || input == closestAncestorInternalPlug() )
 	{
 		outputs.push_back( closestAncestorPlug() );
 	}
@@ -290,21 +277,15 @@ void FilterQuery::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 	}
 	else if( output == exactMatchPlug() )
 	{
-		static_cast<BoolPlug *>( output )->setValue(
-			matchPlug()->getValue() & IECore::PathMatcher::ExactMatch
-		);
+		static_cast<BoolPlug *>( output )->setValue( matchPlug()->getValue() & IECore::PathMatcher::ExactMatch );
 	}
 	else if( output == descendantMatchPlug() )
 	{
-		static_cast<BoolPlug *>( output )->setValue(
-			matchPlug()->getValue() & IECore::PathMatcher::DescendantMatch
-		);
+		static_cast<BoolPlug *>( output )->setValue( matchPlug()->getValue() & IECore::PathMatcher::DescendantMatch );
 	}
 	else if( output == ancestorMatchPlug() )
 	{
-		static_cast<BoolPlug *>( output )->setValue(
-			matchPlug()->getValue() & IECore::PathMatcher::AncestorMatch
-		);
+		static_cast<BoolPlug *>( output )->setValue( matchPlug()->getValue() & IECore::PathMatcher::AncestorMatch );
 	}
 	else if( output == closestAncestorPlug() )
 	{
@@ -351,11 +332,7 @@ void FilterQuery::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 
 Gaffer::ValuePlug::CachePolicy FilterQuery::computeCachePolicy( const Gaffer::ValuePlug *output ) const
 {
-	if(
-		output == exactMatchPlug() ||
-		output == descendantMatchPlug() ||
-		output == ancestorMatchPlug()
-	)
+	if( output == exactMatchPlug() || output == descendantMatchPlug() || output == ancestorMatchPlug() )
 	{
 		// Not much point caching these since they are so trivial.
 		return ValuePlug::CachePolicy::Uncached;

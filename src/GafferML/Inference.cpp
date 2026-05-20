@@ -142,10 +142,7 @@ Ort::Session &acquireSession( const std::string &fileName )
 struct AsyncWaiter
 {
 
-	AsyncWaiter( Ort::RunOptions &runOptions )
-		: m_runOptions( runOptions )
-	{
-	}
+	AsyncWaiter( Ort::RunOptions &runOptions ) : m_runOptions( runOptions ) {}
 
 	void wait( const IECore::Canceller *canceller )
 	{
@@ -180,7 +177,7 @@ struct AsyncWaiter
 		that->m_conditionVariable.notify_all();
 	}
 
-	private:
+private:
 
 	Ort::RunOptions &m_runOptions;
 	std::mutex m_mutex;
@@ -198,19 +195,20 @@ GAFFER_NODE_DEFINE_TYPE( Inference );
 
 size_t Inference::g_firstPlugIndex = 0;
 
-Inference::Inference( const std::string &name )
-	: ComputeNode( name )
+Inference::Inference( const std::string &name ) : ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "model" ) );
-	addChild( new ArrayPlug( "in", Plug::In, new TensorPlug( "in0" ), 0, std::numeric_limits<size_t>::max(), Plug::Default, false ) );
-	addChild( new ArrayPlug( "out", Plug::Out, new TensorPlug( "out0" ), 0, std::numeric_limits<size_t>::max(), Plug::Default, false ) );
+	addChild( new ArrayPlug(
+		"in", Plug::In, new TensorPlug( "in0" ), 0, std::numeric_limits<size_t>::max(), Plug::Default, false
+	) );
+	addChild( new ArrayPlug(
+		"out", Plug::Out, new TensorPlug( "out0" ), 0, std::numeric_limits<size_t>::max(), Plug::Default, false
+	) );
 	addChild( new CompoundObjectPlug( "__inference", Plug::Out ) );
 }
 
-Inference::~Inference()
-{
-}
+Inference::~Inference() {}
 
 void Inference::loadModel()
 {
@@ -304,10 +302,7 @@ void Inference::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outp
 {
 	ComputeNode::affects( input, outputs );
 
-	if(
-		input == modelPlug() ||
-		input->parent() == inPlug()
-	)
+	if( input == modelPlug() || input->parent() == inPlug() )
 	{
 		outputs.push_back( inferencePlug() );
 	}
@@ -360,7 +355,9 @@ void Inference::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 		for( auto &p : TensorPlug::InputRange( *inPlug() ) )
 		{
 			int inputIndex = StringAlgo::numericSuffix( p->getName().string() );
-			inputNameOwners.push_back( session.GetInputNameAllocated( inputIndex, Ort::AllocatorWithDefaultOptions() ) );
+			inputNameOwners.push_back(
+				session.GetInputNameAllocated( inputIndex, Ort::AllocatorWithDefaultOptions() )
+			);
 			inputNames.push_back( inputNameOwners.back().get() );
 			inputOwners.push_back( p->getValue() );
 			inputs.push_back( inputOwners.back()->value() );
@@ -372,7 +369,9 @@ void Inference::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 		for( auto &p : TensorPlug::OutputRange( *outPlug() ) )
 		{
 			int outputIndex = StringAlgo::numericSuffix( p->getName().string() );
-			outputNameOwners.push_back( session.GetOutputNameAllocated( outputIndex, Ort::AllocatorWithDefaultOptions() ) );
+			outputNameOwners.push_back(
+				session.GetOutputNameAllocated( outputIndex, Ort::AllocatorWithDefaultOptions() )
+			);
 			outputNames.push_back( outputNameOwners.back().get() );
 			outputs.push_back( Ort::Value( nullptr ) );
 		}
@@ -399,13 +398,8 @@ void Inference::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 			// same layout as `OrtValue *` (the underlying C type) so we can
 			// just reinterpret cast from the latter. Indeed, `Run()` is going
 			// to cast straight back to `OrtValue *` to call the C API!
-			reinterpret_cast<Ort::Value *>( inputs.data() ),
-			inputs.size(),
-			outputNames.data(),
-			outputs.data(),
-			outputNames.size(),
-			waiter.callback,
-			&waiter
+			reinterpret_cast<Ort::Value *>( inputs.data() ), inputs.size(), outputNames.data(), outputs.data(),
+			outputNames.size(), waiter.callback, &waiter
 		);
 
 		waiter.wait( context->canceller() );

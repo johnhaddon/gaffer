@@ -70,13 +70,14 @@ std::string repr( PerformanceMonitor::Statistics &s )
 }
 
 PerformanceMonitor::Statistics *statisticsConstructor(
-	size_t hashCount,
-	size_t computeCount,
-	boost::chrono::nanoseconds::rep hashDuration,
+	size_t hashCount, size_t computeCount, boost::chrono::nanoseconds::rep hashDuration,
 	boost::chrono::nanoseconds::rep computeDuration
 )
 {
-	return new PerformanceMonitor::Statistics( hashCount, computeCount, boost::chrono::nanoseconds( hashDuration ), boost::chrono::nanoseconds( computeDuration ) );
+	return new PerformanceMonitor::Statistics(
+		hashCount, computeCount, boost::chrono::nanoseconds( hashDuration ),
+		boost::chrono::nanoseconds( computeDuration )
+	);
 }
 
 boost::chrono::nanoseconds::rep getHashDuration( PerformanceMonitor::Statistics &s )
@@ -138,7 +139,9 @@ void annotateWrapper1( Node &root, const PerformanceMonitor &monitor, bool persi
 	MonitorAlgo::annotate( root, monitor, persistent );
 }
 
-void annotateWrapper2( Node &root, const PerformanceMonitor &monitor, MonitorAlgo::PerformanceMetric metric, bool persistent )
+void annotateWrapper2(
+	Node &root, const PerformanceMonitor &monitor, MonitorAlgo::PerformanceMetric metric, bool persistent
+)
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	MonitorAlgo::annotate( root, monitor, metric, persistent );
@@ -220,42 +223,19 @@ void GafferModule::bindMonitor()
 			.value( "ComputeCount", ComputeCount )
 			.value( "HashesPerCompute", HashesPerCompute );
 
-		def(
-			"formatStatistics",
-			(std::string ( * )( const PerformanceMonitor &, size_t ))&formatStatistics,
-			(
-				arg( "monitor" ),
-				arg( "maxLinesPerMetric" ) = 50
-			)
-		);
+		def( "formatStatistics", (std::string ( * )( const PerformanceMonitor &, size_t ))&formatStatistics,
+			 ( arg( "monitor" ), arg( "maxLinesPerMetric" ) = 50 ) );
 
-		def(
-			"formatStatistics",
-			(std::string ( * )( const PerformanceMonitor &, PerformanceMetric, size_t ))&formatStatistics,
-			(
-				arg( "monitor" ),
-				arg( "metric" ),
-				arg( "maxLines" ) = 50
-			)
-		);
+		def( "formatStatistics",
+			 (std::string ( * )( const PerformanceMonitor &, PerformanceMetric, size_t ))&formatStatistics,
+			 ( arg( "monitor" ), arg( "metric" ), arg( "maxLines" ) = 50 ) );
 
-		def(
-			"annotate",
-			&annotateWrapper1,
-			( arg( "node" ), arg( "monitor" ), arg( "persistent" ) = true )
-		);
+		def( "annotate", &annotateWrapper1, ( arg( "node" ), arg( "monitor" ), arg( "persistent" ) = true ) );
 
-		def(
-			"annotate",
-			&annotateWrapper2,
-			( arg( "node" ), arg( "monitor" ), arg( "metric" ), arg( "persistent" ) = true )
-		);
+		def( "annotate", &annotateWrapper2,
+			 ( arg( "node" ), arg( "monitor" ), arg( "metric" ), arg( "persistent" ) = true ) );
 
-		def(
-			"annotate",
-			&annotateWrapper3,
-			( arg( "node" ), arg( "monitor" ), arg( "persistent" ) = true )
-		);
+		def( "annotate", &annotateWrapper3, ( arg( "node" ), arg( "monitor" ), arg( "persistent" ) = true ) );
 
 		def( "removePerformanceAnnotations", &removePerformanceAnnotationsWrapper, arg( "root" ) );
 		def( "removeContextAnnotations", &removeContextAnnotationsWrapper, arg( "root" ) );
@@ -268,14 +248,27 @@ void GafferModule::bindMonitor()
 	}
 
 	{
-		scope s = IECorePython::RefCountedClass<PerformanceMonitor, Monitor>( "PerformanceMonitor" )
-					  .def( init<>() )
-					  .def( "allStatistics", &allStatistics<PerformanceMonitor> )
-					  .def( "plugStatistics", &PerformanceMonitor::plugStatistics, return_value_policy<copy_const_reference>() )
-					  .def( "combinedStatistics", &PerformanceMonitor::combinedStatistics, return_value_policy<copy_const_reference>() );
+		scope s =
+			IECorePython::RefCountedClass<PerformanceMonitor, Monitor>( "PerformanceMonitor" )
+				.def( init<>() )
+				.def( "allStatistics", &allStatistics<PerformanceMonitor> )
+				.def(
+					"plugStatistics", &PerformanceMonitor::plugStatistics, return_value_policy<copy_const_reference>()
+				)
+				.def(
+					"combinedStatistics", &PerformanceMonitor::combinedStatistics,
+					return_value_policy<copy_const_reference>()
+				);
 
 		class_<PerformanceMonitor::Statistics>( "Statistics" )
-			.def( "__init__", make_constructor( statisticsConstructor, default_call_policies(), ( arg( "hashCount" ) = 0, arg( "computeCount" ) = 0, arg( "hashDuration" ) = 0, arg( "computeDuration" ) = 0 ) ) )
+			.def(
+				"__init__",
+				make_constructor(
+					statisticsConstructor, default_call_policies(),
+					( arg( "hashCount" ) = 0, arg( "computeCount" ) = 0, arg( "hashDuration" ) = 0,
+					  arg( "computeDuration" ) = 0 )
+				)
+			)
 			.def_readwrite( "hashCount", &PerformanceMonitor::Statistics::hashCount )
 			.def_readwrite( "computeCount", &PerformanceMonitor::Statistics::computeCount )
 			.add_property( "hashDuration", &getHashDuration, &setHashDuration )
@@ -286,11 +279,15 @@ void GafferModule::bindMonitor()
 	}
 
 	{
-		scope s = IECorePython::RefCountedClass<ContextMonitor, Monitor>( "ContextMonitor" )
-					  .def( init<const GraphComponent *>( arg( "root" ) = object() ) )
-					  .def( "allStatistics", &allStatistics<ContextMonitor> )
-					  .def( "plugStatistics", &ContextMonitor::plugStatistics, return_value_policy<copy_const_reference>() )
-					  .def( "combinedStatistics", &ContextMonitor::combinedStatistics, return_value_policy<copy_const_reference>() );
+		scope s =
+			IECorePython::RefCountedClass<ContextMonitor, Monitor>( "ContextMonitor" )
+				.def( init<const GraphComponent *>( arg( "root" ) = object() ) )
+				.def( "allStatistics", &allStatistics<ContextMonitor> )
+				.def( "plugStatistics", &ContextMonitor::plugStatistics, return_value_policy<copy_const_reference>() )
+				.def(
+					"combinedStatistics", &ContextMonitor::combinedStatistics,
+					return_value_policy<copy_const_reference>()
+				);
 
 		class_<ContextMonitor::Statistics>( "Statistics" )
 			.def( "numUniqueContexts", &ContextMonitor::Statistics::numUniqueContexts )

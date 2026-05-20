@@ -50,12 +50,13 @@ IE_CORE_FORWARDDECLARE( ScriptNode )
 #define GAFFER_NODE_DECLARE_TYPE( TYPE, TYPEID, BASETYPE ) \
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( TYPE, TYPEID, BASETYPE ) \
 	using Iterator = Gaffer::FilteredChildIterator<Gaffer::TypePredicate<TYPE>>; \
-	using RecursiveIterator = Gaffer::FilteredRecursiveChildIterator<Gaffer::TypePredicate<TYPE>, Gaffer::TypePredicate<Gaffer::Node>>; \
+	using RecursiveIterator = \
+		Gaffer::FilteredRecursiveChildIterator<Gaffer::TypePredicate<TYPE>, Gaffer::TypePredicate<Gaffer::Node>>; \
 	using Range = Gaffer::FilteredChildRange<Gaffer::TypePredicate<TYPE>>; \
-	using RecursiveRange = Gaffer::FilteredRecursiveChildRange<Gaffer::TypePredicate<TYPE>, Gaffer::TypePredicate<Gaffer::Node>>;
+	using RecursiveRange = \
+		Gaffer::FilteredRecursiveChildRange<Gaffer::TypePredicate<TYPE>, Gaffer::TypePredicate<Gaffer::Node>>;
 
-#define GAFFER_NODE_DEFINE_TYPE( TYPE ) \
-	IE_CORE_DEFINERUNTIMETYPED( TYPE )
+#define GAFFER_NODE_DEFINE_TYPE( TYPE ) IE_CORE_DEFINERUNTIMETYPED( TYPE )
 
 /// The primary class from which node graphs are constructed. Nodes may
 /// have any number of child plugs which provide values and/or define connections
@@ -66,7 +67,7 @@ IE_CORE_FORWARDDECLARE( ScriptNode )
 class GAFFER_API Node : public GraphComponent
 {
 
-	public:
+public:
 
 	explicit Node( const std::string &name = defaultName<Node>() );
 	~Node() override;
@@ -143,8 +144,7 @@ class GAFFER_API Node : public GraphComponent
 	/// propagated downstream from an original upstream error. The error
 	/// argument is a description of the problem.
 	using ErrorSignal = Signals::Signal<
-		void( const Plug *plug, const Plug *source, const std::string &error ),
-		Signals::CatchingCombiner<void>>;
+		void( const Plug *plug, const Plug *source, const std::string &error ), Signals::CatchingCombiner<void>>;
 	/// Signal emitted when an error occurs while processing this node.
 	/// This is intended to allow UI elements to display errors that occur
 	/// during processing triggered by other parts of the UI.
@@ -165,7 +165,7 @@ class GAFFER_API Node : public GraphComponent
 	ErrorSignal &errorSignal();
 	const ErrorSignal &errorSignal() const;
 
-	protected:
+protected:
 
 	/// May be overridden to restrict the inputs that plugs on this node will
 	/// accept. Default implementation accepts all plugs. Note that
@@ -185,7 +185,7 @@ class GAFFER_API Node : public GraphComponent
 	/// unparented.
 	void parentChanging( Gaffer::GraphComponent *newParent ) override;
 
-	private:
+private:
 
 	static size_t g_firstPlugIndex;
 

@@ -102,7 +102,7 @@ IE_CORE_FORWARDDECLARE( Inspector );
 class GAFFERSCENEUI_API Inspector : public IECore::RunTimeTyped, public Gaffer::Signals::Trackable
 {
 
-	public:
+public:
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( GafferSceneUI::Private::Inspector, InspectorTypeId, IECore::RunTimeTyped );
 	IE_CORE_FORWARDDECLARE( Result );
@@ -135,11 +135,14 @@ class GAFFERSCENEUI_API Inspector : public IECore::RunTimeTyped, public Gaffer::
 	/// the queries without blocking the UI.
 	Gaffer::PathPtr historyPath() const;
 
-	protected:
+protected:
 
 	/// Protected constructor for use by derived classes. The `name` argument
 	/// will be returned verbatim by the `name()` method.
-	Inspector( const std::vector<Gaffer::PlugPtr> &targets, const std::string &type, const std::string &name, const Gaffer::PlugPtr &editScope );
+	Inspector(
+		const std::vector<Gaffer::PlugPtr> &targets, const std::string &type, const std::string &name,
+		const Gaffer::PlugPtr &editScope
+	);
 
 	Gaffer::EditScope *targetEditScope() const;
 
@@ -166,7 +169,9 @@ class GAFFERSCENEUI_API Inspector : public IECore::RunTimeTyped, public Gaffer::
 	/// used when no value is returned from `value()`. Called with `history->context` as the current
 	/// context. Optionally, `description` may be assigned a description to be shown to the user.
 	/// Typically, this description would be used to disambiguate the source of the fallback value.
-	virtual IECore::ConstObjectPtr fallbackValue( const GafferScene::SceneAlgo::History *history, std::string &description ) const;
+	virtual IECore::ConstObjectPtr fallbackValue(
+		const GafferScene::SceneAlgo::History *history, std::string &description
+	) const;
 
 	/// Should be implemented by derived classes to return the source for
 	/// the value authored at this point in the history. Optionally,
@@ -175,7 +180,9 @@ class GAFFERSCENEUI_API Inspector : public IECore::RunTimeTyped, public Gaffer::
 	/// current context. Default implementation returns null.
 	/// \todo Perhaps this should also be available directly from the
 	/// history class?
-	virtual Gaffer::ValuePlugPtr source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const;
+	virtual Gaffer::ValuePlugPtr source(
+		const GafferScene::SceneAlgo::History *history, std::string &editWarning
+	) const;
 
 	using AcquireEditFunction = std::function<Gaffer::ValuePlugPtr( bool createIfNecessary )>;
 	using AcquireEditFunctionOrFailure = std::variant<AcquireEditFunction, std::string>;
@@ -188,7 +195,9 @@ class GAFFERSCENEUI_API Inspector : public IECore::RunTimeTyped, public Gaffer::
 	/// > Note : Where an EditScope already contains an edit, it is expected
 	/// > that this will be dealt with in `source()`, returning a result
 	/// > that edits the processor itself.
-	virtual AcquireEditFunctionOrFailure acquireEditFunction( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history ) const;
+	virtual AcquireEditFunctionOrFailure acquireEditFunction(
+		Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history
+	) const;
 
 	using DisableEditFunction = std::function<void()>;
 	using DisableEditFunctionOrFailure = std::variant<DisableEditFunction, std::string>;
@@ -196,9 +205,12 @@ class GAFFERSCENEUI_API Inspector : public IECore::RunTimeTyped, public Gaffer::
 	/// at the specified plug. If this is not possible, should return an
 	/// error explaining why (this is typically due to `readOnly` metadata).
 	/// Called with `history->context` as the current context.
-	virtual DisableEditFunctionOrFailure disableEditFunction( Gaffer::ValuePlug *plug, const GafferScene::SceneAlgo::History *history ) const;
+	virtual DisableEditFunctionOrFailure disableEditFunction(
+		Gaffer::ValuePlug *plug, const GafferScene::SceneAlgo::History *history
+	) const;
 
-	using CanEditFunction = std::function<bool( const Gaffer::ValuePlug *plug, const IECore::Object *value, std::string &failureReason )>;
+	using CanEditFunction =
+		std::function<bool( const Gaffer::ValuePlug *plug, const IECore::Object *value, std::string &failureReason )>;
 	/// Can be implemented to return a function that will return whether
 	/// `value` can be set on `plug`. If `value` cannot be set on `plug`,
 	/// `failureReason` should provide the reason why.
@@ -210,9 +222,11 @@ class GAFFERSCENEUI_API Inspector : public IECore::RunTimeTyped, public Gaffer::
 	/// current context.
 	virtual EditFunction editFunction( const GafferScene::SceneAlgo::History *history ) const;
 
-	private:
+private:
 
-	void inspectHistoryWalk( const GafferScene::SceneAlgo::History *history, Result *result, const IECore::Canceller *canceller ) const;
+	void inspectHistoryWalk(
+		const GafferScene::SceneAlgo::History *history, Result *result, const IECore::Canceller *canceller
+	) const;
 	void plugDirtied( Gaffer::Plug *plug );
 	void plugMetadataChanged( IECore::InternedString key, const Gaffer::Plug *plug );
 	void nodeMetadataChanged( IECore::InternedString key, const Gaffer::Node *node );
@@ -224,12 +238,10 @@ class GAFFERSCENEUI_API Inspector : public IECore::RunTimeTyped, public Gaffer::
 	/// and the context at that point in history, which are used as keys into `PlugMap`.
 	class GAFFERSCENEUI_API HistoryPath : public Gaffer::Path
 	{
-		public:
+	public:
 
 		HistoryPath(
-			const ConstInspectorPtr &inspector,
-			Gaffer::ConstContextPtr context,
-			const std::string &path = "/",
+			const ConstInspectorPtr &inspector, Gaffer::ConstContextPtr context, const std::string &path = "/",
 			Gaffer::PathFilterPtr filter = nullptr
 		);
 
@@ -237,9 +249,15 @@ class GAFFERSCENEUI_API Inspector : public IECore::RunTimeTyped, public Gaffer::
 
 		~HistoryPath() override;
 
-		void propertyNames( std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr ) const override;
-		IECore::ConstRunTimeTypedPtr property( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override;
-		Gaffer::ConstContextPtr contextProperty( const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr ) const override;
+		void propertyNames(
+			std::vector<IECore::InternedString> &names, const IECore::Canceller *canceller = nullptr
+		) const override;
+		IECore::ConstRunTimeTypedPtr property(
+			const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr
+		) const override;
+		Gaffer::ConstContextPtr contextProperty(
+			const IECore::InternedString &name, const IECore::Canceller *canceller = nullptr
+		) const override;
 
 		bool isValid( const IECore::Canceller *canceller = nullptr ) const override;
 		bool isLeaf( const IECore::Canceller *canceller = nullptr ) const override;
@@ -247,11 +265,13 @@ class GAFFERSCENEUI_API Inspector : public IECore::RunTimeTyped, public Gaffer::
 
 		const Gaffer::Plug *cancellationSubject() const override;
 
-		protected:
+	protected:
 
-		void doChildren( std::vector<Gaffer::PathPtr> &children, const IECore::Canceller *canceller = nullptr ) const override;
+		void doChildren(
+			std::vector<Gaffer::PathPtr> &children, const IECore::Canceller *canceller = nullptr
+		) const override;
 
-		private:
+	private:
 
 		struct HistoryProvider;
 		using HistoryProviderPtr = std::shared_ptr<HistoryProvider>;
@@ -259,8 +279,7 @@ class GAFFERSCENEUI_API Inspector : public IECore::RunTimeTyped, public Gaffer::
 		// Private constructor for creating children and copies sharing
 		// the same history provider.
 		HistoryPath(
-			const HistoryProviderPtr &historyProvider,
-			const std::string &path = "/",
+			const HistoryProviderPtr &historyProvider, const std::string &path = "/",
 			Gaffer::PathFilterPtr filter = nullptr
 		);
 
@@ -284,7 +303,7 @@ class GAFFERSCENEUI_API Inspector : public IECore::RunTimeTyped, public Gaffer::
 class GAFFERSCENEUI_API Inspector::Result : public IECore::RefCounted
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( Result );
 
@@ -377,7 +396,7 @@ class GAFFERSCENEUI_API Inspector::Result : public IECore::RefCounted
 	/// receive the value.
 	void edit( const IECore::Object *value ) const;
 
-	private:
+private:
 
 	Result( const IECore::ConstObjectPtr &value, const Gaffer::EditScopePtr &editScope );
 

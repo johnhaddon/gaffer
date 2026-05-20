@@ -51,7 +51,7 @@ namespace IECoreScenePreview
 class GAFFERSCENE_API Placeholder : public IECoreScene::VisibleRenderable
 {
 
-	public:
+public:
 
 	enum Mode
 	{
@@ -61,9 +61,13 @@ class GAFFERSCENE_API Placeholder : public IECoreScene::VisibleRenderable
 		Excluded = 1,
 	};
 
-	Placeholder( const Imath::Box3f &bound = Imath::Box3f(), const Placeholder::Mode mode = Placeholder::Mode::Default );
+	Placeholder(
+		const Imath::Box3f &bound = Imath::Box3f(), const Placeholder::Mode mode = Placeholder::Mode::Default
+	);
 
-	IE_CORE_DECLAREEXTENSIONOBJECT( IECoreScenePreview::Placeholder, IECoreScenePreview::PreviewPlaceholderTypeId, IECoreScene::VisibleRenderable );
+	IE_CORE_DECLAREEXTENSIONOBJECT(
+		IECoreScenePreview::Placeholder, IECoreScenePreview::PreviewPlaceholderTypeId, IECoreScene::VisibleRenderable
+	);
 
 	void setMode( Mode mode );
 	Mode getMode() const;
@@ -76,7 +80,7 @@ class GAFFERSCENE_API Placeholder : public IECoreScene::VisibleRenderable
 	void render( IECoreScene::Renderer *renderer ) const override {};
 #endif
 
-	private:
+private:
 
 	static const unsigned int m_ioVersion;
 	Mode m_mode;

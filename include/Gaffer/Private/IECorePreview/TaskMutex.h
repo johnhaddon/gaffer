@@ -110,11 +110,9 @@ class TaskMutex : boost::noncopyable
 
 	using InternalMutex = tbb::spin_rw_mutex;
 
-	public:
+public:
 
-	TaskMutex()
-	{
-	}
+	TaskMutex() {}
 
 	/// Used to acquire a lock on the mutex and release it
 	/// automatically in an exception-safe way. Equivalent to
@@ -122,15 +120,11 @@ class TaskMutex : boost::noncopyable
 	class ScopedLock : boost::noncopyable
 	{
 
-		public:
+	public:
 
-		ScopedLock()
-			: m_mutex( nullptr ), m_writer( false )
-		{
-		}
+		ScopedLock() : m_mutex( nullptr ), m_writer( false ) {}
 
-		ScopedLock( TaskMutex &mutex, bool write = true, bool acceptWork = true )
-			: ScopedLock()
+		ScopedLock( TaskMutex &mutex, bool write = true, bool acceptWork = true ) : ScopedLock()
 		{
 			acquire( mutex, write, acceptWork );
 		}
@@ -196,11 +190,9 @@ class TaskMutex : boost::noncopyable
 			};
 
 			std::optional<tbb::task_group_status> status;
-			m_mutex->m_executionState->arena.execute(
-				[this, &fWrapper, &status] {
-					status = m_mutex->m_executionState->taskGroup.run_and_wait( fWrapper );
-				}
-			);
+			m_mutex->m_executionState->arena.execute( [this, &fWrapper, &status] {
+				status = m_mutex->m_executionState->taskGroup.run_and_wait( fWrapper );
+			} );
 
 			assert( (bool)status );
 
@@ -275,26 +267,21 @@ class TaskMutex : boost::noncopyable
 			ExecutionStatePtr executionState = mutex.m_executionState;
 			executionStateLock.release();
 
-			executionState->arena.execute(
-				[&executionState] { executionState->taskGroup.wait(); }
-			);
+			executionState->arena.execute( [&executionState] { executionState->taskGroup.wait(); } );
 
 			return false;
 		}
 
-		bool isWriter() const
-		{
-			return m_writer;
-		}
+		bool isWriter() const { return m_writer; }
 
-		private:
+	private:
 
 		InternalMutex::scoped_lock m_lock;
 		TaskMutex *m_mutex;
 		bool m_writer;
 	};
 
-	private:
+private:
 
 	// The actual mutex that is held by the ScopedLock.
 	InternalMutex m_mutex;
@@ -304,9 +291,7 @@ class TaskMutex : boost::noncopyable
 	struct ExecutionState : public IECore::RefCounted
 	{
 		// Work around https://bugs.llvm.org/show_bug.cgi?id=32978
-		~ExecutionState() noexcept( true ) override
-		{
-		}
+		~ExecutionState() noexcept( true ) override {}
 
 		// Arena and task group used to allow
 		// waiting threads to participate in work.

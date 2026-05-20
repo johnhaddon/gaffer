@@ -57,7 +57,10 @@ using namespace GafferImage;
 struct VectorWarp::Engine : public Warp::Engine
 {
 
-	Engine( const Box2i &displayWindow, const Box2i &tileBound, const Box2i &validTileBound, ConstFloatVectorDataPtr xData, ConstFloatVectorDataPtr yData, ConstFloatVectorDataPtr aData, VectorMode vectorMode, VectorUnits vectorUnits )
+	Engine(
+		const Box2i &displayWindow, const Box2i &tileBound, const Box2i &validTileBound, ConstFloatVectorDataPtr xData,
+		ConstFloatVectorDataPtr yData, ConstFloatVectorDataPtr aData, VectorMode vectorMode, VectorUnits vectorUnits
+	)
 		: m_displayWindow( displayWindow ),
 		  m_tileBound( tileBound ),
 		  m_xData( xData ),
@@ -83,9 +86,7 @@ struct VectorWarp::Engine : public Warp::Engine
 		{
 			V2f result = m_vectorMode == Relative ? outputPixel : V2f( 0.0f );
 
-			result += m_vectorUnits == Screen ?
-				screenToPixel( V2f( m_x[i], m_y[i] ) ) :
-				V2f( m_x[i], m_y[i] );
+			result += m_vectorUnits == Screen ? screenToPixel( V2f( m_x[i], m_y[i] ) ) : V2f( m_x[i], m_y[i] );
 
 			if( !std::isfinite( result[0] ) || !std::isfinite( result[1] ) )
 			{
@@ -96,7 +97,7 @@ struct VectorWarp::Engine : public Warp::Engine
 		}
 	}
 
-	private:
+private:
 
 	inline V2f screenToPixel( const V2f &vector ) const
 	{
@@ -129,8 +130,7 @@ GAFFER_NODE_DEFINE_TYPE( VectorWarp );
 
 size_t VectorWarp::g_firstPlugIndex = 0;
 
-VectorWarp::VectorWarp( const std::string &name )
-	: Warp( name )
+VectorWarp::VectorWarp( const std::string &name ) : Warp( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "vector" ) );
@@ -141,9 +141,7 @@ VectorWarp::VectorWarp( const std::string &name )
 	outPlug()->dataWindowPlug()->setInput( vectorPlug()->dataWindowPlug() );
 }
 
-VectorWarp::~VectorWarp()
-{
-}
+VectorWarp::~VectorWarp() {}
 
 ImagePlug *VectorWarp::vectorPlug()
 {
@@ -187,13 +185,9 @@ void VectorWarp::affects( const Gaffer::Plug *input, AffectedPlugsContainer &out
 
 bool VectorWarp::affectsEngine( const Gaffer::Plug *input ) const
 {
-	return Warp::affectsEngine( input ) ||
-		input == inPlug()->viewNamesPlug() ||
-		input == inPlug()->formatPlug() ||
-		input == vectorPlug()->channelNamesPlug() ||
-		input == vectorPlug()->channelDataPlug() ||
-		input == vectorModePlug() ||
-		input == vectorUnitsPlug();
+	return Warp::affectsEngine( input ) || input == inPlug()->viewNamesPlug() || input == inPlug()->formatPlug() ||
+		input == vectorPlug()->channelNamesPlug() || input == vectorPlug()->channelDataPlug() ||
+		input == vectorModePlug() || input == vectorUnitsPlug();
 }
 
 void VectorWarp::hashEngine( const Imath::V2i &tileOrigin, const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -289,24 +283,22 @@ const Warp::Engine *VectorWarp::computeEngine( const Imath::V2i &tileOrigin, con
 				yData->readable().size() != (unsigned int)ImagePlug::tilePixels() ||
 				aData->readable().size() != (unsigned int)ImagePlug::tilePixels() )
 			{
-				throw IECore::Exception( "VectorWarp::computeEngine : Bad channel data size on vector plug.  Maybe it's deep?" );
+				throw IECore::Exception(
+					"VectorWarp::computeEngine : Bad channel data size on vector plug.  Maybe it's deep?"
+				);
 			}
 		}
 	}
 
 	return new Engine(
-		displayWindow,
-		tileBound,
-		validTileBound,
-		xData,
-		yData,
-		aData,
-		(VectorMode)vectorModePlug()->getValue(),
+		displayWindow, tileBound, validTileBound, xData, yData, aData, (VectorMode)vectorModePlug()->getValue(),
 		(VectorUnits)vectorUnitsPlug()->getValue()
 	);
 }
 
-void VectorWarp::hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void VectorWarp::hashDeep(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageProcessor::hashDeep( parent, context, h );
 	if( ImageAlgo::viewIsValid( context, vectorPlug()->viewNames()->readable() ) )

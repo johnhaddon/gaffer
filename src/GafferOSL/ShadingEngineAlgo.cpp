@@ -60,7 +60,9 @@ CompoundDataPtr imageShadingPoints( const V2i &resolution )
 {
 	if( resolution.x < 1 || resolution.y < 1 )
 	{
-		throw IECore::Exception( "Invalid resolution x: " + std::to_string( resolution.x ) + " y: " + std::to_string( resolution.y ) );
+		throw IECore::Exception(
+			"Invalid resolution x: " + std::to_string( resolution.x ) + " y: " + std::to_string( resolution.y )
+		);
 	}
 
 	CompoundDataPtr shadingPoints = new CompoundData();
@@ -157,7 +159,10 @@ CompoundDataPtr shadedPointsToImageData( const CompoundData *shadedPoints, const
 namespace GafferOSL
 {
 
-CompoundDataPtr ShadingEngineAlgo::shadeUVTexture( const IECoreScene::ShaderNetwork *shaderNetwork, const Imath::V2i &resolution, IECoreScene::ShaderNetwork::Parameter output )
+CompoundDataPtr ShadingEngineAlgo::shadeUVTexture(
+	const IECoreScene::ShaderNetwork *shaderNetwork, const Imath::V2i &resolution,
+	IECoreScene::ShaderNetwork::Parameter output
+)
 {
 	IECoreScene::ShaderNetworkPtr surfaceNetwork = shaderNetwork->copy();
 
@@ -174,7 +179,8 @@ CompoundDataPtr ShadingEngineAlgo::shadeUVTexture( const IECoreScene::ShaderNetw
 
 	if( output != surfaceNetwork->getOutput() || outputShader->getType() != "osl:surface" )
 	{
-		IECore::InternedString surface = surfaceNetwork->addShader( "surface", new IECoreScene::Shader( "Surface/Constant", "osl:shader" ) );
+		IECore::InternedString surface =
+			surfaceNetwork->addShader( "surface", new IECoreScene::Shader( "Surface/Constant", "osl:shader" ) );
 		surfaceNetwork->addConnection( { output, { surface, "Cs" } } );
 		surfaceNetwork->setOutput( { surface, "" } );
 	}

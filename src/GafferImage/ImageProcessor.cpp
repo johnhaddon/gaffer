@@ -47,25 +47,19 @@ GAFFER_NODE_DEFINE_TYPE( ImageProcessor );
 
 size_t ImageProcessor::g_firstPlugIndex = 0;
 
-ImageProcessor::ImageProcessor( const std::string &name )
-	: ImageNode( name )
+ImageProcessor::ImageProcessor( const std::string &name ) : ImageNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "in", Gaffer::Plug::In ) );
 }
 
-ImageProcessor::ImageProcessor( const std::string &name, size_t minInputs, size_t maxInputs )
-	: ImageNode( name )
+ImageProcessor::ImageProcessor( const std::string &name, size_t minInputs, size_t maxInputs ) : ImageNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
-	addChild(
-		new ArrayPlug( "in", Gaffer::Plug::In, new ImagePlug( "in0" ), minInputs, maxInputs )
-	);
+	addChild( new ArrayPlug( "in", Gaffer::Plug::In, new ImagePlug( "in0" ), minInputs, maxInputs ) );
 }
 
-ImageProcessor::~ImageProcessor()
-{
-}
+ImageProcessor::~ImageProcessor() {}
 
 ImagePlug *ImageProcessor::inPlug()
 {
@@ -123,7 +117,9 @@ const Plug *ImageProcessor::correspondingInput( const Plug *output ) const
 	return ImageNode::correspondingInput( output );
 }
 
-void ImageProcessor::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void ImageProcessor::hash(
+	const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	const ImagePlug *imagePlug = output->parent<ImagePlug>();
 	if( !imagePlug )

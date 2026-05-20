@@ -53,12 +53,14 @@ class NodeGadget;
 class GAFFERUI_API StandardConnectionGadget : public ConnectionGadget
 {
 
-	public:
+public:
 
 	StandardConnectionGadget( GafferUI::NodulePtr srcNodule, GafferUI::NodulePtr dstNodule );
 	~StandardConnectionGadget() override;
 
-	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::StandardConnectionGadget, StandardConnectionGadgetTypeId, ConnectionGadget );
+	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE(
+		GafferUI::StandardConnectionGadget, StandardConnectionGadgetTypeId, ConnectionGadget
+	);
 
 	Imath::Box3f bound() const override;
 
@@ -72,13 +74,13 @@ class GAFFERUI_API StandardConnectionGadget : public ConnectionGadget
 
 	std::string getToolTip( const IECore::LineSegment3f &line ) const override;
 
-	protected:
+protected:
 
 	void renderLayer( Layer layer, const Style *style, RenderReason reason ) const override;
 	unsigned layerMask() const override;
 	Imath::Box3f renderBound() const override;
 
-	private:
+private:
 
 	static ConnectionGadgetTypeDescription<StandardConnectionGadget> g_connectionGadgetTypeDescription;
 

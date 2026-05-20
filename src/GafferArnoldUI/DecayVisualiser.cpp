@@ -176,18 +176,11 @@ void addKnot( IECoreGL::GroupPtr group, const Knot &knot, const float visualiser
 	IECore::CompoundObjectPtr shaderParameters = new CompoundObject;
 	shaderParameters->members()["markerColor"] = new IECore::Color3fData( knot.second );
 
-	markerGroup->getState()->add(
-		new IECoreGL::Primitive::Selectable( false )
-	);
-	markerGroup->getState()->add(
-		new IECoreGL::ShaderStateComponent(
-			ShaderLoader::defaultShaderLoader(),
-			TextureLoader::defaultTextureLoader(),
-			faceCameraVertexSource(),
-			"",
-			knotFragSource(), shaderParameters
-		)
-	);
+	markerGroup->getState()->add( new IECoreGL::Primitive::Selectable( false ) );
+	markerGroup->getState()->add( new IECoreGL::ShaderStateComponent(
+		ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), faceCameraVertexSource(), "",
+		knotFragSource(), shaderParameters
+	) );
 
 	group->addChild( markerGroup );
 }
@@ -195,16 +188,20 @@ void addKnot( IECoreGL::GroupPtr group, const Knot &knot, const float visualiser
 class DecayVisualiser final : public LightFilterVisualiser
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( DecayVisualiser )
 
 	DecayVisualiser();
 	~DecayVisualiser() override;
 
-	Visualisations visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const override;
+	Visualisations visualise(
+		const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork,
+		const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes,
+		IECoreGL::ConstStatePtr &state
+	) const override;
 
-	protected:
+protected:
 
 	static LightFilterVisualiser::LightFilterVisualiserDescription<DecayVisualiser> g_visualiserDescription;
 };
@@ -212,17 +209,19 @@ class DecayVisualiser final : public LightFilterVisualiser
 IE_CORE_DECLAREPTR( DecayVisualiser )
 
 // register the new visualiser
-LightFilterVisualiser::LightFilterVisualiserDescription<DecayVisualiser> DecayVisualiser::g_visualiserDescription( "ai:lightFilter", "light_decay" );
+LightFilterVisualiser::LightFilterVisualiserDescription<DecayVisualiser> DecayVisualiser::g_visualiserDescription(
+	"ai:lightFilter", "light_decay"
+);
 
-DecayVisualiser::DecayVisualiser()
-{
-}
+DecayVisualiser::DecayVisualiser() {}
 
-DecayVisualiser::~DecayVisualiser()
-{
-}
+DecayVisualiser::~DecayVisualiser() {}
 
-Visualisations DecayVisualiser::visualise( const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork, const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state ) const
+Visualisations DecayVisualiser::visualise(
+	const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *shaderNetwork,
+	const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes,
+	IECoreGL::ConstStatePtr &state
+) const
 {
 
 	KnotVector knots;
@@ -247,14 +246,10 @@ Visualisations DecayVisualiser::visualise( const IECore::InternedString &attribu
 	// render (this may need to be configurable later). The decay visualiser
 	// shouldn't scale with visualisation scale either. We scale the triangle
 	// indicators individually by the visualisation scale in `addKnot()`.
-	return {
-		Visualisation(
-			result,
-			Visualisation::Scale::None,
-			Visualisation::Category::Generic,
-			/* affectsFramingBound = */ false
-		)
-	};
+	return { Visualisation(
+		result, Visualisation::Scale::None, Visualisation::Category::Generic,
+		/* affectsFramingBound = */ false
+	) };
 }
 
 } // namespace

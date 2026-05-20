@@ -64,22 +64,30 @@ GAFFER_NODE_DEFINE_TYPE( MotionPath );
 
 size_t MotionPath::g_firstPlugIndex = 0;
 
-MotionPath::MotionPath( const std::string &name )
-	: FilteredSceneProcessor( name, PathMatcher::NoMatch )
+MotionPath::MotionPath( const std::string &name ) : FilteredSceneProcessor( name, PathMatcher::NoMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
 	ValuePlugPtr startPlug = new ValuePlug( "start", Plug::In );
-	startPlug->addChild( new IntPlug( "mode", Plug::In, (int)FrameMode::Relative, /* min */ (int)FrameMode::Relative, /* max */ (int)FrameMode::Absolute ) );
+	startPlug->addChild( new IntPlug(
+		"mode", Plug::In, (int)FrameMode::Relative, /* min */ (int)FrameMode::Relative,
+		/* max */ (int)FrameMode::Absolute
+	) );
 	startPlug->addChild( new FloatPlug( "frame", Plug::In, -2 ) );
 	addChild( startPlug );
 
 	ValuePlugPtr endPlug = new ValuePlug( "end", Plug::In );
-	endPlug->addChild( new IntPlug( "mode", Plug::In, (int)FrameMode::Relative, /* min */ (int)FrameMode::Relative, /* max */ (int)FrameMode::Absolute ) );
+	endPlug->addChild( new IntPlug(
+		"mode", Plug::In, (int)FrameMode::Relative, /* min */ (int)FrameMode::Relative,
+		/* max */ (int)FrameMode::Absolute
+	) );
 	endPlug->addChild( new FloatPlug( "frame", Plug::In, 2 ) );
 	addChild( endPlug );
 
-	addChild( new IntPlug( "samplingMode", Plug::In, (int)SamplingMode::Variable, /* min */ (int)SamplingMode::Variable, /* max */ (int)SamplingMode::Fixed ) );
+	addChild( new IntPlug(
+		"samplingMode", Plug::In, (int)SamplingMode::Variable, /* min */ (int)SamplingMode::Variable,
+		/* max */ (int)SamplingMode::Fixed
+	) );
 	addChild( new FloatPlug( "step", Plug::In, 1, 1e-6 ) );
 	addChild( new IntPlug( "samples", Plug::In, 10, 2 ) );
 
@@ -96,9 +104,7 @@ MotionPath::MotionPath( const std::string &name )
 	outPlug()->globalsPlug()->setInput( isolatedInPlug()->globalsPlug() );
 }
 
-MotionPath::~MotionPath()
-{
-}
+MotionPath::~MotionPath() {}
 
 IntPlug *MotionPath::startModePlug()
 {
@@ -194,26 +200,14 @@ void MotionPath::affects( const Plug *input, DependencyNode::AffectedPlugsContai
 {
 	FilteredSceneProcessor::affects( input, outputs );
 
-	if(
-		input == filterPlug() ||
-		input == adjustBoundsPlug() ||
-		input == outPlug()->objectPlug()
-	)
+	if( input == filterPlug() || input == adjustBoundsPlug() || input == outPlug()->objectPlug() )
 	{
 		outputs.push_back( outPlug()->boundPlug() );
 	}
 
-	if(
-		input == filterPlug() ||
-		input == startModePlug() ||
-		input == startFramePlug() ||
-		input == endModePlug() ||
-		input == endFramePlug() ||
-		input == samplingModePlug() ||
-		input == stepPlug() ||
-		input == samplesPlug() ||
-		input == inPlug()->transformPlug()
-	)
+	if( input == filterPlug() || input == startModePlug() || input == startFramePlug() || input == endModePlug() ||
+		input == endFramePlug() || input == samplingModePlug() || input == stepPlug() || input == samplesPlug() ||
+		input == inPlug()->transformPlug() )
 	{
 		outputs.push_back( outPlug()->objectPlug() );
 	}
@@ -229,7 +223,9 @@ void MotionPath::affects( const Plug *input, DependencyNode::AffectedPlugsContai
 	}
 }
 
-void MotionPath::hashBound( const ScenePath &path, const Context *context, const ScenePlug *parent, MurmurHash &h ) const
+void MotionPath::hashBound(
+	const ScenePath &path, const Context *context, const ScenePlug *parent, MurmurHash &h
+) const
 {
 	if( !adjustBoundsPlug()->getValue() )
 	{
@@ -268,7 +264,8 @@ Imath::Box3f MotionPath::computeBound( const ScenePath &path, const Context *con
 
 	if( m & PathMatcher::ExactMatch )
 	{
-		if( ConstCurvesPrimitivePtr motionPath = runTimeCast<const CurvesPrimitive>( outPlug()->objectPlug()->getValue() ) )
+		if( ConstCurvesPrimitivePtr motionPath =
+				runTimeCast<const CurvesPrimitive>( outPlug()->objectPlug()->getValue() ) )
 		{
 			result.extendBy( SceneAlgo::bound( motionPath.get() ) );
 		}
@@ -277,7 +274,9 @@ Imath::Box3f MotionPath::computeBound( const ScenePath &path, const Context *con
 	return result;
 }
 
-void MotionPath::hashTransform( const ScenePath &path, const Context *context, const ScenePlug *parent, MurmurHash &h ) const
+void MotionPath::hashTransform(
+	const ScenePath &path, const Context *context, const ScenePlug *parent, MurmurHash &h
+) const
 {
 	h = inPlug()->transformPlug()->defaultHash();
 }
@@ -287,17 +286,23 @@ Imath::M44f MotionPath::computeTransform( const ScenePath &path, const Context *
 	return inPlug()->transformPlug()->defaultValue();
 }
 
-void MotionPath::hashAttributes( const ScenePath &path, const Context *context, const ScenePlug *parent, MurmurHash &h ) const
+void MotionPath::hashAttributes(
+	const ScenePath &path, const Context *context, const ScenePlug *parent, MurmurHash &h
+) const
 {
 	h = inPlug()->attributesPlug()->defaultHash();
 }
 
-ConstCompoundObjectPtr MotionPath::computeAttributes( const ScenePath &path, const Context *context, const ScenePlug *parent ) const
+ConstCompoundObjectPtr MotionPath::computeAttributes(
+	const ScenePath &path, const Context *context, const ScenePlug *parent
+) const
 {
 	return inPlug()->attributesPlug()->defaultValue();
 }
 
-void MotionPath::hashObject( const ScenePath &path, const Context *context, const ScenePlug *parent, MurmurHash &h ) const
+void MotionPath::hashObject(
+	const ScenePath &path, const Context *context, const ScenePlug *parent, MurmurHash &h
+) const
 {
 	if( !( filterValue( context ) & PathMatcher::ExactMatch ) )
 	{
@@ -305,8 +310,12 @@ void MotionPath::hashObject( const ScenePath &path, const Context *context, cons
 		return;
 	}
 
-	float start = ( (FrameMode)startModePlug()->getValue() == FrameMode::Absolute ) ? startFramePlug()->getValue() : context->getFrame() + startFramePlug()->getValue();
-	float end = ( (FrameMode)endModePlug()->getValue() == FrameMode::Absolute ) ? endFramePlug()->getValue() : context->getFrame() + endFramePlug()->getValue();
+	float start = ( (FrameMode)startModePlug()->getValue() == FrameMode::Absolute ) ?
+		startFramePlug()->getValue() :
+		context->getFrame() + startFramePlug()->getValue();
+	float end = ( (FrameMode)endModePlug()->getValue() == FrameMode::Absolute ) ?
+		endFramePlug()->getValue() :
+		context->getFrame() + endFramePlug()->getValue();
 	if( start >= end )
 	{
 		h = inPlug()->objectPlug()->defaultHash();
@@ -352,8 +361,12 @@ ConstObjectPtr MotionPath::computeObject( const ScenePath &path, const Context *
 		return inPlug()->objectPlug()->defaultValue();
 	}
 
-	float start = ( (FrameMode)startModePlug()->getValue() == FrameMode::Absolute ) ? startFramePlug()->getValue() : context->getFrame() + startFramePlug()->getValue();
-	float end = ( (FrameMode)endModePlug()->getValue() == FrameMode::Absolute ) ? endFramePlug()->getValue() : context->getFrame() + endFramePlug()->getValue();
+	float start = ( (FrameMode)startModePlug()->getValue() == FrameMode::Absolute ) ?
+		startFramePlug()->getValue() :
+		context->getFrame() + startFramePlug()->getValue();
+	float end = ( (FrameMode)endModePlug()->getValue() == FrameMode::Absolute ) ?
+		endFramePlug()->getValue() :
+		context->getFrame() + endFramePlug()->getValue();
 	if( start >= end )
 	{
 		return inPlug()->objectPlug()->defaultValue();
@@ -413,7 +426,8 @@ ConstObjectPtr MotionPath::computeObject( const ScenePath &path, const Context *
 	scales.emplace_back( s );
 	frames.emplace_back( end );
 
-	CurvesPrimitivePtr motionPath = new CurvesPrimitive( new IntVectorData( { (int)p.size() } ), CubicBasisf::linear(), false, points );
+	CurvesPrimitivePtr motionPath =
+		new CurvesPrimitive( new IntVectorData( { (int)p.size() } ), CubicBasisf::linear(), false, points );
 	motionPath->variables["orientation"] = PrimitiveVariable( PrimitiveVariable::Vertex, orientations );
 	motionPath->variables["scale"] = PrimitiveVariable( PrimitiveVariable::Vertex, scaleData );
 	motionPath->variables["frame"] = PrimitiveVariable( PrimitiveVariable::Vertex, sampleFrames );
@@ -445,7 +459,9 @@ ConstInternedStringVectorDataPtr MotionPath::computeSetNames( const Context *con
 	return result;
 }
 
-void MotionPath::hashSet( const InternedString &setName, const Context *context, const ScenePlug *parent, MurmurHash &h ) const
+void MotionPath::hashSet(
+	const InternedString &setName, const Context *context, const ScenePlug *parent, MurmurHash &h
+) const
 {
 	if( setName == g_camerasSetName || setName == g_lightsSetName || setName == g_defaultLightsSetName )
 	{
@@ -457,7 +473,9 @@ void MotionPath::hashSet( const InternedString &setName, const Context *context,
 	}
 }
 
-ConstPathMatcherDataPtr MotionPath::computeSet( const InternedString &setName, const Context *context, const ScenePlug *parent ) const
+ConstPathMatcherDataPtr MotionPath::computeSet(
+	const InternedString &setName, const Context *context, const ScenePlug *parent
+) const
 {
 	if( setName == g_camerasSetName || setName == g_lightsSetName || setName == g_defaultLightsSetName )
 	{

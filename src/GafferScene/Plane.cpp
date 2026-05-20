@@ -49,17 +49,14 @@ GAFFER_NODE_DEFINE_TYPE( Plane );
 
 size_t Plane::g_firstPlugIndex = 0;
 
-Plane::Plane( const std::string &name )
-	: ObjectSource( name, "plane" )
+Plane::Plane( const std::string &name ) : ObjectSource( name, "plane" )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new V2fPlug( "dimensions", Plug::In, V2f( 1.0f ), V2f( 0.0f ) ) );
 	addChild( new V2iPlug( "divisions", Plug::In, V2i( 1 ), V2i( 1 ) ) );
 }
 
-Plane::~Plane()
-{
-}
+Plane::~Plane() {}
 
 Gaffer::V2fPlug *Plane::dimensionsPlug()
 {
@@ -100,5 +97,7 @@ void Plane::hashSource( const Gaffer::Context *context, IECore::MurmurHash &h ) 
 IECore::ConstObjectPtr Plane::computeSource( const Context *context ) const
 {
 	V2f dimensions = dimensionsPlug()->getValue();
-	return MeshPrimitive::createPlane( Box2f( -dimensions / 2.0f, dimensions / 2.0f ), divisionsPlug()->getValue(), context->canceller() );
+	return MeshPrimitive::createPlane(
+		Box2f( -dimensions / 2.0f, dimensions / 2.0f ), divisionsPlug()->getValue(), context->canceller()
+	);
 }

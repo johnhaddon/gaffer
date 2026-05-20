@@ -44,8 +44,7 @@
 
 using namespace Gaffer;
 
-UndoScope::UndoScope( ScriptNodePtr script, State state, const std::string &mergeGroup )
-	: m_script( script )
+UndoScope::UndoScope( ScriptNodePtr script, State state, const std::string &mergeGroup ) : m_script( script )
 {
 	if( state == Invalid )
 	{

@@ -49,7 +49,11 @@ namespace
 
 const RtUString g_xpuVariant( "xpu" );
 
-RtUString convertSphere( const IECoreScenePreview::Renderer::Samples<const SpherePrimitive *> &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext )
+RtUString convertSphere(
+	const IECoreScenePreview::Renderer::Samples<const SpherePrimitive *> &samples,
+	const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars,
+	const std::string &messageContext
+)
 {
 	const SpherePrimitive *sphere = samples[0];
 
@@ -58,11 +62,15 @@ RtUString convertSphere( const IECoreScenePreview::Renderer::Samples<const Spher
 	if( session->rileyVariant == g_xpuVariant )
 	{
 		// XPU doesn't support sphere primitives, so convert to a mesh.
-		MeshPrimitivePtr mesh = MeshPrimitive::createSphere( sphere->radius(), sphere->zMin(), sphere->zMax(), sphere->thetaMax() );
+		MeshPrimitivePtr mesh =
+			MeshPrimitive::createSphere( sphere->radius(), sphere->zMin(), sphere->zMax(), sphere->thetaMax() );
 		return GeometryAlgo::convert( { mesh.get() }, {}, primVars, messageContext );
 	}
 
-	GeometryAlgo::convertPrimitive( IECoreScenePreview::Renderer::staticSamplesCast<const IECoreScene::Primitive *>( samples ), sampleTimes, primVars, messageContext );
+	GeometryAlgo::convertPrimitive(
+		IECoreScenePreview::Renderer::staticSamplesCast<const IECoreScene::Primitive *>( samples ), sampleTimes,
+		primVars, messageContext
+	);
 
 	const float radius = sphere->radius();
 	const float zMin = sphere->zMin();

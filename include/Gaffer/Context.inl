@@ -95,10 +95,7 @@ struct DataTraits<std::vector<Imath::Vec3<T>>>
 
 } // namespace Detail
 
-inline Context::Value::Value()
-	: m_typeId( IECore::InvalidTypeId ), m_value( nullptr )
-{
-}
+inline Context::Value::Value() : m_typeId( IECore::InvalidTypeId ), m_value( nullptr ) {}
 
 template<typename T>
 Context::Value::Value( const IECore::InternedString &name, const T *value )
@@ -148,7 +145,8 @@ void Context::Value::registerType()
 	};
 	functions.isEqual = []( const Value &a, const Value &b ) {
 		// Type of both `a` and `b` has been checked already in `operator ==`.
-		return ( *static_cast<const ValueType *>( a.rawValue() ) ) == ( *static_cast<const ValueType *>( b.rawValue() ) );
+		return ( *static_cast<const ValueType *>( a.rawValue() ) ) ==
+			( *static_cast<const ValueType *>( b.rawValue() ) );
 	};
 	functions.constructor = []( const IECore::InternedString &name, const IECore::Data *data ) {
 		return Value( name, &static_cast<const T *>( data )->readable() );
@@ -160,9 +158,7 @@ void Context::Value::registerType()
 		const Value rehashed( name, static_cast<const ValueType *>( v.rawValue() ) );
 		if( v.hash() != rehashed.hash() )
 		{
-			throw IECore::Exception(
-				fmt::format( "Context variable \"{}\" has an invalid hash", name.string() )
-			);
+			throw IECore::Exception( fmt::format( "Context variable \"{}\" has an invalid hash", name.string() ) );
 		}
 	};
 }
@@ -204,7 +200,9 @@ inline void Context::internalSet( const IECore::InternedString &name, const Valu
 	}
 }
 
-inline void Context::internalSetWithOwner( const IECore::InternedString &name, const Value &value, IECore::ConstDataPtr &&owner )
+inline void Context::internalSetWithOwner(
+	const IECore::InternedString &name, const Value &value, IECore::ConstDataPtr &&owner
+)
 {
 	IECore::ConstDataPtr &currentOwner = m_allocMap[name];
 	// Keep old value alive for comparison with new value in `internalSet()`.
@@ -297,14 +295,14 @@ inline const IECore::Canceller *Context::canceller() const
 class Context::SubstitutionProvider : public IECore::StringAlgo::VariableProvider
 {
 
-	public:
+public:
 
 	SubstitutionProvider( const Context *context );
 
 	int frame() const override;
 	const std::string &variable( const boost::string_view &name, bool &recurse ) const override;
 
-	private:
+private:
 
 	const Context *m_context;
 	mutable std::string m_formattedString;

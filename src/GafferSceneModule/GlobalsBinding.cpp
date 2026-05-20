@@ -91,8 +91,7 @@ void GafferSceneModule::bindGlobals()
 {
 
 	DependencyNodeClass<GlobalsProcessor>();
-	DependencyNodeClass<DeleteGlobals>()
-		.def( "_namePrefix", &DeleteGlobals::namePrefix );
+	DependencyNodeClass<DeleteGlobals>().def( "_namePrefix", &DeleteGlobals::namePrefix );
 
 	DependencyNodeClass<DeleteOutputs>();
 	DependencyNodeClass<DeleteSets>();

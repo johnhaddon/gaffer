@@ -40,11 +40,6 @@ using namespace GafferCycles;
 
 IE_CORE_DEFINERUNTIMETYPED( CyclesOptions );
 
-CyclesOptions::CyclesOptions( const std::string &name )
-	: GafferScene::Options( name, "cycles" )
-{
-}
+CyclesOptions::CyclesOptions( const std::string &name ) : GafferScene::Options( name, "cycles" ) {}
 
-CyclesOptions::~CyclesOptions()
-{
-}
+CyclesOptions::~CyclesOptions() {}

@@ -44,7 +44,9 @@ namespace
 {
 
 template<typename T>
-void setV2PlugComponentValue( T const &parent, Gaffer::NumericPlug<typename T::ValueType::BaseType> &child, typename T::ValueType const &value )
+void setV2PlugComponentValue(
+	T const &parent, Gaffer::NumericPlug<typename T::ValueType::BaseType> &child, typename T::ValueType const &value
+)
 {
 	float cv;
 
@@ -74,8 +76,7 @@ size_t FormatQuery::g_firstPlugIndex = 0;
 
 GAFFER_NODE_DEFINE_TYPE( FormatQuery );
 
-FormatQuery::FormatQuery( std::string const &name )
-	: Gaffer::ComputeNode( name )
+FormatQuery::FormatQuery( std::string const &name ) : Gaffer::ComputeNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ImagePlug( "image" ) );
@@ -85,15 +86,11 @@ FormatQuery::FormatQuery( std::string const &name )
 	addChild( new Gaffer::V2iPlug( "size", Gaffer::Plug::Out ) );
 }
 
-FormatQuery::~FormatQuery()
-{
-}
+FormatQuery::~FormatQuery() {}
 
 ImagePlug *FormatQuery::imagePlug()
 {
-	return const_cast<ImagePlug *>(
-		static_cast<FormatQuery const *>( this )->imagePlug()
-	);
+	return const_cast<ImagePlug *>( static_cast<FormatQuery const *>( this )->imagePlug() );
 }
 
 ImagePlug const *FormatQuery::imagePlug() const
@@ -123,9 +120,7 @@ FormatPlug const *FormatQuery::formatPlug() const
 
 Gaffer::V2fPlug *FormatQuery::centerPlug()
 {
-	return const_cast<Gaffer::V2fPlug *>(
-		static_cast<FormatQuery const *>( this )->centerPlug()
-	);
+	return const_cast<Gaffer::V2fPlug *>( static_cast<FormatQuery const *>( this )->centerPlug() );
 }
 
 Gaffer::V2fPlug const *FormatQuery::centerPlug() const
@@ -135,9 +130,7 @@ Gaffer::V2fPlug const *FormatQuery::centerPlug() const
 
 Gaffer::V2iPlug *FormatQuery::sizePlug()
 {
-	return const_cast<Gaffer::V2iPlug *>(
-		static_cast<FormatQuery const *>( this )->sizePlug()
-	);
+	return const_cast<Gaffer::V2iPlug *>( static_cast<FormatQuery const *>( this )->sizePlug() );
 }
 
 Gaffer::V2iPlug const *FormatQuery::sizePlug() const
@@ -163,7 +156,9 @@ void FormatQuery::affects( Gaffer::Plug const *const input, AffectedPlugsContain
 	}
 }
 
-void FormatQuery::hash( Gaffer::ValuePlug const *const output, Gaffer::Context const *const context, IECore::MurmurHash &h ) const
+void FormatQuery::hash(
+	Gaffer::ValuePlug const *const output, Gaffer::Context const *const context, IECore::MurmurHash &h
+) const
 {
 	ComputeNode::hash( output, context, h );
 

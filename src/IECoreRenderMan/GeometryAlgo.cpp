@@ -102,92 +102,108 @@ RtDataType dataType( IECore::GeometricData::Interpretation interpretation )
 struct PrimitiveVariableConverter
 {
 
-	PrimitiveVariableConverter( const std::string &messageContext )
-		: m_messageContext( messageContext )
-	{
-	}
+	PrimitiveVariableConverter( const std::string &messageContext ) : m_messageContext( messageContext ) {}
 
 	// Simple data
 
-	void operator () ( const BoolData *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList, unsigned sampleIndex = 0 ) const
+	void operator () (
+		const BoolData *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList,
+		unsigned sampleIndex = 0
+	) const
 	{
 		const int b = data->readable();
 		primVarList.SetIntegerDetail( name, &b, detail( primitiveVariable.interpolation ), sampleIndex );
 	}
 
-	void operator () ( const IntData *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList, unsigned sampleIndex = 0 ) const
+	void operator () (
+		const IntData *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList,
+		unsigned sampleIndex = 0
+	) const
 	{
 		primVarList.SetIntegerDetail( name, &data->readable(), detail( primitiveVariable.interpolation ), sampleIndex );
 	}
 
-	void operator () ( const FloatData *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList, unsigned sampleIndex = 0 ) const
+	void operator () (
+		const FloatData *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList,
+		unsigned sampleIndex = 0
+	) const
 	{
 		primVarList.SetFloatDetail( name, &data->readable(), detail( primitiveVariable.interpolation ), sampleIndex );
 	}
 
-	void operator () ( const StringData *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList, unsigned sampleIndex = 0 ) const
+	void operator () (
+		const StringData *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList,
+		unsigned sampleIndex = 0
+	) const
 	{
 		RtUString s( data->readable().c_str() );
 		primVarList.SetStringDetail( name, &s, detail( primitiveVariable.interpolation ), sampleIndex );
 	}
 
-	void operator () ( const Color3fData *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList, unsigned sampleIndex = 0 ) const
+	void operator () (
+		const Color3fData *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList,
+		unsigned sampleIndex = 0
+	) const
 	{
-		primVarList.SetColorDetail( name, reinterpret_cast<const RtColorRGB *>( data->readable().getValue() ), detail( primitiveVariable.interpolation ), sampleIndex );
+		primVarList.SetColorDetail(
+			name, reinterpret_cast<const RtColorRGB *>( data->readable().getValue() ),
+			detail( primitiveVariable.interpolation ), sampleIndex
+		);
 	}
 
-	void operator () ( const V3fData *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList, unsigned sampleIndex = 0 ) const
+	void operator () (
+		const V3fData *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList,
+		unsigned sampleIndex = 0
+	) const
 	{
 		primVarList.SetParam(
-			{ name,
-			  dataType( data->getInterpretation() ),
-			  detail( primitiveVariable.interpolation ),
+			{ name, dataType( data->getInterpretation() ), detail( primitiveVariable.interpolation ),
 			  /* length = */ 1,
 			  /* array = */ false,
 			  /* motion = */ sampleIndex > 0,
 			  /* deduplicated = */ false },
-			data->readable().getValue(),
-			sampleIndex
+			data->readable().getValue(), sampleIndex
 		);
 	}
 
 	// Vector data
 
-	void operator () ( const IntVectorData *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList, unsigned sampleIndex = 0 ) const
+	void operator () (
+		const IntVectorData *data, RtUString name, const PrimitiveVariable &primitiveVariable,
+		RtPrimVarList &primVarList, unsigned sampleIndex = 0
+	) const
 	{
 		emit(
 			data,
-			{ name,
-			  RtDataType::k_integer,
-			  detail( primitiveVariable.interpolation ),
+			{ name, RtDataType::k_integer, detail( primitiveVariable.interpolation ),
 			  /* length = */ 1,
 			  /* array = */ false,
 			  /* motion = */ sampleIndex > 0,
 			  /* deduplicated = */ false },
-			primitiveVariable,
-			primVarList,
-			sampleIndex
+			primitiveVariable, primVarList, sampleIndex
 		);
 	}
 
-	void operator () ( const FloatVectorData *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList, unsigned sampleIndex = 0 ) const
+	void operator () (
+		const FloatVectorData *data, RtUString name, const PrimitiveVariable &primitiveVariable,
+		RtPrimVarList &primVarList, unsigned sampleIndex = 0
+	) const
 	{
 		emit(
 			data,
-			{ name,
-			  RtDataType::k_float,
-			  detail( primitiveVariable.interpolation ),
+			{ name, RtDataType::k_float, detail( primitiveVariable.interpolation ),
 			  /* length = */ 1,
 			  /* array = */ false,
 			  /* motion = */ sampleIndex > 0,
 			  /* deduplicated = */ false },
-			primitiveVariable,
-			primVarList,
-			sampleIndex
+			primitiveVariable, primVarList, sampleIndex
 		);
 	}
 
-	void operator () ( const StringVectorData *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList, unsigned sampleIndex = 0 ) const
+	void operator () (
+		const StringVectorData *data, RtUString name, const PrimitiveVariable &primitiveVariable,
+		RtPrimVarList &primVarList, unsigned sampleIndex = 0
+	) const
 	{
 		PrimitiveVariable::IndexedView<string> view( primitiveVariable );
 		vector<RtUString> value;
@@ -199,72 +215,74 @@ struct PrimitiveVariableConverter
 		primVarList.SetStringDetail( name, value.data(), detail( primitiveVariable.interpolation ), sampleIndex );
 	}
 
-	void operator () ( const V2fVectorData *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList, unsigned sampleIndex = 0 ) const
+	void operator () (
+		const V2fVectorData *data, RtUString name, const PrimitiveVariable &primitiveVariable,
+		RtPrimVarList &primVarList, unsigned sampleIndex = 0
+	) const
 	{
 		emit(
 			data,
-			{ name,
-			  RtDataType::k_float,
-			  detail( primitiveVariable.interpolation ),
+			{ name, RtDataType::k_float, detail( primitiveVariable.interpolation ),
 			  /* length = */ 2,
 			  /* array = */ true,
 			  /* motion = */ sampleIndex > 0,
 			  /* deduplicated = */ false },
-			primitiveVariable,
-			primVarList,
-			sampleIndex
+			primitiveVariable, primVarList, sampleIndex
 		);
 	}
 
-	void operator () ( const V3fVectorData *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList, unsigned sampleIndex = 0 ) const
+	void operator () (
+		const V3fVectorData *data, RtUString name, const PrimitiveVariable &primitiveVariable,
+		RtPrimVarList &primVarList, unsigned sampleIndex = 0
+	) const
 	{
 		emit(
 			data,
-			{ name,
-			  dataType( data->getInterpretation() ),
-			  detail( primitiveVariable.interpolation ),
+			{ name, dataType( data->getInterpretation() ), detail( primitiveVariable.interpolation ),
 			  /* length = */ 1,
 			  /* array = */ false,
 			  /* motion = */ sampleIndex > 0,
 			  /* deduplicated = */ false },
-			primitiveVariable,
-			primVarList,
-			sampleIndex
+			primitiveVariable, primVarList, sampleIndex
 		);
 	}
 
-	void operator () ( const Color3fVectorData *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList, unsigned sampleIndex = 0 ) const
+	void operator () (
+		const Color3fVectorData *data, RtUString name, const PrimitiveVariable &primitiveVariable,
+		RtPrimVarList &primVarList, unsigned sampleIndex = 0
+	) const
 	{
 		emit(
 			data,
-			{ name,
-			  RtDataType::k_color,
-			  detail( primitiveVariable.interpolation ),
+			{ name, RtDataType::k_color, detail( primitiveVariable.interpolation ),
 			  /* length = */ 1,
 			  /* array = */ false,
 			  /* motion = */ sampleIndex > 0,
 			  /* deduplicated = */ false },
-			primitiveVariable,
-			primVarList,
-			sampleIndex
+			primitiveVariable, primVarList, sampleIndex
 		);
 	}
 
-	void operator () ( const Data *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList, unsigned sampleIndex = 0 ) const
+	void operator () (
+		const Data *data, RtUString name, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList,
+		unsigned sampleIndex = 0
+	) const
 	{
 		IECore::msg(
-			IECore::Msg::Warning,
-			m_messageContext,
+			IECore::Msg::Warning, m_messageContext,
 			fmt::format( "Unsupported primitive variable \"{}\" of type \"{}\"", name.CStr(), data->typeName() )
 		);
 	}
 
-	private:
+private:
 
 	const std::string &m_messageContext;
 
 	template<typename T>
-	void emit( const T *data, const RtPrimVarList::ParamInfo &paramInfo, const PrimitiveVariable &primitiveVariable, RtPrimVarList &primVarList, unsigned sampleIndex = 0 ) const
+	void emit(
+		const T *data, const RtPrimVarList::ParamInfo &paramInfo, const PrimitiveVariable &primitiveVariable,
+		RtPrimVarList &primVarList, unsigned sampleIndex = 0
+	) const
 	{
 		if( primitiveVariable.indices )
 		{
@@ -283,11 +301,7 @@ struct PrimitiveVariableConverter
 		}
 		else
 		{
-			primVarList.SetParam(
-				paramInfo,
-				data->readable().data(),
-				sampleIndex
-			);
+			primVarList.SetParam( paramInfo, data->readable().data(), sampleIndex );
 		}
 	}
 };
@@ -295,16 +309,17 @@ struct PrimitiveVariableConverter
 void convertDetail( const IECoreScene::Primitive *primitive, RtPrimVarList &primVarList )
 {
 	primVarList.SetDetail(
-		primitive->variableSize( PrimitiveVariable::Uniform ),
-		primitive->variableSize( PrimitiveVariable::Vertex ),
-		primitive->variableSize( PrimitiveVariable::Varying ),
-		primitive->variableSize( PrimitiveVariable::FaceVarying )
+		primitive->variableSize( PrimitiveVariable::Uniform ), primitive->variableSize( PrimitiveVariable::Vertex ),
+		primitive->variableSize( PrimitiveVariable::Varying ), primitive->variableSize( PrimitiveVariable::FaceVarying )
 	);
 }
 
 const std::string g_p( "P" );
 
-void convertP( const GeometryAlgo::PrimitiveSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVarList, const std::string &messageContext )
+void convertP(
+	const GeometryAlgo::PrimitiveSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes,
+	RtPrimVarList &primVarList, const std::string &messageContext
+)
 {
 	const auto firstSampleIt = samples[0]->variables.find( g_p );
 	if( firstSampleIt == samples[0]->variables.end() )
@@ -340,11 +355,15 @@ void convertP( const GeometryAlgo::PrimitiveSamples &samples, const IECoreSceneP
 	}
 	else
 	{
-		dispatch( firstSampleIt->second.data.get(), converter, Loader::strings().k_P, firstSampleIt->second, primVarList );
+		dispatch(
+			firstSampleIt->second.data.get(), converter, Loader::strings().k_P, firstSampleIt->second, primVarList
+		);
 	}
 }
 
-void convertPrimitiveVariables( const IECoreScene::Primitive *primitive, RtPrimVarList &primVarList, const std::string &messageContext )
+void convertPrimitiveVariables(
+	const IECoreScene::Primitive *primitive, RtPrimVarList &primVarList, const std::string &messageContext
+)
 {
 	const PrimitiveVariableConverter converter( messageContext );
 	for( const auto &[name, primitiveVariable] : primitive->variables )
@@ -365,7 +384,11 @@ void convertPrimitiveVariables( const IECoreScene::Primitive *primitive, RtPrimV
 // Implementation of external API
 //////////////////////////////////////////////////////////////////////////
 
-RtUString IECoreRenderMan::GeometryAlgo::convert( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars, const std::string &messageContext )
+RtUString IECoreRenderMan::GeometryAlgo::convert(
+	const IECoreScenePreview::Renderer::ObjectSamples &samples,
+	const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVars,
+	const std::string &messageContext
+)
 {
 	Registry &r = registry();
 	auto it = r.find( samples.front()->typeId() );
@@ -381,7 +404,10 @@ void IECoreRenderMan::GeometryAlgo::registerConverter( IECore::TypeId fromType, 
 	registry()[fromType] = converter;
 }
 
-void IECoreRenderMan::GeometryAlgo::convertPrimitive( const PrimitiveSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, RtPrimVarList &primVarList, const std::string &messageContext )
+void IECoreRenderMan::GeometryAlgo::convertPrimitive(
+	const PrimitiveSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes,
+	RtPrimVarList &primVarList, const std::string &messageContext
+)
 {
 	convertDetail( samples[0], primVarList );
 	// "P" is the only primitive variable that RenderMan allows to be animated

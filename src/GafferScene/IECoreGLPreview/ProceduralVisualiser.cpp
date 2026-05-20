@@ -53,26 +53,24 @@ namespace
 class BoundVisualiser : public ObjectVisualiser
 {
 
-	public:
+public:
 
-	BoundVisualiser()
-	{
-	}
+	BoundVisualiser() {}
 
-	~BoundVisualiser() override
-	{
-	}
+	~BoundVisualiser() override {}
 
 	Visualisations visualise( const IECore::Object *object ) const override
 	{
-		const IECoreScene::VisibleRenderable *renderable = IECore::runTimeCast<const IECoreScene::VisibleRenderable>( object );
+		const IECoreScene::VisibleRenderable *renderable =
+			IECore::runTimeCast<const IECoreScene::VisibleRenderable>( object );
 
 		IECoreGL::GroupPtr group = new IECoreGL::Group();
 		group->getState()->add( new IECoreGL::Primitive::DrawWireframe( true ) );
 		group->getState()->add( new IECoreGL::Primitive::DrawSolid( false ) );
 		group->getState()->add( new IECoreGL::CurvesPrimitive::UseGLLines( true ) );
 
-		if( const IECoreScenePreview::Placeholder *placeholder = IECore::runTimeCast<const IECoreScenePreview::Placeholder>( object ) )
+		if( const IECoreScenePreview::Placeholder *placeholder =
+				IECore::runTimeCast<const IECoreScenePreview::Placeholder>( object ) )
 		{
 			if( placeholder->getMode() == IECoreScenePreview::Placeholder::Mode::Excluded )
 			{
@@ -119,8 +117,12 @@ class BoundVisualiser : public ObjectVisualiser
 		p.push_back( V3f( b.min.x, b.min.y, b.max.z ) );
 		p.push_back( V3f( b.min.x, b.max.y, b.max.z ) );
 
-		IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive( IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurveData );
-		curves->addPrimitiveVariable( "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData ) );
+		IECoreGL::CurvesPrimitivePtr curves = new IECoreGL::CurvesPrimitive(
+			IECore::CubicBasisf::linear(), IECoreScene::CurvesPrimitive::Wrap::NonPeriodic, vertsPerCurveData
+		);
+		curves->addPrimitiveVariable(
+			"P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pData )
+		);
 		group->addChild( curves );
 
 		return { Visualisation::createGeometry( group ) };
@@ -130,11 +132,11 @@ class BoundVisualiser : public ObjectVisualiser
 class ProceduralVisualiser : public BoundVisualiser
 {
 
-	public:
+public:
 
 	using ObjectType = IECoreScenePreview::Procedural;
 
-	protected:
+protected:
 
 	static ObjectVisualiserDescription<ProceduralVisualiser> g_visualiserDescription;
 };
@@ -144,25 +146,26 @@ ObjectVisualiser::ObjectVisualiserDescription<ProceduralVisualiser> ProceduralVi
 class ExternalProceduralVisualiser : public BoundVisualiser
 {
 
-	public:
+public:
 
 	using ObjectType = IECoreScene::ExternalProcedural;
 
-	protected:
+protected:
 
 	static ObjectVisualiserDescription<ExternalProceduralVisualiser> g_visualiserDescription;
 };
 
-ObjectVisualiser::ObjectVisualiserDescription<ExternalProceduralVisualiser> ExternalProceduralVisualiser::g_visualiserDescription;
+ObjectVisualiser::ObjectVisualiserDescription<ExternalProceduralVisualiser>
+	ExternalProceduralVisualiser::g_visualiserDescription;
 
 class PlaceholderVisualiser : public BoundVisualiser
 {
 
-	public:
+public:
 
 	using ObjectType = IECoreScenePreview::Placeholder;
 
-	protected:
+protected:
 
 	static ObjectVisualiserDescription<PlaceholderVisualiser> g_visualiserDescription;
 };

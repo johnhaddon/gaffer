@@ -61,17 +61,14 @@ const InternedString g_oslTarget( g_oslPrefix ? std::string( g_oslPrefix ) + ":s
 
 size_t ShaderAssignment::g_firstPlugIndex = 0;
 
-ShaderAssignment::ShaderAssignment( const std::string &name )
-	: AttributeProcessor( name, PathMatcher::EveryMatch )
+ShaderAssignment::ShaderAssignment( const std::string &name ) : AttributeProcessor( name, PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ShaderPlug( "shader" ) );
 	addChild( new StringPlug( "label" ) );
 }
 
-ShaderAssignment::~ShaderAssignment()
-{
-}
+ShaderAssignment::~ShaderAssignment() {}
 
 GafferScene::ShaderPlug *ShaderAssignment::shaderPlug()
 {
@@ -105,7 +102,9 @@ void ShaderAssignment::hashProcessedAttributes( const Gaffer::Context *context, 
 	labelPlug()->hash( h );
 }
 
-IECore::ConstCompoundObjectPtr ShaderAssignment::computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const
+IECore::ConstCompoundObjectPtr ShaderAssignment::computeProcessedAttributes(
+	const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes
+) const
 {
 	ConstCompoundObjectPtr attributes = shaderPlug()->attributes();
 

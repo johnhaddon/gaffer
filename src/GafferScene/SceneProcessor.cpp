@@ -46,25 +46,19 @@ GAFFER_NODE_DEFINE_TYPE( SceneProcessor );
 
 size_t SceneProcessor::g_firstPlugIndex = 0;
 
-SceneProcessor::SceneProcessor( const std::string &name )
-	: SceneNode( name )
+SceneProcessor::SceneProcessor( const std::string &name ) : SceneNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new ScenePlug( "in", Gaffer::Plug::In ) );
 }
 
-SceneProcessor::SceneProcessor( const std::string &name, size_t minInputs, size_t maxInputs )
-	: SceneNode( name )
+SceneProcessor::SceneProcessor( const std::string &name, size_t minInputs, size_t maxInputs ) : SceneNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
-	addChild(
-		new ArrayPlug( "in", Gaffer::Plug::In, new ScenePlug( "in0" ), minInputs, maxInputs )
-	);
+	addChild( new ArrayPlug( "in", Gaffer::Plug::In, new ScenePlug( "in0" ), minInputs, maxInputs ) );
 }
 
-SceneProcessor::~SceneProcessor()
-{
-}
+SceneProcessor::~SceneProcessor() {}
 
 ScenePlug *SceneProcessor::inPlug()
 {
@@ -122,7 +116,9 @@ const Plug *SceneProcessor::correspondingInput( const Plug *output ) const
 	return SceneNode::correspondingInput( output );
 }
 
-void SceneProcessor::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void SceneProcessor::hash(
+	const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	const ScenePlug *scenePlug = output->parent<ScenePlug>();
 	if( scenePlug && !enabled( context ) )

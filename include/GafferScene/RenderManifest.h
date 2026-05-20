@@ -56,7 +56,7 @@ namespace GafferScene
 class GAFFERSCENE_API RenderManifest : boost::noncopyable
 {
 
-	public:
+public:
 
 	RenderManifest();
 
@@ -94,22 +94,22 @@ class GAFFERSCENE_API RenderManifest : boost::noncopyable
 	// In order to get this behaviour, you must not release the shared pointer to the previous manifest you
 	// loaded until after calling this method again ( releasing it to soon would cause it to be evicted from
 	// the cache, and unnecessarily reloaded ).
-	static std::shared_ptr<const RenderManifest> loadFromImageMetadata( const IECore::CompoundData *metadata, const std::string &cryptomatteLayerName );
+	static std::shared_ptr<const RenderManifest> loadFromImageMetadata(
+		const IECore::CompoundData *metadata, const std::string &cryptomatteLayerName
+	);
 
 	// Write the current maninfest to a sidecar EXR file. This file will not contain any image data,
 	// but uses the EXR id manifest format to store this manifest in the header.
 	void writeEXRManifest( const std::filesystem::path &filePath ) const;
 
-	private:
+private:
 
 	using PathAndID = std::pair<ScenePlug::ScenePath, uint32_t>;
 	using Map = boost::multi_index::multi_index_container<
 		PathAndID,
 		boost::multi_index::indexed_by<
-			boost::multi_index::ordered_unique<
-				boost::multi_index::key<&PathAndID::first>>,
-			boost::multi_index::ordered_unique<
-				boost::multi_index::key<&PathAndID::second>>>>;
+			boost::multi_index::ordered_unique<boost::multi_index::key<&PathAndID::first>>,
+			boost::multi_index::ordered_unique<boost::multi_index::key<&PathAndID::second>>>>;
 
 	void loadEXRManifest( const std::filesystem::path &filePath );
 	void loadCryptomatteJSON( std::istream &in );

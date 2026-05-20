@@ -61,7 +61,7 @@ using namespace GafferSceneUI;
 // IECoreGL::Texture doesn't support buffer textures, so we roll our own.
 class OutputBuffer::BufferTexture
 {
-	public:
+public:
 
 	BufferTexture()
 	{
@@ -75,10 +75,7 @@ class OutputBuffer::BufferTexture
 		glDeleteTextures( 1, &m_texture );
 	}
 
-	GLuint texture() const
-	{
-		return m_texture;
-	}
+	GLuint texture() const { return m_texture; }
 
 	void updateBuffer( const vector<uint32_t> &data )
 	{
@@ -89,7 +86,7 @@ class OutputBuffer::BufferTexture
 		glTexBuffer( GL_TEXTURE_BUFFER, GL_R32UI, m_buffer );
 	}
 
-	private:
+private:
 
 	GLuint m_texture;
 	GLuint m_buffer;
@@ -183,8 +180,7 @@ void main()
 // OutputBuffer
 //////////////////////////////////////////////////////////////////////////
 
-OutputBuffer::OutputBuffer( IECoreScenePreview::Renderer *renderer )
-	: m_texturesDirty( false )
+OutputBuffer::OutputBuffer( IECoreScenePreview::Renderer *renderer ) : m_texturesDirty( false )
 {
 	IECoreScene::OutputPtr outputTemplate = new IECoreScene::Output( "", "ieDisplay", "" );
 	outputTemplate->parameters()["driverType"] = new IECore::StringData( "OutputBuffer::DisplayDriver" );
@@ -192,20 +188,19 @@ OutputBuffer::OutputBuffer( IECoreScenePreview::Renderer *renderer )
 	outputTemplate->parameters()["updateInteractively"] = new IECore::BoolData( true );
 
 	using OutputDefinition = std::tuple<const char *, const char *, const char *>;
-	for(
-		auto &[name, data, filter] : {
-			/// \todo Define standard filter names that can be supported across
-			/// all renderer backends, and settle on one for the beauty.
-			OutputDefinition( "beauty", "rgba", nullptr ),
-			// Using `box` rather than `closest` for Z because it gives a better
-			// approximation of depth at the centre of the pixel, which is important
-			// for accuracy in `SceneGadget::objectAt()`.
-			OutputDefinition( "depth", "float Z", "box" ),
-			// The `IECoreImage::DisplayDriver` API only supports floats, and several
-			// renderers have deficiencies in rendering integer AOVs. So we declare
-			// `id` as a float AOV, and pass type-punned integers through it.
-			OutputDefinition( "id", "float id", "closest" ),
-		} )
+	for( auto &[name, data, filter] : {
+			 /// \todo Define standard filter names that can be supported across
+			 /// all renderer backends, and settle on one for the beauty.
+			 OutputDefinition( "beauty", "rgba", nullptr ),
+			 // Using `box` rather than `closest` for Z because it gives a better
+			 // approximation of depth at the centre of the pixel, which is important
+			 // for accuracy in `SceneGadget::objectAt()`.
+			 OutputDefinition( "depth", "float Z", "box" ),
+			 // The `IECoreImage::DisplayDriver` API only supports floats, and several
+			 // renderers have deficiencies in rendering integer AOVs. So we declare
+			 // `id` as a float AOV, and pass type-punned integers through it.
+			 OutputDefinition( "id", "float id", "closest" ),
+		 } )
 	{
 		IECoreScene::OutputPtr output = outputTemplate->copy();
 		output->setName( name );
@@ -218,9 +213,7 @@ OutputBuffer::OutputBuffer( IECoreScenePreview::Renderer *renderer )
 	}
 }
 
-OutputBuffer::~OutputBuffer()
-{
-}
+OutputBuffer::~OutputBuffer() {}
 
 void OutputBuffer::render() const
 {
@@ -281,8 +274,8 @@ void OutputBuffer::renderInternal( bool renderSelection ) const
 		Texture::ScopedBinding depthBinding( *m_depthTexture );
 		glTexImage2D(
 			GL_TEXTURE_2D, 0, GL_R32F,
-			/* width = */ m_dataWindow.size().x + 1, /* height = */ m_dataWindow.size().y + 1, /* border = */ 0,
-			GL_RED, GL_FLOAT, m_depthBuffer.data()
+			/* width = */ m_dataWindow.size().x + 1, /* height = */ m_dataWindow.size().y + 1, /* border = */ 0, GL_RED,
+			GL_FLOAT, m_depthBuffer.data()
 		);
 
 		Texture::ScopedBinding idBinding( *m_idTexture );
@@ -404,10 +397,7 @@ std::vector<uint32_t> OutputBuffer::idsAt( const Box2f &ndcBox ) const
 		return {};
 	}
 
-	Box2i rasterBox(
-		ndcBox.min * ( m_dataWindow.size() + V2i( 1 ) ),
-		ndcBox.max * ( m_dataWindow.size() + V2i( 1 ) )
-	);
+	Box2i rasterBox( ndcBox.min * ( m_dataWindow.size() + V2i( 1 ) ), ndcBox.max * ( m_dataWindow.size() + V2i( 1 ) ) );
 	rasterBox.min = clip( rasterBox.min, m_dataWindow );
 	rasterBox.max = clip( rasterBox.max, m_dataWindow );
 
@@ -425,10 +415,7 @@ std::vector<uint32_t> OutputBuffer::idsAt( const Box2f &ndcBox ) const
 	}
 
 	std::sort( result.begin(), result.end() );
-	result.erase(
-		std::unique( result.begin(), result.end() ),
-		result.end()
-	);
+	result.erase( std::unique( result.begin(), result.end() ), result.end() );
 	return result;
 }
 
@@ -463,7 +450,8 @@ void OutputBuffer::updateBuffer( const Imath::Box2i &box, const T *data, int num
 	const int fromStride = ( box.size().x + 1 ) * numChannels;
 	const int toStride = ( m_dataWindow.size().x + 1 ) * numChannels;
 	const T *from = data;
-	T *to = buffer.data() + ( box.min.y - m_dataWindow.min.y ) * toStride + ( box.min.x - m_dataWindow.min.x ) * numChannels;
+	T *to = buffer.data() + ( box.min.y - m_dataWindow.min.y ) * toStride +
+		( box.min.x - m_dataWindow.min.x ) * numChannels;
 	for( int y = box.min.y; y <= box.max.y; ++y )
 	{
 		std::copy( from, from + fromStride, to );
@@ -482,9 +470,7 @@ void OutputBuffer::dirtyTexture()
 }
 
 void OutputBuffer::snapshotToFile(
-	const std::filesystem::path &fileName,
-	const Box2f &resolutionGate,
-	const CompoundData *metadata
+	const std::filesystem::path &fileName, const Box2f &resolutionGate, const CompoundData *metadata
 )
 {
 	std::filesystem::create_directories( fileName.parent_path() );
@@ -528,11 +514,13 @@ void OutputBuffer::snapshotToFile(
 class OutputBuffer::DisplayDriver : public IECoreImage::DisplayDriver
 {
 
-	public:
+public:
 
 	// Deliberately "borrowing" DisplayDriverTypeId as we don't need an ID for
 	// a non-public class.
-	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( OutputBuffer::DisplayDriver, IECoreImage::DisplayDriverTypeId, DisplayDriver );
+	IE_CORE_DECLARERUNTIMETYPEDEXTENSION(
+		OutputBuffer::DisplayDriver, IECoreImage::DisplayDriverTypeId, DisplayDriver
+	);
 
 	enum class Type
 	{
@@ -541,7 +529,10 @@ class OutputBuffer::DisplayDriver : public IECoreImage::DisplayDriver
 		ID
 	};
 
-	DisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters )
+	DisplayDriver(
+		const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames,
+		IECore::ConstCompoundDataPtr parameters
+	)
 		: IECoreImage::DisplayDriver( displayWindow, dataWindow, channelNames, parameters )
 	{
 		auto bufferData = parameters->member<StringData>( "buffer" );
@@ -585,21 +576,13 @@ class OutputBuffer::DisplayDriver : public IECoreImage::DisplayDriver
 		}
 	}
 
-	void imageClose() override
-	{
-	}
+	void imageClose() override {}
 
-	bool scanLineOrderOnly() const override
-	{
-		return false;
-	}
+	bool scanLineOrderOnly() const override { return false; }
 
-	bool acceptsRepeatedData() const override
-	{
-		return true;
-	}
+	bool acceptsRepeatedData() const override { return true; }
 
-	private:
+private:
 
 	Type m_type;
 
@@ -607,4 +590,5 @@ class OutputBuffer::DisplayDriver : public IECoreImage::DisplayDriver
 	static DisplayDriverDescription<DisplayDriver> g_description;
 };
 
-IECoreImage::DisplayDriver::DisplayDriverDescription<OutputBuffer::DisplayDriver> OutputBuffer::DisplayDriver::g_description;
+IECoreImage::DisplayDriver::DisplayDriverDescription<OutputBuffer::DisplayDriver>
+	OutputBuffer::DisplayDriver::g_description;

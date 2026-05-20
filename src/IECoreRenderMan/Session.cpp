@@ -103,10 +103,7 @@ static std::atomic<const Session *> g_sessionInstance = nullptr;
 struct Session::ExceptionHandler : public RixXcpt::XcptHandler
 {
 
-	ExceptionHandler( const IECore::MessageHandlerPtr &messageHandler )
-		: m_messageHandler( messageHandler )
-	{
-	}
+	ExceptionHandler( const IECore::MessageHandlerPtr &messageHandler ) : m_messageHandler( messageHandler ) {}
 
 	void HandleXcpt( int code, int severity, const char *message ) override
 	{
@@ -134,13 +131,20 @@ struct Session::ExceptionHandler : public RixXcpt::XcptHandler
 		/// any further attempt to interact with the renderer?
 	}
 
-	private:
+private:
 
 	IECore::MessageHandlerPtr m_messageHandler;
 };
 
-Session::Session( RtUString rileyVariant, const RtParamList &rileyParameters, IECoreScenePreview::Renderer::RenderType renderType, const RtParamList &options, const IECore::MessageHandlerPtr &messageHandler )
-	: riley( nullptr ), rileyVariant( rileyVariant ), renderType( renderType ), m_riCtl( (RixRiCtl *)Loader::context()->GetRixInterface( k_RixRiCtl ) ), m_portalsDirty( false )
+Session::Session(
+	RtUString rileyVariant, const RtParamList &rileyParameters, IECoreScenePreview::Renderer::RenderType renderType,
+	const RtParamList &options, const IECore::MessageHandlerPtr &messageHandler
+)
+	: riley( nullptr ),
+	  rileyVariant( rileyVariant ),
+	  renderType( renderType ),
+	  m_riCtl( (RixRiCtl *)Loader::context()->GetRixInterface( k_RixRiCtl ) ),
+	  m_portalsDirty( false )
 {
 	const Session *currentInstance = nullptr;
 	if( !g_sessionInstance.compare_exchange_strong( currentInstance, this ) )
@@ -210,7 +214,10 @@ const Session *Session::instance()
 	return g_sessionInstance;
 }
 
-riley::CameraId Session::createCamera( RtUString name, const riley::ShadingNode &projection, const riley::Transform &transform, const RtParamList &properties, const RtParamList &options )
+riley::CameraId Session::createCamera(
+	RtUString name, const riley::ShadingNode &projection, const riley::Transform &transform,
+	const RtParamList &properties, const RtParamList &options
+)
 {
 	std::lock_guard lock( m_camerasMutex );
 	auto &nameIndex = m_cameras.get<1>();
@@ -229,7 +236,10 @@ riley::CameraId Session::createCamera( RtUString name, const riley::ShadingNode 
 		}
 		else
 		{
-			IECore::msg( IECore::Msg::Warning, "IECoreRenderMan::Renderer", fmt::format( "Failed to modify camera \"{}\"", name.CStr() ) );
+			IECore::msg(
+				IECore::Msg::Warning, "IECoreRenderMan::Renderer",
+				fmt::format( "Failed to modify camera \"{}\"", name.CStr() )
+			);
 		}
 		return it->id;
 	}
@@ -255,7 +265,9 @@ void Session::deleteCamera( riley::CameraId cameraId )
 }
 
 
-riley::LightShaderId Session::createLightShader( const riley::ShadingNetwork &light, const riley::ShadingNetwork &lightFilter )
+riley::LightShaderId Session::createLightShader(
+	const riley::ShadingNetwork &light, const riley::ShadingNetwork &lightFilter
+)
 {
 	riley::LightShaderId result = riley->CreateLightShader( riley::UserId(), light, lightFilter );
 	RtUString type = light.nodeCount ? light.nodes[light.nodeCount - 1].name : RtUString();
@@ -264,7 +276,9 @@ riley::LightShaderId Session::createLightShader( const riley::ShadingNetwork &li
 		LightShaderInfo &lightShaderInfo = m_domeAndPortalShaders[result.AsUInt32()];
 		assert( lightShaderInfo.shaders.empty() ); // ID should be unique.
 		lightShaderInfo.shaders.insert( lightShaderInfo.shaders.end(), light.nodes, light.nodes + light.nodeCount );
-		lightShaderInfo.lightFilterShaders.insert( lightShaderInfo.lightFilterShaders.end(), lightFilter.nodes, lightFilter.nodes + lightFilter.nodeCount );
+		lightShaderInfo.lightFilterShaders.insert(
+			lightShaderInfo.lightFilterShaders.end(), lightFilter.nodes, lightFilter.nodes + lightFilter.nodeCount
+		);
 		m_portalsDirty = true;
 	}
 
@@ -288,21 +302,20 @@ void Session::deleteLightShader( riley::LightShaderId lightShaderId )
 	}
 }
 
-riley::LightInstanceId Session::createLightInstance( riley::GeometryPrototypeId geometry, riley::MaterialId materialId, riley::LightShaderId lightShaderId, const riley::CoordinateSystemList &coordinateSystems, const riley::Transform &transform, const RtParamList &attributes )
+riley::LightInstanceId Session::createLightInstance(
+	riley::GeometryPrototypeId geometry, riley::MaterialId materialId, riley::LightShaderId lightShaderId,
+	const riley::CoordinateSystemList &coordinateSystems, const riley::Transform &transform,
+	const RtParamList &attributes
+)
 {
 	riley::LightInstanceId result = riley->CreateLightInstance(
-		riley::UserId(), riley::GeometryPrototypeId(), geometry,
-		materialId, lightShaderId,
-		coordinateSystems, transform, attributes
+		riley::UserId(), riley::GeometryPrototypeId(), geometry, materialId, lightShaderId, coordinateSystems,
+		transform, attributes
 	);
 
 	if( m_domeAndPortalShaders.count( lightShaderId.AsUInt32() ) )
 	{
-		m_domeAndPortalLights[result.AsUInt32()] = {
-			lightShaderId,
-			*transform.matrix,
-			attributes
-		};
+		m_domeAndPortalLights[result.AsUInt32()] = { lightShaderId, *transform.matrix, attributes };
 		m_portalsDirty = true;
 	}
 
@@ -310,13 +323,14 @@ riley::LightInstanceId Session::createLightInstance( riley::GeometryPrototypeId 
 }
 
 riley::LightInstanceResult Session::modifyLightInstance(
-	riley::LightInstanceId lightInstanceId, const riley::MaterialId *materialId, const riley::LightShaderId *lightShaderId, const riley::CoordinateSystemList *coordinateSystems, const riley::Transform *transform,
-	const RtParamList *attributes
+	riley::LightInstanceId lightInstanceId, const riley::MaterialId *materialId,
+	const riley::LightShaderId *lightShaderId, const riley::CoordinateSystemList *coordinateSystems,
+	const riley::Transform *transform, const RtParamList *attributes
 )
 {
 	riley::LightInstanceResult result = riley->ModifyLightInstance(
-		riley::GeometryPrototypeId(), lightInstanceId,
-		materialId, lightShaderId, coordinateSystems, transform, attributes
+		riley::GeometryPrototypeId(), lightInstanceId, materialId, lightShaderId, coordinateSystems, transform,
+		attributes
 	);
 
 	/// \todo Consider the possibility of a non-portal/dome turning
@@ -435,7 +449,10 @@ void Session::updatePortals()
 		/// linking them to portals. Perhaps this can be achieved via
 		/// `ObjectInterface::link()`? If so, this entire mechanism might be
 		/// better off being implemented in the LightLinker class.
-		IECore::msg( IECore::Msg::Warning, "IECoreRenderMan::Renderer", "PxrPortalLights combined with multiple PxrDomeLights are not yet supported" );
+		IECore::msg(
+			IECore::Msg::Warning, "IECoreRenderMan::Renderer",
+			"PxrPortalLights combined with multiple PxrDomeLights are not yet supported"
+		);
 	}
 
 	// Link the lights appropriately.
@@ -455,7 +472,8 @@ void Session::updatePortals()
 				// to control them all in one place, not on each individual portal.
 				// Portal lights have all the same parameters as dome lights, so this
 				// is easy.
-				const RtParamList &domeParams = m_domeAndPortalShaders.at( domeLight->lightShader.AsUInt32() ).shaders.back().params;
+				const RtParamList &domeParams =
+					m_domeAndPortalShaders.at( domeLight->lightShader.AsUInt32() ).shaders.back().params;
 				LightShaderInfo &portalShader = m_domeAndPortalShaders.at( info.lightShader.AsUInt32() );
 				RtParamList &portalParams = portalShader.shaders.back().params;
 				portalParams.Update( domeParams );
@@ -491,25 +509,28 @@ void Session::updatePortals()
 
 				// And most bizarrely of all, we are required to compute `portalName`,
 				// which must change any time the rotation does.
-				portalParams.SetString( g_portalNameUStr, portalName( colorMap, domeLight->transform, info.transform ) );
+				portalParams.SetString(
+					g_portalNameUStr, portalName( colorMap, domeLight->transform, info.transform )
+				);
 
 				// Update the light shader. We can modify the existing one in
 				// place because we know we're only using it on this one light.
 				riley::ShadingNetwork shaders = { (uint32_t)portalShader.shaders.size(), portalShader.shaders.data() };
-				riley::ShadingNetwork lightFilterShaders = { (uint32_t)portalShader.lightFilterShaders.size(), portalShader.lightFilterShaders.data() };
+				riley::ShadingNetwork lightFilterShaders = { (uint32_t)portalShader.lightFilterShaders.size(),
+															 portalShader.lightFilterShaders.data() };
 				riley->ModifyLightShader( info.lightShader, &shaders, &lightFilterShaders );
 
 				// Unmute, in case we muted previously due to lack of a dome.
 				riley->ModifyLightInstance(
-					riley::GeometryPrototypeId(), riley::LightInstanceId( id ),
-					nullptr, nullptr, nullptr, nullptr, &info.attributes
+					riley::GeometryPrototypeId(), riley::LightInstanceId( id ), nullptr, nullptr, nullptr, nullptr,
+					&info.attributes
 				);
 			}
 			else
 			{
 				riley->ModifyLightInstance(
-					riley::GeometryPrototypeId(), riley::LightInstanceId( id ),
-					nullptr, nullptr, nullptr, nullptr, &mutedAttributes
+					riley::GeometryPrototypeId(), riley::LightInstanceId( id ), nullptr, nullptr, nullptr, nullptr,
+					&mutedAttributes
 				);
 			}
 		}
@@ -517,8 +538,8 @@ void Session::updatePortals()
 		{
 			// Mute domes if there are portals.
 			riley->ModifyLightInstance(
-				riley::GeometryPrototypeId(), riley::LightInstanceId( id ),
-				nullptr, nullptr, nullptr, nullptr, havePortals ? &mutedAttributes : &info.attributes
+				riley::GeometryPrototypeId(), riley::LightInstanceId( id ), nullptr, nullptr, nullptr, nullptr,
+				havePortals ? &mutedAttributes : &info.attributes
 			);
 		}
 	}

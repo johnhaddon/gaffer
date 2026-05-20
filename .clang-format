@@ -8,12 +8,12 @@ Standard: c++17
 
 # Tabs and indentation
 UseTab: Always
-AccessModifierOffset: 0
+AccessModifierOffset: -4
 IndentAccessModifiers: false
 IndentCaseLabels: true
 
 # Disable column limit — the project does not enforce a line length
-ColumnLimit: 0
+ColumnLimit: 120
 
 # Brace wrapping overrides (Microsoft doesn't wrap after union, does after ObjC)
 BraceWrapping:
@@ -70,12 +70,3 @@ ShortNamespaceLines: 0
 
 # Comments
 ReflowComments: false
-
-# Penalties — with ColumnLimit 0 these mostly prevent unwanted reformatting
-PenaltyBreakAssignment: 1000
-PenaltyBreakBeforeFirstCallParameter: 1000
-PenaltyBreakOpenParenthesis: 1000
-PenaltyBreakTemplateDeclaration: 1000
-PenaltyExcessCharacter: 0
-PenaltyReturnTypeOnItsOwnLine: 10000
-...

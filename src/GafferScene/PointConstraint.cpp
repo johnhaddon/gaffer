@@ -46,8 +46,7 @@ GAFFER_NODE_DEFINE_TYPE( PointConstraint );
 
 size_t PointConstraint::g_firstPlugIndex = 0;
 
-PointConstraint::PointConstraint( const std::string &name )
-	: Constraint( name )
+PointConstraint::PointConstraint( const std::string &name ) : Constraint( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new BoolPlug( "xEnabled", Plug::In, true ) );
@@ -56,9 +55,7 @@ PointConstraint::PointConstraint( const std::string &name )
 	addChild( new V3fPlug( "offset", Plug::In, V3f( 0, 0, 0 ) ) );
 }
 
-PointConstraint::~PointConstraint()
-{
-}
+PointConstraint::~PointConstraint() {}
 
 Gaffer::BoolPlug *PointConstraint::xEnabledPlug()
 {
@@ -102,11 +99,8 @@ const Gaffer::V3fPlug *PointConstraint::offsetPlug() const
 
 bool PointConstraint::affectsConstraint( const Gaffer::Plug *input ) const
 {
-	return input == keepReferencePositionPlug() ||
-		input->parent<Plug>() == offsetPlug() ||
-		input == xEnabledPlug() ||
-		input == yEnabledPlug() ||
-		input == zEnabledPlug();
+	return input == keepReferencePositionPlug() || input->parent<Plug>() == offsetPlug() || input == xEnabledPlug() ||
+		input == yEnabledPlug() || input == zEnabledPlug();
 }
 
 void PointConstraint::hashConstraint( const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -120,7 +114,9 @@ void PointConstraint::hashConstraint( const Gaffer::Context *context, IECore::Mu
 	zEnabledPlug()->hash( h );
 }
 
-Imath::M44f PointConstraint::computeConstraint( const Imath::M44f &fullTargetTransform, const Imath::M44f &fullInputTransform, const Imath::M44f &inputTransform ) const
+Imath::M44f PointConstraint::computeConstraint(
+	const Imath::M44f &fullTargetTransform, const Imath::M44f &fullInputTransform, const Imath::M44f &inputTransform
+) const
 {
 	V3f worldPosition = fullTargetTransform.translation();
 	if( !keepReferencePositionPlug()->getValue() )

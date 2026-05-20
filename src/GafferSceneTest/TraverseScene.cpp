@@ -92,7 +92,9 @@ void GafferSceneTest::traverseScene( const GafferScene::ScenePlug *scenePlug )
 	SceneAlgo::parallelTraverse( scenePlug, f );
 }
 
-Signals::Connection GafferSceneTest::connectTraverseSceneToPlugDirtiedSignal( const GafferScene::ConstScenePlugPtr &scene )
+Signals::Connection GafferSceneTest::connectTraverseSceneToPlugDirtiedSignal(
+	const GafferScene::ConstScenePlugPtr &scene
+)
 {
 	const Node *node = scene->node();
 	if( !node )
@@ -103,12 +105,16 @@ Signals::Connection GafferSceneTest::connectTraverseSceneToPlugDirtiedSignal( co
 	return const_cast<Node *>( node )->plugDirtiedSignal().connect( boost::bind( &traverseOnDirty, ::_1, scene ) );
 }
 
-Signals::Connection GafferSceneTest::connectTraverseSceneToContextChangedSignal( const GafferScene::ConstScenePlugPtr &scene, const Gaffer::ContextPtr &context )
+Signals::Connection GafferSceneTest::connectTraverseSceneToContextChangedSignal(
+	const GafferScene::ConstScenePlugPtr &scene, const Gaffer::ContextPtr &context
+)
 {
 	return context->changedSignal().connect( boost::bind( &traverseOnChanged, scene, context ) );
 }
 
-Signals::Connection GafferSceneTest::connectTraverseSceneToPreDispatchSignal( const GafferScene::ConstScenePlugPtr &scene )
+Signals::Connection GafferSceneTest::connectTraverseSceneToPreDispatchSignal(
+	const GafferScene::ConstScenePlugPtr &scene
+)
 {
 	return GafferDispatch::Dispatcher::preDispatchSignal().connect( boost::bind( traverseOnPreDispatch, scene ) );
 }

@@ -65,7 +65,10 @@ namespace
 
 /// \todo Maybe move this to BufferAlgo.h? It could probably be reused
 /// in Offset::computeChannelData() at least.
-void copyRegion( const float *fromBuffer, const Box2i &fromWindow, const Box2i &fromRegion, float *toBuffer, const Box2i &toWindow, const V2i &toOrigin )
+void copyRegion(
+	const float *fromBuffer, const Box2i &fromWindow, const Box2i &fromRegion, float *toBuffer, const Box2i &toWindow,
+	const V2i &toOrigin
+)
 {
 	const int width = fromRegion.max.x - fromRegion.min.x;
 
@@ -74,8 +77,7 @@ void copyRegion( const float *fromBuffer, const Box2i &fromWindow, const Box2i &
 	for( int maxY = fromRegion.max.y; fromP.y < maxY; ++fromP.y, ++toP.y )
 	{
 		memcpy(
-			toBuffer + BufferAlgo::index( toP, toWindow ),
-			fromBuffer + BufferAlgo::index( fromP, fromWindow ),
+			toBuffer + BufferAlgo::index( toP, toWindow ), fromBuffer + BufferAlgo::index( fromP, fromWindow ),
 			sizeof( float ) * width
 		);
 	}
@@ -84,10 +86,11 @@ void copyRegion( const float *fromBuffer, const Box2i &fromWindow, const Box2i &
 class MappingData : public IECore::Data
 {
 
-	public:
+public:
 
 	MappingData( bool addLayerPrefix )
-		: m_addLayerPrefix( addLayerPrefix ), m_outputChannelNames( new StringVectorData )
+		: m_addLayerPrefix( addLayerPrefix ),
+		  m_outputChannelNames( new StringVectorData )
 	{
 	}
 
@@ -95,7 +98,8 @@ class MappingData : public IECore::Data
 	{
 		for( const auto &channelName : channelNames )
 		{
-			const string outputChannelName = m_addLayerPrefix ? ImageAlgo::channelName( layerName, channelName ) : channelName;
+			const string outputChannelName =
+				m_addLayerPrefix ? ImageAlgo::channelName( layerName, channelName ) : channelName;
 			const Input input = { layerName, channelName };
 			if( m_mapping.try_emplace( outputChannelName, input ).second )
 			{
@@ -139,7 +143,7 @@ class MappingData : public IECore::Data
 		return it->second;
 	}
 
-	private:
+private:
 
 	const bool m_addLayerPrefix;
 	StringVectorDataPtr m_outputChannelNames;
@@ -160,8 +164,7 @@ GAFFER_NODE_DEFINE_TYPE( CollectImages );
 
 size_t CollectImages::g_firstPlugIndex = 0;
 
-CollectImages::CollectImages( const std::string &name )
-	: ImageProcessor( name )
+CollectImages::CollectImages( const std::string &name ) : ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -172,9 +175,7 @@ CollectImages::CollectImages( const std::string &name )
 	addChild( new ObjectPlug( "__mapping", Plug::Out, NullObject::defaultNullObject() ) );
 }
 
-CollectImages::~CollectImages()
-{
-}
+CollectImages::~CollectImages() {}
 
 Gaffer::StringVectorDataPlug *CollectImages::rootLayersPlug()
 {
@@ -230,12 +231,8 @@ void CollectImages::affects( const Gaffer::Plug *input, AffectedPlugsContainer &
 {
 	ImageProcessor::affects( input, outputs );
 
-	if(
-		input == addLayerPrefixPlug() ||
-		input == layerVariablePlug() ||
-		input == rootLayersPlug() ||
-		input == inPlug()->channelNamesPlug()
-	)
+	if( input == addLayerPrefixPlug() || input == layerVariablePlug() || input == rootLayersPlug() ||
+		input == inPlug()->channelNamesPlug() )
 	{
 		outputs.push_back( mappingPlug() );
 	}
@@ -245,13 +242,8 @@ void CollectImages::affects( const Gaffer::Plug *input, AffectedPlugsContainer &
 		outputs.push_back( outPlug()->channelNamesPlug() );
 	}
 
-	if(
-		input == mappingPlug() ||
-		input == layerVariablePlug() ||
-		input == inPlug()->deepPlug() ||
-		input == inPlug()->dataWindowPlug() ||
-		input == inPlug()->channelDataPlug()
-	)
+	if( input == mappingPlug() || input == layerVariablePlug() || input == inPlug()->deepPlug() ||
+		input == inPlug()->dataWindowPlug() || input == inPlug()->channelDataPlug() )
 	{
 		outputs.push_back( outPlug()->channelDataPlug() );
 	}
@@ -351,7 +343,9 @@ void CollectImages::compute( Gaffer::ValuePlug *output, const Gaffer::Context *c
 }
 
 
-void CollectImages::hashViewNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CollectImages::hashViewNames(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashViewNames( output, context, h );
 
@@ -368,7 +362,9 @@ void CollectImages::hashViewNames( const GafferImage::ImagePlug *output, const G
 	}
 }
 
-IECore::ConstStringVectorDataPtr CollectImages::computeViewNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr CollectImages::computeViewNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 
 	const std::string layerVariable = layerVariablePlug()->getValue();
@@ -400,10 +396,10 @@ IECore::ConstStringVectorDataPtr CollectImages::computeViewNames( const Gaffer::
 
 			throw IECore::Exception(
 				fmt::format(
-					"Root layer \"{}\" does not match views for \"{}\" : <{}> vs <{}>",
-					rootLayers[i],
-					rootLayers[0],
-					std::accumulate( layerViewNamesData->readable().begin(), layerViewNamesData->readable().end(), std::string( " " ) ),
+					"Root layer \"{}\" does not match views for \"{}\" : <{}> vs <{}>", rootLayers[i], rootLayers[0],
+					std::accumulate(
+						layerViewNamesData->readable().begin(), layerViewNamesData->readable().end(), std::string( " " )
+					),
 					std::accumulate( firstViewNames.begin(), firstViewNames.end(), std::string( " " ) )
 				)
 			);
@@ -413,7 +409,9 @@ IECore::ConstStringVectorDataPtr CollectImages::computeViewNames( const Gaffer::
 	return firstViewNamesData;
 }
 
-void CollectImages::hashFormat( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CollectImages::hashFormat(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ConstStringVectorDataPtr rootLayersData = rootLayersPlug()->getValue();
 
@@ -445,7 +443,9 @@ GafferImage::Format CollectImages::computeFormat( const Gaffer::Context *context
 	}
 }
 
-void CollectImages::hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CollectImages::hashDeep(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashDeep( parent, context, h );
 
@@ -489,7 +489,9 @@ bool CollectImages::computeDeep( const Gaffer::Context *context, const ImagePlug
 	return outDeep.value_or( false );
 }
 
-void CollectImages::hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CollectImages::hashSampleOffsets(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashSampleOffsets( parent, context, h );
 	ConstStringVectorDataPtr rootLayersData;
@@ -508,7 +510,9 @@ void CollectImages::hashSampleOffsets( const GafferImage::ImagePlug *parent, con
 	}
 }
 
-IECore::ConstIntVectorDataPtr CollectImages::computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstIntVectorDataPtr CollectImages::computeSampleOffsets(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	ConstStringVectorDataPtr rootLayersData;
 	string layerVariable;
@@ -530,13 +534,18 @@ IECore::ConstIntVectorDataPtr CollectImages::computeSampleOffsets( const Imath::
 		}
 		else
 		{
-			ImageAlgo::throwIfSampleOffsetsMismatch( outSampleOffsetsData.get(), curSampleOffsetsData.get(), tileOrigin, "SampleOffsets on input to CollectImages must match." );
+			ImageAlgo::throwIfSampleOffsetsMismatch(
+				outSampleOffsetsData.get(), curSampleOffsetsData.get(), tileOrigin,
+				"SampleOffsets on input to CollectImages must match."
+			);
 		}
 	}
 	return outSampleOffsetsData;
 }
 
-void CollectImages::hashMetadata( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CollectImages::hashMetadata(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ConstStringVectorDataPtr rootLayersData = rootLayersPlug()->getValue();
 
@@ -566,7 +575,9 @@ void CollectImages::hashMetadata( const GafferImage::ImagePlug *parent, const Ga
 	}
 }
 
-IECore::ConstCompoundDataPtr CollectImages::computeMetadata( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstCompoundDataPtr CollectImages::computeMetadata(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	ConstStringVectorDataPtr rootLayersData = rootLayersPlug()->getValue();
 
@@ -604,7 +615,9 @@ IECore::ConstCompoundDataPtr CollectImages::computeMetadata( const Gaffer::Conte
 }
 
 
-void CollectImages::hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CollectImages::hashDataWindow(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashDataWindow( output, context, h );
 
@@ -661,8 +674,8 @@ Imath::Box2i CollectImages::computeDataWindow( const Gaffer::Context *context, c
 					fmt::format(
 						"DataWindows on deep input to CollectImages must match. "
 						"Received both {},{} -> {},{} and {},{} -> {},{}",
-						dataWindow.min.x, dataWindow.min.y, dataWindow.max.x, dataWindow.max.y,
-						curDataWindow.min.x, curDataWindow.min.y, curDataWindow.max.x, curDataWindow.max.y
+						dataWindow.min.x, dataWindow.min.y, dataWindow.max.x, dataWindow.max.y, curDataWindow.min.x,
+						curDataWindow.min.y, curDataWindow.max.x, curDataWindow.max.y
 					)
 				);
 			}
@@ -672,19 +685,25 @@ Imath::Box2i CollectImages::computeDataWindow( const Gaffer::Context *context, c
 	return dataWindow;
 }
 
-void CollectImages::hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CollectImages::hashChannelNames(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashChannelNames( output, context, h );
 	mappingPlug()->hash( h );
 }
 
-IECore::ConstStringVectorDataPtr CollectImages::computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr CollectImages::computeChannelNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	auto mapping = boost::static_pointer_cast<const MappingData>( mappingPlug()->getValue() );
 	return mapping->outputChannelNames();
 }
 
-void CollectImages::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CollectImages::hashChannelData(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ConstMappingDataPtr mapping;
 	string layerVariable;
@@ -732,7 +751,10 @@ void CollectImages::hashChannelData( const GafferImage::ImagePlug *parent, const
 	}
 }
 
-IECore::ConstFloatVectorDataPtr CollectImages::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr CollectImages::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	ConstMappingDataPtr mapping;
 	string layerVariable;
@@ -779,14 +801,7 @@ IECore::ConstFloatVectorDataPtr CollectImages::computeChannelData( const std::st
 		FloatVectorDataPtr resultData = new FloatVectorData;
 		vector<float> &result = resultData->writable();
 		result.resize( ImagePlug::tileSize() * ImagePlug::tileSize(), 0.0f );
-		copyRegion(
-			&inputData->readable().front(),
-			tileBound,
-			validBound,
-			&result.front(),
-			tileBound,
-			validBound.min
-		);
+		copyRegion( &inputData->readable().front(), tileBound, validBound, &result.front(), tileBound, validBound.min );
 		return resultData;
 	}
 }

@@ -109,8 +109,7 @@ GAFFER_NODE_DEFINE_TYPE( DeepSlice );
 
 size_t DeepSlice::g_firstPlugIndex = 0;
 
-DeepSlice::DeepSlice( const std::string &name )
-	: ImageProcessor( name )
+DeepSlice::DeepSlice( const std::string &name ) : ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new OptionalValuePlug( "nearClip", new FloatPlug( "value", Gaffer::Plug::In, 0.0f, 0.0f ) ) );
@@ -138,9 +137,7 @@ DeepSlice::DeepSlice( const std::string &name )
 	outPlug()->metadataPlug()->setInput( inPlug()->metadataPlug() );
 }
 
-DeepSlice::~DeepSlice()
-{
-}
+DeepSlice::~DeepSlice() {}
 
 Gaffer::OptionalValuePlug *DeepSlice::nearClipPlug()
 {
@@ -196,46 +193,30 @@ void DeepSlice::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outp
 {
 	ImageProcessor::affects( input, outputs );
 
-	if(
-		input == inPlug()->deepPlug() ||
-		input == flattenPlug()
-	)
+	if( input == inPlug()->deepPlug() || input == flattenPlug() )
 	{
 		outputs.push_back( outPlug()->deepPlug() );
 	}
 
-	if(
-		nearClipPlug()->isAncestorOf( input ) ||
-		farClipPlug()->isAncestorOf( input ) ||
-		input == inPlug()->deepPlug() ||
-		input == inPlug()->channelNamesPlug() ||
-		input == tidyInPlug()->channelDataPlug() ||
-		input == tidyInPlug()->sampleOffsetsPlug()
-	)
+	if( nearClipPlug()->isAncestorOf( input ) || farClipPlug()->isAncestorOf( input ) ||
+		input == inPlug()->deepPlug() || input == inPlug()->channelNamesPlug() ||
+		input == tidyInPlug()->channelDataPlug() || input == tidyInPlug()->sampleOffsetsPlug() )
 	{
 		outputs.push_back( sliceDataPlug() );
 	}
 
-	if(
-		nearClipPlug()->isAncestorOf( input ) ||
-		farClipPlug()->isAncestorOf( input ) ||
-		input == flattenPlug() ||
-		input == inPlug()->deepPlug() ||
-		input == inPlug()->channelNamesPlug() ||
+	if( nearClipPlug()->isAncestorOf( input ) || farClipPlug()->isAncestorOf( input ) || input == flattenPlug() ||
+		input == inPlug()->deepPlug() || input == inPlug()->channelNamesPlug() ||
 		input == tidyInPlug()->channelDataPlug() ||
 		input == inPlug()->channelDataPlug() || // Used by special passthrough when nearClip/farClip/flatten disabled
-		input == sliceDataPlug()
-	)
+		input == sliceDataPlug() )
 	{
 		outputs.push_back( outPlug()->channelDataPlug() );
 	}
 
-	if(
-		nearClipPlug()->isAncestorOf( input ) ||
-		farClipPlug()->isAncestorOf( input ) ||
+	if( nearClipPlug()->isAncestorOf( input ) || farClipPlug()->isAncestorOf( input ) ||
 		input == inPlug()->sampleOffsetsPlug() || // Used by special passthrough when nearClip/farClip/flatten disabled
-		input == sliceDataPlug()
-	)
+		input == sliceDataPlug() )
 	{
 		outputs.push_back( outPlug()->sampleOffsetsPlug() );
 	}
@@ -466,7 +447,8 @@ void DeepSlice::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 			// Increment start to omit any samples that are before the near clip, but don't skip a point
 			// sample exactly at the near clip ( if zBack is exactly on the clip, we only skip if it's
 			// a volume sample with z < zBack )
-			while( start < offset && ( zBack[start] < nearClipDepth || ( zBack[start] == nearClipDepth && z[start] < nearClipDepth ) ) )
+			while( start < offset &&
+				   ( zBack[start] < nearClipDepth || ( zBack[start] == nearClipDepth && z[start] < nearClipDepth ) ) )
 			{
 				start++;
 			}
@@ -506,8 +488,7 @@ void DeepSlice::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 			// that both the start and end of the sample could be clipped. We put the combined
 			// weight representing both clips into firstWeight, and leave lastWeight set to 1.0.
 
-			float usedFraction =
-				( std::min( zBack[start], farClipDepth ) - std::max( z[start], nearClipDepth ) ) /
+			float usedFraction = ( std::min( zBack[start], farClipDepth ) - std::max( z[start], nearClipDepth ) ) /
 				( zBack[start] - z[start] );
 
 			firstWeight = sampleMultiplier( a ? a[start] : 0.0f, usedFraction );
@@ -517,8 +498,7 @@ void DeepSlice::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 			if( nearClip && zBack[start] > z[start] )
 			{
 				float usedFraction =
-					( zBack[start] - std::max( z[start], nearClipDepth ) ) /
-					( zBack[start] - z[start] );
+					( zBack[start] - std::max( z[start], nearClipDepth ) ) / ( zBack[start] - z[start] );
 
 				firstWeight = sampleMultiplier( a ? a[start] : 0.0f, usedFraction );
 			}
@@ -526,8 +506,7 @@ void DeepSlice::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 			if( farClip && zBack[end - 1] > z[end - 1] )
 			{
 				float usedFraction =
-					( std::min( zBack[end - 1], farClipDepth ) - z[end - 1] ) /
-					( zBack[end - 1] - z[end - 1] );
+					( std::min( zBack[end - 1], farClipDepth ) - z[end - 1] ) / ( zBack[end - 1] - z[end - 1] );
 
 				lastWeight = sampleMultiplier( a ? a[end - 1] : 0.0f, usedFraction );
 			}
@@ -562,7 +541,9 @@ void DeepSlice::compute( Gaffer::ValuePlug *output, const Gaffer::Context *conte
 	static_cast<CompoundObjectPlug *>( output )->setValue( result );
 }
 
-void DeepSlice::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepSlice::hashChannelData(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 
 
@@ -606,12 +587,8 @@ void DeepSlice::hashChannelData( const GafferImage::ImagePlug *parent, const Gaf
 
 		const std::string &channelName = context->get<std::string>( ImagePlug::channelNameContextName );
 
-		if(
-			flatten && deep &&
-			channelName != ImageAlgo::channelNameA &&
-			channelName != ImageAlgo::channelNameZ &&
-			channelName != ImageAlgo::channelNameZBack
-		)
+		if( flatten && deep && channelName != ImageAlgo::channelNameA && channelName != ImageAlgo::channelNameZ &&
+			channelName != ImageAlgo::channelNameZBack )
 		{
 			ConstStringVectorDataPtr channelNamesData = inPlug()->channelNames();
 			const std::vector<std::string> &channelNames = channelNamesData->readable();
@@ -629,7 +606,10 @@ void DeepSlice::hashChannelData( const GafferImage::ImagePlug *parent, const Gaf
 }
 
 
-IECore::ConstFloatVectorDataPtr DeepSlice::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr DeepSlice::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	ConstFloatVectorDataPtr channelData = tidyInPlug()->channelDataPlug()->getValue();
 	const std::vector<float> &channel = channelData->readable();
@@ -670,12 +650,8 @@ IECore::ConstFloatVectorDataPtr DeepSlice::computeChannelData( const std::string
 		scope.remove( ImagePlug::channelNameContextName );
 		sliceData = sliceDataPlug()->getValue();
 
-		if(
-			flatten && deep &&
-			channelName != ImageAlgo::channelNameA &&
-			channelName != ImageAlgo::channelNameZ &&
-			channelName != ImageAlgo::channelNameZBack
-		)
+		if( flatten && deep && channelName != ImageAlgo::channelNameA && channelName != ImageAlgo::channelNameZ &&
+			channelName != ImageAlgo::channelNameZBack )
 		{
 			// If the input is deep, and we're flattening, then we need to take into account the alpha's
 			// of samples in front of us when compositing this channel. ( If we're not flattening,
@@ -989,7 +965,9 @@ IECore::ConstFloatVectorDataPtr DeepSlice::computeChannelData( const std::string
 	return resultData;
 }
 
-void DeepSlice::hashSampleOffsets( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepSlice::hashSampleOffsets(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	bool passThrough = false;
 
@@ -1021,7 +999,9 @@ void DeepSlice::hashSampleOffsets( const GafferImage::ImagePlug *parent, const G
 	sliceDataPlug()->hash( h );
 }
 
-IECore::ConstIntVectorDataPtr DeepSlice::computeSampleOffsets( const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstIntVectorDataPtr DeepSlice::computeSampleOffsets(
+	const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 
 	bool passThrough = false;
@@ -1051,7 +1031,9 @@ IECore::ConstIntVectorDataPtr DeepSlice::computeSampleOffsets( const Imath::V2i 
 	return sliceData->member<IntVectorData>( g_sampleOffsetsName );
 }
 
-void DeepSlice::hashDeep( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeepSlice::hashDeep(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	inPlug()->deepPlug()->hash( h );
 	flattenPlug()->hash( h );

@@ -104,7 +104,8 @@ void GafferTest::testFilteredRecursiveChildIterator()
 	GAFFERTEST_ASSERT( plugs[6] == g );
 	GAFFERTEST_ASSERT( plugs[7] == h );
 
-	using DeepRecursiveFloatPlugIterator = FilteredRecursiveChildIterator<PlugPredicate<Plug::Invalid, FloatPlug>, TypePredicate<GraphComponent>>;
+	using DeepRecursiveFloatPlugIterator =
+		FilteredRecursiveChildIterator<PlugPredicate<Plug::Invalid, FloatPlug>, TypePredicate<GraphComponent>>;
 	plugs.clear();
 	for( DeepRecursiveFloatPlugIterator it( a.get() ); !it.done(); it++ )
 	{
@@ -116,7 +117,8 @@ void GafferTest::testFilteredRecursiveChildIterator()
 	GAFFERTEST_ASSERT( plugs[1] == g );
 	GAFFERTEST_ASSERT( plugs[2] == h );
 
-	using DeepRecursiveOutputFloatPlugIterator = FilteredRecursiveChildIterator<PlugPredicate<Plug::Out, FloatPlug>, TypePredicate<GraphComponent>>;
+	using DeepRecursiveOutputFloatPlugIterator =
+		FilteredRecursiveChildIterator<PlugPredicate<Plug::Out, FloatPlug>, TypePredicate<GraphComponent>>;
 	plugs.clear();
 	for( DeepRecursiveOutputFloatPlugIterator it( a.get() ); !it.done(); it++ )
 	{

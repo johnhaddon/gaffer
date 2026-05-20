@@ -82,8 +82,7 @@ struct SlotBase : private boost::noncopyable
 	using Ptr = boost::intrusive_ptr<SlotBase>;
 
 	// Inserts slot after `previous`.
-	SlotBase( Ptr &prev )
-		: previous( &prev ), next( prev ), m_referenceCount( 0 ), blocked( false ), calling( false )
+	SlotBase( Ptr &prev ) : previous( &prev ), next( prev ), m_referenceCount( 0 ), blocked( false ), calling( false )
 	{
 		*previous = this;
 		if( next )
@@ -92,10 +91,7 @@ struct SlotBase : private boost::noncopyable
 		}
 	}
 
-	virtual ~SlotBase()
-	{
-		assert( m_referenceCount.load() == 0 );
-	}
+	virtual ~SlotBase() { assert( m_referenceCount.load() == 0 ); }
 
 	// Removes slot from list. Virtual so that Signal::Slot
 	// can also destroy its slot functor.

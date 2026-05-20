@@ -73,8 +73,14 @@ struct ParticleList
 
 	using PosType = openvdb::Vec3R;
 
-	ParticleList( const Primitive *points, const std::string &width, float widthScale, const std::string &velocity, float velocityScale )
-		: m_positionView( points->variableIndexedView<V3fVectorData>( "P", PrimitiveVariable::Vertex, /* throwIfInvalid = */ true ).value() ),
+	ParticleList(
+		const Primitive *points, const std::string &width, float widthScale, const std::string &velocity,
+		float velocityScale
+	)
+		: m_positionView(
+			  points->variableIndexedView<V3fVectorData>( "P", PrimitiveVariable::Vertex, /* throwIfInvalid = */ true )
+				  .value()
+		  ),
 		  m_widthView( points->variableIndexedView<FloatVectorData>( width, PrimitiveVariable::Vertex ) ),
 		  m_widthScale( 0.5f * widthScale ), // VDB wants radius, so divide by two
 		  m_velocityView( points->variableIndexedView<V3fVectorData>( velocity, PrimitiveVariable::Vertex ) ),
@@ -86,10 +92,7 @@ struct ParticleList
 		}
 	}
 
-	size_t size() const
-	{
-		return m_positionView.size();
-	}
+	size_t size() const { return m_positionView.size(); }
 
 	void getPos( size_t i, PosType &pos ) const
 	{
@@ -114,12 +117,9 @@ struct ParticleList
 		vel[2] = v[2];
 	}
 
-	bool hasVelocity() const
-	{
-		return static_cast<bool>( m_velocityView );
-	}
+	bool hasVelocity() const { return static_cast<bool>( m_velocityView ); }
 
-	private:
+private:
 
 	template<typename T>
 	using OptionalIndexedView = std::optional<PrimitiveVariable::IndexedView<T>>;
@@ -141,8 +141,7 @@ GAFFER_NODE_DEFINE_TYPE( PointsToLevelSet );
 
 size_t PointsToLevelSet::g_firstPlugIndex = 0;
 
-PointsToLevelSet::PointsToLevelSet( const std::string &name )
-	: ObjectProcessor( name )
+PointsToLevelSet::PointsToLevelSet( const std::string &name ) : ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "width", Plug::In, "width" ) );
@@ -155,9 +154,7 @@ PointsToLevelSet::PointsToLevelSet( const std::string &name )
 	addChild( new FloatPlug( "halfBandwidth", Plug::In, 3.0f, 0.0001f ) );
 }
 
-PointsToLevelSet::~PointsToLevelSet()
-{
-}
+PointsToLevelSet::~PointsToLevelSet() {}
 
 Gaffer::StringPlug *PointsToLevelSet::widthPlug()
 {
@@ -241,18 +238,14 @@ const Gaffer::FloatPlug *PointsToLevelSet::halfBandwidthPlug() const
 
 bool PointsToLevelSet::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return ObjectProcessor::affectsProcessedObject( input ) ||
-		input == widthPlug() ||
-		input == widthScalePlug() ||
-		input == useVelocityPlug() ||
-		input == velocityPlug() ||
-		input == velocityScalePlug() ||
-		input == gridPlug() ||
-		input == voxelSizePlug() ||
-		input == halfBandwidthPlug();
+	return ObjectProcessor::affectsProcessedObject( input ) || input == widthPlug() || input == widthScalePlug() ||
+		input == useVelocityPlug() || input == velocityPlug() || input == velocityScalePlug() || input == gridPlug() ||
+		input == voxelSizePlug() || input == halfBandwidthPlug();
 }
 
-void PointsToLevelSet::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void PointsToLevelSet::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ObjectProcessor::hashProcessedObject( path, context, h );
 
@@ -267,7 +260,9 @@ void PointsToLevelSet::hashProcessedObject( const ScenePath &path, const Gaffer:
 	halfBandwidthPlug()->hash( h );
 }
 
-IECore::ConstObjectPtr PointsToLevelSet::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr PointsToLevelSet::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	const Primitive *points = runTimeCast<const Primitive>( inputObject );
 	if( !points || points->variables.find( "P" ) == points->variables.end() )
@@ -284,11 +279,13 @@ IECore::ConstObjectPtr PointsToLevelSet::computeProcessedObject( const ScenePath
 	grid->setName( gridPlug()->getValue() );
 
 	Interrupter interrupter( context->canceller() );
-	openvdb::tools::ParticlesToLevelSet<openvdb::FloatGrid, void, Interrupter> particlesToLevelSet( *grid, &interrupter );
+	openvdb::tools::ParticlesToLevelSet<openvdb::FloatGrid, void, Interrupter> particlesToLevelSet(
+		*grid, &interrupter
+	);
 
 	ParticleList particleList(
-		points, widthPlug()->getValue(), widthScalePlug()->getValue(),
-		velocityPlug()->getValue(), velocityScalePlug()->getValue() / context->getFramesPerSecond()
+		points, widthPlug()->getValue(), widthScalePlug()->getValue(), velocityPlug()->getValue(),
+		velocityScalePlug()->getValue() / context->getFramesPerSecond()
 	);
 	if( particleList.hasVelocity() && useVelocityPlug()->getValue() )
 	{
@@ -309,8 +306,8 @@ IECore::ConstObjectPtr PointsToLevelSet::computeProcessedObject( const ScenePath
 		IECore::msg(
 			IECore::Msg::Warning, relativeName( scriptNode() ),
 			fmt::format(
-				"{} points from \"{}\" were ignored because they were too small",
-				particlesToLevelSet.getMinCount(), ScenePlug::pathToString( path )
+				"{} points from \"{}\" were ignored because they were too small", particlesToLevelSet.getMinCount(),
+				ScenePlug::pathToString( path )
 			)
 		);
 	}

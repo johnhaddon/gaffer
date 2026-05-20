@@ -109,7 +109,10 @@ void GafferImageUIModule::bindImageGadget()
 				  .def( "setImage", &ImageGadget::setImage )
 				  .def( "getImage", &getImage )
 				  .def( "setContext", &ImageGadget::setContext )
-				  .def( "getContext", ( Context * (ImageGadget::*)() ) & ImageGadget::getContext, return_value_policy<CastToIntrusivePtr>() )
+				  .def(
+					  "getContext", ( Context * (ImageGadget::*)() ) & ImageGadget::getContext,
+					  return_value_policy<CastToIntrusivePtr>()
+				  )
 				  .def( "setSoloChannel", &ImageGadget::setSoloChannel )
 				  .def( "getSoloChannel", &ImageGadget::getSoloChannel )
 				  .def( "setPaused", &setPaused )
@@ -133,5 +136,8 @@ void GafferImageUIModule::bindImageGadget()
 		.value( "Running", ImageGadget::Running )
 		.value( "Complete", ImageGadget::Complete );
 
-	SignalClass<ImageGadget::ImageGadgetSignal, DefaultSignalCaller<ImageGadget::ImageGadgetSignal>, ImageGadgetSlotCaller>( "ImageGadgetSignal" );
+	SignalClass<
+		ImageGadget::ImageGadgetSignal, DefaultSignalCaller<ImageGadget::ImageGadgetSignal>, ImageGadgetSlotCaller>(
+		"ImageGadgetSignal"
+	);
 }

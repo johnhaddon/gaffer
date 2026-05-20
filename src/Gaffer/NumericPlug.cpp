@@ -58,12 +58,7 @@ GAFFER_PLUG_DEFINE_TEMPLATE_TYPE( Gaffer::FloatPlug, FloatPlugTypeId )
 
 template<class T>
 NumericPlug<T>::NumericPlug(
-	const std::string &name,
-	Direction direction,
-	T defaultValue,
-	T minValue,
-	T maxValue,
-	unsigned flags
+	const std::string &name, Direction direction, T defaultValue, T minValue, T maxValue, unsigned flags
 )
 	: ValuePlug( name, direction, new DataType( defaultValue ), flags ),
 	  m_minValue( minValue ),
@@ -85,8 +80,7 @@ bool NumericPlug<T>::acceptsInput( const Plug *input ) const
 	}
 	if( input )
 	{
-		return input->isInstanceOf( FloatPlug::staticTypeId() ) ||
-			input->isInstanceOf( IntPlug::staticTypeId() ) ||
+		return input->isInstanceOf( FloatPlug::staticTypeId() ) || input->isInstanceOf( IntPlug::staticTypeId() ) ||
 			input->isInstanceOf( BoolPlug::staticTypeId() );
 	}
 	return true;

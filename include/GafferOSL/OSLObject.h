@@ -55,7 +55,7 @@ IE_CORE_FORWARDDECLARE( ShadingEngine )
 class GAFFEROSL_API OSLObject : public GafferScene::Deformer
 {
 
-	public:
+public:
 
 	explicit OSLObject( const std::string &name = defaultName<OSLObject>() );
 	~OSLObject() override;
@@ -77,11 +77,14 @@ class GAFFEROSL_API OSLObject : public GafferScene::Deformer
 	class GAFFEROSL_API SourceLocationPlug : public Gaffer::ValuePlug
 	{
 
-		public:
+	public:
 
 		GAFFER_PLUG_DECLARE_TYPE( OSLObject::SourceLocationPlug, OSLObjectSourceLocationPlugTypeId, ValuePlug );
 
-		explicit SourceLocationPlug( const std::string &name = defaultName<SourceLocationPlug>(), Direction direction = In, unsigned flags = Default );
+		explicit SourceLocationPlug(
+			const std::string &name = defaultName<SourceLocationPlug>(), Direction direction = In,
+			unsigned flags = Default
+		);
 
 		Gaffer::StringPlug *namePlug();
 		const Gaffer::StringPlug *namePlug() const;
@@ -113,18 +116,22 @@ class GAFFEROSL_API OSLObject : public GafferScene::Deformer
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
 	bool affectsProcessedObject( const Gaffer::Plug *input ) const override;
-	void hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	IECore::ConstObjectPtr computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const override;
+	void hashProcessedObject(
+		const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	IECore::ConstObjectPtr computeProcessedObject(
+		const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+	) const override;
 	Gaffer::ValuePlug::CachePolicy processedObjectComputeCachePolicy() const override;
 	bool adjustBounds() const override;
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
-	private:
+private:
 
 	GafferScene::ShaderPlug *shaderPlug();
 	const GafferScene::ShaderPlug *shaderPlug() const;
@@ -135,7 +142,9 @@ class GAFFEROSL_API OSLObject : public GafferScene::Deformer
 	Gaffer::StringPlug *resampledNamesPlug();
 	const Gaffer::StringPlug *resampledNamesPlug() const;
 
-	ConstShadingEnginePtr shadingEngine( const Gaffer::Context *context, const IECore::CompoundObject *substitutions ) const;
+	ConstShadingEnginePtr shadingEngine(
+		const Gaffer::Context *context, const IECore::CompoundObject *substitutions
+	) const;
 
 	GafferOSL::OSLCode *oslCode();
 	const GafferOSL::OSLCode *oslCode() const;

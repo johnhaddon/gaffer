@@ -57,9 +57,7 @@ const T *TweakPlug::valuePlug() const
 
 template<class GetDataFunctor, class SetDataFunctor>
 bool TweakPlug::applyTweak(
-	GetDataFunctor &&getDataFunctor,
-	SetDataFunctor &&setDataFunctor,
-	MissingMode missingMode
+	GetDataFunctor &&getDataFunctor, SetDataFunctor &&setDataFunctor, MissingMode missingMode
 ) const
 {
 	if( !enabledPlug()->getValue() )
@@ -84,7 +82,9 @@ bool TweakPlug::applyTweak(
 	if( !tweakData )
 	{
 		throw IECore::Exception(
-			fmt::format( "Cannot apply tweak to \"{}\" : Value plug has unsupported type \"{}\"", name, valuePlug()->typeName() )
+			fmt::format(
+				"Cannot apply tweak to \"{}\" : Value plug has unsupported type \"{}\"", name, valuePlug()->typeName()
+			)
 		);
 	}
 
@@ -93,7 +93,8 @@ bool TweakPlug::applyTweak(
 		return setDataFunctor( name, tweakData );
 	}
 
-	const IECore::Data *currentValue = getDataFunctor( name, /* withFallback = */ mode != Gaffer::TweakPlug::CreateIfMissing );
+	const IECore::Data *currentValue =
+		getDataFunctor( name, /* withFallback = */ mode != Gaffer::TweakPlug::CreateIfMissing );
 
 	if( IECore::runTimeCast<const IECore::InternedStringData>( currentValue ) )
 	{
@@ -105,21 +106,24 @@ bool TweakPlug::applyTweak(
 
 	if( !currentValue )
 	{
-		if(
-			mode == Gaffer::TweakPlug::ListAppend ||
-			mode == Gaffer::TweakPlug::ListPrepend ||
-			mode == Gaffer::TweakPlug::CreateIfMissing ||
-			mode == Gaffer::TweakPlug::SetExpressionInclude
-		)
+		if( mode == Gaffer::TweakPlug::ListAppend || mode == Gaffer::TweakPlug::ListPrepend ||
+			mode == Gaffer::TweakPlug::CreateIfMissing || mode == Gaffer::TweakPlug::SetExpressionInclude )
 		{
 			setDataFunctor( name, tweakData );
 			return true;
 		}
-		else if( missingMode == Gaffer::TweakPlug::MissingMode::Ignore || mode == Gaffer::TweakPlug::ListRemove || mode == Gaffer::TweakPlug::SetExpressionExclude )
+		else if(
+			missingMode == Gaffer::TweakPlug::MissingMode::Ignore || mode == Gaffer::TweakPlug::ListRemove ||
+			mode == Gaffer::TweakPlug::SetExpressionExclude
+		)
 		{
 			return false;
 		}
-		throw IECore::Exception( fmt::format( "Cannot apply tweak with mode {} to \"{}\" : This parameter does not exist", modeToString( mode ), name ) );
+		throw IECore::Exception(
+			fmt::format(
+				"Cannot apply tweak with mode {} to \"{}\" : This parameter does not exist", modeToString( mode ), name
+			)
+		);
 	}
 
 	if( mode == Gaffer::TweakPlug::CreateIfMissing )
@@ -143,11 +147,8 @@ bool TweakPlug::applyTweak(
 
 template<class GetDataFunctor, class SetDataFunctor>
 bool TweakPlug::applyElementwiseTweak(
-	GetDataFunctor &&getDataFunctor,
-	SetDataFunctor &&setDataFunctor,
-	size_t createSize,
-	const boost::dynamic_bitset<> *mask,
-	MissingMode missingMode
+	GetDataFunctor &&getDataFunctor, SetDataFunctor &&setDataFunctor, size_t createSize,
+	const boost::dynamic_bitset<> *mask, MissingMode missingMode
 ) const
 {
 	if( !enabledPlug()->getValue() )
@@ -172,7 +173,9 @@ bool TweakPlug::applyElementwiseTweak(
 	if( !tweakData )
 	{
 		throw IECore::Exception(
-			fmt::format( "Cannot apply tweak to \"{}\" : Value plug has unsupported type \"{}\"", name, valuePlug()->typeName() )
+			fmt::format(
+				"Cannot apply tweak to \"{}\" : Value plug has unsupported type \"{}\"", name, valuePlug()->typeName()
+			)
 		);
 	}
 
@@ -182,10 +185,10 @@ bool TweakPlug::applyElementwiseTweak(
 		current = getDataFunctor( name, /* withFallback = */ mode != Gaffer::TweakPlug::CreateIfMissing );
 	}
 
-	if(
-		mode == Gaffer::TweakPlug::Create ||
-		( !current.data && ( mode == Gaffer::TweakPlug::CreateIfMissing || mode == Gaffer::TweakPlug::ListAppend || mode == Gaffer::TweakPlug::ListPrepend ) )
-	)
+	if( mode == Gaffer::TweakPlug::Create ||
+		( !current.data &&
+		  ( mode == Gaffer::TweakPlug::CreateIfMissing || mode == Gaffer::TweakPlug::ListAppend ||
+			mode == Gaffer::TweakPlug::ListPrepend ) ) )
 	{
 		DataAndIndices result;
 		if( mask )
@@ -215,7 +218,11 @@ bool TweakPlug::applyElementwiseTweak(
 		{
 			return false;
 		}
-		throw IECore::Exception( fmt::format( "Cannot apply tweak with mode {} to \"{}\" : This parameter does not exist", modeToString( mode ), name ) );
+		throw IECore::Exception(
+			fmt::format(
+				"Cannot apply tweak with mode {} to \"{}\" : This parameter does not exist", modeToString( mode ), name
+			)
+		);
 	}
 
 	if( mode == Gaffer::TweakPlug::CreateIfMissing )
@@ -239,9 +246,7 @@ bool TweakPlug::applyElementwiseTweak(
 
 template<class GetDataFunctor, class SetDataFunctor>
 bool TweaksPlug::applyTweaks(
-	GetDataFunctor &&getDataFunctor,
-	SetDataFunctor &&setDataFunctor,
-	TweakPlug::MissingMode missingMode
+	GetDataFunctor &&getDataFunctor, SetDataFunctor &&setDataFunctor, TweakPlug::MissingMode missingMode
 ) const
 {
 	bool tweakApplied = false;

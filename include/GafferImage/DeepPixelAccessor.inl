@@ -116,12 +116,15 @@ inline unsigned int DeepPixelAccessor::sampleCount( int x, int y )
 	return tileOffsets[tilePixelIndex] - prev;
 }
 
-inline void DeepPixelAccessor::cachedData( Imath::V2i p, const float *&tileData, const int *&tileOffsets, int &tilePixelIndex )
+inline void DeepPixelAccessor::cachedData(
+	Imath::V2i p, const float *&tileData, const int *&tileOffsets, int &tilePixelIndex
+)
 {
 	// Get the smart pointer to the tile we want.
 
 	constexpr int lowMask = ( 1 << ImagePlug::tileSizeLog2() ) - 1;
-	int cacheIndex = ( p.x >> ImagePlug::tileSizeLog2() ) + m_cacheWidth * ( p.y >> ImagePlug::tileSizeLog2() ) - m_cacheOriginIndex;
+	int cacheIndex =
+		( p.x >> ImagePlug::tileSizeLog2() ) + m_cacheWidth * ( p.y >> ImagePlug::tileSizeLog2() ) - m_cacheOriginIndex;
 
 	tilePixelIndex = ( p.x & lowMask ) + ( ( p.y & lowMask ) << ImagePlug::tileSizeLog2() );
 

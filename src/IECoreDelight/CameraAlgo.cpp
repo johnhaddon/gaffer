@@ -50,7 +50,10 @@ using namespace IECoreDelight;
 namespace
 {
 
-bool convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::Camera *> &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, NSIContext_t context, const char *handle )
+bool convert(
+	const IECoreScenePreview::Renderer::Samples<const IECoreScene::Camera *> &samples,
+	const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, NSIContext_t context, const char *handle
+)
 {
 	const IECoreScene::Camera *camera = samples[0];
 

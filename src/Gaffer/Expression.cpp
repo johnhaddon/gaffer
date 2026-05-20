@@ -63,29 +63,18 @@ size_t Expression::g_firstPlugIndex;
 
 GAFFER_NODE_DEFINE_TYPE( Expression );
 
-Expression::Expression( const std::string &name )
-	: ComputeNode( name ), m_engine( nullptr )
+Expression::Expression( const std::string &name ) : ComputeNode( name ), m_engine( nullptr )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
-	addChild(
-		new StringPlug(
-			"__engine",
-			Plug::In,
-			"",
-			Plug::Default & ~( Plug::AcceptsInputs | Plug::Serialisable ),
-			IECore::StringAlgo::NoSubstitutions
-		)
-	);
-	addChild(
-		new StringPlug(
-			"__expression",
-			Plug::In,
-			"",
-			Plug::Default & ~( Plug::AcceptsInputs | Plug::Serialisable ),
-			IECore::StringAlgo::NoSubstitutions
-		)
-	);
+	addChild( new StringPlug(
+		"__engine", Plug::In, "", Plug::Default & ~( Plug::AcceptsInputs | Plug::Serialisable ),
+		IECore::StringAlgo::NoSubstitutions
+	) );
+	addChild( new StringPlug(
+		"__expression", Plug::In, "", Plug::Default & ~( Plug::AcceptsInputs | Plug::Serialisable ),
+		IECore::StringAlgo::NoSubstitutions
+	) );
 
 	addChild( new ValuePlug( "__in", Plug::In, Plug::Default & ~Plug::AcceptsInputs ) );
 	addChild( new ValuePlug( "__out", Plug::Out ) );
@@ -94,9 +83,7 @@ Expression::Expression( const std::string &name )
 	plugSetSignal().connect( boost::bind( &Expression::plugSet, this, ::_1 ) );
 }
 
-Expression::~Expression()
-{
-}
+Expression::~Expression() {}
 
 void Expression::languages( std::vector<std::string> &languages )
 {
@@ -144,7 +131,9 @@ void Expression::setExpression( const std::string &expression, const std::string
 		{
 			if( std::binary_search( sortedInPlugs.begin(), sortedInPlugs.end(), *it ) )
 			{
-				throw Exception( fmt::format( "Cannot both read from and write to plug \"{}\"", ( *it )->relativeName( parent() ) ) );
+				throw Exception(
+					fmt::format( "Cannot both read from and write to plug \"{}\"", ( *it )->relativeName( parent() ) )
+				);
 			}
 		}
 	}
@@ -185,8 +174,7 @@ void Expression::setExpression( const std::string &expression, const std::string
 	expressionPlug()->setValue( internalExpression );
 
 	Action::enact(
-		this,
-		boost::bind( boost::ref( expressionChangedSignal() ), this ),
+		this, boost::bind( boost::ref( expressionChangedSignal() ), this ),
 		Action::Function() // does nothing
 	);
 }
@@ -265,11 +253,7 @@ void Expression::affects( const Plug *input, AffectedPlugsContainer &outputs ) c
 {
 	ComputeNode::affects( input, outputs );
 
-	if(
-		inPlug()->isAncestorOf( input ) ||
-		input == expressionPlug() ||
-		input == enginePlug()
-	)
+	if( inPlug()->isAncestorOf( input ) || input == expressionPlug() || input == enginePlug() )
 	{
 		outputs.push_back( executePlug() );
 	}
@@ -309,7 +293,8 @@ void Expression::hash( const ValuePlug *output, const Context *context, IECore::
 			h.append( ( *it )->typeId() );
 		}
 
-		for( std::vector<IECore::InternedString>::const_iterator it = m_contextNames.begin(); it != m_contextNames.end(); it++ )
+		for( std::vector<IECore::InternedString>::const_iterator it = m_contextNames.begin();
+			 it != m_contextNames.end(); it++ )
 		{
 			h.append( context->variableHash( *it ) );
 		}
@@ -416,10 +401,8 @@ void Expression::updatePlug( ValuePlug *parentPlug, size_t childIndex, ValuePlug
 	{
 		// See if we can reuse the existing plug
 		Plug *existingChildPlug = parentPlug->getChild<Plug>( childIndex );
-		if(
-			( existingChildPlug->direction() == Plug::In && existingChildPlug->getInput() == plug ) ||
-			( existingChildPlug->direction() == Plug::Out && plug->getInput() == existingChildPlug )
-		)
+		if( ( existingChildPlug->direction() == Plug::In && existingChildPlug->getInput() == plug ) ||
+			( existingChildPlug->direction() == Plug::Out && plug->getInput() == existingChildPlug ) )
 		{
 			return;
 		}
@@ -511,7 +494,10 @@ void Expression::plugSet( const Plug *plug )
 	const ScriptNode *script = scriptNode();
 	if( script && !script->isExecuting() )
 	{
-		IECore::msg( IECore::Msg::Warning, "Expression::plugSet", "Unexpected change to __engine plug. Should you be calling setExpression() instead?" );
+		IECore::msg(
+			IECore::Msg::Warning, "Expression::plugSet",
+			"Unexpected change to __engine plug. Should you be calling setExpression() instead?"
+		);
 		return;
 	}
 

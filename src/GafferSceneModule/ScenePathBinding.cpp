@@ -85,35 +85,30 @@ void GafferSceneModule::bindScenePath()
 		.def(
 			"__init__",
 			make_constructor(
-				constructor1,
-				default_call_policies(),
-				(
-					arg( "scene" ),
-					arg( "context" ),
-					arg( "filter" ) = object()
-				)
+				constructor1, default_call_policies(), ( arg( "scene" ), arg( "context" ), arg( "filter" ) = object() )
 			)
 		)
 		.def(
 			"__init__",
 			make_constructor(
-				constructor2,
-				default_call_policies(),
-				(
-					arg( "scene" ),
-					arg( "context" ),
-					arg( "path" ),
-					arg( "filter" ) = object()
-				)
+				constructor2, default_call_policies(),
+				( arg( "scene" ), arg( "context" ), arg( "path" ), arg( "filter" ) = object() )
 			)
 		)
 		.def( "setScene", &ScenePath::setScene )
-		.def( "getScene", ( ScenePlug * (ScenePath::*)() ) & ScenePath::getScene, return_value_policy<CastToIntrusivePtr>() )
+		.def(
+			"getScene", ( ScenePlug * (ScenePath::*)() ) & ScenePath::getScene,
+			return_value_policy<CastToIntrusivePtr>()
+		)
 		.def( "setContext", &ScenePath::setContext )
-		.def( "getContext", ( Context * (ScenePath::*)() ) & ScenePath::getContext, return_value_policy<CastToIntrusivePtr>() )
+		.def(
+			"getContext", ( Context * (ScenePath::*)() ) & ScenePath::getContext,
+			return_value_policy<CastToIntrusivePtr>()
+		)
 		.def( "createStandardFilter", &createStandardFilter, ( arg( "setNames" ) = list(), arg( "setsLabel" ) = "" ) )
 		.staticmethod( "createStandardFilter" );
 
-	RunTimeTypedClass<SceneFilterPathFilter>()
-		.def( init<FilterPtr, IECore::CompoundDataPtr>( ( arg( "filter" ), arg( "userData" ) = object() ) ) );
+	RunTimeTypedClass<SceneFilterPathFilter>().def(
+		init<FilterPtr, IECore::CompoundDataPtr>( ( arg( "filter" ), arg( "userData" ) = object() ) )
+	);
 }

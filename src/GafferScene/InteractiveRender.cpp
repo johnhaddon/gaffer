@@ -102,12 +102,9 @@ unordered_set<string> &activeRenderIds()
 // A thread-safe message handler for render messaging
 class InteractiveRender::RenderMessageHandler : public MessageHandler
 {
-	public:
+public:
 
-	RenderMessageHandler()
-		: m_messages( new MessagesData )
-	{
-	}
+	RenderMessageHandler() : m_messages( new MessagesData ) {}
 
 	void handle( MessageHandler::Level level, const std::string &context, const std::string &message ) override
 	{
@@ -146,7 +143,7 @@ class InteractiveRender::RenderMessageHandler : public MessageHandler
 
 	Signals::Signal<void()> messagesChangedSignal;
 
-	private:
+private:
 
 	tbb::mutex m_mutex;
 	MessagesDataPtr m_messages;
@@ -175,7 +172,9 @@ InteractiveRender::InteractiveRender( const std::string &name )
 	addChild( new ScenePlug( "__adaptedIn", Plug::In, Plug::Default & ~Plug::Serialisable ) );
 
 	// Incremented when new messages are received, triggering a dirty signal for the output plug.
-	addChild( new IntPlug( "__messageUpdateCount", Plug::In, 0, 0, std::numeric_limits<int>::max(), Plug::Default & ~Plug::Serialisable ) );
+	addChild( new IntPlug(
+		"__messageUpdateCount", Plug::In, 0, 0, std::numeric_limits<int>::max(), Plug::Default & ~Plug::Serialisable
+	) );
 
 	SceneProcessorPtr adaptors = SceneAlgo::createRenderAdaptors();
 	setChild( "__adaptors", adaptors );
@@ -320,7 +319,9 @@ void InteractiveRender::setContext( Gaffer::ContextPtr context )
 	}
 }
 
-IECore::DataPtr InteractiveRender::command( const IECore::InternedString name, const IECore::CompoundDataMap &parameters )
+IECore::DataPtr InteractiveRender::command(
+	const IECore::InternedString name, const IECore::CompoundDataMap &parameters
+)
 {
 	if( !m_renderer )
 	{
@@ -388,20 +389,16 @@ void InteractiveRender::update()
 		}
 
 		m_renderer = IECoreScenePreview::Renderer::create(
-			rendererType,
-			IECoreScenePreview::Renderer::Interactive,
-			"",
-			m_messageHandler.get()
+			rendererType, IECoreScenePreview::Renderer::Interactive, "", m_messageHandler.get()
 		);
 		activeRenderIds().insert( Private::RendererAlgo::renderID( m_renderer.get() ) );
 
-		m_controller.reset(
-			new RenderController( adaptedInPlug(), effectiveContext(), m_renderer )
-		);
-		m_updateRequiredConnection = m_controller->updateRequiredSignal().connect(
-			boost::bind( &InteractiveRender::update, this )
-		);
-		m_scriptMetadataChangedConnection = Metadata::nodeValueChangedSignal( scriptNode() ).connect( boost::bind( &InteractiveRender::scriptMetadataChanged, this, ::_2 ) );
+		m_controller.reset( new RenderController( adaptedInPlug(), effectiveContext(), m_renderer ) );
+		m_updateRequiredConnection =
+			m_controller->updateRequiredSignal().connect( boost::bind( &InteractiveRender::update, this ) );
+		m_scriptMetadataChangedConnection =
+			Metadata::nodeValueChangedSignal( scriptNode() )
+				.connect( boost::bind( &InteractiveRender::scriptMetadataChanged, this, ::_2 ) );
 
 		// We can now use a live render manifest from the controller, so get rid of the saved manifest
 		m_lastRenderManifest.reset();
@@ -584,7 +581,9 @@ std::shared_ptr<const RenderManifest> InteractiveRender::renderManifest() const
 	return m_lastRenderManifest;
 }
 
-void InteractiveRender::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void InteractiveRender::hash(
+	const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ComputeNode::hash( output, context, h );
 

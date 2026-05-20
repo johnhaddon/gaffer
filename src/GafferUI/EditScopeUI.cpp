@@ -53,17 +53,16 @@ namespace
 class EditScopePlugAdder : public PlugAdder
 {
 
-	public:
+public:
 
-	EditScopePlugAdder( EditScopePtr editScope )
-		: m_editScope( editScope )
+	EditScopePlugAdder( EditScopePtr editScope ) : m_editScope( editScope )
 	{
 		m_editScope->childAddedSignal().connect( boost::bind( &EditScopePlugAdder::childAdded, this ) );
 		m_editScope->childRemovedSignal().connect( boost::bind( &EditScopePlugAdder::childRemoved, this ) );
 		updateVisibility();
 	}
 
-	protected:
+protected:
 
 	bool canCreateConnection( const Plug *endpoint ) const override
 	{
@@ -72,10 +71,7 @@ class EditScopePlugAdder : public PlugAdder
 			return false;
 		}
 
-		if(
-			endpoint->node() == m_editScope ||
-			m_editScope->inPlug()
-		)
+		if( endpoint->node() == m_editScope || m_editScope->inPlug() )
 		{
 			return false;
 		}
@@ -104,22 +100,13 @@ class EditScopePlugAdder : public PlugAdder
 		applyEdgeMetadata( m_editScope->outPlug(), endpoint->direction() == Plug::Out );
 	}
 
-	private:
+private:
 
-	void updateVisibility()
-	{
-		setVisible( !m_editScope->inPlug() );
-	}
+	void updateVisibility() { setVisible( !m_editScope->inPlug() ); }
 
-	void childAdded()
-	{
-		updateVisibility();
-	}
+	void childAdded() { updateVisibility(); }
 
-	void childRemoved()
-	{
-		updateVisibility();
-	}
+	void childRemoved() { updateVisibility(); }
 
 	EditScopePtr m_editScope;
 };
@@ -129,16 +116,13 @@ struct Registration
 
 	Registration()
 	{
-		NoduleLayout::registerCustomGadget(
-			"GafferUI.EditScopeUI.PlugAdder",
-			[]( GraphComponentPtr parent ) {
-				if( EditScopePtr editScope = runTimeCast<EditScope>( parent ) )
-				{
-					return new EditScopePlugAdder( editScope );
-				}
-				throw IECore::Exception( "Expected an EditScope" );
+		NoduleLayout::registerCustomGadget( "GafferUI.EditScopeUI.PlugAdder", []( GraphComponentPtr parent ) {
+			if( EditScopePtr editScope = runTimeCast<EditScope>( parent ) )
+			{
+				return new EditScopePlugAdder( editScope );
 			}
-		);
+			throw IECore::Exception( "Expected an EditScope" );
+		} );
 	}
 };
 

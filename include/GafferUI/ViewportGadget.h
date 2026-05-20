@@ -59,7 +59,7 @@ namespace GafferUI
 class GAFFERUI_API ViewportGadget : public Gadget
 {
 
-	public:
+public:
 
 	using UnarySignal = Gaffer::Signals::Signal<void( ViewportGadget * ), Gaffer::Signals::CatchingCombiner<void>>;
 
@@ -191,7 +191,8 @@ class GAFFERUI_API ViewportGadget : public Gadget
 		All = Camera | Transform | CenterOfInterest
 	};
 
-	using CameraChangedSignal = Gaffer::Signals::Signal<void( ViewportGadget *, CameraFlags ), Gaffer::Signals::CatchingCombiner<void>>;
+	using CameraChangedSignal =
+		Gaffer::Signals::Signal<void( ViewportGadget *, CameraFlags ), Gaffer::Signals::CatchingCombiner<void>>;
 	/// A signal emitted when the camera is changed, either via the API or
 	/// through user interaction. The CameraFlags bitmask is used to specify
 	/// what aspects of the camera changed.
@@ -211,7 +212,9 @@ class GAFFERUI_API ViewportGadget : public Gadget
 	bool getDollyingEnabled() const;
 
 	/// Moves the camera to view the box using the specified view direction.
-	void frame( const Imath::Box3f &box, const Imath::V3f &viewDirection, const Imath::V3f &upVector = Imath::V3f( 0, 1, 0 ) );
+	void frame(
+		const Imath::Box3f &box, const Imath::V3f &viewDirection, const Imath::V3f &upVector = Imath::V3f( 0, 1, 0 )
+	);
 
 	void fitClippingPlanes( const Imath::Box3f &box );
 
@@ -255,7 +258,7 @@ class GAFFERUI_API ViewportGadget : public Gadget
 	class GAFFERUI_API RasterScope : boost::noncopyable
 	{
 
-		public:
+	public:
 
 		RasterScope( const ViewportGadget *viewportGadget );
 		~RasterScope();
@@ -300,35 +303,42 @@ class GAFFERUI_API ViewportGadget : public Gadget
 	class GAFFERUI_API SelectionScope : boost::noncopyable
 	{
 
-		public:
+	public:
 
 		/// Start an OpenGL selection operation for the specified position in the specified gadget. After construction,
 		/// perform drawing as usual in the object space of the Gadget, and upon destruction the selection
 		/// vector will have been filled with the specified hits.
 		SelectionScope(
 			const IECore::LineSegment3f &lineInGadgetSpace, const Gadget *gadget,
-			std::vector<IECoreGL::HitRecord> &selection,
-			IECoreGL::Selector::Mode mode = IECoreGL::Selector::GLSelect
+			std::vector<IECoreGL::HitRecord> &selection, IECoreGL::Selector::Mode mode = IECoreGL::Selector::GLSelect
 		);
 		/// As above, but selecting within a rectangle in screen space, defined by two corners in gadget space.
 		SelectionScope(
 			const Imath::V3f &corner0InGadgetSpace, const Imath::V3f &corner1InGadgetSpace, const Gadget *gadget,
-			std::vector<IECoreGL::HitRecord> &selection,
-			IECoreGL::Selector::Mode mode = IECoreGL::Selector::GLSelect
+			std::vector<IECoreGL::HitRecord> &selection, IECoreGL::Selector::Mode mode = IECoreGL::Selector::GLSelect
 		);
 		~SelectionScope();
 
 		/// Returns the IECoreGL::State which should be used for rendering while selecting.
 		IECoreGL::State *baseState();
 
-		private:
+	private:
 
 		/// Private constructor for use by ViewportGadget.
-		SelectionScope( const ViewportGadget *viewportGadget, const Imath::Box2f &rasterRegion, std::vector<IECoreGL::HitRecord> &selection, IECoreGL::Selector::Mode mode );
+		SelectionScope(
+			const ViewportGadget *viewportGadget, const Imath::Box2f &rasterRegion,
+			std::vector<IECoreGL::HitRecord> &selection, IECoreGL::Selector::Mode mode
+		);
 		friend class ViewportGadget;
 
-		void begin( const ViewportGadget *viewportGadget, const Imath::V2f &rasterPosition, const Imath::M44f &transform, IECoreGL::Selector::Mode mode );
-		void begin( const ViewportGadget *viewportGadget, const Imath::Box2f &rasterRegion, const Imath::M44f &transform, IECoreGL::Selector::Mode mode );
+		void begin(
+			const ViewportGadget *viewportGadget, const Imath::V2f &rasterPosition, const Imath::M44f &transform,
+			IECoreGL::Selector::Mode mode
+		);
+		void begin(
+			const ViewportGadget *viewportGadget, const Imath::Box2f &rasterRegion, const Imath::M44f &transform,
+			IECoreGL::Selector::Mode mode
+		);
 		void end();
 
 		bool m_depthSort;
@@ -337,7 +347,7 @@ class GAFFERUI_API ViewportGadget : public Gadget
 		std::vector<IECoreGL::HitRecord> &m_selection;
 	};
 
-	private:
+private:
 
 	// Called by `Gadget::dirty()` to notify ViewportGadget of changes
 	// that may affect the rendering it is responsible for.
@@ -355,10 +365,15 @@ class GAFFERUI_API ViewportGadget : public Gadget
 	};
 	mutable std::vector<RenderItem> m_renderItems;
 
-	static void getRenderItems( const Gadget *gadget, Imath::M44f transform, const Style *parentStyle, std::vector<RenderItem> &renderItems );
+	static void getRenderItems(
+		const Gadget *gadget, Imath::M44f transform, const Style *parentStyle, std::vector<RenderItem> &renderItems
+	);
 
 	void renderInternal( RenderReason reason, Layer filterLayer = Layer::None ) const;
-	void renderLayerInternal( RenderReason reason, Layer layer, const Imath::M44f &viewTransform, const Imath::Box3f &bound, IECoreGL::Selector *selector ) const;
+	void renderLayerInternal(
+		RenderReason reason, Layer layer, const Imath::M44f &viewTransform, const Imath::Box3f &bound,
+		IECoreGL::Selector *selector
+	) const;
 	GLuint acquireFramebuffer() const;
 
 	void childRemoved( GraphComponent *parent, GraphComponent *child );
@@ -398,10 +413,14 @@ class GAFFERUI_API ViewportGadget : public Gadget
 	void trackDragIdle();
 
 	template<typename Event, typename Signal>
-	typename Signal::result_type dispatchEvent( std::vector<Gadget *> &gadgets, Signal &( Gadget::*signalGetter )(), const Event &event, Gadget *&handler );
+	typename Signal::result_type dispatchEvent(
+		std::vector<Gadget *> &gadgets, Signal &( Gadget::*signalGetter )(), const Event &event, Gadget *&handler
+	);
 
 	template<typename Event, typename Signal>
-	typename Signal::result_type dispatchEvent( Gadget *gadget, Signal &( Gadget::*signalGetter )(), const Event &event );
+	typename Signal::result_type dispatchEvent(
+		Gadget *gadget, Signal &( Gadget::*signalGetter )(), const Event &event
+	);
 
 	class CameraController;
 	std::unique_ptr<CameraController> m_cameraController;

@@ -56,7 +56,7 @@ IE_CORE_FORWARDDECLARE( Nodule )
 class GAFFERUI_API Nodule : public ConnectionCreator
 {
 
-	public:
+public:
 
 	GAFFER_GRAPHCOMPONENT_DECLARE_TYPE( GafferUI::Nodule, NoduleTypeId, ConnectionCreator );
 	~Nodule() override;
@@ -81,11 +81,13 @@ class GAFFERUI_API Nodule : public ConnectionCreator
 	using NoduleCreator = std::function<NodulePtr( Gaffer::PlugPtr )>;
 	/// Registers a Nodule subclass, optionally registering it as the default
 	/// nodule type for a particular type of plug.
-	static void registerNodule( const std::string &noduleTypeName, NoduleCreator creator, IECore::TypeId plugType = IECore::InvalidTypeId );
+	static void registerNodule(
+		const std::string &noduleTypeName, NoduleCreator creator, IECore::TypeId plugType = IECore::InvalidTypeId
+	);
 
 	std::string getToolTip( const IECore::LineSegment3f &line ) const override;
 
-	protected:
+protected:
 
 	explicit Nodule( Gaffer::PlugPtr plug );
 
@@ -93,11 +95,14 @@ class GAFFERUI_API Nodule : public ConnectionCreator
 	template<class T>
 	struct NoduleTypeDescription
 	{
-		NoduleTypeDescription( IECore::TypeId plugType = IECore::InvalidTypeId ) { Nodule::registerNodule( T::staticTypeName(), &creator, plugType ); };
+		NoduleTypeDescription( IECore::TypeId plugType = IECore::InvalidTypeId )
+		{
+			Nodule::registerNodule( T::staticTypeName(), &creator, plugType );
+		};
 		static NodulePtr creator( Gaffer::PlugPtr plug ) { return new T( plug ); };
 	};
 
-	private:
+private:
 
 	Gaffer::PlugPtr m_plug;
 

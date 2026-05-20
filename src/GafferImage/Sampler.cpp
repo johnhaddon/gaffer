@@ -43,7 +43,10 @@ using namespace Imath;
 using namespace Gaffer;
 using namespace GafferImage;
 
-Sampler::Sampler( const GafferImage::ImagePlug *plug, const std::string &channelName, const Imath::Box2i &sampleWindow, BoundingMode boundingMode )
+Sampler::Sampler(
+	const GafferImage::ImagePlug *plug, const std::string &channelName, const Imath::Box2i &sampleWindow,
+	BoundingMode boundingMode
+)
 	: m_plug( plug ),
 	  m_channelName( channelName ),
 	  m_boundingMode( boundingMode )
@@ -112,7 +115,8 @@ Sampler::Sampler( const GafferImage::ImagePlug *plug, const std::string &channel
 	m_dataCache.resize( m_cacheWidth * cacheHeight, nullptr );
 	m_dataCacheRaw.resize( m_cacheWidth * cacheHeight, nullptr );
 
-	m_cacheOriginIndex = ( m_cacheWindow.min.x >> ImagePlug::tileSizeLog2() ) + m_cacheWidth * ( m_cacheWindow.min.y >> ImagePlug::tileSizeLog2() );
+	m_cacheOriginIndex = ( m_cacheWindow.min.x >> ImagePlug::tileSizeLog2() ) +
+		m_cacheWidth * ( m_cacheWindow.min.y >> ImagePlug::tileSizeLog2() );
 }
 
 void Sampler::populate()

@@ -55,21 +55,17 @@ namespace
 
 void registerTool( const std::string &toolName, IECore::TypeId viewType, object toolCreator )
 {
-	Tool::registerTool(
-		toolName,
-		viewType,
-		[toolCreator]( View *view ) -> ToolPtr {
-			IECorePython::ScopedGILLock gilLock;
-			try
-			{
-				return extract<ToolPtr>( toolCreator( ViewPtr( view ) ) );
-			}
-			catch( const boost::python::error_already_set & )
-			{
-				IECorePython::ExceptionAlgo::translatePythonException();
-			}
+	Tool::registerTool( toolName, viewType, [toolCreator]( View *view ) -> ToolPtr {
+		IECorePython::ScopedGILLock gilLock;
+		try
+		{
+			return extract<ToolPtr>( toolCreator( ViewPtr( view ) ) );
 		}
-	);
+		catch( const boost::python::error_already_set & )
+		{
+			IECorePython::ExceptionAlgo::translatePythonException();
+		}
+	} );
 }
 
 boost::python::list registeredTools( IECore::TypeId viewType )

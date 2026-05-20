@@ -62,13 +62,12 @@ IECore::InternedString g_scenePath( "scene:path" );
 
 } // namespace
 
-ProcessMessageHandler::ProcessMessageHandler( IECore::MessageHandlerPtr handler ) : IECore::FilteredMessageHandler( handler )
+ProcessMessageHandler::ProcessMessageHandler( IECore::MessageHandlerPtr handler )
+	: IECore::FilteredMessageHandler( handler )
 {
 }
 
-ProcessMessageHandler::~ProcessMessageHandler()
-{
-}
+ProcessMessageHandler::~ProcessMessageHandler() {}
 
 void ProcessMessageHandler::handle( Level level, const string &context, const string &message )
 {
@@ -87,10 +86,8 @@ void ProcessMessageHandler::handle( Level level, const string &context, const st
 
 		if( auto path = p->context()->getIfExists<std::vector<IECore::InternedString>>( g_scenePath ) )
 		{
-			std::string strPath = std::string( "/" ) + join( *path | transformed( []( const IECore::InternedString &s ) {
-									  return s.string();
-								  } ),
-															 "/" );
+			std::string strPath = std::string( "/" ) +
+				join( *path | transformed( []( const IECore::InternedString &s ) { return s.string(); } ), "/" );
 			ss << ", path: '" << strPath << "'";
 		}
 

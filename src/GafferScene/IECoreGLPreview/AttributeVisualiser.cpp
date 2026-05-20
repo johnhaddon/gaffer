@@ -54,15 +54,13 @@ AttributeVisualisers &visualisers()
 
 } // namespace
 
-AttributeVisualiser::AttributeVisualiser()
-{
-}
+AttributeVisualiser::AttributeVisualiser() {}
 
-AttributeVisualiser::~AttributeVisualiser()
-{
-}
+AttributeVisualiser::~AttributeVisualiser() {}
 
-Visualisations AttributeVisualiser::allVisualisations( const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state )
+Visualisations AttributeVisualiser::allVisualisations(
+	const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state
+)
 {
 	const AttributeVisualisers &v = visualisers();
 

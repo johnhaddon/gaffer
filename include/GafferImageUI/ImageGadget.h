@@ -94,7 +94,7 @@ namespace GafferImageUI
 class GAFFERIMAGEUI_API ImageGadget : public GafferUI::Gadget
 {
 
-	public:
+public:
 
 	ImageGadget();
 	~ImageGadget() override;
@@ -177,13 +177,13 @@ class GAFFERIMAGEUI_API ImageGadget : public GafferUI::Gadget
 	void setHighlightID( uint32_t id );
 	uint32_t getHighlightID();
 
-	protected:
+protected:
 
 	void renderLayer( Layer layer, const GafferUI::Style *style, RenderReason reason ) const override;
 	unsigned layerMask() const override;
 	Imath::Box3f renderBound() const override;
 
-	private:
+private:
 
 	// Image and context. We must monitor these so
 	// that dirtying of the plug or changes to the context
@@ -256,7 +256,8 @@ class GAFFERIMAGEUI_API ImageGadget : public GafferUI::Gadget
 	struct TileIndex
 	{
 		TileIndex( const Imath::V2i &tileOrigin, IECore::InternedString channelName )
-			: tileOrigin( tileOrigin ), channelName( channelName )
+			: tileOrigin( tileOrigin ),
+			  channelName( channelName )
 		{
 		}
 
@@ -308,7 +309,7 @@ class GAFFERIMAGEUI_API ImageGadget : public GafferUI::Gadget
 		// Called from the UI thread.
 		const IECoreGL::Texture *texture( bool &active );
 
-		private:
+	private:
 
 		IECore::MurmurHash m_channelDataHash;
 		IECore::ConstFloatVectorDataPtr m_channelDataToConvert;
@@ -336,7 +337,9 @@ class GAFFERIMAGEUI_API ImageGadget : public GafferUI::Gadget
 
 	void visibilityChanged();
 	void renderTiles( bool ids = false ) const;
-	void renderText( const std::string &text, const Imath::V2f &position, const Imath::V2f &alignment, const GafferUI::Style *style ) const;
+	void renderText(
+		const std::string &text, const Imath::V2f &position, const Imath::V2f &alignment, const GafferUI::Style *style
+	) const;
 
 	BlendMode m_blendMode;
 

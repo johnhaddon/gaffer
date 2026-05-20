@@ -67,23 +67,35 @@ const IECore::InternedString g_inspectorContextPropertyName( "inspector:context"
 IE_CORE_DEFINERUNTIMETYPED( ScenePath );
 
 ScenePath::ScenePath( ScenePlugPtr scene, Gaffer::ContextPtr context, Gaffer::PathFilterPtr filter )
-	: Path( filter ), m_node( scene ? scene->node() : nullptr ), m_scene( scene ), m_context( context )
+	: Path( filter ),
+	  m_node( scene ? scene->node() : nullptr ),
+	  m_scene( scene ),
+	  m_context( context )
 {
 }
 
-ScenePath::ScenePath( ScenePlugPtr scene, Gaffer::ContextPtr context, const std::string &path, Gaffer::PathFilterPtr filter )
-	: Path( path, filter ), m_node( scene ? scene->node() : nullptr ), m_scene( scene ), m_context( context )
+ScenePath::ScenePath(
+	ScenePlugPtr scene, Gaffer::ContextPtr context, const std::string &path, Gaffer::PathFilterPtr filter
+)
+	: Path( path, filter ),
+	  m_node( scene ? scene->node() : nullptr ),
+	  m_scene( scene ),
+	  m_context( context )
 {
 }
 
-ScenePath::ScenePath( ScenePlugPtr scene, Gaffer::ContextPtr context, const Names &names, const IECore::InternedString &root, Gaffer::PathFilterPtr filter )
-	: Path( names, root, filter ), m_node( scene ? scene->node() : nullptr ), m_scene( scene ), m_context( context )
+ScenePath::ScenePath(
+	ScenePlugPtr scene, Gaffer::ContextPtr context, const Names &names, const IECore::InternedString &root,
+	Gaffer::PathFilterPtr filter
+)
+	: Path( names, root, filter ),
+	  m_node( scene ? scene->node() : nullptr ),
+	  m_scene( scene ),
+	  m_context( context )
 {
 }
 
-ScenePath::~ScenePath()
-{
-}
+ScenePath::~ScenePath() {}
 
 void ScenePath::setScene( ScenePlugPtr scene )
 {
@@ -99,7 +111,8 @@ void ScenePath::setScene( ScenePlugPtr scene )
 
 	if( m_node && havePathChangedSignal() )
 	{
-		m_plugDirtiedConnection = m_node->plugDirtiedSignal().connect( boost::bind( &ScenePath::plugDirtied, this, ::_1 ) );
+		m_plugDirtiedConnection =
+			m_node->plugDirtiedSignal().connect( boost::bind( &ScenePath::plugDirtied, this, ::_1 ) );
 	}
 
 	emitPathChanged();
@@ -124,7 +137,8 @@ void ScenePath::setContext( Gaffer::ContextPtr context )
 
 	if( havePathChangedSignal() )
 	{
-		m_contextChangedConnection = context->changedSignal().connect( boost::bind( &ScenePath::contextChanged, this, ::_2 ) );
+		m_contextChangedConnection =
+			context->changedSignal().connect( boost::bind( &ScenePath::contextChanged, this, ::_2 ) );
 	}
 
 	m_context = context;
@@ -168,7 +182,9 @@ void ScenePath::propertyNames( std::vector<IECore::InternedString> &names, const
 	names.push_back( g_inspectorContextPropertyName );
 }
 
-Gaffer::ConstContextPtr ScenePath::contextProperty( const IECore::InternedString &name, const IECore::Canceller *canceller ) const
+Gaffer::ConstContextPtr ScenePath::contextProperty(
+	const IECore::InternedString &name, const IECore::Canceller *canceller
+) const
 {
 	if( name == g_inspectorContextPropertyName )
 	{
@@ -210,7 +226,9 @@ void ScenePath::doChildren( std::vector<PathPtr> &children, const IECore::Cancel
 	for( std::vector<InternedString>::const_iterator it = childNames.begin(), eIt = childNames.end(); it != eIt; ++it )
 	{
 		childPath.back() = *it;
-		children.push_back( new ScenePath( m_scene, m_context, childPath, root(), const_cast<PathFilter *>( getFilter() ) ) );
+		children.push_back(
+			new ScenePath( m_scene, m_context, childPath, root(), const_cast<PathFilter *>( getFilter() ) )
+		);
 	}
 }
 
@@ -219,9 +237,11 @@ void ScenePath::pathChangedSignalCreated()
 	Path::pathChangedSignalCreated();
 	if( m_node )
 	{
-		m_plugDirtiedConnection = m_node->plugDirtiedSignal().connect( boost::bind( &ScenePath::plugDirtied, this, ::_1 ) );
+		m_plugDirtiedConnection =
+			m_node->plugDirtiedSignal().connect( boost::bind( &ScenePath::plugDirtied, this, ::_1 ) );
 	}
-	m_contextChangedConnection = m_context->changedSignal().connect( boost::bind( &ScenePath::contextChanged, this, ::_2 ) );
+	m_contextChangedConnection =
+		m_context->changedSignal().connect( boost::bind( &ScenePath::contextChanged, this, ::_2 ) );
 }
 
 void ScenePath::contextChanged( const IECore::InternedString &key )
@@ -237,7 +257,9 @@ void ScenePath::plugDirtied( Gaffer::Plug *plug )
 	}
 }
 
-Gaffer::PathFilterPtr ScenePath::createStandardFilter( const std::vector<std::string> &setNames, const std::string &setsLabel )
+Gaffer::PathFilterPtr ScenePath::createStandardFilter(
+	const std::vector<std::string> &setNames, const std::string &setsLabel
+)
 {
 	if( !setNames.size() )
 	{

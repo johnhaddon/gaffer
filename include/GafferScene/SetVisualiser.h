@@ -62,7 +62,7 @@ namespace GafferScene
 class GAFFERSCENE_API SetVisualiser : public AttributeProcessor
 {
 
-	public:
+public:
 
 	explicit SetVisualiser( const std::string &name = defaultName<SetVisualiser>() );
 	~SetVisualiser() override;
@@ -83,16 +83,18 @@ class GAFFERSCENE_API SetVisualiser : public AttributeProcessor
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
 	void hash( const Gaffer::ValuePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
 	void compute( Gaffer::ValuePlug *output, const Gaffer::Context *context ) const override;
 
 	bool affectsProcessedAttributes( const Gaffer::Plug *input ) const override;
 	void hashProcessedAttributes( const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	IECore::ConstCompoundObjectPtr computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const override;
+	IECore::ConstCompoundObjectPtr computeProcessedAttributes(
+		const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes
+	) const override;
 
-	private:
+private:
 
 	Gaffer::AtomicCompoundDataPlug *outSetsPlug();
 	const Gaffer::AtomicCompoundDataPlug *outSetsPlug() const;

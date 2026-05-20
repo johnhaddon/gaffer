@@ -49,16 +49,13 @@ GAFFER_NODE_DEFINE_TYPE( PointsType );
 
 size_t PointsType::g_firstPlugIndex = 0;
 
-PointsType::PointsType( const std::string &name )
-	: ObjectProcessor( name, PathMatcher::EveryMatch )
+PointsType::PointsType( const std::string &name ) : ObjectProcessor( name, PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "type", Plug::In, "" ) );
 }
 
-PointsType::~PointsType()
-{
-}
+PointsType::~PointsType() {}
 
 Gaffer::StringPlug *PointsType::typePlug()
 {
@@ -72,17 +69,20 @@ const Gaffer::StringPlug *PointsType::typePlug() const
 
 bool PointsType::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return ObjectProcessor::affectsProcessedObject( input ) ||
-		input == typePlug();
+	return ObjectProcessor::affectsProcessedObject( input ) || input == typePlug();
 }
 
-void PointsType::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void PointsType::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ObjectProcessor::hashProcessedObject( path, context, h );
 	typePlug()->hash( h );
 }
 
-IECore::ConstObjectPtr PointsType::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr PointsType::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	const PointsPrimitive *inputPoints = runTimeCast<const PointsPrimitive>( inputObject );
 	if( !inputPoints )

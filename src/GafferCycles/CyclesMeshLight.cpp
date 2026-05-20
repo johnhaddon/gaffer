@@ -69,7 +69,8 @@ CyclesMeshLight::CyclesMeshLight( const std::string &name )
 	attributes->filterPlug()->setInput( filterPlug() );
 	for( NameValuePlug::Iterator it( attributes->attributesPlug() ); !it.done(); ++it )
 	{
-		if( boost::starts_with( ( *it )->getName().string(), "cycles:visibility:" ) && ( *it )->getName() != "cycles:visibility:camera" )
+		if( boost::starts_with( ( *it )->getName().string(), "cycles:visibility:" ) &&
+			( *it )->getName() != "cycles:visibility:camera" )
 		{
 			( *it )->enabledPlug()->setValue( true );
 			( *it )->valuePlug<BoolPlug>()->setValue( false );
@@ -98,7 +99,8 @@ CyclesMeshLight::CyclesMeshLight( const std::string &name )
 
 	PlugPtr parametersPlug = shader->parametersPlug()->createCounterpart( "parameters", Plug::In );
 	addChild( parametersPlug );
-	for( Plug::Iterator srcIt( parametersPlug.get() ), dstIt( shader->parametersPlug() ); !srcIt.done(); ++srcIt, ++dstIt )
+	for( Plug::Iterator srcIt( parametersPlug.get() ), dstIt( shader->parametersPlug() ); !srcIt.done();
+		 ++srcIt, ++dstIt )
 	{
 		( *dstIt )->setInput( *srcIt );
 		// We don't need the parameters to be dynamic, because we create the
@@ -145,6 +147,4 @@ CyclesMeshLight::CyclesMeshLight( const std::string &name )
 	outPlug()->setFlags( Plug::Serialisable, false );
 }
 
-CyclesMeshLight::~CyclesMeshLight()
-{
-}
+CyclesMeshLight::~CyclesMeshLight() {}

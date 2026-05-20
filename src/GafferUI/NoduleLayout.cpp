@@ -111,7 +111,10 @@ GadgetPtr createCustomGadget( const InternedString &gadgetType, GraphComponentPt
 	const CustomGadgetCreatorMap::const_iterator it = m.find( gadgetType );
 	if( it == m.end() )
 	{
-		IECore::msg( IECore::Msg::Warning, "NoduleLayout", fmt::format( "No custom gadget \"{}\" registered for `{}`", gadgetType.string(), parent->fullName() ) );
+		IECore::msg(
+			IECore::Msg::Warning, "NoduleLayout",
+			fmt::format( "No custom gadget \"{}\" registered for `{}`", gadgetType.string(), parent->fullName() )
+		);
 		return nullptr;
 	}
 	return it->second( parent );
@@ -121,13 +124,15 @@ GadgetPtr createCustomGadget( const InternedString &gadgetType, GraphComponentPt
 
 int layoutIndex( const GraphComponent *parent, const InternedString &gadgetName, int defaultValue )
 {
-	ConstIntDataPtr i = Metadata::value<IntData>( parent, "noduleLayout:customGadget:" + gadgetName.string() + ":index" );
+	ConstIntDataPtr i =
+		Metadata::value<IntData>( parent, "noduleLayout:customGadget:" + gadgetName.string() + ":index" );
 	return i ? i->readable() : defaultValue;
 }
 
 std::string section( const GraphComponent *parent, const InternedString &gadgetName )
 {
-	ConstStringDataPtr s = Metadata::value<StringData>( parent, "noduleLayout:customGadget:" + gadgetName.string() + ":section" );
+	ConstStringDataPtr s =
+		Metadata::value<StringData>( parent, "noduleLayout:customGadget:" + gadgetName.string() + ":section" );
 	return s ? s->readable() : "top";
 }
 
@@ -138,7 +143,8 @@ bool visible( const GraphComponent *parent, const InternedString &gadgetName, IE
 		return false;
 	}
 
-	if( ConstBoolDataPtr b = Metadata::value<BoolData>( parent, "noduleLayout:customGadget:" + gadgetName.string() + ":visible" ) )
+	if( ConstBoolDataPtr b =
+			Metadata::value<BoolData>( parent, "noduleLayout:customGadget:" + gadgetName.string() + ":visible" ) )
 	{
 		return b->readable();
 	}
@@ -203,7 +209,8 @@ InternedString gadgetType( const GraphComponent *parent, const GadgetKey &gadget
 	else
 	{
 		const InternedString &name = std::get<InternedString>( gadgetKey );
-		ConstStringDataPtr d = Metadata::value<StringData>( parent, "noduleLayout:customGadget:" + name.string() + ":gadgetType" );
+		ConstStringDataPtr d =
+			Metadata::value<StringData>( parent, "noduleLayout:customGadget:" + name.string() + ":gadgetType" );
 		return d ? d->readable() : "";
 	}
 }
@@ -383,14 +390,13 @@ bool affectsDirection( IECore::InternedString key, IECore::InternedString sectio
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( NoduleLayout );
 
 NoduleLayout::NoduleLayout( Gaffer::GraphComponentPtr parent, IECore::InternedString section )
-	: Gadget(), m_parent( parent ), m_section( section )
+	: Gadget(),
+	  m_parent( parent ),
+	  m_section( section )
 {
 	LinearContainerPtr noduleContainer = new LinearContainer(
-		"__noduleContainer",
-		orientation( m_parent.get(), m_section ),
-		LinearContainer::Centre,
-		spacing( m_parent.get(), m_section ),
-		direction( m_parent.get(), m_section )
+		"__noduleContainer", orientation( m_parent.get(), m_section ), LinearContainer::Centre,
+		spacing( m_parent.get(), m_section ), direction( m_parent.get(), m_section )
 	);
 
 	addChild( noduleContainer );
@@ -401,15 +407,17 @@ NoduleLayout::NoduleLayout( Gaffer::GraphComponentPtr parent, IECore::InternedSt
 	Node *node = runTimeCast<Node>( parent.get() );
 	node = node ? node : parent->ancestor<Node>();
 
-	Metadata::plugValueChangedSignal( node ).connect( boost::bind( &NoduleLayout::plugMetadataChanged, this, ::_1, ::_2 ) );
-	Metadata::nodeValueChangedSignal( node ).connect( boost::bind( &NoduleLayout::nodeMetadataChanged, this, ::_1, ::_2 ) );
+	Metadata::plugValueChangedSignal( node ).connect(
+		boost::bind( &NoduleLayout::plugMetadataChanged, this, ::_1, ::_2 )
+	);
+	Metadata::nodeValueChangedSignal( node ).connect(
+		boost::bind( &NoduleLayout::nodeMetadataChanged, this, ::_1, ::_2 )
+	);
 
 	updateNoduleLayout();
 }
 
-NoduleLayout::~NoduleLayout()
-{
-}
+NoduleLayout::~NoduleLayout() {}
 
 Nodule *NoduleLayout::nodule( const Gaffer::Plug *plug )
 {
@@ -497,11 +505,8 @@ void NoduleLayout::plugMetadataChanged( const Gaffer::Plug *plug, IECore::Intern
 {
 	if( plug->parent() == m_parent.get() )
 	{
-		if(
-			key == g_sectionKey || key == g_indexKey || key == g_visibleKey ||
-			key == g_noduleTypeKey ||
-			key == g_nodulePositionKey || key == g_noduleIndexKey
-		)
+		if( key == g_sectionKey || key == g_indexKey || key == g_visibleKey || key == g_noduleTypeKey ||
+			key == g_nodulePositionKey || key == g_noduleIndexKey )
 		{
 			updateNoduleLayout();
 		}

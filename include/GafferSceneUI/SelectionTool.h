@@ -55,7 +55,7 @@ IE_CORE_FORWARDDECLARE( SceneGadget )
 class GAFFERSCENEUI_API SelectionTool : public GafferUI::Tool
 {
 
-	public:
+public:
 
 	explicit SelectionTool( SceneView *view, const std::string &name = defaultName<SelectionTool>() );
 
@@ -66,10 +66,8 @@ class GAFFERSCENEUI_API SelectionTool : public GafferUI::Tool
 	Gaffer::StringPlug *selectModePlug();
 	const Gaffer::StringPlug *selectModePlug() const;
 
-	using SelectFunction = std::function<GafferScene::ScenePlug::ScenePath(
-		const GafferScene::ScenePlug *,
-		const GafferScene::ScenePlug::ScenePath &
-	)>;
+	using SelectFunction = std::function<
+		GafferScene::ScenePlug::ScenePath( const GafferScene::ScenePlug *, const GafferScene::ScenePlug::ScenePath & )>;
 	// Registers a select mode identified by `name`. `function` must accept
 	// the scene from which a selection will be made and the `ScenePath` the user
 	// initially selected. It returns the `ScenePath` to use as the actual selection.
@@ -79,7 +77,7 @@ class GAFFERSCENEUI_API SelectionTool : public GafferUI::Tool
 	static std::vector<std::string> registeredSelectModes();
 	static void deregisterSelectMode( const std::string &mode );
 
-	private:
+private:
 
 	static ToolDescription<SelectionTool, SceneView> g_toolDescription;
 

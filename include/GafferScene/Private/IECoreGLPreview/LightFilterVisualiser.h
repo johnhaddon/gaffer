@@ -59,7 +59,7 @@ IE_CORE_FORWARDDECLARE( LightFilterVisualiser )
 class GAFFERSCENE_API LightFilterVisualiser : public IECore::RefCounted
 {
 
-	public:
+public:
 
 	IE_CORE_DECLAREMEMBERPTR( LightFilterVisualiser )
 
@@ -69,10 +69,8 @@ class GAFFERSCENE_API LightFilterVisualiser : public IECore::RefCounted
 	/// Must be implemented by derived classes to visualise
 	/// the light filter contained within `filterShaderNetwork`.
 	virtual Visualisations visualise(
-		const IECore::InternedString &attributeName,
-		const IECoreScene::ShaderNetwork *filterShaderNetwork,
-		const IECoreScene::ShaderNetwork *lightShaderNetwork,
-		const IECore::CompoundObject *attributes,
+		const IECore::InternedString &attributeName, const IECoreScene::ShaderNetwork *filterShaderNetwork,
+		const IECoreScene::ShaderNetwork *lightShaderNetwork, const IECore::CompoundObject *attributes,
 		IECoreGL::ConstStatePtr &state
 	) const = 0;
 
@@ -80,8 +78,7 @@ class GAFFERSCENE_API LightFilterVisualiser : public IECore::RefCounted
 	/// For instance, `registerLightFilterVisualiser( "ai:lightFilter", "gobo", visualiser )`
 	/// would register a visualiser for an Arnold gobo light filter.
 	static void registerLightFilterVisualiser(
-		const IECore::InternedString &attributeName,
-		const IECore::InternedString &shaderName,
+		const IECore::InternedString &attributeName, const IECore::InternedString &shaderName,
 		ConstLightFilterVisualiserPtr visualiser
 	);
 
@@ -89,17 +86,16 @@ class GAFFERSCENE_API LightFilterVisualiser : public IECore::RefCounted
 	/// returning a map of renderable groups and some extra state. The
 	/// return value may be left empty and/or the state may be left null if
 	/// no registered visualisers do anything with these attributes.
-	static Visualisations allVisualisations(
-		const IECore::CompoundObject *attributes,
-		IECoreGL::ConstStatePtr &state
-	);
+	static Visualisations allVisualisations( const IECore::CompoundObject *attributes, IECoreGL::ConstStatePtr &state );
 
-	protected:
+protected:
 
 	template<typename FilterVisualiserType>
 	struct LightFilterVisualiserDescription
 	{
-		LightFilterVisualiserDescription( const IECore::InternedString &attributeName, const IECore::InternedString &shaderName )
+		LightFilterVisualiserDescription(
+			const IECore::InternedString &attributeName, const IECore::InternedString &shaderName
+		)
 		{
 			registerLightFilterVisualiser( attributeName, shaderName, new FilterVisualiserType() );
 		}

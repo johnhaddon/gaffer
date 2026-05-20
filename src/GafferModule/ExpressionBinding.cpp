@@ -72,10 +72,7 @@ tuple getExpression( Expression &e )
 
 struct ExpressionEngineCreator
 {
-	ExpressionEngineCreator( object fn )
-		: m_fn( fn )
-	{
-	}
+	ExpressionEngineCreator( object fn ) : m_fn( fn ) {}
 
 	Expression::EnginePtr operator () ()
 	{
@@ -84,7 +81,7 @@ struct ExpressionEngineCreator
 		return result;
 	}
 
-	private:
+private:
 
 	object m_fn;
 };
@@ -125,7 +122,10 @@ ValuePlug::CachePolicy defaultExecuteCachePolicy()
 		}
 		else
 		{
-			IECore::msg( IECore::Msg::Warning, "Expression", "Invalid value for GAFFER_PYTHONEXPRESSION_CACHEPOLICY. Must be TaskCollaboration or Default." );
+			IECore::msg(
+				IECore::Msg::Warning, "Expression",
+				"Invalid value for GAFFER_PYTHONEXPRESSION_CACHEPOLICY. Must be TaskCollaboration or Default."
+			);
 		}
 	}
 
@@ -135,14 +135,14 @@ ValuePlug::CachePolicy defaultExecuteCachePolicy()
 
 class EngineWrapper : public IECorePython::RefCountedWrapper<Expression::Engine>
 {
-	public:
+public:
 
-	EngineWrapper( PyObject *self )
-		: IECorePython::RefCountedWrapper<Expression::Engine>( self )
-	{
-	}
+	EngineWrapper( PyObject *self ) : IECorePython::RefCountedWrapper<Expression::Engine>( self ) {}
 
-	void parse( Expression *node, const std::string &expression, std::vector<ValuePlug *> &inputs, std::vector<ValuePlug *> &outputs, std::vector<IECore::InternedString> &contextVariables ) override
+	void parse(
+		Expression *node, const std::string &expression, std::vector<ValuePlug *> &inputs,
+		std::vector<ValuePlug *> &outputs, std::vector<IECore::InternedString> &contextVariables
+	) override
 	{
 		if( isSubclassed() )
 		{
@@ -170,7 +170,9 @@ class EngineWrapper : public IECorePython::RefCountedWrapper<Expression::Engine>
 		throw IECore::Exception( "Engine::parse() python method not defined" );
 	}
 
-	IECore::ConstObjectVectorPtr execute( const Context *context, const std::vector<const ValuePlug *> &proxyInputs ) const override
+	IECore::ConstObjectVectorPtr execute(
+		const Context *context, const std::vector<const ValuePlug *> &proxyInputs
+	) const override
 	{
 		if( isSubclassed() )
 		{
@@ -181,7 +183,8 @@ class EngineWrapper : public IECorePython::RefCountedWrapper<Expression::Engine>
 				if( f )
 				{
 					list pythonProxyInputs;
-					for( std::vector<const ValuePlug *>::const_iterator it = proxyInputs.begin(); it != proxyInputs.end(); it++ )
+					for( std::vector<const ValuePlug *>::const_iterator it = proxyInputs.begin();
+						 it != proxyInputs.end(); it++ )
 					{
 						pythonProxyInputs.append( PlugPtr( const_cast<ValuePlug *>( *it ) ) );
 					}
@@ -199,12 +202,11 @@ class EngineWrapper : public IECorePython::RefCountedWrapper<Expression::Engine>
 		throw IECore::Exception( "Engine::execute() python method not defined" );
 	}
 
-	ValuePlug::CachePolicy executeCachePolicy() const override
-	{
-		return g_cachePolicy;
-	}
+	ValuePlug::CachePolicy executeCachePolicy() const override { return g_cachePolicy; }
 
-	void apply( ValuePlug *proxyOutput, const ValuePlug *topLevelProxyOutput, const IECore::Object *value ) const override
+	void apply(
+		ValuePlug *proxyOutput, const ValuePlug *topLevelProxyOutput, const IECore::Object *value
+	) const override
 	{
 		if( isSubclassed() )
 		{
@@ -214,7 +216,8 @@ class EngineWrapper : public IECorePython::RefCountedWrapper<Expression::Engine>
 				object f = this->methodOverride( "apply" );
 				if( f )
 				{
-					f( ValuePlugPtr( proxyOutput ), ValuePlugPtr( const_cast<ValuePlug *>( topLevelProxyOutput ) ), IECore::ObjectPtr( const_cast<IECore::Object *>( value ) ) );
+					f( ValuePlugPtr( proxyOutput ), ValuePlugPtr( const_cast<ValuePlug *>( topLevelProxyOutput ) ),
+					   IECore::ObjectPtr( const_cast<IECore::Object *>( value ) ) );
 					return;
 				}
 			}
@@ -237,7 +240,9 @@ class EngineWrapper : public IECorePython::RefCountedWrapper<Expression::Engine>
 				object f = this->methodOverride( "identifier" );
 				if( f )
 				{
-					object result = f( ExpressionPtr( const_cast<Expression *>( node ) ), ValuePlugPtr( const_cast<ValuePlug *>( plug ) ) );
+					object result =
+						f( ExpressionPtr( const_cast<Expression *>( node ) ),
+						   ValuePlugPtr( const_cast<ValuePlug *>( plug ) ) );
 					return extract<std::string>( result );
 				}
 			}
@@ -250,7 +255,10 @@ class EngineWrapper : public IECorePython::RefCountedWrapper<Expression::Engine>
 		throw IECore::Exception( "Engine::identifier() python method not defined" );
 	}
 
-	std::string replace( const Expression *node, const std::string &expression, const std::vector<const ValuePlug *> &oldPlugs, const std::vector<const ValuePlug *> &newPlugs ) const override
+	std::string replace(
+		const Expression *node, const std::string &expression, const std::vector<const ValuePlug *> &oldPlugs,
+		const std::vector<const ValuePlug *> &newPlugs
+	) const override
 	{
 		if( isSubclassed() )
 		{
@@ -261,16 +269,20 @@ class EngineWrapper : public IECorePython::RefCountedWrapper<Expression::Engine>
 				if( f )
 				{
 					list pythonOldPlugs, pythonNewPlugs;
-					for( std::vector<const ValuePlug *>::const_iterator it = oldPlugs.begin(); it != oldPlugs.end(); it++ )
+					for( std::vector<const ValuePlug *>::const_iterator it = oldPlugs.begin(); it != oldPlugs.end();
+						 it++ )
 					{
 						pythonOldPlugs.append( PlugPtr( const_cast<ValuePlug *>( *it ) ) );
 					}
-					for( std::vector<const ValuePlug *>::const_iterator it = newPlugs.begin(); it != newPlugs.end(); it++ )
+					for( std::vector<const ValuePlug *>::const_iterator it = newPlugs.begin(); it != newPlugs.end();
+						 it++ )
 					{
 						pythonNewPlugs.append( PlugPtr( const_cast<ValuePlug *>( *it ) ) );
 					}
 
-					object result = f( ExpressionPtr( const_cast<Expression *>( node ) ), expression, pythonOldPlugs, pythonNewPlugs );
+					object result =
+						f( ExpressionPtr( const_cast<Expression *>( node ) ), expression, pythonOldPlugs,
+						   pythonNewPlugs );
 					return extract<std::string>( result );
 				}
 			}
@@ -345,7 +357,9 @@ tuple languages()
 class ExpressionSerialiser : public NodeSerialiser
 {
 
-	void moduleDependencies( const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation ) const override
+	void moduleDependencies(
+		const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation
+	) const override
 	{
 		const Expression *e = static_cast<const Expression *>( graphComponent );
 		std::string language;
@@ -358,7 +372,9 @@ class ExpressionSerialiser : public NodeSerialiser
 		}
 	}
 
-	std::string postScript( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const override
+	std::string postScript(
+		const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+	) const override
 	{
 		// We delay the serialisation of the values for the engine and expression plugs
 		// until now so that `Expression::plugSet()` can successfully restore the engine
@@ -392,15 +408,16 @@ class ExpressionSerialiser : public NodeSerialiser
 void GafferModule::bindExpression()
 {
 
-	scope s = DependencyNodeClass<Expression>()
-				  .def( "languages", &languages )
-				  .staticmethod( "languages" )
-				  .def( "defaultExpression", &Expression::defaultExpression )
-				  .staticmethod( "defaultExpression" )
-				  .def( "setExpression", &setExpression, ( arg( "expression" ), arg( "language" ) = "python" ) )
-				  .def( "getExpression", &getExpression )
-				  .def( "expressionChangedSignal", &Expression::expressionChangedSignal, return_internal_reference<1>() )
-				  .def( "identifier", &Expression::identifier );
+	scope s =
+		DependencyNodeClass<Expression>()
+			.def( "languages", &languages )
+			.staticmethod( "languages" )
+			.def( "defaultExpression", &Expression::defaultExpression )
+			.staticmethod( "defaultExpression" )
+			.def( "setExpression", &setExpression, ( arg( "expression" ), arg( "language" ) = "python" ) )
+			.def( "getExpression", &getExpression )
+			.def( "expressionChangedSignal", &Expression::expressionChangedSignal, return_internal_reference<1>() )
+			.def( "identifier", &Expression::identifier );
 
 	IECorePython::RefCountedClass<Expression::Engine, IECore::RefCounted, EngineWrapper>( "Engine" )
 		.def( init<>() )
@@ -409,7 +426,9 @@ void GafferModule::bindExpression()
 		.def( "registeredEngines", &EngineWrapper::registeredEngines )
 		.staticmethod( "registeredEngines" );
 
-	SignalClass<Expression::ExpressionChangedSignal, DefaultSignalCaller<Expression::ExpressionChangedSignal>, ExpressionChangedSlotCaller>( "ExpressionChangedSignal" );
+	SignalClass<
+		Expression::ExpressionChangedSignal, DefaultSignalCaller<Expression::ExpressionChangedSignal>,
+		ExpressionChangedSlotCaller>( "ExpressionChangedSignal" );
 
 	Serialisation::registerSerialiser( Expression::staticTypeId(), new ExpressionSerialiser );
 }

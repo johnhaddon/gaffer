@@ -52,12 +52,13 @@ GAFFER_NODE_DEFINE_TYPE( ReflectionConstraint );
 
 size_t ReflectionConstraint::g_firstPlugIndex = 0;
 
-ReflectionConstraint::ReflectionConstraint( const std::string &name )
-	: Constraint( name )
+ReflectionConstraint::ReflectionConstraint( const std::string &name ) : Constraint( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "camera" ) );
-	addChild( new IntPlug( "distanceMode", Plug::In, (int)DistanceMode::Camera, (int)DistanceMode::Camera, (int)DistanceMode::Constant ) );
+	addChild( new IntPlug(
+		"distanceMode", Plug::In, (int)DistanceMode::Camera, (int)DistanceMode::Camera, (int)DistanceMode::Constant
+	) );
 	addChild( new FloatPlug( "distance", Plug::In, 1.0f ) );
 	addChild( new BoolPlug( "aimEnabled" ) );
 	addChild( new V3fPlug( "aim", Plug::In, V3f( 0, 0, -1 ) ) );
@@ -65,9 +66,7 @@ ReflectionConstraint::ReflectionConstraint( const std::string &name )
 	addChild( new FloatPlug( "twist" ) );
 }
 
-ReflectionConstraint::~ReflectionConstraint()
-{
-}
+ReflectionConstraint::~ReflectionConstraint() {}
 
 Gaffer::StringPlug *ReflectionConstraint::cameraPlug()
 {
@@ -141,15 +140,9 @@ const Gaffer::FloatPlug *ReflectionConstraint::twistPlug() const
 
 bool ReflectionConstraint::affectsConstraint( const Gaffer::Plug *input ) const
 {
-	return input == cameraPlug() ||
-		input == inPlug()->existsPlug() ||
-		input == inPlug()->transformPlug() ||
-		input == distanceModePlug() ||
-		input == distancePlug() ||
-		input == aimEnabledPlug() ||
-		input->parent() == aimPlug() ||
-		input->parent() == upPlug() ||
-		input == twistPlug();
+	return input == cameraPlug() || input == inPlug()->existsPlug() || input == inPlug()->transformPlug() ||
+		input == distanceModePlug() || input == distancePlug() || input == aimEnabledPlug() ||
+		input->parent() == aimPlug() || input->parent() == upPlug() || input == twistPlug();
 }
 
 void ReflectionConstraint::hashConstraint( const Gaffer::Context *context, IECore::MurmurHash &h ) const
@@ -176,7 +169,9 @@ void ReflectionConstraint::hashConstraint( const Gaffer::Context *context, IECor
 	twistPlug()->hash( h );
 }
 
-Imath::M44f ReflectionConstraint::computeConstraint( const Imath::M44f &fullTargetTransform, const Imath::M44f &fullInputTransform, const Imath::M44f &inputTransform ) const
+Imath::M44f ReflectionConstraint::computeConstraint(
+	const Imath::M44f &fullTargetTransform, const Imath::M44f &fullInputTransform, const Imath::M44f &inputTransform
+) const
 {
 	// Get camera position
 
@@ -193,7 +188,9 @@ Imath::M44f ReflectionConstraint::computeConstraint( const Imath::M44f &fullTarg
 		{
 			return fullTargetTransform;
 		}
-		throw IECore::Exception( fmt::format( "Camera \"{}\" does not exist. Error may be suppressed using `ignoreMissingTarget`.", camera ) );
+		throw IECore::Exception(
+			fmt::format( "Camera \"{}\" does not exist. Error may be suppressed using `ignoreMissingTarget`.", camera )
+		);
 	}
 
 	const M44f fullCameraTransform = inPlug()->fullTransform( cameraPath );
@@ -234,10 +231,13 @@ Imath::M44f ReflectionConstraint::computeConstraint( const Imath::M44f &fullTarg
 		// with the new translation and rotation.
 		V3f s( 1 ), h( 0 ), r( 0 ), t( 0 );
 		Imath::extractSHRT( fullInputTransform, s, h, r, t );
-		const M44f rotationMatrix = rotationMatrixWithUpDir( aimPlug()->getValue(), -reflectionVector.normalized(), upPlug()->getValue() );
+		const M44f rotationMatrix =
+			rotationMatrixWithUpDir( aimPlug()->getValue(), -reflectionVector.normalized(), upPlug()->getValue() );
 		result.translate( translation );
 		result.shear( h );
-		result = M44f().setAxisAngle( reflectionVector.normalized(), IECore::degreesToRadians( twistPlug()->getValue() ) ) * result;
+		result =
+			M44f().setAxisAngle( reflectionVector.normalized(), IECore::degreesToRadians( twistPlug()->getValue() ) ) *
+			result;
 		result = rotationMatrix * result;
 		result.scale( s );
 	}

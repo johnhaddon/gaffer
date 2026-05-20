@@ -69,8 +69,15 @@ bool hasInput( const Plug *p )
 
 GAFFER_PLUG_DEFINE_TYPE( ArrayPlug )
 
-ArrayPlug::ArrayPlug( const std::string &name, Direction direction, ConstPlugPtr elementPrototype, size_t minSize, size_t maxSize, unsigned flags, bool resizeWhenInputsChange )
-	: Plug( name, direction, flags ), m_elementPrototype( elementPrototype ), m_minSize( minSize ), m_maxSize( std::max( maxSize, m_minSize ) ), m_resizeWhenInputsChange( resizeWhenInputsChange )
+ArrayPlug::ArrayPlug(
+	const std::string &name, Direction direction, ConstPlugPtr elementPrototype, size_t minSize, size_t maxSize,
+	unsigned flags, bool resizeWhenInputsChange
+)
+	: Plug( name, direction, flags ),
+	  m_elementPrototype( elementPrototype ),
+	  m_minSize( minSize ),
+	  m_maxSize( std::max( maxSize, m_minSize ) ),
+	  m_resizeWhenInputsChange( resizeWhenInputsChange )
 {
 	if( !m_elementPrototype )
 	{
@@ -84,9 +91,7 @@ ArrayPlug::ArrayPlug( const std::string &name, Direction direction, ConstPlugPtr
 	resize( m_minSize );
 }
 
-ArrayPlug::~ArrayPlug()
-{
-}
+ArrayPlug::~ArrayPlug() {}
 
 bool ArrayPlug::acceptsChild( const GraphComponent *potentialChild ) const
 {
@@ -131,7 +136,9 @@ void ArrayPlug::setInput( PlugPtr input )
 
 PlugPtr ArrayPlug::createCounterpart( const std::string &name, Direction direction ) const
 {
-	ArrayPlugPtr result = new ArrayPlug( name, direction, m_elementPrototype, m_minSize, m_maxSize, getFlags(), resizeWhenInputsChange() );
+	ArrayPlugPtr result = new ArrayPlug(
+		name, direction, m_elementPrototype, m_minSize, m_maxSize, getFlags(), resizeWhenInputsChange()
+	);
 	if( m_elementPrototype )
 	{
 		result->resize( children().size() );
@@ -160,8 +167,7 @@ void ArrayPlug::resize( size_t size )
 	{
 		throw IECore::Exception(
 			fmt::format(
-				"Invalid size {} requested for `{}` (minSize={}, maxSize={})",
-				size, fullName(), m_minSize, m_maxSize
+				"Invalid size {} requested for `{}` (minSize={}, maxSize={})", size, fullName(), m_minSize, m_maxSize
 			)
 		);
 	}
@@ -169,10 +175,7 @@ void ArrayPlug::resize( size_t size )
 	if( !m_elementPrototype )
 	{
 		throw IECore::Exception(
-			fmt::format(
-				"ArrayPlug `{}` was constructed without the required `elementPrototype`",
-				fullName()
-			)
+			fmt::format( "ArrayPlug `{}` was constructed without the required `elementPrototype`", fullName() )
 		);
 	}
 
@@ -224,7 +227,8 @@ void ArrayPlug::parentChanged( GraphComponent *oldParent )
 		return;
 	}
 
-	m_inputChangedConnection = node()->plugInputChangedSignal().connect( boost::bind( &ArrayPlug::inputChanged, this, ::_1 ) );
+	m_inputChangedConnection =
+		node()->plugInputChangedSignal().connect( boost::bind( &ArrayPlug::inputChanged, this, ::_1 ) );
 }
 
 void ArrayPlug::inputChanged( Gaffer::Plug *plug )
@@ -244,10 +248,7 @@ void ArrayPlug::inputChanged( Gaffer::Plug *plug )
 
 	if( const ScriptNode *script = ancestor<ScriptNode>() )
 	{
-		if(
-			script->currentActionStage() == Action::Undo ||
-			script->currentActionStage() == Action::Redo
-		)
+		if( script->currentActionStage() == Action::Undo || script->currentActionStage() == Action::Redo )
 		{
 			// If we're currently in an undo or redo, we don't
 			// need to do anything, because our previous actions

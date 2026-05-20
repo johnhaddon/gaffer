@@ -42,14 +42,19 @@ using namespace boost::python;
 
 namespace
 {
-float sampleBoxWrapper( GafferImage::Sampler &sampler, const Imath::V2f &p, float dx, float dy, const std::string &filter )
+float sampleBoxWrapper(
+	GafferImage::Sampler &sampler, const Imath::V2f &p, float dx, float dy, const std::string &filter
+)
 {
 	const OIIO::Filter2D *f = GafferImage::FilterAlgo::acquireFilter( filter );
 	std::vector<float> scratchMemory;
 	return GafferImage::FilterAlgo::sampleBox( sampler, p, dx, dy, f, scratchMemory );
 }
 
-float sampleParallelogramWrapper( GafferImage::Sampler &sampler, const Imath::V2f &p, const Imath::V2f &dpdx, const Imath::V2f &dpdy, const std::string &filter )
+float sampleParallelogramWrapper(
+	GafferImage::Sampler &sampler, const Imath::V2f &p, const Imath::V2f &dpdx, const Imath::V2f &dpdy,
+	const std::string &filter
+)
 {
 	const OIIO::Filter2D *f = GafferImage::FilterAlgo::acquireFilter( filter );
 	return GafferImage::FilterAlgo::sampleParallelogram( sampler, p, dpdx, dpdy, f );

@@ -56,9 +56,7 @@ OptionTweaks::OptionTweaks( const std::string &name ) : GlobalsProcessor( name )
 	addChild( new TweaksPlug( "tweaks" ) );
 }
 
-OptionTweaks::~OptionTweaks()
-{
-}
+OptionTweaks::~OptionTweaks() {}
 
 Gaffer::BoolPlug *OptionTweaks::ignoreMissingPlug()
 {
@@ -104,8 +102,7 @@ void OptionTweaks::hashProcessedGlobals( const Gaffer::Context *context, IECore:
 }
 
 IECore::ConstCompoundObjectPtr OptionTweaks::computeProcessedGlobals(
-	const Gaffer::Context *context,
-	const IECore::ConstCompoundObjectPtr inputGlobals
+	const Gaffer::Context *context, const IECore::ConstCompoundObjectPtr inputGlobals
 ) const
 {
 	const TweaksPlug *tweaksPlug = this->tweaksPlug();

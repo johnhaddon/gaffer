@@ -85,17 +85,15 @@ namespace Gaffer
 class GAFFER_API StringPlug : public ValuePlug
 {
 
-	public:
+public:
 
 	using ValueType = std::string;
 
 	GAFFER_PLUG_DECLARE_TYPE( Gaffer::StringPlug, StringPlugTypeId, ValuePlug );
 
 	explicit StringPlug(
-		const std::string &name = defaultName<StringPlug>(),
-		Direction direction = In,
-		const std::string &defaultValue = "",
-		unsigned flags = Default,
+		const std::string &name = defaultName<StringPlug>(), Direction direction = In,
+		const std::string &defaultValue = "", unsigned flags = Default,
 		unsigned substitutions = IECore::StringAlgo::AllSubstitutions
 	);
 	~StringPlug() override;
@@ -128,7 +126,7 @@ class GAFFER_API StringPlug : public ValuePlug
 	/// ValuePlug::hash( h )
 	using ValuePlug::hash;
 
-	private:
+private:
 
 	unsigned m_substitutions;
 };

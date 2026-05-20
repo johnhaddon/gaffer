@@ -165,17 +165,23 @@ const IECore::InternedString g_includeParentPlugMetadata( "plugSerialiser:includ
 
 } // namespace
 
-void PlugSerialiser::moduleDependencies( const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation ) const
+void PlugSerialiser::moduleDependencies(
+	const Gaffer::GraphComponent *graphComponent, std::set<std::string> &modules, const Serialisation &serialisation
+) const
 {
 	Serialiser::moduleDependencies( graphComponent, modules, serialisation );
 }
 
-std::string PlugSerialiser::constructor( const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation ) const
+std::string PlugSerialiser::constructor(
+	const Gaffer::GraphComponent *graphComponent, Serialisation &serialisation
+) const
 {
 	return repr( static_cast<const Plug *>( graphComponent ) );
 }
 
-std::string PlugSerialiser::postHierarchy( const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation ) const
+std::string PlugSerialiser::postHierarchy(
+	const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation
+) const
 {
 	const Plug *plug = static_cast<const Plug *>( graphComponent );
 
@@ -203,14 +209,18 @@ std::string PlugSerialiser::postHierarchy( const Gaffer::GraphComponent *graphCo
 	return result;
 }
 
-bool PlugSerialiser::childNeedsSerialisation( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const
+bool PlugSerialiser::childNeedsSerialisation(
+	const Gaffer::GraphComponent *child, const Serialisation &serialisation
+) const
 {
 	// cast is safe because of constraints maintained by Plug::acceptsChild().
 	const Plug *childPlug = static_cast<const Plug *>( child );
 	return childPlug->getFlags( Plug::Serialisable );
 }
 
-bool PlugSerialiser::childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const
+bool PlugSerialiser::childNeedsConstruction(
+	const Gaffer::GraphComponent *child, const Serialisation &serialisation
+) const
 {
 	// cast is safe because of constraints maintained by Plug::acceptsChild().
 	const Plug *childPlug = static_cast<const Plug *>( child );
@@ -232,8 +242,12 @@ std::string PlugSerialiser::directionRepr( Plug::Direction direction )
 
 std::string PlugSerialiser::flagsRepr( unsigned flags )
 {
-	static const Plug::Flags values[] = { Plug::Dynamic, Plug::Serialisable, Plug::AcceptsInputs, Plug::Cacheable, Plug::AcceptsDependencyCycles, Plug::None };
-	static const char *names[] = { "Dynamic", "Serialisable", "AcceptsInputs", "Cacheable", "AcceptsDependencyCycles", nullptr };
+	static const Plug::Flags values[] = {
+		Plug::Dynamic, Plug::Serialisable, Plug::AcceptsInputs, Plug::Cacheable, Plug::AcceptsDependencyCycles,
+		Plug::None
+	};
+	static const char *names[] = { "Dynamic", "Serialisable", "AcceptsInputs", "Cacheable", "AcceptsDependencyCycles",
+								   nullptr };
 
 	int defaultButOffCount = 0;
 	std::string defaultButOff;

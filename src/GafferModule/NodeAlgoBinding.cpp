@@ -49,10 +49,7 @@ namespace
 struct PythonVisitor
 {
 
-	PythonVisitor( object visitor )
-		: m_visitor( visitor )
-	{
-	}
+	PythonVisitor( object visitor ) : m_visitor( visitor ) {}
 
 	bool operator () ( Node *node ) const
 	{
@@ -60,14 +57,12 @@ struct PythonVisitor
 		extract<bool> boolExtractor( r );
 		if( r == object() || !boolExtractor.check() )
 		{
-			throw IECore::Exception(
-				"Visitor must return a bool (True to continue, False to prune)"
-			);
+			throw IECore::Exception( "Visitor must return a bool (True to continue, False to prune)" );
 		}
 		return boolExtractor;
 	}
 
-	private:
+private:
 
 	object m_visitor;
 };
@@ -90,10 +85,7 @@ void visitConnectedWrapper( Node &node, object visitor, NodeAlgo::VisitOrder ord
 struct PythonPredicate
 {
 
-	PythonPredicate( object predicate )
-		: m_predicate( predicate )
-	{
-	}
+	PythonPredicate( object predicate ) : m_predicate( predicate ) {}
 
 	bool operator () ( const Node *node ) const
 	{
@@ -101,7 +93,7 @@ struct PythonPredicate
 		return extract<bool>( r );
 	}
 
-	private:
+private:
 
 	object m_predicate;
 };
@@ -153,10 +145,7 @@ list findAllConnectedWrapper( Node &node, object predicate, NodeAlgo::VisitOrder
 // take a TypeId rather than template argument to specify the type.
 struct FindByTypeVisitor
 {
-	FindByTypeVisitor( IECore::TypeId type )
-		: m_type( type )
-	{
-	}
+	FindByTypeVisitor( IECore::TypeId type ) : m_type( type ) {}
 
 	bool operator () ( Node *node )
 	{
@@ -169,7 +158,7 @@ struct FindByTypeVisitor
 
 	list result;
 
-	private:
+private:
 
 	const IECore::TypeId m_type;
 };
@@ -209,19 +198,31 @@ void GafferModule::bindNodeAlgo()
 		.value( "DepthFirst", NodeAlgo::VisitOrder::DepthFirst )
 		.value( "BreadthFirst", NodeAlgo::VisitOrder::BreadthFirst );
 
-	def( "visitUpstream", &visitUpstreamWrapper, ( arg( "node" ), arg( "visitor" ), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
-	def( "visitDownstream", &visitDownstreamWrapper, ( arg( "node" ), arg( "visitor" ), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
-	def( "visitConnected", &visitConnectedWrapper, ( arg( "node" ), arg( "visitor" ), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
+	def( "visitUpstream", &visitUpstreamWrapper,
+		 ( arg( "node" ), arg( "visitor" ), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
+	def( "visitDownstream", &visitDownstreamWrapper,
+		 ( arg( "node" ), arg( "visitor" ), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
+	def( "visitConnected", &visitConnectedWrapper,
+		 ( arg( "node" ), arg( "visitor" ), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
 
-	def( "findUpstream", &findUpstreamWrapper, ( arg( "node" ), arg( "predicate" ), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
-	def( "findDownstream", &findDownstreamWrapper, ( arg( "node" ), arg( "predicate" ), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
-	def( "findConnected", &findConnectedWrapper, ( arg( "node" ), arg( "predicate" ), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
+	def( "findUpstream", &findUpstreamWrapper,
+		 ( arg( "node" ), arg( "predicate" ), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
+	def( "findDownstream", &findDownstreamWrapper,
+		 ( arg( "node" ), arg( "predicate" ), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
+	def( "findConnected", &findConnectedWrapper,
+		 ( arg( "node" ), arg( "predicate" ), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
 
-	def( "findAllUpstream", &findAllUpstreamWrapper, ( arg( "node" ), arg( "predicate" ), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
-	def( "findAllDownstream", &findAllDownstreamWrapper, ( arg( "node" ), arg( "predicate" ), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
-	def( "findAllConnected", &findAllConnectedWrapper, ( arg( "node" ), arg( "predicate" ), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
+	def( "findAllUpstream", &findAllUpstreamWrapper,
+		 ( arg( "node" ), arg( "predicate" ), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
+	def( "findAllDownstream", &findAllDownstreamWrapper,
+		 ( arg( "node" ), arg( "predicate" ), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
+	def( "findAllConnected", &findAllConnectedWrapper,
+		 ( arg( "node" ), arg( "predicate" ), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
 
-	def( "upstreamNodes", &upstreamNodes, ( arg( "node" ), arg( "type" ) = Node::staticTypeId(), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
-	def( "downstreamNodes", &downstreamNodes, ( arg( "node" ), arg( "type" ) = Node::staticTypeId(), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
-	def( "connectedNodes", &connectedNodes, ( arg( "node" ), arg( "type" ) = Node::staticTypeId(), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
+	def( "upstreamNodes", &upstreamNodes,
+		 ( arg( "node" ), arg( "type" ) = Node::staticTypeId(), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
+	def( "downstreamNodes", &downstreamNodes,
+		 ( arg( "node" ), arg( "type" ) = Node::staticTypeId(), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
+	def( "connectedNodes", &connectedNodes,
+		 ( arg( "node" ), arg( "type" ) = Node::staticTypeId(), arg( "order" ) = NodeAlgo::VisitOrder::BreadthFirst ) );
 }

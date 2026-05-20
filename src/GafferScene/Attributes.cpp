@@ -62,8 +62,7 @@ GAFFER_NODE_DEFINE_TYPE( Attributes );
 
 size_t Attributes::g_firstPlugIndex = 0;
 
-Attributes::Attributes( const std::string &name )
-	: AttributeProcessor( name, PathMatcher::EveryMatch )
+Attributes::Attributes( const std::string &name ) : AttributeProcessor( name, PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new CompoundDataPlug( "attributes" ) );
@@ -71,24 +70,24 @@ Attributes::Attributes( const std::string &name )
 }
 
 
-Attributes::Attributes( const std::string &name, const std::string &rendererPrefix )
-	: Attributes( name )
+Attributes::Attributes( const std::string &name, const std::string &rendererPrefix ) : Attributes( name )
 {
 	const string targetPattern = fmt::format( "attribute:{}:*", rendererPrefix );
 	for( const auto &target : Metadata::targetsWithMetadata( targetPattern, g_defaultValue ) )
 	{
-		if( auto valuePlug = MetadataAlgo::createPlugFromMetadata( "value", Plug::Direction::In, Plug::Flags::Default, target ) )
+		if( auto valuePlug =
+				MetadataAlgo::createPlugFromMetadata( "value", Plug::Direction::In, Plug::Flags::Default, target ) )
 		{
 			const std::string attributeName = target.string().substr( 10 );
-			NameValuePlugPtr attributePlug = new NameValuePlug( attributeName, valuePlug, false, boost::replace_all_copy( attributeName, ".", "_" ) );
+			NameValuePlugPtr attributePlug = new NameValuePlug(
+				attributeName, valuePlug, false, boost::replace_all_copy( attributeName, ".", "_" )
+			);
 			attributesPlug()->addChild( attributePlug );
 		}
 	}
 }
 
-Attributes::~Attributes()
-{
-}
+Attributes::~Attributes() {}
 
 Gaffer::CompoundDataPlug *Attributes::attributesPlug()
 {
@@ -111,8 +110,7 @@ const Gaffer::CompoundObjectPlug *Attributes::extraAttributesPlug() const
 }
 bool Attributes::affectsProcessedAttributes( const Gaffer::Plug *input ) const
 {
-	return AttributeProcessor::affectsProcessedAttributes( input ) ||
-		attributesPlug()->isAncestorOf( input ) ||
+	return AttributeProcessor::affectsProcessedAttributes( input ) || attributesPlug()->isAncestorOf( input ) ||
 		input == extraAttributesPlug();
 }
 
@@ -128,7 +126,9 @@ void Attributes::hashProcessedAttributes( const Gaffer::Context *context, IECore
 	extraAttributesPlug()->hash( h );
 }
 
-IECore::ConstCompoundObjectPtr Attributes::computeProcessedAttributes( const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes ) const
+IECore::ConstCompoundObjectPtr Attributes::computeProcessedAttributes(
+	const Gaffer::Context *context, const IECore::CompoundObject *inputAttributes
+) const
 {
 	const CompoundDataPlug *ap = attributesPlug();
 	IECore::ConstCompoundObjectPtr extraAttributes = extraAttributesPlug()->getValue();

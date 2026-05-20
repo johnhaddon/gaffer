@@ -41,11 +41,6 @@ using namespace GafferScene;
 
 GAFFER_NODE_DEFINE_TYPE( OpenGLAttributes );
 
-OpenGLAttributes::OpenGLAttributes( const std::string &name )
-	: Attributes( name, "gl" )
-{
-}
+OpenGLAttributes::OpenGLAttributes( const std::string &name ) : Attributes( name, "gl" ) {}
 
-OpenGLAttributes::~OpenGLAttributes()
-{
-}
+OpenGLAttributes::~OpenGLAttributes() {}

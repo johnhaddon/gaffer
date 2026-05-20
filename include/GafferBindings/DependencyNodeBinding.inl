@@ -74,8 +74,7 @@ GAFFERBINDINGS_API PyTypeObject *dependencyNodeMetaclass();
 } // namespace Detail
 
 template<typename T, typename Ptr>
-DependencyNodeClass<T, Ptr>::DependencyNodeClass( const char *docString )
-	: NodeClass<T, Ptr>( docString )
+DependencyNodeClass<T, Ptr>::DependencyNodeClass( const char *docString ) : NodeClass<T, Ptr>( docString )
 {
 	this->def( "affects", &Detail::affects<T> );
 	this->def( "enabledPlug", &Detail::enabledPlug<T> );

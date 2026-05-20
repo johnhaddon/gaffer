@@ -46,17 +46,14 @@ GAFFER_NODE_DEFINE_TYPE( ClosestPointSampler );
 
 size_t ClosestPointSampler::g_firstPlugIndex = 0;
 
-ClosestPointSampler::ClosestPointSampler( const std::string &name )
-	: PrimitiveSampler( name )
+ClosestPointSampler::ClosestPointSampler( const std::string &name ) : PrimitiveSampler( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
 	addChild( new StringPlug( "position", Plug::In, "P" ) );
 }
 
-ClosestPointSampler::~ClosestPointSampler()
-{
-}
+ClosestPointSampler::~ClosestPointSampler() {}
 
 Gaffer::StringPlug *ClosestPointSampler::positionPlug()
 {
@@ -79,7 +76,9 @@ void ClosestPointSampler::hashSamplingFunction( IECore::MurmurHash &h ) const
 	positionPlug()->hash( h );
 }
 
-PrimitiveSampler::SamplingFunction ClosestPointSampler::computeSamplingFunction( const IECoreScene::Primitive *destinationPrimitive, IECoreScene::PrimitiveVariable::Interpolation &interpolation ) const
+PrimitiveSampler::SamplingFunction ClosestPointSampler::computeSamplingFunction(
+	const IECoreScene::Primitive *destinationPrimitive, IECoreScene::PrimitiveVariable::Interpolation &interpolation
+) const
 {
 	const std::string position = positionPlug()->getValue();
 	if( position.empty() )
@@ -96,7 +95,8 @@ PrimitiveSampler::SamplingFunction ClosestPointSampler::computeSamplingFunction(
 	interpolation = it->second.interpolation;
 	PrimitiveVariable::IndexedView<V3f> positionView( it->second );
 
-	return [positionView]( const PrimitiveEvaluator &evaluator, size_t index, const M44f &transform, PrimitiveEvaluator::Result &result ) {
-		return evaluator.closestPoint( positionView[index] * transform, &result );
-	};
+	return
+		[positionView](
+			const PrimitiveEvaluator &evaluator, size_t index, const M44f &transform, PrimitiveEvaluator::Result &result
+		) { return evaluator.closestPoint( positionView[index] * transform, &result ); };
 }

@@ -51,14 +51,9 @@ using namespace Gaffer;
 
 IE_CORE_DEFINERUNTIMETYPED( Action );
 
-Action::Action( bool cancelBackgroundTasks )
-	: m_done( false ), m_cancelBackgroundTasks( cancelBackgroundTasks )
-{
-}
+Action::Action( bool cancelBackgroundTasks ) : m_done( false ), m_cancelBackgroundTasks( cancelBackgroundTasks ) {}
 
-Action::~Action()
-{
-}
+Action::~Action() {}
 
 void Action::enact( ActionPtr action )
 {
@@ -109,9 +104,7 @@ bool Action::canMerge( const Action *other ) const
 	return true;
 }
 
-void Action::merge( const Action *other )
-{
-}
+void Action::merge( const Action *other ) {}
 
 //////////////////////////////////////////////////////////////////////////
 // SimpleAction implementation and Action::enact() convenience overload.
@@ -123,10 +116,15 @@ namespace Gaffer
 class SimpleAction : public Action
 {
 
-	public:
+public:
 
-	SimpleAction( const GraphComponentPtr subject, const Function &doFn, const Function &undoFn, bool cancelBackgroundTasks )
-		: Action( cancelBackgroundTasks ), m_subject( subject.get() ), m_doFn( doFn ), m_undoFn( undoFn )
+	SimpleAction(
+		const GraphComponentPtr subject, const Function &doFn, const Function &undoFn, bool cancelBackgroundTasks
+	)
+		: Action( cancelBackgroundTasks ),
+		  m_subject( subject.get() ),
+		  m_doFn( doFn ),
+		  m_undoFn( undoFn )
 	{
 		// In the documentation for Action::enact(), we promise that we'll keep
 		// the subject alive for as long as the Functions are in use. If the subject
@@ -149,12 +147,9 @@ class SimpleAction : public Action
 
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Gaffer::SimpleAction, SimpleActionTypeId, Action );
 
-	protected:
+protected:
 
-	GraphComponent *subject() const override
-	{
-		return m_subject;
-	}
+	GraphComponent *subject() const override { return m_subject; }
 
 	void doAction() override
 	{
@@ -174,16 +169,11 @@ class SimpleAction : public Action
 		}
 	}
 
-	bool canMerge( const Action *other ) const override
-	{
-		return false;
-	}
+	bool canMerge( const Action *other ) const override { return false; }
 
-	void merge( const Action *other ) override
-	{
-	}
+	void merge( const Action *other ) override {}
 
-	private:
+private:
 
 	GraphComponent *m_subject;
 	Function m_doFn;
@@ -192,7 +182,9 @@ class SimpleAction : public Action
 
 IE_CORE_DEFINERUNTIMETYPED( SimpleAction );
 
-void Action::enact( GraphComponentPtr subject, const Function &doFn, const Function &undoFn, bool cancelBackgroundTasks )
+void Action::enact(
+	GraphComponentPtr subject, const Function &doFn, const Function &undoFn, bool cancelBackgroundTasks
+)
 {
 	/// \todo We might want to optimise away the construction of a SimpleAction
 	/// when we know that enact() will just call doFn and throw it away (when undo

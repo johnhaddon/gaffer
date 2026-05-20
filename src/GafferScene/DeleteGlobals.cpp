@@ -49,17 +49,14 @@ GAFFER_NODE_DEFINE_TYPE( DeleteGlobals );
 
 size_t DeleteGlobals::g_firstPlugIndex = 0;
 
-DeleteGlobals::DeleteGlobals( const std::string &name )
-	: GlobalsProcessor( name )
+DeleteGlobals::DeleteGlobals( const std::string &name ) : GlobalsProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "names" ) );
 	addChild( new BoolPlug( "invertNames" ) );
 }
 
-DeleteGlobals::~DeleteGlobals()
-{
-}
+DeleteGlobals::~DeleteGlobals() {}
 
 Gaffer::StringPlug *DeleteGlobals::namesPlug()
 {
@@ -102,7 +99,9 @@ void DeleteGlobals::hashProcessedGlobals( const Gaffer::Context *context, IECore
 	invertNamesPlug()->hash( h );
 }
 
-IECore::ConstCompoundObjectPtr DeleteGlobals::computeProcessedGlobals( const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals ) const
+IECore::ConstCompoundObjectPtr DeleteGlobals::computeProcessedGlobals(
+	const Gaffer::Context *context, IECore::ConstCompoundObjectPtr inputGlobals
+) const
 {
 	if( inputGlobals->members().empty() )
 	{
@@ -119,7 +118,9 @@ IECore::ConstCompoundObjectPtr DeleteGlobals::computeProcessedGlobals( const Gaf
 	const std::string prefix = namePrefix();
 
 	IECore::CompoundObjectPtr result = new IECore::CompoundObject;
-	for( IECore::CompoundObject::ObjectMap::const_iterator it = inputGlobals->members().begin(), eIt = inputGlobals->members().end(); it != eIt; ++it )
+	for( IECore::CompoundObject::ObjectMap::const_iterator it = inputGlobals->members().begin(),
+														   eIt = inputGlobals->members().end();
+		 it != eIt; ++it )
 	{
 		bool keep = true;
 		if( boost::starts_with( it->first.c_str(), prefix ) )

@@ -47,7 +47,10 @@ namespace Gaffer
 GAFFER_NODE_DEFINE_TYPE( Loop );
 
 Loop::Loop( const std::string &name )
-	: ComputeNode( name ), m_inPlugIndex( 0 ), m_outPlugIndex( 0 ), m_firstPlugIndex( 0 )
+	: ComputeNode( name ),
+	  m_inPlugIndex( 0 ),
+	  m_outPlugIndex( 0 ),
+	  m_firstPlugIndex( 0 )
 {
 	// Connect to `childAddedSignal()` so we can set ourselves up later when the
 	// appropriate plugs are added manually.
@@ -55,9 +58,7 @@ Loop::Loop( const std::string &name )
 	m_childAddedConnection = childAddedSignal().connect( boost::bind( &Loop::childAdded, this ) );
 }
 
-Loop::~Loop()
-{
-}
+Loop::~Loop() {}
 
 void Loop::setup( const ValuePlug *plug )
 {
@@ -191,10 +192,7 @@ void Loop::affects( const Plug *input, DependencyNode::AffectedPlugsContainer &o
 	{
 		addAffectedPlug( outPlug(), outputs );
 	}
-	else if(
-		input == indexVariablePlug() ||
-		input == enabledPlug()
-	)
+	else if( input == indexVariablePlug() || input == enabledPlug() )
 	{
 		addAffectedPlug( outPlug(), outputs );
 		addAffectedPlug( previousPlug(), outputs );
@@ -354,16 +352,22 @@ const ValuePlug *Loop::ancestorPlug( const ValuePlug *plug, std::vector<IECore::
 	return nullptr;
 }
 
-const ValuePlug *Loop::descendantPlug( const ValuePlug *plug, const std::vector<IECore::InternedString> &relativeName ) const
+const ValuePlug *Loop::descendantPlug(
+	const ValuePlug *plug, const std::vector<IECore::InternedString> &relativeName
+) const
 {
-	for( std::vector<IECore::InternedString>::const_reverse_iterator it = relativeName.rbegin(), eIt = relativeName.rend(); it != eIt; ++it )
+	for( std::vector<IECore::InternedString>::const_reverse_iterator it = relativeName.rbegin(),
+																	 eIt = relativeName.rend();
+		 it != eIt; ++it )
 	{
 		plug = plug->getChild<ValuePlug>( *it );
 	}
 	return plug;
 }
 
-const ValuePlug *Loop::sourcePlug( const ValuePlug *output, const Context *context, int &sourceLoopIndex, IECore::InternedString &indexVariable ) const
+const ValuePlug *Loop::sourcePlug(
+	const ValuePlug *output, const Context *context, int &sourceLoopIndex, IECore::InternedString &indexVariable
+) const
 {
 	sourceLoopIndex = -1;
 

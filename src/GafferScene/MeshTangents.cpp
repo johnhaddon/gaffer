@@ -48,8 +48,7 @@ GAFFER_NODE_DEFINE_TYPE( MeshTangents );
 
 size_t MeshTangents::g_firstPlugIndex = 0;
 
-MeshTangents::MeshTangents( const std::string &name )
-	: ObjectProcessor( name, PathMatcher::EveryMatch )
+MeshTangents::MeshTangents( const std::string &name ) : ObjectProcessor( name, PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new IntPlug( "mode", Plug::In, Mode::UV, /* min */ 0, /* max */ Mode::NumberOfModes ) );
@@ -64,9 +63,7 @@ MeshTangents::MeshTangents( const std::string &name )
 	addChild( new StringPlug( "biTangent", Plug::In, "biTangent" ) );
 }
 
-MeshTangents::~MeshTangents()
-{
-}
+MeshTangents::~MeshTangents() {}
 
 Gaffer::IntPlug *MeshTangents::modePlug()
 {
@@ -170,20 +167,14 @@ const Gaffer::StringPlug *MeshTangents::biTangentPlug() const
 
 bool MeshTangents::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return ObjectProcessor::affectsProcessedObject( input ) ||
-		input == uvSetPlug() ||
-		input == positionPlug() ||
-		input == orthogonalPlug() ||
-		input == modePlug() ||
-		input == leftHandedPlug() ||
-		input == uTangentPlug() ||
-		input == vTangentPlug() ||
-		input == tangentPlug() ||
-		input == biTangentPlug() ||
-		input == normalPlug();
+	return ObjectProcessor::affectsProcessedObject( input ) || input == uvSetPlug() || input == positionPlug() ||
+		input == orthogonalPlug() || input == modePlug() || input == leftHandedPlug() || input == uTangentPlug() ||
+		input == vTangentPlug() || input == tangentPlug() || input == biTangentPlug() || input == normalPlug();
 }
 
-void MeshTangents::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void MeshTangents::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ObjectProcessor::hashProcessedObject( path, context, h );
 	uvSetPlug()->hash( h );
@@ -198,7 +189,9 @@ void MeshTangents::hashProcessedObject( const ScenePath &path, const Gaffer::Con
 	normalPlug()->hash( h );
 }
 
-IECore::ConstObjectPtr MeshTangents::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr MeshTangents::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	const MeshPrimitive *mesh = runTimeCast<const MeshPrimitive>( inputObject );
 	if( !mesh )
@@ -220,7 +213,8 @@ IECore::ConstObjectPtr MeshTangents::computeProcessedObject( const ScenePath &pa
 		std::string uTangent = uTangentPlug()->getValue();
 		std::string vTangent = vTangentPlug()->getValue();
 
-		tangentPrimvars = MeshAlgo::calculateTangentsFromUV( mesh, uvSet, position, ortho, leftHanded, context->canceller() );
+		tangentPrimvars =
+			MeshAlgo::calculateTangentsFromUV( mesh, uvSet, position, ortho, leftHanded, context->canceller() );
 
 		meshWithTangents->variables[uTangent] = tangentPrimvars.first;
 		meshWithTangents->variables[vTangent] = tangentPrimvars.second;
@@ -233,15 +227,21 @@ IECore::ConstObjectPtr MeshTangents::computeProcessedObject( const ScenePath &pa
 
 		if( mode == Mode::FirstEdge )
 		{
-			tangentPrimvars = MeshAlgo::calculateTangentsFromFirstEdge( mesh, position, normal, ortho, leftHanded, context->canceller() );
+			tangentPrimvars = MeshAlgo::calculateTangentsFromFirstEdge(
+				mesh, position, normal, ortho, leftHanded, context->canceller()
+			);
 		}
 		else if( mode == Mode::TwoEdges )
 		{
-			tangentPrimvars = MeshAlgo::calculateTangentsFromTwoEdges( mesh, position, normal, ortho, leftHanded, context->canceller() );
+			tangentPrimvars = MeshAlgo::calculateTangentsFromTwoEdges(
+				mesh, position, normal, ortho, leftHanded, context->canceller()
+			);
 		}
 		else
 		{
-			tangentPrimvars = MeshAlgo::calculateTangentsFromPrimitiveCentroid( mesh, position, normal, ortho, leftHanded, context->canceller() );
+			tangentPrimvars = MeshAlgo::calculateTangentsFromPrimitiveCentroid(
+				mesh, position, normal, ortho, leftHanded, context->canceller()
+			);
 		}
 
 		meshWithTangents->variables[tangent] = tangentPrimvars.first;

@@ -43,11 +43,6 @@ using namespace GafferRenderMan;
 
 IE_CORE_DEFINERUNTIMETYPED( RenderManOptions );
 
-RenderManOptions::RenderManOptions( const std::string &name )
-	: GafferScene::Options( name, "ri" )
-{
-}
+RenderManOptions::RenderManOptions( const std::string &name ) : GafferScene::Options( name, "ri" ) {}
 
-RenderManOptions::~RenderManOptions()
-{
-}
+RenderManOptions::~RenderManOptions() {}

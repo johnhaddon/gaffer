@@ -54,10 +54,7 @@ using namespace GafferUI;
 // PathColumn
 //////////////////////////////////////////////////////////////////////////
 
-PathColumn::PathColumn( SizeMode sizeMode )
-	: m_sizeMode( sizeMode )
-{
-}
+PathColumn::PathColumn( SizeMode sizeMode ) : m_sizeMode( sizeMode ) {}
 
 PathColumn::SizeMode PathColumn::getSizeMode() const
 {
@@ -139,8 +136,12 @@ StandardPathColumn::StandardPathColumn( const std::string &label, IECore::Intern
 {
 }
 
-StandardPathColumn::StandardPathColumn( const CellData &headerData, IECore::InternedString property, PathColumn::SizeMode sizeMode )
-	: PathColumn( sizeMode ), m_headerData( headerData ), m_property( property )
+StandardPathColumn::StandardPathColumn(
+	const CellData &headerData, IECore::InternedString property, PathColumn::SizeMode sizeMode
+)
+	: PathColumn( sizeMode ),
+	  m_headerData( headerData ),
+	  m_property( property )
 {
 }
 
@@ -166,7 +167,9 @@ PathColumn::CellData StandardPathColumn::cellData( const Gaffer::Path &path, con
 	return CellData( cellData );
 }
 
-PathColumn::CellData StandardPathColumn::headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const
+PathColumn::CellData StandardPathColumn::headerData(
+	const Gaffer::Path &rootPath, const IECore::Canceller *canceller
+) const
 {
 	return m_headerData;
 }
@@ -175,13 +178,21 @@ PathColumn::CellData StandardPathColumn::headerData( const Gaffer::Path &rootPat
 // IconPathColumn
 //////////////////////////////////////////////////////////////////////////
 
-IconPathColumn::IconPathColumn( const std::string &label, const std::string &prefix, IECore::InternedString property, SizeMode sizeMode )
+IconPathColumn::IconPathColumn(
+	const std::string &label, const std::string &prefix, IECore::InternedString property, SizeMode sizeMode
+)
 	: IconPathColumn( CellData( new StringData( label ) ), prefix, property, sizeMode )
 {
 }
 
-IconPathColumn::IconPathColumn( const CellData &headerData, const std::string &prefix, IECore::InternedString property, PathColumn::SizeMode sizeMode )
-	: PathColumn( sizeMode ), m_headerData( headerData ), m_prefix( prefix ), m_property( property )
+IconPathColumn::IconPathColumn(
+	const CellData &headerData, const std::string &prefix, IECore::InternedString property,
+	PathColumn::SizeMode sizeMode
+)
+	: PathColumn( sizeMode ),
+	  m_headerData( headerData ),
+	  m_prefix( prefix ),
+	  m_property( property )
 {
 }
 
@@ -212,16 +223,23 @@ PathColumn::CellData IconPathColumn::cellData( const Gaffer::Path &path, const I
 			fileName += static_cast<const IECore::StringData *>( property.get() )->readable();
 			break;
 		case IECore::IntDataTypeId :
-			fileName += boost::lexical_cast<std::string>( static_cast<const IECore::IntData *>( property.get() )->readable() );
+			fileName +=
+				boost::lexical_cast<std::string>( static_cast<const IECore::IntData *>( property.get() )->readable() );
 			break;
 		case IECore::UInt64DataTypeId :
-			fileName += boost::lexical_cast<std::string>( static_cast<const IECore::UInt64Data *>( property.get() )->readable() );
+			fileName += boost::lexical_cast<std::string>(
+				static_cast<const IECore::UInt64Data *>( property.get() )->readable()
+			);
 			break;
 		case IECore::BoolDataTypeId :
-			fileName += boost::lexical_cast<std::string>( static_cast<const IECore::BoolData *>( property.get() )->readable() );
+			fileName +=
+				boost::lexical_cast<std::string>( static_cast<const IECore::BoolData *>( property.get() )->readable() );
 			break;
 		default :
-			IECore::msg( IECore::Msg::Warning, "IconPathColumn", fmt::format( "Unsupported property type \"{}\"", property->typeName() ) );
+			IECore::msg(
+				IECore::Msg::Warning, "IconPathColumn",
+				fmt::format( "Unsupported property type \"{}\"", property->typeName() )
+			);
 			return result;
 	}
 
@@ -229,7 +247,9 @@ PathColumn::CellData IconPathColumn::cellData( const Gaffer::Path &path, const I
 	return result;
 }
 
-PathColumn::CellData IconPathColumn::headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const
+PathColumn::CellData IconPathColumn::headerData(
+	const Gaffer::Path &rootPath, const IECore::Canceller *canceller
+) const
 {
 	return m_headerData;
 }
@@ -239,7 +259,8 @@ PathColumn::CellData IconPathColumn::headerData( const Gaffer::Path &rootPath, c
 //////////////////////////////////////////////////////////////////////////
 
 FileIconPathColumn::FileIconPathColumn( SizeMode sizeMode )
-	: PathColumn( sizeMode ), m_label( new IECore::StringData( "Type" ) )
+	: PathColumn( sizeMode ),
+	  m_label( new IECore::StringData( "Type" ) )
 {
 }
 
@@ -266,12 +287,16 @@ PathColumn::CellData FileIconPathColumn::cellData( const Gaffer::Path &path, con
 	const auto p = std::filesystem::path( s );
 	// Use a sortValue of `extension:stem` to allow sorting by extension
 	// while maintaining a reasonable ordering within each extension.
-	result.sortValue = new StringData( ( std::filesystem::is_directory( p ) ? " " : p.extension().string() ) + ":" + p.stem().string() );
+	result.sortValue = new StringData(
+		( std::filesystem::is_directory( p ) ? " " : p.extension().string() ) + ":" + p.stem().string()
+	);
 
 	return result;
 }
 
-PathColumn::CellData FileIconPathColumn::headerData( const Gaffer::Path &rootPath, const IECore::Canceller *canceller ) const
+PathColumn::CellData FileIconPathColumn::headerData(
+	const Gaffer::Path &rootPath, const IECore::Canceller *canceller
+) const
 {
 	return CellData( m_label );
 }

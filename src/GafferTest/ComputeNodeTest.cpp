@@ -54,10 +54,7 @@ namespace
 struct Edit
 {
 
-	Edit( const std::atomic_bool &stop )
-		: m_stop( stop )
-	{
-	}
+	Edit( const std::atomic_bool &stop ) : m_stop( stop ) {}
 
 	void operator () ()
 	{
@@ -70,7 +67,7 @@ struct Edit
 		}
 	}
 
-	private:
+private:
 
 	const std::atomic_bool &m_stop;
 };
@@ -78,8 +75,7 @@ struct Edit
 struct Compute
 {
 
-	Compute()
-		: m_node1( new GafferTest::MultiplyNode ), m_node2( new GafferTest::MultiplyNode )
+	Compute() : m_node1( new GafferTest::MultiplyNode ), m_node2( new GafferTest::MultiplyNode )
 	{
 		m_node1->op1Plug()->setValue( 3 );
 		m_node1->op2Plug()->setValue( 3 );
@@ -95,7 +91,7 @@ struct Compute
 		}
 	}
 
-	private:
+private:
 
 	GafferTest::MultiplyNodePtr m_node1;
 	GafferTest::MultiplyNodePtr m_node2;

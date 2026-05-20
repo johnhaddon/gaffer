@@ -53,21 +53,21 @@ IE_CORE_DEFINERUNTIMETYPED( Path );
 static InternedString g_namePropertyName( "name" );
 static InternedString g_fullNamePropertyName( "fullName" );
 
-Path::Path( PathFilterPtr filter )
-	: m_pathChangedSignal( nullptr )
+Path::Path( PathFilterPtr filter ) : m_pathChangedSignal( nullptr )
 {
 	setFilter( filter );
 }
 
-Path::Path( const std::string &path, PathFilterPtr filter )
-	: m_pathChangedSignal( nullptr )
+Path::Path( const std::string &path, PathFilterPtr filter ) : m_pathChangedSignal( nullptr )
 {
 	setFromString( path );
 	setFilter( filter );
 }
 
 Path::Path( const Names &names, const IECore::InternedString &root, PathFilterPtr filter )
-	: m_root( root ), m_names( names ), m_pathChangedSignal( nullptr )
+	: m_root( root ),
+	  m_names( names ),
+	  m_pathChangedSignal( nullptr )
 {
 	for( Names::const_iterator it = m_names.begin(), eIt = m_names.end(); it != eIt; ++it )
 	{
@@ -107,7 +107,9 @@ void Path::propertyNames( std::vector<IECore::InternedString> &names, const IECo
 	names.push_back( g_fullNamePropertyName );
 }
 
-IECore::ConstRunTimeTypedPtr Path::property( const IECore::InternedString &name, const IECore::Canceller *canceller ) const
+IECore::ConstRunTimeTypedPtr Path::property(
+	const IECore::InternedString &name, const IECore::Canceller *canceller
+) const
 {
 	if( name == g_namePropertyName )
 	{
@@ -368,9 +370,7 @@ std::string Path::string() const
 
 bool Path::operator == ( const Path &other ) const
 {
-	return typeId() == other.typeId() &&
-		m_root == other.m_root &&
-		m_names == other.m_names;
+	return typeId() == other.typeId() && m_root == other.m_root && m_names == other.m_names;
 }
 
 bool Path::operator != ( const Path &other ) const
@@ -383,9 +383,7 @@ const Plug *Path::cancellationSubject() const
 	return nullptr;
 }
 
-void Path::doChildren( std::vector<PathPtr> &children, const IECore::Canceller *canceller ) const
-{
-}
+void Path::doChildren( std::vector<PathPtr> &children, const IECore::Canceller *canceller ) const {}
 
 void Path::emitPathChanged()
 {

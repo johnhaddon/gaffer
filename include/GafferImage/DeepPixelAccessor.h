@@ -50,14 +50,17 @@ namespace GafferImage
 class GAFFERIMAGE_API DeepPixelAccessor
 {
 
-	public:
+public:
 
 	/// Sampler Constructor
 	/// @param plug The image plug to sample from.
 	/// @param channelName The channel to sample ( or empty string, if you only need sample counts )
 	/// @param sampleWindow The area from which samples may be requested. It is an error to request samples outside this area.
 	/// @param boundingMode The method of handling samples that fall outside the data window.
-	DeepPixelAccessor( const GafferImage::ImagePlug *plug, const std::string &channelName, const Imath::Box2i &sampleWindow, Sampler::BoundingMode boundingMode = Sampler::Black );
+	DeepPixelAccessor(
+		const GafferImage::ImagePlug *plug, const std::string &channelName, const Imath::Box2i &sampleWindow,
+		Sampler::BoundingMode boundingMode = Sampler::Black
+	);
 
 	/// Construct from another DeepPixelAccessor with a different channelName, in order to reuse the
 	/// sample offsets data.
@@ -83,7 +86,7 @@ class GAFFERIMAGE_API DeepPixelAccessor
 	/// empty hash object and return it.
 	IECore::MurmurHash hash() const;
 
-	private:
+private:
 
 	/// Cached data access
 	/// @param p Any point within the cache that we wish to retrieve the data for.

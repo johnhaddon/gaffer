@@ -114,7 +114,7 @@ void begin()
 
 class ArnoldAPIScope
 {
-	public:
+public:
 
 	~ArnoldAPIScope()
 	{
@@ -149,21 +149,16 @@ class ArnoldAPIScope
 		return g_apiScope;
 	}
 
-	private:
+private:
 
-	ArnoldAPIScope()
-		: m_sharedUniverse( nullptr )
-	{
-		begin();
-	}
+	ArnoldAPIScope() : m_sharedUniverse( nullptr ) { begin(); }
 
 	AtUniverse *m_sharedUniverse;
 };
 
 } // namespace
 
-UniverseBlock::UniverseBlock( bool writable )
-	: m_writable( writable )
+UniverseBlock::UniverseBlock( bool writable ) : m_writable( writable )
 {
 	ArnoldAPIScope &apiScope = ArnoldAPIScope::acquire();
 	m_universe = m_writable ? AiUniverse() : apiScope.sharedUniverse();

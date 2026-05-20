@@ -86,10 +86,7 @@ ConstDataPtr g_xpuGPUConfigDefault = new IntVectorData();
 riley::FilterSize g_defaultPixelFilterSize = { 2, 2 };
 float g_defaultPixelVariance = 0.015;
 
-const vector<InternedString> g_rejectedOutputFilterParameters = {
-	"filter",
-	"filterwidth"
-};
+const vector<InternedString> g_rejectedOutputFilterParameters = { "filter", "filterwidth" };
 
 // These must be kept in sync with `startup/GafferScene/renderManOptions.py`
 // See that file for a fuller explanation of this mess.
@@ -108,7 +105,8 @@ const unordered_map<string, string> g_lpeLobeDefaults = {
 	{ "lpe:user3", "Position" },
 	{ "lpe:user4", "UserColor" },
 	{ "lpe:user5", "" },
-	{ "lpe:user6", "Normal,DiffuseNormal,HairTangent,SubsurfaceNormal,SpecularNormal,RoughSpecularNormal,SingleScatterNormal,FuzzNormal,IridescenceNormal,GlassNormal" },
+	{ "lpe:user6",
+	  "Normal,DiffuseNormal,HairTangent,SubsurfaceNormal,SpecularNormal,RoughSpecularNormal,SingleScatterNormal,FuzzNormal,IridescenceNormal,GlassNormal" },
 	{ "lpe:user7", "" },
 	{ "lpe:user8", "" },
 };
@@ -127,7 +125,10 @@ T *optionCast( const IECore::RunTimeTyped *v, const IECore::InternedString &name
 		return t;
 	}
 
-	IECore::msg( IECore::Msg::Warning, "IECoreRenderMan::Renderer", fmt::format( "Expected {} but got {} for option \"{}\".", T::staticTypeName(), v->typeName(), name.c_str() ) );
+	IECore::msg(
+		IECore::Msg::Warning, "IECoreRenderMan::Renderer",
+		fmt::format( "Expected {} but got {} for option \"{}\".", T::staticTypeName(), v->typeName(), name.c_str() )
+	);
 	return nullptr;
 }
 
@@ -146,7 +147,13 @@ T parameter( const CompoundDataMap &parameters, const IECore::InternedString &na
 		return data->readable();
 	}
 
-	IECore::msg( IECore::Msg::Warning, "IECoreRenderMan::Renderer", fmt::format( "Expected {} but got {} for parameter \"{}\".", DataType::staticTypeName(), it->second->typeName(), name.c_str() ) );
+	IECore::msg(
+		IECore::Msg::Warning, "IECoreRenderMan::Renderer",
+		fmt::format(
+			"Expected {} but got {} for parameter \"{}\".", DataType::staticTypeName(), it->second->typeName(),
+			name.c_str()
+		)
+	);
 	return defaultValue;
 }
 
@@ -176,7 +183,9 @@ struct Globals::InteractiveRenderThread
 {
 
 	InteractiveRenderThread( Globals *globals )
-		: m_globals( globals ), m_state( State::Stopped ), m_thread( &InteractiveRenderThread::threadFunction, this )
+		: m_globals( globals ),
+		  m_state( State::Stopped ),
+		  m_thread( &InteractiveRenderThread::threadFunction, this )
 	{
 	}
 
@@ -202,20 +211,18 @@ struct Globals::InteractiveRenderThread
 	{
 		std::unique_lock lock( m_stateMutex );
 		m_requestedState = State::Waiting;
-		m_stateCondition.wait(
-			lock, [this] {
-				// Calling `Stop()` causes the call to `riley->Render()` to exit
-				// in `threadFunction()`. But it's possible that we make the
-				// first `Stop()` call before `threadFunction()` reaches `riley->Render()`,
-				// in which case `Stop()` does nothing. So we call `Stop()` in the wait
-				// loop rather than outside it, so that we get a second chance.
-				m_globals->m_session->riley->Stop();
-				return m_state == State::Waiting;
-			}
-		);
+		m_stateCondition.wait( lock, [this] {
+			// Calling `Stop()` causes the call to `riley->Render()` to exit
+			// in `threadFunction()`. But it's possible that we make the
+			// first `Stop()` call before `threadFunction()` reaches `riley->Render()`,
+			// in which case `Stop()` does nothing. So we call `Stop()` in the wait
+			// loop rather than outside it, so that we get a second chance.
+			m_globals->m_session->riley->Stop();
+			return m_state == State::Waiting;
+		} );
 	}
 
-	private:
+private:
 
 	void threadFunction()
 	{
@@ -228,11 +235,7 @@ struct Globals::InteractiveRenderThread
 		{
 			{
 				unique_lock lock( m_stateMutex );
-				m_stateCondition.wait(
-					lock, [this] {
-						return m_requestedState.has_value();
-					}
-				);
+				m_stateCondition.wait( lock, [this] { return m_requestedState.has_value(); } );
 				m_state = m_requestedState.value();
 				m_requestedState.reset();
 			}
@@ -276,8 +279,18 @@ struct Globals::InteractiveRenderThread
 // Globals
 //////////////////////////////////////////////////////////////////////////
 
-Globals::Globals( RtUString rileyVariant, IECoreScenePreview::Renderer::RenderType renderType, const IECore::MessageHandlerPtr &messageHandler )
-	: m_rileyVariant( rileyVariant ), m_renderType( renderType ), m_messageHandler( messageHandler ), m_pixelFilter( Loader::strings().k_gaussian ), m_pixelFilterSize( g_defaultPixelFilterSize ), m_pixelVariance( g_defaultPixelVariance ), m_expectedSessionCreationThreadId( std::this_thread::get_id() ), m_renderTargetExtent()
+Globals::Globals(
+	RtUString rileyVariant, IECoreScenePreview::Renderer::RenderType renderType,
+	const IECore::MessageHandlerPtr &messageHandler
+)
+	: m_rileyVariant( rileyVariant ),
+	  m_renderType( renderType ),
+	  m_messageHandler( messageHandler ),
+	  m_pixelFilter( Loader::strings().k_gaussian ),
+	  m_pixelFilterSize( g_defaultPixelFilterSize ),
+	  m_pixelVariance( g_defaultPixelVariance ),
+	  m_expectedSessionCreationThreadId( std::this_thread::get_id() ),
+	  m_renderTargetExtent()
 {
 	// Initialise `m_integratorToConvert`.
 	option( g_integratorOption, nullptr );
@@ -305,7 +318,8 @@ Globals::Globals( RtUString rileyVariant, IECoreScenePreview::Renderer::RenderTy
 
 	m_renderParameters.SetString(
 		RtUString( "renderMode" ),
-		renderType == IECoreScenePreview::Renderer::RenderType::Interactive ? RtUString( "interactive" ) : RtUString( "batch" )
+		renderType == IECoreScenePreview::Renderer::RenderType::Interactive ? RtUString( "interactive" ) :
+																			  RtUString( "batch" )
 	);
 
 	for( const auto &[name, value] : g_lpeLobeDefaults )
@@ -322,9 +336,7 @@ Globals::Globals( RtUString rileyVariant, IECoreScenePreview::Renderer::RenderTy
 	option( g_xpuGPUConfigOption, g_xpuGPUConfigDefault.get() );
 }
 
-Globals::~Globals()
-{
-}
+Globals::~Globals() {}
 
 void Globals::option( const IECore::InternedString &name, const IECore::Object *value )
 {
@@ -336,7 +348,9 @@ void Globals::option( const IECore::InternedString &name, const IECore::Object *
 		m_pixelVariance = d ? d->readable() : g_defaultPixelVariance;
 		if( m_renderTarget != riley::RenderTargetId() )
 		{
-			m_session->riley->ModifyRenderTarget( m_renderTarget, nullptr, nullptr, nullptr, &m_pixelVariance, nullptr );
+			m_session->riley->ModifyRenderTarget(
+				m_renderTarget, nullptr, nullptr, nullptr, &m_pixelVariance, nullptr
+			);
 		}
 		// Fall through so that we update `m_options` as well. It's completely
 		// unclear whether Riley uses the value from the target or from the
@@ -443,12 +457,16 @@ void Globals::option( const IECore::InternedString &name, const IECore::Object *
 	else if( name == g_xpuCPUConfigOption )
 	{
 		auto data = optionCast<const Data>( value, name );
-		ParamListAlgo::convertParameter( g_xpuCPUConfigParameter, data ? data : g_xpuCPUConfigDefault.get(), m_rileyParameters );
+		ParamListAlgo::convertParameter(
+			g_xpuCPUConfigParameter, data ? data : g_xpuCPUConfigDefault.get(), m_rileyParameters
+		);
 	}
 	else if( name == g_xpuGPUConfigOption )
 	{
 		auto data = optionCast<const Data>( value, name );
-		ParamListAlgo::convertParameter( g_xpuGPUConfigParameter, data ? data : g_xpuGPUConfigDefault.get(), m_rileyParameters );
+		ParamListAlgo::convertParameter(
+			g_xpuGPUConfigParameter, data ? data : g_xpuGPUConfigDefault.get(), m_rileyParameters
+		);
 	}
 	else if( name == g_progressModeOption )
 	{
@@ -529,7 +547,13 @@ void Globals::output( const IECore::InternedString &name, const Output *output )
 		{
 			if( copy->parameters().erase( n ) )
 			{
-				IECore::msg( IECore::Msg::Warning, "RenderManRenderer", fmt::format( "Ignoring unsupported parameter \"{}\" on output \"{}\". Filters must be specified via global options.", n.string(), name.string() ) );
+				IECore::msg(
+					IECore::Msg::Warning, "RenderManRenderer",
+					fmt::format(
+						"Ignoring unsupported parameter \"{}\" on output \"{}\". Filters must be specified via global options.",
+						n.string(), name.string()
+					)
+				);
 			}
 		}
 		m_outputs[name] = copy;
@@ -549,8 +573,7 @@ Session *Globals::acquireSession()
 		if( m_expectedSessionCreationThreadId != std::this_thread::get_id() )
 		{
 			IECore::msg(
-				Msg::Error,
-				"RenderMan",
+				Msg::Error, "RenderMan",
 				"You must call `Renderer::command( \"ri:acquireRiley\" )` before commencing "
 				"multithreaded geometry output (RenderMan limitation)."
 			);
@@ -567,7 +590,8 @@ Session *Globals::acquireSession()
 			m_rileyParameters.SetInteger( g_xpuCPUConfigParameter, 1 );
 		}
 
-		m_session = std::make_unique<Session>( m_rileyVariant, m_rileyParameters, m_renderType, m_options, m_messageHandler );
+		m_session =
+			std::make_unique<Session>( m_rileyVariant, m_rileyParameters, m_renderType, m_options, m_messageHandler );
 	}
 
 	return m_session.get();
@@ -592,12 +616,9 @@ void Globals::updateIntegrator()
 	RtParamList integratorParamList;
 	ParamListAlgo::convertParameters( m_integratorToConvert->parameters(), integratorParamList );
 
-	riley::ShadingNode integratorNode = {
-		riley::ShadingNode::Type::k_Integrator,
-		RtUString( m_integratorToConvert->getName().c_str() ),
-		RtUString( "integrator" ),
-		integratorParamList
-	};
+	riley::ShadingNode integratorNode = { riley::ShadingNode::Type::k_Integrator,
+										  RtUString( m_integratorToConvert->getName().c_str() ),
+										  RtUString( "integrator" ), integratorParamList };
 
 	m_integratorId = m_session->riley->CreateIntegrator( riley::UserId(), integratorNode );
 	m_integratorToConvert = nullptr;
@@ -619,7 +640,9 @@ void Globals::updateDisplayFilter()
 	if( m_displayFilterToConvert != g_emptyShaderNetwork )
 	{
 		const std::vector<riley::ShadingNode> nodes = ShaderNetworkAlgo::convert( m_displayFilterToConvert.get() );
-		m_displayFilterId = m_session->riley->CreateDisplayFilter( riley::UserId(), { (uint32_t)nodes.size(), nodes.data() }, RtParamList() );
+		m_displayFilterId = m_session->riley->CreateDisplayFilter(
+			riley::UserId(), { (uint32_t)nodes.size(), nodes.data() }, RtParamList()
+		);
 	}
 
 	m_displayFilterToConvert = nullptr;
@@ -641,7 +664,9 @@ void Globals::updateSampleFilter()
 	if( m_sampleFilterToConvert != g_emptyShaderNetwork )
 	{
 		const std::vector<riley::ShadingNode> nodes = ShaderNetworkAlgo::convert( m_sampleFilterToConvert.get() );
-		m_sampleFilterId = m_session->riley->CreateSampleFilter( riley::UserId(), { (uint32_t)nodes.size(), nodes.data() }, RtParamList() );
+		m_sampleFilterId = m_session->riley->CreateSampleFilter(
+			riley::UserId(), { (uint32_t)nodes.size(), nodes.data() }, RtParamList()
+		);
 	}
 
 	m_sampleFilterToConvert = nullptr;
@@ -702,20 +727,19 @@ void Globals::updateRenderView()
 		{
 			const auto matrix = Imath::M44f().scale( Imath::V3f( 1, 1, -1 ) );
 			m_defaultCamera = m_session->riley->CreateCamera(
-				riley::UserId(),
-				RtUString( "ieCoreRenderMan:defaultCamera" ),
+				riley::UserId(), RtUString( "ieCoreRenderMan:defaultCamera" ),
 				/// \todo Projection?
-				{
-					riley::ShadingNode::Type::k_Projection, RtUString( "PxrCamera" ),
-					RtUString( "projection" ), RtParamList() },
-				StaticTransform( matrix ),
-				RtParamList()
+				{ riley::ShadingNode::Type::k_Projection, RtUString( "PxrCamera" ), RtUString( "projection" ),
+				  RtParamList() },
+				StaticTransform( matrix ), RtParamList()
 			);
 		}
 		camera.id = m_defaultCamera;
 	}
 
-	if( std::any_of( m_outputs.begin(), m_outputs.end(), []( const auto &v ) { return v.second->getType() == "quicklyNoiseless"; } ) )
+	if( std::any_of( m_outputs.begin(), m_outputs.end(), []( const auto &v ) {
+			return v.second->getType() == "quicklyNoiseless";
+		} ) )
 	{
 		// The `quicklyNoiseless` driver doesn't handle interactive edits to the
 		// crop window - it variously crashes, offsets the image, or fails to clear
@@ -756,9 +780,7 @@ void Globals::updateRenderView()
 		{
 			// Must only modify this if it has actually changed, because it causes
 			// Riley to close and reopen all the display drivers.
-			m_session->riley->ModifyRenderTarget(
-				m_renderTarget, nullptr, &extent, nullptr, nullptr, nullptr
-			);
+			m_session->riley->ModifyRenderTarget( m_renderTarget, nullptr, &extent, nullptr, nullptr, nullptr );
 			m_renderTargetExtent = extent;
 		}
 		const auto displayFilterList = idToList<riley::DisplayFilterList>( m_displayFilterId );
@@ -795,7 +817,9 @@ void Globals::updateRenderView()
 		const vector<riley::RenderOutputId> &renderOutputs = acquireRenderOutputs( output.get() );
 		if( renderOutputs.empty() )
 		{
-			IECore::msg( IECore::Msg::Warning, "RenderManRenderer", fmt::format( "Ignoring unsupported output {}", name.c_str() ) );
+			IECore::msg(
+				IECore::Msg::Warning, "RenderManRenderer", fmt::format( "Ignoring unsupported output {}", name.c_str() )
+			);
 			continue;
 		}
 
@@ -823,7 +847,9 @@ void Globals::updateRenderView()
 				if( boost::starts_with( parameterName.c_str(), "header:" ) )
 				{
 					const string exrName = "exrheader_" + parameterName.string().substr( 7 );
-					ParamListAlgo::convertParameter( RtUString( exrName.c_str() ), parameterValue.get(), display.driverParamList );
+					ParamListAlgo::convertParameter(
+						RtUString( exrName.c_str() ), parameterValue.get(), display.driverParamList
+					);
 				}
 			}
 		}
@@ -842,52 +868,37 @@ void Globals::updateRenderView()
 		const bool beauty = renderOutputs.size() == 2;
 
 		display.outputs.insert(
-			beauty ? display.outputs.begin() : display.outputs.end(),
-			renderOutputs.begin(), renderOutputs.end()
+			beauty ? display.outputs.begin() : display.outputs.end(), renderOutputs.begin(), renderOutputs.end()
 		);
 
 		renderTargetOutputs.insert(
-			beauty ? renderTargetOutputs.begin() : renderTargetOutputs.end(),
-			renderOutputs.begin(), renderOutputs.end()
+			beauty ? renderTargetOutputs.begin() : renderTargetOutputs.end(), renderOutputs.begin(), renderOutputs.end()
 		);
 	}
 
 	m_renderTarget = m_session->riley->CreateRenderTarget(
-		riley::UserId(),
-		{ (uint32_t)renderTargetOutputs.size(), renderTargetOutputs.data() },
+		riley::UserId(), { (uint32_t)renderTargetOutputs.size(), renderTargetOutputs.data() },
 		// Why must the resolution be specified both here _and_ via the
 		// `k_Ri_FormatResolution` option? Riley only knows.
-		extent,
-		RtUString( "importance" ),
+		extent, RtUString( "importance" ),
 		// Likewise, it's unclear what the relationship is between this
 		// and the `k_Ri_PixelVariance` option. We just specify them both
 		// to be on the safe side.
-		m_pixelVariance,
-		RtParamList()
+		m_pixelVariance, RtParamList()
 	);
 	m_renderTargetExtent = extent;
 
 	for( const auto &[name, definition] : displayDefinitions )
 	{
-		m_displays.push_back(
-			m_session->riley->CreateDisplay(
-				riley::UserId(),
-				m_renderTarget,
-				RtUString( name.c_str() ),
-				definition.driver,
-				{ (uint32_t)definition.outputs.size(), definition.outputs.data() },
-				definition.driverParamList
-			)
-		);
+		m_displays.push_back( m_session->riley->CreateDisplay(
+			riley::UserId(), m_renderTarget, RtUString( name.c_str() ), definition.driver,
+			{ (uint32_t)definition.outputs.size(), definition.outputs.data() }, definition.driverParamList
+		) );
 	}
 
 	m_renderView = m_session->riley->CreateRenderView(
-		riley::UserId(),
-		m_renderTarget,
-		camera.id,
-		m_integratorId,
-		idToList<riley::DisplayFilterList>( m_displayFilterId ),
-		idToList<riley::SampleFilterList>( m_sampleFilterId ),
+		riley::UserId(), m_renderTarget, camera.id, m_integratorId,
+		idToList<riley::DisplayFilterList>( m_displayFilterId ), idToList<riley::SampleFilterList>( m_sampleFilterId ),
 		RtParamList()
 	);
 }
@@ -980,7 +991,9 @@ const std::vector<riley::RenderOutputId> &Globals::acquireRenderOutputs( const I
 
 	// Additional parameters.
 
-	const RtUString accumulationRule( parameter( output->parameters(), "ri:accumulationRule", string( "filter" ) ).c_str() );
+	const RtUString accumulationRule(
+		parameter( output->parameters(), "ri:accumulationRule", string( "filter" ) ).c_str()
+	);
 	const float relativePixelVariance = parameter( output->parameters(), "ri:relativePixelVariance", 0.0f );
 
 	// Hash.
@@ -1005,25 +1018,17 @@ const std::vector<riley::RenderOutputId> &Globals::acquireRenderOutputs( const I
 
 	// Otherwise create and return.
 
-	result.push_back(
-		m_session->riley->CreateRenderOutput(
-			riley::UserId(),
-			renderOutputName, *type, source,
-			accumulationRule, m_pixelFilter, m_pixelFilterSize, relativePixelVariance,
-			RtParamList()
-		)
-	);
+	result.push_back( m_session->riley->CreateRenderOutput(
+		riley::UserId(), renderOutputName, *type, source, accumulationRule, m_pixelFilter, m_pixelFilterSize,
+		relativePixelVariance, RtParamList()
+	) );
 
 	if( output->getData() == "rgba" )
 	{
-		result.push_back(
-			m_session->riley->CreateRenderOutput(
-				riley::UserId(),
-				RtUString( "a" ), riley::RenderOutputType::k_Float, Loader::strings().k_a,
-				accumulationRule, m_pixelFilter, m_pixelFilterSize, relativePixelVariance,
-				RtParamList()
-			)
-		);
+		result.push_back( m_session->riley->CreateRenderOutput(
+			riley::UserId(), RtUString( "a" ), riley::RenderOutputType::k_Float, Loader::strings().k_a,
+			accumulationRule, m_pixelFilter, m_pixelFilterSize, relativePixelVariance, RtParamList()
+		) );
 	}
 
 	return result;

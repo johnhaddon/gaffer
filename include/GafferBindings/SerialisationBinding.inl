@@ -92,7 +92,9 @@ namespace Detail
 // ```
 
 template<typename T, typename Wrapper>
-boost::python::object moduleDependencies( const T *self, const Gaffer::GraphComponent *graphComponent, const Serialisation &serialisation )
+boost::python::object moduleDependencies(
+	const T *self, const Gaffer::GraphComponent *graphComponent, const Serialisation &serialisation
+)
 {
 	std::set<std::string> modules;
 	if( dynamic_cast<const Wrapper *>( self ) )
@@ -127,7 +129,10 @@ std::string constructor( const T *self, const Gaffer::GraphComponent *graphCompo
 }
 
 template<typename T, typename Wrapper>
-std::string postConstructor( const T *self, const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation )
+std::string postConstructor(
+	const T *self, const Gaffer::GraphComponent *graphComponent, const std::string &identifier,
+	Serialisation &serialisation
+)
 {
 	if( dynamic_cast<const Wrapper *>( self ) )
 	{
@@ -140,7 +145,10 @@ std::string postConstructor( const T *self, const Gaffer::GraphComponent *graphC
 }
 
 template<typename T, typename Wrapper>
-std::string postHierarchy( const T *self, const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation )
+std::string postHierarchy(
+	const T *self, const Gaffer::GraphComponent *graphComponent, const std::string &identifier,
+	Serialisation &serialisation
+)
 {
 	if( dynamic_cast<const Wrapper *>( self ) )
 	{
@@ -153,7 +161,10 @@ std::string postHierarchy( const T *self, const Gaffer::GraphComponent *graphCom
 }
 
 template<typename T, typename Wrapper>
-std::string postScript( const T *self, const Gaffer::GraphComponent *graphComponent, const std::string &identifier, Serialisation &serialisation )
+std::string postScript(
+	const T *self, const Gaffer::GraphComponent *graphComponent, const std::string &identifier,
+	Serialisation &serialisation
+)
 {
 	if( dynamic_cast<const Wrapper *>( self ) )
 	{

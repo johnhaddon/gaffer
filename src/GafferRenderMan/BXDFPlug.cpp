@@ -47,9 +47,7 @@ BXDFPlug::BXDFPlug( const std::string &name, Direction direction, unsigned flags
 {
 }
 
-BXDFPlug::~BXDFPlug()
-{
-}
+BXDFPlug::~BXDFPlug() {}
 
 bool BXDFPlug::acceptsChild( const GraphComponent *potentialChild ) const
 {

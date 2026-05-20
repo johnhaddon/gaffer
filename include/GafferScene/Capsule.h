@@ -51,7 +51,7 @@ IE_CORE_FORWARDDECLARE( ScenePlug )
 class GAFFERSCENE_API Capsule : public IECoreScenePreview::Procedural
 {
 
-	public:
+public:
 
 	Capsule();
 	/// A copy of `context` is taken. It is the responsibility of the
@@ -74,11 +74,8 @@ class GAFFERSCENE_API Capsule : public IECoreScenePreview::Procedural
 	/// but because the node's `objectHash()` has changed, they will not
 	/// be reused, and will eventually be evicted.
 	Capsule(
-		const ScenePlug *scene,
-		const ScenePlug::ScenePath &root,
-		const Gaffer::Context &context,
-		const IECore::MurmurHash &hash,
-		const Imath::Box3f &bound
+		const ScenePlug *scene, const ScenePlug::ScenePath &root, const Gaffer::Context &context,
+		const IECore::MurmurHash &hash, const Imath::Box3f &bound
 	);
 	~Capsule() override;
 
@@ -96,7 +93,7 @@ class GAFFERSCENE_API Capsule : public IECoreScenePreview::Procedural
 	void setRenderOptions( const GafferScene::Private::RendererAlgo::RenderOptions &renderOptions );
 	std::optional<GafferScene::Private::RendererAlgo::RenderOptions> getRenderOptions() const;
 
-	protected:
+protected:
 
 	// Returns the current render options - this will be the override if setRenderOptions has been called,
 	// otherwise it will construct render options based on the `scene()`.
@@ -104,7 +101,7 @@ class GAFFERSCENE_API Capsule : public IECoreScenePreview::Procedural
 
 	void throwIfNoScene() const;
 
-	private:
+private:
 
 	IECore::MurmurHash m_hash;
 	Imath::Box3f m_bound;

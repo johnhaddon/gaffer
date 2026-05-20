@@ -49,15 +49,14 @@ struct StaticTransform : riley::Transform
 
 	/// Caution : `m` is referenced directly, and must live until the
 	/// StaticTransform is passed to Riley.
-	StaticTransform( const Imath::M44f &m )
-		: m_time( 0 )
+	StaticTransform( const Imath::M44f &m ) : m_time( 0 )
 	{
 		samples = 1;
 		matrix = &reinterpret_cast<const RtMatrix4x4 &>( m );
 		time = &m_time;
 	}
 
-	private:
+private:
 
 	float m_time;
 };
@@ -68,7 +67,10 @@ struct AnimatedTransform : riley::Transform
 
 	/// Caution : `transformSamples` and `sampleTimes` are referenced
 	/// directly, and must live until the AnimatedTransform is passed to Riley.
-	AnimatedTransform( const IECoreScenePreview::Renderer::TransformSamples &transformSamples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes )
+	AnimatedTransform(
+		const IECoreScenePreview::Renderer::TransformSamples &transformSamples,
+		const IECoreScenePreview::Renderer::SampleTimes &sampleTimes
+	)
 	{
 		samples = transformSamples.size();
 		matrix = reinterpret_cast<const RtMatrix4x4 *>( transformSamples.data() );
@@ -80,15 +82,14 @@ struct AnimatedTransform : riley::Transform
 struct IdentityTransform : riley::Transform
 {
 
-	IdentityTransform()
-		: m_time( 0.0f )
+	IdentityTransform() : m_time( 0.0f )
 	{
 		samples = 1;
 		matrix = reinterpret_cast<const RtMatrix4x4 *>( m_matrix.getValue() );
 		time = &m_time;
 	}
 
-	private:
+private:
 
 	const float m_time;
 	const Imath::M44f m_matrix;

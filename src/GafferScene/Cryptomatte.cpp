@@ -179,7 +179,8 @@ IECore::CompoundDataPtr propertyTreeToCompoundData( const boost::property_tree::
 
 		uint32_t hash = 0;
 
-		auto [_unused, errorCode] = std::from_chars( hashString.data(), hashString.data() + hashString.size(), hash, 16 );
+		auto [_unused, errorCode] =
+			std::from_chars( hashString.data(), hashString.data() + hashString.size(), hash, 16 );
 
 		if( errorCode != std::errc() )
 		{
@@ -200,7 +201,9 @@ IECore::CompoundDataPtr parseManifestFromMetadata( const std::string &metadataKe
 	}
 
 	const StringData *manifest = metadata->member<StringData>( metadataKey );
-	boost::iostreams::stream<boost::iostreams::array_source> stream( manifest->readable().c_str(), manifest->readable().size() );
+	boost::iostreams::stream<boost::iostreams::array_source> stream(
+		manifest->readable().c_str(), manifest->readable().size()
+	);
 	boost::property_tree::ptree pt;
 
 	try
@@ -240,7 +243,9 @@ IECore::CompoundDataPtr parseManifestFromSidecarFile( const std::string &manifes
 	return propertyTreeToCompoundData( pt );
 }
 
-IECore::CompoundDataPtr parseManifestFromMetadataAndSidecar( const std::string &metadataKey, ConstCompoundDataPtr metadata, std::string manifestDirectory )
+IECore::CompoundDataPtr parseManifestFromMetadataAndSidecar(
+	const std::string &metadataKey, ConstCompoundDataPtr metadata, std::string manifestDirectory
+)
 {
 	if( metadata->readable().find( metadataKey ) == metadata->readable().end() )
 	{
@@ -252,7 +257,9 @@ IECore::CompoundDataPtr parseManifestFromMetadataAndSidecar( const std::string &
 		const StringData *filePathData = metadata->member<StringData>( "filePath" );
 		if( !filePathData )
 		{
-			throw IECore::Exception( "No manifest directory provided, and no `filePath` metadata that would allow inferring the directory. A directory is required to locate the manifest." );
+			throw IECore::Exception(
+				"No manifest directory provided, and no `filePath` metadata that would allow inferring the directory. A directory is required to locate the manifest."
+			);
 		}
 		manifestDirectory = std::filesystem::path( filePathData->readable() ).parent_path().generic_string();
 	}
@@ -272,7 +279,9 @@ IECore::CompoundDataPtr parseManifestFromMetadataAndSidecar( const std::string &
 
 const std::regex g_nameMetadataRegex( R"((cryptomatte/[^/]{1,7})/name)" );
 
-IECore::CompoundDataPtr parseManifestFromFirstMetadataEntry( const std::string &cryptomatteLayer, ConstCompoundDataPtr metadata, const std::string &manifestDirectory )
+IECore::CompoundDataPtr parseManifestFromFirstMetadataEntry(
+	const std::string &cryptomatteLayer, ConstCompoundDataPtr metadata, const std::string &manifestDirectory
+)
 {
 	// The Cryptomatte specification suggests metadata entries stored for each
 	// layer based on a key generated from the first 7 characters of the hashed
@@ -343,7 +352,12 @@ IECore::CompoundDataPtr parseManifestFromFirstMetadataEntry( const std::string &
 	}
 	else
 	{
-		throw IECore::Exception( fmt::format( "Image metadata entry not found. One of the following entries expected: {} {}", manifestKey, manifestFileKey ) );
+		throw IECore::Exception(
+			fmt::format(
+				"Image metadata entry not found. One of the following entries expected: {} {}", manifestKey,
+				manifestFileKey
+			)
+		);
 	}
 }
 
@@ -365,12 +379,14 @@ static const ChannelMap g_channelMap = {
 const std::string g_firstDataChannelSuffix = "00.R";
 const std::string g_cryptomatteChannelPattern = "^{}[0-9]+\\.[RGBA]";
 
-Cryptomatte::Cryptomatte( const std::string &name )
-	: GafferImage::FlatImageProcessor( name )
+Cryptomatte::Cryptomatte( const std::string &name ) : GafferImage::FlatImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "layer", Gaffer::Plug::In, "" ) );
-	addChild( new IntPlug( "manifestSource", Gaffer::Plug::In, (int)ManifestSource::Metadata, /* min */ (int)ManifestSource::None, /* max */ (int)ManifestSource::Sidecar ) );
+	addChild( new IntPlug(
+		"manifestSource", Gaffer::Plug::In, (int)ManifestSource::Metadata, /* min */ (int)ManifestSource::None,
+		/* max */ (int)ManifestSource::Sidecar
+	) );
 	addChild( new StringPlug( "manifestDirectory", Gaffer::Plug::In, "" ) );
 	addChild( new StringPlug( "sidecarFile", Gaffer::Plug::In, "" ) );
 	addChild( new StringPlug( "outputChannel", Gaffer::Plug::In, "A" ) );
@@ -386,9 +402,7 @@ Cryptomatte::Cryptomatte( const std::string &name )
 	outPlug()->dataWindowPlug()->setInput( inPlug()->dataWindowPlug() );
 }
 
-Cryptomatte::~Cryptomatte()
-{
-}
+Cryptomatte::~Cryptomatte() {}
 
 Gaffer::StringPlug *Cryptomatte::layerPlug()
 {
@@ -504,9 +518,7 @@ void Cryptomatte::affects( const Gaffer::Plug *input, AffectedPlugsContainer &ou
 {
 	FlatImageProcessor::affects( input, outputs );
 
-	if( input == inPlug()->channelDataPlug() ||
-		input == layerPlug() ||
-		input == outputChannelPlug() ||
+	if( input == inPlug()->channelDataPlug() || input == layerPlug() || input == outputChannelPlug() ||
 		input == matteValuesPlug() )
 	{
 		outputs.push_back( matteChannelDataPlug() );
@@ -517,23 +529,18 @@ void Cryptomatte::affects( const Gaffer::Plug *input, AffectedPlugsContainer &ou
 		outputs.push_back( outPlug()->channelDataPlug() );
 	}
 
-	if( input == inPlug()->channelNamesPlug() ||
-		input == outputChannelPlug() )
+	if( input == inPlug()->channelNamesPlug() || input == outputChannelPlug() )
 	{
 		outputs.push_back( outPlug()->channelNamesPlug() );
 	}
 
-	if( input == layerPlug() ||
-		input == manifestDirectoryPlug() ||
-		input == sidecarFilePlug() ||
-		input == manifestSourcePlug() ||
-		input == inPlug()->metadataPlug() )
+	if( input == layerPlug() || input == manifestDirectoryPlug() || input == sidecarFilePlug() ||
+		input == manifestSourcePlug() || input == inPlug()->metadataPlug() )
 	{
 		outputs.push_back( manifestPlug() );
 	}
 
-	if( input == matteNamesPlug() ||
-		input == manifestPlug() )
+	if( input == matteNamesPlug() || input == manifestPlug() )
 	{
 		outputs.push_back( matteValuesPlug() );
 	}
@@ -587,7 +594,8 @@ void Cryptomatte::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *
 	}
 	else if( output == manifestScenePlug()->childNamesPlug() )
 	{
-		const GafferScene::ScenePlug::ScenePath &scenePath = context->get<GafferScene::ScenePlug::ScenePath>( GafferScene::ScenePlug::scenePathContextName );
+		const GafferScene::ScenePlug::ScenePath &scenePath =
+			context->get<GafferScene::ScenePlug::ScenePath>( GafferScene::ScenePlug::scenePathContextName );
 		h.append( &scenePath.front(), scenePath.size() );
 		ScenePlug::GlobalScope globalScope( context );
 		manifestPathDataPlug()->hash( h );
@@ -617,7 +625,8 @@ void Cryptomatte::hash( const Gaffer::ValuePlug *output, const Gaffer::Context *
 					continue;
 				}
 
-				const std::string &alphaChannel = GafferImage::ImageAlgo::channelName( GafferImage::ImageAlgo::layerName( c ), cIt->second );
+				const std::string &alphaChannel =
+					GafferImage::ImageAlgo::channelName( GafferImage::ImageAlgo::layerName( c ), cIt->second );
 				if( !GafferImage::ImageAlgo::channelExists( channelNames, alphaChannel ) )
 				{
 					continue;
@@ -692,7 +701,10 @@ void Cryptomatte::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 				}
 				catch( const std::exception & )
 				{
-					IECore::msg( IECore::Msg::Error, "Cryptomatte::matteValues", fmt::format( "Error converting value: {}", name ) );
+					IECore::msg(
+						IECore::Msg::Error, "Cryptomatte::matteValues",
+						fmt::format( "Error converting value: {}", name )
+					);
 					continue;
 				}
 			}
@@ -715,8 +727,10 @@ void Cryptomatte::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 		{
 			for( const auto &manifestEntry : manifest->readable() )
 			{
-				const std::string &matteName = static_cast<IECore::StringData *>( manifestEntry.second.get() )->readable();
-				if( pathMatcher.match( matteName ) & ( IECore::PathMatcher::ExactMatch | IECore::PathMatcher::AncestorMatch ) )
+				const std::string &matteName =
+					static_cast<IECore::StringData *>( manifestEntry.second.get() )->readable();
+				if( pathMatcher.match( matteName ) &
+					( IECore::PathMatcher::ExactMatch | IECore::PathMatcher::AncestorMatch ) )
 				{
 					matteValues.insert( matteNameToValue( matteName ) );
 				}
@@ -759,7 +773,8 @@ void Cryptomatte::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 
 		const PathMatcher &manifestPaths = manifestPathData->readable();
 
-		const GafferScene::ScenePlug::ScenePath &scenePath = context->get<GafferScene::ScenePlug::ScenePath>( GafferScene::ScenePlug::scenePathContextName );
+		const GafferScene::ScenePlug::ScenePath &scenePath =
+			context->get<GafferScene::ScenePlug::ScenePath>( GafferScene::ScenePlug::scenePathContextName );
 
 		auto match = manifestPaths.subTree( scenePath );
 		PathMatcher::RawIterator it = match.begin();
@@ -775,12 +790,9 @@ void Cryptomatte::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 			++it;
 		}
 
-		std::sort(
-			result.begin(), result.end(),
-			[]( const InternedString a, const InternedString b ) {
-				return a.string() < b.string();
-			}
-		);
+		std::sort( result.begin(), result.end(), []( const InternedString a, const InternedString b ) {
+			return a.string() < b.string();
+		} );
 
 		static_cast<InternedStringVectorDataPlug *>( output )->setValue( resultData );
 	}
@@ -819,7 +831,8 @@ void Cryptomatte::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 					continue;
 				}
 
-				const std::string &alphaChannel = GafferImage::ImageAlgo::channelName( GafferImage::ImageAlgo::layerName( c ), cIt->second );
+				const std::string &alphaChannel =
+					GafferImage::ImageAlgo::channelName( GafferImage::ImageAlgo::layerName( c ), cIt->second );
 				if( !GafferImage::ImageAlgo::channelExists( channelNames, alphaChannel ) )
 				{
 					continue;
@@ -835,7 +848,8 @@ void Cryptomatte::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 
 				std::vector<float>::const_iterator vIt = value.begin();
 				std::vector<float>::const_iterator aIt = alpha.begin();
-				for( std::vector<float>::iterator it = result.begin(), eIt = result.end(); it != eIt; ++it, ++vIt, ++aIt )
+				for( std::vector<float>::iterator it = result.begin(), eIt = result.end(); it != eIt;
+					 ++it, ++vIt, ++aIt )
 				{
 					if( std::binary_search( matteValues.begin(), matteValues.end(), *vIt ) )
 					{
@@ -851,9 +865,7 @@ void Cryptomatte::compute( Gaffer::ValuePlug *output, const Gaffer::Context *con
 
 Gaffer::ValuePlug::CachePolicy Cryptomatte::computeCachePolicy( const Gaffer::ValuePlug *output ) const
 {
-	if( output == matteValuesPlug() ||
-		output == manifestPlug() ||
-		output == manifestPathDataPlug() )
+	if( output == matteValuesPlug() || output == manifestPlug() || output == manifestPathDataPlug() )
 	{
 		// Request blocking compute to avoid concurrent threads computing the manifest redundantly.
 		return ValuePlug::CachePolicy::TaskCollaboration;
@@ -862,26 +874,34 @@ Gaffer::ValuePlug::CachePolicy Cryptomatte::computeCachePolicy( const Gaffer::Va
 	return ImageNode::computeCachePolicy( output );
 }
 
-void Cryptomatte::hashViewNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Cryptomatte::hashViewNames(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageProcessor::hashViewNames( parent, context, h );
 	// Because our view names are constant, we don't need to add
 	// anything else to the hash.
 }
 
-IECore::ConstStringVectorDataPtr Cryptomatte::computeViewNames( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr Cryptomatte::computeViewNames(
+	const Gaffer::Context *context, const GafferImage::ImagePlug *parent
+) const
 {
 	return GafferImage::ImagePlug::defaultViewNames();
 }
 
-void Cryptomatte::hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Cryptomatte::hashChannelNames(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	FlatImageProcessor::hashChannelNames( parent, context, h );
 	inPlug()->channelNamesPlug()->hash( h );
 	outputChannelPlug()->hash( h );
 }
 
-IECore::ConstStringVectorDataPtr Cryptomatte::computeChannelNames( const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr Cryptomatte::computeChannelNames(
+	const Gaffer::Context *context, const GafferImage::ImagePlug *parent
+) const
 {
 	StringVectorDataPtr resultData = inPlug()->channelNamesPlug()->getValue()->copy();
 	std::vector<std::string> &result = resultData->writable();
@@ -903,7 +923,9 @@ IECore::ConstStringVectorDataPtr Cryptomatte::computeChannelNames( const Gaffer:
 	return resultData;
 }
 
-void Cryptomatte::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Cryptomatte::hashChannelData(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	const std::string &channelName = context->get<std::string>( GafferImage::ImagePlug::channelNameContextName );
 	const Imath::V2i &tileOrigin = context->get<Imath::V2i>( GafferImage::ImagePlug::tileOriginContextName );
@@ -972,7 +994,10 @@ void Cryptomatte::hashChannelData( const GafferImage::ImagePlug *output, const G
 	h.append( channelName );
 }
 
-IECore::ConstFloatVectorDataPtr Cryptomatte::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const GafferImage::ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr Cryptomatte::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const GafferImage::ImagePlug *parent
+) const
 {
 	std::string alphaChannel;
 	{

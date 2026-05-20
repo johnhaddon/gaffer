@@ -50,17 +50,14 @@ GAFFER_NODE_DEFINE_TYPE( CameraTweaks );
 
 size_t CameraTweaks::g_firstPlugIndex = 0;
 
-CameraTweaks::CameraTweaks( const std::string &name )
-	: ObjectProcessor( name )
+CameraTweaks::CameraTweaks( const std::string &name ) : ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new BoolPlug( "ignoreMissing", Plug::In, false ) );
 	addChild( new TweaksPlug( "tweaks" ) );
 }
 
-CameraTweaks::~CameraTweaks()
-{
-}
+CameraTweaks::~CameraTweaks() {}
 
 Gaffer::BoolPlug *CameraTweaks::ignoreMissingPlug()
 {
@@ -84,12 +81,13 @@ const Gaffer::TweaksPlug *CameraTweaks::tweaksPlug() const
 
 bool CameraTweaks::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return ObjectProcessor::affectsProcessedObject( input ) ||
-		input == ignoreMissingPlug() ||
+	return ObjectProcessor::affectsProcessedObject( input ) || input == ignoreMissingPlug() ||
 		tweaksPlug()->isAncestorOf( input );
 }
 
-void CameraTweaks::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void CameraTweaks::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	if( tweaksPlug()->children().empty() )
 	{
@@ -103,7 +101,9 @@ void CameraTweaks::hashProcessedObject( const ScenePath &path, const Gaffer::Con
 	}
 }
 
-IECore::ConstObjectPtr CameraTweaks::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr CameraTweaks::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	IECoreScene::ConstCameraPtr inputCamera = IECore::runTimeCast<const IECoreScene::Camera>( inputObject );
 	if( !inputCamera )
@@ -144,7 +144,9 @@ IECore::ConstObjectPtr CameraTweaks::computeProcessedObject( const ScenePath &pa
 			{
 				if( auto fieldOfView = runTimeCast<const FloatData>( value.get() ) )
 				{
-					result->setFocalLengthFromFieldOfView( std::max( 0.0f, std::min( 179.99f, fieldOfView->readable() ) ) );
+					result->setFocalLengthFromFieldOfView(
+						std::max( 0.0f, std::min( 179.99f, fieldOfView->readable() ) )
+					);
 					return true;
 				}
 				return false;

@@ -55,23 +55,25 @@ GAFFER_PLUG_DEFINE_TYPE( FilterPlug );
 const IECore::InternedString FilterPlug::inputSceneContextName( "scene:filter:inputScene" );
 
 static ContextAlgo::GlobalScope::Registration g_globalScopeRegistration(
-	ScenePlug::staticTypeId(),
-	{ FilterPlug::inputSceneContextName }
+	ScenePlug::staticTypeId(), { FilterPlug::inputSceneContextName }
 );
 
 FilterPlug::FilterPlug( const std::string &name, Direction direction, unsigned flags )
-	: IntPlug( name, direction, IECore::PathMatcher::NoMatch, IECore::PathMatcher::NoMatch, IECore::PathMatcher::EveryMatch, flags )
+	: IntPlug(
+		  name, direction, IECore::PathMatcher::NoMatch, IECore::PathMatcher::NoMatch, IECore::PathMatcher::EveryMatch,
+		  flags
+	  )
 {
 }
 
-FilterPlug::FilterPlug( const std::string &name, Direction direction, int defaultValue, int minValue, int maxValue, unsigned flags )
+FilterPlug::FilterPlug(
+	const std::string &name, Direction direction, int defaultValue, int minValue, int maxValue, unsigned flags
+)
 	: IntPlug( name, direction, defaultValue, minValue, maxValue, flags )
 {
 }
 
-FilterPlug::~FilterPlug()
-{
-}
+FilterPlug::~FilterPlug() {}
 
 bool FilterPlug::acceptsInput( const Gaffer::Plug *input ) const
 {
@@ -127,7 +129,9 @@ Gaffer::PlugPtr FilterPlug::createCounterpart( const std::string &name, Directio
 	return new FilterPlug( name, direction, defaultValue(), minValue(), maxValue(), getFlags() );
 }
 
-void FilterPlug::sceneAffects( const Gaffer::Plug *scenePlugChild, Gaffer::DependencyNode::AffectedPlugsContainer &outputs ) const
+void FilterPlug::sceneAffects(
+	const Gaffer::Plug *scenePlugChild, Gaffer::DependencyNode::AffectedPlugsContainer &outputs
+) const
 {
 	const Plug *source = this->source();
 	if( source == this )

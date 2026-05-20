@@ -53,14 +53,16 @@ const RtUString g_name( "name" );
 
 } // namespace
 
-LightFilter::LightFilter( const std::string &name, const Attributes *attributes, Session *session, LightLinker *lightLinker )
-	: m_session( session ), m_coordinateSystemName( name.c_str() ), m_lightLinker( lightLinker )
+LightFilter::LightFilter(
+	const std::string &name, const Attributes *attributes, Session *session, LightLinker *lightLinker
+)
+	: m_session( session ),
+	  m_coordinateSystemName( name.c_str() ),
+	  m_lightLinker( lightLinker )
 {
 	RtParamList params;
 	params.SetString( g_name, m_coordinateSystemName );
-	m_coordinateSystem = session->riley->CreateCoordinateSystem(
-		riley::UserId(), IdentityTransform(), params
-	);
+	m_coordinateSystem = session->riley->CreateCoordinateSystem( riley::UserId(), IdentityTransform(), params );
 
 	this->attributes( attributes );
 }
@@ -73,13 +75,15 @@ LightFilter::~LightFilter()
 	}
 }
 
-void LightFilter::transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times )
+void LightFilter::transform(
+	const IECoreScenePreview::Renderer::TransformSamples &samples,
+	const IECoreScenePreview::Renderer::SampleTimes &times
+)
 {
 	AnimatedTransform animatedTransform( samples, times );
 
-	const riley::CoordinateSystemResult result = m_session->riley->ModifyCoordinateSystem(
-		m_coordinateSystem, &animatedTransform, /* attributes = */ nullptr
-	);
+	const riley::CoordinateSystemResult result =
+		m_session->riley->ModifyCoordinateSystem( m_coordinateSystem, &animatedTransform, /* attributes = */ nullptr );
 
 	if( result != riley::CoordinateSystemResult::k_Success )
 	{
@@ -130,14 +134,12 @@ bool LightFilter::attributes( const IECoreScenePreview::Renderer::AttributesInte
 	return true;
 }
 
-void LightFilter::link( const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects )
+void LightFilter::link(
+	const IECore::InternedString &type, const IECoreScenePreview::Renderer::ConstObjectSetPtr &objects
+)
 {
 }
 
-void LightFilter::assignID( uint32_t id )
-{
-}
+void LightFilter::assignID( uint32_t id ) {}
 
-void LightFilter::assignInstanceID( uint32_t id )
-{
-}
+void LightFilter::assignInstanceID( uint32_t id ) {}

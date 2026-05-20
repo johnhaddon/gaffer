@@ -59,9 +59,7 @@ namespace
 // Copied from Instancer.cpp - maybe should be shared somehow if it gets reused?
 struct IdData
 {
-	IdData() : intElements( nullptr ), int64Elements( nullptr )
-	{
-	}
+	IdData() : intElements( nullptr ), int64Elements( nullptr ) {}
 
 	void initialize( const Primitive *primitive, const std::string &name, bool throwIfMissing = false )
 	{
@@ -75,7 +73,12 @@ struct IdData
 		}
 		else if( throwIfMissing )
 		{
-			throw IECore::Exception( fmt::format( "DeletePoints : No primitive variable \"{}\" found of type IntVectorData or type Int64VectorData", name ) );
+			throw IECore::Exception(
+				fmt::format(
+					"DeletePoints : No primitive variable \"{}\" found of type IntVectorData or type Int64VectorData",
+					name
+				)
+			);
 		}
 	}
 
@@ -117,14 +120,13 @@ GAFFER_NODE_DEFINE_TYPE( DeletePoints );
 
 size_t DeletePoints::g_firstPlugIndex = 0;
 
-DeletePoints::DeletePoints( const std::string &name )
-	: Deformer( name )
+DeletePoints::DeletePoints( const std::string &name ) : Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
 	addChild( new IntPlug(
-		"selectionMode", Plug::In,
-		(int)SelectionMode::VertexPrimitiveVariable, (int)SelectionMode::VertexPrimitiveVariable, (int)SelectionMode::IdList
+		"selectionMode", Plug::In, (int)SelectionMode::VertexPrimitiveVariable,
+		(int)SelectionMode::VertexPrimitiveVariable, (int)SelectionMode::IdList
 	) );
 	addChild( new StringPlug( "points", Plug::In, "deletePoints" ) );
 	addChild( new StringPlug( "idListVariable", Plug::In, "inactiveIds" ) );
@@ -135,9 +137,7 @@ DeletePoints::DeletePoints( const std::string &name )
 	addChild( new BoolPlug( "ignoreMissingVariable", Plug::In, false ) );
 }
 
-DeletePoints::~DeletePoints()
-{
-}
+DeletePoints::~DeletePoints() {}
 
 Gaffer::IntPlug *DeletePoints::selectionModePlug()
 {
@@ -211,17 +211,14 @@ const Gaffer::BoolPlug *DeletePoints::ignoreMissingVariablePlug() const
 
 bool DeletePoints::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return Deformer::affectsProcessedObject( input ) ||
-		input == selectionModePlug() ||
-		input == pointsPlug() ||
-		input == idListVariablePlug() ||
-		input == idListPlug() ||
-		input == idPlug() ||
-		input == invertPlug() ||
+	return Deformer::affectsProcessedObject( input ) || input == selectionModePlug() || input == pointsPlug() ||
+		input == idListVariablePlug() || input == idListPlug() || input == idPlug() || input == invertPlug() ||
 		input == ignoreMissingVariablePlug();
 }
 
-void DeletePoints::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeletePoints::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	Deformer::hashProcessedObject( path, context, h );
 	selectionModePlug()->hash( h );
@@ -233,7 +230,9 @@ void DeletePoints::hashProcessedObject( const ScenePath &path, const Gaffer::Con
 	ignoreMissingVariablePlug()->hash( h );
 }
 
-IECore::ConstObjectPtr DeletePoints::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr DeletePoints::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	const PointsPrimitive *points = runTimeCast<const PointsPrimitive>( inputObject );
 	if( !points )
@@ -262,7 +261,9 @@ IECore::ConstObjectPtr DeletePoints::computeProcessedObject( const ScenePath &pa
 				return inputObject;
 			}
 
-			throw InvalidArgumentException( fmt::format( "DeletePoints : No primitive variable \"{}\" found", deletePrimVarName ) );
+			throw InvalidArgumentException(
+				fmt::format( "DeletePoints : No primitive variable \"{}\" found", deletePrimVarName )
+			);
 		}
 
 		toDelete = it->second;

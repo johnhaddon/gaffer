@@ -48,8 +48,7 @@ size_t MeshDistortion::g_firstPlugIndex = 0;
 
 GAFFER_NODE_DEFINE_TYPE( MeshDistortion );
 
-MeshDistortion::MeshDistortion( const std::string &name )
-	: ObjectProcessor( name )
+MeshDistortion::MeshDistortion( const std::string &name ) : ObjectProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -60,9 +59,7 @@ MeshDistortion::MeshDistortion( const std::string &name )
 	addChild( new StringPlug( "uvDistortion", Plug::In, "uvDistortion" ) );
 }
 
-MeshDistortion::~MeshDistortion()
-{
-}
+MeshDistortion::~MeshDistortion() {}
 
 Gaffer::StringPlug *MeshDistortion::positionPlug()
 {
@@ -116,15 +113,14 @@ const Gaffer::StringPlug *MeshDistortion::uvDistortionPlug() const
 
 bool MeshDistortion::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return ObjectProcessor::affectsProcessedObject( input ) ||
-		input == positionPlug() ||
-		input == referencePositionPlug() ||
-		input == uvSetPlug() ||
-		input == distortionPlug() ||
+	return ObjectProcessor::affectsProcessedObject( input ) || input == positionPlug() ||
+		input == referencePositionPlug() || input == uvSetPlug() || input == distortionPlug() ||
 		input == uvDistortionPlug();
 }
 
-void MeshDistortion::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void MeshDistortion::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ObjectProcessor::hashProcessedObject( path, context, h );
 
@@ -135,7 +131,9 @@ void MeshDistortion::hashProcessedObject( const ScenePath &path, const Gaffer::C
 	uvDistortionPlug()->hash( h );
 }
 
-IECore::ConstObjectPtr MeshDistortion::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr MeshDistortion::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	const MeshPrimitive *mesh = runTimeCast<const MeshPrimitive>( inputObject );
 	if( !mesh )
@@ -158,13 +156,7 @@ IECore::ConstObjectPtr MeshDistortion::computeProcessedObject( const ScenePath &
 		return inputObject;
 	}
 
-	auto distortions = MeshAlgo::calculateDistortion(
-		mesh,
-		uvSet,
-		referencePosition,
-		position,
-		context->canceller()
-	);
+	auto distortions = MeshAlgo::calculateDistortion( mesh, uvSet, referencePosition, position, context->canceller() );
 
 	MeshPrimitivePtr result = mesh->copy();
 

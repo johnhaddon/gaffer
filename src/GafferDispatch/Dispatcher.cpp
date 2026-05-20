@@ -116,7 +116,7 @@ struct BatchContextPool
 		return it->second;
 	}
 
-	private:
+private:
 
 	std::unordered_map<IECore::MurmurHash, ConstContextPtr> m_contexts;
 	// Scratch space to avoid allocations every time we query names.
@@ -143,10 +143,8 @@ ValuePlug *acquireCellValuePlug( Spreadsheet *spreadsheet, const InternedString 
 /// \todo Move these to `PlugAlgo`
 bool canSetValueFromObject( const ValuePlug *plug, const Object *value = nullptr )
 {
-	return PlugAlgo::canSetValueFromData( plug ) ||
-		plug->typeId() == CompoundObjectPlug::staticTypeId() ||
-		plug->typeId() == ObjectPlug::staticTypeId() ||
-		plug->typeId() == ObjectVectorPlug::staticTypeId();
+	return PlugAlgo::canSetValueFromData( plug ) || plug->typeId() == CompoundObjectPlug::staticTypeId() ||
+		plug->typeId() == ObjectPlug::staticTypeId() || plug->typeId() == ObjectVectorPlug::staticTypeId();
 }
 
 ObjectPtr getValueAsObject( const ValuePlug *plug )
@@ -244,7 +242,8 @@ void bakePlugValue( ValuePlug *destinationPlug, const ValuePlug *sourcePlug, con
 
 			if( columnName.string().empty() )
 			{
-				columnName = boost::replace_all_copy( destinationPlug->relativeName( destinationPlug->node() ), ".", "_" );
+				columnName =
+					boost::replace_all_copy( destinationPlug->relativeName( destinationPlug->node() ), ".", "_" );
 				animationSpreadsheet->rowsPlug()->addColumn( destinationPlug, columnName );
 
 				destinationPlug->setInput( animationSpreadsheet->outPlug()->getChild<Plug>( columnName ) );
@@ -272,7 +271,9 @@ void bakePlugValue( ValuePlug *destinationPlug, const ValuePlug *sourcePlug, con
 	}
 }
 
-void isolateScriptPlugs( ScriptNode *destinationScript, const ScriptNode *sourceScript, const std::vector<float> &frames )
+void isolateScriptPlugs(
+	ScriptNode *destinationScript, const ScriptNode *sourceScript, const std::vector<float> &frames
+)
 {
 	StandardSetPtr plugsToSerialise = new StandardSet();
 
@@ -330,8 +331,7 @@ std::string Dispatcher::g_defaultDispatcherType = "";
 
 GAFFER_NODE_DEFINE_TYPE( Dispatcher )
 
-Dispatcher::Dispatcher( const std::string &name )
-	: TaskNode( name )
+Dispatcher::Dispatcher( const std::string &name ) : TaskNode( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -342,9 +342,7 @@ Dispatcher::Dispatcher( const std::string &name )
 	addChild( new StringPlug( "jobsDirectory", Plug::In, "" ) );
 }
 
-Dispatcher::~Dispatcher()
-{
-}
+Dispatcher::~Dispatcher() {}
 
 Gaffer::ArrayPlug *Dispatcher::tasksPlug()
 {
@@ -558,12 +556,9 @@ FrameListPtr Dispatcher::frameRange() const
 class Dispatcher::TaskBatch::Namer
 {
 
-	public:
+public:
 
-	Namer( const Context &baseContext )
-		: m_baseContext( baseContext )
-	{
-	}
+	Namer( const Context &baseContext ) : m_baseContext( baseContext ) {}
 
 	string name( const TaskBatch *batch )
 	{
@@ -587,7 +582,7 @@ class Dispatcher::TaskBatch::Namer
 		return result;
 	}
 
-	private:
+private:
 
 	const string &nodeLabel( const Node *node )
 	{
@@ -626,12 +621,9 @@ class Dispatcher::TaskBatch::Namer
 
 		vector<InternedString> names;
 		context->names( names );
-		std::sort(
-			names.begin(), names.end(),
-			[]( InternedString a, InternedString b ) {
-				return a.string() < b.string();
-			}
-		);
+		std::sort( names.begin(), names.end(), []( InternedString a, InternedString b ) {
+			return a.string() < b.string();
+		} );
 
 		for( const auto &name : names )
 		{
@@ -652,23 +644,20 @@ class Dispatcher::TaskBatch::Namer
 			}
 
 			DataPtr data = context->getAsData( name );
-			IECore::dispatch(
-				data.get(),
-				[&]( const auto *data ) -> void {
-					using DataType = remove_pointer_t<decltype( data )>;
-					using ValueType = typename DataType::ValueType;
-					if constexpr( fmt::is_formattable<ValueType>::value )
+			IECore::dispatch( data.get(), [&]( const auto *data ) -> void {
+				using DataType = remove_pointer_t<decltype( data )>;
+				using ValueType = typename DataType::ValueType;
+				if constexpr( fmt::is_formattable<ValueType>::value )
+				{
+					if( result.size() )
 					{
-						if( result.size() )
-						{
-							result += ", ";
-						}
-						result += fmt::format( "{}={}", name.string(), data->readable() );
+						result += ", ";
 					}
-					/// \todo Register formatters for Imath types, and anything
-					/// else that might end up in a context variable.
+					result += fmt::format( "{}={}", name.string(), data->readable() );
 				}
-			);
+				/// \todo Register formatters for Imath types, and anything
+				/// else that might end up in a context variable.
+			} );
 		}
 
 		return result;
@@ -684,13 +673,17 @@ class Dispatcher::TaskBatch::Namer
 // TaskBatch implementation
 //////////////////////////////////////////////////////////////////////////
 
-Dispatcher::TaskBatch::TaskBatch()
-	: TaskBatch( nullptr, nullptr )
-{
-}
+Dispatcher::TaskBatch::TaskBatch() : TaskBatch( nullptr, nullptr ) {}
 
 Dispatcher::TaskBatch::TaskBatch( TaskNode::ConstTaskPlugPtr plug, Gaffer::ConstContextPtr context )
-	: m_plug( plug ), m_context( context ), m_blindData( new CompoundData ), m_size( 0 ), m_postTaskIndex( 0 ), m_immediate( false ), m_visited( false ), m_executed( false )
+	: m_plug( plug ),
+	  m_context( context ),
+	  m_blindData( new CompoundData ),
+	  m_size( 0 ),
+	  m_postTaskIndex( 0 ),
+	  m_immediate( false ),
+	  m_visited( false ),
+	  m_executed( false )
 {
 }
 
@@ -862,20 +855,16 @@ void Dispatcher::TaskBatch::preprocess( bool omitEmpty, Namer &namer, bool immed
 void Dispatcher::TaskBatch::isolate()
 {
 	auto sourceNode = runTimeCast<const TaskNode>( m_plug->node() );
-	const ScriptNode *sourceScript = sourceNode->scriptNode(); // `execute()` has already checked that this will be valid
+	const ScriptNode *sourceScript =
+		sourceNode->scriptNode(); // `execute()` has already checked that this will be valid
 
 	std::filesystem::path scriptPath( m_context->get<std::string>( g_scriptFileNameContextEntry ) );
 	const std::string sourceNodeRelativeName = sourceNode->relativeName( sourceScript );
 	const std::vector<FrameList::Frame> intFrames( m_frames.begin(), m_frames.end() );
 	FrameListPtr batchFrames = frameListFromList( intFrames );
 
-	std::filesystem::path isolatedPath =
-		scriptPath.parent_path() /
-		"isolated" /
-		sourceNodeRelativeName /
-		m_context->hash().toString() /
-		batchFrames->asString() /
-		( scriptPath.stem().string() + ".gfr" );
+	std::filesystem::path isolatedPath = scriptPath.parent_path() / "isolated" / sourceNodeRelativeName /
+		m_context->hash().toString() / batchFrames->asString() / ( scriptPath.stem().string() + ".gfr" );
 
 	ContextPtr isolatedContext = new Context( *m_context );
 	isolatedContext->set( g_scriptFileNameContextEntry, isolatedPath.generic_string() );
@@ -956,12 +945,9 @@ void Dispatcher::TaskBatch::isolate()
 class Dispatcher::Batcher
 {
 
-	public:
+public:
 
-	Batcher()
-		: m_rootBatch( new TaskBatch() )
-	{
-	}
+	Batcher() : m_rootBatch( new TaskBatch() ) {}
 
 	void addTask( const TaskNode::Task &task )
 	{
@@ -971,10 +957,7 @@ class Dispatcher::Batcher
 		}
 	}
 
-	TaskBatch *rootBatch()
-	{
-		return m_rootBatch.get();
-	}
+	TaskBatch *rootBatch() { return m_rootBatch.get(); }
 
 	// Returns a hash representing all the tasks that will be
 	// executed, but _not_ the dependencies between them. This
@@ -991,9 +974,11 @@ class Dispatcher::Batcher
 		return h;
 	}
 
-	private:
+private:
 
-	TaskBatchPtr batchTasksWalk( TaskNode::Task task, const std::set<const TaskBatch *> &ancestors = std::set<const TaskBatch *>() )
+	TaskBatchPtr batchTasksWalk(
+		TaskNode::Task task, const std::set<const TaskBatch *> &ancestors = std::set<const TaskBatch *>()
+	)
 	{
 		// Find source task, taking into account
 		// Switches and ContextProcessors.
@@ -1021,7 +1006,12 @@ class Dispatcher::Batcher
 		TaskBatchPtr batch = acquireBatch( task );
 		if( ancestors.find( batch.get() ) != ancestors.end() )
 		{
-			throw IECore::Exception( fmt::format( "Dispatched tasks cannot have cyclic dependencies but {} is involved in a cycle.", batch->plug()->relativeName( batch->plug()->ancestor<ScriptNode>() ) ) );
+			throw IECore::Exception(
+				fmt::format(
+					"Dispatched tasks cannot have cyclic dependencies but {} is involved in a cycle.",
+					batch->plug()->relativeName( batch->plug()->ancestor<ScriptNode>() )
+				)
+			);
 		}
 
 		// Ask the task what preTasks and postTasks it would like.
@@ -1198,9 +1188,11 @@ namespace
 class DispatcherSignalGuard
 {
 
-	public:
+public:
 
-	DispatcherSignalGuard( const Dispatcher *dispatcher ) : m_cancelledByPreDispatch( false ), m_dispatcher( dispatcher )
+	DispatcherSignalGuard( const Dispatcher *dispatcher )
+		: m_cancelledByPreDispatch( false ),
+		  m_dispatcher( dispatcher )
 	{
 		if( Context::current()->getIfExists<string>( g_jobDirectoryContextEntry ) )
 		{
@@ -1229,10 +1221,7 @@ class DispatcherSignalGuard
 		}
 	}
 
-	bool cancelledByPreDispatch()
-	{
-		return m_cancelledByPreDispatch;
-	}
+	bool cancelledByPreDispatch() { return m_cancelledByPreDispatch; }
 
 	void emitDispatchSignal()
 	{
@@ -1242,7 +1231,7 @@ class DispatcherSignalGuard
 		}
 	}
 
-	private:
+private:
 
 	bool m_cancelledByPreDispatch;
 	const Dispatcher *m_dispatcher;
@@ -1329,7 +1318,9 @@ void Dispatcher::execute() const
 		{
 			if( script && s != script )
 			{
-				throw IECore::Exception( fmt::format( "{} does not belong to ScriptNode {}.", taskPlug->fullName(), script->fullName() ) );
+				throw IECore::Exception(
+					fmt::format( "{} does not belong to ScriptNode {}.", taskPlug->fullName(), script->fullName() )
+				);
 			}
 			script = s;
 		}

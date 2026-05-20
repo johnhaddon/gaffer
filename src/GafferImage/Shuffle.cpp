@@ -60,16 +60,14 @@ struct MappingData : public IECore::Data
 			m_mapping[channelName] = channelName;
 		}
 
-		Map extraSources = {
-			{ "__white", "__white" },
-			{ "__black", "__black" }
-		};
+		Map extraSources = { { "__white", "__white" }, { "__black", "__black" } };
 		if( mode == Shuffle::MissingSourceMode::Black )
 		{
 			extraSources["*"] = "__black";
 		}
 
-		m_mapping = shuffles->shuffleWithExtraSources( m_mapping, extraSources, mode == Shuffle::MissingSourceMode::Ignore );
+		m_mapping =
+			shuffles->shuffleWithExtraSources( m_mapping, extraSources, mode == Shuffle::MissingSourceMode::Ignore );
 
 		m_outChannelNames = new StringVectorData();
 		for( const auto &m : m_mapping )
@@ -91,7 +89,7 @@ struct MappingData : public IECore::Data
 		return it->second;
 	}
 
-	private:
+private:
 
 	StringVectorDataPtr m_outChannelNames;
 
@@ -107,11 +105,13 @@ size_t Shuffle::g_firstPlugIndex = 0;
 
 GAFFER_NODE_DEFINE_TYPE( Shuffle );
 
-Shuffle::Shuffle( const std::string &name )
-	: ImageProcessor( name )
+Shuffle::Shuffle( const std::string &name ) : ImageProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
-	addChild( new IntPlug( "missingSourceMode", Plug::In, (int)MissingSourceMode::Black, (int)MissingSourceMode::Ignore, (int)MissingSourceMode::Black ) );
+	addChild( new IntPlug(
+		"missingSourceMode", Plug::In, (int)MissingSourceMode::Black, (int)MissingSourceMode::Ignore,
+		(int)MissingSourceMode::Black
+	) );
 	addChild( new ShufflesPlug( "shuffles" ) );
 	addChild( new ObjectPlug( "__mapping", Plug::Out, IECore::NullObject::defaultNullObject() ) );
 
@@ -124,9 +124,7 @@ Shuffle::Shuffle( const std::string &name )
 	outPlug()->sampleOffsetsPlug()->setInput( inPlug()->sampleOffsetsPlug() );
 }
 
-Shuffle::~Shuffle()
-{
-}
+Shuffle::~Shuffle() {}
 
 Gaffer::IntPlug *Shuffle::missingSourceModePlug()
 {
@@ -162,11 +160,8 @@ void Shuffle::affects( const Gaffer::Plug *input, AffectedPlugsContainer &output
 {
 	ImageProcessor::affects( input, outputs );
 
-	if(
-		input == inPlug()->channelNamesPlug() ||
-		shufflesPlug()->isAncestorOf( input ) ||
-		input == missingSourceModePlug()
-	)
+	if( input == inPlug()->channelNamesPlug() || shufflesPlug()->isAncestorOf( input ) ||
+		input == missingSourceModePlug() )
 	{
 		outputs.push_back( mappingPlug() );
 	}
@@ -176,10 +171,7 @@ void Shuffle::affects( const Gaffer::Plug *input, AffectedPlugsContainer &output
 		outputs.push_back( outPlug()->channelNamesPlug() );
 	}
 
-	if(
-		input == mappingPlug() ||
-		input == inPlug()->channelDataPlug()
-	)
+	if( input == mappingPlug() || input == inPlug()->channelDataPlug() )
 	{
 		outputs.push_back( outPlug()->channelDataPlug() );
 	}
@@ -202,28 +194,34 @@ void Shuffle::compute( Gaffer::ValuePlug *output, const Gaffer::Context *context
 	if( output == mappingPlug() )
 	{
 		ConstStringVectorDataPtr inChannelNames = inPlug()->channelNamesPlug()->getValue();
-		static_cast<ObjectPlug *>( output )->setValue(
-			new MappingData( inChannelNames.get(), shufflesPlug(), (MissingSourceMode)missingSourceModePlug()->getValue() )
-		);
+		static_cast<ObjectPlug *>( output )->setValue( new MappingData(
+			inChannelNames.get(), shufflesPlug(), (MissingSourceMode)missingSourceModePlug()->getValue()
+		) );
 	}
 
 	return ImageProcessor::compute( output, context );
 }
 
-void Shuffle::hashChannelNames( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Shuffle::hashChannelNames(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ImageProcessor::hashChannelNames( parent, context, h );
 	mappingPlug()->hash( h );
 }
 
-IECore::ConstStringVectorDataPtr Shuffle::computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstStringVectorDataPtr Shuffle::computeChannelNames(
+	const Gaffer::Context *context, const ImagePlug *parent
+) const
 {
 	ConstMappingDataPtr mapping = boost::static_pointer_cast<const MappingData>( mappingPlug()->getValue() );
 	return mapping->outChannelNames();
 }
 
 
-void Shuffle::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Shuffle::hashChannelData(
+	const GafferImage::ImagePlug *parent, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	std::string c = inChannelName( context->get<string>( ImagePlug::channelNameContextName ) );
 
@@ -255,7 +253,10 @@ void Shuffle::hashChannelData( const GafferImage::ImagePlug *parent, const Gaffe
 	}
 }
 
-IECore::ConstFloatVectorDataPtr Shuffle::computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const
+IECore::ConstFloatVectorDataPtr Shuffle::computeChannelData(
+	const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+	const ImagePlug *parent
+) const
 {
 	std::string c = inChannelName( context->get<string>( ImagePlug::channelNameContextName ) );
 

@@ -49,23 +49,26 @@ using namespace GafferUI;
 
 GAFFER_GRAPHCOMPONENT_DEFINE_TYPE( AuxiliaryNodeGadget );
 
-AuxiliaryNodeGadget::NodeGadgetTypeDescription<AuxiliaryNodeGadget> AuxiliaryNodeGadget::g_nodeGadgetTypeDescription( Gaffer::Node::staticTypeId() );
+AuxiliaryNodeGadget::NodeGadgetTypeDescription<AuxiliaryNodeGadget> AuxiliaryNodeGadget::g_nodeGadgetTypeDescription(
+	Gaffer::Node::staticTypeId()
+);
 
 static IECore::InternedString g_labelKey( "auxiliaryNodeGadget:label" );
 static IECore::InternedString g_colorKey( "nodeGadget:color" );
 
 AuxiliaryNodeGadget::AuxiliaryNodeGadget( Gaffer::NodePtr node )
-	: StandardNodeGadget( node, true ), m_label( "" ), m_radius( 1.0 )
+	: StandardNodeGadget( node, true ),
+	  m_label( "" ),
+	  m_radius( 1.0 )
 {
-	Gaffer::Metadata::nodeValueChangedSignal( node.get() ).connect( boost::bind( &AuxiliaryNodeGadget::nodeMetadataChanged, this, ::_2 ) );
+	Gaffer::Metadata::nodeValueChangedSignal( node.get() )
+		.connect( boost::bind( &AuxiliaryNodeGadget::nodeMetadataChanged, this, ::_2 ) );
 
 	updateLabel();
 	setContents( nullptr );
 }
 
-AuxiliaryNodeGadget::~AuxiliaryNodeGadget()
-{
-}
+AuxiliaryNodeGadget::~AuxiliaryNodeGadget() {}
 
 Imath::Box3f AuxiliaryNodeGadget::bound() const
 {

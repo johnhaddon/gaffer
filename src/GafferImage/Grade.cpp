@@ -48,8 +48,7 @@ namespace
 {
 struct GradeParametersScope : public Gaffer::Context::EditableScope
 {
-	GradeParametersScope( const Gaffer::Context *context )
-		: EditableScope( context )
+	GradeParametersScope( const Gaffer::Context *context ) : EditableScope( context )
 	{
 		remove( GafferImage::ImagePlug::tileOriginContextName );
 	}
@@ -61,8 +60,7 @@ GAFFER_NODE_DEFINE_TYPE( Grade );
 
 size_t Grade::g_firstPlugIndex = 0;
 
-Grade::Grade( const std::string &name )
-	: ChannelDataProcessor( name, true /* hasUnpremultPlug */ )
+Grade::Grade( const std::string &name ) : ChannelDataProcessor( name, true /* hasUnpremultPlug */ )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new Color4fPlug( "blackPoint" ) );
@@ -76,9 +74,7 @@ Grade::Grade( const std::string &name )
 	addChild( new BoolPlug( "whiteClamp" ) );
 }
 
-Grade::~Grade()
-{
-}
+Grade::~Grade() {}
 
 Gaffer::Color4fPlug *Grade::blackPointPlug()
 {
@@ -200,15 +196,10 @@ void Grade::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs 
 	// Process the children of the compound plugs.
 	for( unsigned int i = 0; i < 4; ++i )
 	{
-		if(
-			input == blackPointPlug()->getChild( i ) ||
-			input == whitePointPlug()->getChild( i ) ||
-			input == liftPlug()->getChild( i ) ||
-			input == gainPlug()->getChild( i ) ||
-			input == multiplyPlug()->getChild( i ) ||
-			input == offsetPlug()->getChild( i ) ||
-			input == gammaPlug()->getChild( i )
-		)
+		if( input == blackPointPlug()->getChild( i ) || input == whitePointPlug()->getChild( i ) ||
+			input == liftPlug()->getChild( i ) || input == gainPlug()->getChild( i ) ||
+			input == multiplyPlug()->getChild( i ) || input == offsetPlug()->getChild( i ) ||
+			input == gammaPlug()->getChild( i ) )
 		{
 			outputs.push_back( outPlug()->channelDataPlug() );
 			return;
@@ -216,18 +207,16 @@ void Grade::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs 
 	}
 
 	// Process all other plugs.
-	if(
-		input == inPlug()->channelDataPlug() ||
-		input == blackClampPlug() ||
-		input == whiteClampPlug()
-	)
+	if( input == inPlug()->channelDataPlug() || input == blackClampPlug() || input == whiteClampPlug() )
 	{
 		outputs.push_back( outPlug()->channelDataPlug() );
 		return;
 	}
 }
 
-void Grade::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Grade::hashChannelData(
+	const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	ChannelDataProcessor::hashChannelData( output, context, h );
 
@@ -248,7 +237,9 @@ void Grade::hashChannelData( const GafferImage::ImagePlug *output, const Gaffer:
 	whiteClampPlug()->hash( h );
 }
 
-void Grade::processChannelData( const Gaffer::Context *context, const ImagePlug *parent, const std::string &channel, FloatVectorDataPtr outData ) const
+void Grade::processChannelData(
+	const Gaffer::Context *context, const ImagePlug *parent, const std::string &channel, FloatVectorDataPtr outData
+) const
 {
 	// Do some pre-processing.
 	float A, B, gamma;

@@ -57,7 +57,10 @@ using namespace IECoreDelight;
 namespace
 {
 
-bool convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::ExternalProcedural *> &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, NSIContext_t context, const char *handle )
+bool convert(
+	const IECoreScenePreview::Renderer::Samples<const IECoreScene::ExternalProcedural *> &samples,
+	const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, NSIContext_t context, const char *handle
+)
 {
 	const IECoreScene::ExternalProcedural *object = samples[0];
 
@@ -72,7 +75,10 @@ bool convert( const IECoreScenePreview::Renderer::Samples<const IECoreScene::Ext
 	{
 		type = "lua";
 	}
-	else if( boost::ends_with( filename, "nsi" ) or boost::ends_with( filename, "nsia" ) or boost::ends_with( filename, "nsi.gz" ) or boost::ends_with( filename, "nsia.gz" ) )
+	else if(
+		boost::ends_with( filename, "nsi" ) or boost::ends_with( filename, "nsia" ) or
+		boost::ends_with( filename, "nsi.gz" ) or boost::ends_with( filename, "nsia.gz" )
+	)
 	{
 		type = "apistream";
 	}

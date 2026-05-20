@@ -82,8 +82,20 @@ void GafferSceneModule::bindFilter()
 		.staticmethod( "getInputScene" );
 
 	PlugClass<FilterPlug>()
-		.def( init<const std::string &, Plug::Direction, unsigned>( ( arg( "name" ) = Gaffer::GraphComponent::defaultName<FilterPlug>(), arg( "direction" ) = Gaffer::Plug::In, arg( "flags" ) = Gaffer::Plug::Default ) ) )
-		.def( init<const std::string &, Plug::Direction, int, int, int, unsigned>( ( arg( "name" ) = Gaffer::GraphComponent::defaultName<FilterPlug>(), arg( "direction" ) = Gaffer::Plug::In, arg( "defaultValue" ) = IECore::PathMatcher::NoMatch, arg( "minValue" ) = IECore::PathMatcher::NoMatch, arg( "maxValue" ) = IECore::PathMatcher::EveryMatch, arg( "flags" ) = Gaffer::Plug::Default ) ) )
+		.def(
+			init<const std::string &, Plug::Direction, unsigned>(
+				( arg( "name" ) = Gaffer::GraphComponent::defaultName<FilterPlug>(),
+				  arg( "direction" ) = Gaffer::Plug::In, arg( "flags" ) = Gaffer::Plug::Default )
+			)
+		)
+		.def(
+			init<const std::string &, Plug::Direction, int, int, int, unsigned>(
+				( arg( "name" ) = Gaffer::GraphComponent::defaultName<FilterPlug>(),
+				  arg( "direction" ) = Gaffer::Plug::In, arg( "defaultValue" ) = IECore::PathMatcher::NoMatch,
+				  arg( "minValue" ) = IECore::PathMatcher::NoMatch, arg( "maxValue" ) = IECore::PathMatcher::EveryMatch,
+				  arg( "flags" ) = Gaffer::Plug::Default )
+			)
+		)
 		.def( "match", &match );
 
 	GafferBindings::DependencyNodeClass<PathFilter>();

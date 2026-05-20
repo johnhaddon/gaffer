@@ -45,12 +45,11 @@ using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreRenderMan;
 
-GeometryPrototypeCache::GeometryPrototypeCache( Session *session )
-	: m_session( session )
-{
-}
+GeometryPrototypeCache::GeometryPrototypeCache( Session *session ) : m_session( session ) {}
 
-GeometryPrototypePtr GeometryPrototypeCache::get( const IECore::Object *object, const Attributes *attributes, const std::string &messageContext )
+GeometryPrototypePtr GeometryPrototypeCache::get(
+	const IECore::Object *object, const Attributes *attributes, const std::string &messageContext
+)
 {
 	if( !object )
 	{
@@ -60,9 +59,15 @@ GeometryPrototypePtr GeometryPrototypeCache::get( const IECore::Object *object, 
 	return get( { object }, { 0.0f }, attributes, messageContext );
 }
 
-GeometryPrototypePtr GeometryPrototypeCache::get( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, const Attributes *attributes, const std::string &messageContext )
+GeometryPrototypePtr GeometryPrototypeCache::get(
+	const IECoreScenePreview::Renderer::ObjectSamples &samples,
+	const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, const Attributes *attributes,
+	const std::string &messageContext
+)
 {
-	auto converter = [&]( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, const Attributes *attributes, Session *session, GeometryPrototypePtr &result ) {
+	auto converter = [&]( const IECoreScenePreview::Renderer::ObjectSamples &samples,
+						  const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, const Attributes *attributes,
+						  Session *session, GeometryPrototypePtr &result ) {
 		riley::DisplacementId displacement;
 		if( auto d = attributes->displacement() )
 		{
@@ -76,8 +81,7 @@ GeometryPrototypePtr GeometryPrototypeCache::get( const IECoreScenePreview::Rend
 		{
 			primVars.RtParamList::Inherit( attributes->prototypeAttributes() );
 			result = new GeometryPrototype(
-				session->riley->CreateGeometryPrototype( riley::UserId(), type, displacement, primVars ),
-				session
+				session->riley->CreateGeometryPrototype( riley::UserId(), type, displacement, primVars ), session
 			);
 		}
 	};
@@ -98,9 +102,7 @@ GeometryPrototypePtr GeometryPrototypeCache::get( const IECoreScenePreview::Rend
 		h.append( sampleTimes[i] );
 	}
 
-	auto [it, inserted] = m_cache.emplace(
-		std::piecewise_construct, std::forward_as_tuple( h ), std::make_tuple()
-	);
+	auto [it, inserted] = m_cache.emplace( std::piecewise_construct, std::forward_as_tuple( h ), std::make_tuple() );
 	std::call_once( it->second.onceFlag, converter, samples, sampleTimes, attributes, m_session, it->second.prototype );
 
 	return it->second.prototype;

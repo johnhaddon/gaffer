@@ -54,8 +54,7 @@ GAFFER_NODE_DEFINE_TYPE( DeleteFaces );
 
 size_t DeleteFaces::g_firstPlugIndex = 0;
 
-DeleteFaces::DeleteFaces( const std::string &name )
-	: Deformer( name )
+DeleteFaces::DeleteFaces( const std::string &name ) : Deformer( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 
@@ -64,9 +63,7 @@ DeleteFaces::DeleteFaces( const std::string &name )
 	addChild( new BoolPlug( "ignoreMissingVariable", Plug::In, false ) );
 }
 
-DeleteFaces::~DeleteFaces()
-{
-}
+DeleteFaces::~DeleteFaces() {}
 
 Gaffer::StringPlug *DeleteFaces::facesPlug()
 {
@@ -100,13 +97,13 @@ const Gaffer::BoolPlug *DeleteFaces::ignoreMissingVariablePlug() const
 
 bool DeleteFaces::affectsProcessedObject( const Gaffer::Plug *input ) const
 {
-	return Deformer::affectsProcessedObject( input ) ||
-		input == facesPlug() ||
-		input == invertPlug() ||
+	return Deformer::affectsProcessedObject( input ) || input == facesPlug() || input == invertPlug() ||
 		input == ignoreMissingVariablePlug();
 }
 
-void DeleteFaces::hashProcessedObject( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void DeleteFaces::hashProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	Deformer::hashProcessedObject( path, context, h );
 	facesPlug()->hash( h );
@@ -114,7 +111,9 @@ void DeleteFaces::hashProcessedObject( const ScenePath &path, const Gaffer::Cont
 	ignoreMissingVariablePlug()->hash( h );
 }
 
-IECore::ConstObjectPtr DeleteFaces::computeProcessedObject( const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject ) const
+IECore::ConstObjectPtr DeleteFaces::computeProcessedObject(
+	const ScenePath &path, const Gaffer::Context *context, const IECore::Object *inputObject
+) const
 {
 	const MeshPrimitive *mesh = runTimeCast<const MeshPrimitive>( inputObject );
 	if( !mesh )
@@ -137,7 +136,9 @@ IECore::ConstObjectPtr DeleteFaces::computeProcessedObject( const ScenePath &pat
 			return inputObject;
 		}
 
-		throw InvalidArgumentException( fmt::format( "DeleteFaces : No primitive variable \"{}\" found", deletePrimVarName ) );
+		throw InvalidArgumentException(
+			fmt::format( "DeleteFaces : No primitive variable \"{}\" found", deletePrimVarName )
+		);
 	}
 
 	return MeshAlgo::deleteFaces( mesh, it->second, invertPlug()->getValue(), context->canceller() );

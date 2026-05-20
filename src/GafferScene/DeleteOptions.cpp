@@ -41,14 +41,9 @@ using namespace GafferScene;
 
 GAFFER_NODE_DEFINE_TYPE( DeleteOptions );
 
-DeleteOptions::DeleteOptions( const std::string &name )
-	: DeleteGlobals( name )
-{
-}
+DeleteOptions::DeleteOptions( const std::string &name ) : DeleteGlobals( name ) {}
 
-DeleteOptions::~DeleteOptions()
-{
-}
+DeleteOptions::~DeleteOptions() {}
 
 std::string DeleteOptions::namePrefix() const
 {

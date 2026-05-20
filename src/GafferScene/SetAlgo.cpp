@@ -48,15 +48,9 @@ namespace
 
 struct SceneSetProvider : public Gaffer::SetExpressionAlgo::SetProvider
 {
-	SceneSetProvider( const ScenePlug *scene )
-		: m_scene( scene )
-	{
-	}
+	SceneSetProvider( const ScenePlug *scene ) : m_scene( scene ) {}
 
-	IECore::ConstInternedStringVectorDataPtr setNames() const override
-	{
-		return m_scene->setNames();
-	}
+	IECore::ConstInternedStringVectorDataPtr setNames() const override { return m_scene->setNames(); }
 
 	const IECore::PathMatcher paths( const std::string &setName ) const override
 	{
@@ -100,8 +94,7 @@ bool affectsSetExpression( const Plug *scenePlugChild )
 {
 	if( auto parent = scenePlugChild->parent<ScenePlug>() )
 	{
-		return scenePlugChild == parent->setPlug() ||
-			scenePlugChild == parent->setNamesPlug();
+		return scenePlugChild == parent->setPlug() || scenePlugChild == parent->setNamesPlug();
 	}
 	return false;
 }

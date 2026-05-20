@@ -49,6 +49,4 @@ RenderManLightFilter::RenderManLightFilter( const std::string &name )
 {
 }
 
-RenderManLightFilter::~RenderManLightFilter()
-{
-}
+RenderManLightFilter::~RenderManLightFilter() {}

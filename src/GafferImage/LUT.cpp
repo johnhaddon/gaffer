@@ -47,30 +47,17 @@ GAFFER_NODE_DEFINE_TYPE( LUT );
 
 size_t LUT::g_firstPlugIndex = 0;
 
-LUT::LUT( const std::string &name )
-	: OpenColorIOTransform( name )
+LUT::LUT( const std::string &name ) : OpenColorIOTransform( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "fileName" ) );
 
-	addChild( new IntPlug(
-		"interpolation", Plug::In,
-		Best,
-		Best,
-		Tetrahedral
-	) );
+	addChild( new IntPlug( "interpolation", Plug::In, Best, Best, Tetrahedral ) );
 
-	addChild( new IntPlug(
-		"direction", Plug::In,
-		Forward,
-		Forward,
-		Inverse
-	) );
+	addChild( new IntPlug( "direction", Plug::In, Forward, Forward, Inverse ) );
 }
 
-LUT::~LUT()
-{
-}
+LUT::~LUT() {}
 
 Gaffer::StringPlug *LUT::fileNamePlug()
 {

@@ -45,17 +45,13 @@ namespace Gaffer
 template<typename T>
 T *BoxIO::plug()
 {
-	return IECore::runTimeCast<T>(
-		m_direction == Plug::In ? outPlugInternal() : inPlugInternal()
-	);
+	return IECore::runTimeCast<T>( m_direction == Plug::In ? outPlugInternal() : inPlugInternal() );
 }
 
 template<typename T>
 const T *BoxIO::plug() const
 {
-	return IECore::runTimeCast<const T>(
-		m_direction == Plug::In ? outPlugInternal() : inPlugInternal()
-	);
+	return IECore::runTimeCast<const T>( m_direction == Plug::In ? outPlugInternal() : inPlugInternal() );
 }
 
 template<typename T>

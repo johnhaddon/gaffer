@@ -47,8 +47,7 @@ GAFFER_NODE_DEFINE_TYPE( Deformer );
 
 size_t Deformer::g_firstPlugIndex = 0;
 
-Deformer::Deformer( const std::string &name )
-	: ObjectProcessor( name )
+Deformer::Deformer( const std::string &name ) : ObjectProcessor( name )
 {
 	init();
 }
@@ -68,9 +67,7 @@ void Deformer::init()
 	outPlug()->childBoundsPlug()->setFlags( Plug::AcceptsDependencyCycles, true );
 }
 
-Deformer::~Deformer()
-{
-}
+Deformer::~Deformer() {}
 
 Gaffer::BoolPlug *Deformer::adjustBoundsPlug()
 {
@@ -86,15 +83,9 @@ void Deformer::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outpu
 {
 	ObjectProcessor::affects( input, outputs );
 
-	if(
-		input == adjustBoundsPlug() ||
-		input == filterPlug() ||
-		affectsProcessedObjectBound( input ) ||
-		input == inPlug()->objectPlug() ||
-		input == outPlug()->childBoundsPlug() ||
-		input == inPlug()->childBoundsPlug() ||
-		input == inPlug()->boundPlug()
-	)
+	if( input == adjustBoundsPlug() || input == filterPlug() || affectsProcessedObjectBound( input ) ||
+		input == inPlug()->objectPlug() || input == outPlug()->childBoundsPlug() ||
+		input == inPlug()->childBoundsPlug() || input == inPlug()->boundPlug() )
 	{
 		outputs.push_back( outPlug()->boundPlug() );
 	}
@@ -110,7 +101,9 @@ bool Deformer::affectsProcessedObjectBound( const Gaffer::Plug *input ) const
 	return input == outPlug()->objectPlug();
 }
 
-void Deformer::hashProcessedObjectBound( const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h ) const
+void Deformer::hashProcessedObjectBound(
+	const ScenePath &path, const Gaffer::Context *context, IECore::MurmurHash &h
+) const
 {
 	outPlug()->objectPlug()->hash( h );
 }
@@ -120,7 +113,9 @@ Imath::Box3f Deformer::computeProcessedObjectBound( const ScenePath &path, const
 	return SceneAlgo::bound( outPlug()->objectPlug()->getValue().get() );
 }
 
-void Deformer::hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Deformer::hashBound(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	bool adjustBounds;
 	{
@@ -159,7 +154,9 @@ void Deformer::hashBound( const ScenePath &path, const Gaffer::Context *context,
 	h = inPlug()->boundPlug()->hash();
 }
 
-Imath::Box3f Deformer::computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::Box3f Deformer::computeBound(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	bool adjustBounds;
 	{

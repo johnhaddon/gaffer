@@ -48,10 +48,22 @@ namespace IECoreArnold
 namespace ParameterAlgo
 {
 
-IECOREARNOLD_API void setParameter( AtNode *node, const AtParamEntry *parameter, const IECore::Data *value, const std::string &messageContext = "ParameterAlgo::setParameter" );
-IECOREARNOLD_API void setParameter( AtNode *node, AtString name, const IECore::Data *value, const std::string &messageContext = "ParameterAlgo::setParameter" );
-IECOREARNOLD_API void setParameter( AtNode *node, const char *name, const IECore::Data *value, const std::string &messageContext = "ParameterAlgo::setParameter" );
-IECOREARNOLD_API void setParameters( AtNode *node, const IECore::CompoundDataMap &values, const std::string &messageContext = "ParameterAlgo::setParameter" );
+IECOREARNOLD_API void setParameter(
+	AtNode *node, const AtParamEntry *parameter, const IECore::Data *value,
+	const std::string &messageContext = "ParameterAlgo::setParameter"
+);
+IECOREARNOLD_API void setParameter(
+	AtNode *node, AtString name, const IECore::Data *value,
+	const std::string &messageContext = "ParameterAlgo::setParameter"
+);
+IECOREARNOLD_API void setParameter(
+	AtNode *node, const char *name, const IECore::Data *value,
+	const std::string &messageContext = "ParameterAlgo::setParameter"
+);
+IECOREARNOLD_API void setParameters(
+	AtNode *node, const IECore::CompoundDataMap &values,
+	const std::string &messageContext = "ParameterAlgo::setParameter"
+);
 
 IECOREARNOLD_API IECore::DataPtr getParameter( AtNode *node, const AtParamEntry *parameter );
 IECOREARNOLD_API IECore::DataPtr getParameter( AtNode *node, const AtUserParamEntry *parameter );

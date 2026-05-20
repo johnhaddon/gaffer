@@ -51,8 +51,7 @@ GAFFER_NODE_DEFINE_TYPE( ImageSampler );
 
 size_t ImageSampler::g_firstPlugIndex = 0;
 
-ImageSampler::ImageSampler( const std::string &name )
-	: ComputeNode( name )
+ImageSampler::ImageSampler( const std::string &name ) : ComputeNode( name )
 {
 
 	storeIndexOfNextChild( g_firstPlugIndex );
@@ -71,10 +70,13 @@ ImageSampler::ImageSampler( const std::string &name )
 	addChild( new V2fPlug( "pixel" ) );
 	addChild( new BoolPlug( "interpolate", Plug::In, true ) );
 
-	addChild( new Color4fPlug( "color", Plug::Out, Imath::Color4f( 0.0f ),
-							   // Override the standard limits on FloatPlug - if there is an inf value in the image,
-							   // ImageSampler should be able to report that
-							   Imath::Color4f( -std::numeric_limits<float>::infinity() ), Imath::Color4f( std::numeric_limits<float>::infinity() ) ) );
+	addChild( new Color4fPlug(
+		"color", Plug::Out, Imath::Color4f( 0.0f ),
+		// Override the standard limits on FloatPlug - if there is an inf value in the image,
+		// ImageSampler should be able to report that
+		Imath::Color4f( -std::numeric_limits<float>::infinity() ),
+		Imath::Color4f( std::numeric_limits<float>::infinity() )
+	) );
 
 	addChild( new ImagePlug( "__flattenedIn", Plug::In, Plug::Default & ~Plug::Serialisable ) );
 
@@ -86,9 +88,7 @@ ImageSampler::ImageSampler( const std::string &name )
 	flattenedInPlug()->setInput( deepStateNode->outPlug() );
 }
 
-ImageSampler::~ImageSampler()
-{
-}
+ImageSampler::~ImageSampler() {}
 
 ImagePlug *ImageSampler::imagePlug()
 {
@@ -174,16 +174,10 @@ void ImageSampler::affects( const Gaffer::Plug *input, AffectedPlugsContainer &o
 {
 	ComputeNode::affects( input, outputs );
 
-	if(
-		input == flattenedInPlug()->viewNamesPlug() ||
-		input == flattenedInPlug()->dataWindowPlug() ||
-		input == flattenedInPlug()->channelDataPlug() ||
-		input == flattenedInPlug()->channelNamesPlug() ||
-		input == viewPlug() ||
-		input == channelsPlug() ||
-		input->parent<Plug>() == pixelPlug() ||
-		input == interpolatePlug()
-	)
+	if( input == flattenedInPlug()->viewNamesPlug() || input == flattenedInPlug()->dataWindowPlug() ||
+		input == flattenedInPlug()->channelDataPlug() || input == flattenedInPlug()->channelNamesPlug() ||
+		input == viewPlug() || input == channelsPlug() || input->parent<Plug>() == pixelPlug() ||
+		input == interpolatePlug() )
 	{
 		for( ValuePlug::Iterator componentIt( colorPlug() ); !componentIt.done(); ++componentIt )
 		{

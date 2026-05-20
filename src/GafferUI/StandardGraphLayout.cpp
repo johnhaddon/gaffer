@@ -135,7 +135,7 @@ namespace
 class Constraint
 {
 
-	public:
+public:
 
 	enum Type
 	{
@@ -146,7 +146,13 @@ class Constraint
 
 	// Enforces p - q ( ==, >=, <= ) d in direction v
 	Constraint( V2f *p, V2f *q, Type type, float d, const V2f &v, float w = 0.5, int category = 0 )
-		: m_p( p ), m_q( q ), m_type( type ), m_d( d ), m_v( v ), m_w( w ), m_category( category )
+		: m_p( p ),
+		  m_q( q ),
+		  m_type( type ),
+		  m_d( d ),
+		  m_v( v ),
+		  m_w( w ),
+		  m_category( category )
 	{
 	}
 
@@ -156,11 +162,8 @@ class Constraint
 		const float q = m_v.dot( *m_q );
 		const float separation = p - q;
 
-		if(
-			( m_type == EqualTo && separation == m_d ) ||
-			( m_type == GreaterThanOrEqualTo && separation >= m_d ) ||
-			( m_type == LessThanOrEqualTo && separation <= m_d )
-		)
+		if( ( m_type == EqualTo && separation == m_d ) || ( m_type == GreaterThanOrEqualTo && separation >= m_d ) ||
+			( m_type == LessThanOrEqualTo && separation <= m_d ) )
 		{
 			return;
 		}
@@ -170,12 +173,9 @@ class Constraint
 		*m_q -= r * ( 1.0f - m_w );
 	}
 
-	int category() const
-	{
-		return m_category;
-	}
+	int category() const { return m_category; }
 
-	private:
+private:
 
 	V2f *m_p;
 	V2f *m_q;
@@ -189,7 +189,7 @@ class Constraint
 class LayoutEngine
 {
 
-	public:
+public:
 
 	LayoutEngine( GraphGadget *graphGadget, float edgeLengthScale, float nodeSeparationScale )
 		: m_graphGadget( graphGadget ),
@@ -226,7 +226,8 @@ class LayoutEngine
 
 		// Put all the visible connections in the graph as edges.
 
-		for( NodesToVertices::const_iterator it = m_nodesToVertices.begin(), eIt = m_nodesToVertices.end(); it != eIt; ++it )
+		for( NodesToVertices::const_iterator it = m_nodesToVertices.begin(), eIt = m_nodesToVertices.end(); it != eIt;
+			 ++it )
 		{
 			for( Plug::RecursiveInputIterator pIt( it->first ); !pIt.done(); ++pIt )
 			{
@@ -280,7 +281,8 @@ class LayoutEngine
 
 	void pinNodes( const Gaffer::Set *nodes, bool invert = false )
 	{
-		for( NodesToVertices::const_iterator it = m_nodesToVertices.begin(), eIt = m_nodesToVertices.end(); it != eIt; ++it )
+		for( NodesToVertices::const_iterator it = m_nodesToVertices.begin(), eIt = m_nodesToVertices.end(); it != eIt;
+			 ++it )
 		{
 			if( nodes->contains( it->first ) != invert )
 			{
@@ -291,7 +293,8 @@ class LayoutEngine
 
 	void pinNonAuxiliaryNodes( const Gaffer::Set *nodes )
 	{
-		for( NodesToVertices::const_iterator it = m_nodesToVertices.begin(), eIt = m_nodesToVertices.end(); it != eIt; ++it )
+		for( NodesToVertices::const_iterator it = m_nodesToVertices.begin(), eIt = m_nodesToVertices.end(); it != eIt;
+			 ++it )
 		{
 			if( nodes && !nodes->contains( it->first ) )
 			{
@@ -405,19 +408,17 @@ class LayoutEngine
 
 		// add constraints to keep the children in the right positions relative to the group.
 
-		for( vector<VertexDescriptor>::const_iterator it = childVertexDescriptors.begin(), eIt = childVertexDescriptors.end(); it != eIt; ++it )
+		for( vector<VertexDescriptor>::const_iterator it = childVertexDescriptors.begin(),
+													  eIt = childVertexDescriptors.end();
+			 it != eIt; ++it )
 		{
 			Vertex &child = m_graph[*it];
 			child.collisionGroup = -1;
 			for( int d = 0; d < 2; ++d )
 			{
 				addConstraint(
-					child,
-					group,
-					Constraint::EqualTo,
-					child.position[d] - group.position[d],
-					d == 0 ? V2f( 1, 0 ) : V2f( 0, 1 ),
-					1.0f
+					child, group, Constraint::EqualTo, child.position[d] - group.position[d],
+					d == 0 ? V2f( 1, 0 ) : V2f( 0, 1 ), 1.0f
 				);
 			}
 		}
@@ -482,19 +483,13 @@ class LayoutEngine
 					continue;
 				}
 
-				const float separation =
-					edge.sourceOffset[d] * edge.idealDirection[d] -
-					edge.targetOffset[d] * edge.idealDirection[d] +
-					m_edgeLength;
+				const float separation = edge.sourceOffset[d] * edge.idealDirection[d] -
+					edge.targetOffset[d] * edge.idealDirection[d] + m_edgeLength;
 
 				addConstraint(
-					dst,
-					src,
-					Constraint::GreaterThanOrEqualTo,
-					separation,
+					dst, src, Constraint::GreaterThanOrEqualTo, separation,
 					d == 0 ? V2f( edge.idealDirection[d], 0 ) : V2f( 0, edge.idealDirection[d] ),
-					/* w = */ 0.5,
-					category
+					/* w = */ 0.5, category
 				);
 			}
 		}
@@ -524,7 +519,8 @@ class LayoutEngine
 		// springs to those that have more than one outgoing connection.
 		std::vector<std::pair<const Plug *, const Plug *>> stagedAuxiliaryConnectionPlugs;
 
-		for( NodesToVertices::const_iterator nodeIt = m_nodesToVertices.begin(), eIt = m_nodesToVertices.end(); nodeIt != eIt; ++nodeIt )
+		for( NodesToVertices::const_iterator nodeIt = m_nodesToVertices.begin(), eIt = m_nodesToVertices.end();
+			 nodeIt != eIt; ++nodeIt )
 		{
 			for( Plug::RecursiveInputIterator plugIt( nodeIt->first ); !plugIt.done(); ++plugIt )
 			{
@@ -609,10 +605,7 @@ class LayoutEngine
 		);
 	}
 
-	void clearConstraints()
-	{
-		m_constraints.clear();
-	}
+	void clearConstraints() { m_constraints.clear(); }
 
 	void solve( bool withCollisions )
 	{
@@ -660,19 +653,23 @@ class LayoutEngine
 			const Vertex &v = m_graph[*it];
 			if( !v.pinned && v.node )
 			{
-				if( !isnan( v.position.x ) && !isnan( v.position.y ) && !isinf( v.position.x ) && !isinf( v.position.y ) )
+				if( !isnan( v.position.x ) && !isnan( v.position.y ) && !isinf( v.position.x ) &&
+					!isinf( v.position.y ) )
 				{
 					m_graphGadget->setNodePosition( v.node, v.position );
 				}
 				else
 				{
-					IECore::msg( IECore::Msg::Warning, "LayoutEngine::applyPositions", "Layout algorithm failed to produce valid position for " + v.node->getName().string() );
+					IECore::msg(
+						IECore::Msg::Warning, "LayoutEngine::applyPositions",
+						"Layout algorithm failed to produce valid position for " + v.node->getName().string()
+					);
 				}
 			}
 		}
 	}
 
-	private:
+private:
 
 	// The tangents of connection endpoints are specified by NodeGadgets
 	// as arbitrary V3fs. We make the simplifying assumption that they
@@ -793,16 +790,13 @@ class LayoutEngine
 			Vertex *curr = &( m_graph[source( *it, m_graph )] );
 			if( prev )
 			{
-				const float separation = m_nodeSeparation + 0.5 * ( fabs( prev->bound.size()[dimension] ) + fabs( curr->bound.size()[dimension] ) );
+				const float separation = m_nodeSeparation +
+					0.5 * ( fabs( prev->bound.size()[dimension] ) + fabs( curr->bound.size()[dimension] ) );
 
 				addConstraint(
-					*curr,
-					*prev,
-					Constraint::GreaterThanOrEqualTo,
-					separation,
+					*curr, *prev, Constraint::GreaterThanOrEqualTo, separation,
 					dimension == 0 ? V2f( 1, 0 ) : V2f( 0, 1 ),
-					/* w = */ 0.5,
-					category
+					/* w = */ 0.5, category
 				);
 			}
 			prev = curr;
@@ -810,7 +804,9 @@ class LayoutEngine
 	}
 
 	// Adds a constraint between p and q, adjusting w based on their pinning status.
-	void addConstraint( Vertex &p, Vertex &q, Constraint::Type type, float d, const V2f &v, float w = 0.5f, int category = 0 )
+	void addConstraint(
+		Vertex &p, Vertex &q, Constraint::Type type, float d, const V2f &v, float w = 0.5f, int category = 0
+	)
 	{
 		if( p.pinned && q.pinned )
 		{
@@ -826,17 +822,7 @@ class LayoutEngine
 			w = 1.0f;
 		}
 
-		m_constraints.push_back(
-			Constraint(
-				&( p.position ),
-				&( q.position ),
-				type,
-				d,
-				v,
-				w,
-				category
-			)
-		);
+		m_constraints.push_back( Constraint( &( p.position ), &( q.position ), type, d, v, w, category ) );
 	}
 
 	void addCollisionConstraints()
@@ -874,7 +860,8 @@ class LayoutEngine
 		{
 			intersectingBounds.clear();
 			tree.intersectingBounds( *it, intersectingBounds );
-			for( vector<BoundIterator>::const_iterator bIt = intersectingBounds.begin(); bIt != intersectingBounds.end(); ++bIt )
+			for( vector<BoundIterator>::const_iterator bIt = intersectingBounds.begin();
+				 bIt != intersectingBounds.end(); ++bIt )
 			{
 				size_t bound1Index = it - bounds.begin();
 				size_t bound2Index = *bIt - bounds.begin();
@@ -887,11 +874,8 @@ class LayoutEngine
 				Vertex &vertex1 = m_graph[vertexDescriptors[bound1Index]];
 				Vertex &vertex2 = m_graph[vertexDescriptors[bound2Index]];
 
-				if(
-					vertex1.collisionGroup < 0 ||
-					vertex2.collisionGroup < 0 ||
-					vertex1.collisionGroup != vertex2.collisionGroup
-				)
+				if( vertex1.collisionGroup < 0 || vertex2.collisionGroup < 0 ||
+					vertex1.collisionGroup != vertex2.collisionGroup )
 				{
 					continue;
 				}
@@ -911,13 +895,7 @@ class LayoutEngine
 					q = &vertex2;
 				}
 
-				addConstraint(
-					*p,
-					*q,
-					Constraint::GreaterThanOrEqualTo,
-					separation,
-					v
-				);
+				addConstraint( *p, *q, Constraint::GreaterThanOrEqualTo, separation, v );
 			}
 		}
 	}
@@ -966,7 +944,8 @@ class LayoutEngine
 	{
 		for( size_t i = 0; i < iterations; ++i )
 		{
-			for( std::vector<Constraint>::const_iterator it = m_constraints.begin(), eIt = m_constraints.end(); it != eIt; ++it )
+			for( std::vector<Constraint>::const_iterator it = m_constraints.begin(), eIt = m_constraints.end();
+				 it != eIt; ++it )
 			{
 				it->apply();
 			}
@@ -1033,10 +1012,7 @@ class LayoutEngine
 
 	struct EdgeTargetOffsetLess
 	{
-		EdgeTargetOffsetLess( int dimension, Graph *graph )
-			: m_dimension( dimension ), m_graph( graph )
-		{
-		}
+		EdgeTargetOffsetLess( int dimension, Graph *graph ) : m_dimension( dimension ), m_graph( graph ) {}
 
 		bool operator () ( EdgeDescriptor e1, EdgeDescriptor e2 ) const
 		{
@@ -1045,7 +1021,7 @@ class LayoutEngine
 			return edge1.targetOffset[m_dimension] < edge2.targetOffset[m_dimension];
 		}
 
-		private:
+	private:
 
 		int m_dimension;
 		Graph *m_graph;
@@ -1065,7 +1041,8 @@ class LayoutEngine
 		const Nodule *dstNodule = dstNodeGadget->nodule( dstPlug );
 
 		// Determine if default should be laying out nodes side by side or stacked on top of each other.
-		const V3f defaultDstTangent = m_graph[dstIt->second].auxiliary ? V3f( -1, 0, 0 ) : defaultTangent( dstNodeGadget );
+		const V3f defaultDstTangent =
+			m_graph[dstIt->second].auxiliary ? V3f( -1, 0, 0 ) : defaultTangent( dstNodeGadget );
 
 		const V3f dstTangent = !dstNodule ? defaultDstTangent : dstNodeGadget->connectionTangent( dstNodule );
 		V3f srcTangent = !srcNodule ? -1.0f * defaultDstTangent : srcNodeGadget->connectionTangent( srcNodule );
@@ -1167,14 +1144,9 @@ class LayoutEngine
 
 IE_CORE_DEFINERUNTIMETYPED( StandardGraphLayout )
 
-StandardGraphLayout::StandardGraphLayout()
-	: m_connectionScale( 1.0f ), m_nodeSeparationScale( 1.0f )
-{
-}
+StandardGraphLayout::StandardGraphLayout() : m_connectionScale( 1.0f ), m_nodeSeparationScale( 1.0f ) {}
 
-StandardGraphLayout::~StandardGraphLayout()
-{
-}
+StandardGraphLayout::~StandardGraphLayout() {}
 
 bool StandardGraphLayout::connectNode( GraphGadget *graph, Node *node, Gaffer::Set *potentialInputs ) const
 {
@@ -1213,7 +1185,9 @@ bool StandardGraphLayout::connectNodes( GraphGadget *graph, Gaffer::Set *nodes, 
 			continue;
 		}
 
-		if( connectNodeInternal( graph, node, potentialInputs, nodes->size() == 1 /* only insert if there's only one node */ ) )
+		if( connectNodeInternal(
+				graph, node, potentialInputs, nodes->size() == 1 /* only insert if there's only one node */
+			) )
 		{
 			return true;
 		}
@@ -1222,7 +1196,9 @@ bool StandardGraphLayout::connectNodes( GraphGadget *graph, Gaffer::Set *nodes, 
 	return false;
 }
 
-void StandardGraphLayout::positionNode( GraphGadget *graph, Gaffer::Node *node, const Imath::V2f &fallbackPosition ) const
+void StandardGraphLayout::positionNode(
+	GraphGadget *graph, Gaffer::Node *node, const Imath::V2f &fallbackPosition
+) const
 {
 	graph->setNodePosition( node, fallbackPosition );
 
@@ -1240,7 +1216,9 @@ void StandardGraphLayout::positionNode( GraphGadget *graph, Gaffer::Node *node, 
 	layout.applyPositions();
 }
 
-void StandardGraphLayout::positionNodes( GraphGadget *graph, Gaffer::Set *nodes, const Imath::V2f &fallbackPosition ) const
+void StandardGraphLayout::positionNodes(
+	GraphGadget *graph, Gaffer::Set *nodes, const Imath::V2f &fallbackPosition
+) const
 {
 	LayoutEngine layout( graph, m_connectionScale, m_nodeSeparationScale );
 	layout.pinNodes( nodes, true /* invert */ );
@@ -1328,7 +1306,9 @@ void StandardGraphLayout::layoutNodes( GraphGadget *graph, Gaffer::Set *nodes ) 
 	layout.applyPositions();
 }
 
-bool StandardGraphLayout::connectNodeInternal( GraphGadget *graph, Gaffer::Node *node, Gaffer::Set *potentialInputs, bool insertIfPossible ) const
+bool StandardGraphLayout::connectNodeInternal(
+	GraphGadget *graph, Gaffer::Node *node, Gaffer::Set *potentialInputs, bool insertIfPossible
+) const
 {
 	// we only want to connect plugs which are visible in the ui - otherwise
 	// things will get very confusing for the user.
@@ -1353,23 +1333,20 @@ bool StandardGraphLayout::connectNodeInternal( GraphGadget *graph, Gaffer::Node 
 	// (because our iteration order for the plugs on `node` is naturally
 	// left to right).
 
-	std::sort(
-		outputs.begin(), outputs.end(),
-		[]( const Endpoint &e1, const Endpoint &e2 ) {
-			for( int i = 0; i < 3; ++i )
+	std::sort( outputs.begin(), outputs.end(), []( const Endpoint &e1, const Endpoint &e2 ) {
+		for( int i = 0; i < 3; ++i )
+		{
+			if( e1.position[i] < e2.position[i] )
 			{
-				if( e1.position[i] < e2.position[i] )
-				{
-					return true;
-				}
-				else if( e2.position[i] < e1.position[i] )
-				{
-					return false;
-				}
+				return true;
 			}
-			return false;
+			else if( e2.position[i] < e1.position[i] )
+			{
+				return false;
+			}
 		}
-	);
+		return false;
+	} );
 
 	// If we're trying to connect a Dot, Switch, BoxOut, ContextProcessor
 	// or Loop, then we may need to give it plugs first.
@@ -1540,7 +1517,9 @@ size_t StandardGraphLayout::outputs( NodeGadget *nodeGadget, std::vector<Endpoin
 		{
 			if( !runTimeCast<CompoundNodule>( nodule ) )
 			{
-				endpoints.push_back( { it->get(), nodule->transformedBound( nullptr ).center(), nodeGadget->connectionTangent( nodule ) } );
+				endpoints.push_back(
+					{ it->get(), nodule->transformedBound( nullptr ).center(), nodeGadget->connectionTangent( nodule ) }
+				);
 			}
 		}
 	}
@@ -1576,7 +1555,9 @@ size_t StandardGraphLayout::unconnectedInputs( NodeGadget *nodeGadget, std::vect
 		}
 		if( auto *nodule = nodeGadget->nodule( it->get() ) )
 		{
-			endpoints.push_back( { it->get(), nodule->transformedBound( nullptr ).center(), nodeGadget->connectionTangent( nodule ) } );
+			endpoints.push_back(
+				{ it->get(), nodule->transformedBound( nullptr ).center(), nodeGadget->connectionTangent( nodule ) }
+			);
 		}
 	}
 	return endpoints.size();

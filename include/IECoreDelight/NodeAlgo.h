@@ -58,11 +58,17 @@ namespace NodeAlgo
 /// Converts the specified `IECore::Object` samples into an equivalent
 /// NSI node with the specified handle, returning true on
 /// success and false on failure.
-IECOREDELIGHT_API bool convert( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, NSIContext_t context, const char *handle );
+IECOREDELIGHT_API bool convert(
+	const IECoreScenePreview::Renderer::ObjectSamples &samples,
+	const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, NSIContext_t context, const char *handle
+);
 
 /// Signature of a function which can convert `IECore::Object` samples into an
 /// NSI node.
-using Converter = std::function<bool( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, NSIContext_t context, const char *handle )>;
+using Converter = std::function<bool(
+	const IECoreScenePreview::Renderer::ObjectSamples &samples,
+	const IECoreScenePreview::Renderer::SampleTimes &sampleTimes, NSIContext_t context, const char *handle
+)>;
 
 /// Registers a converter for a specific type.
 /// Use the ConverterDescription utility class in preference to
@@ -75,18 +81,25 @@ template<typename T>
 class ConverterDescription
 {
 
-	public:
+public:
 
 	/// Type-specific conversion functions.
 	using TypedSamples = IECoreScenePreview::Renderer::Samples<const T *>;
-	using TypedConverter = bool ( * )( const TypedSamples &, const IECoreScenePreview::Renderer::SampleTimes &, NSIContext_t, const char * );
+	using TypedConverter = bool ( * )(
+		const TypedSamples &, const IECoreScenePreview::Renderer::SampleTimes &, NSIContext_t, const char *
+	);
 
 	ConverterDescription( TypedConverter converter )
 	{
 		registerConverter(
 			T::staticTypeId(),
-			[converter]( const IECoreScenePreview::Renderer::ObjectSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times, NSIContext_t context, const char *handle ) {
-				return converter( IECoreScenePreview::Renderer::staticSamplesCast<const T *>( samples ), times, context, handle );
+			[converter](
+				const IECoreScenePreview::Renderer::ObjectSamples &samples,
+				const IECoreScenePreview::Renderer::SampleTimes &times, NSIContext_t context, const char *handle
+			) {
+				return converter(
+					IECoreScenePreview::Renderer::staticSamplesCast<const T *>( samples ), times, context, handle
+				);
 			}
 		);
 	}
@@ -95,7 +108,11 @@ class ConverterDescription
 /// Adds all static PrimitiveVariables into a ParameterList for use with
 /// `NSISetAttribute()`, and all animated PrimitiveVariables into a separate vector
 /// of ParameterLists for use with `NSISetAttributeAtTime()`.
-IECOREDELIGHT_API void primitiveVariableParameterLists( const IECoreScenePreview::Renderer::Samples<const IECoreScene::Primitive *> &primitives, ParameterList &staticParameters, IECoreScenePreview::Renderer::Samples<ParameterList> &animatedParameters, const IECore::IntVectorData *vertexIndices = nullptr );
+IECOREDELIGHT_API void primitiveVariableParameterLists(
+	const IECoreScenePreview::Renderer::Samples<const IECoreScene::Primitive *> &primitives,
+	ParameterList &staticParameters, IECoreScenePreview::Renderer::Samples<ParameterList> &animatedParameters,
+	const IECore::IntVectorData *vertexIndices = nullptr
+);
 
 } // namespace NodeAlgo
 

@@ -57,7 +57,9 @@ namespace OpenColorIOAlgo
 //   color multiply : apply a multiplier before the color transform
 //   color power : apply a power curve before the color transform
 //   bool soloChannel : Set to 0-3 to pick channels RGBA, or -2 for luminance.  Default -1 uses all channels as a color.
-GAFFERIMAGEUI_API IECoreGL::Shader::SetupPtr displayTransformToFramebufferShader( const OCIO_NAMESPACE::Processor *processor );
+GAFFERIMAGEUI_API IECoreGL::Shader::SetupPtr displayTransformToFramebufferShader(
+	const OCIO_NAMESPACE::Processor *processor
+);
 
 } // namespace OpenColorIOAlgo
 

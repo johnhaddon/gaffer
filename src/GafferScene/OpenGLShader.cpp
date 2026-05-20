@@ -77,15 +77,12 @@ IECore::InternedString g_glNamespacedFragmentSource( "gl:fragmentSource" );
 
 } // namespace
 
-OpenGLShader::OpenGLShader( const std::string &name )
-	: GafferScene::Shader( name )
+OpenGLShader::OpenGLShader( const std::string &name ) : GafferScene::Shader( name )
 {
 	addChild( new Plug( "out", Plug::Out ) );
 }
 
-OpenGLShader::~OpenGLShader()
-{
-}
+OpenGLShader::~OpenGLShader() {}
 
 void OpenGLShader::loadShader( const std::string &shaderName, bool keepExistingValues )
 {
@@ -138,7 +135,8 @@ void OpenGLShader::loadShader( const std::string &shaderName, bool keepExistingV
 		PlugPtr plug = nullptr;
 
 		const Plug *existingPlug = parametersPlug()->getChild<Plug>( *it );
-		const IECore::TypeId existingType = existingPlug ? (IECore::TypeId)existingPlug->typeId() : IECore::InvalidTypeId;
+		const IECore::TypeId existingType =
+			existingPlug ? (IECore::TypeId)existingPlug->typeId() : IECore::InvalidTypeId;
 		switch( parameter->type )
 		{
 			case GL_BOOL :
@@ -169,14 +167,13 @@ void OpenGLShader::loadShader( const std::string &shaderName, bool keepExistingV
 				plug = existingType != (IECore::TypeId)Color4fPlugTypeId ? new Color4fPlug( *it ) : nullptr;
 				break;
 			case GL_SAMPLER_2D :
-				plug = existingType != (IECore::TypeId)GafferImage::ImagePlugTypeId ? new GafferImage::ImagePlug( *it ) : nullptr;
+				plug = existingType != (IECore::TypeId)GafferImage::ImagePlugTypeId ?
+					new GafferImage::ImagePlug( *it ) :
+					nullptr;
 				break;
 			default :
-				msg(
-					Msg::Warning,
-					"OpenGLShader::loadShader",
-					fmt::format( "Parameter \"{}\" has unsupported type", *it )
-				);
+				msg( Msg::Warning, "OpenGLShader::loadShader",
+					 fmt::format( "Parameter \"{}\" has unsupported type", *it ) );
 		}
 		if( plug )
 		{
@@ -211,7 +208,8 @@ IECore::DataPtr OpenGLShader::parameterValue( const Gaffer::Plug *parameterPlug 
 			CompoundDataPtr value = new CompoundData;
 			value->writable()["displayWindow"] = new Box2iData( image->getDisplayWindow() );
 			value->writable()["dataWindow"] = new Box2iData( image->getDataWindow() );
-			CompoundDataPtr channelData = new CompoundData( CompoundDataMap( image->channels.begin(), image->channels.end() ) );
+			CompoundDataPtr channelData =
+				new CompoundData( CompoundDataMap( image->channels.begin(), image->channels.end() ) );
 			value->writable()["channels"] = channelData;
 			return value;
 		}
@@ -235,10 +233,8 @@ IECore::ConstCompoundObjectPtr OpenGLShader::attributes( const Gaffer::Plug *out
 	IECoreScene::ShaderNetworkPtr updatedNetwork = nullptr;
 
 	auto swapParameter = [network, &updatedNetwork](
-							 const IECoreScene::Shader *oldShader,
-							 IECoreScene::ShaderPtr &newShader,
-							 const InternedString &oldParameterName,
-							 const DataPtr oldParameterValue,
+							 const IECoreScene::Shader *oldShader, IECoreScene::ShaderPtr &newShader,
+							 const InternedString &oldParameterName, const DataPtr oldParameterValue,
 							 const InternedString &newParameterName
 						 ) {
 		if( !updatedNetwork )

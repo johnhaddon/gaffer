@@ -44,14 +44,9 @@ using namespace GafferScene;
 
 GAFFER_NODE_DEFINE_TYPE( UnionFilter );
 
-UnionFilter::UnionFilter( const std::string &name )
-	: FilterProcessor( name, 1 )
-{
-}
+UnionFilter::UnionFilter( const std::string &name ) : FilterProcessor( name, 1 ) {}
 
-UnionFilter::~UnionFilter()
-{
-}
+UnionFilter::~UnionFilter() {}
 
 void UnionFilter::affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const
 {

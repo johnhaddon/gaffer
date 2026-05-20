@@ -72,8 +72,7 @@ GAFFER_NODE_DEFINE_TYPE( DeleteSets );
 
 size_t DeleteSets::g_firstPlugIndex( 0 );
 
-DeleteSets::DeleteSets( const std::string &name )
-	: SceneProcessor( name )
+DeleteSets::DeleteSets( const std::string &name ) : SceneProcessor( name )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "names" ) );
@@ -88,9 +87,7 @@ DeleteSets::DeleteSets( const std::string &name )
 	outPlug()->globalsPlug()->setInput( inPlug()->globalsPlug() );
 }
 
-DeleteSets::~DeleteSets()
-{
-}
+DeleteSets::~DeleteSets() {}
 
 Gaffer::StringPlug *DeleteSets::namesPlug()
 {
@@ -135,7 +132,9 @@ void DeleteSets::hashSetNames( const Gaffer::Context *context, const ScenePlug *
 	invertNamesPlug()->hash( h );
 }
 
-IECore::ConstInternedStringVectorDataPtr DeleteSets::computeSetNames( const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstInternedStringVectorDataPtr DeleteSets::computeSetNames(
+	const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ConstInternedStringVectorDataPtr inputSetNamesData = inPlug()->setNamesPlug()->getValue();
 	const std::vector<InternedString> &inputSetNames = inputSetNamesData->readable();
@@ -161,7 +160,10 @@ IECore::ConstInternedStringVectorDataPtr DeleteSets::computeSetNames( const Gaff
 	return outputSetNamesData;
 }
 
-void DeleteSets::hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void DeleteSets::hashSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent,
+	IECore::MurmurHash &h
+) const
 {
 	const std::string names = namesPlug()->getValue();
 	const bool invert = invertNamesPlug()->getValue();
@@ -175,7 +177,9 @@ void DeleteSets::hashSet( const IECore::InternedString &setName, const Gaffer::C
 	}
 }
 
-IECore::ConstPathMatcherDataPtr DeleteSets::computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstPathMatcherDataPtr DeleteSets::computeSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	const std::string names = namesPlug()->getValue();
 	const bool invert = invertNamesPlug()->getValue();

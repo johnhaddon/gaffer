@@ -43,67 +43,34 @@ template<typename T>
 const IECore::RunTimeTyped::TypeDescription<BoxPlug<T>> BoxPlug<T>::g_typeDescription;
 
 template<typename T>
-BoxPlug<T>::BoxPlug(
-	const std::string &name,
-	Direction direction,
-	T defaultValue,
-	unsigned flags
-)
+BoxPlug<T>::BoxPlug( const std::string &name, Direction direction, T defaultValue, unsigned flags )
 	: ValuePlug( name, direction, flags )
 {
 	const unsigned childFlags = flags & ~Dynamic;
-	addChild(
-		new ChildType(
-			"min", direction,
-			defaultValue.min,
-			typename ChildType::ValueType( std::numeric_limits<typename ChildType::ValueType::BaseType>::lowest() ),
-			typename ChildType::ValueType( std::numeric_limits<typename ChildType::ValueType::BaseType>::max() ),
-			childFlags
-		)
-	);
+	addChild( new ChildType(
+		"min", direction, defaultValue.min,
+		typename ChildType::ValueType( std::numeric_limits<typename ChildType::ValueType::BaseType>::lowest() ),
+		typename ChildType::ValueType( std::numeric_limits<typename ChildType::ValueType::BaseType>::max() ), childFlags
+	) );
 
-	addChild(
-		new ChildType(
-			"max", direction,
-			defaultValue.max,
-			typename ChildType::ValueType( std::numeric_limits<typename ChildType::ValueType::BaseType>::lowest() ),
-			typename ChildType::ValueType( std::numeric_limits<typename ChildType::ValueType::BaseType>::max() ),
-			childFlags
-		)
-	);
+	addChild( new ChildType(
+		"max", direction, defaultValue.max,
+		typename ChildType::ValueType( std::numeric_limits<typename ChildType::ValueType::BaseType>::lowest() ),
+		typename ChildType::ValueType( std::numeric_limits<typename ChildType::ValueType::BaseType>::max() ), childFlags
+	) );
 }
 
 template<typename T>
 BoxPlug<T>::BoxPlug(
-	const std::string &name,
-	Direction direction,
-	T defaultValue,
-	const PointType &minValue,
-	const PointType &maxValue,
+	const std::string &name, Direction direction, T defaultValue, const PointType &minValue, const PointType &maxValue,
 	unsigned flags
 )
 	: ValuePlug( name, direction, flags )
 {
 	const unsigned childFlags = flags & ~Dynamic;
-	addChild(
-		new ChildType(
-			"min", direction,
-			defaultValue.min,
-			minValue,
-			maxValue,
-			childFlags
-		)
-	);
+	addChild( new ChildType( "min", direction, defaultValue.min, minValue, maxValue, childFlags ) );
 
-	addChild(
-		new ChildType(
-			"max", direction,
-			defaultValue.max,
-			minValue,
-			maxValue,
-			childFlags
-		)
-	);
+	addChild( new ChildType( "max", direction, defaultValue.max, minValue, maxValue, childFlags ) );
 }
 
 template<typename T>

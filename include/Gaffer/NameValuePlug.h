@@ -47,7 +47,7 @@ namespace Gaffer
 class GAFFER_API NameValuePlug : public Gaffer::ValuePlug
 {
 
-	public:
+public:
 
 	GAFFER_PLUG_DECLARE_TYPE( Gaffer::NameValuePlug, NameValuePlugTypeId, Gaffer::ValuePlug );
 
@@ -56,55 +56,37 @@ class GAFFER_API NameValuePlug : public Gaffer::ValuePlug
 	// a plug.  In the variant which takes a ValuePlug, NameValuePlug will take ownership
 	// of this plug ( so be careful about using it afterwards ).
 	NameValuePlug(
-		const std::string &nameDefault,
-		const IECore::Data *valueDefault,
-		const std::string &name = defaultName<NameValuePlug>(),
-		Direction direction = In,
-		unsigned flags = Default
+		const std::string &nameDefault, const IECore::Data *valueDefault,
+		const std::string &name = defaultName<NameValuePlug>(), Direction direction = In, unsigned flags = Default
 	);
 
 	/// \deprecated Use the version below.
 	/// \todo Remove, and add default arguments for `name` and `flags`
 	/// in the version below.
 	NameValuePlug(
-		const std::string &nameDefault,
-		Gaffer::PlugPtr valuePlug,
+		const std::string &nameDefault, Gaffer::PlugPtr valuePlug,
 		const std::string &name = defaultName<NameValuePlug>()
 	);
 
-	NameValuePlug(
-		const std::string &nameDefault,
-		Gaffer::PlugPtr valuePlug,
-		const std::string &name,
-		unsigned flags
-	);
+	NameValuePlug( const std::string &nameDefault, Gaffer::PlugPtr valuePlug, const std::string &name, unsigned flags );
 
 	// Similar to above, construct a NameValuePlug with the "name" and "value" children,
 	// and also an "enabled" child.
 	NameValuePlug(
-		const std::string &nameDefault,
-		const IECore::Data *valueDefault,
-		bool defaultEnabled,
-		const std::string &name = defaultName<NameValuePlug>(),
-		Direction direction = In,
-		unsigned flags = Default
+		const std::string &nameDefault, const IECore::Data *valueDefault, bool defaultEnabled,
+		const std::string &name = defaultName<NameValuePlug>(), Direction direction = In, unsigned flags = Default
 	);
 
 	/// \deprecated Use the version below.
 	/// \todo Remove, and add default arguments for `name` and `flags`
 	/// in the version below.
 	NameValuePlug(
-		const std::string &nameDefault,
-		Gaffer::PlugPtr valuePlug,
-		bool defaultEnabled,
+		const std::string &nameDefault, Gaffer::PlugPtr valuePlug, bool defaultEnabled,
 		const std::string &name = defaultName<NameValuePlug>()
 	);
 
 	NameValuePlug(
-		const std::string &nameDefault,
-		Gaffer::PlugPtr valuePlug,
-		bool defaultEnabled,
-		const std::string &name,
+		const std::string &nameDefault, Gaffer::PlugPtr valuePlug, bool defaultEnabled, const std::string &name,
 		unsigned flags
 	);
 
@@ -112,9 +94,7 @@ class GAFFER_API NameValuePlug : public Gaffer::ValuePlug
 	// Deprecated, and dangerous, since if you don't manually construct child plugs in the expected order of
 	// "name", "value", and optionally "enabled" then you will get a crash.
 	explicit NameValuePlug(
-		const std::string &name = defaultName<NameValuePlug>(),
-		Direction direction = In,
-		unsigned flags = Default
+		const std::string &name = defaultName<NameValuePlug>(), Direction direction = In, unsigned flags = Default
 	);
 
 	Gaffer::StringPlug *namePlug();

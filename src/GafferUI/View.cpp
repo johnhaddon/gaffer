@@ -154,23 +154,15 @@ const ToolContainer *View::tools() const
 
 Gaffer::EditScope *View::editScope()
 {
-	return PlugAlgo::findSource(
-		editScopePlug(),
-		[]( Plug *plug ) {
-			return runTimeCast<EditScope>( plug->node() );
-		}
-	);
+	return PlugAlgo::findSource( editScopePlug(), []( Plug *plug ) { return runTimeCast<EditScope>( plug->node() ); } );
 }
 
 const Gaffer::EditScope *View::editScope() const
 {
 	// Cheeky cast to avoid a duplicate `PlugAlgo::findSource( const... )` implementation
-	return PlugAlgo::findSource(
-		const_cast<Plug *>( editScopePlug() ),
-		[]( Plug *plug ) {
-			return runTimeCast<const EditScope>( plug->node() );
-		}
-	);
+	return PlugAlgo::findSource( const_cast<Plug *>( editScopePlug() ), []( Plug *plug ) {
+		return runTimeCast<const EditScope>( plug->node() );
+	} );
 }
 
 const Gaffer::Context *View::context() const
@@ -235,7 +227,8 @@ ViewPtr View::create( Gaffer::PlugPtr plug )
 			NamedCreatorMap::const_iterator it = m.find( t );
 			if( it != m.end() )
 			{
-				for( RegexAndCreatorVector::const_reverse_iterator nIt = it->second.rbegin(); nIt != it->second.rend(); nIt++ )
+				for( RegexAndCreatorVector::const_reverse_iterator nIt = it->second.rbegin(); nIt != it->second.rend();
+					 nIt++ )
 				{
 					if( boost::regex_match( plugPath, nIt->first ) )
 					{
@@ -364,8 +357,7 @@ using NamedTransform = std::pair<std::string, View::DisplayTransform::DisplayTra
 using DisplayTransformCreatorMap = boost::multi_index::multi_index_container<
 	NamedTransform,
 	boost::multi_index::indexed_by<
-		boost::multi_index::ordered_unique<
-			boost::multi_index::key<&NamedTransform::first>>,
+		boost::multi_index::ordered_unique<boost::multi_index::key<&NamedTransform::first>>,
 		boost::multi_index::sequenced<>>>;
 
 DisplayTransformCreatorMap &displayTransformCreators()
@@ -411,22 +403,18 @@ MurmurHash hashWithoutFrame( const Context *context )
 
 size_t View::DisplayTransform::g_firstPlugIndex = 0;
 
-View::DisplayTransform::DisplayTransform( View *view )
-	: m_shaderDirty( true ), m_parametersDirty( true )
+View::DisplayTransform::DisplayTransform( View *view ) : m_shaderDirty( true ), m_parametersDirty( true )
 {
 	// Our settings are represented as plugs parented to us.
 
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new Gaffer::StringPlug( "name" ) );
-	addChild(
-		new IntPlug(
-			"soloChannel",
-			Plug::In,
-			/* defaultValue = */ -1,
-			/* minValue = */ -2,
-			/* maxValue = */ 3
-		)
-	);
+	addChild( new IntPlug(
+		"soloChannel", Plug::In,
+		/* defaultValue = */ -1,
+		/* minValue = */ -2,
+		/* maxValue = */ 3
+	) );
 	addChild( new BoolPlug( "clipping" ) );
 	addChild( new FloatPlug( "exposure", Plug::In, 0.0f ) );
 	addChild( new FloatPlug( "gamma", Plug::In, 1.0f, /* minValue = */ 0.0f ) );
@@ -447,30 +435,18 @@ View::DisplayTransform::DisplayTransform( View *view )
 
 	// Connections needed to update the viewport shader.
 
-	registrationChangedSignal().connect(
-		boost::bind( &DisplayTransform::registrationChanged, this, ::_1 )
-	);
+	registrationChangedSignal().connect( boost::bind( &DisplayTransform::registrationChanged, this, ::_1 ) );
 
-	plugDirtiedSignal().connect(
-		boost::bind( &DisplayTransform::plugDirtied, this, ::_1 )
-	);
+	plugDirtiedSignal().connect( boost::bind( &DisplayTransform::plugDirtied, this, ::_1 ) );
 
-	view->viewportGadget()->preRenderSignal().connect(
-		boost::bind( &DisplayTransform::preRender, this )
-	);
+	view->viewportGadget()->preRenderSignal().connect( boost::bind( &DisplayTransform::preRender, this ) );
 
-	view->viewportGadget()->keyPressSignal().connect(
-		boost::bind( &DisplayTransform::keyPress, this, ::_2 )
-	);
+	view->viewportGadget()->keyPressSignal().connect( boost::bind( &DisplayTransform::keyPress, this, ::_2 ) );
 
-	view->contextChangedSignal().connect(
-		boost::bind( &DisplayTransform::contextChanged, this )
-	);
+	view->contextChangedSignal().connect( boost::bind( &DisplayTransform::contextChanged, this ) );
 }
 
-View::DisplayTransform::DisplayTransform::~DisplayTransform()
-{
-}
+View::DisplayTransform::DisplayTransform::~DisplayTransform() {}
 
 View *View::DisplayTransform::view()
 {
@@ -536,10 +512,7 @@ void View::DisplayTransform::plugDirtied( const Gaffer::Plug *plug )
 		view()->viewportGadget()->renderRequestSignal()( view()->viewportGadget() );
 	}
 	else if(
-		plug == soloChannelPlug() ||
-		plug == clippingPlug() ||
-		plug == exposurePlug() ||
-		plug == gammaPlug() ||
+		plug == soloChannelPlug() || plug == clippingPlug() || plug == exposurePlug() || plug == gammaPlug() ||
 		plug == absolutePlug()
 	)
 	{
@@ -593,9 +566,8 @@ void View::DisplayTransform::preRender()
 
 bool View::DisplayTransform::keyPress( const KeyEvent &event )
 {
-	ConstBoolDataPtr soloChannelShortCuts = Gaffer::Metadata::value<BoolData>(
-		soloChannelPlug()->source(), "view:displayTransform:useShortcuts"
-	);
+	ConstBoolDataPtr soloChannelShortCuts =
+		Gaffer::Metadata::value<BoolData>( soloChannelPlug()->source(), "view:displayTransform:useShortcuts" );
 
 	if( !event.modifiers && ( !soloChannelShortCuts || soloChannelShortCuts->readable() ) )
 	{

@@ -48,13 +48,9 @@ IE_CORE_DEFINERUNTIMETYPED( Style );
 
 StylePtr Style::g_defaultStyle = new StandardStyle;
 
-Style::Style()
-{
-}
+Style::Style() {}
 
-Style::~Style()
-{
-}
+Style::~Style() {}
 
 Style::UnarySignal &Style::changedSignal()
 {

@@ -90,7 +90,7 @@ struct Isolate::SetsToKeep
 		return result;
 	}
 
-	private:
+private:
 
 	boost::container::static_vector<IECore::PathMatcher, 3> m_sets;
 };
@@ -103,8 +103,7 @@ GAFFER_NODE_DEFINE_TYPE( Isolate );
 
 size_t Isolate::g_firstPlugIndex = 0;
 
-Isolate::Isolate( const std::string &name )
-	: FilteredSceneProcessor( name, IECore::PathMatcher::EveryMatch )
+Isolate::Isolate( const std::string &name ) : FilteredSceneProcessor( name, IECore::PathMatcher::EveryMatch )
 {
 	storeIndexOfNextChild( g_firstPlugIndex );
 	addChild( new StringPlug( "from", Plug::In, "/" ) );
@@ -122,9 +121,7 @@ Isolate::Isolate( const std::string &name )
 	outPlug()->setNamesPlug()->setInput( inPlug()->setNamesPlug() );
 }
 
-Isolate::~Isolate()
-{
-}
+Isolate::~Isolate() {}
 
 Gaffer::StringPlug *Isolate::fromPlug()
 {
@@ -171,45 +168,30 @@ void Isolate::affects( const Gaffer::Plug *input, AffectedPlugsContainer &output
 	FilteredSceneProcessor::affects( input, outputs );
 
 	const bool affectsSetsToKeep =
-		input == keepLightsPlug() ||
-		input == keepCamerasPlug() ||
-		input == inPlug()->setPlug();
+		input == keepLightsPlug() || input == keepCamerasPlug() || input == inPlug()->setPlug();
 
-	const bool affectsMayPruneChildren =
-		input == fromPlug() ||
-		input == filterPlug() ||
-		affectsSetsToKeep;
+	const bool affectsMayPruneChildren = input == fromPlug() || input == filterPlug() || affectsSetsToKeep;
 
-	if(
-		input == adjustBoundsPlug() ||
-		affectsMayPruneChildren ||
-		input == outPlug()->childBoundsPlug() ||
-		input == inPlug()->boundPlug()
-	)
+	if( input == adjustBoundsPlug() || affectsMayPruneChildren || input == outPlug()->childBoundsPlug() ||
+		input == inPlug()->boundPlug() )
 	{
 		outputs.push_back( outPlug()->boundPlug() );
 	}
 
-	if(
-		affectsMayPruneChildren ||
-		input == inPlug()->childNamesPlug() ||
-		input == filterPlug()
-	)
+	if( affectsMayPruneChildren || input == inPlug()->childNamesPlug() || input == filterPlug() )
 	{
 		outputs.push_back( outPlug()->childNamesPlug() );
 	}
 
-	if(
-		affectsSetsToKeep ||
-		input == fromPlug() ||
-		input == filterPlug()
-	)
+	if( affectsSetsToKeep || input == fromPlug() || input == filterPlug() )
 	{
 		outputs.push_back( outPlug()->setPlug() );
 	}
 }
 
-void Isolate::hashBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Isolate::hashBound(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	const SetsToKeep setsToKeep( this );
 	if( adjustBoundsPlug()->getValue() && mayPruneChildren( path, context, setsToKeep ) )
@@ -222,7 +204,9 @@ void Isolate::hashBound( const ScenePath &path, const Gaffer::Context *context, 
 	h = inPlug()->boundPlug()->hash();
 }
 
-Imath::Box3f Isolate::computeBound( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+Imath::Box3f Isolate::computeBound(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	const SetsToKeep setsToKeep( this );
 	if( adjustBoundsPlug()->getValue() && mayPruneChildren( path, context, setsToKeep ) )
@@ -233,7 +217,9 @@ Imath::Box3f Isolate::computeBound( const ScenePath &path, const Gaffer::Context
 	return inPlug()->boundPlug()->getValue();
 }
 
-void Isolate::hashChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Isolate::hashChildNames(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h
+) const
 {
 	const SetsToKeep setsToKeep( this );
 
@@ -245,14 +231,16 @@ void Isolate::hashChildNames( const ScenePath &path, const Gaffer::Context *cont
 		const IECore::MurmurHash inputChildNamesHash = inPlug()->childNamesPlug()->hash();
 		h.append( inputChildNamesHash );
 
-		ConstInternedStringVectorDataPtr inputChildNamesData = inPlug()->childNamesPlug()->getValue( &inputChildNamesHash );
+		ConstInternedStringVectorDataPtr inputChildNamesData =
+			inPlug()->childNamesPlug()->getValue( &inputChildNamesHash );
 		const vector<InternedString> &inputChildNames = inputChildNamesData->readable();
 
 		FilterPlug::SceneScope sceneScope( context, inPlug() );
 
 		ScenePath childPath = path;
 		childPath.push_back( InternedString() ); // for the child name
-		for( vector<InternedString>::const_iterator it = inputChildNames.begin(), eIt = inputChildNames.end(); it != eIt; ++it )
+		for( vector<InternedString>::const_iterator it = inputChildNames.begin(), eIt = inputChildNames.end();
+			 it != eIt; ++it )
 		{
 			childPath[path.size()] = *it;
 			const unsigned m = setsToKeep.match( childPath );
@@ -274,7 +262,9 @@ void Isolate::hashChildNames( const ScenePath &path, const Gaffer::Context *cont
 	}
 }
 
-IECore::ConstInternedStringVectorDataPtr Isolate::computeChildNames( const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstInternedStringVectorDataPtr Isolate::computeChildNames(
+	const ScenePath &path, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	const SetsToKeep setsToKeep( this );
 
@@ -291,7 +281,8 @@ IECore::ConstInternedStringVectorDataPtr Isolate::computeChildNames( const Scene
 
 		ScenePath childPath = path;
 		childPath.push_back( InternedString() ); // for the child name
-		for( vector<InternedString>::const_iterator it = inputChildNames.begin(), eIt = inputChildNames.end(); it != eIt; it++ )
+		for( vector<InternedString>::const_iterator it = inputChildNames.begin(), eIt = inputChildNames.end();
+			 it != eIt; it++ )
 		{
 			childPath[path.size()] = *it;
 			unsigned m = setsToKeep.match( childPath );
@@ -315,14 +306,15 @@ IECore::ConstInternedStringVectorDataPtr Isolate::computeChildNames( const Scene
 	}
 }
 
-void Isolate::hashSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent, IECore::MurmurHash &h ) const
+void Isolate::hashSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent,
+	IECore::MurmurHash &h
+) const
 {
 	const bool keepLights = keepLightsPlug()->getValue();
 	const bool keepCameras = keepCamerasPlug()->getValue();
-	if(
-		( ( setName == g_lightsSetName || setName == g_lightFiltersSetName ) && keepLights ) ||
-		( setName == g_camerasSetName && keepCameras )
-	)
+	if( ( ( setName == g_lightsSetName || setName == g_lightFiltersSetName ) && keepLights ) ||
+		( setName == g_camerasSetName && keepCameras ) )
 	{
 		h = inPlug()->setPlug()->hash();
 		return;
@@ -361,13 +353,13 @@ void Isolate::hashSet( const IECore::InternedString &setName, const Gaffer::Cont
 	filterPlug()->hash( h );
 }
 
-IECore::ConstPathMatcherDataPtr Isolate::computeSet( const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent ) const
+IECore::ConstPathMatcherDataPtr Isolate::computeSet(
+	const IECore::InternedString &setName, const Gaffer::Context *context, const ScenePlug *parent
+) const
 {
 	ConstPathMatcherDataPtr inputSetData = inPlug()->setPlug()->getValue();
-	if(
-		( ( setName == g_lightsSetName || setName == g_lightFiltersSetName ) && keepLightsPlug()->getValue() ) ||
-		( setName == g_camerasSetName && keepCamerasPlug()->getValue() )
-	)
+	if( ( ( setName == g_lightsSetName || setName == g_lightFiltersSetName ) && keepLightsPlug()->getValue() ) ||
+		( setName == g_camerasSetName && keepCamerasPlug()->getValue() ) )
 	{
 		return inputSetData;
 	}
@@ -426,7 +418,9 @@ IECore::ConstPathMatcherDataPtr Isolate::computeSet( const IECore::InternedStrin
 	return outputSetData;
 }
 
-bool Isolate::mayPruneChildren( const ScenePath &path, const Gaffer::Context *context, const SetsToKeep &setsToKeep ) const
+bool Isolate::mayPruneChildren(
+	const ScenePath &path, const Gaffer::Context *context, const SetsToKeep &setsToKeep
+) const
 {
 	const std::string fromString = fromPlug()->getValue();
 	ScenePlug::ScenePath fromPath;

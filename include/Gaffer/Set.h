@@ -55,7 +55,7 @@ class SetIterator;
 class GAFFER_API Set : public IECore::RunTimeTyped, public Signals::Trackable
 {
 
-	public:
+public:
 
 	Set();
 	~Set() override;
@@ -92,7 +92,7 @@ class GAFFER_API Set : public IECore::RunTimeTyped, public Signals::Trackable
 	Iterator end();
 	ConstIterator end() const;
 
-	private:
+private:
 
 	MemberSignal m_memberAddedSignal;
 	MemberSignal m_memberRemovedSignal;
@@ -101,54 +101,32 @@ class GAFFER_API Set : public IECore::RunTimeTyped, public Signals::Trackable
 IE_CORE_DECLAREPTR( Set );
 
 template<typename ContainerType, typename ValueType>
-class SetIterator : public boost::iterator_facade<SetIterator<ContainerType, ValueType>, ValueType, boost::random_access_traversal_tag, ValueType &, int64_t>
+class SetIterator
+	: public boost::iterator_facade<
+		  SetIterator<ContainerType, ValueType>, ValueType, boost::random_access_traversal_tag, ValueType &, int64_t>
 {
 
-	public:
+public:
 
-	SetIterator( ContainerType *set )
-		: SetIterator( set, 0 )
-	{
-	}
+	SetIterator( ContainerType *set ) : SetIterator( set, 0 ) {}
 
-	SetIterator( ContainerType *set, size_t index )
-		: m_set( set ), m_index( index )
-	{
-	}
+	SetIterator( ContainerType *set, size_t index ) : m_set( set ), m_index( index ) {}
 
-	private:
+private:
 
 	friend class boost::iterator_core_access;
 
-	void increment()
-	{
-		++m_index;
-	}
+	void increment() { ++m_index; }
 
-	void decrement()
-	{
-		--m_index;
-	}
+	void decrement() { --m_index; }
 
-	void advance( int64_t n )
-	{
-		m_index += n;
-	}
+	void advance( int64_t n ) { m_index += n; }
 
-	int64_t distance_to( SetIterator const &other ) const
-	{
-		return int64_t( m_index ) - int64_t( other.m_index );
-	}
+	int64_t distance_to( SetIterator const &other ) const { return int64_t( m_index ) - int64_t( other.m_index ); }
 
-	bool equal( SetIterator const &other ) const
-	{
-		return m_index == other.m_index;
-	}
+	bool equal( SetIterator const &other ) const { return m_index == other.m_index; }
 
-	ValueType &dereference() const
-	{
-		return *( m_set->member( m_index ) );
-	}
+	ValueType &dereference() const { return *( m_set->member( m_index ) ); }
 
 	ContainerType *const m_set;
 	size_t m_index;

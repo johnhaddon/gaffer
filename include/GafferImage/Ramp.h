@@ -56,7 +56,7 @@ namespace GafferImage
 class GAFFERIMAGE_API Ramp : public FlatImageSource
 {
 
-	public:
+public:
 
 	explicit Ramp( const std::string &name = defaultName<Ramp>() );
 	~Ramp() override;
@@ -83,20 +83,35 @@ class GAFFERIMAGE_API Ramp : public FlatImageSource
 
 	void affects( const Gaffer::Plug *input, AffectedPlugsContainer &outputs ) const override;
 
-	protected:
+protected:
 
-	void hashFormat( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	void hashDataWindow( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	void hashChannelNames( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
-	void hashChannelData( const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h ) const override;
+	void hashFormat(
+		const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	void hashDataWindow(
+		const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	void hashChannelNames(
+		const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
+	void hashChannelData(
+		const GafferImage::ImagePlug *output, const Gaffer::Context *context, IECore::MurmurHash &h
+	) const override;
 
 	GafferImage::Format computeFormat( const Gaffer::Context *context, const ImagePlug *parent ) const override;
 	Imath::Box2i computeDataWindow( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-	IECore::ConstCompoundDataPtr computeMetadata( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-	IECore::ConstStringVectorDataPtr computeChannelNames( const Gaffer::Context *context, const ImagePlug *parent ) const override;
-	IECore::ConstFloatVectorDataPtr computeChannelData( const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context, const ImagePlug *parent ) const override;
+	IECore::ConstCompoundDataPtr computeMetadata(
+		const Gaffer::Context *context, const ImagePlug *parent
+	) const override;
+	IECore::ConstStringVectorDataPtr computeChannelNames(
+		const Gaffer::Context *context, const ImagePlug *parent
+	) const override;
+	IECore::ConstFloatVectorDataPtr computeChannelData(
+		const std::string &channelName, const Imath::V2i &tileOrigin, const Gaffer::Context *context,
+		const ImagePlug *parent
+	) const override;
 
-	private:
+private:
 
 	static size_t g_firstPlugIndex;
 };

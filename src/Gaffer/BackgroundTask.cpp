@@ -135,10 +135,8 @@ struct ActiveTask
 using ActiveTasks = boost::multi_index::multi_index_container<
 	ActiveTask,
 	boost::multi_index::indexed_by<
-		boost::multi_index::hashed_unique<
-			boost::multi_index::key<&ActiveTask::task>>,
-		boost::multi_index::hashed_non_unique<
-			boost::multi_index::key<&ActiveTask::subject>>>>;
+		boost::multi_index::hashed_unique<boost::multi_index::key<&ActiveTask::task>>,
+		boost::multi_index::hashed_non_unique<boost::multi_index::key<&ActiveTask::subject>>>>;
 
 ActiveTasks &activeTasks()
 {
@@ -154,10 +152,7 @@ ActiveTasks &activeTasks()
 
 struct BackgroundTask::TaskData : public boost::noncopyable
 {
-	TaskData( Function *function )
-		: function( function ), canceller( new Canceller ), status( Pending )
-	{
-	}
+	TaskData( Function *function ) : function( function ), canceller( new Canceller ), status( Pending ) {}
 
 	Function *function;
 	IECore::CancellerPtr canceller;
@@ -168,12 +163,16 @@ struct BackgroundTask::TaskData : public boost::noncopyable
 };
 
 BackgroundTask::BackgroundTask( const Plug *subject, const Function &function )
-	: m_function( function ), m_taskData( std::make_shared<TaskData>( &m_function ) )
+	: m_function( function ),
+	  m_taskData( std::make_shared<TaskData>( &m_function ) )
 {
 	const ScriptNode *s = scriptNode( subject );
 	if( subject && !s )
 	{
-		IECore::msg( IECore::Msg::Level::Warning, "BackgroundTask", fmt::format( "Unable to find ScriptNode for {}", subject->fullName() ) );
+		IECore::msg(
+			IECore::Msg::Level::Warning, "BackgroundTask",
+			fmt::format( "Unable to find ScriptNode for {}", subject->fullName() )
+		);
 	}
 
 	activeTasks().insert( ActiveTask{ this, s } );
@@ -207,11 +206,7 @@ BackgroundTask::BackgroundTask( const Plug *subject, const Function &function )
 		}
 		catch( const std::exception &e )
 		{
-			IECore::msg(
-				IECore::Msg::Error,
-				"BackgroundTask",
-				e.what()
-			);
+			IECore::msg( IECore::Msg::Error, "BackgroundTask", e.what() );
 			status = Errored;
 		}
 		catch( const IECore::Cancelled & )
@@ -221,11 +216,7 @@ BackgroundTask::BackgroundTask( const Plug *subject, const Function &function )
 		}
 		catch( ... )
 		{
-			IECore::msg(
-				IECore::Msg::Error,
-				"BackgroundTask",
-				"Unknown error"
-			);
+			IECore::msg( IECore::Msg::Error, "BackgroundTask", "Unknown error" );
 			status = Errored;
 		}
 
@@ -256,23 +247,23 @@ void BackgroundTask::wait()
 	std::unique_lock<std::mutex> lock( m_taskData->mutex );
 	if( m_taskData->threadId == std::this_thread::get_id() )
 	{
-		IECore::msg( IECore::Msg::Error, "BackgroundTask::wait", "Deadlock detected : Task is attempting to wait for itself. Please provide stack trace in bug report." );
+		IECore::msg(
+			IECore::Msg::Error, "BackgroundTask::wait",
+			"Deadlock detected : Task is attempting to wait for itself. Please provide stack trace in bug report."
+		);
 	}
 
-	m_taskData->conditionVariable.wait(
-		lock,
-		[this] {
-			switch( this->m_taskData->status )
-			{
-				case Completed :
-				case Cancelled :
-				case Errored :
-					return true;
-				default :
-					return false;
-			}
+	m_taskData->conditionVariable.wait( lock, [this] {
+		switch( this->m_taskData->status )
+		{
+			case Completed :
+			case Cancelled :
+			case Errored :
+				return true;
+			default :
+				return false;
 		}
-	);
+	} );
 	activeTasks().erase( this );
 }
 
@@ -285,21 +276,17 @@ bool BackgroundTask::waitFor( float seconds )
 	milliseconds timeoutDuration = duration_cast<milliseconds>( duration<float>( seconds ) );
 
 	std::unique_lock<std::mutex> lock( m_taskData->mutex );
-	const bool completed = m_taskData->conditionVariable.wait_for(
-		lock,
-		timeoutDuration,
-		[this] {
-			switch( this->m_taskData->status )
-			{
-				case Completed :
-				case Cancelled :
-				case Errored :
-					return true;
-				default :
-					return false;
-			}
+	const bool completed = m_taskData->conditionVariable.wait_for( lock, timeoutDuration, [this] {
+		switch( this->m_taskData->status )
+		{
+			case Completed :
+			case Cancelled :
+			case Errored :
+				return true;
+			default :
+				return false;
 		}
-	);
+	} );
 
 	if( completed )
 	{
