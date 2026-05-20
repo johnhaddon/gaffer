@@ -200,6 +200,7 @@ enum TypeId
 	MeshLightTypeId = 120155,
 	CurvesTangentsTypeId = 120156,
 	PrimitiveQueryTypeId = 120157,
+	PointInstancerTypeId = 120158,
 
 	LastTypeId = 120999
 };
