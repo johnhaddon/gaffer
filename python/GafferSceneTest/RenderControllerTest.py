@@ -1944,6 +1944,8 @@ class RenderControllerTest( GafferSceneTest.SceneTestCase ) :
 			GafferScene.SceneNode.__init__( self, name )
 
 			self["numPoints"] = Gaffer.IntPlug( defaultValue = 2 )
+			self["sphereRadius"] = Gaffer.FloatPlug( defaultValue = 1 )
+
 			self["objectToScene"] = GafferScene.ObjectToScene()
 			self["objectToScene"]["name"].setValue( "instancer" )
 
@@ -1973,6 +1975,8 @@ class RenderControllerTest( GafferSceneTest.SceneTestCase ) :
 			) )
 
 			self["sphere"] = GafferScene.Sphere()
+			self["sphere"]["radius"].setInput( self["sphereRadius"] )
+			self["sphere"]["type"].setValue( self["sphere"].Type.Primitive )
 			self["cube"] = GafferScene.Cube()
 
 			self["prototypesGroup"] = GafferScene.Group()
@@ -2003,8 +2007,60 @@ class RenderControllerTest( GafferSceneTest.SceneTestCase ) :
 
 		instancer = renderer.capturedObject( "/instancer" )
 		self.assertEqual( instancer.capturedSamples(), [ pointInstancer["out"].object( "/instancer" ) ] )
+		self.assertEqual( instancer.capturedSampleTimes(), [ 1 ] )
 
 		self.assertEqual( len( instancer.capturedPointInstancerPrototypes() ), 2 )
+		self.assertEqual( instancer.capturedPointInstancerPrototypes()[0].samples, [ pointInstancer["out"].object( "/instancer/prototypes/sphere" ) ] )
+		self.assertEqual( instancer.capturedPointInstancerPrototypes()[0].times, [ 1 ] )
+		self.assertEqual( instancer.capturedPointInstancerPrototypes()[1].samples, [ pointInstancer["out"].object( "/instancer/prototypes/cube" ) ] )
+		self.assertEqual( instancer.capturedPointInstancerPrototypes()[1].times, [ 1 ] )
+
+	def testPointInstancerPointCloudEdit( self ) :
+
+		pointInstancer = self.ExamplePointInstancer()
+
+		renderer = GafferScene.Private.IECoreScenePreview.CapturingRenderer()
+		controller = GafferScene.RenderController( pointInstancer["out"], Gaffer.Context(), renderer )
+		controller.setMinimumExpansionDepth( 100 )
+
+		self.assertTrue( controller.updateRequired() )
+		controller.update()
+		capture = renderer.capturedObject( "/instancer" )
+		self.assertEqual( capture.capturedSamples()[0].numPoints, 2 )
+		del capture
+
+		pointInstancer["numPoints"].setValue( 4 )
+		self.assertTrue( controller.updateRequired() )
+		controller.update()
+
+		capture = renderer.capturedObject( "/instancer" )
+		self.assertEqual( capture.capturedSamples()[0].numPoints, 4 )
+
+	def testPointInstancerPrototypeEdit( self ) :
+
+		pointInstancer = self.ExamplePointInstancer()
+
+		renderer = GafferScene.Private.IECoreScenePreview.CapturingRenderer()
+		controller = GafferScene.RenderController( pointInstancer["out"], Gaffer.Context(), renderer )
+		controller.setMinimumExpansionDepth( 100 )
+
+		self.assertTrue( controller.updateRequired() )
+		controller.update()
+		capture = renderer.capturedObject( "/instancer" )
+		self.assertEqual( capture.capturedPointInstancerPrototypes()[0].samples[0].radius(), 1 )
+		del capture
+
+		pointInstancer["sphereRadius"].setValue( 2 )
+		self.assertTrue( controller.updateRequired() )
+		controller.update()
+
+		capture = renderer.capturedObject( "/instancer" )
+		self.assertEqual( capture.capturedPointInstancerPrototypes()[0].samples[0].radius(), 2 )
+
+	def testPointInstancerUnrelatedEdit( self ) :
+
+		# MAKE SURE WE DON'T THROW AWAY INSTANCER UNLESS MODIFIED
+		pass
 
 if __name__ == "__main__":
 	unittest.main()
