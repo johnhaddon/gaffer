@@ -411,6 +411,47 @@ object capturedObjectCapturedLinks( const CapturingRenderer::CapturedObject &o, 
 	}
 }
 
+Renderer::Prototype *prototypeConstructor( object pythonSamples, object pythonTimes, Renderer::AttributesInterfacePtr attributes )
+{
+	auto p = std::make_unique<Renderer::Prototype>();
+	container_utils::extend_container( p->samples, pythonSamples );
+	container_utils::extend_container( p->times, pythonTimes );
+	p->attributes = attributes;
+	return p.release(); // TODO : CHECK ME
+}
+
+list prototypeSamplesGetter( const Renderer::Prototype &p )
+{
+	list result;
+	for( const auto &s : p.samples )
+	{
+		result.append( boost::const_pointer_cast<IECore::Object>( s ) );
+	}
+	return result;
+}
+
+void prototypeSamplesSetter( Renderer::Prototype &p, object pythonSamples )
+{
+	p.samples.clear();
+	container_utils::extend_container( p.samples, pythonSamples );
+}
+
+list prototypeTimesGetter( const Renderer::Prototype &p )
+{
+	list result;
+	for( float t : p.times )
+	{
+		result.append( t );
+	}
+	return result;
+}
+
+void prototypeTimesSetter( Renderer::Prototype &p, object pythonTimes )
+{
+	p.times.clear();
+	container_utils::extend_container( p.times, pythonTimes );
+}
+
 void transformPrimitiveWrapper( IECoreScene::Primitive &primitive, Imath::M44f matrix, const IECore::Canceller *canceller = nullptr )
 {
 	IECorePython::ScopedGILRelease gilRelease;
@@ -472,7 +513,14 @@ void GafferSceneModule::bindIECoreScenePreview()
 		;
 
 		class_<Renderer::Prototype>( "Prototype" )
-
+			.def( "__init__", make_constructor(
+				prototypeConstructor,
+				default_call_policies(),
+				( arg( "samples" ) = list(), arg( "times" ) = list(), arg( "attributes" ) = object() )
+			) )
+			.add_property( "samples", &prototypeSamplesGetter, &prototypeSamplesSetter )
+			.add_property( "times", &prototypeTimesGetter, &prototypeTimesSetter )
+			.def_readwrite( "attributes", &Renderer::Prototype::attributes )
 		;
 	}
 
