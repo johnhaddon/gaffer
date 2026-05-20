@@ -34,6 +34,7 @@
 #
 ##########################################################################
 
+import inspect
 import unittest
 
 import imath
@@ -1935,6 +1936,75 @@ class RenderControllerTest( GafferSceneTest.SceneTestCase ) :
 		self.assertTrue( controller.updateRequired() )
 		controller.update()
 		self.assertTrue( capture.isSame( renderer.capturedObject( "/cube" ) ) )
+
+	class ExamplePointInstancer( GafferScene.SceneNode ) :
+
+		def __init__( self, name = "ExamplePointInstancer" ) :
+
+			GafferScene.SceneNode.__init__( self, name )
+
+			self["numPoints"] = Gaffer.IntPlug( defaultValue = 2 )
+			self["objectToScene"] = GafferScene.ObjectToScene()
+			self["objectToScene"]["name"].setValue( "instancer" )
+
+			self["expression"] = Gaffer.Expression()
+			self["expression"].setExpression( inspect.cleandoc(
+				"""
+				import imath
+				import IECore
+				import IECoreScene
+				numPoints = parent["numPoints"]
+				pointInstancer = IECoreScene.PointInstancer( numPoints )
+				pointInstancer["P"] = IECoreScene.PrimitiveVariable(
+					IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+					IECore.V3fVectorData( [ imath.V3f( i ) for i in range( numPoints ) ] )
+				)
+				pointInstancer["prototypeIndices"] = IECoreScene.PrimitiveVariable(
+					IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+					IECore.IntVectorData( [ i % 2 for i in range( numPoints ) ] )
+				)
+				pointInstancer["prototypeRoots"] = IECoreScene.PrimitiveVariable(
+					IECoreScene.PrimitiveVariable.Interpolation.Constant,
+					IECore.StringVectorData( [ "./prototypes/sphere", "./prototypes/cube" ] )
+				)
+
+				parent["objectToScene"]["object"] = pointInstancer
+				"""
+			) )
+
+			self["sphere"] = GafferScene.Sphere()
+			self["cube"] = GafferScene.Cube()
+
+			self["prototypesGroup"] = GafferScene.Group()
+			self["prototypesGroup"]["name"].setValue( "prototypes" )
+			self["prototypesGroup"]["in"][0].setInput( self["sphere"]["out"] )
+			self["prototypesGroup"]["in"][1].setInput( self["cube"]["out"] )
+
+			self["parent"] = GafferScene.Parent()
+			self["parent"]["in"].setInput( self["objectToScene"]["out"] )
+			self["parent"]["children"][0].setInput( self["prototypesGroup"]["out"] )
+			self["parent"]["parent"].setValue( "/instancer" )
+
+			self["out"].setInput( self["parent"]["out"] )
+
+	def testPointInstancer( self ) :
+
+		pointInstancer = self.ExamplePointInstancer()
+
+		renderer = GafferScene.Private.IECoreScenePreview.CapturingRenderer()
+		controller = GafferScene.RenderController( pointInstancer["out"], Gaffer.Context(), renderer )
+		controller.setMinimumExpansionDepth( 100 )
+
+		self.assertTrue( controller.updateRequired() )
+		controller.update()
+
+		#self.assertEqual( renderer.capturedObjectNames(), "/instancer" ) TODO
+		self.assertIn( "/instancer", renderer.capturedObjectNames() )
+
+		instancer = renderer.capturedObject( "/instancer" )
+		self.assertEqual( instancer.capturedSamples(), [ pointInstancer["out"].object( "/instancer" ) ] )
+
+		self.assertEqual( len( instancer.capturedPointInstancerPrototypes() ), 2 )
 
 if __name__ == "__main__":
 	unittest.main()
