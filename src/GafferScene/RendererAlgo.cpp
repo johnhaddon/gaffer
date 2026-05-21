@@ -38,6 +38,7 @@
 
 #include "GafferScene/Capsule.h"
 #include "GafferScene/Private/IECoreScenePreview/Renderer.h"
+#include "GafferScene/Private/PointInstancerAlgo.h"
 #include "GafferScene/SceneAlgo.h"
 #include "GafferScene/SceneProcessor.h"
 #include "GafferScene/SetAlgo.h"
@@ -595,9 +596,11 @@ std::optional<SampledObject> objectSamples( const Gaffer::ObjectPlug *objectPlug
 			}
 		}
 
-		/// NEED TO HAVE APPLIED THE PROTOTYPES HASH HERE BEFORE COMPARING
-		/// BUT FIRST TIME AROUND, WE DON'T HAVE THE NECESSARY INFO UNTIL
-		/// BELOW...
+		if( hash->isPointInstancer )
+		{
+			PointInstancerAlgo::prototypesHash( objectPlug->parent<ScenePlug>(), combinedHash );
+		}
+
 		if( combinedHash == hash->value )
 		{
 			return std::nullopt;
@@ -700,7 +703,20 @@ std::optional<SampledObject> objectSamples( const Gaffer::ObjectPlug *objectPlug
 	if( hash )
 	{
 		hash->value = combinedHash;
-		hash->isPointInstancer = result.samples.size() && result.samples[0]->isInstanceOf( PointInstancer::staticTypeId() );
+		const bool isPointInstancer = result.samples.size() && result.samples[0]->isInstanceOf( PointInstancer::staticTypeId() );
+		if( isPointInstancer )
+		{
+			if( !hash->isPointInstancer )
+			{
+				// Hash was either uninitialised, or we didn't find a PointInstancer last time round.
+				PointInstancerAlgo::prototypesHash( objectPlug->parent<ScenePlug>(), hash->value );
+			}
+			else
+			{
+				// We already applied the `prototypesHash` above, when testing for early return.
+			}
+		}
+		hash->isPointInstancer = isPointInstancer;
 	}
 
 	return result;
