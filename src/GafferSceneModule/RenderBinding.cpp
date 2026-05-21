@@ -287,6 +287,14 @@ void GafferSceneModule::bindRender()
 				.add_property( "sampleTimes", &sampledObjectSampleTimes )
 			;
 
+			class_<GafferScene::Private::RendererAlgo::ObjectHash>( "ObjectHash" )
+				.def( init<const GafferScene::Private::RendererAlgo::ObjectHash &>() )
+				.def_readwrite( "value", &GafferScene::Private::RendererAlgo::ObjectHash::value )
+				.def_readwrite( "isPointInstancer", &GafferScene::Private::RendererAlgo::ObjectHash::isPointInstancer )
+				.def( self == self )
+				.def( self != self )
+			;
+
 			def( "objectSamples", &objectSamplesWrapper, ( arg( "objectPlug" ), arg( "sampleTimes" ), arg( "hash" ) = object(), arg( "_copy" ) = true ) );
 			def( "transformSamples", &transformSamplesWrapper, ( arg( "transformPlug" ), arg( "sampleTimes" ), arg( "hash" ) = object() ) );
 

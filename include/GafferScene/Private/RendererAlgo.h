@@ -138,6 +138,8 @@ struct ObjectHash
 {
 	IECore::MurmurHash value;
 	bool isPointInstancer = false;
+	bool operator==( const ObjectHash &rhs ) const { return value == rhs.value && isPointInstancer == rhs.isPointInstancer; }
+	bool operator!=( const ObjectHash &rhs ) const { return !(*this == rhs); }
 };
 
 /// Samples the object from the current location in preparation for output to the renderer. The
