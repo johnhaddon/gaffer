@@ -198,6 +198,7 @@ from .GlobalsSanitiserTest import GlobalsSanitiserTest
 from .ReflectionConstraintTest import ReflectionConstraintTest
 from .CurvesInterpolationTest import CurvesInterpolationTest
 from .CurvesTangentsTest import CurvesTangentsTest
+from .PointInstancerAlgoTest import PointInstancerAlgoTest
 
 from .IECoreScenePreviewTest import *
 from .IECoreGLPreviewTest import *
