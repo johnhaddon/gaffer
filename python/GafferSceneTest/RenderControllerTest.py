@@ -2057,10 +2057,46 @@ class RenderControllerTest( GafferSceneTest.SceneTestCase ) :
 		capture = renderer.capturedObject( "/instancer" )
 		self.assertEqual( capture.capturedPointInstancerPrototypes()[0].samples[0].radius(), 2 )
 
-	def testPointInstancerUnrelatedEdit( self ) :
+	def testPointInstancerUnrelatedEdits( self ) :
 
-		# MAKE SURE WE DON'T THROW AWAY INSTANCER UNLESS MODIFIED
-		pass
+		pointInstancer = self.ExamplePointInstancer()
+
+		sphere = GafferScene.Sphere()
+		parent = GafferScene.Parent()
+		parent["in"].setInput( pointInstancer["out"] )
+		parent["children"][0].setInput( sphere["out"] )
+		parent["parent"].setValue( "/" )
+
+		customOptions = GafferScene.CustomOptions()
+		customOptions["options"].addChild( Gaffer.NameValuePlug( "user:test", 10 ) )
+		customOptions["in"].setInput( parent["out"] )
+
+		renderer = GafferScene.Private.IECoreScenePreview.CapturingRenderer()
+		controller = GafferScene.RenderController( customOptions["out"], Gaffer.Context(), renderer )
+		controller.setMinimumExpansionDepth( 100 )
+
+		self.assertTrue( controller.updateRequired() )
+		controller.update()
+		capture = renderer.capturedObject( "/instancer" )
+		self.assertEqual( capture.capturedPointInstancerPrototypes()[0].samples[0].radius(), 1 )
+
+		# Sphere has nothing to do with `/instancer`, so editing it should
+		# not invalidate the captured instancer, no matter how many times we
+		# do it.
+
+		for i in range( 0, 5 ) :
+			sphere["radius"].setValue( 10 + i )
+			self.assertTrue( controller.updateRequired() )
+			controller.update()
+			self.assertTrue( renderer.capturedObject( "/instancer" ).isSame( capture ) )
+
+		# Likewise, the custom option should not cause invalidation.
+
+		customOptions["options"][0]["value"].setValue( 20 )
+		self.assertTrue( controller.updateRequired() )
+		controller.update()
+
+		self.assertTrue( renderer.capturedObject( "/instancer" ).isSame( capture ) )
 
 if __name__ == "__main__":
 	unittest.main()
