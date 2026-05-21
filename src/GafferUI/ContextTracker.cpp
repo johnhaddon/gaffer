@@ -78,7 +78,9 @@ using SharedInstances = boost::multi_index::multi_index_container<
 	SharedInstance,
 	boost::multi_index::indexed_by<
 		boost::multi_index::hashed_unique<boost::multi_index::key<&SharedInstance::first>>,
-		boost::multi_index::hashed_non_unique<boost::multi_index::key<&SharedInstance::second>>>>;
+		boost::multi_index::hashed_non_unique<boost::multi_index::key<&SharedInstance::second>>
+	>
+>;
 
 SharedInstances &sharedInstances()
 {
@@ -91,7 +93,9 @@ using SharedFocusInstances = boost::multi_index::multi_index_container<
 	SharedFocusInstance,
 	boost::multi_index::indexed_by<
 		boost::multi_index::hashed_unique<boost::multi_index::key<&SharedFocusInstance::first>>,
-		boost::multi_index::hashed_non_unique<boost::multi_index::key<&SharedFocusInstance::second>>>>;
+		boost::multi_index::hashed_non_unique<boost::multi_index::key<&SharedFocusInstance::second>>
+	>
+>;
 
 SharedFocusInstances &sharedFocusInstances()
 {

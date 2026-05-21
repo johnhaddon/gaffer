@@ -167,25 +167,28 @@ public:
 	/// behaviours.
 
 	using ButtonSignal = Gaffer::Signals::Signal<
-		bool( Gaffer::Path &path, PathListingWidget &widget, const ButtonEvent &event ), EventSignalCombiner<bool>>;
+		bool( Gaffer::Path &path, PathListingWidget &widget, const ButtonEvent &event ), EventSignalCombiner<bool>
+	>;
 	ButtonSignal &buttonPressSignal();
 	ButtonSignal &buttonReleaseSignal();
 	ButtonSignal &buttonDoubleClickSignal();
 
 	using ContextMenuSignal = Gaffer::Signals::Signal<
 		void( PathColumn &column, PathListingWidget &widget, MenuDefinition &menuDefinition ),
-		Gaffer::Signals::CatchingCombiner<void>>;
+		Gaffer::Signals::CatchingCombiner<void>
+	>;
 	/// To retain `widget` for use in MenuItem commands, use `PathListingWidgetPtr( &widget )`.
 	ContextMenuSignal &contextMenuSignal();
 
-	using KeySignal = Gaffer::Signals::Signal<
-		bool( PathColumn &column, PathListingWidget &widget, const KeyEvent &key ), EventSignalCombiner<bool>>;
+	using KeySignal = Gaffer::Signals::
+		Signal<bool( PathColumn &column, PathListingWidget &widget, const KeyEvent &key ), EventSignalCombiner<bool>>;
 	KeySignal &keyPressSignal();
 	KeySignal &keyReleaseSignal();
 
 	using DragDropSignal = Gaffer::Signals::Signal<
 		bool( PathColumn &column, Gaffer::Path &path, PathListingWidget &widget, const DragDropEvent &event ),
-		EventSignalCombiner<bool>>;
+		EventSignalCombiner<bool>
+	>;
 	DragDropSignal &dragEnterSignal();
 	DragDropSignal &dragMoveSignal();
 	DragDropSignal &dragLeaveSignal();

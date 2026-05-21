@@ -146,12 +146,11 @@ void GafferModule::bindStringPlug()
 		PlugClass<StringPlug>()
 			.def(
 				boost::python::init<
-					const std::string &, Gaffer::Plug::Direction, const std::string &, unsigned, unsigned>(
-					( boost::python::arg_( "name" ) = Gaffer::GraphComponent::defaultName<StringPlug>(),
-					  boost::python::arg_( "direction" ) = Gaffer::Plug::In, boost::python::arg_( "defaultValue" ) = "",
-					  boost::python::arg_( "flags" ) = Gaffer::Plug::Default,
-					  boost::python::arg_( "substitutions" ) = IECore::StringAlgo::AllSubstitutions )
-				)
+					const std::string &, Gaffer::Plug::Direction, const std::string &, unsigned, unsigned
+				>( ( boost::python::arg_( "name" ) = Gaffer::GraphComponent::defaultName<StringPlug>(),
+					 boost::python::arg_( "direction" ) = Gaffer::Plug::In, boost::python::arg_( "defaultValue" ) = "",
+					 boost::python::arg_( "flags" ) = Gaffer::Plug::Default,
+					 boost::python::arg_( "substitutions" ) = IECore::StringAlgo::AllSubstitutions ) )
 			)
 			.def( "__repr__", &repr )
 			.def( "substitutions", &StringPlug::substitutions )

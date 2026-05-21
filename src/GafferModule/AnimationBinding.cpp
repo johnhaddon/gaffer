@@ -413,13 +413,13 @@ void GafferModule::bindAnimation()
 
 	SignalClass<
 		Animation::CurvePlug::CurvePlugKeySignal, DefaultSignalCaller<Animation::CurvePlug::CurvePlugKeySignal>,
-		CurvePlugKeySlotCaller>( "CurvePlugKeySignal" );
+		CurvePlugKeySlotCaller
+	>( "CurvePlugKeySignal" );
 
 	SignalClass<
 		Animation::CurvePlug::CurvePlugDirectionSignal,
-		DefaultSignalCaller<Animation::CurvePlug::CurvePlugDirectionSignal>, CurvePlugDirectionSlotCaller>(
-		"CurvePlugDirectionSignal"
-	);
+		DefaultSignalCaller<Animation::CurvePlug::CurvePlugDirectionSignal>, CurvePlugDirectionSlotCaller
+	>( "CurvePlugDirectionSignal" );
 
 	Serialisation::registerSerialiser( Gaffer::Animation::CurvePlug::staticTypeId(), new CurvePlugSerialiser );
 }

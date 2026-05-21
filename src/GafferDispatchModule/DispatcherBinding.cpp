@@ -350,14 +350,12 @@ void GafferDispatchModule::bindDispatcher()
 		.def( "blindData", &DispatcherWrapper::taskBatchGetBlindData );
 
 	SignalClass<
-		Dispatcher::PreDispatchSignal, DefaultSignalCaller<Dispatcher::PreDispatchSignal>, PreDispatchSlotCaller>(
-		"PreDispatchSignal"
-	);
+		Dispatcher::PreDispatchSignal, DefaultSignalCaller<Dispatcher::PreDispatchSignal>, PreDispatchSlotCaller
+	>( "PreDispatchSignal" );
 	SignalClass<Dispatcher::DispatchSignal, DefaultSignalCaller<Dispatcher::DispatchSignal>, DispatchSlotCaller>(
 		"DispatchSignal"
 	);
 	SignalClass<
-		Dispatcher::PostDispatchSignal, DefaultSignalCaller<Dispatcher::PostDispatchSignal>, PostDispatchSlotCaller>(
-		"PostDispatchSignal"
-	);
+		Dispatcher::PostDispatchSignal, DefaultSignalCaller<Dispatcher::PostDispatchSignal>, PostDispatchSlotCaller
+	>( "PostDispatchSignal" );
 }

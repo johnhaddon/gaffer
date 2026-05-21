@@ -378,8 +378,9 @@ private:
 		using NamedChild = pair<InternedString, std::unique_ptr<TreeItem>>;
 		using ChildMap = multi_index::multi_index_container<
 			NamedChild,
-			multi_index::indexed_by<
-				multi_index::ordered_unique<multi_index::key<&NamedChild::first>>, multi_index::sequenced<>>>;
+			multi_index::
+				indexed_by<multi_index::ordered_unique<multi_index::key<&NamedChild::first>>, multi_index::sequenced<>>
+		>;
 
 		GafferSceneUI::Private::ConstInspectorPtr inspector;
 		ChildMap children;

@@ -376,8 +376,7 @@ void GafferSceneUIModule::bindLightEditor()
 		.def(
 			init<
 				const GafferScene::ScenePlugPtr &, const Gaffer::PlugPtr &, const IECore::InternedString &,
-				const std::string &>(
-				( arg_( "scene" ), arg_( "editScope" ), arg_( "setName" ), arg_( "columnName" ) )
-			)
+				const std::string &
+			>( ( arg_( "scene" ), arg_( "editScope" ), arg_( "setName" ), arg_( "columnName" ) ) )
 		);
 }

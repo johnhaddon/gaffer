@@ -164,7 +164,9 @@ private:
 		SetMember,
 		boost::multi_index::indexed_by<
 			boost::multi_index::ordered_unique<boost::multi_index::key<&SetMember::member>>,
-			boost::multi_index::random_access<>>>;
+			boost::multi_index::random_access<>
+		>
+	>;
 
 	using OrderedIndex = const MemberContainer::nth_index<0>::type;
 	using SequencedIndex = const MemberContainer::nth_index<1>::type;

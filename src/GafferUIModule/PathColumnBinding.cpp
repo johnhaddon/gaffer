@@ -521,10 +521,9 @@ void GafferUIModule::bindPathColumn()
 			.def(
 				init<
 					const IECore::ConstDataPtr &, const IECore::ConstDataPtr &, const IECore::ConstDataPtr &,
-					const IECore::ConstDataPtr &, const IECore::ConstDataPtr &, const IECore::ConstDataPtr &>(
-					( arg( "value" ) = object(), arg( "icon" ) = object(), arg( "background" ) = object(),
-					  arg( "toolTip" ) = object(), arg( "sortValue" ) = object(), arg( "foreground" ) = object() )
-				)
+					const IECore::ConstDataPtr &, const IECore::ConstDataPtr &, const IECore::ConstDataPtr &
+				>( ( arg( "value" ) = object(), arg( "icon" ) = object(), arg( "background" ) = object(),
+					 arg( "toolTip" ) = object(), arg( "sortValue" ) = object(), arg( "foreground" ) = object() ) )
 			)
 			.add_property( "value", &cellDataGetValue, &cellDataSetValue )
 			.add_property( "icon", &cellDataGetIcon, &cellDataSetIcon )
@@ -534,9 +533,8 @@ void GafferUIModule::bindPathColumn()
 			.add_property( "foreground", &cellDataGetForeground, &cellDataSetForeground );
 
 		SignalClass<
-			PathColumn::PathColumnSignal, DefaultSignalCaller<PathColumn::PathColumnSignal>, ChangedSignalSlotCaller>(
-			"PathColumnSignal"
-		);
+			PathColumn::PathColumnSignal, DefaultSignalCaller<PathColumn::PathColumnSignal>, ChangedSignalSlotCaller
+		>( "PathColumnSignal" );
 		SignalClass<PathColumn::ButtonSignal, ButtonSignalCaller, ButtonSignalSlotCaller>( "ButtonSignal" );
 		SignalClass<PathColumn::ContextMenuSignal, ContextMenuSignalCaller, ContextMenuSignalSlotCaller>(
 			"ContextMenuSignal"

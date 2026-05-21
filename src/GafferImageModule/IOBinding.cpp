@@ -104,7 +104,8 @@ object getDefaultColorSpaceFunction()
 		T::getDefaultColorSpaceFunction(), default_call_policies(),
 		boost::mpl::vector<
 			string, const string &, const string &, const string &, const IECore::CompoundData *,
-			const OCIO_NAMESPACE::ConstConfigRcPtr &>()
+			const OCIO_NAMESPACE::ConstConfigRcPtr &
+		>()
 	);
 }
 

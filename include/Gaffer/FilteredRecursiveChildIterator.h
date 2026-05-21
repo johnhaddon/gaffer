@@ -47,7 +47,8 @@ namespace Gaffer
 template<typename Predicate, typename RecursionPredicate = TypePredicate<GraphComponent>>
 class FilteredRecursiveChildIterator : public boost::iterator_adaptor<
 										   FilteredRecursiveChildIterator<Predicate, RecursionPredicate>,
-										   RecursiveChildIterator, const typename Predicate::ChildType::Ptr>
+										   RecursiveChildIterator, const typename Predicate::ChildType::Ptr
+									   >
 {
 
 public:
@@ -55,7 +56,8 @@ public:
 	using ChildType = typename Predicate::ChildType;
 	using BaseIterator = boost::iterator_adaptor<
 		FilteredRecursiveChildIterator<Predicate, RecursionPredicate>, RecursiveChildIterator,
-		const typename Predicate::ChildType::Ptr>;
+		const typename Predicate::ChildType::Ptr
+	>;
 
 	FilteredRecursiveChildIterator()
 		: BaseIterator(),

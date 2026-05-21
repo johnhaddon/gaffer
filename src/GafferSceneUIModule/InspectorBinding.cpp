@@ -210,9 +210,8 @@ void GafferSceneUIModule::bindInspector()
 		.def(
 			init<
 				const ScenePlugPtr &, const PlugPtr &, IECore::InternedString, const ShaderNetwork::Parameter &,
-				const bool>(
-				( arg( "scene" ), arg( "attribute" ), arg( "parameter" ), arg( "inheritAttributes" ) = false )
-			)
+				const bool
+			>( ( arg( "scene" ), arg( "attribute" ), arg( "parameter" ), arg( "inheritAttributes" ) = false ) )
 		)
 		.def( "parameter", &ParameterInspector::parameter, return_value_policy<copy_const_reference>() )
 		.def( "connectionSource", &ParameterInspector::connectionSource )
@@ -242,14 +241,13 @@ void GafferSceneUIModule::bindInspector()
 		);
 
 	{
-		scope scope = RunTimeTypedClass<TransformInspector>( "TransformInspector" )
-						  .def(
-							  init<
-								  const ScenePlugPtr &, const PlugPtr &, TransformInspector::Space,
-								  TransformInspector::Component>(
-								  ( arg( "scene" ), arg( "editScope" ), arg( "space" ), arg( "component" ) )
-							  )
-						  );
+		scope scope =
+			RunTimeTypedClass<TransformInspector>( "TransformInspector" )
+				.def(
+					init<
+						const ScenePlugPtr &, const PlugPtr &, TransformInspector::Space, TransformInspector::Component
+					>( ( arg( "scene" ), arg( "editScope" ), arg( "space" ), arg( "component" ) ) )
+				);
 
 		enum_<TransformInspector::Space>( "Space" )
 			.value( "Local", TransformInspector::Space::Local )
@@ -264,15 +262,14 @@ void GafferSceneUIModule::bindInspector()
 	}
 
 	{
-		scope scope =
-			RunTimeTypedClass<PrimitiveVariableInspector>( "PrimitiveVariableInspector" )
-				.def(
-					init<
-						const ScenePlugPtr &, const PlugPtr &, IECore::InternedString,
-						PrimitiveVariableInspector::Property, const std::string &>( (
-						arg( "scene" ), arg( "editScope" ), arg( "attribute" ), arg( "property" ), arg( "name" ) = ""
-					) )
-				);
+		scope scope = RunTimeTypedClass<PrimitiveVariableInspector>( "PrimitiveVariableInspector" )
+						  .def(
+							  init<
+								  const ScenePlugPtr &, const PlugPtr &, IECore::InternedString,
+								  PrimitiveVariableInspector::Property, const std::string &
+							  >( ( arg( "scene" ), arg( "editScope" ), arg( "attribute" ), arg( "property" ),
+								   arg( "name" ) = "" ) )
+						  );
 
 		enum_<PrimitiveVariableInspector::Property>( "Property" )
 			.value( "Interpolation", PrimitiveVariableInspector::Property::Interpolation )

@@ -155,7 +155,9 @@ private:
 		CameraInfo,
 		boost::multi_index::indexed_by<
 			boost::multi_index::ordered_unique<boost::multi_index::key<&CameraInfo::id>>,
-			boost::multi_index::ordered_unique<boost::multi_index::key<&CameraInfo::name>>>>;
+			boost::multi_index::ordered_unique<boost::multi_index::key<&CameraInfo::name>>
+		>
+	>;
 	CameraMap m_cameras;
 
 	struct LightShaderInfo

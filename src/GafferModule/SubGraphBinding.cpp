@@ -353,7 +353,8 @@ void GafferModule::bindSubGraph()
 
 	SignalClass<
 		Reference::ReferenceLoadedSignal, DefaultSignalCaller<Reference::ReferenceLoadedSignal>,
-		ReferenceLoadedSlotCaller>( "ReferenceLoadedSignal" );
+		ReferenceLoadedSlotCaller
+	>( "ReferenceLoadedSignal" );
 
 	Serialisation::registerSerialiser( Reference::staticTypeId(), new ReferenceSerialiser );
 

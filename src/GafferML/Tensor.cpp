@@ -245,8 +245,8 @@ Tensor::Tensor( const IECore::ConstDataPtr &data, std::vector<int64_t> shape )
 {
 	IECore::dispatch( data.get(), [&]( auto typedData ) -> void {
 		using DataType = remove_const_t<remove_pointer_t<decltype( typedData )>>;
-		using BaseType = typename std::conditional_t<
-			std::is_same_v<DataType, HalfVectorData>, Ort::Float16_t, typename DataType::BaseType>;
+		using BaseType = typename std::
+			conditional_t<std::is_same_v<DataType, HalfVectorData>, Ort::Float16_t, typename DataType::BaseType>;
 
 		if( !shape.size() )
 		{

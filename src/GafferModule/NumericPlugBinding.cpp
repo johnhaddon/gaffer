@@ -84,13 +84,12 @@ void bind()
 			.def(
 				init<
 					const char *, Plug::Direction, typename T::ValueType, typename T::ValueType, typename T::ValueType,
-					unsigned>(
-					( boost::python::arg_( "name" ) = GraphComponent::defaultName<T>(),
-					  boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "defaultValue" ) = V(),
-					  boost::python::arg_( "minValue" ) = std::numeric_limits<V>::lowest(),
-					  boost::python::arg_( "maxValue" ) = std::numeric_limits<V>::max(),
-					  boost::python::arg_( "flags" ) = Plug::Default )
-				)
+					unsigned
+				>( ( boost::python::arg_( "name" ) = GraphComponent::defaultName<T>(),
+					 boost::python::arg_( "direction" ) = Plug::In, boost::python::arg_( "defaultValue" ) = V(),
+					 boost::python::arg_( "minValue" ) = std::numeric_limits<V>::lowest(),
+					 boost::python::arg_( "maxValue" ) = std::numeric_limits<V>::max(),
+					 boost::python::arg_( "flags" ) = Plug::Default ) )
 			)
 			.def( "defaultValue", &T::defaultValue )
 			.def( "hasMinValue", &T::hasMinValue )

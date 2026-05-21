@@ -228,7 +228,8 @@ private:
 	// a sorted static vector to store links without the overhead of allocations.
 	using LinkMap = boost::container::flat_map<
 		IECore::InternedString, Renderer::ConstObjectSetPtr, std::less<IECore::InternedString>,
-		boost::container::static_vector<std::pair<IECore::InternedString, Renderer::ConstObjectSetPtr>, 3>>;
+		boost::container::static_vector<std::pair<IECore::InternedString, Renderer::ConstObjectSetPtr>, 3>
+	>;
 
 	LinkMap m_links;
 };

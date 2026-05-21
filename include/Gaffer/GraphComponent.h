@@ -91,8 +91,8 @@ public:
 	using NameChangedSignal =
 		Signals::Signal<void( GraphComponent *, IECore::InternedString ), Signals::CatchingCombiner<void>>;
 	using BinarySignal = Signals::Signal<void( GraphComponent *, GraphComponent * ), Signals::CatchingCombiner<void>>;
-	using ChildrenReorderedSignal = Signals::Signal<
-		void( GraphComponent *, const std::vector<size_t> &originalIndices ), Signals::CatchingCombiner<void>>;
+	using ChildrenReorderedSignal = Signals::
+		Signal<void( GraphComponent *, const std::vector<size_t> &originalIndices ), Signals::CatchingCombiner<void>>;
 
 	/// @name Naming
 	/// All GraphComponents have a name, which must be unique among

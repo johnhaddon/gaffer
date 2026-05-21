@@ -406,12 +406,13 @@ void GafferModule::bindGraphComponent()
 		"UnarySignal"
 	);
 	SignalClass<
-		GraphComponent::NameChangedSignal, DefaultSignalCaller<GraphComponent::NameChangedSignal>,
-		NameChangedSlotCaller>( "NameChangedSignal" );
+		GraphComponent::NameChangedSignal, DefaultSignalCaller<GraphComponent::NameChangedSignal>, NameChangedSlotCaller
+	>( "NameChangedSignal" );
 	SignalClass<GraphComponent::BinarySignal, DefaultSignalCaller<GraphComponent::BinarySignal>, BinarySlotCaller>(
 		"BinarySignal"
 	);
 	SignalClass<
 		GraphComponent::ChildrenReorderedSignal, DefaultSignalCaller<GraphComponent::ChildrenReorderedSignal>,
-		ChildrenReorderedSlotCaller>( "BinarySignal" );
+		ChildrenReorderedSlotCaller
+	>( "BinarySignal" );
 }

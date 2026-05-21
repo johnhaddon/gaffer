@@ -541,8 +541,8 @@ private:
 	{
 		bool operator () ( const HeapEntry &a, const HeapEntry &b ) const { return a.first > b.first; }
 	};
-	using MinHeap = boost::heap::d_ary_heap<
-		HeapEntry, boost::heap::arity<2>, boost::heap::mutable_<true>, boost::heap::compare<MinCompare>>;
+	using MinHeap = boost::heap::
+		d_ary_heap<HeapEntry, boost::heap::arity<2>, boost::heap::mutable_<true>, boost::heap::compare<MinCompare>>;
 	MinHeap m_minHeap;
 
 	// The max heap is used when we need to decrease the number of elements in the lower set, decreasing
@@ -551,8 +551,8 @@ private:
 	{
 		bool operator () ( const HeapEntry &a, const HeapEntry &b ) const { return a.first < b.first; }
 	};
-	using MaxHeap = boost::heap::d_ary_heap<
-		HeapEntry, boost::heap::arity<2>, boost::heap::mutable_<true>, boost::heap::compare<MaxCompare>>;
+	using MaxHeap = boost::heap::
+		d_ary_heap<HeapEntry, boost::heap::arity<2>, boost::heap::mutable_<true>, boost::heap::compare<MaxCompare>>;
 	MaxHeap m_maxHeap;
 
 	// We store the handle for each every element in the heaps, in order matching the rows. This allows us to

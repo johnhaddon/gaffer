@@ -151,7 +151,8 @@ ConstShadingEnginePtr getter( const ShadingEngineCacheGetterKey &key, size_t &co
 }
 
 using ShadingEngineCache = IECorePreview::LRUCache<
-	IECore::MurmurHash, ConstShadingEnginePtr, IECorePreview::LRUCachePolicy::Parallel, ShadingEngineCacheGetterKey>;
+	IECore::MurmurHash, ConstShadingEnginePtr, IECorePreview::LRUCachePolicy::Parallel, ShadingEngineCacheGetterKey
+>;
 ShadingEngineCache g_shadingEngineCache( getter, 10000 );
 
 using ShaderTypeSet = boost::container::flat_set<IECore::InternedString>;

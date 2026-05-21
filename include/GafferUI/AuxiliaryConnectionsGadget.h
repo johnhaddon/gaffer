@@ -162,7 +162,9 @@ private:
 			// `dstNodeGadget`. This will include all destination
 			// endpoints which are either `dstNodeGadget` itself or
 			// are a nodule belonging to it.
-			boost::multi_index::hashed_non_unique<boost::multi_index::key<&AuxiliaryConnection::dstNodeGadget>>>>;
+			boost::multi_index::hashed_non_unique<boost::multi_index::key<&AuxiliaryConnection::dstNodeGadget>>
+		>
+	>;
 
 	mutable AuxiliaryConnections m_auxiliaryConnections;
 	mutable bool m_dirty;

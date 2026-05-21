@@ -137,7 +137,6 @@ void GafferImageUIModule::bindImageGadget()
 		.value( "Complete", ImageGadget::Complete );
 
 	SignalClass<
-		ImageGadget::ImageGadgetSignal, DefaultSignalCaller<ImageGadget::ImageGadgetSignal>, ImageGadgetSlotCaller>(
-		"ImageGadgetSignal"
-	);
+		ImageGadget::ImageGadgetSignal, DefaultSignalCaller<ImageGadget::ImageGadgetSignal>, ImageGadgetSlotCaller
+	>( "ImageGadgetSignal" );
 }

@@ -252,7 +252,6 @@ void GafferSceneUIModule::bindSceneGadget()
 		.value( "Complete", SceneGadget::Complete );
 
 	SignalClass<
-		SceneGadget::SceneGadgetSignal, DefaultSignalCaller<SceneGadget::SceneGadgetSignal>, SceneGadgetSlotCaller>(
-		"ImageGadgetSignal"
-	);
+		SceneGadget::SceneGadgetSignal, DefaultSignalCaller<SceneGadget::SceneGadgetSignal>, SceneGadgetSlotCaller
+	>( "ImageGadgetSignal" );
 }

@@ -166,31 +166,31 @@ struct GridPropertyCacheGetterKey
 };
 
 struct GridPropertyCache
-	: public IECorePreview::LRUCache<
-		  MurmurHash, ConstDataPtr, IECorePreview::LRUCachePolicy::Parallel, GridPropertyCacheGetterKey>
+	: public IECorePreview::
+		  LRUCache<MurmurHash, ConstDataPtr, IECorePreview::LRUCachePolicy::Parallel, GridPropertyCacheGetterKey>
 {
 
 	using PropertyGetter = std::function<ConstDataPtr( const openvdb::GridBase *grid )>;
 
 	GridPropertyCache( PropertyGetter propertyGetter )
-		: IECorePreview::LRUCache<
-			  MurmurHash, ConstDataPtr, IECorePreview::LRUCachePolicy::Parallel, GridPropertyCacheGetterKey>(
-			  [propertyGetter](
-				  const GridPropertyCacheGetterKey &key, size_t &cost, const IECore::Canceller *canceller
-			  ) -> ConstDataPtr {
-				  cost = 1;
-				  if( openvdb::GridBase::ConstPtr g = grid( *key.objectPlug, key.gridName ) )
-				  {
-					  // The OpenVDB function called by our PropertyGetters typically
-					  // use TBB tasks. Isolate them so they don't go stealing unrelated
-					  // tasks that could lead to deadlock.
-					  return tbb::this_task_arena::isolate( [&]() { return propertyGetter( g.get() ); } );
-				  }
-				  return nullptr;
-			  },
-			  /* maxCost = */
-			  1000 // Properties are small but expensive to compute - might as well cache a bunch of them.
-		  )
+		: IECorePreview::
+			  LRUCache<MurmurHash, ConstDataPtr, IECorePreview::LRUCachePolicy::Parallel, GridPropertyCacheGetterKey>(
+				  [propertyGetter](
+					  const GridPropertyCacheGetterKey &key, size_t &cost, const IECore::Canceller *canceller
+				  ) -> ConstDataPtr {
+					  cost = 1;
+					  if( openvdb::GridBase::ConstPtr g = grid( *key.objectPlug, key.gridName ) )
+					  {
+						  // The OpenVDB function called by our PropertyGetters typically
+						  // use TBB tasks. Isolate them so they don't go stealing unrelated
+						  // tasks that could lead to deadlock.
+						  return tbb::this_task_arena::isolate( [&]() { return propertyGetter( g.get() ); } );
+					  }
+					  return nullptr;
+				  },
+				  /* maxCost = */
+				  1000 // Properties are small but expensive to compute - might as well cache a bunch of them.
+			  )
 	{
 	}
 };

@@ -197,7 +197,8 @@ struct OutputTraits
 	using ContainerType = vector<typename InputPlugType::ValueType>;
 	using ObjectType = std::conditional_t<
 		IECore::TypeTraits::IsVec<typename ContainerType::value_type>::value, IECore::GeometricTypedData<ContainerType>,
-		IECore::TypedData<ContainerType>>;
+		IECore::TypedData<ContainerType>
+	>;
 	using PlugType = TypedObjectPlug<ObjectType>;
 	static ContainerType &container( ObjectType &object ) { return object.writable(); }
 	static typename InputPlugType::ValueType collect( const InputPlugType *input ) { return input->getValue(); }

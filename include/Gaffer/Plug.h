@@ -58,18 +58,22 @@ IE_CORE_FORWARDDECLARE( Node )
 	using RecursiveIterator = \
 		Gaffer::FilteredRecursiveChildIterator<Gaffer::Plug::TypePredicate<TYPE>, Gaffer::Plug::TypePredicate<>>; \
 	using RecursiveInputIterator = Gaffer::FilteredRecursiveChildIterator< \
-		Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::In>, Gaffer::Plug::TypePredicate<>>; \
+		Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::In>, Gaffer::Plug::TypePredicate<> \
+	>; \
 	using RecursiveOutputIterator = Gaffer::FilteredRecursiveChildIterator< \
-		Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::Out>, Gaffer::Plug::TypePredicate<>>; \
+		Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::Out>, Gaffer::Plug::TypePredicate<> \
+	>; \
 	using Range = Gaffer::FilteredChildRange<Gaffer::Plug::TypePredicate<TYPE>>; \
 	using InputRange = Gaffer::FilteredChildRange<Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::In>>; \
 	using OutputRange = Gaffer::FilteredChildRange<Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::Out>>; \
 	using RecursiveRange = \
 		Gaffer::FilteredRecursiveChildRange<Gaffer::Plug::TypePredicate<TYPE>, Gaffer::Plug::TypePredicate<>>; \
 	using RecursiveInputRange = Gaffer::FilteredRecursiveChildRange< \
-		Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::In>, Gaffer::Plug::TypePredicate<>>; \
+		Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::In>, Gaffer::Plug::TypePredicate<> \
+	>; \
 	using RecursiveOutputRange = Gaffer::FilteredRecursiveChildRange< \
-		Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::Out>, Gaffer::Plug::TypePredicate<>>;
+		Gaffer::Plug::TypePredicate<TYPE, Gaffer::Plug::Out>, Gaffer::Plug::TypePredicate<> \
+	>;
 
 #define GAFFER_PLUG_DECLARE_TYPE( TYPE, TYPEID, BASETYPE ) \
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( TYPE, TYPEID, BASETYPE ) \

@@ -152,7 +152,8 @@ PathMatcher pathMatcherCacheGetter(
 }
 
 using PathMatcherCache = IECorePreview::LRUCache<
-	IECore::MurmurHash, IECore::PathMatcher, IECorePreview::LRUCachePolicy::Parallel, PathMatcherCacheGetterKey>;
+	IECore::MurmurHash, IECore::PathMatcher, IECorePreview::LRUCachePolicy::Parallel, PathMatcherCacheGetterKey
+>;
 PathMatcherCache g_pathMatcherCache( pathMatcherCacheGetter, 25 );
 
 const InternedString g_setNamePropertyName( "setPath:setName" );

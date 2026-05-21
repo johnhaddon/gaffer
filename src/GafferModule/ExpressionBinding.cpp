@@ -428,7 +428,8 @@ void GafferModule::bindExpression()
 
 	SignalClass<
 		Expression::ExpressionChangedSignal, DefaultSignalCaller<Expression::ExpressionChangedSignal>,
-		ExpressionChangedSlotCaller>( "ExpressionChangedSignal" );
+		ExpressionChangedSlotCaller
+	>( "ExpressionChangedSignal" );
 
 	Serialisation::registerSerialiser( Expression::staticTypeId(), new ExpressionSerialiser );
 }

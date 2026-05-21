@@ -147,7 +147,9 @@ struct NameMapData : public IECore::Data
 			// First index allows lookup using `inputName`.
 			boost::multi_index::hashed_unique<boost::multi_index::key<&Names::inputName>, InternedStringAddressHash>,
 			// Second index allows lookup using `outputName`.
-			boost::multi_index::hashed_unique<boost::multi_index::key<&Names::outputName>, InternedStringAddressHash>>>;
+			boost::multi_index::hashed_unique<boost::multi_index::key<&Names::outputName>, InternedStringAddressHash>
+		>
+	>;
 
 	Map map;
 };

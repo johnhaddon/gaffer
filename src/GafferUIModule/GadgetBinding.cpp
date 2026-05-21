@@ -243,7 +243,8 @@ void GafferUIModule::bindGadget()
 
 	SignalClass<
 		Gadget::VisibilityChangedSignal, DefaultSignalCaller<Gadget::VisibilityChangedSignal>,
-		VisibilityChangedSlotCaller>( "VisibilityChangedSignal" );
+		VisibilityChangedSlotCaller
+	>( "VisibilityChangedSignal" );
 	SignalClass<Gadget::ButtonSignal, DefaultSignalCaller<Gadget::ButtonSignal>, ButtonSlotCaller>( "ButtonSignal" );
 	SignalClass<Gadget::KeySignal, DefaultSignalCaller<Gadget::KeySignal>, KeySlotCaller>( "KeySignal" );
 	SignalClass<Gadget::DragBeginSignal, DefaultSignalCaller<Gadget::DragBeginSignal>, DragBeginSlotCaller>(

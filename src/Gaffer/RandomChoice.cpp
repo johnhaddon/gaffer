@@ -66,7 +66,8 @@ namespace
 
 template<typename T>
 using ValuesDataType = std::conditional_t<
-	IECore::TypeTraits::IsVec<T>::value, IECore::GeometricTypedData<vector<T>>, IECore::TypedData<vector<T>>>;
+	IECore::TypeTraits::IsVec<T>::value, IECore::GeometricTypedData<vector<T>>, IECore::TypedData<vector<T>>
+>;
 
 template<typename T>
 using ValuesPlugType = Gaffer::TypedObjectPlug<ValuesDataType<T>>;

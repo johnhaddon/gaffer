@@ -159,8 +159,8 @@ CompoundDataPtr getter( const OSLTextureCacheGetterKey &key, size_t &cost, const
 	return nullptr;
 }
 
-using OSLTextureCache = IECorePreview::LRUCache<
-	IECore::MurmurHash, CompoundDataPtr, IECorePreview::LRUCachePolicy::Parallel, OSLTextureCacheGetterKey>;
+using OSLTextureCache = IECorePreview::
+	LRUCache<IECore::MurmurHash, CompoundDataPtr, IECorePreview::LRUCachePolicy::Parallel, OSLTextureCacheGetterKey>;
 OSLTextureCache g_oslTextureCache( getter, 1024 * 1024 * 64 );
 
 const char *texturedFragSource()

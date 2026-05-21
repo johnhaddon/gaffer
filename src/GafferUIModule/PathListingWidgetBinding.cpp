@@ -2229,13 +2229,14 @@ struct DisplayGradientCacheGetterKey
 };
 
 struct DisplayGradientCache
-	: public IECorePreview::LRUCache<
-		  IECore::MurmurHash, QBrush, IECorePreview::LRUCachePolicy::Serial, DisplayGradientCacheGetterKey>
+	: public IECorePreview::
+		  LRUCache<IECore::MurmurHash, QBrush, IECorePreview::LRUCachePolicy::Serial, DisplayGradientCacheGetterKey>
 {
 
 	DisplayGradientCache( const DisplayTransform &displayTransform, size_t maxGradients = 1000 )
 		: IECorePreview::LRUCache<
-			  IECore::MurmurHash, QBrush, IECorePreview::LRUCachePolicy::Serial, DisplayGradientCacheGetterKey>(
+			  IECore::MurmurHash, QBrush, IECorePreview::LRUCachePolicy::Serial, DisplayGradientCacheGetterKey
+		  >(
 			  [displayTransform](
 				  const DisplayGradientCacheGetterKey &key, size_t &cost, const IECore::Canceller *canceller
 			  ) {

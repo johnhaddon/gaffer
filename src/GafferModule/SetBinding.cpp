@@ -206,7 +206,8 @@ void GafferModule::bindSet()
 
 		SignalClass<
 			StandardSet::MemberAcceptanceSignal, DefaultSignalCaller<StandardSet::MemberAcceptanceSignal>,
-			MemberAcceptanceSlotCaller>( "MemberAcceptanceSignal" );
+			MemberAcceptanceSlotCaller
+		>( "MemberAcceptanceSignal" );
 	}
 
 	IECorePython::RunTimeTypedClass<ChildSet>().def( boost::python::init<GraphComponentPtr>() );

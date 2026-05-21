@@ -565,7 +565,6 @@ void GafferModule::bindScriptNode()
 		"UndoAddedSignal"
 	);
 	SignalClass<
-		ScriptNode::FocusChangedSignal, DefaultSignalCaller<ScriptNode::FocusChangedSignal>, FocusChangedSlotCaller>(
-		"FocusChangedSignal"
-	);
+		ScriptNode::FocusChangedSignal, DefaultSignalCaller<ScriptNode::FocusChangedSignal>, FocusChangedSlotCaller
+	>( "FocusChangedSignal" );
 }

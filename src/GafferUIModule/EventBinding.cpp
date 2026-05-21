@@ -147,7 +147,8 @@ void GafferUIModule::bindEvent()
 					  .def(
 						  init<
 							  ButtonEvent::Buttons, ButtonEvent::Buttons, const IECore::LineSegment3f &, float,
-							  ModifiableEvent::Modifiers>()
+							  ModifiableEvent::Modifiers
+						  >()
 					  )
 					  .def_readwrite( "button", &ButtonEvent::button )
 					  .def_readwrite( "buttons", &ButtonEvent::buttons )
@@ -171,7 +172,8 @@ void GafferUIModule::bindEvent()
 		.def( init<ButtonEvent::Buttons, ButtonEvent::Buttons, const IECore::LineSegment3f &>() )
 		.def(
 			init<
-				ButtonEvent::Buttons, ButtonEvent::Buttons, const IECore::LineSegment3f &, ModifiableEvent::Modifiers>()
+				ButtonEvent::Buttons, ButtonEvent::Buttons, const IECore::LineSegment3f &, ModifiableEvent::Modifiers
+			>()
 		)
 		.add_property( "sourceGadget", &getSourceGadget, &setSourceGadget )
 		.add_property( "data", &getData, &setData )

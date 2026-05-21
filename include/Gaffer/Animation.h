@@ -316,7 +316,7 @@ public:
 #else
 			boost::intrusive::normal_link
 #endif
-			>>;
+		>>;
 
 		struct Dispose
 		{
@@ -582,8 +582,8 @@ class Animation::KeyIterator
 };
 
 class Animation::ConstKeyIterator
-	: public boost::iterator_facade<
-		  Animation::ConstKeyIterator, const Animation::Key, boost::bidirectional_traversal_tag>
+	: public boost::
+		  iterator_facade<Animation::ConstKeyIterator, const Animation::Key, boost::bidirectional_traversal_tag>
 {
 	friend class boost::iterator_core_access;
 	friend class Animation::CurvePlug;

@@ -149,9 +149,8 @@ void GafferSceneModule::bindCatalogue()
 					  .staticmethod( "imageReceivedSignal" );
 
 		SignalClass<
-			Display::DriverCreatedSignal, DefaultSignalCaller<Display::DriverCreatedSignal>, DriverCreatedSlotCaller>(
-			"DriverCreated"
-		);
+			Display::DriverCreatedSignal, DefaultSignalCaller<Display::DriverCreatedSignal>, DriverCreatedSlotCaller
+		>( "DriverCreated" );
 	}
 
 	{

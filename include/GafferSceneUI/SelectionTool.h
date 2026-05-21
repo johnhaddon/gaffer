@@ -66,8 +66,9 @@ public:
 	Gaffer::StringPlug *selectModePlug();
 	const Gaffer::StringPlug *selectModePlug() const;
 
-	using SelectFunction = std::function<
-		GafferScene::ScenePlug::ScenePath( const GafferScene::ScenePlug *, const GafferScene::ScenePlug::ScenePath & )>;
+	using SelectFunction = std::function<GafferScene::ScenePlug::ScenePath(
+		const GafferScene::ScenePlug *, const GafferScene::ScenePlug::ScenePath &
+	)>;
 	// Registers a select mode identified by `name`. `function` must accept
 	// the scene from which a selection will be made and the `ScenePath` the user
 	// initially selected. It returns the `ScenePath` to use as the actual selection.

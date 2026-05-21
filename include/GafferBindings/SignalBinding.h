@@ -58,7 +58,8 @@ struct DefaultSlotCaller;
 /// to the signal as slots.
 template<
 	typename Signal, typename SignalCaller = DefaultSignalCaller<Signal>,
-	typename SlotCaller = DefaultSlotCaller<Signal>>
+	typename SlotCaller = DefaultSlotCaller<Signal>
+>
 class SignalClass : public boost::python::class_<Signal, boost::noncopyable>
 {
 

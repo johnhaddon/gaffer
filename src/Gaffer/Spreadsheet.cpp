@@ -570,7 +570,9 @@ private:
 		Row,
 		multi_index::indexed_by<
 			multi_index::hashed_unique<multi_index::key<&Row::plug>>,
-			multi_index::hashed_non_unique<multi_index::key<&Row::name>>>>;
+			multi_index::hashed_non_unique<multi_index::key<&Row::name>>
+		>
+	>;
 
 	Map m_map;
 };

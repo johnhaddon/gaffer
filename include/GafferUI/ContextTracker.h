@@ -210,7 +210,8 @@ private:
 		boost::unordered_map<Gaffer::ConstNodePtr, NodeData, TransparentPtrHash<const Gaffer::Node>, std::equal_to<>>;
 	NodeContexts m_nodeContexts;
 	using PlugContexts = boost::unordered_map<
-		Gaffer::ConstPlugPtr, Gaffer::ConstContextPtr, TransparentPtrHash<const Gaffer::Plug>, std::equal_to<>>;
+		Gaffer::ConstPlugPtr, Gaffer::ConstContextPtr, TransparentPtrHash<const Gaffer::Plug>, std::equal_to<>
+	>;
 	// Stores plug-specific contexts, which take precedence over `m_nodeContexts`.
 	PlugContexts m_plugContexts;
 

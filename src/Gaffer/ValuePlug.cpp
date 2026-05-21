@@ -488,16 +488,17 @@ private:
 		std::atomic_int clearCache;
 	};
 
-	static tbb::enumerable_thread_specific<
-		ThreadData, tbb::cache_aligned_allocator<ThreadData>, tbb::ets_key_per_instance>
-		g_threadData;
+	static tbb::
+		enumerable_thread_specific<ThreadData, tbb::cache_aligned_allocator<ThreadData>, tbb::ets_key_per_instance>
+			g_threadData;
 	static std::atomic_size_t g_cacheSizeLimit;
 };
 
 const IECore::InternedString ValuePlug::HashProcess::staticType( ValuePlug::hashProcessType() );
 tbb::enumerable_thread_specific<
 	ValuePlug::HashProcess::ThreadData, tbb::cache_aligned_allocator<ValuePlug::HashProcess::ThreadData>,
-	tbb::ets_key_per_instance>
+	tbb::ets_key_per_instance
+>
 	ValuePlug::HashProcess::g_threadData;
 // Default limit corresponds to a cost of roughly 25Mb per thread.
 std::atomic_size_t ValuePlug::HashProcess::g_cacheSizeLimit( 128000 );

@@ -94,7 +94,8 @@ class TaskParallel;
 ///
 /// \ingroup utilityGroup
 template<
-	typename Key, typename Value, template<typename> class Policy = LRUCachePolicy::Parallel, typename GetterKey = Key>
+	typename Key, typename Value, template<typename> class Policy = LRUCachePolicy::Parallel, typename GetterKey = Key
+>
 class LRUCache : private boost::noncopyable
 {
 public:

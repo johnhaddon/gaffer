@@ -62,8 +62,9 @@ namespace
 using NamedOutput = std::pair<std::string, OutputPtr>;
 using OutputMap = multi_index::multi_index_container<
 	NamedOutput,
-	multi_index::indexed_by<
-		multi_index::ordered_unique<multi_index::key<&NamedOutput::first>>, multi_index::sequenced<>>>;
+	multi_index::
+		indexed_by<multi_index::ordered_unique<multi_index::key<&NamedOutput::first>>, multi_index::sequenced<>>
+>;
 
 OutputMap &outputMap()
 {

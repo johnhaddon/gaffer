@@ -341,9 +341,8 @@ void GafferSceneUIModule::bindViews()
 		.staticmethod( "registeredScenes" );
 
 	SignalClass<
-		ShaderView::SceneChangedSignal, DefaultSignalCaller<ShaderView::SceneChangedSignal>, SceneChangedSlotCaller>(
-		"SceneChangedSignal"
-	);
+		ShaderView::SceneChangedSignal, DefaultSignalCaller<ShaderView::SceneChangedSignal>, SceneChangedSlotCaller
+	>( "SceneChangedSignal" );
 
 	{
 		scope s = GafferBindings::NodeClass<UVView>( nullptr, no_init )

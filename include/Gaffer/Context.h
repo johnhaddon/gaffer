@@ -82,8 +82,8 @@ public:
 
 	IE_CORE_DECLAREMEMBERPTR( Context )
 
-	using ChangedSignal = Signals::Signal<
-		void( const Context *context, const IECore::InternedString & ), Signals::CatchingCombiner<void>>;
+	using ChangedSignal = Signals::
+		Signal<void( const Context *context, const IECore::InternedString & ), Signals::CatchingCombiner<void>>;
 
 	/// Sets a variable to the specified value. A copy is taken so that
 	/// subsequent changes to `value` do not affect the context.

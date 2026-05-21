@@ -109,7 +109,9 @@ private:
 		PathAndID,
 		boost::multi_index::indexed_by<
 			boost::multi_index::ordered_unique<boost::multi_index::key<&PathAndID::first>>,
-			boost::multi_index::ordered_unique<boost::multi_index::key<&PathAndID::second>>>>;
+			boost::multi_index::ordered_unique<boost::multi_index::key<&PathAndID::second>>
+		>
+	>;
 
 	void loadEXRManifest( const std::filesystem::path &filePath );
 	void loadCryptomatteJSON( std::istream &in );

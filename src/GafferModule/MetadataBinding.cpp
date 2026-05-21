@@ -451,24 +451,28 @@ void GafferModule::bindMetadata()
 			.value( "InstanceDeregistration", Metadata::ValueChangedReason::InstanceDeregistration );
 
 		SignalClass<
-			Metadata::ValueChangedSignal, DefaultSignalCaller<Metadata::ValueChangedSignal>, ValueChangedSlotCaller>(
-			"ValueChangedSignal"
-		);
+			Metadata::ValueChangedSignal, DefaultSignalCaller<Metadata::ValueChangedSignal>, ValueChangedSlotCaller
+		>( "ValueChangedSignal" );
 		SignalClass<
 			Metadata::NodeValueChangedSignal, DefaultSignalCaller<Metadata::NodeValueChangedSignal>,
-			ValueChangedSlotCaller>( "NodeValueChangedSignal" );
+			ValueChangedSlotCaller
+		>( "NodeValueChangedSignal" );
 		SignalClass<
 			Metadata::PlugValueChangedSignal, DefaultSignalCaller<Metadata::PlugValueChangedSignal>,
-			ValueChangedSlotCaller>( "PlugValueChangedSignal" );
+			ValueChangedSlotCaller
+		>( "PlugValueChangedSignal" );
 		SignalClass<
 			Metadata::LegacyValueChangedSignal, DefaultSignalCaller<Metadata::LegacyValueChangedSignal>,
-			ValueChangedSlotCaller>( "LegacyValueChangedSignal" );
+			ValueChangedSlotCaller
+		>( "LegacyValueChangedSignal" );
 		SignalClass<
 			Metadata::LegacyNodeValueChangedSignal, DefaultSignalCaller<Metadata::LegacyNodeValueChangedSignal>,
-			ValueChangedSlotCaller>( "LegacyNodeValueChangedSignal" );
+			ValueChangedSlotCaller
+		>( "LegacyNodeValueChangedSignal" );
 		SignalClass<
 			Metadata::LegacyPlugValueChangedSignal, DefaultSignalCaller<Metadata::LegacyPlugValueChangedSignal>,
-			ValueChangedSlotCaller>( "LegacyPlugValueChangedSignal" );
+			ValueChangedSlotCaller
+		>( "LegacyPlugValueChangedSignal" );
 	}
 
 	metadataClass.def( "registerValue", &registerValue )

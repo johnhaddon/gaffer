@@ -117,7 +117,9 @@ public:
 			// using Item::key as the key.
 			boost::multi_index::hashed_unique<boost::multi_index::key<&Item::key>>,
 			// Second index is equivalent to std::list.
-			boost::multi_index::sequenced<>>>;
+			boost::multi_index::sequenced<>
+		>
+	>;
 
 	using MapIterator = typename MapAndList::iterator;
 	using List = typename MapAndList::template nth_index<1>::type;
@@ -311,7 +313,9 @@ public:
 			//   key. This provides the possibility of creating a
 			//   prehashed key prior to taking a Bin lock, although
 			//   this is not implemented here yet.
-			boost::multi_index::hashed_unique<boost::multi_index::key<&Item::key>>>>;
+			boost::multi_index::hashed_unique<boost::multi_index::key<&Item::key>>
+		>
+	>;
 
 	using MapIterator = typename Map::iterator;
 
@@ -644,7 +648,9 @@ public:
 			//   key. This provides the possibility of creating a
 			//   prehashed key prior to taking a Bin lock, although
 			//   this is not implemented here yet.
-			boost::multi_index::hashed_unique<boost::multi_index::key<&Item::key>>>>;
+			boost::multi_index::hashed_unique<boost::multi_index::key<&Item::key>>
+		>
+	>;
 
 	using MapIterator = typename Map::iterator;
 
@@ -962,8 +968,8 @@ LRUCache<Key, Value, Policy, GetterKey>::CacheEntry::CacheEntry() : cost( 0 )
 }
 
 template<typename Key, typename Value, template<typename> class Policy, typename GetterKey>
-typename LRUCache<Key, Value, Policy, GetterKey>::Status LRUCache<
-	Key, Value, Policy, GetterKey>::CacheEntry::status() const
+typename LRUCache<Key, Value, Policy, GetterKey>::Status LRUCache<Key, Value, Policy, GetterKey>::CacheEntry::
+	status() const
 {
 	return static_cast<Status>( state.which() );
 }

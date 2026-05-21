@@ -358,7 +358,9 @@ using DisplayTransformCreatorMap = boost::multi_index::multi_index_container<
 	NamedTransform,
 	boost::multi_index::indexed_by<
 		boost::multi_index::ordered_unique<boost::multi_index::key<&NamedTransform::first>>,
-		boost::multi_index::sequenced<>>>;
+		boost::multi_index::sequenced<>
+	>
+>;
 
 DisplayTransformCreatorMap &displayTransformCreators()
 {

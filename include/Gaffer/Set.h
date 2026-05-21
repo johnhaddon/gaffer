@@ -103,7 +103,8 @@ IE_CORE_DECLAREPTR( Set );
 template<typename ContainerType, typename ValueType>
 class SetIterator
 	: public boost::iterator_facade<
-		  SetIterator<ContainerType, ValueType>, ValueType, boost::random_access_traversal_tag, ValueType &, int64_t>
+		  SetIterator<ContainerType, ValueType>, ValueType, boost::random_access_traversal_tag, ValueType &, int64_t
+	  >
 {
 
 public:

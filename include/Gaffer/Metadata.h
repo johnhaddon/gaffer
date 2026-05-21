@@ -195,11 +195,14 @@ public:
 
 	using ValueChangedSignal = Signals::Signal<
 		void( IECore::InternedString target, IECore::InternedString key, ValueChangedReason reason ),
-		Signals::CatchingCombiner<void>>;
+		Signals::CatchingCombiner<void>
+	>;
 	using NodeValueChangedSignal = Signals::Signal<
-		void( Node *node, IECore::InternedString key, ValueChangedReason reason ), Signals::CatchingCombiner<void>>;
+		void( Node *node, IECore::InternedString key, ValueChangedReason reason ), Signals::CatchingCombiner<void>
+	>;
 	using PlugValueChangedSignal = Signals::Signal<
-		void( Plug *plug, IECore::InternedString key, ValueChangedReason reason ), Signals::CatchingCombiner<void>>;
+		void( Plug *plug, IECore::InternedString key, ValueChangedReason reason ), Signals::CatchingCombiner<void>
+	>;
 
 	/// Returns a signal that will be emitted when metadata has changed for `target`.
 	static ValueChangedSignal &valueChangedSignal( IECore::InternedString target );
@@ -215,17 +218,19 @@ public:
 	/// Their usage leads to performance bottlenecks whereby all observers
 	/// are triggered by all edits. They will be removed in future.
 
-	using LegacyValueChangedSignal = Signals::Signal<
-		void( IECore::InternedString target, IECore::InternedString key ), Signals::CatchingCombiner<void>>;
+	using LegacyValueChangedSignal = Signals::
+		Signal<void( IECore::InternedString target, IECore::InternedString key ), Signals::CatchingCombiner<void>>;
 	using LegacyNodeValueChangedSignal = Signals::Signal<
 		void( IECore::TypeId nodeTypeId, IECore::InternedString key, Gaffer::Node *node ),
-		Signals::CatchingCombiner<void>>;
+		Signals::CatchingCombiner<void>
+	>;
 	using LegacyPlugValueChangedSignal = Signals::Signal<
 		void(
 			IECore::TypeId typeId, const IECore::StringAlgo::MatchPattern &plugPath, IECore::InternedString key,
 			Gaffer::Plug *plug
 		),
-		Signals::CatchingCombiner<void>>;
+		Signals::CatchingCombiner<void>
+	>;
 
 	/// \deprecated
 	static LegacyValueChangedSignal &valueChangedSignal();

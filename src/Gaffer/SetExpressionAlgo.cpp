@@ -111,7 +111,8 @@ std::ostream &operator << ( std::ostream &out, const Op &op )
 using ExpressionAst = boost::variant<
 	Nil,
 	std::string, // identifier
-	boost::recursive_wrapper<BinaryOp>>;
+	boost::recursive_wrapper<BinaryOp>
+>;
 
 struct BinaryOp
 {

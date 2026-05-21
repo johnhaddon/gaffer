@@ -102,7 +102,8 @@ void GafferSceneModule::bindHierarchy()
 		.def(
 			init<
 				const ScenePlug *, const ScenePlug::ScenePath &, const Gaffer::Context &, const IECore::MurmurHash &,
-				const Imath::Box3f &>()
+				const Imath::Box3f &
+			>()
 		)
 		.def( "scene", &scene )
 		.def( "root", &root )

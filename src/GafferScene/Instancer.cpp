@@ -3337,7 +3337,8 @@ void Instancer::InstancerCapsule::render( IECoreScenePreview::Renderer *renderer
 	// If fixedPrototypes is not set, we will put prototypes in this cache whenever we first encounter
 	// a prototype using a given context.
 	IECorePreview::LRUCache<
-		IECore::MurmurHash, ConstPrototypePtr, IECorePreview::LRUCachePolicy::Parallel, PrototypeCacheGetterKey>
+		IECore::MurmurHash, ConstPrototypePtr, IECorePreview::LRUCachePolicy::Parallel, PrototypeCacheGetterKey
+	>
 		prototypeCache(
 			[&prototypesPlug, &sampleTimes, &outerCapsuleHash, &renderOpts, &renderer, &hasAttributes, &engines,
 			 &defaultContext, &enginePath](

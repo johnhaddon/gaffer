@@ -66,7 +66,9 @@ using SelectModeMap = boost::multi_index::multi_index_container<
 	NamedSelectMode,
 	boost::multi_index::indexed_by<
 		boost::multi_index::ordered_unique<boost::multi_index::key<&NamedSelectMode::first>>,
-		boost::multi_index::sequenced<>>>;
+		boost::multi_index::sequenced<>
+	>
+>;
 
 const std::string g_standardSelectModeName = "/Standard";
 

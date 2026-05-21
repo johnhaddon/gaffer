@@ -258,15 +258,16 @@ using NamedValue = std::pair<InternedString, Metadata::ValueFunction>;
 
 using Values = multi_index::multi_index_container<
 	NamedValue,
-	multi_index::indexed_by<
-		multi_index::ordered_unique<multi_index::key<&NamedValue::first>>, multi_index::sequenced<>>>;
+	multi_index::indexed_by<multi_index::ordered_unique<multi_index::key<&NamedValue::first>>, multi_index::sequenced<>>
+>;
 
 using NamedValues = std::pair<InternedString, Values>;
 
 using MetadataMap = multi_index::multi_index_container<
 	NamedValues,
-	multi_index::indexed_by<
-		multi_index::ordered_unique<multi_index::key<&NamedValues::first>>, multi_index::sequenced<>>>;
+	multi_index::
+		indexed_by<multi_index::ordered_unique<multi_index::key<&NamedValues::first>>, multi_index::sequenced<>>
+>;
 
 MetadataMap &metadataMap()
 {
@@ -293,13 +294,15 @@ struct GraphComponentMetadata
 
 	using Values = multi_index::multi_index_container<
 		NamedValue,
-		multi_index::indexed_by<
-			multi_index::ordered_unique<multi_index::key<&NamedValue::first>>, multi_index::sequenced<>>>;
+		multi_index::
+			indexed_by<multi_index::ordered_unique<multi_index::key<&NamedValue::first>>, multi_index::sequenced<>>
+	>;
 
 	using PlugValues = multi_index::multi_index_container<
 		NamedPlugValue,
-		multi_index::indexed_by<
-			multi_index::ordered_unique<multi_index::key<&NamedPlugValue::first>>, multi_index::sequenced<>>>;
+		multi_index::
+			indexed_by<multi_index::ordered_unique<multi_index::key<&NamedPlugValue::first>>, multi_index::sequenced<>>
+	>;
 
 	using PlugPathsToValues = map<StringAlgo::MatchPatternPath, PlugValues>;
 
@@ -329,8 +332,9 @@ struct NamedInstanceValue
 
 using InstanceValues = multi_index::multi_index_container<
 	NamedInstanceValue,
-	multi_index::indexed_by<
-		multi_index::ordered_unique<multi_index::key<&NamedInstanceValue::name>>, multi_index::sequenced<>>>;
+	multi_index::
+		indexed_by<multi_index::ordered_unique<multi_index::key<&NamedInstanceValue::name>>, multi_index::sequenced<>>
+>;
 
 using InstanceMetadataMap = concurrent_hash_map<const GraphComponent *, std::unique_ptr<InstanceValues>>;
 

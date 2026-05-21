@@ -242,10 +242,10 @@ void GafferUIModule::bindViewportGadget()
 		.def( "__exit__", &RasterScopeWrapper::exit );
 
 	SignalClass<
-		ViewportGadget::UnarySignal, DefaultSignalCaller<ViewportGadget::UnarySignal>, ViewportGadgetSlotCaller>(
-		"UnarySignal"
-	);
+		ViewportGadget::UnarySignal, DefaultSignalCaller<ViewportGadget::UnarySignal>, ViewportGadgetSlotCaller
+	>( "UnarySignal" );
 	SignalClass<
 		ViewportGadget::CameraChangedSignal, DefaultSignalCaller<ViewportGadget::CameraChangedSignal>,
-		ViewportGadgetSlotCaller>( "UnarySignal" );
+		ViewportGadgetSlotCaller
+	>( "UnarySignal" );
 }

@@ -136,7 +136,9 @@ using ActiveTasks = boost::multi_index::multi_index_container<
 	ActiveTask,
 	boost::multi_index::indexed_by<
 		boost::multi_index::hashed_unique<boost::multi_index::key<&ActiveTask::task>>,
-		boost::multi_index::hashed_non_unique<boost::multi_index::key<&ActiveTask::subject>>>>;
+		boost::multi_index::hashed_non_unique<boost::multi_index::key<&ActiveTask::subject>>
+	>
+>;
 
 ActiveTasks &activeTasks()
 {

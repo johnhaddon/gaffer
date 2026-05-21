@@ -334,7 +334,9 @@ private:
 		Gaffer::Animation::KeyPtr,
 		boost::multi_index::indexed_by<
 			boost::multi_index::ordered_unique<boost::multi_index::identity<Gaffer::Animation::KeyPtr>>,
-			boost::multi_index::random_access<>>>;
+			boost::multi_index::random_access<>
+		>
+	>;
 
 	struct ConnectionData
 	{

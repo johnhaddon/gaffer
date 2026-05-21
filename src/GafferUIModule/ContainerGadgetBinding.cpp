@@ -108,7 +108,8 @@ void GafferUIModule::bindContainerGadget()
 	c.def(
 		init<optional<
 			const std::string &, LinearContainer::Orientation, LinearContainer::Alignment, float,
-			LinearContainer::Direction>>(
+			LinearContainer::Direction
+		>>(
 			( arg_( "name" ) = Gaffer::GraphComponent::defaultName<LinearContainer>(),
 			  arg_( "orientation" ) = LinearContainer::X, arg_( "alignment" ) = LinearContainer::Centre,
 			  arg_( "spacing" ) = 0.0f, arg_( "direction" ) = LinearContainer::Increasing )

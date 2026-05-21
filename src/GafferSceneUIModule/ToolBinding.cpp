@@ -262,9 +262,8 @@ void GafferSceneUIModule::bindTools()
 
 		GafferBindings::SignalClass<
 			CropWindowTool::StatusChangedSignal,
-			GafferBindings::DefaultSignalCaller<CropWindowTool::StatusChangedSignal>, StatusChangedSlotCaller>(
-			"StatusChangedSignal"
-		);
+			GafferBindings::DefaultSignalCaller<CropWindowTool::StatusChangedSignal>, StatusChangedSlotCaller
+		>( "StatusChangedSignal" );
 	}
 
 	{
@@ -280,7 +279,8 @@ void GafferSceneUIModule::bindTools()
 			.def(
 				init<
 					const ConstScenePlugPtr &, const ScenePlug::ScenePath &, const ConstContextPtr &,
-					const EditScopePtr &>()
+					const EditScopePtr &
+				>()
 			)
 
 			.def( "scene", &scene )
@@ -310,7 +310,8 @@ void GafferSceneUIModule::bindTools()
 		GafferBindings::SignalClass<
 			TransformTool::SelectionChangedSignal,
 			GafferBindings::DefaultSignalCaller<TransformTool::SelectionChangedSignal>,
-			SelectionChangedSlotCaller<TransformTool>>( "SelectionChangedSignal" );
+			SelectionChangedSlotCaller<TransformTool>
+		>( "SelectionChangedSignal" );
 	}
 
 	GafferBindings::NodeClass<TranslateTool>( nullptr, no_init )
@@ -361,6 +362,7 @@ void GafferSceneUIModule::bindTools()
 		GafferBindings::SignalClass<
 			ImageSelectionTool::StatusChangedSignal,
 			GafferBindings::DefaultSignalCaller<ImageSelectionTool::StatusChangedSignal>,
-			ImageSelectionToolStatusChangedSlotCaller>( "StatusChangedSignal" );
+			ImageSelectionToolStatusChangedSlotCaller
+		>( "StatusChangedSignal" );
 	}
 }

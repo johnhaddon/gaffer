@@ -228,7 +228,8 @@ public:
 	ButtonSignal &mouseMoveSignal();
 
 	using DragBeginSignal = Gaffer::Signals::Signal<
-		IECore::RunTimeTypedPtr( Gadget *, const DragDropEvent &event ), EventSignalCombiner<IECore::RunTimeTypedPtr>>;
+		IECore::RunTimeTypedPtr( Gadget *, const DragDropEvent &event ), EventSignalCombiner<IECore::RunTimeTypedPtr>
+	>;
 	using DragDropSignal =
 		Gaffer::Signals::Signal<bool( Gadget *, const DragDropEvent &event ), EventSignalCombiner<bool>>;
 

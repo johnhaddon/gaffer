@@ -358,7 +358,8 @@ void GafferUIModule::bindGraphGadget()
 
 		GafferBindings::SignalClass<
 			GraphGadget::RootChangedSignal, GafferBindings::DefaultSignalCaller<GraphGadget::RootChangedSignal>,
-			RootChangedSlotCaller>( "RootChangedSignal" );
+			RootChangedSlotCaller
+		>( "RootChangedSignal" );
 	}
 
 	GadgetClass<AuxiliaryConnectionsGadget>()

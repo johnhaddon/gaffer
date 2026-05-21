@@ -138,7 +138,9 @@ using MenuItemContainer = boost::multi_index_container<
 	MenuItem,
 	boost::multi_index::indexed_by<
 		boost::multi_index::random_access<>,
-		boost::multi_index::ordered_non_unique<boost::multi_index::key<&MenuItem::getName>>>>;
+		boost::multi_index::ordered_non_unique<boost::multi_index::key<&MenuItem::getName>>
+	>
+>;
 
 struct PlugAdder : GafferUI::PlugAdder
 {

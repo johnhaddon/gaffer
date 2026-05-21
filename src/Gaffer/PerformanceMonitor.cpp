@@ -159,8 +159,8 @@ void PerformanceMonitor::processFinished( const Process *process )
 
 void PerformanceMonitor::collate() const
 {
-	tbb::enumerable_thread_specific<
-		ThreadData, tbb::cache_aligned_allocator<ThreadData>, tbb::ets_key_per_instance>::iterator it,
+	tbb::enumerable_thread_specific<ThreadData, tbb::cache_aligned_allocator<ThreadData>, tbb::ets_key_per_instance>::
+		iterator it,
 		eIt;
 	for( it = m_threadData.begin(), eIt = m_threadData.end(); it != eIt; ++it )
 	{

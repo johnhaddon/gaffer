@@ -112,7 +112,8 @@ public:
 
 		if constexpr( !std::is_same_v<
 						  decltype( &WrappedType::updateDragEndPoint ),
-						  decltype( &GafferUI::ConnectionCreator::updateDragEndPoint )> )
+						  decltype( &GafferUI::ConnectionCreator::updateDragEndPoint )
+					  > )
 		{
 			// No need to force PlugAdder derived classes to reimplement this.
 			WrappedType::updateDragEndPoint( position, tangent );

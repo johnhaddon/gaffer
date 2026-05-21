@@ -57,6 +57,7 @@ SortIncludes:
 AllowShortFunctionsOnASingleLine: Inline
 BreakBeforeTernaryOperators: false
 BreakStringLiterals: false
+BreakBeforeTemplateCloser: true
 BreakTemplateDeclarations: Yes
 Cpp11BracedListStyle: FunctionCall
 PackConstructorInitializers: CurrentLine

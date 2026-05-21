@@ -393,7 +393,8 @@ typename DestDataType::Ptr convertData( const SrcDataType *srcData )
 		{
 			if constexpr(
 				valueTypesAreConvertible<
-					typename SrcDataType::ValueType::value_type, typename DestDataType::ValueType::value_type>()
+					typename SrcDataType::ValueType::value_type, typename DestDataType::ValueType::value_type
+				>()
 			)
 			{
 				typename DestDataType::Ptr resultData = new DestDataType();
@@ -746,7 +747,8 @@ IECore::DataPtr TweakPlug::createVectorDataFromElement(
 				constexpr bool isGeometric = IECore::TypeTraits::IsGeometricTypedData<DataType>::value;
 				using VectorDataType = std::conditional_t<
 					isGeometric, IECore::GeometricTypedData<std::vector<ValueType>>,
-					IECore::TypedData<std::vector<ValueType>>>;
+					IECore::TypedData<std::vector<ValueType>>
+				>;
 
 				typename VectorDataType::Ptr vectorData = new VectorDataType();
 

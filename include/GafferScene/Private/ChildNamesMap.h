@@ -94,7 +94,9 @@ private:
 		Child,
 		boost::multi_index::indexed_by<
 			boost::multi_index::hashed_unique<boost::multi_index::key<&Child::output>>,
-			boost::multi_index::hashed_unique<boost::multi_index::key<&Child::input>>>>;
+			boost::multi_index::hashed_unique<boost::multi_index::key<&Child::input>>
+		>
+	>;
 
 	Map m_map;
 };
