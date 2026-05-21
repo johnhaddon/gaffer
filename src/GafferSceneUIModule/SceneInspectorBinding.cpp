@@ -942,12 +942,14 @@ const InspectorTree::Registration g_objectTypeInspectionRegistration(
 );
 
 const boost::container::flat_map<PrimitiveVariable::Interpolation, ConstStringDataPtr>
-	g_primitiveVariableInterpolations = { { PrimitiveVariable::Invalid, new StringData( "Invalid" ) },
-										  { PrimitiveVariable::Constant, new StringData( "Constant" ) },
-										  { PrimitiveVariable::Uniform, new StringData( "Uniform" ) },
-										  { PrimitiveVariable::Vertex, new StringData( "Vertex" ) },
-										  { PrimitiveVariable::Varying, new StringData( "Varying" ) },
-										  { PrimitiveVariable::FaceVarying, new StringData( "FaceVarying" ) } };
+	g_primitiveVariableInterpolations = {
+		{ PrimitiveVariable::Invalid, new StringData( "Invalid" ) },
+		{ PrimitiveVariable::Constant, new StringData( "Constant" ) },
+		{ PrimitiveVariable::Uniform, new StringData( "Uniform" ) },
+		{ PrimitiveVariable::Vertex, new StringData( "Vertex" ) },
+		{ PrimitiveVariable::Varying, new StringData( "Varying" ) },
+		{ PrimitiveVariable::FaceVarying, new StringData( "FaceVarying" ) }
+};
 
 InspectorTree::Inspections primitiveTopologyInspectionProvider( ScenePlug *scene, const Gaffer::PlugPtr &editScope )
 {

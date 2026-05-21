@@ -82,10 +82,12 @@ V3f tangent( const PlugAdder *g )
 
 StandardNodeGadget::Edge tangentEdge( const V3f &tangent )
 {
-	auto tangents = { make_pair( V3f( 0, 1, 0 ), StandardNodeGadget::TopEdge ),
-					  make_pair( V3f( 0, -1, 0 ), StandardNodeGadget::BottomEdge ),
-					  make_pair( V3f( -1, 0, 0 ), StandardNodeGadget::LeftEdge ),
-					  make_pair( V3f( 1, 0, 0 ), StandardNodeGadget::RightEdge ) };
+	auto tangents = {
+		make_pair( V3f( 0, 1, 0 ), StandardNodeGadget::TopEdge ),
+		make_pair( V3f( 0, -1, 0 ), StandardNodeGadget::BottomEdge ),
+		make_pair( V3f( -1, 0, 0 ), StandardNodeGadget::LeftEdge ),
+		make_pair( V3f( 1, 0, 0 ), StandardNodeGadget::RightEdge )
+	};
 
 	for( const auto &t : tangents )
 	{

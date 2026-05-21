@@ -73,13 +73,14 @@ std::string getValue( const StringPlug *plug )
 
 std::string substitutionsRepr( unsigned substitutions )
 {
-	static const IECore::StringAlgo::Substitutions values[] = { IECore::StringAlgo::FrameSubstitutions,
-																IECore::StringAlgo::VariableSubstitutions,
-																IECore::StringAlgo::EscapeSubstitutions,
-																IECore::StringAlgo::TildeSubstitutions,
-																IECore::StringAlgo::NoSubstitutions };
-	static const char *names[] = { "FrameSubstitutions", "VariableSubstitutions", "EscapeSubstitutions",
-								   "TildeSubstitutions", nullptr };
+	static const IECore::StringAlgo::Substitutions values[] = {
+		IECore::StringAlgo::FrameSubstitutions, IECore::StringAlgo::VariableSubstitutions,
+		IECore::StringAlgo::EscapeSubstitutions, IECore::StringAlgo::TildeSubstitutions,
+		IECore::StringAlgo::NoSubstitutions
+	};
+	static const char *names[] = {
+		"FrameSubstitutions", "VariableSubstitutions", "EscapeSubstitutions", "TildeSubstitutions", nullptr
+	};
 
 	if( substitutions == IECore::StringAlgo::AllSubstitutions )
 	{

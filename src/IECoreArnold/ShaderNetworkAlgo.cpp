@@ -249,8 +249,9 @@ AtNode *convertWalk(
 AtString g_name( "name" );
 AtString g_lightBlockerNodeEntryName( "light_blocker" );
 
-const std::vector<AtString> g_protectedLightParameters = { AtString( "matrix" ), AtString( "filters" ),
-														   AtString( "mesh" ) };
+const std::vector<AtString> g_protectedLightParameters = {
+	AtString( "matrix" ), AtString( "filters" ), AtString( "mesh" )
+};
 
 const std::vector<AtString> g_protectedLightFilterParameters = {
 	AtString( "geometry_matrix" ),
@@ -1248,10 +1249,12 @@ void IECoreArnold::ShaderNetworkAlgo::convertUSDShaders( ShaderNetwork *shaderNe
 			transferUSDLightParameters( shaderNetwork, handle, shader.get(), newShader.get() );
 			const float width = parameterValue( shader.get(), g_widthParameter, 1.0f );
 			const float height = parameterValue( shader.get(), g_heightParameter, 1.0f );
-			newShader->parameters()[g_verticesParameter] = new V3fVectorData(
-				{ V3f( width / 2, -height / 2, 0 ), V3f( -width / 2, -height / 2, 0 ), V3f( -width / 2, height / 2, 0 ),
-				  V3f( width / 2, height / 2, 0 ) }
-			);
+			newShader->parameters()[g_verticesParameter] = new V3fVectorData( {
+				V3f( width / 2, -height / 2, 0 ),
+				V3f( -width / 2, -height / 2, 0 ),
+				V3f( -width / 2, height / 2, 0 ),
+				V3f( width / 2, height / 2, 0 ),
+			} );
 			transferUSDTextureFile( shaderNetwork, handle, shader.get(), newShader.get() );
 		}
 

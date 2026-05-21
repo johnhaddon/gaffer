@@ -106,7 +106,8 @@ const unordered_map<string, ParameterSet> g_omittedParameters = { {
 	  "colorMapGamma", "colorMapSaturation", "enableTemperature", "temperature", "specular", "diffuse", "enableShadows",
 	  "shadowColor", "shadowDistance", "shadowFalloff", "shadowFalloffGamma", "shadowSubset", "shadowExcludeSubset",
 	  "traceLightPaths", "thinShadow", "visibleInRefractionPath", "cheapCaustics", "cheapCausticsExcludeGroup",
-	  "fixedSampleCount", "lightGroup", "importanceMultiplier", "msApprox", "msApproxBleed", "msApproxContribution" },
+	  "fixedSampleCount", "lightGroup", "importanceMultiplier", "msApprox", "msApproxBleed", "msApproxContribution"
+	},
 } };
 
 } // namespace

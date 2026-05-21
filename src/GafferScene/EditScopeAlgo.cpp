@@ -322,10 +322,12 @@ std::optional<GafferScene::EditScopeAlgo::TransformEdit> GafferScene::EditScopeA
 		row->namePlug()->setValue( pathString );
 	}
 
-	return TransformEdit{ row->cellsPlug()->getChild<Spreadsheet::CellPlug>( g_translate )->valuePlug<V3fPlug>(),
-						  row->cellsPlug()->getChild<Spreadsheet::CellPlug>( g_rotate )->valuePlug<V3fPlug>(),
-						  row->cellsPlug()->getChild<Spreadsheet::CellPlug>( g_scale )->valuePlug<V3fPlug>(),
-						  row->cellsPlug()->getChild<Spreadsheet::CellPlug>( g_pivot )->valuePlug<V3fPlug>() };
+	return TransformEdit{
+		row->cellsPlug()->getChild<Spreadsheet::CellPlug>( g_translate )->valuePlug<V3fPlug>(),
+		row->cellsPlug()->getChild<Spreadsheet::CellPlug>( g_rotate )->valuePlug<V3fPlug>(),
+		row->cellsPlug()->getChild<Spreadsheet::CellPlug>( g_scale )->valuePlug<V3fPlug>(),
+		row->cellsPlug()->getChild<Spreadsheet::CellPlug>( g_pivot )->valuePlug<V3fPlug>()
+	};
 }
 
 const GraphComponent *GafferScene::EditScopeAlgo::transformEditReadOnlyReason(
@@ -413,10 +415,12 @@ const boost::container::flat_map<string, string> g_rendererAttributePrefixes = {
 
 /// \todo Create a registration method for populating overrides.
 using ProcessorOverrideMap = std::unordered_map<std::string, std::string>;
-const ProcessorOverrideMap g_processorNameOverrides = { { "ai:lightFilter:filter", "ArnoldLightBlockerFilterEdits" },
-														{ "ai:lightFilter:barndoor", "ArnoldBarndoorFilterEdits" },
-														{ "ai:lightFilter:light_decay", "ArnoldLightDecayFilterEdits" },
-														{ "ai:lightFilter:gobo", "ArnoldGoboFilterEdits" } };
+const ProcessorOverrideMap g_processorNameOverrides = {
+	{ "ai:lightFilter:filter", "ArnoldLightBlockerFilterEdits" },
+	{ "ai:lightFilter:barndoor", "ArnoldBarndoorFilterEdits" },
+	{ "ai:lightFilter:light_decay", "ArnoldLightDecayFilterEdits" },
+	{ "ai:lightFilter:gobo", "ArnoldGoboFilterEdits" }
+};
 
 string parameterProcessorName( const std::string &attribute )
 {

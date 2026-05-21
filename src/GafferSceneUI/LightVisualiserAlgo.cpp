@@ -637,10 +637,12 @@ IECoreGL::ConstRenderablePtr roundedQuadSurface(
 		for( const auto &[startIndex, innerCornerId, nextInnerCornerId, nextOuterRadiusId] :
 			 std::array<CornerIndices, 4>{
 				 CornerIndices{ 4, 0, 1, 4 + ( numCornerRadiusPoints / 4 ) }, // Top-right
-				 CornerIndices{ 4 + ( numCornerRadiusPoints / 4 ), 1, 2,
-								4 + ( numCornerRadiusPoints / 2 ) }, // Top-left
-				 CornerIndices{ 4 + ( numCornerRadiusPoints / 2 ), 2, 3,
-								4 + ( numCornerRadiusPoints * 3 / 4 ) }, // Bottom-left
+				 CornerIndices{
+					 4 + ( numCornerRadiusPoints / 4 ), 1, 2, 4 + ( numCornerRadiusPoints / 2 )
+				 }, // Top-left
+				 CornerIndices{
+					 4 + ( numCornerRadiusPoints / 2 ), 2, 3, 4 + ( numCornerRadiusPoints * 3 / 4 )
+				 }, // Bottom-left
 				 CornerIndices{ 4 + ( numCornerRadiusPoints * 3 / 4 ), 3, 0, 4 } // Bottom-right
 			 } )
 		{

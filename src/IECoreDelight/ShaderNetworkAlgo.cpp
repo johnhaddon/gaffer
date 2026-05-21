@@ -1236,8 +1236,10 @@ void updateLightGeometry(
 
 			if( newState != state )
 			{
-				const V3f p[4] = { V3f( 0.5f * width, 0.5f * height, 0 ), V3f( 0.5f * width, -0.5f * height, 0 ),
-								   V3f( -0.5f * width, -0.5f * height, 0 ), V3f( -0.5f * width, 0.5f * height, 0 ) };
+				const V3f p[4] = {
+					V3f( 0.5f * width, 0.5f * height, 0 ), V3f( 0.5f * width, -0.5f * height, 0 ),
+					V3f( -0.5f * width, -0.5f * height, 0 ), V3f( -0.5f * width, 0.5f * height, 0 )
+				};
 				ParameterList parameters;
 				parameters.add( { "P", &p, NSITypePoint, 1, 4, 0 } );
 

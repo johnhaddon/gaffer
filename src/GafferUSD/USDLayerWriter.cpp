@@ -130,8 +130,9 @@ Filters buildFilters(
 
 				if( !layerScene->existsPlug()->getValue() )
 				{
-					return { false, g_emptyPathMatcher, g_emptyPathMatcher, g_emptyPathMatcher,
-							 ScenePlug::ScenePath() };
+					return {
+						false, g_emptyPathMatcher, g_emptyPathMatcher, g_emptyPathMatcher, ScenePlug::ScenePath()
+					};
 				}
 
 				if( attributesMatch )

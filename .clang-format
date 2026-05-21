@@ -58,7 +58,7 @@ AllowShortFunctionsOnASingleLine: Inline
 BreakBeforeTernaryOperators: false
 BreakStringLiterals: false
 BreakTemplateDeclarations: Yes
-Cpp11BracedListStyle: Block
+Cpp11BracedListStyle: FunctionCall
 PackConstructorInitializers: CurrentLine
 
 # Empty lines

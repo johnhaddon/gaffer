@@ -180,21 +180,25 @@ PrimitiveVariableHistoryCache g_primitiveVariableHistoryCache(
 
 // \todo : Duplicated from src/GafferSceneUIModule/SceneInspectorBinding.cpp
 const boost::container::flat_map<IECoreScene::PrimitiveVariable::Interpolation, IECore::ConstStringDataPtr>
-	g_primitiveVariableInterpolations = { { PrimitiveVariable::Invalid, new IECore::StringData( "Invalid" ) },
-										  { PrimitiveVariable::Constant, new IECore::StringData( "Constant" ) },
-										  { PrimitiveVariable::Uniform, new IECore::StringData( "Uniform" ) },
-										  { PrimitiveVariable::Vertex, new IECore::StringData( "Vertex" ) },
-										  { PrimitiveVariable::Varying, new IECore::StringData( "Varying" ) },
-										  { PrimitiveVariable::FaceVarying, new IECore::StringData( "FaceVarying" ) } };
+	g_primitiveVariableInterpolations = {
+		{ PrimitiveVariable::Invalid, new IECore::StringData( "Invalid" ) },
+		{ PrimitiveVariable::Constant, new IECore::StringData( "Constant" ) },
+		{ PrimitiveVariable::Uniform, new IECore::StringData( "Uniform" ) },
+		{ PrimitiveVariable::Vertex, new IECore::StringData( "Vertex" ) },
+		{ PrimitiveVariable::Varying, new IECore::StringData( "Varying" ) },
+		{ PrimitiveVariable::FaceVarying, new IECore::StringData( "FaceVarying" ) }
+};
 
 const boost::container::flat_map<IECore::GeometricData::Interpretation, IECore::ConstStringDataPtr>
-	g_geometricInterpretations = { { GeometricData::None, new IECore::StringData( "None" ) },
-								   { GeometricData::Point, new IECore::StringData( "Point" ) },
-								   { GeometricData::Normal, new IECore::StringData( "Normal" ) },
-								   { GeometricData::Vector, new IECore::StringData( "Vector" ) },
-								   { GeometricData::Color, new IECore::StringData( "Color" ) },
-								   { GeometricData::UV, new IECore::StringData( "UV" ) },
-								   { GeometricData::Rational, new IECore::StringData( "Rational" ) } };
+	g_geometricInterpretations = {
+		{ GeometricData::None, new IECore::StringData( "None" ) },
+		{ GeometricData::Point, new IECore::StringData( "Point" ) },
+		{ GeometricData::Normal, new IECore::StringData( "Normal" ) },
+		{ GeometricData::Vector, new IECore::StringData( "Vector" ) },
+		{ GeometricData::Color, new IECore::StringData( "Color" ) },
+		{ GeometricData::UV, new IECore::StringData( "UV" ) },
+		{ GeometricData::Rational, new IECore::StringData( "Rational" ) }
+};
 
 } // namespace
 

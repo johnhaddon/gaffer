@@ -86,17 +86,22 @@ void addRect(
 
 	for( const auto &[startIndex, quadrantMult, quadrantOffset, falloffMult] :
 		 std::array<std::tuple<int, V3f, V3f, V3f>, 4>{
-			 std::tuple<int, V3f, V3f, V3f>{ 0, V3f( 1.f, 1.f, 0.f ), V3f( innerOffset[3], innerOffset[0], 0.f ),
-											 V3f( falloffScale[3], falloffScale[0], 0.f ) }, // Top-right
-			 std::tuple<int, V3f, V3f, V3f>{ numDivisions / 4, V3f( -1.f, 1.f, 0.f ),
-											 V3f( -innerOffset[1], innerOffset[0], 0.f ),
-											 V3f( falloffScale[1], falloffScale[0], 0.f ) }, // Top-left
-			 std::tuple<int, V3f, V3f, V3f>{ numDivisions / 2, V3f( -1.f, -1.f, 0.f ),
-											 V3f( -innerOffset[1], -innerOffset[2], 0.f ),
-											 V3f( falloffScale[1], falloffScale[2], 0.f ) }, // Bottom-left
-			 std::tuple<int, V3f, V3f, V3f>{ ( numDivisions * 3 ) / 4, V3f( 1.f, -1.f, 0.f ),
-											 V3f( innerOffset[3], -innerOffset[2], 0.f ),
-											 V3f( falloffScale[3], falloffScale[2], 0.f ) } // Bottom-right
+			 std::tuple<int, V3f, V3f, V3f>{
+				 0, V3f( 1.f, 1.f, 0.f ), V3f( innerOffset[3], innerOffset[0], 0.f ),
+				 V3f( falloffScale[3], falloffScale[0], 0.f )
+			 }, // Top-right
+			 std::tuple<int, V3f, V3f, V3f>{
+				 numDivisions / 4, V3f( -1.f, 1.f, 0.f ), V3f( -innerOffset[1], innerOffset[0], 0.f ),
+				 V3f( falloffScale[1], falloffScale[0], 0.f )
+			 }, // Top-left
+			 std::tuple<int, V3f, V3f, V3f>{
+				 numDivisions / 2, V3f( -1.f, -1.f, 0.f ), V3f( -innerOffset[1], -innerOffset[2], 0.f ),
+				 V3f( falloffScale[1], falloffScale[2], 0.f )
+			 }, // Bottom-left
+			 std::tuple<int, V3f, V3f, V3f>{
+				 ( numDivisions * 3 ) / 4, V3f( 1.f, -1.f, 0.f ), V3f( innerOffset[3], -innerOffset[2], 0.f ),
+				 V3f( falloffScale[3], falloffScale[2], 0.f )
+			 } // Bottom-right
 		 } )
 	{
 		for( int i = startIndex, eI = startIndex + ( numDivisions / 4 ); i <= eI; ++i )

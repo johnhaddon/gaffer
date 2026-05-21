@@ -218,8 +218,9 @@ public:
 
 		static const float handleThickness = size.y * 0.3f;
 		static const float handleXs[2] = { b.min.x * 0.1f, b.max.x * 0.1f };
-		static const float handleYs[3] = { b.max.y, b.max.y + handleThickness,
-										   b.max.y + handleThickness + ( handleXs[1] - handleXs[0] ) };
+		static const float handleYs[3] = {
+			b.max.y, b.max.y + handleThickness, b.max.y + handleThickness + ( handleXs[1] - handleXs[0] )
+		};
 		static const float handleZs[4] = { b.min.z + 0.1f, b.min.z + 0.15f, b.max.z - 0.45f, b.max.z - 0.4f };
 
 		// Outer handle

@@ -2445,9 +2445,9 @@ const boost::container::flat_map<std::string, ccl::PathRayFlag> g_rayTypes = {
 	{ "shadow", ccl::PATH_RAY_SHADOW }, { "scatter", ccl::PATH_RAY_VOLUME_SCATTER }
 };
 
-const boost::container::flat_map<int, ccl::LogLevel> g_logLevels = { { 0, ccl::LOG_LEVEL_ERROR },
-																	 { 1, ccl::LOG_LEVEL_WARNING },
-																	 { 2, ccl::LOG_LEVEL_INFO } };
+const boost::container::flat_map<int, ccl::LogLevel> g_logLevels = {
+	{ 0, ccl::LOG_LEVEL_ERROR }, { 1, ccl::LOG_LEVEL_WARNING }, { 2, ccl::LOG_LEVEL_INFO }
+};
 
 // Dicing camera
 IECore::InternedString g_dicingCameraOptionName( "cycles:dicing_camera" );

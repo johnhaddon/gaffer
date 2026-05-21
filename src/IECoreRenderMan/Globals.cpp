@@ -616,9 +616,10 @@ void Globals::updateIntegrator()
 	RtParamList integratorParamList;
 	ParamListAlgo::convertParameters( m_integratorToConvert->parameters(), integratorParamList );
 
-	riley::ShadingNode integratorNode = { riley::ShadingNode::Type::k_Integrator,
-										  RtUString( m_integratorToConvert->getName().c_str() ),
-										  RtUString( "integrator" ), integratorParamList };
+	riley::ShadingNode integratorNode = {
+		riley::ShadingNode::Type::k_Integrator, RtUString( m_integratorToConvert->getName().c_str() ),
+		RtUString( "integrator" ), integratorParamList
+	};
 
 	m_integratorId = m_session->riley->CreateIntegrator( riley::UserId(), integratorNode );
 	m_integratorToConvert = nullptr;

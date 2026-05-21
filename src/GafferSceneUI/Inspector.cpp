@@ -363,8 +363,9 @@ Inspector::ResultPtr Inspector::inspect() const
 			}
 		}
 
-		result->m_editors = { fmt::format( formatString, "edit" ), "", fmt::format( formatString, "disable" ), nullptr,
-							  nullptr };
+		result->m_editors = {
+			fmt::format( formatString, "edit" ), "", fmt::format( formatString, "disable" ), nullptr, nullptr
+		};
 	}
 
 	return result;
@@ -466,14 +467,16 @@ void Inspector::inspectHistoryWalk(
 			const std::string nonEditableReason = ::nonEditableReason( source.get() );
 			if( nonEditableReason.empty() )
 			{
-				result->m_editors = { [source = source]( bool unused ) { return source; }, editWarning,
-									  disableEditFunction( source.get(), history ), canEditFunction( history ),
-									  editFunction( history ) };
+				result->m_editors = {
+					[source = source]( bool unused ) { return source; }, editWarning,
+					disableEditFunction( source.get(), history ), canEditFunction( history ), editFunction( history )
+				};
 			}
 			else
 			{
-				result->m_editors = { nonEditableReason, "", nonEditableReason, canEditFunction( history ),
-									  editFunction( history ) };
+				result->m_editors = {
+					nonEditableReason, "", nonEditableReason, canEditFunction( history ), editFunction( history )
+				};
 			}
 		}
 		// Otherwise try to initialise from EditScope if we've hit it.

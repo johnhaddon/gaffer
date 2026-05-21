@@ -777,8 +777,10 @@ void convertShaderNetworkWalk(
 		return;
 	}
 
-	riley::ShadingNode node = { shaderInfo->type, RtUString( shader->getName().c_str() ),
-								RtUString( outputParameter.shader.c_str() ), RtParamList() };
+	riley::ShadingNode node = {
+		shaderInfo->type, RtUString( shader->getName().c_str() ), RtUString( outputParameter.shader.c_str() ),
+		RtParamList()
+	};
 
 	for( const auto &[parameterName, parameterValue] : shader->parameters() )
 	{
@@ -805,13 +807,15 @@ void convertShaderNetworkWalk(
 
 	for( const auto &[destination, references] : arrayConnections )
 	{
-		RtParamList::ParamInfo const info = { RtUString( destination.c_str() ),
-											  shaderInfo->parameters.at( destination ).type,
-											  pxrcore::DetailType::k_reference,
-											  (uint32_t)references.size(),
-											  true,
-											  false,
-											  false };
+		RtParamList::ParamInfo const info = {
+			RtUString( destination.c_str() ),
+			shaderInfo->parameters.at( destination ).type,
+			pxrcore::DetailType::k_reference,
+			(uint32_t)references.size(),
+			true,
+			false,
+			false
+		};
 
 		node.params.SetParam( info, references.data() );
 	}
@@ -1109,13 +1113,15 @@ const std::vector<InternedString> g_pxrSurfaceParameters = {
 };
 
 const std::unordered_map<std::string, std::tuple<std::string, InternedString, std::variant<float, V3f, int>>>
-	g_primVarMap = { { "UsdPrimvarReader_float", { "float", g_defaultFloatParameter, 0.f } },
-					 { "UsdPrimvarReader_float2", { "float2", g_defaultFloat3Parameter, V3f( 0.f ) } },
-					 { "UsdPrimvarReader_float3", { "vector", g_defaultFloat3Parameter, V3f( 0.f ) } },
-					 { "UsdPrimvarReader_normal", { "normal", g_defaultFloat3Parameter, V3f( 0.f ) } },
-					 { "UsdPrimvarReader_point", { "point", g_defaultFloat3Parameter, V3f( 0.f ) } },
-					 { "UsdPrimvarReader_vector", { "vector", g_defaultFloat3Parameter, V3f( 0.f ) } },
-					 { "UsdPrimvarReader_int", { "int", g_defaultIntParameter, 0 } } };
+	g_primVarMap = {
+		{ "UsdPrimvarReader_float", { "float", g_defaultFloatParameter, 0.f } },
+		{ "UsdPrimvarReader_float2", { "float2", g_defaultFloat3Parameter, V3f( 0.f ) } },
+		{ "UsdPrimvarReader_float3", { "vector", g_defaultFloat3Parameter, V3f( 0.f ) } },
+		{ "UsdPrimvarReader_normal", { "normal", g_defaultFloat3Parameter, V3f( 0.f ) } },
+		{ "UsdPrimvarReader_point", { "point", g_defaultFloat3Parameter, V3f( 0.f ) } },
+		{ "UsdPrimvarReader_vector", { "vector", g_defaultFloat3Parameter, V3f( 0.f ) } },
+		{ "UsdPrimvarReader_int", { "int", g_defaultIntParameter, 0 } }
+};
 
 void transferUSDLightParameters(
 	ShaderNetwork *network, InternedString shaderHandle, const Shader *usdShader, Shader *shader,

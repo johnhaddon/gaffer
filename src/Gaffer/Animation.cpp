@@ -811,11 +811,11 @@ double Animation::Interpolator::effectiveScale(
 
 const Animation::Interpolator::Container &Animation::Interpolator::get()
 {
-	static const Container container{ ConstInterpolatorPtr( new InterpolatorBezier() ),
-									  ConstInterpolatorPtr( new InterpolatorCubic() ),
-									  ConstInterpolatorPtr( new InterpolatorLinear() ),
-									  ConstInterpolatorPtr( new InterpolatorConstantNext() ),
-									  ConstInterpolatorPtr( new InterpolatorConstant() ) };
+	static const Container container{
+		ConstInterpolatorPtr( new InterpolatorBezier() ), ConstInterpolatorPtr( new InterpolatorCubic() ),
+		ConstInterpolatorPtr( new InterpolatorLinear() ), ConstInterpolatorPtr( new InterpolatorConstantNext() ),
+		ConstInterpolatorPtr( new InterpolatorConstant() )
+	};
 
 	return container;
 }
@@ -1396,8 +1396,9 @@ void Animation::Tangent::positionToRelative( Imath::V2d &position, const bool re
 
 IE_CORE_DEFINERUNTIMETYPED( Gaffer::Animation::Key )
 
-Animation::Tangent Animation::Key::*const Animation::Key::m_tangents[2] = { &Animation::Key::m_tangentIn,
-																			&Animation::Key::m_tangentOut };
+Animation::Tangent Animation::Key::*const Animation::Key::m_tangents[2] = {
+	&Animation::Key::m_tangentIn, &Animation::Key::m_tangentOut
+};
 
 Animation::Key::Key(
 	const float time, const float value, const Animation::Interpolation interpolation, const double inSlope,

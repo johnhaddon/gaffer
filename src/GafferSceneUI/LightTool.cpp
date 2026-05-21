@@ -1759,10 +1759,12 @@ private:
 		Inspector::ResultPtr coneHandleInspection = handleInspection( g_coneAngleParameter );
 		Inspector::ResultPtr penumbraHandleInspection = handleInspection( g_penumbraAngleParameter );
 
-		return { coneHandleAngle( coneHandleInspection->typedValue<float>( 0.f ) ),
-				 penumbraHandleInspection ?
-					 std::optional<float>( penumbraHandleAngle( penumbraHandleInspection->typedValue<float>( 0.f ) ) ) :
-					 std::nullopt };
+		return {
+			coneHandleAngle( coneHandleInspection->typedValue<float>( 0.f ) ),
+			penumbraHandleInspection ?
+				std::optional<float>( penumbraHandleAngle( penumbraHandleInspection->typedValue<float>( 0.f ) ) ) :
+				std::nullopt
+		};
 	}
 
 	// Convert from the angle representation used by plugs to that used by handles.

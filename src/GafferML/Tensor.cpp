@@ -291,15 +291,16 @@ Tensor::Tensor( const IECore::ConstDataPtr &data, std::vector<int64_t> shape )
 		else if constexpr( HasTensorType<BaseType>::value )
 		{
 			Ort::MemoryInfo memoryInfo = Ort::MemoryInfo::CreateCpu( OrtArenaAllocator, OrtMemTypeDefault );
-			m_state =
-				new State{ Ort::Value::CreateTensor(
-							   memoryInfo.GetConst(),
-							   // `const_cast()` is OK because we only provide const access to the
-							   // `Ort::Value` after construction.
-							   reinterpret_cast<BaseType *>( const_cast<DataType *>( typedData )->baseWritable() ),
-							   typedData->baseSize(), shape.data(), shape.size()
-						   ),
-						   data };
+			m_state = new State{
+				Ort::Value::CreateTensor(
+					memoryInfo.GetConst(),
+					// `const_cast()` is OK because we only provide const access to the
+					// `Ort::Value` after construction.
+					reinterpret_cast<BaseType *>( const_cast<DataType *>( typedData )->baseWritable() ),
+					typedData->baseSize(), shape.data(), shape.size()
+				),
+				data
+			};
 		}
 		else
 		{

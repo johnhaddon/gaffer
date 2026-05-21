@@ -538,8 +538,10 @@ void samplePixelDepths(
 						// segments.
 						float curAlpha = -expm1f( depthFraction * log1MinusAlpha );
 						result.push_back(
-							SampledDepth{ depth, std::min( 1.0f, curAlpha / segmentAlpha ) * ( 1.0f - accumAlpha ),
-										  accumAlpha + curAlpha * ( 1.0f - accumAlpha ), (int)endSample }
+							SampledDepth{
+								depth, std::min( 1.0f, curAlpha / segmentAlpha ) * ( 1.0f - accumAlpha ),
+								accumAlpha + curAlpha * ( 1.0f - accumAlpha ), (int)endSample
+							}
 						);
 					}
 				}

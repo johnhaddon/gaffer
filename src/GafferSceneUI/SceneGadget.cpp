@@ -359,12 +359,10 @@ void SceneGadget::setRenderer( IECore::InternedString name )
 	{
 		try
 		{
-			m_renderer = new IECoreScenePreview::CompoundRenderer(
-				{
-					m_renderer,
-					IECoreScenePreview::Renderer::create( name, IECoreScenePreview::Renderer::Interactive ),
-				}
-			);
+			m_renderer = new IECoreScenePreview::CompoundRenderer( {
+				m_renderer,
+				IECoreScenePreview::Renderer::create( name, IECoreScenePreview::Renderer::Interactive ),
+			} );
 			m_outputBuffer = std::make_unique<OutputBuffer>( m_renderer.get() );
 			m_outputBuffer->bufferChangedSignal().connect( boost::bind( &SceneGadget::bufferChanged, this ) );
 		}

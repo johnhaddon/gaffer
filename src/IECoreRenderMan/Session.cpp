@@ -516,8 +516,9 @@ void Session::updatePortals()
 				// Update the light shader. We can modify the existing one in
 				// place because we know we're only using it on this one light.
 				riley::ShadingNetwork shaders = { (uint32_t)portalShader.shaders.size(), portalShader.shaders.data() };
-				riley::ShadingNetwork lightFilterShaders = { (uint32_t)portalShader.lightFilterShaders.size(),
-															 portalShader.lightFilterShaders.data() };
+				riley::ShadingNetwork lightFilterShaders = {
+					(uint32_t)portalShader.lightFilterShaders.size(), portalShader.lightFilterShaders.data()
+				};
 				riley->ModifyLightShader( info.lightShader, &shaders, &lightFilterShaders );
 
 				// Unmute, in case we muted previously due to lack of a dome.

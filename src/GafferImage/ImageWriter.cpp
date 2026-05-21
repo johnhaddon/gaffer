@@ -1568,9 +1568,11 @@ LayoutForChannel evaluateLayoutForChannel(
 		return { "", "", "", node->layoutPartNamePlug()->getValue().find( nukeViewTestToken ) != std::string::npos };
 	}
 
-	return { cleanExcessDots( node->layoutPartNamePlug()->getValue() ),
-			 cleanExcessDots( node->layoutChannelNamePlug()->getValue() ), dataTypePlug ? dataTypePlug->getValue() : "",
-			 false };
+	return {
+		cleanExcessDots( node->layoutPartNamePlug()->getValue() ),
+		cleanExcessDots( node->layoutChannelNamePlug()->getValue() ), dataTypePlug ? dataTypePlug->getValue() : "",
+		false
+	};
 }
 
 bool testNukeView( const ImageWriter *node, const StringPlug *dataTypePlug, const std::string &gafferChannel )

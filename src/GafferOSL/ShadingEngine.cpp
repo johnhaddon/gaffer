@@ -395,9 +395,9 @@ struct PointCloud
 				dataView.type.unarray();
 			}
 
-			m_attributes[ustringhash( primVarName.c_str() )] = { dataView,
-																 primVar.indices ? &primVar.indices->readable() :
-																				   nullptr };
+			m_attributes[ustringhash( primVarName.c_str() )] = {
+				dataView, primVar.indices ? &primVar.indices->readable() : nullptr
+			};
 		}
 	}
 
@@ -1314,12 +1314,14 @@ OSL::ShadingSystem *shadingSystem( int *batchSize = nullptr )
 	};
 
 
-	ClosureParam debugParams[] = { CLOSURE_STRING_PARAM( DebugParameters, name ),
-								   CLOSURE_STRING_KEYPARAM( DebugParameters, type, "type" ),
-								   CLOSURE_COLOR_KEYPARAM( DebugParameters, value, "value" ),
-								   CLOSURE_MATRIX_KEYPARAM( DebugParameters, matrixValue, "matrixValue" ),
-								   CLOSURE_STRING_KEYPARAM( DebugParameters, stringValue, "stringValue" ),
-								   CLOSURE_FINISH_PARAM( DebugParameters ) };
+	ClosureParam debugParams[] = {
+		CLOSURE_STRING_PARAM( DebugParameters, name ),
+		CLOSURE_STRING_KEYPARAM( DebugParameters, type, "type" ),
+		CLOSURE_COLOR_KEYPARAM( DebugParameters, value, "value" ),
+		CLOSURE_MATRIX_KEYPARAM( DebugParameters, matrixValue, "matrixValue" ),
+		CLOSURE_STRING_KEYPARAM( DebugParameters, stringValue, "stringValue" ),
+		CLOSURE_FINISH_PARAM( DebugParameters )
+	};
 
 	g_shadingSystem->register_closure(
 		/* name */ "emission",

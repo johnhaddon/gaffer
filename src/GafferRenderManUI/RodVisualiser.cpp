@@ -167,7 +167,8 @@ Visualisations RodVisualiser::visualise(
 					parameterOrDefault( filterParameters, "frontEdge", 1.f ),
 					parameterOrDefault( filterParameters, "bottomEdge", 1.f ),
 					parameterOrDefault( filterParameters, "backEdge", 1.f ) ),
-			   parameterOrDefault( filterParameters, "edge", 0.f ), M44f().rotate( V3f( 0.f, M_PI * 0.5f, 0.f ) ) } } )
+			   parameterOrDefault( filterParameters, "edge", 0.f ), M44f().rotate( V3f( 0.f, M_PI * 0.5f, 0.f ) ) }
+		 } )
 	{
 		IECoreGL::GroupPtr axisGroup =
 			GafferRenderManUI::lightFilterRectangles( innerSize, radius, innerScale, innerOffset, falloffScale, edge );

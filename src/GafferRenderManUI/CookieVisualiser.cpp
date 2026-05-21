@@ -317,8 +317,10 @@ Visualisations CookieVisualiser::visualise(
 		GafferRenderManUI::lightFilterRectangles( size, 0, V2f( 1.f ), V4f( 0.f ), V4f( 0.f ), 0.f )
 	);
 
-	return { Visualisation::createGeometry( result, IECoreGLPreview::Visualisation::ColorSpace::Scene ),
-			 Visualisation::createGeometry( outlineResult ) };
+	return {
+		Visualisation::createGeometry( result, IECoreGLPreview::Visualisation::ColorSpace::Scene ),
+		Visualisation::createGeometry( outlineResult )
+	};
 }
 
 } // namespace

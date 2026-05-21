@@ -69,46 +69,48 @@ public:
 	void collect( openvdb::GridBase::ConstPtr grid )
 	{
 		static const std::map<std::string, std::function<void( GeometryCollector &, openvdb::GridBase::ConstPtr )>>
-			collectors = { { openvdb::typeNameAsString<bool>(),
-							 []( GeometryCollector &collector, openvdb::GridBase::ConstPtr grid ) {
-								 collector.collectTyped<openvdb::BoolGrid>( grid );
-							 } },
-						   { openvdb::typeNameAsString<double>(),
-							 []( GeometryCollector &collector, openvdb::GridBase::ConstPtr grid ) {
-								 collector.collectTyped<openvdb::DoubleGrid>( grid );
-							 } },
-						   { openvdb::typeNameAsString<float>(),
-							 []( GeometryCollector &collector, openvdb::GridBase::ConstPtr grid ) {
-								 collector.collectTyped<openvdb::FloatGrid>( grid );
-							 } },
-						   { openvdb::typeNameAsString<int32_t>(),
-							 []( GeometryCollector &collector, openvdb::GridBase::ConstPtr grid ) {
-								 collector.collectTyped<openvdb::Int32Grid>( grid );
-							 } },
-						   { openvdb::typeNameAsString<int64_t>(),
-							 []( GeometryCollector &collector, openvdb::GridBase::ConstPtr grid ) {
-								 collector.collectTyped<openvdb::Int64Grid>( grid );
-							 } },
-						   { openvdb::typeNameAsString<openvdb::ValueMask>(),
-							 []( GeometryCollector &collector, openvdb::GridBase::ConstPtr grid ) {
-								 collector.collectTyped<openvdb::MaskGrid>( grid );
-							 } },
-						   { openvdb::typeNameAsString<openvdb::Vec3d>(),
-							 []( GeometryCollector &collector, openvdb::GridBase::ConstPtr grid ) {
-								 collector.collectTyped<openvdb::Vec3DGrid>( grid );
-							 } },
-						   { openvdb::typeNameAsString<openvdb::Vec3i>(),
-							 []( GeometryCollector &collector, openvdb::GridBase::ConstPtr grid ) {
-								 collector.collectTyped<openvdb::Vec3IGrid>( grid );
-							 } },
-						   { openvdb::typeNameAsString<openvdb::Vec3f>(),
-							 []( GeometryCollector &collector, openvdb::GridBase::ConstPtr grid ) {
-								 collector.collectTyped<openvdb::Vec3SGrid>( grid );
-							 } },
-						   { openvdb::typeNameAsString<openvdb::PointDataIndex32>(),
-							 []( GeometryCollector &collector, openvdb::GridBase::ConstPtr grid ) {
-								 collector.collectPoints( grid );
-							 } } };
+			collectors = {
+				{ openvdb::typeNameAsString<bool>(),
+				  []( GeometryCollector &collector, openvdb::GridBase::ConstPtr grid ) {
+					  collector.collectTyped<openvdb::BoolGrid>( grid );
+				  } },
+				{ openvdb::typeNameAsString<double>(),
+				  []( GeometryCollector &collector, openvdb::GridBase::ConstPtr grid ) {
+					  collector.collectTyped<openvdb::DoubleGrid>( grid );
+				  } },
+				{ openvdb::typeNameAsString<float>(),
+				  []( GeometryCollector &collector, openvdb::GridBase::ConstPtr grid ) {
+					  collector.collectTyped<openvdb::FloatGrid>( grid );
+				  } },
+				{ openvdb::typeNameAsString<int32_t>(),
+				  []( GeometryCollector &collector, openvdb::GridBase::ConstPtr grid ) {
+					  collector.collectTyped<openvdb::Int32Grid>( grid );
+				  } },
+				{ openvdb::typeNameAsString<int64_t>(),
+				  []( GeometryCollector &collector, openvdb::GridBase::ConstPtr grid ) {
+					  collector.collectTyped<openvdb::Int64Grid>( grid );
+				  } },
+				{ openvdb::typeNameAsString<openvdb::ValueMask>(),
+				  []( GeometryCollector &collector, openvdb::GridBase::ConstPtr grid ) {
+					  collector.collectTyped<openvdb::MaskGrid>( grid );
+				  } },
+				{ openvdb::typeNameAsString<openvdb::Vec3d>(),
+				  []( GeometryCollector &collector, openvdb::GridBase::ConstPtr grid ) {
+					  collector.collectTyped<openvdb::Vec3DGrid>( grid );
+				  } },
+				{ openvdb::typeNameAsString<openvdb::Vec3i>(),
+				  []( GeometryCollector &collector, openvdb::GridBase::ConstPtr grid ) {
+					  collector.collectTyped<openvdb::Vec3IGrid>( grid );
+				  } },
+				{ openvdb::typeNameAsString<openvdb::Vec3f>(),
+				  []( GeometryCollector &collector, openvdb::GridBase::ConstPtr grid ) {
+					  collector.collectTyped<openvdb::Vec3SGrid>( grid );
+				  } },
+				{ openvdb::typeNameAsString<openvdb::PointDataIndex32>(),
+				  []( GeometryCollector &collector, openvdb::GridBase::ConstPtr grid ) {
+					  collector.collectPoints( grid );
+				  } }
+			};
 
 		const auto it = collectors.find( grid->valueType() );
 		if( it != collectors.end() )
@@ -366,9 +368,10 @@ public:
 		IECoreGL::Group *rootGroup = new IECoreGL::Group();
 
 		// todo can these colors go into a config?
-		static std::array<Color4f, 4> colors = { { Color4f( 0.56, 0.06, 0.2, 0.2 ), Color4f( 0.06, 0.56, 0.2, 0.2 ),
-												   Color4f( 0.06, 0.2, 0.56, 0.2 ),
-												   Color4f( 0.55, 0.55, 0.55, 0.5 ) } };
+		static std::array<Color4f, 4> colors = {
+			{ Color4f( 0.56, 0.06, 0.2, 0.2 ), Color4f( 0.06, 0.56, 0.2, 0.2 ), Color4f( 0.06, 0.2, 0.56, 0.2 ),
+			  Color4f( 0.55, 0.55, 0.55, 0.5 ) }
+		};
 
 		GeometryCollector collector;
 		collector.collect( grid );

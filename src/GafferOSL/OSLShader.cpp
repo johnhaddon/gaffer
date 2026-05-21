@@ -206,9 +206,9 @@ QueryCache &queryCache()
 namespace
 {
 
-boost::container::flat_map<string, string> g_typeOverrides = { { "vdbVolume", "osl:volume" },
-															   { "dlDisplacement", "osl:displacement" },
-															   { "PxrDisplace", "osl:displacement" } };
+boost::container::flat_map<string, string> g_typeOverrides = {
+	{ "vdbVolume", "osl:volume" }, { "dlDisplacement", "osl:displacement" }, { "PxrDisplace", "osl:displacement" }
+};
 
 } // namespace
 

@@ -174,10 +174,11 @@ Camera::Camera( const std::string &name, const IECoreScene::Camera *camera, Sess
 	options.SetFloat( Loader::strings().k_Ri_FormatPixelAspectRatio, camera->getPixelAspectRatio() );
 
 	Imath::Box2i renderRegion = camera->renderRegion();
-	float renderManCropWindow[4] = { divRoundDown( renderRegion.min.x, resolution.x ),
-									 divRoundDown( renderRegion.max.x, resolution.x ),
-									 divRoundDown( resolution.y - renderRegion.min.y, resolution.y ),
-									 divRoundDown( resolution.y - renderRegion.max.y, resolution.y ) };
+	float renderManCropWindow[4] = {
+		divRoundDown( renderRegion.min.x, resolution.x ), divRoundDown( renderRegion.max.x, resolution.x ),
+		divRoundDown( resolution.y - renderRegion.min.y, resolution.y ),
+		divRoundDown( resolution.y - renderRegion.max.y, resolution.y )
+	};
 	options.SetFloatArray( Loader::strings().k_Ri_CropWindow, renderManCropWindow, 4 );
 
 	// Camera
