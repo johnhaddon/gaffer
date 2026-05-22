@@ -812,6 +812,316 @@ class RenderTest( GafferSceneTest.SceneTestCase ) :
 			)
 		)
 
+	@GafferTest.TestRunner.CategorisedTestMethod( { "pointInstancer" } )
+	def testPointInstancer( self ) :
+
+		script = Gaffer.ScriptNode()
+
+		pointInstancer = IECoreScene.PointInstancer( 4 )
+		pointInstancer["P"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData( [
+				imath.V3f( -1, -1, 0 ), imath.V3f( 1, -1, 0 ),
+				imath.V3f( 1, 1, 0 ), imath.V3f( -1, 1, 0 ),
+			] )
+		)
+		pointInstancer["prototypeIndex"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.IntVectorData( [ 0, 0, 0, 0 ] ),
+		)
+		pointInstancer["prototypeRoots"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Constant,
+			IECore.StringVectorData( [ "./sphere" ] ),
+		)
+
+		script["pointInstancer"] = GafferScene.ObjectToScene()
+		script["pointInstancer"]["name"].setValue( "instancer" )
+		script["pointInstancer"]["object"].setValue( pointInstancer )
+
+		script["sphere"] = GafferScene.Sphere()
+		script["sphere"]["radius"].setValue( 0.5 )
+
+		script["prototypeParent"] = GafferScene.Parent()
+		script["prototypeParent"]["in"].setInput( script["pointInstancer"]["out"] )
+		script["prototypeParent"]["children"][0].setInput( script["sphere"]["out"] )
+		script["prototypeParent"]["parent"].setValue( "/instancer" )
+
+		script["camera"] = GafferScene.Camera()
+		script["camera"]["transform"]["translate"]["z"].setValue( 5 )
+
+		script["parent"] = GafferScene.Parent()
+		script["parent"]["in"].setInput( script["prototypeParent"]["out"] )
+		script["parent"]["children"][0].setInput( script["camera"]["out"] )
+		script["parent"]["parent"].setValue( "/" )
+
+		imagePath = self.temporaryDirectory() / "test.exr"
+
+		script["outputs"] = GafferScene.Outputs()
+		script["outputs"].addOutput(
+			"beauty",
+			IECoreScene.Output(
+				imagePath.as_posix(),
+				"exr",
+				"rgba"
+			)
+		)
+
+		script["outputs"]["in"].setInput( script["parent"]["out"] )
+
+		script["options"] = GafferScene.StandardOptions()
+		script["options"]["in"].setInput( script["outputs"]["out"] )
+		script["options"]["options"]["render:camera"]["enabled"].setValue( True )
+		script["options"]["options"]["render:camera"]["value"].setValue( "/camera" )
+
+		script["rendererOptions"] = self._createOptions()
+		script["rendererOptions"]["in"].setInput( script["options"]["out"] )
+
+		script["render"] = GafferScene.Render()
+		script["render"]["in"].setInput( script["rendererOptions"]["out"] )
+		script["render"]["renderer"].setValue( self.renderer )
+
+		script["render"]["task"].execute()
+
+		reader = GafferImage.ImageReader()
+		reader["fileName"].setValue( imagePath )
+
+		sampler = GafferImage.ImageSampler()
+		sampler["image"].setInput( reader["out"] )
+
+		for centre in [
+			imath.V2f( 180, 102 ),
+			imath.V2f( 456, 102 ),
+			imath.V2f( 179, 379 ),
+			imath.V2f( 456, 379 ),
+		] :
+
+			with self.subTest( centre = centre ) :
+
+				# Assert there's an instance where we expect it.
+				sampler["pixel"].setValue( centre )
+				self.assertEqual( sampler["color"]["a"].getValue(), 1 )
+				# And that it's not a fluke by asserting there is empty
+				# space around it.
+				for offset in [
+					imath.V2f( 80, 0 ), imath.V2f( -80, 0 ),
+					imath.V2f( 0, 80 ), imath.V2f( 0, -80 ),
+				] :
+					sampler["pixel"].setValue( centre + offset )
+					self.assertAlmostEqual( sampler["color"]["a"].getValue(), 0, delta = 0.01 )
+
+		# TODO : ASSERT THAT THE CENTRAL PROTOTYPE ISN'T RENDERED (ONCE YOU'VE STOPPED THAT HAPPENING)
+
+	@GafferTest.TestRunner.CategorisedTestMethod( { "pointInstancer" } )
+	def testPointInstancerPrototypeIndices( self ) :
+
+		script = Gaffer.ScriptNode()
+
+		pointInstancer = IECoreScene.PointInstancer( 2 )
+		pointInstancer["P"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData( [
+				imath.V3f( -1, 0, 0 ), imath.V3f( 1, 0, 0 ),
+			] )
+		)
+		pointInstancer["prototypeIndex"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.IntVectorData( [ 0, 1 ] ),
+		)
+		pointInstancer["prototypeRoots"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Constant,
+			IECore.StringVectorData( [ "./sphere", "./cube" ] ),
+		)
+
+		script["pointInstancer"] = GafferScene.ObjectToScene()
+		script["pointInstancer"]["name"].setValue( "instancer" )
+		script["pointInstancer"]["object"].setValue( pointInstancer )
+
+		script["sphere"] = GafferScene.Sphere()
+		script["sphere"]["radius"].setValue( 0.5 )
+
+		script["redShader"], redColorPlug, redShaderOut = self._createConstantShader()
+		redColorPlug.setValue( imath.Color3f( 1, 0, 0 ) )
+		script["redShaderAssignment"] = GafferScene.ShaderAssignment()
+		script["redShaderAssignment"]["in"].setInput( script["sphere"]["out"] )
+		script["redShaderAssignment"]["shader"].setInput( redShaderOut )
+
+		script["cube"] = GafferScene.Cube()
+
+		script["greenShader"], greenColorPlug, greenShaderOut = self._createConstantShader()
+		greenColorPlug.setValue( imath.Color3f( 0, 1, 0 ) )
+		script["greenShaderAssignment"] = GafferScene.ShaderAssignment()
+		script["greenShaderAssignment"]["in"].setInput( script["cube"]["out"] )
+		script["greenShaderAssignment"]["shader"].setInput( greenShaderOut )
+
+		script["prototypeParent"] = GafferScene.Parent()
+		script["prototypeParent"]["in"].setInput( script["pointInstancer"]["out"] )
+		script["prototypeParent"]["children"][0].setInput( script["redShaderAssignment"]["out"] )
+		script["prototypeParent"]["children"][1].setInput( script["greenShaderAssignment"]["out"] )
+		script["prototypeParent"]["parent"].setValue( "/instancer" )
+
+		script["camera"] = GafferScene.Camera()
+		script["camera"]["transform"]["translate"]["z"].setValue( 5 )
+
+		script["parent"] = GafferScene.Parent()
+		script["parent"]["in"].setInput( script["prototypeParent"]["out"] )
+		script["parent"]["children"][0].setInput( script["camera"]["out"] )
+		script["parent"]["parent"].setValue( "/" )
+
+		imagePath = self.temporaryDirectory() / "test.exr"
+
+		script["outputs"] = GafferScene.Outputs()
+		script["outputs"].addOutput(
+			"beauty",
+			IECoreScene.Output(
+				imagePath.as_posix(),
+				"exr",
+				"rgba"
+			)
+		)
+
+		script["outputs"]["in"].setInput( script["parent"]["out"] )
+
+		script["options"] = GafferScene.StandardOptions()
+		script["options"]["in"].setInput( script["outputs"]["out"] )
+		script["options"]["options"]["render:camera"]["enabled"].setValue( True )
+		script["options"]["options"]["render:camera"]["value"].setValue( "/camera" )
+
+		script["rendererOptions"] = self._createOptions()
+		script["rendererOptions"]["in"].setInput( script["options"]["out"] )
+
+		script["render"] = GafferScene.Render()
+		script["render"]["in"].setInput( script["rendererOptions"]["out"] )
+		script["render"]["renderer"].setValue( self.renderer )
+
+		script["render"]["task"].execute()
+
+		reader = GafferImage.ImageReader()
+		reader["fileName"].setValue( imagePath )
+
+		sampler = GafferImage.ImageSampler()
+		sampler["image"].setInput( reader["out"] )
+
+		for position, expectedColor in [
+			( imath.V2f( 186, 234 ), imath.Color4f( 1, 0, 0, 1 ) ),
+			( imath.V2f( 484, 234 ), imath.Color4f( 0, 1, 0, 1 ) ),
+		] :
+
+			with self.subTest( position = position ) :
+
+				# Assert there's an instance where we expect it.
+				sampler["pixel"].setValue( position )
+				self.assertEqual( sampler["color"].getValue(), expectedColor )
+
+	@GafferTest.TestRunner.CategorisedTestMethod( { "pointInstancer" } )
+	def testPointInstancerWithGroupPrototype( self ) :
+
+		script = Gaffer.ScriptNode()
+
+		pointInstancer = IECoreScene.PointInstancer( 2 )
+		pointInstancer["P"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData( [ imath.V3f( 0, 1, 0 ) ] )
+		)
+		pointInstancer["prototypeIndex"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.IntVectorData( [ 0 ] ),
+		)
+		pointInstancer["prototypeRoots"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Constant,
+			IECore.StringVectorData( [ "./group" ] ),
+		)
+
+		script["pointInstancer"] = GafferScene.ObjectToScene()
+		script["pointInstancer"]["name"].setValue( "instancer" )
+		script["pointInstancer"]["object"].setValue( pointInstancer )
+
+		script["sphere"] = GafferScene.Sphere()
+		script["sphere"]["transform"]["translate"]["x"].setValue( -1 )
+		script["sphere"]["radius"].setValue( 0.25 )
+
+		script["cube"] = GafferScene.Cube()
+		script["cube"]["transform"]["translate"]["x"].setValue( 1 )
+		script["cube"]["dimensions"].setValue( imath.V3f( 0.5 ) )
+
+		script["group"] = GafferScene.Group()
+		script["group"]["in"][0].setInput( script["sphere"]["out"] )
+		script["group"]["in"][1].setInput( script["cube"]["out"] )
+
+		script["prototypeParent"] = GafferScene.Parent()
+		script["prototypeParent"]["in"].setInput( script["pointInstancer"]["out"] )
+		script["prototypeParent"]["children"][0].setInput( script["group"]["out"] )
+		script["prototypeParent"]["parent"].setValue( "/instancer" )
+
+		script["camera"] = GafferScene.Camera()
+		script["camera"]["transform"]["translate"]["z"].setValue( 5 )
+
+		script["parent"] = GafferScene.Parent()
+		script["parent"]["in"].setInput( script["prototypeParent"]["out"] )
+		script["parent"]["children"][0].setInput( script["camera"]["out"] )
+		script["parent"]["parent"].setValue( "/" )
+
+		imagePath = self.temporaryDirectory() / "test.exr"
+
+		script["outputs"] = GafferScene.Outputs()
+		script["outputs"].addOutput(
+			"beauty",
+			IECoreScene.Output(
+				imagePath.as_posix(),
+				"exr",
+				"rgba"
+			)
+		)
+
+		script["outputs"]["in"].setInput( script["parent"]["out"] )
+
+		script["options"] = GafferScene.StandardOptions()
+		script["options"]["in"].setInput( script["outputs"]["out"] )
+		script["options"]["options"]["render:camera"]["enabled"].setValue( True )
+		script["options"]["options"]["render:camera"]["value"].setValue( "/camera" )
+
+		script["rendererOptions"] = self._createOptions()
+		script["rendererOptions"]["in"].setInput( script["options"]["out"] )
+
+		script["render"] = GafferScene.Render()
+		script["render"]["in"].setInput( script["rendererOptions"]["out"] )
+		script["render"]["renderer"].setValue( self.renderer )
+
+		script["render"]["task"].execute()
+
+		reader = GafferImage.ImageReader()
+		reader["fileName"].setValue( imagePath )
+
+		sampler = GafferImage.ImageSampler()
+		sampler["image"].setInput( reader["out"] )
+
+		for centre in [
+			imath.V2f( 183, 378 ),
+			imath.V2f( 462, 382 ),
+		] :
+
+			with self.subTest( centre = centre ) :
+
+				# Assert there's an instance where we expect it.
+				sampler["pixel"].setValue( centre )
+				self.assertEqual( sampler["color"]["a"].getValue(), 1 )
+				# And that it's not a fluke by asserting there is empty
+				# space around it.
+				for offset in [
+					imath.V2f( 60, 0 ), imath.V2f( -60, 0 ),
+					imath.V2f( 0, 60 ), imath.V2f( 0, -60 ),
+				] :
+					sampler["pixel"].setValue( centre + offset )
+					self.assertAlmostEqual( sampler["color"]["a"].getValue(), 0, delta = 0.01 )
+
+
+	## Should be implemented by derived classes to return
+	# an appropriate Shader node with a constant surface shader loaded, along
+	# with the plug for the colour parameter and the output plug to be connected
+	# to a ShaderAssignment.
+	def _createConstantShader( self ) :
+
+		raise NotImplementedError
+
 	## Should be implemented by derived classes to return
 	# an appropriate Shader node with a diffuse surface shader loaded, along
 	# with the plug for the colour parameter and the output plug to be connected
