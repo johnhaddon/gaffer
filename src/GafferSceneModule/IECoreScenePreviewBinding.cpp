@@ -186,7 +186,6 @@ IECoreScenePreview::Renderer::ObjectInterfacePtr rendererObject2( Renderer &rend
 	return renderer.object( name, samples, times, attributes );
 }
 
-
 IECoreScenePreview::Renderer::ObjectInterfacePtr rendererCamera1( Renderer &renderer, const std::string &name, const IECoreScene::Camera *camera, const Renderer::AttributesInterface *attributes )
 {
 	return renderer.camera( name, camera, attributes );
@@ -344,6 +343,16 @@ list capturedObjectCapturedSampleTimes( const CapturingRenderer::CapturedObject 
 	for( auto t : o.capturedSampleTimes() )
 	{
 		result.append( t );
+	}
+	return result;
+}
+
+list capturedObjectCapturedPointInstancerPrototypes( const CapturingRenderer::CapturedObject &o )
+{
+	list result;
+	for( auto &p : o.capturedPointInstancerPrototypes() )
+	{
+		result.append( p );
 	}
 	return result;
 }
@@ -626,6 +635,7 @@ void GafferSceneModule::bindIECoreScenePreview()
 		.def( "capturedName", &capturedObjectCapturedName )
 		.def( "capturedSamples", &capturedObjectCapturedSamples )
 		.def( "capturedSampleTimes", &capturedObjectCapturedSampleTimes )
+		.def( "capturedPointInstancerPrototypes", &capturedObjectCapturedPointInstancerPrototypes )
 		.def( "capturedTransforms", &capturedObjectCapturedTransforms )
 		.def( "capturedTransformTimes", &capturedObjectCapturedTransformTimes )
 		.def( "capturedAttributes", &capturedObjectCapturedAttributes )
