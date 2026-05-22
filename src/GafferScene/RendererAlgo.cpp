@@ -598,7 +598,7 @@ std::optional<SampledObject> objectSamples( const Gaffer::ObjectPlug *objectPlug
 
 		if( hash->isPointInstancer )
 		{
-			PointInstancerAlgo::prototypesHash( objectPlug->parent<ScenePlug>(), combinedHash );
+			combinedHash.append( PointInstancerAlgo::prototypesHash( objectPlug->parent<ScenePlug>() ) );
 		}
 
 		if( combinedHash == hash->value )
@@ -709,7 +709,7 @@ std::optional<SampledObject> objectSamples( const Gaffer::ObjectPlug *objectPlug
 			if( !hash->isPointInstancer )
 			{
 				// Hash was either uninitialised, or we didn't find a PointInstancer last time round.
-				PointInstancerAlgo::prototypesHash( objectPlug->parent<ScenePlug>(), hash->value );
+				hash->value.append( PointInstancerAlgo::prototypesHash( objectPlug->parent<ScenePlug>() ) );
 			}
 			else
 			{
