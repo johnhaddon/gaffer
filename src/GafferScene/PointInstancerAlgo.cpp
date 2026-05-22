@@ -75,13 +75,14 @@ ScenePlug::ScenePath fullPrototypePath( const std::string &prototypePath, const 
 
 } // namespace
 
-bool Private::PointInstancerAlgo::prototypesHash( const ScenePlug *scene, IECore::MurmurHash &h )
+IECore::MurmurHash Private::PointInstancerAlgo::prototypesHash( const ScenePlug *scene )
 {
+	MurmurHash result;
 	ConstObjectPtr object = scene->objectPlug()->getValue();
 	auto pointInstancer = runTimeCast<const PointInstancer>( object.get() );
 	if( !pointInstancer )
 	{
-		return false;
+		return result;
 	}
 
 	const auto &currentPath = Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
@@ -91,8 +92,8 @@ bool Private::PointInstancerAlgo::prototypesHash( const ScenePlug *scene, IECore
 	for( size_t prototypeIndex = 0; prototypeIndex < prototypePaths->size(); ++prototypeIndex )
 	{
 		auto fullPath = fullPrototypePath( (*prototypePaths)[prototypeIndex], currentPath );
-		h.append( SceneAlgo::hierarchyHash( scene, fullPath ) );
+		result.append( SceneAlgo::hierarchyHash( scene, fullPath ) );
 	}
 
-	return true;
+	return result;
 }

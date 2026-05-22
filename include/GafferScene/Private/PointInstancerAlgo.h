@@ -43,8 +43,8 @@
 namespace GafferScene::Private::PointInstancerAlgo
 {
 
-/// Appends a combined `SceneAlgo::hierarchyHash()` of all prototypes referenced by any PointInstancer
-/// at the current location. Returns `true` if a PointInstancer was found, and false otherwise.
-bool prototypesHash( const ScenePlug *scene, IECore::MurmurHash &h );
+/// Returns a combined `SceneAlgo::hierarchyHash()` of all prototypes referenced by any PointInstancer
+/// at the current location. If there is no PointInstancer, returns an empty hash.
+IECore::MurmurHash prototypesHash( const ScenePlug *scene);
 
 } // namespace GafferScene::Private::PointInstancerAlgo
