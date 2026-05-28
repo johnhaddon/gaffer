@@ -52,6 +52,9 @@ GAFFERSCENE_API IECore::MurmurHash prototypesHash( const ScenePlug *scene );
 
 GAFFERSCENE_API std::vector<IECoreScenePreview::Renderer::Prototype> prototypes( const IECoreScene::PointInstancer *instancer, const RendererAlgo::RenderOptions &renderOptions, const ScenePlug *scene, IECoreScenePreview::Renderer *renderer );
 
+/// Flattens a PointInstancer so that it refers only to leaf-level locations. Adds additional points
+/// as necessary whenever an input prototype contains multiple leaf locations. Also transfers transforms
+/// from the prototypes onto the points, so we don't need to pass prototype transforms to the Renderer.
 GAFFERSCENE_API IECoreScene::PointInstancerPtr flatten( const IECoreScene::PointInstancer *instancer, const ScenePlug *scene );
 
 } // namespace GafferScene::Private::PointInstancerAlgo
