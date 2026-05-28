@@ -239,7 +239,7 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 				const Attributes *prototypeAttributes = static_cast<const Attributes *>( prototypes[prototypeIndex].attributes.get() );
 				m_session->riley->CreateGeometryInstance(
 					riley::UserId(), group->id(), geometryPrototypes[prototypeIndex]->id(),
-					prototypeAttributes->surfaceMaterial()->id(), riley::CoordinateSystemList(),
+					prototypeAttributes->material()->id(), riley::CoordinateSystemList(),
 					StaticTransform( m ),
 					prototypeAttributes->instanceAttributes()
 				);
