@@ -576,9 +576,15 @@ class RenderController::SceneGraph
 				m_objectHash = Private::RendererAlgo::ObjectHash();
 			}
 
+			const bool hadPointInstancer = m_objectHash.isPointInstancer;
 			if( ( m_dirtyComponents & ObjectComponent ) && updateObject( controller->m_scene.get(), type, controller->m_renderer.get(), controller->m_renderOptions, controller->m_lightLinks.get() ) )
 			{
 				m_changedComponents |= ObjectComponent;
+				if( hadPointInstancer != m_objectHash.isPointInstancer )
+				{
+					// Account for `updateChildren()` checking `isPointInstancer` flag.
+					m_dirtyComponents |= ChildNamesComponent;
+				}
 			}
 
 			if( m_objectInterface )
@@ -971,6 +977,17 @@ class RenderController::SceneGraph
 		// will subsequently be updated in parallel by update().
 		bool updateChildren( const InternedStringVectorDataPlug *childNamesPlug )
 		{
+			if( m_objectHash.isPointInstancer )
+			{
+				// By convention, we don't render the children of
+				// PointInstancers. This allows prototypes to be nested without
+				// fear of them being rendered in their own right.
+				const bool hadChildren = m_children.size();
+				m_children.clear();
+				m_childNamesHash = IECore::MurmurHash();
+				return hadChildren;
+			}
+
 			const IECore::MurmurHash childNamesHash = childNamesPlug->hash();
 			if( childNamesHash == m_childNamesHash )
 			{

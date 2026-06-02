@@ -1730,7 +1730,7 @@ struct ObjectOutput : public LocationOutput
 		}
 
 		// By convention, we don't render the children of PointInstancers. This allows prototypes to
-		// be nested without fear of them being rendering in their own right.
+		// be nested without fear of them being rendered in their own right.
 		return !runTimeCast<const IECoreScene::PointInstancer>( sampledObject->samples[0].get() );
 	}
 
