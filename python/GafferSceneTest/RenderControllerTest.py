@@ -2003,8 +2003,7 @@ class RenderControllerTest( GafferSceneTest.SceneTestCase ) :
 		self.assertTrue( controller.updateRequired() )
 		controller.update()
 
-		#self.assertEqual( renderer.capturedObjectNames(), "/instancer" ) TODO
-		self.assertIn( "/instancer", renderer.capturedObjectNames() )
+		self.assertEqual( renderer.capturedObjectNames(), "/instancer" )
 
 		with Gaffer.Context() as context :
 			context["scene:path"] = GafferScene.ScenePlug.stringToPath( "/instancer" )
