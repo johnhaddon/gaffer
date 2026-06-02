@@ -880,38 +880,45 @@ class RenderTest( GafferSceneTest.SceneTestCase ) :
 		script["render"]["in"].setInput( script["rendererOptions"]["out"] )
 		script["render"]["renderer"].setValue( self.renderer )
 
-		script["render"]["task"].execute()
-
 		reader = GafferImage.ImageReader()
 		reader["fileName"].setValue( imagePath )
 
 		sampler = GafferImage.ImageSampler()
 		sampler["image"].setInput( reader["out"] )
 
-		for centre in [
-			imath.V2f( 180, 102 ),
-			imath.V2f( 456, 102 ),
-			imath.V2f( 179, 379 ),
-			imath.V2f( 456, 379 ),
+		for prototypeTranslation, pixelOffset in [
+			( 0, 0 ),
+			( 1, 140 ),
 		] :
 
-			with self.subTest( centre = centre ) :
+			script["sphere"]["transform"]["translate"]["x"].setValue( prototypeTranslation )
+			script["render"]["task"].execute()
+			reader["refreshCount"].setValue( reader["refreshCount"].getValue() + 1 )
 
-				# Assert there's an instance where we expect it.
-				sampler["pixel"].setValue( centre )
-				self.assertEqual( sampler["color"]["a"].getValue(), 1 )
-				# And that it's not a fluke by asserting there is empty
-				# space around it.
-				for offset in [
-					imath.V2f( 80, 0 ), imath.V2f( -80, 0 ),
-					imath.V2f( 0, 80 ), imath.V2f( 0, -80 ),
-				] :
-					sampler["pixel"].setValue( centre + offset )
-					self.assertAlmostEqual( sampler["color"]["a"].getValue(), 0, delta = 0.01 )
+			for centre in [
+				imath.V2f( 180 + pixelOffset, 102 ),
+				imath.V2f( 456 + pixelOffset, 102 ),
+				imath.V2f( 179 + pixelOffset, 379 ),
+				imath.V2f( 456 + pixelOffset, 379 ),
+			] :
 
-		# The prototypes are at the origin, and shouldn't be rendered.
-		sampler["pixel"].setValue( imath.V2f( 320, 240 ) )
-		self.assertEqual( sampler["color"]["a"].getValue(), 0 )
+				with self.subTest( centre = centre, prototypeTranslation = prototypeTranslation ) :
+
+					# Assert there's an instance where we expect it.
+					sampler["pixel"].setValue( centre )
+					self.assertEqual( sampler["color"]["a"].getValue(), 1 )
+					# And that it's not a fluke by asserting there is empty
+					# space around it.
+					for offset in [
+						imath.V2f( 80, 0 ), imath.V2f( -80, 0 ),
+						imath.V2f( 0, 80 ), imath.V2f( 0, -80 ),
+					] :
+						sampler["pixel"].setValue( centre + offset )
+						self.assertAlmostEqual( sampler["color"]["a"].getValue(), 0, delta = 0.01 )
+
+			# The prototypes are at the origin, and shouldn't be rendered.
+			sampler["pixel"].setValue( imath.V2f( 320 + pixelOffset, 240 ) )
+			self.assertEqual( sampler["color"]["a"].getValue(), 0 )
 
 	@GafferTest.TestRunner.CategorisedTestMethod( { "pointInstancer" } )
 	def testPointInstancerPrototypeIndices( self ) :
