@@ -2388,7 +2388,6 @@ class Instance
 		{
 			if( node )
 			{
-				AiNodeSetByte( node.get(), g_visibilityArnoldString, 0 );
 				m_ginstance = SharedAtNodePtr(
 					AiNode( universe, g_ginstanceArnoldString, AtString( instanceName.c_str() ), parent ),
 					nodeDeleter
@@ -2453,6 +2452,10 @@ class InstanceCache : public IECore::RefCounted
 					}
 				}
 				node = writeAccessor->second;
+				if( node )
+				{
+					AiNodeSetByte( node.get(), g_visibilityArnoldString, 0 );
+				}
 				writeAccessor.release();
 			}
 
