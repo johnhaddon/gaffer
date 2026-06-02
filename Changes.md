@@ -1,7 +1,10 @@
 1.7.x.x (relative to 1.7.0.0a1)
 =======
 
+Fixes
+-----
 
+- RenderMan : Fixed PxrDisplace shader assignments, which now target the `ri:displacement` attribute rather than `osl:displacement`. This renders as before in Gaffer, but is more compatible with other applications when exported to USD.
 
 1.7.0.0a1 (relative to 1.6.19.1)
 =========
