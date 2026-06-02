@@ -38,6 +38,7 @@ import unittest
 
 import IECore
 
+import GafferOSL
 import GafferSceneTest
 
 class DelightRenderTest( GafferSceneTest.RenderTest ) :
@@ -61,6 +62,12 @@ class DelightRenderTest( GafferSceneTest.RenderTest ) :
 	def testInstanceIDOutput( self ) :
 
 		pass
+
+	def _createConstantShader( self ) :
+
+		shader = GafferOSL.OSLShader()
+		shader.loadShader( "Surface/Constant" )
+		return shader, shader["parameters"]["Cs"], shader["out"]["out"]
 
 if __name__ == "__main__":
 	unittest.main()
