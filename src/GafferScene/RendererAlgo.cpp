@@ -1729,7 +1729,9 @@ struct ObjectOutput : public LocationOutput
 			}
 		}
 
-		return true;
+		// By convention, we don't render the children of PointInstancers. This allows prototypes to
+		// be nested without fear of them being rendering in their own right.
+		return !runTimeCast<const IECoreScene::PointInstancer>( sampledObject->samples[0].get() );
 	}
 
 	const PathMatcher &m_cameraSet;

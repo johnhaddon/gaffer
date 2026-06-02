@@ -909,7 +909,9 @@ class RenderTest( GafferSceneTest.SceneTestCase ) :
 					sampler["pixel"].setValue( centre + offset )
 					self.assertAlmostEqual( sampler["color"]["a"].getValue(), 0, delta = 0.01 )
 
-		# TODO : ASSERT THAT THE CENTRAL PROTOTYPE ISN'T RENDERED (ONCE YOU'VE STOPPED THAT HAPPENING)
+		# The prototypes are at the origin, and shouldn't be rendered.
+		sampler["pixel"].setValue( imath.V2f( 320, 240 ) )
+		self.assertEqual( sampler["color"]["a"].getValue(), 0 )
 
 	@GafferTest.TestRunner.CategorisedTestMethod( { "pointInstancer" } )
 	def testPointInstancerPrototypeIndices( self ) :
