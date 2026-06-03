@@ -38,6 +38,7 @@ import unittest
 
 import IECore
 
+import GafferDelight
 import GafferOSL
 import GafferSceneTest
 
@@ -68,6 +69,17 @@ class DelightRenderTest( GafferSceneTest.RenderTest ) :
 		shader = GafferOSL.OSLShader()
 		shader.loadShader( "Surface/Constant" )
 		return shader, shader["parameters"]["Cs"], shader["out"]["out"]
+
+	def _createOptions( self ) :
+
+		# Improve anti-aliasing for motion-blur tests.
+
+		options = GafferDelight.DelightOptions()
+
+		options["options"]["dl:oversampling"]["enabled"].setValue( True )
+		options["options"]["dl:oversampling"]["value"].setValue( 16 )
+
+		return options
 
 if __name__ == "__main__":
 	unittest.main()
