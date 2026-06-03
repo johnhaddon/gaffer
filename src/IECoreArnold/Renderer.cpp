@@ -4676,17 +4676,36 @@ ArnoldRendererBase::ObjectInterfacePtr ArnoldRendererBase::pointInstancer( const
 
 	AiNodeSetArray( instancerNode.get(), AtString( "nodes" ), prototypesArray );
 
+	// Convert transforms
+
+	AiNodeSetFlt( instancerNode.get(), AtString( "motion_start" ), times.front() );
+	AiNodeSetFlt( instancerNode.get(), AtString( "motion_end" ), times.back() );
+
+	vector<IECoreScene::PointInstancer::Query> sampleQueries;
+	for( const auto &sample : samples )
+	{
+		sampleQueries.push_back( IECoreScene::PointInstancer::Query( sample ) );
+	}
+
+	auto matrixArray = AiArrayAllocate( sampleQueries[0].numInstances(), sampleQueries.size(), AI_TYPE_MATRIX );
+	size_t matrixArrayIndex = 0;
+	for( const auto &query : sampleQueries )
+	{
+		for( size_t instanceIndex = 0, e = query.numInstances(); instanceIndex < e; ++instanceIndex ) // TODO : parallel_for
+		{
+			Imath::M44f m = query.transform( instanceIndex );
+			AiArraySetMtx( matrixArray, matrixArrayIndex++, reinterpret_cast<const AtMatrix&>( m.x ) );
+		}
+	}
+
 	// TODO : ACCESSOR? SOMETHING IN QUERY OBJECT?
 	auto prototypeIndex = samples[0]->variableIndexedView<IECore::IntVectorData>( "prototypeIndex", IECoreScene::PrimitiveVariable::Vertex, false );
 
 	IECoreScene::PointInstancer::Query query( samples[0] );
-	auto matrixArray = AiArrayAllocate( query.numInstances(), 1, AI_TYPE_MATRIX ); // TODO : MOTION BLUR
 	auto indexArray = AiArrayAllocate( query.numInstances(), 1, AI_TYPE_UINT );
 	auto visibilityArray = AiArrayAllocate( query.numInstances(), 1, AI_TYPE_BYTE );
 	for( size_t instanceIndex = 0, e = query.numInstances(); instanceIndex < e; ++instanceIndex ) // TODO : parallel_for
 	{
-		Imath::M44f m = query.transform( instanceIndex );
-		AiArraySetMtx( matrixArray, instanceIndex, reinterpret_cast<const AtMatrix&>( m.x ) );
 		AiArraySetInt( indexArray, instanceIndex, prototypeIndex ? (*prototypeIndex)[instanceIndex] : 0 ); // TODO : THE REAL THING
 		AiArraySetByte( visibilityArray, instanceIndex, 255 ); // TODO : THE REAL THING
 	}
