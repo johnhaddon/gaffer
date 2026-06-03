@@ -224,12 +224,23 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 				m_session
 			);
 
-			IECoreScene::PointInstancer::Query query( samples[0] );
+			vector<IECoreScene::PointInstancer::Query> sampleQueries;
+			for( const auto &sample : samples )
+			{
+				sampleQueries.push_back( IECoreScene::PointInstancer::Query( sample ) );
+			}
+
 			auto prototypeIndices = samples[0]->variableIndexedView<IECore::IntVectorData>( "prototypeIndex", IECoreScene::PrimitiveVariable::Vertex, false );
 
-			for( size_t instanceIndex = 0, e = query.numInstances(); instanceIndex < e; ++instanceIndex ) // TODO : parallel_for
+			Renderer::TransformSamples transformSamples;
+			transformSamples.resize( samples.size() );
+			for( size_t instanceIndex = 0, e = sampleQueries[0].numInstances(); instanceIndex < e; ++instanceIndex ) // TODO : parallel_for
 			{
-				Imath::M44f m = query.transform( instanceIndex );
+				for( size_t sampleIndex = 0; sampleIndex < sampleQueries.size(); ++sampleIndex )
+				{
+					transformSamples[sampleIndex] = sampleQueries[sampleIndex].transform( instanceIndex );
+				}
+
 				const size_t prototypeIndex = prototypeIndices ? (*prototypeIndices)[instanceIndex] : 0;
 				if( !geometryPrototypes[prototypeIndex] )
 				{
@@ -240,7 +251,7 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 				m_session->riley->CreateGeometryInstance(
 					riley::UserId(), group->id(), geometryPrototypes[prototypeIndex]->id(),
 					prototypeAttributes->material()->id(), riley::CoordinateSystemList(),
-					StaticTransform( m ),
+					AnimatedTransform( transformSamples, times ),
 					prototypeAttributes->instanceAttributes()
 				);
 			}
