@@ -1664,6 +1664,11 @@ class ArnoldRenderTest( GafferSceneTest.RenderTest ) :
 		options["options"]["ai:GI_total_depth"]["enabled"].setValue( True )
 		options["options"]["ai:GI_total_depth"]["value"].setValue( 0 )
 
+		# Improve sampling for motion blur tests.
+
+		options["options"]["ai:AA_samples"]["enabled"].setValue( True )
+		options["options"]["ai:AA_samples"]["value"].setValue( 3 )
+
 		return options
 
 if __name__ == "__main__":
