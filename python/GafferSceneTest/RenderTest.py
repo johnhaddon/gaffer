@@ -34,6 +34,7 @@
 #
 ##########################################################################
 
+import inspect
 import pathlib
 import struct
 import subprocess
@@ -1122,6 +1123,100 @@ class RenderTest( GafferSceneTest.SceneTestCase ) :
 					sampler["pixel"].setValue( centre + offset )
 					self.assertAlmostEqual( sampler["color"]["a"].getValue(), 0, delta = 0.01 )
 
+	@GafferTest.TestRunner.CategorisedTestMethod( { "pointInstancer" } )
+	def testPointInstancerMotionBlur( self ) :
+
+		script = Gaffer.ScriptNode()
+
+		script["pointInstancer"] = GafferScene.ObjectToScene()
+		script["pointInstancer"]["name"].setValue( "instancer" )
+
+		script["pointInstancerExpression"] = Gaffer.Expression()
+		script["pointInstancerExpression"].setExpression( inspect.cleandoc(
+			"""
+			import IECore
+			import IECoreScene
+
+			pointInstancer = IECoreScene.PointInstancer( 1 )
+			pointInstancer["P"] = IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+				IECore.V3fVectorData( [ imath.V3f( ( context.getFrame() - 1 ) * 10, 0, 0 ) ] )
+			)
+			pointInstancer["prototypeIndex"] = IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+				IECore.IntVectorData( [ 0 ] ),
+			)
+			pointInstancer["prototypeRoots"] = IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Constant,
+				IECore.StringVectorData( [ "./sphere" ] ),
+			)
+
+			parent["pointInstancer"]["object"] = pointInstancer
+			"""
+		) )
+
+		script["sphere"] = GafferScene.Sphere()
+		script["sphere"]["radius"].setValue( 0.5 )
+
+		script["prototypeParent"] = GafferScene.Parent()
+		script["prototypeParent"]["in"].setInput( script["pointInstancer"]["out"] )
+		script["prototypeParent"]["children"][0].setInput( script["sphere"]["out"] )
+		script["prototypeParent"]["parent"].setValue( "/instancer" )
+
+		script["camera"] = GafferScene.Camera()
+		script["camera"]["transform"]["translate"]["z"].setValue( 5 )
+
+		script["parent"] = GafferScene.Parent()
+		script["parent"]["in"].setInput( script["prototypeParent"]["out"] )
+		script["parent"]["children"][0].setInput( script["camera"]["out"] )
+		script["parent"]["parent"].setValue( "/" )
+
+		imagePath = self.temporaryDirectory() / "test.exr"
+
+		script["outputs"] = GafferScene.Outputs()
+		script["outputs"].addOutput(
+			"beauty",
+			IECoreScene.Output(
+				imagePath.as_posix(),
+				"exr",
+				"rgba"
+			)
+		)
+
+		script["outputs"]["in"].setInput( script["parent"]["out"] )
+
+		script["options"] = GafferScene.StandardOptions()
+		script["options"]["in"].setInput( script["outputs"]["out"] )
+		script["options"]["options"]["render:camera"]["enabled"].setValue( True )
+		script["options"]["options"]["render:camera"]["value"].setValue( "/camera" )
+		script["options"]["options"]["render:deformationBlur"]["enabled"].setValue( True )
+		script["options"]["options"]["render:deformationBlur"]["value"].setValue( True )
+
+		script["rendererOptions"] = self._createOptions()
+		script["rendererOptions"]["in"].setInput( script["options"]["out"] )
+
+		script["render"] = GafferScene.Render()
+		script["render"]["in"].setInput( script["rendererOptions"]["out"] )
+		script["render"]["renderer"].setValue( self.renderer )
+		script["render"]["task"].execute()
+
+		reader = GafferImage.ImageReader()
+		reader["fileName"].setValue( imagePath )
+
+		sampler = GafferImage.ImageSampler()
+		sampler["image"].setInput( reader["out"] )
+
+		for x in range( 1, 638 ) :
+
+			# Assert there's an instance where we expect it,
+			# streaked horizontally across the centre of the image.
+			sampler["pixel"].setValue( imath.V2f( x, 240 ) )
+			self.assertGreater( sampler["color"]["a"].getValue(), 0.1 )
+			# And check it's not a fluke by asserting there is empty
+			# space above and below.
+			for y in ( 150, 320 ) :
+				sampler["pixel"].setValue( imath.V2f( x, y ) )
+				self.assertEqualWithAbsError( sampler["color"]["a"].getValue(), 0, 0.005 )
 
 	## Should be implemented by derived classes to return
 	# an appropriate Shader node with a constant surface shader loaded, along
