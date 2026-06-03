@@ -134,5 +134,20 @@ class OpenGLRenderTest( GafferSceneTest.RenderTest ) :
 
 		pass
 
+	@unittest.skip( "PointInstancer not supported yet" )
+	def testPointInstancer( self ) :
+
+		pass
+
+	@unittest.skip( "PointInstancer not supported yet" )
+	def testPointInstancerPrototypeIndices( self ) :
+
+		pass
+
+	@unittest.skip( "PointInstancer not supported yet" )
+	def testPointInstancerWithGroupPrototype( self ) :
+
+		pass
+
 if __name__ == "__main__":
 	unittest.main()
