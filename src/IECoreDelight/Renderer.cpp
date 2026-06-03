@@ -1032,6 +1032,7 @@ class PrototypeCache : public IECore::RefCounted
 
 			ParameterList parameters;
 			parameters.add( "transformationmatrices", instanceMatricesData.get() );
+			parameters.add( "modelindices", samples[0]->variableData<IntVectorData>( "prototypeIndex" ) ); // TODO : ERROR HANDLING. ACCESSOR.
 
 			NSISetAttribute( m_context, handle, parameters.size(), parameters.data() );
 
@@ -1041,6 +1042,8 @@ class PrototypeCache : public IECore::RefCounted
 			{
 				const auto &prototype = prototypes[prototypeIndex];
 				DelightHandleSharedPtr prototypeHandle = get( prototype.samples, prototype.times );
+
+				/// TODO : SHADERS AND ATTRIBUTES
 
 				modelIndexData->writable() = prototypeIndex;
 				ParameterList connectionParameters;
