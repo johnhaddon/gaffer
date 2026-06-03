@@ -1026,7 +1026,7 @@ class RenderTest( GafferSceneTest.SceneTestCase ) :
 
 		script = Gaffer.ScriptNode()
 
-		pointInstancer = IECoreScene.PointInstancer( 2 )
+		pointInstancer = IECoreScene.PointInstancer( 1 )
 		pointInstancer["P"] = IECoreScene.PrimitiveVariable(
 			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 			IECore.V3fVectorData( [ imath.V3f( 0, 1, 0 ) ] )
