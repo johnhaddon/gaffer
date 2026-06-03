@@ -1019,19 +1019,9 @@ class PrototypeCache : public IECore::RefCounted
 			const std::vector<IECoreScenePreview::Renderer::Prototype> &prototypes, const char *handle
 		)
 		{
-			IECoreScene::PointInstancer::Query query( samples[0] );
-			M44dVectorDataPtr instanceMatricesData = new M44dVectorData();
-			std::vector<M44d> &instanceMatrices = instanceMatricesData->writable();
-			instanceMatrices.reserve( query.numInstances() );
-			for( size_t instanceIndex = 0, e = query.numInstances(); instanceIndex < e; ++instanceIndex )
-			{
-				instanceMatrices.push_back( M44d( query.transform( instanceIndex ) ) );
-			}
-
 			NSICreate( m_context, handle, "instances", 0, nullptr );
 
 			ParameterList parameters;
-			parameters.add( "transformationmatrices", instanceMatricesData.get() );
 			parameters.add( "modelindices", samples[0]->variableData<IntVectorData>( "prototypeIndex" ) ); // TODO : ERROR HANDLING. ACCESSOR.
 
 			NSISetAttribute( m_context, handle, parameters.size(), parameters.data() );
@@ -1062,6 +1052,21 @@ class PrototypeCache : public IECore::RefCounted
 				{
 					// TODO : WHAT NOW? INDICES ARE MESSED UP AT THE VERY LEAST
 				}
+			}
+
+			M44dVectorDataPtr instanceMatricesData = new M44dVectorData();
+			std::vector<M44d> &instanceMatrices = instanceMatricesData->writable();
+			for( size_t sampleIndex = 0; sampleIndex < samples.size(); ++sampleIndex )
+			{
+				IECoreScene::PointInstancer::Query query( samples[sampleIndex] );
+				instanceMatrices.clear();
+				instanceMatrices.reserve( query.numInstances() );
+				for( size_t instanceIndex = 0, e = query.numInstances(); instanceIndex < e; ++instanceIndex )
+				{
+					instanceMatrices.push_back( M44d( query.transform( instanceIndex ) ) );
+				}
+				parameters.add( "transformationmatrices", instanceMatricesData.get() );
+				NSISetAttributeAtTime( m_context, handle, times[sampleIndex], parameters.size(), parameters.data() );
 			}
 
 			return true;
