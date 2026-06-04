@@ -98,7 +98,7 @@ class GAFFERSCENE_API TemporalFilter : public Deformer
 		Gaffer::IntPlug *samplesPlug();
 		const Gaffer::IntPlug *samplesPlug() const;
 
-		Gaffer::IntPlug *filterTypePlug();
+		Gaffer::IntPlug *filterTypePlug(); // TODO : MAYBE `temporalFilter`?
 		const Gaffer::IntPlug *filterTypePlug() const;
 
 		Gaffer::RampffPlug *rampPlug();

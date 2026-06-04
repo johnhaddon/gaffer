@@ -264,7 +264,8 @@ vector<float> TemporalFilter::sampleWeights( const vector<float> &frames ) const
 		case Filter::Box : // TODO : Needs normalisation
 		case Filter::Min :
 		case Filter::Max :
-			fill( weights.begin(), weights.end(), 1.0f );
+			fill( weights.begin(), weights.end(), 1.0f / (float)n );
+			fmt::print( "WEIGHTS {}\n", n );
 			break;
 
 		case Filter::Gaussian :
