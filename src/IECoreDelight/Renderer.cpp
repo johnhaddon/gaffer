@@ -1716,7 +1716,7 @@ class DelightRenderer final : public IECoreScenePreview::Renderer
 		{
 			const IECore::MessageHandler::Scope s( m_messageHandler.get() );
 
-			m_prototypeCache->clearUnused();
+			//m_prototypeCache->clearUnused();
 			m_attributesCache->clearUnused();
 
 			if( m_rendering )
