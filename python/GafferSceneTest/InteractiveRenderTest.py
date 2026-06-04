@@ -3577,24 +3577,38 @@ class InteractiveRenderTest( GafferSceneTest.SceneTestCase ) :
 		script["render"] = self._createInteractiveRender()
 		script["render"]["in"].setInput( script["rendererOptions"]["out"] )
 
-		print( script["render"]["in"].globals() )
-
 		script["render"]["state"].setValue( script["render"].State.Running )
 
-		#import time
-		#time.sleep( 2 )
-		self.uiThreadCallHandler.waitFor( 2 )
+		# Two instances should be visible.
 
-	#			self.assertGreater( self._color4fAtUV( s["catalogue"], imath.V2f( 0.25, 0.5 ) ).a, 0.9 )
+		self.assertEventually(
+			lambda : self.assertAlmostEqual( self._color4fAtUV( script["catalogue"], imath.V2f( 0.5 ) ).a, 1 )
+		)
+		self.assertEventually(
+			lambda : self.assertAlmostEqual( self._color4fAtUV( script["catalogue"], imath.V2f( 0.8 ) ).a, 1 )
+		)
 
+		script["instancer"]["numPoints"].setValue( 1 )
 
-		print( "IMAGES", script["catalogue"]["images"].keys() )
+		# Now only one should be visible.
 
-		image = GafferImage.ImageAlgo.image( script["catalogue"]["out"] )
-		IECoreImage.ImageWriter( image, "test.exr" ).write()
+		self.assertEventually(
+			lambda : self.assertAlmostEqual( self._color4fAtUV( script["catalogue"], imath.V2f( 0.5 ) ).a, 1 )
+		)
+		self.assertEventually(
+			lambda : self.assertAlmostEqual( self._color4fAtUV( script["catalogue"], imath.V2f( 0.8 ) ).a, 0 )
+		)
 
-		#self.assertEventually( lambda : assertVisible( False, True ) )
-		#self.assertGreater( self._color4fAtUV( s["catalogue"], imath.V2f( 0.25, 0.5 ) ).a, 0.9 )
+		script["instancer"]["transform"]["translate"]["x"].setValue( -2 )
+
+		# Now the instance should have moved.
+
+		self.assertEventually(
+			lambda : self.assertAlmostEqual( self._color4fAtUV( script["catalogue"], imath.V2f( 0.5 ) ).a, 0 )
+		)
+		self.assertEventually(
+			lambda : self.assertAlmostEqual( self._color4fAtUV( script["catalogue"], imath.V2f( 0.2, 0.5 ) ).a, 1 )
+		)
 
 		script["render"]["state"].setValue( script["render"].State.Stopped )
 
