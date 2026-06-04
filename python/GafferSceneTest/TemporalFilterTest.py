@@ -34,7 +34,7 @@
 #
 ##########################################################################
 
-import math
+import inspect
 import unittest
 
 import imath
@@ -49,34 +49,81 @@ import GafferSceneTest
 
 class TemporalFilterTest( GafferSceneTest.SceneTestCase ) :
 
+	class __AnimatedSphere( GafferScene.SceneNode ) :
+
+		def __init__( self, name = "__AnimatedSphere" ) :
+
+			GafferScene.SceneNode.__init__( self, name )
+
+			self["__objectToScene"] = GafferScene.ObjectToScene()
+
+			self["__expression"] = Gaffer.Expression()
+			self["__expression"].setExpression( inspect.cleandoc(
+				"""
+				import imath
+				import IECore
+				import IECoreScene
+
+				sphere = IECoreScene.Sphere()
+
+				frame = context.getFrame()
+				numVertices = sphere.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+
+				sphere["frame"] = IECore.PrimitiveVariable(
+					IECore.PrimitiveVariable.Interpolation.Constant,
+					IECore.FloatData( frame )
+				)
+				sphere["vertexFrame"] = IECore.PrimitiveVariable(
+					IECore.PrimitiveVariable.Interpolation.Vertex,
+					IECore.FloatVectorData( [ frame ] * numVertices )
+				)
+				sphere["vectorFrame"] = IECore.PrimitiveVariable(
+					IECore.PrimitiveVariable.Interpolation.Constant,
+					IECore.V3fData( imath.V3f( frame - 1, frame, frame + 1 ) )
+				)
+				sphere["pulse"] = IECore.PrimitiveVariable(
+					IECore.PrimitiveVariable.Interpolation.Constant,
+					IECore.FloatData( int( frame ) % 2 )
+				)
+				sphere["onOne"] = IECore.PrimitiveVariable(
+					IECore.PrimitiveVariable.Interpolation.Constant,
+					IECore.FloatData( frame == 1 )
+				)
+				"""
+			) )
+
+			self["out"].setInput( self["__objectToScene"]["out"] )
+
+	IECore.registerRunTimeTyped( __AnimatedSphere )
+
 	# Builds a scene with a sphere whose `frame` primitive variable equals
 	# the current frame number.
-	def __makeScene( self ) :
+	# def __makeScene( self ) :
 
-		script = Gaffer.ScriptNode()
+	# 	script = Gaffer.ScriptNode()
 
-		script["sphere"] = GafferScene.Sphere()
+	# 	script["sphere"] = GafferScene.Sphere()
 
-		script["sphereFilter"] = GafferScene.PathFilter()
-		script["sphereFilter"]["paths"].setValue( IECore.StringVectorData( [ "/sphere" ] ) )
+	# 	script["sphereFilter"] = GafferScene.PathFilter()
+	# 	script["sphereFilter"]["paths"].setValue( IECore.StringVectorData( [ "/sphere" ] ) )
 
-		script["primitiveVariables"] = GafferScene.PrimitiveVariables()
-		script["primitiveVariables"]["in"].setInput( script["sphere"]["out"] )
-		script["primitiveVariables"]["filter"].setInput( script["sphereFilter"]["out"] )
+	# 	script["primitiveVariables"] = GafferScene.PrimitiveVariables()
+	# 	script["primitiveVariables"]["in"].setInput( script["sphere"]["out"] )
+	# 	script["primitiveVariables"]["filter"].setInput( script["sphereFilter"]["out"] )
 
-		script["frame"] = GafferTest.FrameNode()
+	# 	script["frame"] = GafferTest.FrameNode()
 
-		script["primitiveVariables"]["primitiveVariables"].addChild(
-			Gaffer.NameValuePlug( "frame", 0.0, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
-		)
-		script["primitiveVariables"]["primitiveVariables"][0]["value"].setInput( script["frame"]["output"] )
+	# 	script["primitiveVariables"]["primitiveVariables"].addChild(
+	# 		Gaffer.NameValuePlug( "frame", 0.0, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+	# 	)
+	# 	script["primitiveVariables"]["primitiveVariables"][0]["value"].setInput( script["frame"]["output"] )
 
-		script["temporalFilter"] = GafferScene.TemporalFilter()
-		script["temporalFilter"]["in"].setInput( script["primitiveVariables"]["out"] )
-		script["temporalFilter"]["filter"].setInput( script["sphereFilter"]["out"] )
-		script["temporalFilter"]["primitiveVariables"].setValue( "frame" )
+	# 	script["temporalFilter"] = GafferScene.TemporalFilter()
+	# 	script["temporalFilter"]["in"].setInput( script["primitiveVariables"]["out"] )
+	# 	script["temporalFilter"]["filter"].setInput( script["sphereFilter"]["out"] )
+	# 	script["temporalFilter"]["primitiveVariables"].setValue( "frame" )
 
-		return script
+	# 	return script
 
 	def __val( self, script, frame ) :
 
@@ -100,7 +147,7 @@ class TemporalFilterTest( GafferSceneTest.SceneTestCase ) :
 
 		with Gaffer.Context( script.context() ) as context :
 			context.setFrame( 0 )
-			self.assertIsInstance( script["temporalFilter"]["out"].object( "/" ), IECore.NullObject )
+			self.assertIsInstance( script["temporalFilter"]["out"].object( "/" ), IECore.NullObject ) # TODO : MEANS NOTHING - COMPUTE ISN'T CALLED AT ROOT
 
 	def testBoxFilter( self ) :
 
@@ -142,7 +189,7 @@ class TemporalFilterTest( GafferSceneTest.SceneTestCase ) :
 
 		# Min of {F-2, F-1, F, F+1, F+2} = F-2.
 		for frame in ( 0, 3, -1 ) :
-			self.assertAlmostEqual( self.__val( script, frame ), float( frame ) - 2, places=5 )
+			self.assertAlmostEqual( self.__val( script, frame ), float( frame ) - 2, places=5 ) # TODO : SHOULD BE EXACT - THERE IS NO AVERAGING WITH MIN
 
 	def testMaxFilter( self ) :
 
@@ -151,7 +198,7 @@ class TemporalFilterTest( GafferSceneTest.SceneTestCase ) :
 
 		# Max of {F-2, F-1, F, F+1, F+2} = F+2.
 		for frame in ( 0, 3, -1 ) :
-			self.assertAlmostEqual( self.__val( script, frame ), float( frame ) + 2, places=5 )
+			self.assertAlmostEqual( self.__val( script, frame ), float( frame ) + 2, places=5 ) # TODO : SHOULD BE EXACT - THERE IS NO AVERAGING WITH MIN
 
 	def testRampFilter( self ) :
 
@@ -248,7 +295,7 @@ class TemporalFilterTest( GafferSceneTest.SceneTestCase ) :
 			context.setFrame( 0 )
 			obj = script["temporalFilter"]["out"].object( "/sphere" )
 		self.assertAlmostEqual( obj["val"].data.value, 0.0, places=5 )
-		self.assertAlmostEqual( obj["other"].data.value, 10.0, places=5 )
+		self.assertAlmostEqual( obj["other"].data.value, 10.0, places=5 ) # TODO : NOT PROVING ANYTHING AT ALL
 
 		# Wildcard.
 		script["temporalFilter"]["primitiveVariables"].setValue( "*" )
@@ -259,7 +306,7 @@ class TemporalFilterTest( GafferSceneTest.SceneTestCase ) :
 
 	def testMissingVariable( self ) :
 
-		# If the variable doesn't exist at some sample times it contributes zero.
+		# If the variable doesn't exist at some sample times it contributes zero. # TODO : TEST DOESN'T TEST THAT AT ALL. NEED TO DISABLE PRIMITIVE VARIABLES NODE ON SOME FRAMES.
 		script = self.__makeScene()
 		script["temporalFilter"]["filterType"].setValue( GafferScene.TemporalFilter.Filter.Box )
 
@@ -337,7 +384,7 @@ class TemporalFilterTest( GafferSceneTest.SceneTestCase ) :
 		script = self.__makeScene()
 
 		# Default: primitiveVariables = "val" which doesn't include P,
-		# so adjustBounds should be a no-op.
+		# so adjustBounds should be a no-op. # TODO : TEST HASH
 		with Gaffer.Context( script.context() ) as context :
 			context.setFrame( 0 )
 			self.assertEqual(
@@ -351,7 +398,7 @@ class TemporalFilterTest( GafferSceneTest.SceneTestCase ) :
 		with Gaffer.Context( script.context() ) as context :
 			context.setFrame( 0 )
 			obj = script["temporalFilter"]["out"].object( "/sphere" )
-			import IECoreScene
+			import IECoreScene # TODO WHY HERE
 			bound = script["temporalFilter"]["out"].bound( "/sphere" )
 			self.assertEqual( bound, IECoreScene.MeshPrimitive.computeBound( obj ) )
 

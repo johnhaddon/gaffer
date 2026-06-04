@@ -272,10 +272,10 @@ vector<float> TemporalFilter::sampleWeights( const vector<float> &frames ) const
 			const float start = frames.front();
 			const float range = frames.back() - start;
 			float sum = 0;
-			for( int i = 0; i < n; ++i )
+			for( int i = 0; i < n; ++i ) // TODO : CHECK WE'RE NOT WEIGHTING THE OUTER SAMPLES TO ZERO
 			{
 				// Map sample position to [-1, 1] centred on the midpoint of the range.
-				const float x = range > 0 ? 2.0f * ( frames[i] - start ) / range - 1.0f : 0.0f;
+				const float x = range > 0 ? 2.0f * ( frames[i] - start ) / range - 1.0f : 0.0f; // TODO : REMOVE CHECK FOR EMPTY RANGE
 				const float w = exp( -2.0f * x * x );
 				weights[i] = w;
 				sum += w;
