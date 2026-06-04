@@ -4776,7 +4776,7 @@ class ArnoldRenderer final : public ArnoldRendererBase
 			const IECore::MessageHandler::Scope s( m_messageHandler.get() );
 
 			m_shaderCache->preRender( m_globals->renderType() );
-			m_instanceCache->clearUnused();
+			//m_instanceCache->clearUnused();
 			m_globals->render();
 		}
 
