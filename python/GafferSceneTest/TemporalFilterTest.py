@@ -43,39 +43,38 @@ import IECore
 import IECoreScene
 
 import Gaffer
+import GafferTest
 import GafferScene
 import GafferSceneTest
 
 class TemporalFilterTest( GafferSceneTest.SceneTestCase ) :
 
-	# Builds a scene with a sphere whose "val" primitive variable equals
-	# the current frame number (linear, so we can predict filter outputs).
+	# Builds a scene with a sphere whose `frame` primitive variable equals
+	# the current frame number.
 	def __makeScene( self ) :
 
 		script = Gaffer.ScriptNode()
 
 		script["sphere"] = GafferScene.Sphere()
 
-		script["vars"] = GafferScene.PrimitiveVariables()
-		script["vars"]["in"].setInput( script["sphere"]["out"] )
+		script["sphereFilter"] = GafferScene.PathFilter()
+		script["sphereFilter"]["paths"].setValue( IECore.StringVectorData( [ "/sphere" ] ) )
 
-		script["vars"]["primitiveVariables"].addChild(
-			Gaffer.NameValuePlug( "val", 0.0, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		script["primitiveVariables"] = GafferScene.PrimitiveVariables()
+		script["primitiveVariables"]["in"].setInput( script["sphere"]["out"] )
+		script["primitiveVariables"]["filter"].setInput( script["sphereFilter"]["out"] )
+
+		script["frame"] = GafferTest.FrameNode()
+
+		script["primitiveVariables"]["primitiveVariables"].addChild(
+			Gaffer.NameValuePlug( "frame", 0.0, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
 		)
-
-		# Animate "val" so that its value equals the frame number.
-		anim = Gaffer.Animation.acquire( script["vars"]["primitiveVariables"]["NameValuePlug"]["value"] )
-		for f in range( -10, 11 ) :
-			anim.addKey( Gaffer.Animation.Key( f / 24.0, float( f ), Gaffer.Animation.Interpolation.Linear ) )
-
-		script["filter"] = GafferScene.PathFilter()
-		script["filter"]["paths"].setValue( IECore.StringVectorData( [ "/sphere" ] ) )
-		script["vars"]["filter"].setInput( script["filter"]["out"] )
+		script["primitiveVariables"]["primitiveVariables"][0]["value"].setInput( script["frame"]["output"] )
 
 		script["temporalFilter"] = GafferScene.TemporalFilter()
-		script["temporalFilter"]["in"].setInput( script["vars"]["out"] )
-		script["temporalFilter"]["filter"].setInput( script["filter"]["out"] )
-		script["temporalFilter"]["primitiveVariables"].setValue( "val" )
+		script["temporalFilter"]["in"].setInput( script["primitiveVariables"]["out"] )
+		script["temporalFilter"]["filter"].setInput( script["sphereFilter"]["out"] )
+		script["temporalFilter"]["primitiveVariables"].setValue( "frame" )
 
 		return script
 
@@ -231,7 +230,7 @@ class TemporalFilterTest( GafferSceneTest.SceneTestCase ) :
 		with Gaffer.Context( script.context() ) as context :
 			context.setFrame( 0 )
 			self.assertAlmostEqual(
-				script["temporalFilter"]["out"].object( "/sphere" )["val"].data.value,
+				script["temporalFilter"]["out"].object( "/sphere" )["val"].data.value, # TODO : WHY NOT A TRUE PASS THROUGH?3
 				0.0, places=5
 			)
 

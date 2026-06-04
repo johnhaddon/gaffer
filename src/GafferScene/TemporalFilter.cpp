@@ -261,7 +261,7 @@ vector<float> TemporalFilter::sampleWeights( const vector<float> &frames ) const
 	const Filter filter = (Filter)filterTypePlug()->getValue();
 	switch( filter )
 	{
-		case Filter::Box :
+		case Filter::Box : // TODO : Needs normalisation
 		case Filter::Min :
 		case Filter::Max :
 			fill( weights.begin(), weights.end(), 1.0f );
@@ -318,7 +318,11 @@ void TemporalFilter::hashProcessedObject( const ScenePath &path, const Context *
 	filterTypePlug()->hash( h );
 	rampPlug()->hash( h );
 
-	const vector<float> frames = sampleFrames( context );
+	const vector<float> frames = sampleFrames( context ); // TODO : WHY NOT JUST HASH THE INPUTS?
+	if( frames.empty() )
+	{
+		return;
+	}
 	const vector<float> weights = sampleWeights( frames );
 
 	Context::EditableScope scope( context );
@@ -354,6 +358,7 @@ IECore::ConstObjectPtr TemporalFilter::computeProcessedObject( const ScenePath &
 	const vector<float> weights = sampleWeights( frames );
 
 	// Fetch the primitive at each sample time.
+	// TODO : DON'T STORE EVERYTHING! FILTER ON THE FLY!!! FFS.
 	vector<ConstPrimitivePtr> samplePrims;
 	samplePrims.reserve( frames.size() );
 	Context::EditableScope scope( context );

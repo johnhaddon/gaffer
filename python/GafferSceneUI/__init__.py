@@ -171,6 +171,7 @@ from . import ClosestPointSamplerUI
 from . import CurveSamplerUI
 from . import UnencapsulateUI
 from . import MotionPathUI
+from . import TemporalFilterUI
 from . import FilterQueryUI
 from . import TransformQueryUI
 from . import BoundQueryUI
