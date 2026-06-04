@@ -82,7 +82,7 @@ TemporalFilter::TemporalFilter( const std::string &name )
 	addChild( new IntPlug( "samples", Plug::In, 10, 2 ) );
 
 	addChild( new IntPlug( "filterType", Plug::In, (int)Filter::Gaussian, (int)Filter::Box, (int)Filter::Ramp ) );
-	addChild( new RampffPlug( "ramp" ) );
+	addChild( new RampffPlug( "ramp", Plug::In, IECore::Rampff( { { 0.0f, 0.0f }, { 1.0f, 1.0f } }, IECore::RampInterpolation::CatmullRom ) ) );
 }
 
 TemporalFilter::~TemporalFilter()
