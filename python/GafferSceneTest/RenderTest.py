@@ -819,21 +819,14 @@ class RenderTest( GafferSceneTest.SceneTestCase ) :
 		script = Gaffer.ScriptNode()
 
 		pointInstancer = IECoreScene.PointInstancer( 4 )
-		pointInstancer["P"] = IECoreScene.PrimitiveVariable(
-			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+		pointInstancer.setPosition(
 			IECore.V3fVectorData( [
 				imath.V3f( -1, -1, 0 ), imath.V3f( 1, -1, 0 ),
 				imath.V3f( 1, 1, 0 ), imath.V3f( -1, 1, 0 ),
 			] )
 		)
-		pointInstancer["prototypeIndex"] = IECoreScene.PrimitiveVariable(
-			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-			IECore.IntVectorData( [ 0, 0, 0, 0 ] ),
-		)
-		pointInstancer["prototypeRoots"] = IECoreScene.PrimitiveVariable(
-			IECoreScene.PrimitiveVariable.Interpolation.Constant,
-			IECore.StringVectorData( [ "./sphere" ] ),
-		)
+		pointInstancer.setPrototypeIndex( IECore.IntVectorData( [ 0, 0, 0, 0 ] ) )
+		pointInstancer.setPrototypes( IECore.StringVectorData( [ "./sphere" ] ) )
 
 		script["pointInstancer"] = GafferScene.ObjectToScene()
 		script["pointInstancer"]["name"].setValue( "instancer" )
@@ -927,20 +920,13 @@ class RenderTest( GafferSceneTest.SceneTestCase ) :
 		script = Gaffer.ScriptNode()
 
 		pointInstancer = IECoreScene.PointInstancer( 2 )
-		pointInstancer["P"] = IECoreScene.PrimitiveVariable(
-			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+		pointInstancer.setPosition(
 			IECore.V3fVectorData( [
 				imath.V3f( -1, 0, 0 ), imath.V3f( 1, 0, 0 ),
 			] )
 		)
-		pointInstancer["prototypeIndex"] = IECoreScene.PrimitiveVariable(
-			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-			IECore.IntVectorData( [ 0, 1 ] ),
-		)
-		pointInstancer["prototypeRoots"] = IECoreScene.PrimitiveVariable(
-			IECoreScene.PrimitiveVariable.Interpolation.Constant,
-			IECore.StringVectorData( [ "./sphere", "./cube" ] ),
-		)
+		pointInstancer.setPrototypeIndex( IECore.IntVectorData( [ 0, 1 ] ) )
+		pointInstancer.setPrototypes( IECore.StringVectorData( [ "./sphere", "./cube" ] ) )
 
 		script["pointInstancer"] = GafferScene.ObjectToScene()
 		script["pointInstancer"]["name"].setValue( "instancer" )
@@ -1028,25 +1014,15 @@ class RenderTest( GafferSceneTest.SceneTestCase ) :
 		script = Gaffer.ScriptNode()
 
 		pointInstancer = IECoreScene.PointInstancer( 4 )
-		pointInstancer["P"] = IECoreScene.PrimitiveVariable(
-			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+		pointInstancer.setPosition(
 			IECore.V3fVectorData( [
 				imath.V3f( -1, -1, 0 ), imath.V3f( 1, -1, 0 ),
 				imath.V3f( 1, 1, 0 ), imath.V3f( -1, 1, 0 ),
 			] )
 		)
-		pointInstancer["prototypeIndex"] = IECoreScene.PrimitiveVariable(
-			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-			IECore.IntVectorData( [ 0, 0, 0, 0 ] ),
-		)
-		pointInstancer["invisibleIds"] = IECoreScene.PrimitiveVariable(
-			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-			IECore.Int64VectorData( [ 0, 2 ] ),
-		)
-		pointInstancer["prototypeRoots"] = IECoreScene.PrimitiveVariable(
-			IECoreScene.PrimitiveVariable.Interpolation.Constant,
-			IECore.StringVectorData( [ "./sphere" ] ),
-		)
+		pointInstancer.setPrototypeIndex( IECore.IntVectorData( [ 0, 0, 0, 0 ] ) )
+		pointInstancer.setInvisibleIDs( IECore.Int64VectorData( [ 0, 2 ] ) )
+		pointInstancer.setPrototypes( IECore.StringVectorData( [ "./sphere" ] ) )
 
 		script["pointInstancer"] = GafferScene.ObjectToScene()
 		script["pointInstancer"]["name"].setValue( "instancer" )
@@ -1119,29 +1095,16 @@ class RenderTest( GafferSceneTest.SceneTestCase ) :
 		script = Gaffer.ScriptNode()
 
 		pointInstancer = IECoreScene.PointInstancer( 4 )
-		pointInstancer["P"] = IECoreScene.PrimitiveVariable(
-			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+		pointInstancer.setPosition(
 			IECore.V3fVectorData( [
 				imath.V3f( -1, -1, 0 ), imath.V3f( 1, -1, 0 ),
 				imath.V3f( 1, 1, 0 ), imath.V3f( -1, 1, 0 ),
 			] )
 		)
-		pointInstancer["prototypeIndex"] = IECoreScene.PrimitiveVariable(
-			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-			IECore.IntVectorData( [ 0, 0, 0, 0 ] ),
-		)
-		pointInstancer["id"] = IECoreScene.PrimitiveVariable(
-			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-			IECore.Int64VectorData( [ 3, 2, 1, 0 ] ),
-		)
-		pointInstancer["invisibleIds"] = IECoreScene.PrimitiveVariable(
-			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-			IECore.Int64VectorData( [ 0, 2 ] ),
-		)
-		pointInstancer["prototypeRoots"] = IECoreScene.PrimitiveVariable(
-			IECoreScene.PrimitiveVariable.Interpolation.Constant,
-			IECore.StringVectorData( [ "./sphere" ] ),
-		)
+		pointInstancer.setPrototypeIndex( IECore.IntVectorData( [ 0, 0, 0, 0 ] ) )
+		pointInstancer.setID( IECore.Int64VectorData( [ 3, 2, 1, 0 ] ) )
+		pointInstancer.setInvisibleIDs( IECore.Int64VectorData( [ 0, 2 ] ) )
+		pointInstancer.setPrototypes( IECore.StringVectorData( [ "./sphere" ] ) )
 
 		script["pointInstancer"] = GafferScene.ObjectToScene()
 		script["pointInstancer"]["name"].setValue( "instancer" )
@@ -1214,18 +1177,9 @@ class RenderTest( GafferSceneTest.SceneTestCase ) :
 		script = Gaffer.ScriptNode()
 
 		pointInstancer = IECoreScene.PointInstancer( 1 )
-		pointInstancer["P"] = IECoreScene.PrimitiveVariable(
-			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-			IECore.V3fVectorData( [ imath.V3f( 0, 1, 0 ) ] )
-		)
-		pointInstancer["prototypeIndex"] = IECoreScene.PrimitiveVariable(
-			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-			IECore.IntVectorData( [ 0 ] ),
-		)
-		pointInstancer["prototypeRoots"] = IECoreScene.PrimitiveVariable(
-			IECoreScene.PrimitiveVariable.Interpolation.Constant,
-			IECore.StringVectorData( [ "./group" ] ),
-		)
+		pointInstancer.setPosition( IECore.V3fVectorData( [ imath.V3f( 0, 1, 0 ) ] ) )
+		pointInstancer.setPrototypeIndex( IECore.IntVectorData( [ 0 ] ) )
+		pointInstancer.setPrototypes( IECore.StringVectorData( [ "./group" ] ) )
 
 		script["pointInstancer"] = GafferScene.ObjectToScene()
 		script["pointInstancer"]["name"].setValue( "instancer" )
@@ -1324,18 +1278,9 @@ class RenderTest( GafferSceneTest.SceneTestCase ) :
 			import IECoreScene
 
 			pointInstancer = IECoreScene.PointInstancer( 1 )
-			pointInstancer["P"] = IECoreScene.PrimitiveVariable(
-				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-				IECore.V3fVectorData( [ imath.V3f( ( context.getFrame() - 1 ) * 10, 0, 0 ) ] )
-			)
-			pointInstancer["prototypeIndex"] = IECoreScene.PrimitiveVariable(
-				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-				IECore.IntVectorData( [ 0 ] ),
-			)
-			pointInstancer["prototypeRoots"] = IECoreScene.PrimitiveVariable(
-				IECoreScene.PrimitiveVariable.Interpolation.Constant,
-				IECore.StringVectorData( [ "./sphere" ] ),
-			)
+			pointInstancer.setPosition( IECore.V3fVectorData( [ imath.V3f( ( context.getFrame() - 1 ) * 10, 0, 0 ) ] ) )
+			pointInstancer.setPrototypeIndex( IECore.IntVectorData( [ 0 ] ) )
+			pointInstancer.setPrototypes( IECore.StringVectorData( [ "./sphere" ] ) )
 
 			parent["pointInstancer"]["object"] = pointInstancer
 			"""
