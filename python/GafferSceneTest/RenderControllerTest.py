@@ -1959,18 +1959,9 @@ class RenderControllerTest( GafferSceneTest.SceneTestCase ) :
 				import IECoreScene
 				numPoints = parent["numPoints"]
 				pointInstancer = IECoreScene.PointInstancer( numPoints )
-				pointInstancer["P"] = IECoreScene.PrimitiveVariable(
-					IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-					IECore.V3fVectorData( [ imath.V3f( i ) for i in range( numPoints ) ] )
-				)
-				pointInstancer["prototypeIndex"] = IECoreScene.PrimitiveVariable(
-					IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-					IECore.IntVectorData( [ i % 2 for i in range( numPoints ) ] )
-				)
-				pointInstancer["prototypeRoots"] = IECoreScene.PrimitiveVariable(
-					IECoreScene.PrimitiveVariable.Interpolation.Constant,
-					IECore.StringVectorData( [ "./prototypes/sphere", "./prototypes/cube" ] )
-				)
+				pointInstancer.setPosition( IECore.V3fVectorData( [ imath.V3f( i ) for i in range( numPoints ) ] ) )
+				pointInstancer.setPrototypeIndex( IECore.IntVectorData( [ i % 2 for i in range( numPoints ) ] ) )
+				pointInstancer.setPrototypes( IECore.StringVectorData( [ "./prototypes/sphere", "./prototypes/cube" ] ) )
 
 				parent["objectToScene"]["object"] = pointInstancer
 				"""
