@@ -3484,7 +3484,7 @@ class InteractiveRenderTest( GafferSceneTest.SceneTestCase ) :
 				{
 					"driverType" : "ClientDisplayDriver",
 					"displayHost" : "localhost",
-					"displayPort" : str( s['catalogue'].displayDriverServer().portNumber() ),
+					"displayPort" : str( script["catalogue"].displayDriverServer().portNumber() ),
 					"remoteDisplayType" : "GafferScene::GafferDisplayDriver",
 				}
 			)
@@ -3531,6 +3531,86 @@ class InteractiveRenderTest( GafferSceneTest.SceneTestCase ) :
 		self.assertEventually( lambda : assertVisible( True, False ) )
 
 		s["render"]["state"].setValue( s["render"].State.Stopped )
+
+	def testEditPointInstancer( self ) :
+
+		script = Gaffer.ScriptNode()
+
+		script["catalogue"] = GafferScene.Catalogue()
+
+		script["instancer"] = GafferSceneTest.RenderControllerTest.ExamplePointInstancer()
+
+		script["camera"] = GafferScene.Camera()
+		script["camera"]["transform"]["translate"]["z"].setValue( 5 )
+
+		script["parent"] = GafferScene.Parent()
+		script["parent"]["in"].setInput( script["instancer"]["out"] )
+		script["parent"]["children"][0].setInput( script["camera"]["out"] )
+		script["parent"]["parent"].setValue( "/" )
+
+		script["outputs"] = GafferScene.Outputs()
+		script["outputs"].addOutput(
+			"beauty",
+			IECoreScene.Output(
+				"test",
+				"ieDisplay",
+				"rgba",
+				{
+					"driverType" : "ClientDisplayDriver",
+					"displayHost" : "localhost",
+					"displayPort" : str( script["catalogue"].displayDriverServer().portNumber() ),
+					"remoteDisplayType" : "GafferScene::GafferDisplayDriver",
+				}
+			)
+		)
+
+		script["outputs"]["in"].setInput( script["parent"]["out"] )
+
+		script["options"] = GafferScene.StandardOptions()
+		script["options"]["in"].setInput( script["outputs"]["out"] )
+		script["options"]["options"]["render:camera"]["enabled"].setValue( True )
+		script["options"]["options"]["render:camera"]["value"].setValue( "/camera" )
+
+		script["rendererOptions"] = self._createOptions()
+		script["rendererOptions"]["in"].setInput( script["options"]["out"] )
+
+		script["render"] = self._createInteractiveRender()
+		script["render"]["in"].setInput( script["rendererOptions"]["out"] )
+
+		script["render"]["state"].setValue( script["render"].State.Running )
+
+		# Two instances should be visible.
+
+		self.assertEventually(
+			lambda : self.assertAlmostEqual( self._color4fAtUV( script["catalogue"], imath.V2f( 0.5 ) ).a, 1 )
+		)
+		self.assertEventually(
+			lambda : self.assertAlmostEqual( self._color4fAtUV( script["catalogue"], imath.V2f( 0.8 ) ).a, 1 )
+		)
+
+		script["instancer"]["numPoints"].setValue( 1 )
+
+		# Now only one should be visible.
+
+		self.assertEventually(
+			lambda : self.assertAlmostEqual( self._color4fAtUV( script["catalogue"], imath.V2f( 0.5 ) ).a, 1 )
+		)
+		self.assertEventually(
+			lambda : self.assertAlmostEqual( self._color4fAtUV( script["catalogue"], imath.V2f( 0.8 ) ).a, 0 )
+		)
+
+		script["instancer"]["transform"]["translate"]["x"].setValue( -2 )
+
+		# Now the instance should have moved.
+
+		self.assertEventually(
+			lambda : self.assertAlmostEqual( self._color4fAtUV( script["catalogue"], imath.V2f( 0.5 ) ).a, 0 )
+		)
+		self.assertEventually(
+			lambda : self.assertAlmostEqual( self._color4fAtUV( script["catalogue"], imath.V2f( 0.2, 0.5 ) ).a, 1 )
+		)
+
+		script["render"]["state"].setValue( script["render"].State.Stopped )
 
 	def tearDown( self ) :
 
@@ -3614,7 +3694,10 @@ class InteractiveRenderTest( GafferSceneTest.SceneTestCase ) :
 	# options that should be used by the tests.
 	def _createOptions( self ) :
 
-		return GafferScene.CustomOptions()
+		c = GafferScene.CustomOptions()
+		c["options"].addChild( Gaffer.NameValuePlug( "ai:console:info", True ) )
+		c["options"].addChild( Gaffer.NameValuePlug( "ai:console:info", True ) )
+		return c
 
 	def _color4fAtUV( self, image, uv ) :
 
