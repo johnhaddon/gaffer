@@ -94,10 +94,10 @@ IECore::MurmurHash Private::PointInstancerAlgo::prototypesHash( const ScenePlug 
 	const auto &currentPath = Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
 
 	/// TODO : PARALLEL_REDUCE
-	auto prototypePaths = pointInstancer->getPrototypes( /* throwIfInvalid = */ true );
-	for( size_t prototypeIndex = 0; prototypeIndex < prototypePaths->size(); ++prototypeIndex )
+	auto prototypePaths = pointInstancer->getPrototypes();
+	for( size_t prototypeIndex = 0, numPrototypes = prototypePaths ? prototypePaths.size() : 0; prototypeIndex < numPrototypes; ++prototypeIndex )
 	{
-		auto fullPath = fullPrototypePath( (*prototypePaths)[prototypeIndex], currentPath );
+		auto fullPath = fullPrototypePath( prototypePaths[prototypeIndex], currentPath );
 		/// TODO : CHECK EXISTENCE
 		result.append( SceneAlgo::hierarchyHash( scene, fullPath ) );
 	}
@@ -107,19 +107,22 @@ IECore::MurmurHash Private::PointInstancerAlgo::prototypesHash( const ScenePlug 
 
 std::vector<IECoreScenePreview::Renderer::Prototype> Private::PointInstancerAlgo::prototypes( const IECoreScene::PointInstancer *instancer, const RendererAlgo::RenderOptions &renderOptions, const ScenePlug *scene, IECoreScenePreview::Renderer *renderer )
 {
-	const auto &currentPath = Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
+	auto prototypePaths = instancer->getPrototypes();
+	if( !prototypePaths )
+	{
+		return {};
+	}
 
-	auto prototypePaths = instancer->getPrototypes( /* throwIfInvalid = */ true );
 	std::vector<IECoreScenePreview::Renderer::Prototype> result;
-	result.resize( prototypePaths->size() );
+	result.resize( prototypePaths.size() );
 
-
+	const auto &currentPath = Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
 	const ThreadState &threadState = ThreadState::current();
 	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
 
 	tbb::parallel_for(
 
-		tbb::blocked_range<size_t>( 0, prototypePaths->size() ),
+		tbb::blocked_range<size_t>( 0, prototypePaths.size() ),
 
 		[&]( const tbb::blocked_range<size_t> &r )
 		{
@@ -128,7 +131,7 @@ std::vector<IECoreScenePreview::Renderer::Prototype> Private::PointInstancerAlgo
 
 			for( size_t prototypeIndex = r.begin(); prototypeIndex != r.end(); ++prototypeIndex )
 			{
-				auto fullPath = fullPrototypePath( (*prototypePaths)[prototypeIndex], currentPath );
+				auto fullPath = fullPrototypePath( prototypePaths[prototypeIndex], currentPath );
 				prototypeScope.setPath( &fullPath );
 				if( !scene->existsPlug()->getValue() )
 				{
@@ -256,17 +259,21 @@ IECoreScene::PointInstancerPtr Private::PointInstancerAlgo::flatten( const IECor
 	// with non-empty objects.
 
 	const auto &currentPath = Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
-	auto prototypePaths = instancer->getPrototypes( /* throwIfInvalid = */ true );
+	auto prototypePaths = instancer->getPrototypes();
+	if( !prototypePaths )
+	{
+		return instancer->copy();
+	}
 
 	vector<FlattenedPrototype> flattenedPrototypes;
-	flattenedPrototypes.resize( prototypePaths->size() );
+	flattenedPrototypes.resize( prototypePaths.size() );
 
 	const ThreadState &threadState = ThreadState::current();
 	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
 
 	tbb::parallel_for(
 
-		tbb::blocked_range<size_t>( 0, prototypePaths->size() ),
+		tbb::blocked_range<size_t>( 0, prototypePaths.size() ),
 
 		[&]( const tbb::blocked_range<size_t> &r )
 		{
@@ -274,7 +281,7 @@ IECoreScene::PointInstancerPtr Private::PointInstancerAlgo::flatten( const IECor
 
 			for( size_t prototypeIndex = r.begin(); prototypeIndex != r.end(); ++prototypeIndex )
 			{
-				auto fullPath = fullPrototypePath( (*prototypePaths)[prototypeIndex], currentPath );
+				auto fullPath = fullPrototypePath( prototypePaths[prototypeIndex], currentPath );
 				prototypeScope.setPath( &fullPath );
 				if( !scene->existsPlug()->getValue() )
 				{
@@ -285,7 +292,7 @@ IECoreScene::PointInstancerPtr Private::PointInstancerAlgo::flatten( const IECor
 					continue;
 				}
 
-				flattenedPrototypes[prototypeIndex] = flattenedPrototype( scene, (*prototypePaths)[prototypeIndex], fullPath );
+				flattenedPrototypes[prototypeIndex] = flattenedPrototype( scene, prototypePaths[prototypeIndex], fullPath );
 			}
 
 		},
