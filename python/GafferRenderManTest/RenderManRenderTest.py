@@ -107,6 +107,12 @@ class RenderManRenderTest( GafferSceneTest.RenderTest ) :
 			self.assertAlmostEqual( middlePixel.a, 1, delta = 0.01 )
 			self.assertEqual( lowerPixel, imath.Color4f( 0 ) )
 
+	def _createConstantShader( self ) :
+
+		shader = GafferRenderMan.RenderManShader()
+		shader.loadShader( "PxrConstant" )
+		return shader, shader["parameters"]["emitColor"], shader["out"]
+
 	def _createDiffuseShader( self ) :
 
 		shader = GafferRenderMan.RenderManShader()
