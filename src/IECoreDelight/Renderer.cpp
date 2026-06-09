@@ -1022,7 +1022,7 @@ class PrototypeCache : public IECore::RefCounted
 			NSICreate( m_context, handle, "instances", 0, nullptr );
 
 			ParameterList parameters;
-			parameters.add( "modelindices", samples[0]->variableData<IntVectorData>( "prototypeIndex" ) ); // TODO : ERROR HANDLING. ACCESSOR.
+			parameters.add( "modelindices", samples[0]->variableData<IntVectorData>( "prototypeIndex" ) ); // TODO : ERROR HANDLING. ACCESSOR. THIS IS THE FIRST CASE WHERE WE COULD BE QUICKER IF WE DIDN'T USE INDEXEDVIEW.
 
 			NSISetAttribute( m_context, handle, parameters.size(), parameters.data() );
 
@@ -1058,10 +1058,10 @@ class PrototypeCache : public IECore::RefCounted
 			std::vector<M44d> &instanceMatrices = instanceMatricesData->writable();
 			for( size_t sampleIndex = 0; sampleIndex < samples.size(); ++sampleIndex )
 			{
-				IECoreScene::PointInstancer::Query query( samples[sampleIndex] );
+				IECoreScene::PointInstancer::TransformQuery query( *samples[sampleIndex] );
 				instanceMatrices.clear();
-				instanceMatrices.reserve( query.numInstances() );
-				for( size_t instanceIndex = 0, e = query.numInstances(); instanceIndex < e; ++instanceIndex )
+				instanceMatrices.reserve( samples[0]->getNumPoints() );
+				for( size_t instanceIndex = 0, e = samples[0]->getNumPoints(); instanceIndex < e; ++instanceIndex )
 				{
 					instanceMatrices.push_back( M44d( query.transform( instanceIndex ) ) );
 				}
