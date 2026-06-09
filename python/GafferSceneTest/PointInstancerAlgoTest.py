@@ -210,7 +210,7 @@ class PointInstancerAlgoTest( GafferSceneTest.SceneTestCase ) :
 			self.assertEqual( pointInstancer, pointInstancerNode["object"].getValue() )
 
 			flattened = GafferScene.Private.PointInstancerAlgo.flatten( pointInstancer, parent["out"] )
-			query = IECoreScene.PointInstancer.Query( flattened )
+			query = IECoreScene.PointInstancer.TransformQuery( flattened )
 			# Actually want to test relative transform, but can use `fullTransform()`
 			self.assertEqual(
 				query.transform( 0 ),

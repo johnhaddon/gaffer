@@ -255,19 +255,21 @@ FlattenedPrototype flattenedPrototype( const ScenePlug *scene, const string &roo
 
 IECoreScene::PointInstancerPtr Private::PointInstancerAlgo::flatten( const IECoreScene::PointInstancer *instancer, const ScenePlug *scene )
 {
-	// For each prototype, get a flattened list of descendant locations
-	// with non-empty objects.
-
-	const auto &currentPath = Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
 	auto prototypePaths = instancer->getPrototypes();
-	if( !prototypePaths )
+	auto prototypeIndex = instancer->getPrototypeIndex();
+
+	if( !prototypePaths || !prototypeIndex )
 	{
 		return instancer->copy();
 	}
 
+	// For each prototype, get a flattened list of descendant locations
+	// with non-empty objects.
+
 	vector<FlattenedPrototype> flattenedPrototypes;
 	flattenedPrototypes.resize( prototypePaths.size() );
 
+	const auto &currentPath = Context::current()->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName );
 	const ThreadState &threadState = ThreadState::current();
 	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
 
@@ -320,43 +322,42 @@ IECoreScene::PointInstancerPtr Private::PointInstancerAlgo::flatten( const IECor
 	fmt::print( "flattened prototypes {}\n", flattenedPrototypes.size() );
 
 	/// TODO : THROW IF CAN'T GET? MAKE ACCESSORS THROW FOR THINGS REQUIRED BY USD?
-	auto prototypeIndex = instancer->variableIndexedView<IECore::IntVectorData>( "prototypeIndex", IECoreScene::PrimitiveVariable::Vertex, false ); // TODO : ACCESSOR, THROW IF MISSING
 
 	fmt::print( "indexed view {}\n", (bool)prototypeIndex );
 
-	PointInstancer::VisibilityQuery visibilityQuery( instancer );
+	PointInstancer::VisibilityQuery visibilityQuery( *instancer );
 
 	size_t numFlattenedPoints = 0;
-	for( size_t pointIndex = 0; pointIndex < prototypeIndex->size(); ++pointIndex )
+	for( size_t pointIndex = 0; pointIndex < prototypeIndex.size(); ++pointIndex )
 	{
-		fmt::print( "Processing prototype {}\n", (*prototypeIndex)[pointIndex] );
+		fmt::print( "Processing prototype {}\n", prototypeIndex[pointIndex] );
 		if( !visibilityQuery.visible( pointIndex ) )
 		{
 			continue;
 		}
-		numFlattenedPoints += flattenedPrototypes[(*prototypeIndex)[pointIndex]].size();
+		numFlattenedPoints += flattenedPrototypes[prototypeIndex[pointIndex]].size();
 	}
 
 	PointInstancerPtr result = new PointInstancer( numFlattenedPoints );
-	result->variables["prototypeRoots"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, flattenedPrototypeRootsData ); // TODO : ACCESSOR
+	result->setPrototypes( flattenedPrototypeRootsData );
 
 	IntVectorDataPtr flattenedPrototypeIndicesData = new IntVectorData;
-	result->variables["prototypeIndex"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, flattenedPrototypeIndicesData ); // TODO : ACCESSOR
+	result->setPrototypeIndex( flattenedPrototypeIndicesData );
 	auto &flattenedPrototypeIndices = flattenedPrototypeIndicesData->writable();
 	flattenedPrototypeIndices.resize( numFlattenedPoints );
 
 	V3fVectorDataPtr flattenedPData = new V3fVectorData;
-	result->variables["P"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, flattenedPData ); // TODO : ACCESSOR
+	result->setPosition( flattenedPData );
 	auto &flattenedP = flattenedPData->writable();
 	flattenedP.resize( numFlattenedPoints );
 
 	V3fVectorDataPtr flattenedScaleData = new V3fVectorData;
-	result->variables["scale"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, flattenedScaleData ); // TODO : ACCESSOR
+	result->setScale( flattenedScaleData );
 	auto &flattenedScale = flattenedScaleData->writable();
 	flattenedScale.resize( numFlattenedPoints );
 
 	QuatfVectorDataPtr flattenedOrientationData = new QuatfVectorData;
-	result->variables["orientation"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, flattenedOrientationData ); // TODO : ACCESSOR
+	result->setOrientation( flattenedOrientationData );
 	auto &flattenedOrientation = flattenedOrientationData->writable();
 	flattenedOrientation.resize( numFlattenedPoints );
 
@@ -365,7 +366,7 @@ IECoreScene::PointInstancerPtr Private::PointInstancerAlgo::flatten( const IECor
 	// TODO : TBB ME
 	// TODO : CUSTOM VERTEX PRIMVARS
 
-	PointInstancer::Query query( instancer );
+	PointInstancer::TransformQuery transformQuery( *instancer );
 
 	size_t flattenedPointIndex = 0;
 	for( size_t pointIndex = 0; pointIndex < instancer->getNumPoints(); ++pointIndex )
@@ -375,11 +376,11 @@ IECoreScene::PointInstancerPtr Private::PointInstancerAlgo::flatten( const IECor
 			continue;
 		}
 
-		for( const auto &location : flattenedPrototypes[(*prototypeIndex)[pointIndex]] )
+		for( const auto &location : flattenedPrototypes[prototypeIndex[pointIndex]] )
 		{
 			flattenedPrototypeIndices[flattenedPointIndex] = location.index;
 
-			M44f m = location.transform * query.transform( pointIndex );
+			M44f m = location.transform * transformQuery.transform( pointIndex );
 			flattenedP[flattenedPointIndex] = m.translation();
 
 			V3f discardedShear( 0 );
