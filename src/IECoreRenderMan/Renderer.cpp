@@ -224,24 +224,24 @@ class RenderManRenderer final : public IECoreScenePreview::Renderer
 				m_session
 			);
 
-			vector<IECoreScene::PointInstancer::Query> sampleQueries;
+			vector<IECoreScene::PointInstancer::TransformQuery> sampleQueries;
 			for( const auto &sample : samples )
 			{
-				sampleQueries.push_back( IECoreScene::PointInstancer::Query( sample ) );
+				sampleQueries.push_back( IECoreScene::PointInstancer::TransformQuery( *sample ) );
 			}
 
-			auto prototypeIndices = samples[0]->variableIndexedView<IECore::IntVectorData>( "prototypeIndex", IECoreScene::PrimitiveVariable::Vertex, false );
+			auto prototypeIndices = samples[0]->getPrototypeIndex();
 
 			Renderer::TransformSamples transformSamples;
 			transformSamples.resize( samples.size() );
-			for( size_t instanceIndex = 0, e = sampleQueries[0].numInstances(); instanceIndex < e; ++instanceIndex ) // TODO : parallel_for
+			for( size_t instanceIndex = 0, e = samples[0]->getNumPoints(); instanceIndex < e; ++instanceIndex ) // TODO : parallel_for
 			{
 				for( size_t sampleIndex = 0; sampleIndex < sampleQueries.size(); ++sampleIndex )
 				{
 					transformSamples[sampleIndex] = sampleQueries[sampleIndex].transform( instanceIndex );
 				}
 
-				const size_t prototypeIndex = prototypeIndices ? (*prototypeIndices)[instanceIndex] : 0;
+				const size_t prototypeIndex = prototypeIndices ? prototypeIndices[instanceIndex] : 0;
 				if( !geometryPrototypes[prototypeIndex] )
 				{
 					//fmt::print( "Empty proto\n" );
