@@ -113,6 +113,7 @@ std::vector<IECoreScenePreview::Renderer::Prototype> Private::PointInstancerAlgo
 	std::vector<IECoreScenePreview::Renderer::Prototype> result;
 	result.resize( prototypePaths->size() );
 
+
 	const ThreadState &threadState = ThreadState::current();
 	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
 
@@ -316,11 +317,17 @@ IECoreScene::PointInstancerPtr Private::PointInstancerAlgo::flatten( const IECor
 
 	fmt::print( "indexed view {}\n", (bool)prototypeIndex );
 
+	PointInstancer::VisibilityQuery visibilityQuery( instancer );
+
 	size_t numFlattenedPoints = 0;
-	for( auto index : *prototypeIndex )
+	for( size_t pointIndex = 0; pointIndex < prototypeIndex->size(); ++pointIndex )
 	{
-		fmt::print( "Processing prototype {}\n", index );
-		numFlattenedPoints += flattenedPrototypes[index].size();
+		fmt::print( "Processing prototype {}\n", (*prototypeIndex)[pointIndex] );
+		if( !visibilityQuery.visible( pointIndex ) )
+		{
+			continue;
+		}
+		numFlattenedPoints += flattenedPrototypes[(*prototypeIndex)[pointIndex]].size();
 	}
 
 	PointInstancerPtr result = new PointInstancer( numFlattenedPoints );
@@ -356,6 +363,11 @@ IECoreScene::PointInstancerPtr Private::PointInstancerAlgo::flatten( const IECor
 	size_t flattenedPointIndex = 0;
 	for( size_t pointIndex = 0; pointIndex < instancer->getNumPoints(); ++pointIndex )
 	{
+		if( !visibilityQuery.visible( pointIndex ) )
+		{
+			continue;
+		}
+
 		for( const auto &location : flattenedPrototypes[(*prototypeIndex)[pointIndex]] )
 		{
 			flattenedPrototypeIndices[flattenedPointIndex] = location.index;

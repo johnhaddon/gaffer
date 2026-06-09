@@ -55,6 +55,7 @@ GAFFERSCENE_API std::vector<IECoreScenePreview::Renderer::Prototype> prototypes(
 /// Flattens a PointInstancer so that it refers only to leaf-level locations. Adds additional points
 /// as necessary whenever an input prototype contains multiple leaf locations. Also transfers transforms
 /// from the prototypes onto the points, so we don't need to pass prototype transforms to the Renderer.
+/// Omits invisible points, since there is no point passing them to the renderer.
 GAFFERSCENE_API IECoreScene::PointInstancerPtr flatten( const IECoreScene::PointInstancer *instancer, const ScenePlug *scene );
 
 } // namespace GafferScene::Private::PointInstancerAlgo
