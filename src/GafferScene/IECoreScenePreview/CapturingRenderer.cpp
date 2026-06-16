@@ -115,32 +115,22 @@ Renderer::AttributesInterfacePtr CapturingRenderer::attributes( const IECore::Co
 	return new CapturedAttributes( ConstCompoundObjectPtr( attributes ) );
 }
 
-Renderer::ObjectInterfacePtr CapturingRenderer::camera( const std::string &name, const IECoreScene::Camera *camera, const AttributesInterface *attributes )
+Renderer::ObjectInterfacePtr CapturingRenderer::camera( const std::string &name, const CameraSamples &samples, const SampleTimes &times, const AttributesInterface *attributes )
 {
-	return this->object( name, camera, attributes );
-}
-
-Renderer::ObjectInterfacePtr CapturingRenderer::camera( const std::string &name, const std::vector<const IECoreScene::Camera *> &samples, const std::vector<float> &times, const AttributesInterface *attributes )
-{
-	return this->object( name, vector<const Object *>( samples.begin(), samples.end() ), times, attributes );
+	return this->object( name, ObjectSamples( samples.begin(), samples.end() ), times, attributes );
 }
 
 Renderer::ObjectInterfacePtr CapturingRenderer::light( const std::string &name, const IECore::Object *object, const AttributesInterface *attributes )
 {
-	return this->object( name, object, attributes );
+	return this->object( name, { object }, {}, attributes );
 }
 
 Renderer::ObjectInterfacePtr CapturingRenderer::lightFilter( const std::string &name, const IECore::Object *object, const AttributesInterface *attributes )
 {
-	return this->object( name, object, attributes );
-}
-
-Renderer::ObjectInterfacePtr CapturingRenderer::object( const std::string &name, const IECore::Object *object, const AttributesInterface *attributes )
-{
 	return this->object( name, { object }, {}, attributes );
 }
 
-Renderer::ObjectInterfacePtr CapturingRenderer::object( const std::string &name, const std::vector<const IECore::Object *> &samples, const std::vector<float> &times, const AttributesInterface *attributes )
+Renderer::ObjectInterfacePtr CapturingRenderer::object( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes )
 {
 	IECore::MessageHandler::Scope s( m_messageHandler.get() );
 
@@ -237,7 +227,7 @@ bool CapturingRenderer::CapturedAttributes::unrenderableAttributeValue( const Ca
 // CapturedObject
 //////////////////////////////////////////////////////////////////////////
 
-CapturingRenderer::CapturedObject::CapturedObject( CapturingRenderer *renderer, const std::string &name, const std::vector<const IECore::Object *> &samples, const std::vector<float> &times )
+CapturingRenderer::CapturedObject::CapturedObject( CapturingRenderer *renderer, const std::string &name, const ObjectSamples &samples, const SampleTimes &times )
 	:	m_renderer( renderer ), m_name( name ), m_capturedSamples( samples.begin(), samples.end() ), m_capturedSampleTimes( times ), m_numAttributeEdits( 0 ), m_id( 0 ), m_instanceID( 0 )
 {
 }
@@ -257,22 +247,22 @@ const std::string &CapturingRenderer::CapturedObject::capturedName() const
 	return m_name;
 }
 
-const std::vector<IECore::ConstObjectPtr> &CapturingRenderer::CapturedObject::capturedSamples() const
+const IECoreScenePreview::Renderer::ObjectSamples &CapturingRenderer::CapturedObject::capturedSamples() const
 {
 	return m_capturedSamples;
 }
 
-const std::vector<float> &CapturingRenderer::CapturedObject::capturedSampleTimes() const
+const IECoreScenePreview::Renderer::SampleTimes &CapturingRenderer::CapturedObject::capturedSampleTimes() const
 {
 	return m_capturedSampleTimes;
 }
 
-const std::vector<Imath::M44f> &CapturingRenderer::CapturedObject::capturedTransforms() const
+const IECoreScenePreview::Renderer::TransformSamples &CapturingRenderer::CapturedObject::capturedTransforms() const
 {
 	return m_capturedTransforms;
 }
 
-const std::vector<float> &CapturingRenderer::CapturedObject::capturedTransformTimes() const
+const IECoreScenePreview::Renderer::SampleTimes &CapturingRenderer::CapturedObject::capturedTransformTimes() const
 {
 	return m_capturedTransformTimes;
 }
@@ -337,7 +327,7 @@ void CapturingRenderer::CapturedObject::transform( const Imath::M44f &transform 
 	m_capturedTransformTimes.clear();
 }
 
-void CapturingRenderer::CapturedObject::transform( const std::vector<Imath::M44f> &samples, const std::vector<float> &times )
+void CapturingRenderer::CapturedObject::transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const SampleTimes &times )
 {
 	m_renderer->checkPaused();
 	m_capturedTransforms = samples;

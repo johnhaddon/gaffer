@@ -534,7 +534,7 @@ class OpenGLObject : public IECoreScenePreview::Renderer::ObjectInterface
 			} );
 		}
 
-		void transform( const std::vector<Imath::M44f> &samples, const std::vector<float> &times ) override
+		void transform( const IECoreScenePreview::Renderer::TransformSamples &samples, const IECoreScenePreview::Renderer::SampleTimes &times ) override
 		{
 			transform( samples.front() );
 		}
@@ -944,7 +944,7 @@ class OpenGLRenderer final : public IECoreScenePreview::Renderer
 			return result;
 		}
 
-		ObjectInterfacePtr camera( const std::string &name, const IECoreScene::Camera *camera, const AttributesInterface *attributes ) override
+		ObjectInterfacePtr camera( const std::string &name, const CameraSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override
 		{
 			IECore::MessageHandler::Scope s( m_messageHandler.get() );
 
@@ -955,7 +955,7 @@ class OpenGLRenderer final : public IECoreScenePreview::Renderer
 				openGLAttributes = new OpenGLAttributes( emptyAttributes.get() );
 			}
 
-			OpenGLCameraPtr result = new OpenGLCamera( name, camera, openGLAttributes, m_editQueue );
+			OpenGLCameraPtr result = new OpenGLCamera( name, samples.front().get(), openGLAttributes, m_editQueue );
 			m_editQueue.push( [this, result, name]() {
 				m_objects.push_back( result );
 				m_cameras[name] = result;
@@ -981,8 +981,9 @@ class OpenGLRenderer final : public IECoreScenePreview::Renderer
 			return result;
 		}
 
-		Renderer::ObjectInterfacePtr object( const std::string &name, const IECore::Object *object, const AttributesInterface *attributes ) override
+		ObjectInterfacePtr object( const std::string &name, const ObjectSamples &samples, const SampleTimes &times, const AttributesInterface *attributes ) override
 		{
+			const IECore::Object *object = samples.front().get();
 			if( !m_renderObjects && !runTimeCast<const IECoreScenePreview::Placeholder>( object ) )
 			{
 				return nullptr;
@@ -993,11 +994,6 @@ class OpenGLRenderer final : public IECoreScenePreview::Renderer
 			OpenGLObjectPtr result = new OpenGLObject( name, object, static_cast<const OpenGLAttributes *>( attributes ), m_editQueue );
 			m_editQueue.push( [this, result]() { m_objects.push_back( result ); } );
 			return result;
-		}
-
-		ObjectInterfacePtr object( const std::string &name, const std::vector<const IECore::Object *> &samples, const std::vector<float> &times, const AttributesInterface *attributes ) override
-		{
-			return object( name, samples.front(), attributes );
 		}
 
 		void render() override
