@@ -11,11 +11,14 @@ Fixes
 -----
 
 - SceneInspector : Fixed Interpolation field for primitive variables that don't exist. Previously it said "Invalid", and now it shows nothing.
+- NodeGadget : Fixed usage of `instanceCreatedSignal()` with NodeGadgets implemented in Python [^1].
 
 API
 ---
 
 - Image : Added `updateImage()` method.
+
+[^1]: Fix for bug introduced in `1.7.0.0a1`, so should be omitted from final `1.7.0.0` release notes.
 
 1.7.0.0a2 (relative to 1.7.0.0a1)
 =========
