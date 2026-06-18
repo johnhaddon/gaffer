@@ -1,7 +1,10 @@
 1.6.x.x (relative to 1.6.19.2)
 =======
 
+Improvements
+------------
 
+- SceneWriter : Added `IECOREUSD_WRITE_CONFORMANT_OSL_SHADERS` environment variable. When set to a value of `1`, OSL shaders are written to USD in a format compatible with `hdPrman`, for rendering with RenderMan in `usdview` and other Hydra-based applications.
 
 1.6.19.2 (relative to 1.6.19.1)
 ========
