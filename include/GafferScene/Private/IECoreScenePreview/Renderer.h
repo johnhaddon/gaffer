@@ -314,12 +314,17 @@ class GAFFERSCENE_API Renderer : public IECore::RefCounted
 		/// Convenience overload for when there is only a single object sample.
 		ObjectInterfacePtr object( const std::string &name, const IECore::Object *object, const AttributesInterface *attributes );
 
+		/// Prototype geometry for use in the `pointInstancer()` method.
 		struct Prototype
 		{
 			ObjectSamples samples;
 			SampleTimes times;
 			AttributesInterfacePtr attributes;
 		};
+		/// Renders prototype geometry instanced onto a point cloud.
+		/// > Note : It is the caller's responsibility to have
+		/// > prepared `prototypes` based on the value of
+		/// >`PointInstancer::getPrototypes()`.
 		virtual ObjectInterfacePtr pointInstancer( const std::string &name, const PointInstancerSamples &samples, const SampleTimes &times, const std::vector<Prototype> &prototypes, const AttributesInterface *attributes );
 
 		/// Performs the render - should be called after the
