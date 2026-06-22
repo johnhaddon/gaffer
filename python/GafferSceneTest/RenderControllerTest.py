@@ -2004,7 +2004,9 @@ class RenderControllerTest( GafferSceneTest.SceneTestCase ) :
 		with Gaffer.Context() as context :
 			context["scene:path"] = GafferScene.ScenePlug.stringToPath( "/instancer" )
 			expectedInstancer = pointInstancer["out"]["object"].getValue()
-			expectedInstancer = GafferScene.Private.PointInstancerAlgo.flatten( expectedInstancer, pointInstancer["out"] )
+			expectedInstancer = GafferScene.Private.PointInstancerAlgo.flatten(
+				expectedInstancer, GafferScene.Private.RendererAlgo.RenderOptions( pointInstancer["out"] ), pointInstancer["out"]
+			)
 
 		capuredInstancer = renderer.capturedObject( "/instancer" )
 		self.assertEqual( capuredInstancer.capturedSamples(), [ expectedInstancer ] )
