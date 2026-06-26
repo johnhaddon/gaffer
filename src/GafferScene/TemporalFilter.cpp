@@ -383,10 +383,12 @@ IECore::ConstObjectPtr TemporalFilter::computeProcessedObject( const ScenePath &
 				using DataType = std::remove_pointer_t<decltype( typedData )>;
 				if constexpr( TypeTraits::IsVectorTypedData<DataType>::value || TypeTraits::IsSimpleTypedData<DataType>::value )
 				{
-				if constexpr( TypeTraits::IsNumericBasedTypedData<DataType>::value )
+				if constexpr( TypeTraits::IsNumericBasedTypedData<DataType>::value ) // TODO : SIMPLY TESTS IF WE CAN. UNNEST IF WE CAN.
 				{
 					using BaseType = typename DataType::BaseType;
 					const size_t numBaseValues = typedData->baseSize();
+
+					// TODO : MUST BE MORE COMPACT WAY OF EXPRESSING THIS
 
 					if( filter == Filter::Min || filter == Filter::Max )
 					{
