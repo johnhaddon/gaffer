@@ -48,6 +48,7 @@
 
 #include <cmath>
 #include <limits>
+#include <numeric>
 #include <vector>
 
 using namespace std;
@@ -217,37 +218,33 @@ bool TemporalFilter::affectsProcessedObject( const Gaffer::Plug *input ) const
 
 vector<float> TemporalFilter::sampleFrames( const Context *context ) const
 {
-	const float start = ( (FrameMode)startModePlug()->getValue() == FrameMode::Absolute )
-		? startFramePlug()->getValue()
-		: context->getFrame() + startFramePlug()->getValue();
-	const float end = ( (FrameMode)endModePlug()->getValue() == FrameMode::Absolute )
-		? endFramePlug()->getValue()
-		: context->getFrame() + endFramePlug()->getValue();
+	// This is the same logic used by MotionPath.
 
+	const float start = ( (FrameMode)startModePlug()->getValue() == FrameMode::Absolute ) ? startFramePlug()->getValue() : context->getFrame() + startFramePlug()->getValue();
+	const float end = ( (FrameMode)endModePlug()->getValue() == FrameMode::Absolute ) ? endFramePlug()->getValue() : context->getFrame() + endFramePlug()->getValue();
 	if( start >= end )
 	{
 		return {};
 	}
 
-	int n;
-	float s;
-	const SamplingMode mode = (SamplingMode)samplingModePlug()->getValue();
-	if( mode == SamplingMode::Variable )
+	float step;
+	int samples;
+	if( (SamplingMode)samplingModePlug()->getValue() == SamplingMode::Variable )
 	{
-		s = stepPlug()->getValue();
-		n = (int)ceil( ( end - start ) / s - 1e-6f ) + 1;
+		step = stepPlug()->getValue();
+		samples = (int)ceil( ( end - start ) / step - 1e-6f ) + 1;
 	}
 	else
 	{
-		n = samplesPlug()->getValue();
-		s = ( end - start ) / ( n - 1 );
+		samples = samplesPlug()->getValue();
+		step = ( end - start ) / ( samples - 1 );
 	}
 
 	vector<float> frames;
-	frames.reserve( n );
-	for( int i = 0; i < n - 1; ++i )
+	frames.reserve( samples );
+	for( int i = 0; i < samples - 1; ++i )
 	{
-		frames.push_back( start + s * i );
+		frames.push_back( start + step * i );
 	}
 	frames.push_back( end );
 	return frames;
@@ -255,57 +252,52 @@ vector<float> TemporalFilter::sampleFrames( const Context *context ) const
 
 vector<float> TemporalFilter::sampleWeights( const vector<float> &frames ) const
 {
-	const int n = frames.size();
-	vector<float> weights( n );
+	vector<float> weights( frames.size() );
 
 	const Filter filter = (Filter)filterTypePlug()->getValue();
 	switch( filter )
 	{
-		case Filter::Box : // TODO : Needs normalisation
+		case Filter::Box :
 		case Filter::Min :
 		case Filter::Max :
-			fill( weights.begin(), weights.end(), 1.0f / (float)n );
-			fmt::print( "WEIGHTS {}\n", n );
+			fill( weights.begin(), weights.end(), 1.0f );
 			break;
-
 		case Filter::Gaussian :
 		{
-			const float start = frames.front();
-			const float range = frames.back() - start;
-			float sum = 0;
-			for( int i = 0; i < n; ++i ) // TODO : CHECK WE'RE NOT WEIGHTING THE OUTER SAMPLES TO ZERO
+			for( size_t i = 0; i < frames.size(); ++i ) // TODO : CHECK WE'RE NOT WEIGHTING THE OUTER SAMPLES TO ZERO
 			{
-				// Map sample position to [-1, 1] centred on the midpoint of the range.
-				const float x = range > 0 ? 2.0f * ( frames[i] - start ) / range - 1.0f : 0.0f; // TODO : REMOVE CHECK FOR EMPTY RANGE
-				const float w = exp( -2.0f * x * x );
+				const float x = ( frames[i] - frames.front() ) / ( frames.back() - frames.front() );
+				const float w = exp( - 3 * pow( x - 0.5, 2 ) ); // TODO : CHECK RANGE (MAYBE NEED BIGGENING?), NAME VARIABLES
 				weights[i] = w;
-				sum += w;
-			}
-			if( sum > 0 )
-			{
-				for( auto &w : weights ) w /= sum;
 			}
 			break;
 		}
-
 		case Filter::Ramp :
 		{
 			auto evaluator = rampPlug()->getValue().evaluator();
-			float sum = 0;
-			for( int i = 0; i < n; ++i )
+			for( size_t i = 0; i < frames.size(); ++i )
 			{
-				// Map sample index to [0, 1].
-				const float x = n > 1 ? (float)i / ( n - 1 ) : 0.5f;
-				const float w = evaluator( x );
-				weights[i] = w;
-				sum += w;
-			}
-			if( sum > 0 )
-			{
-				for( auto &w : weights ) w /= sum;
+				const float x = ( frames[i] - frames.front() ) / ( frames.back() - frames.front() );
+				weights[i] = evaluator( x );
 			}
 			break;
 		}
+	}
+
+	// Normalise
+
+	const float sum = std::accumulate( weights.begin(), weights.end(), 0.0f );
+	if( sum > 0.0f )
+	{
+		for( auto &weight : weights )
+		{
+			weight /= sum;
+		}
+	}
+
+	for( size_t i = 0; i < frames.size(); ++i )
+	{
+		fmt::print( "{} : {} : {}\n", i, frames[i], weights[i] );
 	}
 
 	return weights;
@@ -319,12 +311,14 @@ void TemporalFilter::hashProcessedObject( const ScenePath &path, const Context *
 	filterTypePlug()->hash( h );
 	rampPlug()->hash( h );
 
-	const vector<float> frames = sampleFrames( context ); // TODO : WHY NOT JUST HASH THE INPUTS?
+	const vector<float> frames = sampleFrames( context );
 	if( frames.empty() )
 	{
 		return;
 	}
 	const vector<float> weights = sampleWeights( frames );
+
+	// TODO : PARALLEL_FOR
 
 	Context::EditableScope scope( context );
 	for( size_t i = 0; i < frames.size(); ++i )
@@ -360,6 +354,7 @@ IECore::ConstObjectPtr TemporalFilter::computeProcessedObject( const ScenePath &
 
 	// Fetch the primitive at each sample time.
 	// TODO : DON'T STORE EVERYTHING! FILTER ON THE FLY!!! FFS.
+	// TODO : PARALLEL_FOR, OR GATHER.
 	vector<ConstPrimitivePtr> samplePrims;
 	samplePrims.reserve( frames.size() );
 	Context::EditableScope scope( context );
