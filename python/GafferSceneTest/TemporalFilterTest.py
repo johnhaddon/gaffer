@@ -162,7 +162,7 @@ class TemporalFilterTest( GafferSceneTest.SceneTestCase ) :
 			context.setFrame( 4 )
 			filtered = temporalFilter["out"].object( "/sphere" )
 
-			# linear sequence centred on 4, so averages to 1.
+			# linear sequence centred on 4, so averages to 4.
 			self.assertAlmostEqual( filtered["frame"].data.value, 4, delta = 0.0001 )
 			# only 2 odd frames out of our 5 samples.
 			self.assertAlmostEqual( filtered["pulse"].data.value, 2 / 5, delta = 0.0001 )
@@ -171,26 +171,42 @@ class TemporalFilterTest( GafferSceneTest.SceneTestCase ) :
 
 	def testGaussianFilter( self ) :
 
-		script = self.__makeScene()
-		script["temporalFilter"]["filterType"].setValue( GafferScene.TemporalFilter.Filter.Gaussian )
+		sphere = self.__AnimatedSphere()
 
-		# Gaussian is symmetric around the midpoint of the range, so it also
-		# reproduces a linear function exactly.
-		for frame in ( 0, 3, -1 ) :
-			self.assertAlmostEqual( self.__val( script, frame ), float( frame ), places=5 )
+		sphereFilter = GafferScene.PathFilter()
+		sphereFilter["paths"].setValue( IECore.StringVectorData( [ "/sphere" ] ) )
 
-		# Verify the weights are bell-shaped: centre sample should have more
-		# influence than the edge samples by comparing with a skewed constant.
-		# Replace "val" with 1 at the centre sample only, 0 elsewhere, and
-		# check the output is above 1/5 (box weight).
-		script["vars"]["primitiveVariables"]["NameValuePlug"]["value"].clearKeys()
-		anim = Gaffer.Animation.acquire( script["vars"]["primitiveVariables"]["NameValuePlug"]["value"] )
-		for f in range( -10, 11 ) :
-			anim.addKey( Gaffer.Animation.Key( f / 24.0, 1.0 if f == 0 else 0.0, Gaffer.Animation.Interpolation.Constant ) )
-		with Gaffer.Context( script.context() ) as context :
-			context.setFrame( 0 )
-			centreWeight = script["temporalFilter"]["out"].object( "/sphere" )["val"].data.value
-		self.assertGreater( centreWeight, 1.0 / 5.0 )
+		temporalFilter = GafferScene.TemporalFilter()
+		temporalFilter["in"].setInput( sphere["out"] )
+		temporalFilter["filter"].setInput( sphereFilter["out"] )
+		temporalFilter["primitiveVariables"].setValue( "*" )
+		temporalFilter["filterType"].setValue( GafferScene.TemporalFilter.Filter.Gaussian )
+
+		# Gaussian is symmetric around the midpoint of the filter, and normalised,
+		# so averages to the value of `frame`.
+		with Gaffer.Context() as context :
+
+			for frame in ( 0, 3, -1 ) :
+				context.setFrame( frame )
+				filtered = temporalFilter["out"].object( "/sphere" )
+				self.assertAlmostEqual( filtered["frame"].data.value, frame, delta = 0.0001 )
+
+		# Test specific weights by filtering against a value which is only non-zero
+		# on frame 1.
+
+		weights = []
+		with Gaffer.Context() as context :
+
+			for frame in range( -1, 4 ) :
+				context.setFrame( frame )
+				filtered = temporalFilter["out"].object( "/sphere" )
+				weights.append( filtered["onOne"].data.value )
+
+		self.assertEqual( weights, list( reversed( weights ) ) ) # Symmetric
+		self.assertAlmostEqual( sum( weights ), 1, delta = 0.00001 ) # Normalised
+		self.assertAlmostEqual( weights[0], 0.05448869 )
+		self.assertAlmostEqual( weights[1], 0.24420136 )
+		self.assertAlmostEqual( weights[2], 0.40261996 )
 
 	def testMinMaxFilters( self ) :
 
@@ -220,84 +236,94 @@ class TemporalFilterTest( GafferSceneTest.SceneTestCase ) :
 
 	def testRampFilter( self ) :
 
-		script = self.__makeScene()
-		script["temporalFilter"]["filterType"].setValue( GafferScene.TemporalFilter.Filter.Ramp )
+		sphere = self.__AnimatedSphere()
 
-		# Configure ramp to put all weight on the last sample (x=1 → y=1, rest 0).
+		sphereFilter = GafferScene.PathFilter()
+		sphereFilter["paths"].setValue( IECore.StringVectorData( [ "/sphere" ] ) )
+
+		temporalFilter = GafferScene.TemporalFilter()
+		temporalFilter["in"].setInput( sphere["out"] )
+		temporalFilter["filter"].setInput( sphereFilter["out"] )
+		temporalFilter["primitiveVariables"].setValue( "*" )
+		temporalFilter["filterType"].setValue( GafferScene.TemporalFilter.Filter.Ramp )
+
 		ramp = IECore.Rampff(
-			{ 0.0 : 0.0, 1.0 : 1.0 },
-			IECore.RampInterpolation.Constant
+			[
+				( 0, 0 ),
+				( 1, 1 ),
+			],
+			IECore.RampInterpolation.Linear
 		)
-		script["temporalFilter"]["ramp"].setValue( ramp )
+		temporalFilter["ramp"].setValue( ramp )
 
-		# Last sample is at F+2, so result should equal F+2.
-		for frame in ( 0, 3 ) :
-			self.assertAlmostEqual( self.__val( script, frame ), float( frame ) + 2, places=5 )
+		expectedWeights = [ 0, 0.1, 0.2, 0.3, 0.4 ]
+
+		filtered = temporalFilter["out"].object( "/sphere" )
+		self.assertAlmostEqual(
+			filtered["frame"].data.value,
+			sum( expectedWeights[x] * ( x - 1 ) for x in range( 0, 5 ) ),
+			delta = 0.0001
+		)
 
 	def testRelativeRange( self ) :
 
-		script = self.__makeScene()
-		script["temporalFilter"]["filterType"].setValue( GafferScene.TemporalFilter.Filter.Box )
+		sphere = self.__AnimatedSphere()
 
-		script["temporalFilter"]["start"]["mode"].setValue( GafferScene.TemporalFilter.FrameMode.Relative )
-		script["temporalFilter"]["end"]["mode"].setValue( GafferScene.TemporalFilter.FrameMode.Relative )
-		script["temporalFilter"]["start"]["frame"].setValue( -1 )
-		script["temporalFilter"]["end"]["frame"].setValue( 1 )
+		sphereFilter = GafferScene.PathFilter()
+		sphereFilter["paths"].setValue( IECore.StringVectorData( [ "/sphere" ] ) )
 
-		# Samples at F-1, F, F+1 → average is F.
-		for frame in ( 0, 5 ) :
-			self.assertAlmostEqual( self.__val( script, frame ), float( frame ), places=5 )
+		temporalFilter = GafferScene.TemporalFilter()
+		temporalFilter["in"].setInput( sphere["out"] )
+		temporalFilter["filter"].setInput( sphereFilter["out"] )
+		temporalFilter["primitiveVariables"].setValue( "*" )
+		temporalFilter["start"]["mode"].setValue( GafferScene.TemporalFilter.FrameMode.Relative )
+		temporalFilter["end"]["mode"].setValue( GafferScene.TemporalFilter.FrameMode.Relative )
+		temporalFilter["start"]["frame"].setValue( -5 )
+		temporalFilter["end"]["frame"].setValue( 3 )
+
+		with Gaffer.Context() as context :
+
+			for frame in ( 0, 5 ) :
+
+				context.setFrame( frame )
+
+				temporalFilter["filterType"].setValue( GafferScene.TemporalFilter.Filter.Min )
+				filtered = temporalFilter["out"].object( "/sphere" )
+				self.assertEqual( filtered["frame"].data.value, frame - 5 )
+
+				temporalFilter["filterType"].setValue( GafferScene.TemporalFilter.Filter.Max )
+				filtered = temporalFilter["out"].object( "/sphere" )
+				self.assertEqual( filtered["frame"].data.value, frame + 3 )
 
 	def testAbsoluteRange( self ) :
 
-		script = self.__makeScene()
-		script["temporalFilter"]["filterType"].setValue( GafferScene.TemporalFilter.Filter.Box )
+		sphere = self.__AnimatedSphere()
 
-		script["temporalFilter"]["start"]["mode"].setValue( GafferScene.TemporalFilter.FrameMode.Absolute )
-		script["temporalFilter"]["end"]["mode"].setValue( GafferScene.TemporalFilter.FrameMode.Absolute )
-		script["temporalFilter"]["start"]["frame"].setValue( 0 )
-		script["temporalFilter"]["end"]["frame"].setValue( 4 )
+		sphereFilter = GafferScene.PathFilter()
+		sphereFilter["paths"].setValue( IECore.StringVectorData( [ "/sphere" ] ) )
 
-		# Samples always at 0, 1, 2, 3, 4 regardless of current frame.
-		expected = ( 0 + 1 + 2 + 3 + 4 ) / 5.0
-		for frame in ( 0, 5, -3 ) :
-			self.assertAlmostEqual( self.__val( script, frame ), expected, places=5 )
+		temporalFilter = GafferScene.TemporalFilter()
+		temporalFilter["in"].setInput( sphere["out"] )
+		temporalFilter["filter"].setInput( sphereFilter["out"] )
+		temporalFilter["primitiveVariables"].setValue( "*" )
+		temporalFilter["start"]["mode"].setValue( GafferScene.TemporalFilter.FrameMode.Absolute )
+		temporalFilter["end"]["mode"].setValue( GafferScene.TemporalFilter.FrameMode.Absolute )
+		temporalFilter["start"]["frame"].setValue( 0 )
+		temporalFilter["end"]["frame"].setValue( 10 )
 
-	def testVariableSampling( self ) :
+		with Gaffer.Context() as context :
 
-		script = self.__makeScene()
-		script["temporalFilter"]["filterType"].setValue( GafferScene.TemporalFilter.Filter.Box )
-		script["temporalFilter"]["samplingMode"].setValue( GafferScene.TemporalFilter.SamplingMode.Variable )
-		script["temporalFilter"]["step"].setValue( 0.5 )
-		# step=0.5, range=-2..2 → 9 samples at -2, -1.5, ..., 1.5, 2.
-		# Average of linear sequence centred on F is still F.
-		for frame in ( 0, 3 ) :
-			self.assertAlmostEqual( self.__val( script, frame ), float( frame ), places=5 )
+			for frame in range( 0, 5 ) :
 
-	def testFixedSampling( self ) :
+				context.setFrame( frame )
 
-		script = self.__makeScene()
-		script["temporalFilter"]["filterType"].setValue( GafferScene.TemporalFilter.Filter.Box )
-		script["temporalFilter"]["samplingMode"].setValue( GafferScene.TemporalFilter.SamplingMode.Fixed )
-		script["temporalFilter"]["samples"].setValue( 3 )
-		# 3 samples at F-2, F, F+2 → average is F.
-		for frame in ( 0, 3 ) :
-			self.assertAlmostEqual( self.__val( script, frame ), float( frame ), places=5 )
+				temporalFilter["filterType"].setValue( GafferScene.TemporalFilter.Filter.Min )
+				filtered = temporalFilter["out"].object( "/sphere" )
+				self.assertEqual( filtered["frame"].data.value, 0 )
 
-	def testBadRange( self ) :
-
-		script = self.__makeScene()
-
-		# start >= end → pass-through.
-		script["temporalFilter"]["start"]["frame"].setValue( 2 )
-		script["temporalFilter"]["end"]["frame"].setValue( -2 )
-
-		with Gaffer.Context( script.context() ) as context :
-			context.setFrame( 0 )
-			self.assertAlmostEqual(
-				script["temporalFilter"]["out"].object( "/sphere" )["val"].data.value, # TODO : WHY NOT A TRUE PASS THROUGH?3
-				0.0, places=5
-			)
+				temporalFilter["filterType"].setValue( GafferScene.TemporalFilter.Filter.Max )
+				filtered = temporalFilter["out"].object( "/sphere" )
+				self.assertEqual( filtered["frame"].data.value, 10 )
 
 	def testPrimitiveVariablesPattern( self ) :
 

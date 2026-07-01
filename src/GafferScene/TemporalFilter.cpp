@@ -264,10 +264,11 @@ vector<float> TemporalFilter::sampleWeights( const vector<float> &frames ) const
 			break;
 		case Filter::Gaussian :
 		{
-			for( size_t i = 0; i < frames.size(); ++i ) // TODO : CHECK WE'RE NOT WEIGHTING THE OUTER SAMPLES TO ZERO
+			for( size_t i = 0; i < frames.size(); ++i )
 			{
-				const float x = ( frames[i] - frames.front() ) / ( frames.back() - frames.front() );
-				const float w = exp( - 3 * pow( x - 0.5, 2 ) ); // TODO : CHECK RANGE (MAYBE NEED BIGGENING?), NAME VARIABLES
+				float x = ( frames[i] - frames.front() ) / ( frames.back() - frames.front() ); // 0 to 1
+				x = 2.0f * ( x - 0.5f ); // -1 to 1
+				const float w = exp( -2.0f * x * x );
 				weights[i] = w;
 			}
 			break;
@@ -295,10 +296,10 @@ vector<float> TemporalFilter::sampleWeights( const vector<float> &frames ) const
 		}
 	}
 
-	for( size_t i = 0; i < frames.size(); ++i )
-	{
-		fmt::print( "{} : {} : {}\n", i, frames[i], weights[i] );
-	}
+	// for( size_t i = 0; i < frames.size(); ++i )
+	// {
+	// 	fmt::print( "{} : {} : {}\n", i, frames[i], weights[i] );
+	// }
 
 	return weights;
 }
@@ -307,15 +308,16 @@ void TemporalFilter::hashProcessedObject( const ScenePath &path, const Context *
 {
 	Deformer::hashProcessedObject( path, context, h );
 
-	primitiveVariablesPlug()->hash( h );
-	filterTypePlug()->hash( h );
-	rampPlug()->hash( h );
-
 	const vector<float> frames = sampleFrames( context );
 	if( frames.empty() )
 	{
+		h = inPlug()->objectPlug()->hash();
 		return;
 	}
+
+	primitiveVariablesPlug()->hash( h );
+
+	filterTypePlug()->hash( h ); // Needed to distinguish Min and Max mode, which have the same weights.
 	const vector<float> weights = sampleWeights( frames );
 
 	// TODO : PARALLEL_FOR
@@ -337,14 +339,14 @@ IECore::ConstObjectPtr TemporalFilter::computeProcessedObject( const ScenePath &
 		return inputObject;
 	}
 
-	const string primVars = primitiveVariablesPlug()->getValue();
-	if( primVars.empty() )
+	const vector<float> frames = sampleFrames( context );
+	if( frames.empty() )
 	{
 		return inputObject;
 	}
 
-	const vector<float> frames = sampleFrames( context );
-	if( frames.empty() )
+	const string primVars = primitiveVariablesPlug()->getValue();
+	if( primVars.empty() )
 	{
 		return inputObject;
 	}
