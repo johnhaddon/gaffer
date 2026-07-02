@@ -345,8 +345,8 @@ IECore::ConstObjectPtr TemporalFilter::computeProcessedObject( const ScenePath &
 		return inputObject;
 	}
 
-	const string primVars = primitiveVariablesPlug()->getValue();
-	if( primVars.empty() )
+	const string primitiveVariables = primitiveVariablesPlug()->getValue();
+	if( primitiveVariables.empty() )
 	{
 		return inputObject;
 	}
@@ -369,17 +369,14 @@ IECore::ConstObjectPtr TemporalFilter::computeProcessedObject( const ScenePath &
 
 	PrimitivePtr result = inputPrimitive->copy();
 
-	for( auto &namedVar : result->variables )
+	for( auto &[name, primitiveVariable] : result->variables )
 	{
-		const std::string &name = namedVar.first;
-		PrimitiveVariable &var = namedVar.second;
-
-		if( !StringAlgo::matchMultiple( name, primVars ) )
+		if( !StringAlgo::matchMultiple( name, primitiveVariables ) )
 		{
 			continue;
 		}
 
-		IECore::dispatch( var.data.get(),
+		IECore::dispatch( primitiveVariable.data.get(),
 			[&]( auto *typedData )
 			{
 				using DataType = std::remove_pointer_t<decltype( typedData )>;
@@ -410,7 +407,7 @@ IECore::ConstObjectPtr TemporalFilter::computeProcessedObject( const ScenePath &
 								auto it = samplePrim->variables.find( name );
 								if(
 									it != samplePrim->variables.end() &&
-									it->second.data->typeId() == var.data->typeId()
+									it->second.data->typeId() == typedData->typeId()
 								)
 								{
 									const auto *st = static_cast<const DataType *>( it->second.data.get() );
@@ -482,7 +479,7 @@ IECore::ConstObjectPtr TemporalFilter::computeProcessedObject( const ScenePath &
 							auto it = samplePrim->variables.find( name );
 							if(
 								it == samplePrim->variables.end() ||
-								it->second.data->typeId() != var.data->typeId()
+								it->second.data->typeId() != typedData->typeId()
 							)
 							{
 								// Missing or incompatible sample contributes zero - no-op.
