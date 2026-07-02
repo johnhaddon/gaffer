@@ -296,11 +296,6 @@ vector<float> TemporalFilter::sampleWeights( const vector<float> &frames ) const
 		}
 	}
 
-	// for( size_t i = 0; i < frames.size(); ++i )
-	// {
-	// 	fmt::print( "{} : {} : {}\n", i, frames[i], weights[i] );
-	// }
-
 	return weights;
 }
 
