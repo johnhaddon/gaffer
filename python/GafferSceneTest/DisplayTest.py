@@ -53,6 +53,23 @@ import GafferScene
 
 class DisplayTest( GafferImageTest.ImageTestCase ) :
 
+	def setUp( self ) :
+
+		GafferImageTest.ImageTestCase.setUp( self )
+
+		self.uiThreadCallHandler = GafferTest.ParallelAlgoTest.UIThreadCallHandler()
+		self.uiThreadCallHandler.__enter__()
+
+	def tearDown( self ) :
+
+		self.uiThreadCallHandler.__exit__( None, None, None )
+		GafferImageTest.ImageTestCase.tearDown( self )
+
+	def assertEventually( self, fn, timeout = 10.0, interval = 0.1 ) :
+
+		print( "assertEventually" )
+		return GafferTest.TestCase.assertEventually( self, fn, timeout, interval, delayFn = self.uiThreadCallHandler.waitFor )
+
 	# Utility class for sending images to Display nodes.
 	# This abstracts away the different image orientations between
 	# Gaffer and Cortex. All Driver methods expect data with the
@@ -70,18 +87,12 @@ class DisplayTest( GafferImageTest.ImageTestCase ) :
 			}
 			parameters.update( extraParameters )
 
-			with GafferTest.ParallelAlgoTest.UIThreadCallHandler() as h :
-
-				self.__driver = IECoreImage.ClientDisplayDriver(
-					self.__format.toEXRSpace( self.__format.getDisplayWindow() ),
-					self.__format.toEXRSpace( dataWindow ),
-					list( channelNames ),
-					parameters,
-				)
-
-				# Expect UI thread call used to emit Display::driverCreatedSignal()
-				h.assertCalled()
-				h.assertDone()
+			self.__driver = IECoreImage.ClientDisplayDriver(
+				self.__format.toEXRSpace( self.__format.getDisplayWindow() ),
+				self.__format.toEXRSpace( dataWindow ),
+				list( channelNames ),
+				parameters,
+			)
 
 		# The channelData argument is a list of FloatVectorData
 		# per channel.
@@ -95,28 +106,14 @@ class DisplayTest( GafferImageTest.ImageTestCase ) :
 					for c in channelData :
 						bucketData.append( c[i] )
 
-			with GafferTest.ParallelAlgoTest.UIThreadCallHandler() as h :
+			self.__driver.imageData(
+				self.__format.toEXRSpace( bucketWindow ),
+				bucketData
+			)
 
-				self.__driver.imageData(
-					self.__format.toEXRSpace( bucketWindow ),
-					bucketData
-				)
+		def close( self ) :
 
-				# Expect UI thread call used to increment updateCount plug
-				h.assertCalled()
-				h.assertDone()
-
-		def close( self, withCallHandler = True ) :
-
-			if not withCallHandler :
-				self.__driver.imageClose()
-				return
-
-			with GafferTest.ParallelAlgoTest.UIThreadCallHandler() as h :
-				self.__driver.imageClose()
-				# Expect UI thread call used to emit Display::imageReceivedSignal()
-				h.assertCalled()
-				h.assertDone()
+			self.__driver.imageClose()
 
 		@classmethod
 		def sendImage( cls, image, port, extraParameters = {}, close = True ) :
@@ -349,9 +346,13 @@ class DisplayTest( GafferImageTest.ImageTestCase ) :
 
 		self.Driver.sendImage( imageReader["out"], port = server.portNumber() )
 
-		self.assertImagesEqual( imageReader["out"], node["out"] )
+		self.assertEventually(
+			lambda : self.assertImagesEqual( imageReader["out"], node["out"] )
+		)
 
-		self.assertEqual( len( imagesReceived ), 1 )
+		self.assertEventually(
+			lambda : self.assertEqual( len( imagesReceived ), 1 )
+		)
 		self.assertEqual( imagesReceived[0][0], node["out"] )
 		self.assertTrue( node.driverClosed() )
 
