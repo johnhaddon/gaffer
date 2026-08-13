@@ -209,7 +209,9 @@ class GafferDisplayDriver : public IECoreImage::DisplayDriver
 		void imageClose() override
 		{
 			m_closed = true;
+			fmt::print( "Driver closed\n" );
 			imageReceivedSignal()( this );
+			fmt::print( "Emitted imageReceivedSignal\n" );
 		}
 
 		bool scanLineOrderOnly() const override
@@ -674,6 +676,7 @@ void Display::setupDriver( GafferDisplayDriverPtr driver )
 	{
 		m_dataReceivedConnection = m_driver->dataReceivedSignal().connect( boost::bind( &Display::dataReceived, this ) );
 		m_imageReceivedConnection = m_driver->imageReceivedSignal().connect( boost::bind( &Display::imageReceived, this ) );
+		fmt::print( "Connected to driver {}\n", (void *)this );
 	}
 }
 
@@ -774,6 +777,7 @@ void Display::dataReceivedUI()
 
 void Display::imageReceived()
 {
+	fmt::print( "Display::imageReceived()\n" );
 	ParallelAlgo::callOnUIThread( boost::bind( &Display::imageReceivedUI, DisplayPtr( this ) ) );
 }
 

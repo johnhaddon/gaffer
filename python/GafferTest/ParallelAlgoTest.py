@@ -110,6 +110,7 @@ class ParallelAlgoTest( GafferTest.TestCase ) :
 				except queue.Empty:
 					return
 
+				print( "UI THREAD CALL", f )
 				f()
 				elapsed = timeit.default_timer() - startTime
 
