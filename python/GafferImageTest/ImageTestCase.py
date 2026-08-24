@@ -38,6 +38,8 @@ import imath
 import os
 import pathlib
 
+import OpenImageIO
+
 import IECore
 
 import Gaffer
@@ -196,6 +198,29 @@ class ImageTestCase( GafferTest.TestCase ) :
 									self.assertEqual( len( pixelDataA[k][i] ), len( pixelDataB[k][i] ), " while checking pixel data %s : %s" % ( k, tileStr ) )
 									for j in range( len( pixelDataA[k][i] ) ):
 										self.assertEqual( pixelDataA[k][i][j], pixelDataB[k][i][j] , " while checking pixel data %s : %s at index %i" % ( k, tileStr, j ) )
+
+	def assertEqualToImageBuf( self, image, imageBuf ) :
+
+		imageBuf = OpenImageIO.ImageBufAlgo.flip( imageBuf )
+		spec = imageBuf.spec()
+
+		self.assertEqual(
+			image.dataWindow(),
+			imath.Box2i(
+				imath.V2i( spec.x, spec.y ),
+				imath.V2i( spec.x + spec.width, spec.y + spec.height ),
+			)
+		)
+
+		self.assertEqual(
+			image.format().getDisplayWindow(),
+			imath.Box2i(
+				imath.V2i( spec.full_x, spec.full_y ),
+				imath.V2i( spec.full_x + spec.full_width, spec.y + spec.full_height ),
+			)
+		)
+
+		print( spec.channelnames )
 
 	## Returns an image node with an empty data window. This is useful in
 	# verifying that nodes deal correctly with such inputs.

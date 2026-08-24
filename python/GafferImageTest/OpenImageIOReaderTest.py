@@ -128,13 +128,8 @@ class OpenImageIOReaderTest( GafferImageTest.ImageTestCase ) :
 		self.assertIn( "B", channelNames )
 		self.assertIn( "A", channelNames )
 
-		image = GafferImage.ImageAlgo.image( n["out"] )
-		self.assertEqual( image.blindData(), IECore.CompoundData( dict(expectedMetadata) ) )
-
-		image2 = IECore.Reader.create( str( self.fileName ) ).read()
-		image.blindData().clear()
-		image2.blindData().clear()
-		self.assertEqual( image, image2 )
+		self.assertEqual( n["out"].metadata(), expectedMetadata )
+		self.assertEqualToImageBuf( n["out"], OpenImageIO.ImageBuf( str( self.fileName ) ) )
 
 	def testNegativeDisplayWindowRead( self ) :
 
