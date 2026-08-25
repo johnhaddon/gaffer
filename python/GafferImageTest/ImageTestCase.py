@@ -199,6 +199,14 @@ class ImageTestCase( GafferTest.TestCase ) :
 									for j in range( len( pixelDataA[k][i] ) ):
 										self.assertEqual( pixelDataA[k][i][j], pixelDataB[k][i][j] , " while checking pixel data %s : %s at index %i" % ( k, tileStr, j ) )
 
+	def assertImagesNotEqual( self, *args ) :
+
+		try :
+			self.assertImagesEqual( *args )
+			self.fail( "Images unexpectedly equal" )
+		except :
+			pass
+
 	def assertEqualToImageBuf( self, image, imageBuf ) :
 
 		imageBuf = OpenImageIO.ImageBufAlgo.flip( imageBuf )
