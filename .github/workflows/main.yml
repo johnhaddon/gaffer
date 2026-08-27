@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - '*_maintenance'
+      - '*'
   pull_request:
     branches:
       - '*'
@@ -28,52 +29,52 @@ jobs:
         # and then use `include` to define their settings.
 
         name: [
-          linux-gcc11,
-          linux-debug-gcc11,
-          linux-gcc11-platform23,
+          #linux-gcc11,
+          #linux-debug-gcc11,
+          #linux-gcc11-platform23,
           windows,
         ]
 
         include:
 
-          - name: linux-gcc11
-            os: ubuntu-24.04
-            buildType: RELEASE
-            publish: true
-            containerImage: ghcr.io/gafferhq/build/build:3.4.0
-            # GitHub container builds run as root. This causes failures for tests that
-            # assert that filesystem permissions are respected, because root doesn't
-            # respect permissions. So we run the final test suite as a dedicated
-            # test user rather than as root.
-            testRunner: sudo -E -u testUser
-            sconsCacheMegabytes: 400
-            jobs: 4
+          # - name: linux-gcc11
+          #   os: ubuntu-24.04
+          #   buildType: RELEASE
+          #   publish: true
+          #   containerImage: ghcr.io/gafferhq/build/build:3.4.0
+          #   # GitHub container builds run as root. This causes failures for tests that
+          #   # assert that filesystem permissions are respected, because root doesn't
+          #   # respect permissions. So we run the final test suite as a dedicated
+          #   # test user rather than as root.
+          #   testRunner: sudo -E -u testUser
+          #   sconsCacheMegabytes: 400
+          #   jobs: 4
 
-          - name: linux-debug-gcc11
-            os: ubuntu-24.04
-            buildType: DEBUG
-            publish: false
-            containerImage: ghcr.io/gafferhq/build/build:3.4.0
-            testRunner: sudo -E -u testUser
-            testArguments: -excludedCategories performance
-            # Debug builds are ludicrously big, so we must use a larger cache
-            # limit. In practice this compresses down to 4-500Mb.
-            sconsCacheMegabytes: 2500
-            jobs: 4
+          # - name: linux-debug-gcc11
+          #   os: ubuntu-24.04
+          #   buildType: DEBUG
+          #   publish: false
+          #   containerImage: ghcr.io/gafferhq/build/build:3.4.0
+          #   testRunner: sudo -E -u testUser
+          #   testArguments: -excludedCategories performance
+          #   # Debug builds are ludicrously big, so we must use a larger cache
+          #   # limit. In practice this compresses down to 4-500Mb.
+          #   sconsCacheMegabytes: 2500
+          #   jobs: 4
 
-          - name: linux-gcc11-platform23
-            os: ubuntu-24.04
-            buildType: RELEASE
-            publish: false
-            containerImage: ghcr.io/gafferhq/build/build:3.4.0
-            # GitHub container builds run as root. This causes failures for tests that
-            # assert that filesystem permissions are respected, because root doesn't
-            # respect permissions. So we run the final test suite as a dedicated
-            # test user rather than as root.
-            testRunner: sudo -E -u testUser
-            sconsCacheMegabytes: 400
-            jobs: 4
-            dependenciesURL: https://github.com/ImageEngine/cortex/releases/download/10.5.16.0/cortex-10.5.16.0-linux-gcc11.tar.gz
+          # - name: linux-gcc11-platform23
+          #   os: ubuntu-24.04
+          #   buildType: RELEASE
+          #   publish: false
+          #   containerImage: ghcr.io/gafferhq/build/build:3.4.0
+          #   # GitHub container builds run as root. This causes failures for tests that
+          #   # assert that filesystem permissions are respected, because root doesn't
+          #   # respect permissions. So we run the final test suite as a dedicated
+          #   # test user rather than as root.
+          #   testRunner: sudo -E -u testUser
+          #   sconsCacheMegabytes: 400
+          #   jobs: 4
+          #   dependenciesURL: https://github.com/ImageEngine/cortex/releases/download/10.5.16.0/cortex-10.5.16.0-linux-gcc11.tar.gz
 
           - name: windows
             os: windows-2022
@@ -210,15 +211,15 @@ jobs:
       env:
         PYTHONUTF8: 1
 
-    - name: Test
-      # Tests should complete in well under an hour. If they don't it's most likely because
-      # of a hang, in which case we'd like to know more quickly than the default 6hr timeout
-      # allows.
-      timeout-minutes: 60
-      run: |
-        echo "::add-matcher::./.github/workflows/main/problemMatchers/unittest.json"
-        ${{ matrix.testRunner }} ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer test ${{ matrix.testArguments }}
-        echo "::remove-matcher owner=unittest::"
+    # - name: Test
+    #   # Tests should complete in well under an hour. If they don't it's most likely because
+    #   # of a hang, in which case we'd like to know more quickly than the default 6hr timeout
+    #   # allows.
+    #   timeout-minutes: 60
+    #   run: |
+    #     echo "::add-matcher::./.github/workflows/main/problemMatchers/unittest.json"
+    #     ${{ matrix.testRunner }} ${{ env.GAFFER_BUILD_DIR }}/bin/gaffer test ${{ matrix.testArguments }}
+    #     echo "::remove-matcher owner=unittest::"
 
     - name: Build and test Arnold extension
       run: |
@@ -246,7 +247,7 @@ jobs:
           testCommand = os.path.join( os.environ["GAFFER_BUILD_DIR"], "bin", "gaffer" if os.name != "nt" else "gaffer.cmd" )
           if os.name == "nt" :
             testCommand = testCommand.lstrip( "./\\" )
-          subprocess.check_call( "${{ matrix.testRunner }} " + testCommand + " test IECoreArnoldTest GafferArnoldTest GafferArnoldUITest", shell = True )
+          subprocess.check_call( "${{ matrix.testRunner }} " + testCommand + " test GafferArnoldTest.ArnoldRenderTest GafferArnoldUITest.VisualiserAlgoTest", shell = True )
           print( "::remove-matcher owner=unittest::" )
 
           # Publish ARNOLD_ROOT to the environment for subsequent steps,

@@ -1074,6 +1074,8 @@ class ArnoldRenderTest( GafferSceneTest.RenderTest ) :
 		) :
 			render["task"].execute()
 
+		print( "RESTORED PATHS", os.getenv( "OSL_SHADER_PATHS" ) )
+
 		# Check we still managed to find the right shader.
 
 		imageReader["refreshCount"].setValue( 1 )
