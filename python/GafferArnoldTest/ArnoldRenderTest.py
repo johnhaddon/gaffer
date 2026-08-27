@@ -1067,7 +1067,7 @@ class ArnoldRenderTest( GafferSceneTest.RenderTest ) :
 				# Make sure the shader is on the path. The wrapper would have done
 				# this for us if IECOREUSD_WRITE_CONFORMANT_OSL_SHADERS was set at
 				# the time.
-				"OSL_SHADER_PATHS" : "{}{}{}".format(
+				"NOT_OSL_SHADER_PATHS" : "{}{}{}".format(
 					os.environ["OSL_SHADER_PATHS"], os.pathsep, Gaffer.rootPath() / "shaders" / "Surface"
 				)
 			}
