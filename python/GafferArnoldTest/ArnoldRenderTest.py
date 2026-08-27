@@ -1053,8 +1053,8 @@ class ArnoldRenderTest( GafferSceneTest.RenderTest ) :
 		sceneWriter["in"].setInput( ball["out"] )
 		sceneWriter["fileName"].setValue( self.temporaryDirectory() / "test.usda" )
 
-		with unittest.mock.patch.dict( os.environ, { "IECOREUSD_WRITE_CONFORMANT_OSL_SHADERS" : "1" } ) :
-			sceneWriter["task"].execute()
+		#with unittest.mock.patch.dict( os.environ, { "IECOREUSD_WRITE_CONFORMANT_OSL_SHADERS" : "1" } ) :
+		sceneWriter["task"].execute()
 
 		# Render using the USD.
 
