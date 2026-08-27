@@ -70,6 +70,8 @@ OSLQueryPtr oslQueryGetter( const std::string &shaderName, size_t &cost, const I
 {
 	cost = 1;
 
+	std::cerr << "oslQueryGetter " << g_oslSearchPaths << std::endl;
+
 	OSLQueryPtr result( new OSLQuery() );
 	if( result->open( shaderName, g_oslSearchPaths ? g_oslSearchPaths : "" ) )
 	{
