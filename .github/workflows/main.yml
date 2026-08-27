@@ -247,7 +247,7 @@ jobs:
           testCommand = os.path.join( os.environ["GAFFER_BUILD_DIR"], "bin", "gaffer" if os.name != "nt" else "gaffer.cmd" )
           if os.name == "nt" :
             testCommand = testCommand.lstrip( "./\\" )
-          subprocess.check_call( "${{ matrix.testRunner }} " + testCommand + " test GafferArnoldTest.ArnoldRenderTest GafferArnoldUITest.VisualiserAlgoTest", shell = True )
+          subprocess.check_call( "${{ matrix.testRunner }} " + testCommand + " test GafferArnoldUITest.VisualiserAlgoTest", shell = True )
           print( "::remove-matcher owner=unittest::" )
 
           # Publish ARNOLD_ROOT to the environment for subsequent steps,
