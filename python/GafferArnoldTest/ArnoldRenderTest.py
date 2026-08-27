@@ -1062,17 +1062,17 @@ class ArnoldRenderTest( GafferSceneTest.RenderTest ) :
 		sceneReader["fileName"].setInput( sceneWriter["fileName"] )
 
 		outputs["in"].setInput( sceneReader["out"] )
-		with unittest.mock.patch.dict(
-			os.environ, {
-				# Make sure the shader is on the path. The wrapper would have done
-				# this for us if IECOREUSD_WRITE_CONFORMANT_OSL_SHADERS was set at
-				# the time.
-				"NOT_OSL_SHADER_PATHS" : "{}{}{}".format(
-					os.environ["OSL_SHADER_PATHS"], os.pathsep, Gaffer.rootPath() / "shaders" / "Surface"
-				)
-			}
-		) :
-			render["task"].execute()
+		# with unittest.mock.patch.dict(
+		# 	os.environ, {
+		# 		# Make sure the shader is on the path. The wrapper would have done
+		# 		# this for us if IECOREUSD_WRITE_CONFORMANT_OSL_SHADERS was set at
+		# 		# the time.
+		# 		"NOT_OSL_SHADER_PATHS" : "{}{}{}".format(
+		# 			os.environ["OSL_SHADER_PATHS"], os.pathsep, Gaffer.rootPath() / "shaders" / "Surface"
+		# 		)
+		# 	}
+		# ) :
+		render["task"].execute()
 
 		print( "RESTORED PATHS", os.getenv( "OSL_SHADER_PATHS" ) )
 
