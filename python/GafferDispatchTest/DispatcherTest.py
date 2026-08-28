@@ -113,8 +113,6 @@ class DispatcherTest( GafferTest.TestCase ) :
 
 		GafferDispatch.Dispatcher.registerDispatcher( "testDispatcher", functools.partial( create, self.temporaryDirectory() ) )
 
-		self.__emptyTasksOmitted = os.environ.get( "GAFFERDISPATCH_OMIT_EMPTY_TASKS" )
-
 	def tearDown( self ) :
 
 		GafferTest.TestCase.tearDown( self )
@@ -123,11 +121,6 @@ class DispatcherTest( GafferTest.TestCase ) :
 		GafferDispatch.Dispatcher.deregisterDispatcher( "testDispatcherWithCustomPlugs" )
 
 		Gaffer.Metadata.deregisterValue( GafferDispatch.TaskList, "dispatcher:allowIsolation" )
-
-		if self.__emptyTasksOmitted is not None :
-			os.environ["GAFFERDISPATCH_OMIT_EMPTY_TASKS"] = self.__emptyTasksOmitted
-		elif "GAFFERDISPATCH_OMIT_EMPTY_TASKS" in os.environ :
-			del os.environ["GAFFERDISPATCH_OMIT_EMPTY_TASKS"]
 
 	def testBadJobDirectory( self ) :
 

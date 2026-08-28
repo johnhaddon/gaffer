@@ -51,19 +51,6 @@ import GafferOSLTest
 
 class OSLCodeTest( GafferOSLTest.OSLTestCase ) :
 
-	def setUp( self ) :
-
-		GafferOSLTest.OSLTestCase.setUp( self )
-
-		# Arrange to restore GAFFEROSL_CODE_DIRECTORY env-var, so tests
-		# are free to modify it temporarily.
-
-		oslCodeDir = os.environ.get( "GAFFEROSL_CODE_DIRECTORY" )
-		if oslCodeDir :
-			self.addCleanup( os.environ.__setitem__, "GAFFEROSL_CODE_DIRECTORY", oslCodeDir )
-		else :
-			self.addCleanup( os.environ.__delitem__, "GAFFEROSL_CODE_DIRECTORY" )
-
 	def testPlugTypes( self ) :
 
 		oslCode = GafferOSL.OSLCode()

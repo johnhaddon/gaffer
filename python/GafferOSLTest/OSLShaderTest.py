@@ -172,17 +172,13 @@ class OSLShaderTest( GafferOSLTest.OSLTestCase ) :
 
 	def testSearchPaths( self ) :
 
-		standardShaderPaths = os.environ["OSL_SHADER_PATHS"]
-		try:
-			s = self.compileShader( pathlib.Path( __file__ ).parent / "shaders" / "types.osl" )
+		s = self.compileShader( pathlib.Path( __file__ ).parent / "shaders" / "types.osl" )
 
-			os.environ["OSL_SHADER_PATHS"] = str( pathlib.Path( s ).parent )
-			n = GafferOSL.OSLShader()
-			n.loadShader( pathlib.Path( s ).name )
+		os.environ["OSL_SHADER_PATHS"] = str( pathlib.Path( s ).parent )
+		n = GafferOSL.OSLShader()
+		n.loadShader( pathlib.Path( s ).name )
 
-			self.assertEqual( n["parameters"].keys(), [ "i", "f", "c", "s", "m" ] )
-		finally:
-			os.environ["OSL_SHADER_PATHS"] = standardShaderPaths
+		self.assertEqual( n["parameters"].keys(), [ "i", "f", "c", "s", "m" ] )
 
 	def testNoConnectionToParametersPlug( self ) :
 
