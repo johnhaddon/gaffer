@@ -2108,7 +2108,7 @@ def exportExtensions( target, source, env ) :
 					stub.write( f"class {nodeName} : pass\n" )
 
 			exportScript.write( f"\nscript['fileName'].setValue( '{sourceFile}' )\n" )
-			exportScript.write( "script.load()\n" )
+			exportScript.write( "script.load( continueOnError = True )\n" )
 			exportScript.write( f"Gaffer.ExtensionAlgo.exportNode( '{moduleName}', script['{nodeName}'], r'{targetFile}' )\n" )
 			exportScript.write( f"Gaffer.ExtensionAlgo.exportNodeUI( '{moduleName}', script['{nodeName}'], r'{targetUIFile}' )\n" )
 
