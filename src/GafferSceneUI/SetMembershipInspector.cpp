@@ -125,6 +125,11 @@ HistoryCache g_historyCache(
 
 );
 
+const boost::container::flat_map<bool, ConstBoolDataPtr> g_values = {
+	{ true, new BoolData( true ) },
+	{ false, new BoolData( false ) }
+};
+
 bool canEdit( const Gaffer::Plug *plug, const IECore::Object *value, std::string &failureReason )
 {
 	if( !runTimeCast<const IECore::BoolData>( value ) )
@@ -256,7 +261,7 @@ IECore::ConstObjectPtr SetMembershipInspector::value( const GafferScene::SceneAl
 
 	// Return nullptr for non-exact match so `fallbackValue()` has the opportunity to provide
 	// an AncestorMatch.
-	return matchResult & IECore::PathMatcher::Result::ExactMatch ? new BoolData( true ) : nullptr;
+	return matchResult & IECore::PathMatcher::Result::ExactMatch ? g_values.at( true ) : nullptr;
 }
 
 IECore::ConstObjectPtr SetMembershipInspector::fallbackValue( const GafferScene::SceneAlgo::History *history, std::string &description ) const
@@ -287,7 +292,7 @@ IECore::ConstObjectPtr SetMembershipInspector::fallbackValue( const GafferScene:
 		description = "Default value";
 	}
 
-	return new BoolData( ancestorMatch );
+	return g_values.at( ancestorMatch );
 }
 
 Gaffer::ValuePlugPtr SetMembershipInspector::source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const
