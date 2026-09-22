@@ -135,6 +135,13 @@ class GAFFERSCENEUI_API Inspector : public IECore::RunTimeTyped, public Gaffer::
 		/// the queries without blocking the UI.
 		Gaffer::PathPtr historyPath() const;
 
+		/// Exception type thrown by Result's edit functions when editing is
+		/// not allowed, for example because a plug is read-only.
+		struct EditDisallowed : public IECore::Exception
+		{
+			EditDisallowed( const std::string &reason ) : IECore::Exception( reason ) {};
+		};
+
 	protected :
 
 		/// Protected constructor for use by derived classes. The `name` argument
@@ -190,25 +197,11 @@ class GAFFERSCENEUI_API Inspector : public IECore::RunTimeTyped, public Gaffer::
 		/// > that edits the processor itself.
 		virtual AcquireEditFunctionOrFailure acquireEditFunction( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history ) const;
 
-		using DisableEditFunction = std::function<void ()>;
-		using DisableEditFunctionOrFailure = std::variant<DisableEditFunction, std::string>;
-		/// Can be implemented to return a function that will disable an edit
-		/// at the specified plug. If this is not possible, should return an
-		/// error explaining why (this is typically due to `readOnly` metadata).
-		/// Called with `history->context` as the current context.
-		virtual DisableEditFunctionOrFailure disableEditFunction( Gaffer::ValuePlug *plug, const GafferScene::SceneAlgo::History *history ) const;
+		virtual void edit( const IECore::Object *value, const GafferScene::SceneAlgo::History *history, bool dryRun ) const;
+		virtual void edit( const IECore::Object *value, Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history, bool dryRun ) const;
 
-		using CanEditFunction = std::function<bool ( const Gaffer::ValuePlug *plug, const IECore::Object *value, std::string &failureReason )>;
-		/// Can be implemented to return a function that will return whether
-		/// `value` can be set on `plug`. If `value` cannot be set on `plug`,
-		/// `failureReason` should provide the reason why.
-		virtual CanEditFunction canEditFunction( const GafferScene::SceneAlgo::History *history ) const;
-
-		using EditFunction = std::function<void ( Gaffer::ValuePlug *plug, const IECore::Object *value )>;
-		/// Can be implemented to return a function that will directly
-		/// edit `plug` to set `value`. Called with `history->context` as the
-		/// current context.
-		virtual EditFunction editFunction( const GafferScene::SceneAlgo::History *history ) const;
+		virtual void disableEdit( const GafferScene::SceneAlgo::History *history, bool dryRun ) const;
+		virtual void disableEdit( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history, bool dryRun ) const;
 
 	private :
 
@@ -351,9 +344,7 @@ class GAFFERSCENEUI_API Inspector::Result : public IECore::RefCounted
 		/// and `false` otherwise.
 		bool editable() const;
 		/// If `editable()` returns false, returns the reason why.
-		/// If `canEdit( value )` returns false, `nonEditableReason( value )`
-		/// returns the reason why. This should be displayed to the user.
-		std::string nonEditableReason( const IECore::Object *value = nullptr ) const;
+		std::string nonEditableReason() const;
 
 		/// Returns a plug that can be used to edit the property
 		/// represented by this inspector, creating it if necessary.
@@ -375,7 +366,10 @@ class GAFFERSCENEUI_API Inspector::Result : public IECore::RefCounted
 
 		/// Returns whether a direct edit can be made with the
 		/// specified value.
-		bool canEdit( const IECore::Object *value, std::string &failureReason ) const;
+		bool canEdit( const IECore::Object *value ) const;
+		/// If `canEdit( value )` returns false, returns the reason why.
+		/// This should be displayed to the user.
+		std::string cantEditReason( const IECore::Object *value ) const;
 		/// Applies a direct edit with the specified value.
 		/// Calls `acquireEdit()` to ensure a plug exists to
 		/// receive the value.
@@ -395,13 +389,17 @@ class GAFFERSCENEUI_API Inspector::Result : public IECore::RefCounted
 		Gaffer::EditScopePtr m_editScope;
 		bool m_editScopeInHistory;
 
+		// Function types to abstract away the difference between History-centric
+		// and EditScope-centric edits.
+		using EditFunction = std::function<void ( const IECore::Object *value, bool dryRun )>;
+		using DisableEditFunction = std::function<void ( bool dryRun )>;
+
 		struct Editors
 		{
 			AcquireEditFunctionOrFailure acquireEditFunction;
 			std::string editWarning;
-			DisableEditFunctionOrFailure disableEditFunction;
-			CanEditFunction canEditFunction;
 			EditFunction editFunction;
+			DisableEditFunction disableEditFunction;
 		};
 
 		std::optional<Editors> m_editors;

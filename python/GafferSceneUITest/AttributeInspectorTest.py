@@ -1038,14 +1038,14 @@ class AttributeInspectorTest( GafferUITest.TestCase ) :
 		inspection = self.__inspect( s["group"]["out"], "/group/light", "gl:visualiser:scale", None )
 		self.assertFalse( inspection.canDisableEdit() )
 		self.assertEqual( inspection.nonDisableableReason(), "light.visualiserAttributes.scale.enabled is locked." )
-		self.assertRaisesRegex( IECore.Exception, "Cannot disable edit : light.visualiserAttributes.scale.enabled is locked.", inspection.disableEdit )
+		self.assertRaisesRegex( IECore.Exception, "light.visualiserAttributes.scale.enabled is locked.", inspection.disableEdit )
 
 		Gaffer.MetadataAlgo.setReadOnly( s["light"]["visualiserAttributes"]["scale"]["enabled"], False )
 		Gaffer.MetadataAlgo.setReadOnly( s["light"]["visualiserAttributes"]["scale"], True )
 		inspection = self.__inspect( s["group"]["out"], "/group/light", "gl:visualiser:scale", None )
 		self.assertFalse( inspection.canDisableEdit() )
 		self.assertEqual( inspection.nonDisableableReason(), "light.visualiserAttributes.scale is locked." )
-		self.assertRaisesRegex( IECore.Exception, "Cannot disable edit : light.visualiserAttributes.scale is locked.", inspection.disableEdit )
+		self.assertRaisesRegex( IECore.Exception, "light.visualiserAttributes.scale is locked.", inspection.disableEdit )
 
 		Gaffer.MetadataAlgo.setReadOnly( s["light"]["visualiserAttributes"]["scale"], False )
 		inspection = self.__inspect( s["group"]["out"], "/group/light", "gl:visualiser:scale", None )
@@ -1067,18 +1067,18 @@ class AttributeInspectorTest( GafferUITest.TestCase ) :
 		inspection = self.__inspect( s["editScope2"]["out"], "/group/light", "gl:visualiser:scale", None )
 		self.assertFalse( inspection.canDisableEdit() )
 		self.assertEqual( inspection.nonDisableableReason(), "light.visualiserAttributes.scale.enabled is not enabled." )
-		self.assertRaisesRegex( IECore.Exception, "Cannot disable edit : light.visualiserAttributes.scale.enabled is not enabled.", inspection.disableEdit )
+		self.assertRaisesRegex( IECore.Exception, "light.visualiserAttributes.scale.enabled is not enabled.", inspection.disableEdit )
 
 		inspection = self.__inspect( s["editScope2"]["out"], "/group/light", "gl:visualiser:scale", s["editScope2"] )
 		self.assertFalse( inspection.canDisableEdit() )
 		self.assertEqual( inspection.nonDisableableReason(), "There is no edit in editScope2." )
-		self.assertRaisesRegex( IECore.Exception, "Cannot disable edit : There is no edit in editScope2.", inspection.disableEdit )
+		self.assertRaisesRegex( IECore.Exception, "There is no edit in editScope2.", inspection.disableEdit )
 
 		Gaffer.MetadataAlgo.setReadOnly( s["editScope1"], True )
 		inspection = self.__inspect( s["editScope1"]["out"], "/group/light", "gl:visualiser:scale", s["editScope1"] )
 		self.assertFalse( inspection.canDisableEdit() )
 		self.assertEqual( inspection.nonDisableableReason(), "editScope1 is locked." )
-		self.assertRaisesRegex( IECore.Exception, "Cannot disable edit : editScope1 is locked.", inspection.disableEdit )
+		self.assertRaisesRegex( IECore.Exception, "editScope1 is locked.", inspection.disableEdit )
 
 		Gaffer.MetadataAlgo.setReadOnly( s["editScope1"], False )
 		inspection = self.__inspect( s["editScope1"]["out"], "/group/light", "gl:visualiser:scale", s["editScope1"] )
@@ -1125,10 +1125,11 @@ class AttributeInspectorTest( GafferUITest.TestCase ) :
 			)
 		)
 
-		def assertCanEdit( inspection, data, nonEditableReason ) :
+		def assertCanEdit( inspection, data, cantEditReason ) :
 
-			self.assertEqual( inspection.canEdit( data ), nonEditableReason == "" )
-			self.assertEqual( inspection.nonEditableReason( data ), nonEditableReason )
+			print( "cantEditReason", inspection.cantEditReason( data ) )
+			self.assertEqual( inspection.canEdit( data ), cantEditReason == "" )
+			self.assertEqual( inspection.cantEditReason( data ), cantEditReason )
 
 		inspection = self.__inspect( s["customAttributes"]["out"], "/sphere", "test:attr", None )
 		assertCanEdit( inspection, IECore.FloatData( 123.0 ), "" )
@@ -1188,14 +1189,14 @@ class AttributeInspectorTest( GafferUITest.TestCase ) :
 			)
 		)
 
-		def assertEdit( inspection, data, nonEditableReason ) :
+		def assertEdit( inspection, data, cantEditReason ) :
 
-			self.assertEqual( inspection.canEdit( data ), nonEditableReason == "" )
-			self.assertEqual( inspection.nonEditableReason( data ), nonEditableReason )
-			if nonEditableReason == "" :
+			self.assertEqual( inspection.canEdit( data ), cantEditReason == "" )
+			self.assertEqual( inspection.cantEditReason( data ), cantEditReason )
+			if cantEditReason == "" :
 				inspection.edit( data )
 			else :
-				self.assertRaisesRegex( IECore.Exception, "Not editable : " + nonEditableReason, inspection.edit, data )
+				self.assertRaisesRegex( IECore.Exception, cantEditReason, inspection.edit, data )
 
 		Gaffer.MetadataAlgo.setReadOnly( s["customAttributes"]["attributes"]["testPlug"]["enabled"], True )
 		inspection = self.__inspect( s["customAttributes"]["out"], "/sphere", "test:attr", None )
@@ -1218,6 +1219,8 @@ class AttributeInspectorTest( GafferUITest.TestCase ) :
 		s["editScope"] = Gaffer.EditScope()
 		s["editScope"].setup( s["customAttributes"]["out"] )
 		s["editScope"]["in"].setInput( s["customAttributes"]["out"] )
+
+		print( "----------------------------------------------------------" )
 
 		inspection = self.__inspect( s["editScope"]["out"], "/sphere", "test:attr", s["editScope"] )
 		assertEdit( inspection, IECore.StringData( "foo" ), "Data of type \"StringData\" is not compatible." )

@@ -180,27 +180,26 @@ std::string nonEditableReason( const ValuePlug *plug )
 	return "";
 }
 
-bool canEdit( const Gaffer::ValuePlug *plug, const IECore::Object *value, std::string &failureReason )
+void setPlugValue( ValuePlug *plug, const IECore::Object *value, bool dryRun )
 {
-	const IECore::Data *data = runTimeCast<const IECore::Data>( value );
-	if( !data )
+	ValuePlug *valuePlug;
+	BoolPlug *enabledPlug = nullptr;
+	IntPlug *modePlug = nullptr;
+	if( auto nameValuePlug = runTimeCast<NameValuePlug>( plug ) )
 	{
-		failureReason = fmt::format( "Unsupported value of type \"{}\".", value->typeName() );
-		return false;
+		valuePlug = runTimeCast<ValuePlug>( nameValuePlug->valuePlug() );
+		enabledPlug = nameValuePlug->enabledPlug();
 	}
-
-	const ValuePlug *valuePlug;
-	if( auto nameValuePlug = runTimeCast<const NameValuePlug>( plug ) )
-	{
-		valuePlug = runTimeCast<const ValuePlug>( nameValuePlug->valuePlug() );
-	}
-	else if( auto tweakPlug = runTimeCast<const TweakPlug>( plug ) )
+	else if( auto tweakPlug = runTimeCast<TweakPlug>( plug ) )
 	{
 		valuePlug = tweakPlug->valuePlug();
+		enabledPlug = tweakPlug->enabledPlug();
+		modePlug = tweakPlug->modePlug();
 	}
-	else if( auto optionalValuePlug = runTimeCast<const OptionalValuePlug>( plug ) )
+	else if( auto optionalValuePlug = runTimeCast<OptionalValuePlug>( plug ) )
 	{
 		valuePlug = optionalValuePlug->valuePlug();
+		enabledPlug = optionalValuePlug->enabledPlug();
 	}
 	else
 	{
@@ -209,61 +208,41 @@ bool canEdit( const Gaffer::ValuePlug *plug, const IECore::Object *value, std::s
 
 	if( !valuePlug )
 	{
-		failureReason = "No plug found to edit.";
-		return false;
+		throw Inspector::EditDisallowed( "No plug found to edit." );
 	}
 
-	if( !PlugAlgo::canSetValueFromData( valuePlug, data ) )
+	for( auto plugToCheck : { valuePlug, static_cast<ValuePlug *>( enabledPlug ), static_cast<ValuePlug *>( modePlug ) } )
 	{
-		failureReason = fmt::format( "Data of type \"{}\" is not compatible.", value->typeName() );
-		return false;
+		if( plugToCheck )
+		{
+			std::string nonEditableReason = ::nonEditableReason( plugToCheck );
+			if( !nonEditableReason.empty() )
+			{
+				throw Inspector::EditDisallowed( nonEditableReason );
+			}
+		}
 	}
 
-	return true;
-}
-
-void edit( Gaffer::ValuePlug *plug, const IECore::Object *value )
-{
 	const IECore::Data *data = runTimeCast<const IECore::Data>( value );
-	if( !data )
+	if( !data || !PlugAlgo::canSetValueFromData( valuePlug, data ) )
+	{
+		throw Inspector::EditDisallowed( fmt::format( "Data of type \"{}\" is not compatible.", value->typeName() ) );
+	}
+
+	if( dryRun )
 	{
 		return;
 	}
 
-	ValuePlug *valuePlug;
-	if( auto nameValuePlug = runTimeCast<NameValuePlug>( plug ) )
+	if( enabledPlug )
 	{
-		if( auto enabledPlug = nameValuePlug->enabledPlug() )
-		{
-			enabledPlug->setValue( true );
-		}
-		valuePlug = runTimeCast<ValuePlug>( nameValuePlug->valuePlug() );
+		enabledPlug->setValue( true );
 	}
-	else if( auto tweakPlug = runTimeCast<TweakPlug>( plug ) )
+	if( modePlug )
 	{
-		tweakPlug->enabledPlug()->setValue( true );
-		tweakPlug->modePlug()->setValue( TweakPlug::Mode::Create );
-		valuePlug = tweakPlug->valuePlug();
+		modePlug->setValue( TweakPlug::Mode::Create );
 	}
-	else if( auto optionalValuePlug = runTimeCast<OptionalValuePlug>( plug ) )
-	{
-		optionalValuePlug->enabledPlug()->setValue( true );
-		valuePlug = optionalValuePlug->valuePlug();
-	}
-	else
-	{
-		valuePlug = plug;
-	}
-
-	if( !valuePlug )
-	{
-		throw IECore::Exception( "No plug found to edit" );
-	}
-
-	if( !PlugAlgo::setValueFromData( valuePlug, data ) )
-	{
-		throw IECore::Exception( fmt::format( "Data of type \"{}\" is not compatible.", value->typeName() ) );
-	}
+	PlugAlgo::setValueFromData( valuePlug, data );
 }
 
 } // namespace
@@ -361,7 +340,13 @@ Inspector::ResultPtr Inspector::inspect() const
 		}
 
 		result->m_editors = {
-			fmt::format( formatString, "edit" ), "", fmt::format( formatString, "disable" ), nullptr, nullptr
+			fmt::format( formatString, "edit" ), "",
+			[reason=fmt::format( formatString, "edit" )] ( const Object *value, bool dryRun ) {
+				throw Inspector::EditDisallowed( reason );
+			},
+			[reason=fmt::format( formatString, "disable" )] ( bool dryRun ) {
+				throw Inspector::EditDisallowed( reason );
+			}
 		};
 	}
 
@@ -465,19 +450,29 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 		if( source && source->ancestor<EditScope>() == result->m_editScope )
 		{
 			const std::string nonEditableReason = ::nonEditableReason( source.get() );
+
+			auto editFunction = [inspector = ConstInspectorPtr( this ), history = GafferScene::SceneAlgo::History::ConstPtr( history )] ( const IECore::Object *value, bool dryRun ) {
+				Context::Scope scope( history->context.get() );
+				inspector->edit( value, history.get(), dryRun );
+			};
+
+			auto disableEditFunction = [inspector = ConstInspectorPtr( this ), history = GafferScene::SceneAlgo::History::ConstPtr( history )] ( bool dryRun ) {
+				Context::Scope scope( history->context.get() );
+				inspector->disableEdit( history.get(), dryRun );
+			};
+
 			if( nonEditableReason.empty() )
 			{
 				result->m_editors = {
 					[source = source] ( bool unused ) { return source; },
 					editWarning,
-					disableEditFunction( source.get(), history ),
-					canEditFunction( history ),
-					editFunction( history )
+					editFunction,
+					disableEditFunction
 				};
 			}
 			else
 			{
-				result->m_editors = { nonEditableReason, "", nonEditableReason, canEditFunction( history ), editFunction( history ) };
+				result->m_editors = { nonEditableReason, "", editFunction, disableEditFunction };
 			}
 		}
 		// Otherwise try to initialise from EditScope if we've hit it.
@@ -494,30 +489,44 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 				// `outPlug()` of the EditScope - see TransformTool. We should also
 				// explicitly prefer branches where `scene:path` matches the value
 				// in the `outPlug()` context, to avoid making edits to locations
-				// other than the one emerging from the EditScope.
+				// other than the one emerging from the EditScope.`
 				result->m_editScopeInHistory = true;
 				Context::EditableScope scope( history->context.get() );
 				scope.setCanceller( canceller );
 				AcquireEditFunctionOrFailure func;
+				Result::EditFunction editFunction;
+				Result::DisableEditFunction disableEditFunction;
 				if( editScope->enabledPlug()->getValue() )
 				{
 					func = acquireEditFunction( editScope, history );
+					editFunction = [ inspector = ConstInspectorPtr( this ), editScope = EditScopePtr( editScope ), history = SceneAlgo::History::ConstPtr( history ) ] ( const IECore::Object *value, bool dryRun ) {
+						Context::Scope scope( history->context.get() );
+						inspector->edit( value, editScope.get(), history.get(), dryRun );
+					};
+					disableEditFunction = [ inspector = ConstInspectorPtr( this ), editScope = EditScopePtr( editScope ), history = SceneAlgo::History::ConstPtr( history ) ] ( bool dryRun ) {
+						Context::Scope scope( history->context.get() );
+						inspector->disableEdit( editScope.get(), history.get(), dryRun );
+					};
 				}
 				else
 				{
-					func = fmt::format(
+					const std::string reason = fmt::format(
 						"The target edit scope {} is disabled.",
 						editScope->relativeName( editScope->scriptNode() )
 					);
+					func = reason;
+					editFunction = [reason] ( const IECore::Object *value, bool dryRun ) {
+						throw EditDisallowed( reason );
+					};
+					disableEditFunction = [reason] ( bool dryRun ) {
+						throw EditDisallowed( reason );
+					};
 				}
 
 				result->m_editors = {
 					func, "",
-					fmt::format(
-						"There is no edit in {}.", editScope->relativeName( editScope->scriptNode() )
-					),
-					canEditFunction( history ),
-					editFunction( history )
+					editFunction,
+					disableEditFunction
 				};
 			}
 		}
@@ -565,18 +574,60 @@ Inspector::AcquireEditFunctionOrFailure Inspector::acquireEditFunction( Gaffer::
 	return "Editing not supported";
 }
 
-Inspector::CanEditFunction Inspector::canEditFunction( const GafferScene::SceneAlgo::History *history ) const
+void Inspector::edit( const IECore::Object *value, const GafferScene::SceneAlgo::History *history, bool dryRun ) const
 {
-	return [] ( const Gaffer::ValuePlug *plug, const IECore::Object *value, std::string &failureReason ) { return ::canEdit( plug, value, failureReason ); };
+	std::string editWarning;
+	auto plug = source( history, editWarning );
+	if( !plug )
+	{
+		throw EditDisallowed( "No plug found to edit." );
+	}
+
+	setPlugValue( plug.get(), value, dryRun );
 }
 
-Inspector::EditFunction Inspector::editFunction( const GafferScene::SceneAlgo::History *history ) const
+void Inspector::edit( const IECore::Object *value, Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history, bool dryRun ) const
 {
-	return [] ( Gaffer::ValuePlug *plug, const IECore::Object *value ) { ::edit( plug, value ); };
+	AcquireEditFunctionOrFailure editFunctionOrFailure = acquireEditFunction( editScope, history );
+	if( std::holds_alternative<std::string>( editFunctionOrFailure ) )
+	{
+		throw EditDisallowed( std::get<std::string>( editFunctionOrFailure ) );
+	}
+
+	if( dryRun )
+	{
+		// We want to check that the plug that `AcquireEditFunction` will create
+		// will accept `value`, but since this is a dry run we don't want to actually
+		// create a plug in the graph. Assume that the plug will be typed to match the current
+		// value, and make a temporary plug to use for the check.
+		ValuePlugPtr testPlug;
+		if( auto currentData = runTimeCast<const IECore::Data>( this->value( history ) ) )
+		{
+			testPlug = PlugAlgo::createPlugFromData( "value", Plug::In, Plug::Default, currentData.get() );
+		}
+		auto newData = runTimeCast<const IECore::Data>( value );
+		if( !testPlug || !newData || !PlugAlgo::canSetValueFromData( testPlug.get(), newData ) )
+		{
+			throw EditDisallowed( fmt::format( "Data of type \"{}\" is not compatible.", value->typeName() ) );
+		}
+		return;
+	}
+
+	ValuePlugPtr plug = std::get<AcquireEditFunction>( editFunctionOrFailure )( editScope );
+	setPlugValue( plug.get(), value, dryRun );
 }
 
-Inspector::DisableEditFunctionOrFailure Inspector::disableEditFunction( Gaffer::ValuePlug *plug, const GafferScene::SceneAlgo::History *history ) const
+void Inspector::disableEdit( const GafferScene::SceneAlgo::History *history, bool dryRun ) const
 {
+	std::string editWarning;
+	PlugPtr plug  = source( history, editWarning );
+	if( !plug || plug->direction() == Plug::Out )
+	{
+		throw EditDisallowed( "No edit found to disable." );
+	}
+
+	plug = spreadsheetAwareSource( plug.get() );
+
 	Gaffer::BoolPlugPtr enabledPlug;
 	if( auto tweakPlug = runTimeCast<TweakPlug>( plug ) )
 	{
@@ -595,25 +646,33 @@ Inspector::DisableEditFunctionOrFailure Inspector::disableEditFunction( Gaffer::
 	{
 		if( const GraphComponent *readOnlyReason = MetadataAlgo::readOnlyReason( enabledPlug.get() ) )
 		{
-			return fmt::format( "{} is locked.", readOnlyReason->relativeName( readOnlyReason->ancestor<ScriptNode>() ) );
+			throw EditDisallowed( fmt::format( "{} is locked.", readOnlyReason->relativeName( readOnlyReason->ancestor<ScriptNode>() ) ) );
 		}
 		else if( !enabledPlug->settable() )
 		{
-			return fmt::format( "{} is not settable.", enabledPlug->relativeName( enabledPlug->ancestor<ScriptNode>() ) );
+			throw EditDisallowed( fmt::format( "{} is not settable.", enabledPlug->relativeName( enabledPlug->ancestor<ScriptNode>() ) ) );
 		}
 		else if( !enabledPlug->getValue() )
 		{
-			return fmt::format( "{} is not enabled.", enabledPlug->relativeName( enabledPlug->ancestor<ScriptNode>() ) );
-		}
-		else
-		{
-			return [ enabledPlug ] () { enabledPlug->setValue( false ); };
+			throw EditDisallowed( fmt::format( "{} is not enabled.", enabledPlug->relativeName( enabledPlug->ancestor<ScriptNode>() ) ) );
 		}
 	}
 	else
 	{
-		return "Disabling edits not supported for this plug.";
+		throw EditDisallowed( "Disabling edits not supported for this plug." );
 	}
+
+	if( dryRun )
+	{
+		return;
+	}
+
+	enabledPlug->setValue( false );
+}
+
+void Inspector::disableEdit( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history, bool dryRun ) const
+{
+	throw EditDisallowed( fmt::format( "There is no edit in {}.", editScope->relativeName( editScope->scriptNode() ) ) );
 }
 
 IECore::ConstObjectPtr Inspector::fallbackValue( const GafferScene::SceneAlgo::History *history, std::string &description ) const
@@ -1125,19 +1184,12 @@ bool Inspector::Result::editable() const
 	return m_editors && std::holds_alternative<AcquireEditFunction>( m_editors->acquireEditFunction );
 }
 
-std::string Inspector::Result::nonEditableReason( const IECore::Object *value ) const
+std::string Inspector::Result::nonEditableReason() const
 {
 	if( auto s = std::get_if<std::string>( &m_editors.value().acquireEditFunction ) )
 	{
 		return *s;
 	}
-
-	std::string reason;
-	if( value && !canEdit( value, reason ) )
-	{
-		return reason;
-	}
-
 	return "";
 }
 
@@ -1148,32 +1200,7 @@ Gaffer::ValuePlugPtr Inspector::Result::acquireEdit( bool createIfNecessary ) co
 		return (*f)( createIfNecessary );
 	}
 
-	throw IECore::Exception( "Not editable : " + std::get<std::string>( m_editors.value().acquireEditFunction ) );
-}
-
-bool Inspector::Result::canDisableEdit() const
-{
-	return std::holds_alternative<DisableEditFunction>( m_editors.value().disableEditFunction );
-}
-
-std::string Inspector::Result::nonDisableableReason() const
-{
-	if( auto s = std::get_if<std::string>( &m_editors.value().disableEditFunction ) )
-	{
-		return *s;
-	}
-
-	return "";
-}
-
-void Inspector::Result::disableEdit() const
-{
-	if( auto f = std::get_if<DisableEditFunction>( &m_editors.value().disableEditFunction ) )
-	{
-		return (*f)();
-	}
-
-	throw IECore::Exception( "Cannot disable edit : " + std::get<std::string>( m_editors.value().disableEditFunction ) );
+	throw EditDisallowed( "Not editable : " + std::get<std::string>( m_editors.value().acquireEditFunction ) );
 }
 
 std::string Inspector::Result::editWarning() const
@@ -1181,46 +1208,97 @@ std::string Inspector::Result::editWarning() const
 	return m_editors.value().editWarning;
 }
 
-bool Inspector::Result::canEdit( const IECore::Object *value, std::string &failureReason ) const
+bool Inspector::Result::canEdit( const IECore::Object *value ) const
 {
-	if( !m_editors || !m_editors->editFunction || !m_editors->canEditFunction )
+	if( !m_editors || !m_editors->editFunction )
 	{
-		failureReason = "Direct editing is not supported.";
 		return false;
 	}
 
-	ValuePlugPtr plug;
-	if( auto f = std::get_if<AcquireEditFunction>( &m_editors.value().acquireEditFunction ) )
+	try
 	{
-		// Attempt to acquire an existing edit to test against.
-		plug = (*f)( /* createIfNecessary = */ false );
-
-		if( !plug )
-		{
-			if( const IECore::Data *currentData = runTimeCast<const IECore::Data>( Result::value() ) )
-			{
-				// If we can't acquire an existing edit, create a temporary plug based on the current
-				// value to avoid creating an edit.
-				plug = PlugAlgo::createPlugFromData( "value", Plug::In, Plug::Default, currentData );
-			}
-		}
+		m_editors->editFunction( value, /* dryRun = */ true );
 	}
-	else
+	catch( EditDisallowed &e )
 	{
-		failureReason = nonEditableReason();
 		return false;
 	}
 
-	return m_editors->canEditFunction( plug.get(), value, failureReason );
+	return true;
+}
+
+std::string Inspector::Result::cantEditReason( const IECore::Object *value ) const
+{
+	if( !m_editors || !m_editors->editFunction )
+	{
+		return "";
+	}
+
+	try
+	{
+		m_editors->editFunction( value, /* dryRun = */ true );
+	}
+	catch( EditDisallowed &e )
+	{
+		return e.what();
+	}
+	return "";
 }
 
 void Inspector::Result::edit( const IECore::Object *value ) const
 {
-	std::string reason;
-	if( !canEdit( value, reason ) )
+	if( !m_editors || !m_editors->editFunction )
 	{
-		throw IECore::Exception( "Not editable : " + reason );
+		throw EditDisallowed( "Not editable" );
 	}
 
-	m_editors->editFunction( acquireEdit( /* createIfNecessary = */ true ).get(), value );
+	m_editors->editFunction( value, /* dryRun = */ false );
+}
+
+
+bool Inspector::Result::canDisableEdit() const
+{
+	if( !m_editors || !m_editors->disableEditFunction )
+	{
+		return false;
+	}
+
+	try
+	{
+		m_editors->disableEditFunction( /* dryRun = */ true );
+	}
+	catch( EditDisallowed &e )
+	{
+		return false;
+	}
+
+	return true;
+}
+
+std::string Inspector::Result::nonDisableableReason() const
+{
+	if( !m_editors || !m_editors->disableEditFunction )
+	{
+		return "";
+	}
+
+	try
+	{
+		m_editors->disableEditFunction( /* dryRun = */ true );
+	}
+	catch( EditDisallowed &e )
+	{
+		return e.what();
+	}
+	return "";
+}
+
+void Inspector::Result::disableEdit() const
+{
+	if( !m_editors || !m_editors->disableEditFunction )
+	{
+		throw EditDisallowed( "Can't disable edit" );
+	}
+
+	m_editors->disableEditFunction( /* dryRun = */ false );
 }
