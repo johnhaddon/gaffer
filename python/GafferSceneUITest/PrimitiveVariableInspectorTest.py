@@ -97,7 +97,7 @@ class PrimitiveVariableInspectorTest( GafferUITest.TestCase ) :
 		self.assertEqual( inspection.nonEditableReason(), "sphere.out is not editable." )
 		self.assertRaises( RuntimeError, inspection.acquireEdit )
 		self.assertFalse( inspection.canDisableEdit() )
-		self.assertEqual( inspection.nonDisableableReason(), "sphere.out is not editable." )
+		self.assertEqual( inspection.nonDisableableReason(), "No edit found to disable." )
 		self.assertRaises( RuntimeError, inspection.disableEdit )
 		self.assertFalse( inspection.canEdit( inspection.value() ) )
 		self.assertRaises( RuntimeError, inspection.edit, inspection.value() )

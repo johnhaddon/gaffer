@@ -67,21 +67,26 @@ class GAFFERSCENEUI_API SetMembershipInspector : public Inspector
 		GafferScene::SceneAlgo::History::ConstPtr history() const override;
 		IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history) const override;
 		IECore::ConstObjectPtr fallbackValue( const GafferScene::SceneAlgo::History *history, std::string &description ) const override;
-		/// For the given `history`, returns either the "sets" `StringPlug` of an `ObjectSource`
-		/// node, the "name" `StringPlug` of a `Set` node, the `Spreadsheet::RowPlug` for the
-		/// appropriate row of a set membership processor spreadsheet or `nullptr` if none of
-		/// those are found.
+		// We don't have any source plugs we could present to a user directly, so
+		// we return `history->scene` to denote locations where we know an edit has
+		// been made.
 		Gaffer::ValuePlugPtr source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const override;
-		AcquireEditFunctionOrFailure acquireEditFunction( Gaffer::EditScope *scope, const GafferScene::SceneAlgo::History *history ) const override;
-		DisableEditFunctionOrFailure disableEditFunction( Gaffer::ValuePlug *plug, const GafferScene::SceneAlgo::History *history ) const override;
-		CanEditFunction canEditFunction( const GafferScene::SceneAlgo::History *history ) const override;
-		EditFunction editFunction( const GafferScene::SceneAlgo::History *history ) const override;
+
+		void edit( const IECore::Object *value, const GafferScene::SceneAlgo::History *history, bool dryRun ) const override;
+		void edit( const IECore::Object *value, Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history, bool dryRun ) const override;
+
+		void disableEdit( const GafferScene::SceneAlgo::History *history, bool dryRun ) const override;
+		void disableEdit( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history, bool dryRun ) const override;
 
 	private :
 
+		void setSetMembership( GafferScene::EditScopeAlgo::SetMembership membership, const GafferScene::SceneAlgo::History *history, bool dryRun ) const;
+		void setSetMembership( GafferScene::EditScopeAlgo::SetMembership membership, Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history, bool dryRun ) const;
+
 		const GafferScene::ScenePlugPtr m_scene;
 		const IECore::InternedString m_setName;
-};
+
+	};
 
 }
 

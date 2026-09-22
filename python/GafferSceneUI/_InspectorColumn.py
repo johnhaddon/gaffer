@@ -606,7 +606,7 @@ def __drop( column, path, pathListing, event ) :
 
 	data = __dropData( column, path, inspection, event )
 	if not inspection.canEdit( data ) :
-		GafferUI.PopupWindow.showWarning( inspection.nonEditableReason( data ) or "Unable to edit.", parent = pathListing )
+		GafferUI.PopupWindow.showWarning( inspection.cantEditReason( data ) or "Unable to edit.", parent = pathListing )
 		return True
 
 	with Gaffer.UndoScope( pathListing.ancestor( GafferUI.Editor ).scriptNode() ) :
@@ -967,9 +967,9 @@ def __pasteFunctionsOrNonPasteableReason( pathListing, objectMatrix ) :
 			if inspection.canEdit( value ) :
 				pasteFunctions.append( functools.partial( inspection.edit, value ) )
 			elif len( columns ) > 1 :
-				return "{} : {}".format( column.headerData( rootPath ).value, inspection.nonEditableReason( value ) )
+				return "{} : {}".format( column.headerData( rootPath ).value, inspection.cantEditReason( value ) )
 			else :
-				return inspection.nonEditableReason( value )
+				return inspection.cantEditReason( value )
 
 	return pasteFunctions
 

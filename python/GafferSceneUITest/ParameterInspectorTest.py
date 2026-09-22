@@ -469,14 +469,14 @@ class ParameterInspectorTest( GafferUITest.TestCase ) :
 		inspection = self.__inspect( s["shaderTweaks"]["out"], "/light", "exposure", None )
 		self.assertFalse( inspection.canDisableEdit() )
 		self.assertEqual( inspection.nonDisableableReason(), "shaderTweaks.tweaks.tweak.enabled is locked." )
-		self.assertRaisesRegex( IECore.Exception, "Cannot disable edit : shaderTweaks.tweaks.tweak.enabled is locked.", inspection.disableEdit )
+		self.assertRaisesRegex( IECore.Exception, "shaderTweaks.tweaks.tweak.enabled is locked.", inspection.disableEdit )
 
 		Gaffer.MetadataAlgo.setReadOnly( exposureTweak["enabled"], False )
 		Gaffer.MetadataAlgo.setReadOnly( exposureTweak, True )
 		inspection = self.__inspect( s["shaderTweaks"]["out"], "/light", "exposure", None )
 		self.assertFalse( inspection.canDisableEdit() )
 		self.assertEqual( inspection.nonDisableableReason(), "shaderTweaks.tweaks.tweak is locked." )
-		self.assertRaisesRegex( IECore.Exception, "Cannot disable edit : shaderTweaks.tweaks.tweak is locked.", inspection.disableEdit )
+		self.assertRaisesRegex( IECore.Exception, "shaderTweaks.tweaks.tweak is locked.", inspection.disableEdit )
 
 		Gaffer.MetadataAlgo.setReadOnly( exposureTweak, False )
 		inspection = self.__inspect( s["shaderTweaks"]["out"], "/light", "exposure", None )
@@ -499,18 +499,18 @@ class ParameterInspectorTest( GafferUITest.TestCase ) :
 		self.assertTrue( inspection.acquireEdit( False ).isSame( s["light"]["parameters"]["exposure"] ) )
 		self.assertFalse( inspection.canDisableEdit() )
 		self.assertEqual( inspection.nonDisableableReason(), "Disabling edits not supported for this plug." )
-		self.assertRaisesRegex( IECore.Exception, "Cannot disable edit : Disabling edits not supported for this plug.", inspection.disableEdit )
+		self.assertRaisesRegex( IECore.Exception, "Disabling edits not supported for this plug.", inspection.disableEdit )
 
 		inspection = self.__inspect( s["editScope2"]["out"], "/light", "exposure", s["editScope2"] )
 		self.assertFalse( inspection.canDisableEdit() )
 		self.assertEqual( inspection.nonDisableableReason(), "There is no edit in editScope2." )
-		self.assertRaisesRegex( IECore.Exception, "Cannot disable edit : There is no edit in editScope2.", inspection.disableEdit )
+		self.assertRaisesRegex( IECore.Exception, "There is no edit in editScope2.", inspection.disableEdit )
 
 		Gaffer.MetadataAlgo.setReadOnly( s["editScope"], True )
 		inspection = self.__inspect( s["editScope"]["out"], "/light", "exposure", s["editScope"] )
 		self.assertFalse( inspection.canDisableEdit() )
 		self.assertEqual( inspection.nonDisableableReason(), "editScope is locked." )
-		self.assertRaisesRegex( IECore.Exception, "Cannot disable edit : editScope is locked.", inspection.disableEdit )
+		self.assertRaisesRegex( IECore.Exception, "editScope is locked.", inspection.disableEdit )
 
 		Gaffer.MetadataAlgo.setReadOnly( s["editScope"], False )
 		inspection = self.__inspect( s["editScope"]["out"], "/light", "exposure", s["editScope"] )
@@ -1318,10 +1318,10 @@ class ParameterInspectorTest( GafferUITest.TestCase ) :
 		s["editScope"].setup( s["shaderTweaks"]["out"] )
 		s["editScope"]["in"].setInput( s["shaderTweaks"]["out"] )
 
-		def assertCanEdit( inspection, data, nonEditableReason ) :
+		def assertCanEdit( inspection, data, cantEditReason ) :
 
-			self.assertEqual( inspection.canEdit( data ), nonEditableReason == "" )
-			self.assertEqual( inspection.nonEditableReason( data ), nonEditableReason )
+			self.assertEqual( inspection.canEdit( data ), cantEditReason == "" )
+			self.assertEqual( inspection.cantEditReason( data ), cantEditReason )
 
 		inspection = self.__inspect( s["shaderTweaks"]["out"], "/light", "exposure", None )
 		assertCanEdit( inspection, IECore.FloatData( 123.0 ), "" )
@@ -1368,14 +1368,14 @@ class ParameterInspectorTest( GafferUITest.TestCase ) :
 		s["editScope"].setup( s["shaderTweaks"]["out"] )
 		s["editScope"]["in"].setInput( s["shaderTweaks"]["out"] )
 
-		def assertEdit( inspection, data, nonEditableReason ) :
+		def assertEdit( inspection, data, cantEditReason ) :
 
-			self.assertEqual( inspection.canEdit( data ), nonEditableReason == "" )
-			self.assertEqual( inspection.nonEditableReason( data ), nonEditableReason )
-			if nonEditableReason == "" :
+			self.assertEqual( inspection.canEdit( data ), cantEditReason == "" )
+			self.assertEqual( inspection.cantEditReason( data ), cantEditReason )
+			if cantEditReason == "" :
 				inspection.edit( data )
 			else :
-				self.assertRaisesRegex( IECore.Exception, "Not editable : " + nonEditableReason, inspection.edit, data )
+				self.assertRaisesRegex( IECore.Exception, cantEditReason, inspection.edit, data )
 
 		Gaffer.MetadataAlgo.setReadOnly( s["shaderTweaks"], True )
 		inspection = self.__inspect( s["shaderTweaks"]["out"], "/light", "exposure", None )
