@@ -1445,6 +1445,8 @@ TweakPlug *GafferScene::EditScopeAlgo::acquireRenderPassOptionEdit( Gaffer::Edit
 
 	ensureOptionValue();
 
+	fmt::print( "MAKING THE PLUG!\n" );
+
 	ValuePlugPtr valuePlug = PlugAlgo::createPlugFromData( "value", Plug::In, Plug::Default, optionValue.get() );
 
 	TweakPlugPtr tweakPlug = new TweakPlug( option, valuePlug, TweakPlug::Create, false );

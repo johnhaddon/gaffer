@@ -184,18 +184,21 @@ class GAFFERSCENEUI_API Inspector : public IECore::RunTimeTyped, public Gaffer::
 		/// history class?
 		virtual Gaffer::ValuePlugPtr source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const;
 
-		using AcquireEditFunction = std::function<Gaffer::ValuePlugPtr ( bool createIfNecessary )>;
-		using AcquireEditFunctionOrFailure = std::variant<AcquireEditFunction, std::string>;
-		/// Should be implemented to return a function that will acquire
-		/// an edit from the EditScope at the specified point in the history.
-		/// If this is not possible, should return an error explaining why
-		/// (this is typically due to `readOnly` metadata). Called with `history->context`
-		/// as the current context.
-		///
-		/// > Note : Where an EditScope already contains an edit, it is expected
-		/// > that this will be dealt with in `source()`, returning a result
-		/// > that edits the processor itself.
-		virtual AcquireEditFunctionOrFailure acquireEditFunction( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history ) const;
+		// using AcquireEditFunction = std::function<Gaffer::ValuePlugPtr ( bool createIfNecessary )>;
+		// using AcquireEditFunctionOrFailure = std::variant<AcquireEditFunction, std::string>;
+		// /// Should be implemented to return a function that will acquire
+		// /// an edit from the EditScope at the specified point in the history.
+		// /// If this is not possible, should return an error explaining why
+		// /// (this is typically due to `readOnly` metadata). Called with `history->context`
+		// /// as the current context.
+		// ///
+		// /// > Note : Where an EditScope already contains an edit, it is expected
+		// /// > that this will be dealt with in `source()`, returning a result
+		// /// > that edits the processor itself.
+		// virtual AcquireEditFunctionOrFailure acquireEditFunction( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history ) const;
+
+		//virtual Gaffer::ValuePlugPtr acquireEdit( const GafferScene::SceneAlgo::History *history, bool createIfNecessary, bool dryRun ) const;
+		virtual Gaffer::ValuePlugPtr acquireEdit( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history, bool createIfNecessary, bool dryRun ) const;
 
 		virtual void edit( const IECore::Object *value, const GafferScene::SceneAlgo::History *history, bool dryRun ) const;
 		virtual void edit( const IECore::Object *value, Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history, bool dryRun ) const;
@@ -344,17 +347,21 @@ class GAFFERSCENEUI_API Inspector::Result : public IECore::RefCounted
 
 		/// Returns `true` if `acquireEdit()` will produce an edit,
 		/// and `false` otherwise.
-		bool editable() const;
-		/// If `editable()` returns false, returns the reason why.
-		std::string nonEditableReason() const;
+		// bool editable() const;
+		// /// If `editable()` returns false, returns the reason why.
+		// std::string nonEditableReason() const;
 
 		/// Returns a plug that can be used to edit the property
 		/// represented by this inspector, creating it if necessary.
 		/// Throws if `!editable()`.
+		// Gaffer::ValuePlugPtr acquireEdit( bool createIfNecessary = true ) const;
+		// /// Returns a warning associated with the plug returned
+		// /// by `acquireEdit()`. This should be displayed to the user.
+		// std::string editWarning() const;
+
+		bool canAcquireEdit( bool createIfNecessary = true ) const;
+		std::string cantAcquireEditReason( bool createIfNecessary = true ) const;
 		Gaffer::ValuePlugPtr acquireEdit( bool createIfNecessary = true ) const;
-		/// Returns a warning associated with the plug returned
-		/// by `acquireEdit()`. This should be displayed to the user.
-		std::string editWarning() const;
 
 		/// Returns `true` if `disableEdit()` will disable the edit
 		/// at `source()`, and `false` otherwise.
@@ -393,13 +400,13 @@ class GAFFERSCENEUI_API Inspector::Result : public IECore::RefCounted
 
 		// Function types to abstract away the difference between History-centric
 		// and EditScope-centric edits.
+		using AcquireEditFunction = std::function<Gaffer::ValuePlugPtr ( bool createIfNecessary, bool dryRun )>;
 		using EditFunction = std::function<void ( const IECore::Object *value, bool dryRun )>;
 		using DisableEditFunction = std::function<void ( bool dryRun )>;
 
 		struct Editors
 		{
-			AcquireEditFunctionOrFailure acquireEditFunction;
-			std::string editWarning;
+			AcquireEditFunction acquireEditFunction;
 			EditFunction editFunction;
 			DisableEditFunction disableEditFunction;
 		};

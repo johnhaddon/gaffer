@@ -280,7 +280,7 @@ PathColumn::CellData InspectorColumn::cellDataFromInspection( const GafferSceneU
 	}
 
 	/// \todo Should we have the ability to create read-only columns?
-	if( inspection->editable() )
+	if( inspection->canAcquireEdit() ) // TODO : TOGGLING AND EDITING ARE TWO DIFFERENT THINGS AND NEED TWO CHECKS
 	{
 		toolTip += !toolTip.empty() ? "\n\n" : "";
 		if( runTimeCast<const IECore::BoolData>( result.value ) )

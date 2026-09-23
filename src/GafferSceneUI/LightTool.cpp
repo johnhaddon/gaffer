@@ -581,14 +581,15 @@ void drawSelectionTips(
 				parameterSources.push_back( editScope );
 			}
 
-			if( inspection->editable() && !inspection->editWarning().empty() )
-			{
-				warningTips.push_back( inspection->editWarning() );
-			}
-			else if( !inspection->editable() )
-			{
-				warningTips.push_back( inspection->nonEditableReason() );
-			}
+			// TODO : WHAT KIND OF EDITABLE DO WE WANT??
+			// if( inspection->editable() && !inspection->editWarning().empty() )
+			// {
+			// 	warningTips.push_back( inspection->editWarning() );
+			// }
+			// else if( !inspection->editable() )
+			// {
+			// 	warningTips.push_back( inspection->nonEditableReason() );
+			// }
 		}
 	}
 
@@ -1271,10 +1272,11 @@ class LightToolHandle : public Handle
 			}
 
 			bool enabled = true;
-			for( const auto &i : requiredInspections )
-			{
-				enabled &= i && i->editable();
-			}
+			// for( const auto &i : requiredInspections )
+			// {
+			// 	// TODO : WHICH FLAVOUR MATTERS?
+			// 	//enabled &= i && i->editable();
+			// }
 
 			return enabled;
 		}

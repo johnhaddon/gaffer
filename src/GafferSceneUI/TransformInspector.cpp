@@ -273,11 +273,11 @@ Gaffer::ValuePlugPtr TransformInspector::source( const GafferScene::SceneAlgo::H
 	}
 }
 
-Inspector::AcquireEditFunctionOrFailure TransformInspector::acquireEditFunction( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history ) const
+Gaffer::ValuePlugPtr TransformInspector::acquireEdit( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history, bool createIfNecessary, bool dryRun ) const
 {
 	if( m_space != Space::Local )
 	{
-		return "World space transform cannot be edited.";
+		throw EditDisallowed( "World space transform cannot be edited." );
 	}
 	// We'd like to use `EditScopeAlgo::acquireTransformEdit()`, but that makes
 	// edits for translate, rotate, and scale all at once. Since we purport to
@@ -289,7 +289,7 @@ Inspector::AcquireEditFunctionOrFailure TransformInspector::acquireEditFunction(
 	/// 2. We then update the Transform node to optionally edit only specific components.
 	/// 3. `acquireTransformEdit()` returns plugs including an `enabledPlug()` to let
 	///    us edit just one component.
-	return "Edit creation not supported yet. Use the transform tools in the Viewer instead.";
+	throw EditDisallowed( "Edit creation not supported yet. Use the transform tools in the Viewer instead." );
 }
 
 const char *TransformInspector::toString( Space space )
