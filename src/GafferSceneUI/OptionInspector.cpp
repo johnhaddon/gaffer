@@ -259,78 +259,93 @@ Gaffer::ValuePlugPtr OptionInspector::source( const GafferScene::SceneAlgo::Hist
 	return nullptr;
 }
 
-Inspector::AcquireEditFunctionOrFailure OptionInspector::acquireEditFunction( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history ) const
+Gaffer::ValuePlugPtr OptionInspector::acquireEdit( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history, bool createIfNecessary, bool dryRun ) const
 {
 	// If our history's context contains a non-empty `renderPass` variable,
 	// we'll want to make a specific edit for that render pass.
 	const std::string renderPass = history->context->get<std::string>( g_renderPassContextName, g_emptyString );
+
+	fmt::print( "renderPass = {}\n", renderPass );
 	if( !renderPass.empty() )
 	{
+		auto plug = EditScopeAlgo::acquireRenderPassOptionEdit(
+			editScope,
+			renderPass,
+			m_option,
+			/* createIfNecessary = */ false
+		);
+
+		if( plug || !createIfNecessary )
+		{
+			fmt::print( "returning plug {}\n", plug ? plug->fullName() : "none" );
+			return plug;
+		}
+
 		const GraphComponent *readOnlyReason = EditScopeAlgo::renderPassOptionEditReadOnlyReason(
 			editScope,
 			renderPass,
 			m_option
 		);
+			fmt::print( "readOnlyReason = \n", readOnlyReason ? readOnlyReason->fullName() : "" );
 
 		if( readOnlyReason )
 		{
-			// If we don't have an edit and the scope is locked, we error,
+			// TODO : COMMENT NEEDS TWEAKING
+		// If we don't have an edit and the scope is locked, we error,
 			// as we can't add an edit. Other cases where we already _have_
 			// an edit will have been found by `source()`.
-			return fmt::format(
+			throw EditDisallowed( fmt::format(
 				"{} is locked.",
 				readOnlyReason->relativeName( readOnlyReason->ancestor<ScriptNode>() )
-			);
+			) );
 		}
-		else
+
+		if( dryRun )
 		{
-			return [
-				editScope = EditScopePtr( editScope ),
-				renderPass,
-				option = m_option,
-				context = history->context
-			] ( bool createIfNecessary ) {
-				Context::Scope scope( context.get() );
-				return EditScopeAlgo::acquireRenderPassOptionEdit(
-					editScope.get(),
-					renderPass,
-					option,
-					createIfNecessary
-				);
-			};
+			return nullptr;
 		}
+
+		return EditScopeAlgo::acquireRenderPassOptionEdit(
+			editScope,
+			renderPass,
+			m_option,
+			createIfNecessary
+		);
 	}
 	else
 	{
-		const GraphComponent *readOnlyReason = EditScopeAlgo::optionEditReadOnlyReason(
+		auto plug = EditScopeAlgo::acquireOptionEdit(
 			editScope,
-			m_option
+			m_option,
+			/* createIfNecessary = */ false
 		);
 
+		if( plug || !createIfNecessary )
+		{
+			fmt::print( "returning plug\n", renderPass );
+			return plug;
+		}
+
+		const GraphComponent *readOnlyReason = EditScopeAlgo::optionEditReadOnlyReason( editScope, m_option );
+
+			fmt::print( "readOnlyReason = \n", readOnlyReason ? readOnlyReason->fullName() : "" );
 		if( readOnlyReason )
 		{
+		// TODO : COMMENT NEEDS TWEAKING
 			// If we don't have an edit and the scope is locked, we error,
 			// as we can't add an edit. Other cases where we already _have_
 			// an edit will have been found by `source()`.
-			return fmt::format(
+			throw EditDisallowed( fmt::format(
 				"{} is locked.",
 				readOnlyReason->relativeName( readOnlyReason->ancestor<ScriptNode>() )
-			);
+			) );
 		}
-		else
+
+		if( dryRun )
 		{
-			return [
-				editScope = EditScopePtr( editScope ),
-				option = m_option,
-				context = history->context
-			] ( bool createIfNecessary ) {
-				Context::Scope scope( context.get() );
-				return EditScopeAlgo::acquireOptionEdit(
-					editScope.get(),
-					option,
-					createIfNecessary
-				);
-			};
+			return nullptr;
 		}
+
+		return EditScopeAlgo::acquireOptionEdit( editScope, m_option, createIfNecessary );
 	}
 }

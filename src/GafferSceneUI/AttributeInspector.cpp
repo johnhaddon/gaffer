@@ -376,12 +376,26 @@ Gaffer::ValuePlugPtr AttributeInspector::source( const GafferScene::SceneAlgo::H
 	return nullptr;
 }
 
-Inspector::AcquireEditFunctionOrFailure AttributeInspector::acquireEditFunction( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history ) const
+Gaffer::ValuePlugPtr AttributeInspector::acquireEdit( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history, bool createIfNecessary, bool dryRun ) const
 {
 	InternedString attributeName = m_attribute;
 	if( auto attributeHistory = dynamic_cast<const SceneAlgo::AttributeHistory *>( history ) )
 	{
 		attributeName = attributeHistory->attributeName;
+	}
+
+	auto plug = EditScopeAlgo::acquireAttributeEdit(
+		editScope,
+		history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ),
+		attributeName,
+		/* createIfNecessary = */ false
+	);
+
+	fmt::print( "AttributeInspector::acquireEdit {}\n", plug ? plug->fullName() : "" );
+
+	if( plug || !createIfNecessary )
+	{
+		return plug;
 	}
 
 	const GraphComponent *readOnlyReason = EditScopeAlgo::attributeEditReadOnlyReason(
@@ -392,27 +406,26 @@ Inspector::AcquireEditFunctionOrFailure AttributeInspector::acquireEditFunction(
 
 	if( readOnlyReason )
 	{
+		// TODO : COMMENT NEEDS TWEAKING
 		// If we don't have an edit and the scope is locked, we error,
 		// as we can't add an edit. Other cases where we already _have_
 		// an edit will have been found by `source()`.
-		return fmt::format( "{} is locked.", readOnlyReason->relativeName( readOnlyReason->ancestor<ScriptNode>() ) );
+		throw EditDisallowed(
+			fmt::format( "{} is locked.", readOnlyReason->relativeName( readOnlyReason->ancestor<ScriptNode>() ) )
+		);
 	}
-	else
+
+	if( dryRun )
 	{
-		return [
-			editScope = EditScopePtr( editScope ),
-			attributeName,
-			context = history->context
-		] ( bool createIfNecessary ) {
-			Context::Scope scope( context.get() );
-			return EditScopeAlgo::acquireAttributeEdit(
-				editScope.get(),
-				context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ),
-				attributeName,
-				createIfNecessary
-			);
-		};
+		return nullptr;
 	}
+
+	return EditScopeAlgo::acquireAttributeEdit(
+		editScope,
+		history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ),
+		attributeName,
+		createIfNecessary
+	);
 }
 
 bool AttributeInspector::attributeExists( const bool inheritAttributes ) const

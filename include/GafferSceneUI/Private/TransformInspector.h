@@ -85,7 +85,7 @@ class GAFFERSCENEUI_API TransformInspector : public Inspector
 		GafferScene::SceneAlgo::History::ConstPtr history() const override;
 		IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history) const override;
 		Gaffer::ValuePlugPtr source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const override;
-		AcquireEditFunctionOrFailure acquireEditFunction( Gaffer::EditScope *scope, const GafferScene::SceneAlgo::History *history ) const override;
+		Gaffer::ValuePlugPtr acquireEdit( Gaffer::EditScope *scope, const GafferScene::SceneAlgo::History *history, bool createIfNecessary, bool dryRun ) const override;
 
 	private :
 

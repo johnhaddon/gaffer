@@ -253,7 +253,7 @@ Gaffer::ValuePlugPtr ParameterInspector::source( const GafferScene::SceneAlgo::H
 	return nullptr;
 }
 
-Inspector::AcquireEditFunctionOrFailure ParameterInspector::acquireEditFunction( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history ) const
+Gaffer::ValuePlugPtr ParameterInspector::acquireEdit( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history, bool createIfNecessary, bool dryRun ) const
 {
 	auto attributeHistory = static_cast<const SceneAlgo::AttributeHistory *>( history );
 
@@ -267,9 +267,21 @@ Inspector::AcquireEditFunctionOrFailure ParameterInspector::acquireEditFunction(
 	if( !v )
 	{
 		// \todo - Now that Inspector itself has handling for missing values, does this special case
-		// still make sense? It's weird to sometimes get this, but sometimes get
-		// "No editable source found in history."
-		return fmt::format( "Parameter \"{}\" does not exist.", m_parameter.name.string() );
+		// still make sense? It's weird to sometimes get this, but sometimes get "No value to edit."
+		throw EditDisallowed( fmt::format( "Parameter \"{}\" does not exist.", m_parameter.name.string() ) );
+	}
+
+	auto plug = EditScopeAlgo::acquireParameterEdit(
+		editScope,
+		history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ),
+		attributeHistory->attributeName,
+		m_parameter,
+		/* createIfNecessary = */ false
+	);
+
+	if( plug || !createIfNecessary )
+	{
+		return plug;
 	}
 
 	const GraphComponent *readOnlyReason = EditScopeAlgo::parameterEditReadOnlyReason(
@@ -281,30 +293,26 @@ Inspector::AcquireEditFunctionOrFailure ParameterInspector::acquireEditFunction(
 
 	if( readOnlyReason )
 	{
+		// TODO : COMMENT NEEDS TWEAKING
 		// If we don't have an edit and the scope is locked, we error,
 		// as we can't add an edit. Other cases where we already _have_
 		// an edit will have been found by `source()`.
-		return fmt::format(
+		throw EditDisallowed( fmt::format(
 			"{} is locked.",
 			readOnlyReason->relativeName( readOnlyReason->ancestor<ScriptNode>() )
-		);
+		) );
 	}
-	else
+
+	if( dryRun )
 	{
-		return [
-			editScope = EditScopePtr( editScope ),
-			attributeName = attributeHistory->attributeName,
-			context = attributeHistory->context,
-			parameter = m_parameter
-		] ( bool createIfNecessary ) {
-				Context::Scope scope( context.get() );
-				return EditScopeAlgo::acquireParameterEdit(
-					editScope.get(),
-					context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ),
-					attributeName,
-					parameter,
-					createIfNecessary
-				);
-		};
+		return nullptr;
 	}
+
+	return EditScopeAlgo::acquireParameterEdit(
+		editScope,
+		history->context->get<ScenePlug::ScenePath>( ScenePlug::scenePathContextName ),
+		attributeHistory->attributeName,
+		m_parameter,
+		createIfNecessary
+	);
 }

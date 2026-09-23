@@ -340,7 +340,9 @@ Inspector::ResultPtr Inspector::inspect() const
 		}
 
 		result->m_editors = {
-			fmt::format( formatString, "edit" ), "",
+			[reason=fmt::format( formatString, "edit" )] ( bool createIfNecessary, bool dryRun ) -> ValuePlugPtr {
+				throw Inspector::EditDisallowed( reason );
+			},
 			[reason=fmt::format( formatString, "edit" )] ( const Object *value, bool dryRun ) {
 				throw Inspector::EditDisallowed( reason );
 			},
@@ -449,7 +451,14 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 		// Initialise editors from source if we can.
 		if( source && source->ancestor<EditScope>() == result->m_editScope )
 		{
-			const std::string nonEditableReason = ::nonEditableReason( source.get() );
+			auto acquireEditFunction = [source] ( bool createIfNecessary, bool dryRun ) {
+				const std::string nonEditableReason = ::nonEditableReason( source.get() );
+				if( !nonEditableReason.empty() )
+				{
+					throw EditDisallowed( nonEditableReason );
+				}
+				return source;
+			};
 
 			auto editFunction = [inspector = ConstInspectorPtr( this ), history = GafferScene::SceneAlgo::History::ConstPtr( history )] ( const IECore::Object *value, bool dryRun ) {
 				Context::Scope scope( history->context.get() );
@@ -461,19 +470,7 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 				inspector->disableEdit( history.get(), dryRun );
 			};
 
-			if( nonEditableReason.empty() )
-			{
-				result->m_editors = {
-					[source = source] ( bool unused ) { return source; },
-					editWarning,
-					editFunction,
-					disableEditFunction
-				};
-			}
-			else
-			{
-				result->m_editors = { nonEditableReason, "", editFunction, disableEditFunction };
-			}
+			result->m_editors = { acquireEditFunction, editFunction, disableEditFunction };
 		}
 		// Otherwise try to initialise from EditScope if we've hit it.
 		else if( auto editScope = runTimeCast<EditScope>( node ) )
@@ -485,7 +482,7 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 				// the scope to take precedence. An existing edit in the scope will
 				// have been picked up via `source()` already.
 				//
-				// \todo Should call `acquireEditFunction()` with the context from the
+				// \todo Should call `acquireEdit()` with the context from the
 				// `outPlug()` of the EditScope - see TransformTool. We should also
 				// explicitly prefer branches where `scene:path` matches the value
 				// in the `outPlug()` context, to avoid making edits to locations
@@ -493,12 +490,15 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 				result->m_editScopeInHistory = true;
 				Context::EditableScope scope( history->context.get() );
 				scope.setCanceller( canceller );
-				AcquireEditFunctionOrFailure func;
+				Result::AcquireEditFunction acquireEditFunction;
 				Result::EditFunction editFunction;
 				Result::DisableEditFunction disableEditFunction;
 				if( editScope->enabledPlug()->getValue() )
 				{
-					func = acquireEditFunction( editScope, history );
+					acquireEditFunction = [ inspector = ConstInspectorPtr( this ), editScope = EditScopePtr( editScope ), history = SceneAlgo::History::ConstPtr( history ) ] ( bool createIfNecessary, bool dryRun ) {
+						Context::Scope scope( history->context.get() );
+						return inspector->acquireEdit( editScope.get(), history.get(), createIfNecessary, dryRun );
+					};
 					editFunction = [ inspector = ConstInspectorPtr( this ), editScope = EditScopePtr( editScope ), history = SceneAlgo::History::ConstPtr( history ) ] ( const IECore::Object *value, bool dryRun ) {
 						Context::Scope scope( history->context.get() );
 						inspector->edit( value, editScope.get(), history.get(), dryRun );
@@ -514,7 +514,9 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 						"The target edit scope {} is disabled.",
 						editScope->relativeName( editScope->scriptNode() )
 					);
-					func = reason;
+					acquireEditFunction = [reason] ( bool createIfNecessary, bool dryRun ) -> ValuePlugPtr {
+						throw EditDisallowed( reason );
+					};
 					editFunction = [reason] ( const IECore::Object *value, bool dryRun ) {
 						throw EditDisallowed( reason );
 					};
@@ -524,7 +526,7 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 				}
 
 				result->m_editors = {
-					func, "",
+					acquireEditFunction,
 					editFunction,
 					disableEditFunction
 				};
@@ -538,17 +540,17 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 
 		// If we initialised the acquire edit function, tag on a warning if any edits won't be visible
 		// due to being overridden downstream.
-		if( result->m_editors && std::holds_alternative<AcquireEditFunction>( result->m_editors->acquireEditFunction ) && result->m_sourceType == Result::SourceType::Downstream )
-		{
-			const Node *downstreamNode = result->m_source->node();
-			const auto *downstreamEditScope = downstreamNode->ancestor<EditScope>();
-			downstreamNode = downstreamEditScope ? downstreamEditScope : downstreamNode;
-			result->m_editors->editWarning = fmt::format(
-				"{} has edits downstream in {}.",
-				std::string( 1, std::toupper( type()[0] ) ) + type().substr( 1 ),
-				downstreamNode->relativeName( downstreamNode->scriptNode() )
-			);
-		}
+		// if( result->m_editors && std::holds_alternative<AcquireEditFunction>( result->m_editors->acquireEditFunction ) && result->m_sourceType == Result::SourceType::Downstream )
+		// {
+		// 	const Node *downstreamNode = result->m_source->node();
+		// 	const auto *downstreamEditScope = downstreamNode->ancestor<EditScope>();
+		// 	downstreamNode = downstreamEditScope ? downstreamEditScope : downstreamNode;
+		// 	result->m_editors->editWarning = fmt::format(
+		// 		"{} has edits downstream in {}.",
+		// 		std::string( 1, std::toupper( type()[0] ) ) + type().substr( 1 ),
+		// 		downstreamNode->relativeName( downstreamNode->scriptNode() )
+		// 	);
+		// }
 	}
 
 	// If we haven't found everything we want yet, then recurse up the history
@@ -569,9 +571,9 @@ Gaffer::ValuePlugPtr Inspector::source( const GafferScene::SceneAlgo::History *h
 	return nullptr;
 }
 
-Inspector::AcquireEditFunctionOrFailure Inspector::acquireEditFunction( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history ) const
+Gaffer::ValuePlugPtr Inspector::acquireEdit( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history, bool createIfNecessary, bool dryRun ) const
 {
-	return "Editing not supported";
+	throw EditDisallowed( "Editing not supported" );
 }
 
 void Inspector::edit( const IECore::Object *value, const GafferScene::SceneAlgo::History *history, bool dryRun ) const
@@ -588,33 +590,35 @@ void Inspector::edit( const IECore::Object *value, const GafferScene::SceneAlgo:
 
 void Inspector::edit( const IECore::Object *value, Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history, bool dryRun ) const
 {
-	AcquireEditFunctionOrFailure editFunctionOrFailure = acquireEditFunction( editScope, history );
-	if( std::holds_alternative<std::string>( editFunctionOrFailure ) )
-	{
-		throw EditDisallowed( std::get<std::string>( editFunctionOrFailure ) );
-	}
-
 	if( dryRun )
 	{
-		// We want to check that the plug that `AcquireEditFunction` will create
-		// will accept `value`, but since this is a dry run we don't want to actually
-		// create a plug in the graph. Assume that the plug will be typed to match the current
-		// value, and make a temporary plug to use for the check.
-		ValuePlugPtr testPlug;
-		if( auto currentData = runTimeCast<const IECore::Data>( this->value( history ) ) )
+		ValuePlugPtr plug = acquireEdit( editScope, history, /* createIfNecessary = */ false, dryRun );
+		if( plug )
 		{
-			testPlug = PlugAlgo::createPlugFromData( "value", Plug::In, Plug::Default, currentData.get() );
+			setPlugValue( plug.get(), value, /* dryRun = */ true );
 		}
-		auto newData = runTimeCast<const IECore::Data>( value );
-		if( !testPlug || !newData || !PlugAlgo::canSetValueFromData( testPlug.get(), newData ) )
+		else
 		{
-			throw EditDisallowed( fmt::format( "Data of type \"{}\" is not compatible.", value->typeName() ) );
+			// We want to check that the plug that `acquireEdit()` will create
+			// will accept `value`, but since this is a dry run we don't want to actually
+			// create a plug in the graph. Assume that the plug will be typed to match the current
+			// value, and make a temporary plug to use for the check.
+			if( auto currentData = runTimeCast<const IECore::Data>( this->value( history ) ) )
+			{
+				plug = PlugAlgo::createPlugFromData( "value", Plug::In, Plug::Default, currentData.get() );
+			}
+			auto newData = runTimeCast<const IECore::Data>( value );
+			if( !plug || !newData || !PlugAlgo::canSetValueFromData( plug.get(), newData ) )
+			{
+				throw EditDisallowed( fmt::format( "Data of type \"{}\" is not compatible.", value->typeName() ) );
+			}
 		}
+
 		return;
 	}
 
-	ValuePlugPtr plug = std::get<AcquireEditFunction>( editFunctionOrFailure )( editScope );
-	setPlugValue( plug.get(), value, dryRun );
+	ValuePlugPtr plug = acquireEdit( editScope, history, /* createIfNecessary = */ true, /* dryRun = */ false );
+	setPlugValue( plug.get(), value, /* dryRun = */ false );
 }
 
 void Inspector::disableEdit( const GafferScene::SceneAlgo::History *history, bool dryRun ) const
@@ -1179,33 +1183,81 @@ const std::string &Inspector::Result::fallbackDescription() const
 	return m_fallbackDescription;
 }
 
-bool Inspector::Result::editable() const
+// bool Inspector::Result::editable() const
+// {
+// 	return m_editors && std::holds_alternative<AcquireEditFunction>( m_editors->acquireEditFunction );
+// }
+
+// std::string Inspector::Result::nonEditableReason() const
+// {
+// 	if( auto s = std::get_if<std::string>( &m_editors.value().acquireEditFunction ) )
+// 	{
+// 		return *s;
+// 	}
+// 	return "";
+// }
+
+// Gaffer::ValuePlugPtr Inspector::Result::acquireEdit( bool createIfNecessary ) const
+// {
+// 	if( auto f = std::get_if<AcquireEditFunction>( &m_editors.value().acquireEditFunction ) )
+// 	{
+// 		return (*f)( createIfNecessary );
+// 	}
+
+// 	throw EditDisallowed( "Not editable : " + std::get<std::string>( m_editors.value().acquireEditFunction ) );
+// }
+
+// std::string Inspector::Result::editWarning() const
+// {
+// 	return m_editors.value().editWarning;
+// }
+
+bool Inspector::Result::canAcquireEdit( bool createIfNecessary ) const
 {
-	return m_editors && std::holds_alternative<AcquireEditFunction>( m_editors->acquireEditFunction );
+	if( !m_editors || !m_editors->acquireEditFunction )
+	{
+		return false;
+	}
+
+	try
+	{
+		m_editors->acquireEditFunction( createIfNecessary, /* dryRun = */ true );
+	}
+	catch( EditDisallowed &e )
+	{
+		return false;
+	}
+
+	return true;
 }
 
-std::string Inspector::Result::nonEditableReason() const
+std::string Inspector::Result::cantAcquireEditReason( bool createIfNecessary ) const
 {
-	if( auto s = std::get_if<std::string>( &m_editors.value().acquireEditFunction ) )
+	if( !m_editors || !m_editors->editFunction )
 	{
-		return *s;
+		return "";
+	}
+
+	try
+	{
+		m_editors->acquireEditFunction( createIfNecessary, /* dryRun = */ true );
+	}
+	catch( EditDisallowed &e )
+	{
+		return e.what();
 	}
 	return "";
 }
 
 Gaffer::ValuePlugPtr Inspector::Result::acquireEdit( bool createIfNecessary ) const
 {
-	if( auto f = std::get_if<AcquireEditFunction>( &m_editors.value().acquireEditFunction ) )
+	if( !m_editors || !m_editors->editFunction )
 	{
-		return (*f)( createIfNecessary );
+		/// TODO Why don't we make life easier and always initialise `m_editors`?
+		throw EditDisallowed( "Not editable" );
 	}
 
-	throw EditDisallowed( "Not editable : " + std::get<std::string>( m_editors.value().acquireEditFunction ) );
-}
-
-std::string Inspector::Result::editWarning() const
-{
-	return m_editors.value().editWarning;
+	return m_editors->acquireEditFunction( createIfNecessary, /* dryRun = */ false );
 }
 
 bool Inspector::Result::canEdit( const IECore::Object *value ) const

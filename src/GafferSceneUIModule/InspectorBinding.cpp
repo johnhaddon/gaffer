@@ -181,10 +181,13 @@ void GafferSceneUIModule::bindInspector()
 			.def( "editScope", &Inspector::Result::editScope, return_value_policy<CastToIntrusivePtr>() )
 			.def( "sourceType", &Inspector::Result::sourceType )
 			.def( "fallbackDescription", &Inspector::Result::fallbackDescription, return_value_policy<copy_const_reference>() )
-			.def( "editable", &Inspector::Result::editable )
-			.def( "nonEditableReason", &Inspector::Result::nonEditableReason )
+			// .def( "editable", &Inspector::Result::editable ) TODO
+			// .def( "nonEditableReason", &Inspector::Result::nonEditableReason ) TODO
+			.def( "canAcquireEdit", &Inspector::Result::canAcquireEdit, ( arg( "createIfNecessary" ) = true ) )
+			.def( "cantAcquireEditReason", &Inspector::Result::cantAcquireEditReason, ( arg( "createIfNecessary" ) = true ) )
 			.def( "acquireEdit", &acquireEditWrapper, ( arg( "createIfNecessary" ) = true ) )
-			.def( "editWarning", &Inspector::Result::editWarning )
+
+			//.def( "editWarning", &Inspector::Result::editWarning ) TODO
 			.def( "canDisableEdit", &Inspector::Result::canDisableEdit )
 			.def( "nonDisableableReason", &Inspector::Result::nonDisableableReason )
 			.def( "disableEdit", &disableEditWrapper )

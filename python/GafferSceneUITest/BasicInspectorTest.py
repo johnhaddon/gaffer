@@ -102,8 +102,8 @@ class BasicInspectorTest( GafferUITest.TestCase ) :
 		self.assertEqual( inspection.source(), script["sphere"]["out"]["object"] )
 		self.assertEqual( inspection.sourceType(), inspection.SourceType.Other )
 		self.assertEqual( inspection.fallbackDescription(), "" )
-		self.assertFalse( inspection.editable() )
-		self.assertEqual( inspection.nonEditableReason(), "sphere.out.object is not editable." )
+		self.assertFalse( inspection.canAcquireEdit() )
+		self.assertEqual( inspection.cantAcquireEditReason(), "sphere.out.object is not editable." )
 		self.assertRaises( RuntimeError, inspection.acquireEdit )
 		self.assertFalse( inspection.canDisableEdit() )
 		self.assertEqual( inspection.nonDisableableReason(), "No edit found to disable." )
@@ -131,8 +131,8 @@ class BasicInspectorTest( GafferUITest.TestCase ) :
 		self.assertEqual( inspection.source(), script["options"]["out"]["globals"] )
 		self.assertEqual( inspection.sourceType(), inspection.SourceType.Other )
 		self.assertEqual( inspection.fallbackDescription(), "" )
-		self.assertFalse( inspection.editable() )
-		self.assertEqual( inspection.nonEditableReason(), "options.out.globals is not editable." )
+		self.assertFalse( inspection.canAcquireEdit() )
+		self.assertEqual( inspection.cantAcquireEditReason(), "options.out.globals is not editable." )
 		self.assertRaises( RuntimeError, inspection.acquireEdit )
 		self.assertFalse( inspection.canDisableEdit() )
 		self.assertEqual( inspection.nonDisableableReason(), "No edit found to disable." )
@@ -224,8 +224,8 @@ class BasicInspectorTest( GafferUITest.TestCase ) :
 			self.assertIsNotNone( inspection )
 			self.assertEqual( inspection.source(), source )
 			self.assertEqual( inspection.sourceType(), sourceType )
-			self.assertFalse( inspection.editable() )
-			with self.assertRaisesRegex( RuntimeError, "Not editable.*" ) :
+			self.assertFalse( inspection.canAcquireEdit() )
+			with self.assertRaisesRegex( RuntimeError, "Not editable.*" ) : # TODO : MAKE WORDING MATCH
 				inspection.acquireEdit()
 
 		SourceType = GafferSceneUI.Private.Inspector.Result.SourceType

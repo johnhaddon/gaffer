@@ -118,7 +118,7 @@ class TransformInspectorTest( GafferUITest.TestCase ) :
 					# World matrix is typically the result of concatenating a hierarchy
 					# of matrices, so there can be no single source.
 					self.assertIsNone( source )
-					self.assertFalse( inspection.editable() )
+					self.assertFalse( inspection.canAcquireEdit() )
 					continue
 
 				if expectedSource is None :
@@ -127,23 +127,23 @@ class TransformInspectorTest( GafferUITest.TestCase ) :
 					match component :
 						case GafferSceneUI.Private.TransformInspector.Component.Matrix :
 							self.assertTrue( source.isSame( expectedSource ) )
-							self.assertTrue( inspection.editable() )
+							self.assertTrue( inspection.canAcquireEdit() )
 						case GafferSceneUI.Private.TransformInspector.Component.Translate :
 							self.assertTrue( source.isSame( expectedSource["translate"] ) )
-							self.assertTrue( inspection.editable() )
+							self.assertTrue( inspection.canAcquireEdit() )
 						case GafferSceneUI.Private.TransformInspector.Component.Rotate :
 							self.assertTrue( source.isSame( expectedSource["rotate"] ) )
-							self.assertTrue( inspection.editable() )
+							self.assertTrue( inspection.canAcquireEdit() )
 						case GafferSceneUI.Private.TransformInspector.Component.Scale :
 							self.assertTrue( source.isSame( expectedSource["scale"] ) )
-							self.assertTrue( inspection.editable() )
+							self.assertTrue( inspection.canAcquireEdit() )
 						case _ :
 							self.assertIsNone( source )
-							self.assertFalse( inspection.editable() )
+							self.assertFalse( inspection.canAcquireEdit() )
 				else :
 					self.assertTrue( source.isSame( expectedSource ) )
 					self.assertTrue( source.isSame( source.node()["out"]["transform"] ) )
-					self.assertFalse( inspection.editable() )
+					self.assertFalse( inspection.canAcquireEdit() )
 
 	@GafferTest.TestRunner.CategorisedTestMethod( { "inspector" } )
 	def testObjectSourceSource( self ) :
@@ -236,8 +236,8 @@ class TransformInspectorTest( GafferUITest.TestCase ) :
 		)
 		self.assertEqual( inspection.source(), s["plane"]["transform"]["translate"] )
 		self.assertEqual( inspection.sourceType(), inspection.SourceType.Upstream )
-		self.assertFalse( inspection.editable() )
-		self.assertEqual( inspection.nonEditableReason(), "Edit creation not supported yet. Use the transform tools in the Viewer instead." )
+		self.assertFalse( inspection.canAcquireEdit() )
+		self.assertEqual( inspection.cantAcquireEditReason(), "Edit creation not supported yet. Use the transform tools in the Viewer instead." )
 
 		# But if an edit already exists, we'll use it.
 
@@ -251,4 +251,4 @@ class TransformInspectorTest( GafferUITest.TestCase ) :
 		)
 		self.assertEqual( inspection.source(), edit.translate )
 		self.assertEqual( inspection.sourceType(), inspection.SourceType.EditScope )
-		self.assertTrue( inspection.editable() )
+		self.assertTrue( inspection.canAcquireEdit() )
