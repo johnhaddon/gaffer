@@ -40,6 +40,7 @@
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "kernel/types.h"
 #include "session/output_driver.h"
+#include "util/progress.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
 // Cortex
@@ -58,7 +59,9 @@ class OIIOOutputDriver : public ccl::OutputDriver
 {
 	public:
 
-		OIIOOutputDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const IECore::CompoundDataMap &layers );
+		using ErrorFunction = std::function<void ( const std::string &error )>;
+
+		OIIOOutputDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const IECore::CompoundDataMap &layers, const ErrorFunction &errorFunction );
 		~OIIOOutputDriver() override;
 
 		void write_render_tile( const Tile &tile ) override;
@@ -79,6 +82,7 @@ class OIIOOutputDriver : public ccl::OutputDriver
 		Imath::Box2i m_dataWindow;
 		using Layers = std::vector<Layer>;
 		Layers m_layers;
+		ErrorFunction m_errorFunction;
 };
 
 } // namespace
