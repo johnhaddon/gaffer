@@ -310,9 +310,15 @@ void OIIOOutputDriver::write_render_tile( const Tile &tile )
 			imageData = &pixels[0];
 		}
 
-		imageOutput->write_image( OIIO::TypeDesc::FLOAT, imageData );
+		if( !imageOutput->write_image( OIIO::TypeDesc::FLOAT, imageData ) )
+		{
+			m_errorFunction( imageOutput->geterror() );
+		}
 
-		imageOutput->close();
+		if( !imageOutput->close() )
+		{
+			m_errorFunction( imageOutput->geterror() );
+		}
 	}
 }
 

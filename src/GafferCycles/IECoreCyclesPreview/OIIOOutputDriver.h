@@ -40,7 +40,6 @@
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "kernel/types.h"
 #include "session/output_driver.h"
-#include "util/progress.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
 // Cortex
