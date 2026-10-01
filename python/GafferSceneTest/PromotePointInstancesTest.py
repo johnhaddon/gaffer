@@ -69,8 +69,16 @@ class PromotePointInstancesTest( GafferSceneTest.SceneTestCase ) :
 			self["instancer"]["prototypesList"].setValue( IECore.StringVectorData( [ "/group/sphere", "/group/cube" ] ) )
 			self["instancer"]["prototypeIndexMode"].setValue( GafferScene.PointInstancer.PrototypeIndexMode.Random )
 
+			self["primitiveVariables"] = GafferScene.PrimitiveVariables()
+			self["primitiveVariables"]["in"].setInput( self["instancer"]["out"] )
+			self["primitiveVariables"]["filter"].setInput( self["planeFilter"]["out"] )
+			self["primitiveVariables"]["primitiveVariables"].addChild(
+				Gaffer.NameValuePlug( "invisibleIds", IECore.Int64VectorData( [] ) )
+			)
+			Gaffer.PlugAlgo.promoteWithName( self["primitiveVariables"]["primitiveVariables"][-1]["value"], name = "invisibleIds" )
+
 			self["promoter"] = GafferScene.PromotePointInstances()
-			self["promoter"]["in"].setInput( self["instancer"]["out"] )
+			self["promoter"]["in"].setInput( self["primitiveVariables"]["out"] )
 			self["promoter"]["filter"].setInput( self["planeFilter"]["out"] )
 			Gaffer.PlugAlgo.promote( self["promoter"]["idList"] )
 			Gaffer.PlugAlgo.promote( self["promoter"]["name"] )
@@ -96,7 +104,7 @@ class PromotePointInstancesTest( GafferSceneTest.SceneTestCase ) :
 			prototype = [ "sphere", "cube" ][prototypeIndices[id]]
 			self.assertEqual( network["out"].childNames( f"/promotedInstances/{id}" ), IECore.InternedStringVectorData( [ prototype ] ) )
 
-	def testInvisibleIDs( self ) :
+	def testPromotedIDsAddedToInvisibleIDs( self ) :
 
 		network = self.TestNetwork()
 		for id in range( 0, 4 ) :
@@ -137,3 +145,20 @@ class PromotePointInstancesTest( GafferSceneTest.SceneTestCase ) :
 					"uv" : IECore.V2fData( uv.data[uv.indices[id]], IECore.GeometricData.Interpretation.UV ),
 				} )
 			)
+
+	def testInvisibleIDsTranslatedToSceneVisibility( self ) :
+
+		network = self.TestNetwork()
+		invisibleIds = [ 0, 2 ]
+		network["invisibleIds"].setValue( IECore.Int64VectorData( invisibleIds ) )
+		network["idList"].setValue( IECore.Int64VectorData( [ 0, 1, 2, 3 ] ) )
+
+		prototypeIndices = network["out"].object( "/plane" ).getPrototypeIndex()
+
+		for id in range( 0, 4 ) :
+			prototype = [ "sphere", "cube" ][prototypeIndices[id]]
+			attributes = network["out"].attributes( f"/promotedInstances/{id}/{prototype}" )
+			if id in invisibleIds :
+				self.assertEqual( attributes["scene:visible"].value, False )
+			else :
+				self.assertNotIn( "scene:visible", attributes )
