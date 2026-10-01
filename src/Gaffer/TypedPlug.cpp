@@ -39,6 +39,7 @@
 
 #include "Gaffer/NumericPlug.h"
 #include "Gaffer/StringPlug.h"
+#include "Gaffer/TypedObjectPlug.h"
 #include "Gaffer/TypedPlugImplementation.h"
 
 namespace Gaffer
@@ -66,7 +67,8 @@ bool BoolPlug::acceptsInput( const Plug *input ) const
 			input->isInstanceOf( staticTypeId() ) ||
 			input->isInstanceOf( IntPlug::staticTypeId() ) ||
 			input->isInstanceOf( FloatPlug::staticTypeId() ) ||
-			input->isInstanceOf( StringPlug::staticTypeId() )
+			input->isInstanceOf( StringPlug::staticTypeId() ) ||
+			input->isInstanceOf( Int64VectorDataPlug::staticTypeId() )
 		;
 	}
 	return true;
@@ -88,6 +90,9 @@ void BoolPlug::setFrom( const ValuePlug *other )
 			break;
 		case StringPlugTypeId :
 			setValue( static_cast<const StringPlug *>( other )->getValue().size() );
+			break;
+		case Int64VectorDataPlugTypeId :
+			setValue( static_cast<const Int64VectorDataPlug *>( other )->getValue()->readable().size() );
 			break;
 		default :
 			throw IECore::Exception( "Unsupported plug type" );
