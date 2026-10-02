@@ -37,9 +37,12 @@
 
 #include "Gaffer/NumericPlug.h"
 
+#include "Gaffer/StringPlug.h"
 #include "Gaffer/TypedPlug.h"
 
 #include "Imath/ImathFun.h"
+
+#include "boost/lexical_cast.hpp"
 
 using namespace IECore;
 using namespace Gaffer;
@@ -88,7 +91,8 @@ bool NumericPlug<T>::acceptsInput( const Plug *input ) const
 		return
 			input->isInstanceOf( FloatPlug::staticTypeId() ) ||
 			input->isInstanceOf( IntPlug::staticTypeId() ) ||
-			input->isInstanceOf( BoolPlug::staticTypeId() )
+			input->isInstanceOf( BoolPlug::staticTypeId() ) ||
+			input->isInstanceOf( StringPlug::staticTypeId() )
 		;
 	}
 	return true;
@@ -151,6 +155,10 @@ void NumericPlug<T>::setFrom( const ValuePlug *other )
 	else if( const BoolPlug *p = runTimeCast<const BoolPlug>( other ) )
 	{
 		setValue( static_cast<T>( p->getValue() ) );
+	}
+	else if( const StringPlug *p = runTimeCast<const StringPlug>( other ) )
+	{
+		setValue( boost::lexical_cast<T>( p->getValue() ) );
 	}
 	else
 	{
