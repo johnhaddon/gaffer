@@ -133,10 +133,10 @@ T convertComponent( S v )
 		{
 			return std::numeric_limits<T>::lowest();
 		}
-		else if( v >= static_cast<S>( std::numeric_limits<T>::max() ) )
-		{
-			return std::numeric_limits<T>::max();
-		}
+		// else if( v >= static_cast<S>( std::numeric_limits<T>::max() ) )
+		// {
+		// 	return std::numeric_limits<T>::max();
+		// }
 	}
 
 	return static_cast<T>( v );
