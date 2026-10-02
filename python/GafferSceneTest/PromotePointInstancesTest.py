@@ -162,3 +162,16 @@ class PromotePointInstancesTest( GafferSceneTest.SceneTestCase ) :
 				self.assertEqual( attributes["scene:visible"].value, False )
 			else :
 				self.assertNotIn( "scene:visible", attributes )
+
+	def testNoContextLeaks( self ) :
+
+		network = self.TestNetwork()
+		network["idList"].setValue( IECore.Int64VectorData( [ 0, 1, 2, 3 ] ) )
+
+		with Gaffer.ContextMonitor( root = network["prototypes"] ) as monitor :
+			GafferSceneTest.traverseScene( network["promoter"]["out"] )
+
+		self.assertEqual(
+			set( monitor.combinedStatistics().variableNames() ),
+			{ "scene:path", "frame", "framesPerSecond" }
+		)
