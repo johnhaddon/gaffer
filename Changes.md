@@ -1,6 +1,11 @@
 1.7.x.x (relative to 1.7.4.0)
 =======
 
+Features
+--------
+
+- TemporalFilter : Added a new node for filtering PrimitiveVariables across multiple time samples.
+
 Fixes
 -----
 
