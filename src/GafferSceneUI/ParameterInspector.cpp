@@ -44,7 +44,9 @@
 #include "GafferScene/ShaderAssignment.h"
 #include "GafferScene/ShaderTweaks.h"
 
+#include "Gaffer/Animation.h"
 #include "Gaffer/Metadata.h"
+#include "Gaffer/MetadataAlgo.h"
 #include "Gaffer/OptionalValuePlug.h"
 #include "Gaffer/ScriptNode.h"
 #include "Gaffer/Switch.h"
@@ -176,12 +178,12 @@ IECore::ConstObjectPtr ParameterInspector::fallbackValue( const GafferScene::Sce
 	return nullptr;
 }
 
-Gaffer::ValuePlugPtr ParameterInspector::source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const
+Gaffer::ValuePlugPtr ParameterInspector::acquireEdit( const GafferScene::SceneAlgo::History *history, bool createIfNecessary, bool dryRun ) const
 {
 	auto sceneNode = runTimeCast<SceneNode>( history->scene->node() );
 	if( !sceneNode || history->scene != sceneNode->outPlug() )
 	{
-		return nullptr;
+		return Inspector::acquireEdit( history, createIfNecessary, dryRun );
 	}
 
 	if( auto light = runTimeCast<Light>( sceneNode ) )
@@ -212,19 +214,11 @@ Gaffer::ValuePlugPtr ParameterInspector::source( const GafferScene::SceneAlgo::H
 	{
 		if( shaderAssignment->globalPlug()->getValue() || !(shaderAssignment->filterPlug()->match( shaderAssignment->inPlug() ) & PathMatcher::ExactMatch) )
 		{
-			return nullptr;
+			return Inspector::acquireEdit( history, createIfNecessary, dryRun );
 		}
 
 		if( auto parameterPlug = shaderAssignment->shaderPlug()->parameterSource( m_parameter ) )
 		{
-			/// \todo This is overly conservative. We should test to see if there is more than
-			/// one filter match (but make sure to early-out once two are found, rather than test
-			/// the rest of the scene).
-			const Node *shaderNode = parameterPlug->node();
-			editWarning = fmt::format(
-				"Edits to {} may affect other locations in the scene.",
-				shaderNode->relativeName( shaderNode->scriptNode() )
-			);
 			return parameterPlug;
 		}
 	}
@@ -250,7 +244,7 @@ Gaffer::ValuePlugPtr ParameterInspector::source( const GafferScene::SceneAlgo::H
 		}
 	}
 
-	return nullptr;
+	return Inspector::acquireEdit( history, createIfNecessary, dryRun );
 }
 
 Gaffer::ValuePlugPtr ParameterInspector::acquireEdit( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history, bool createIfNecessary, bool dryRun ) const

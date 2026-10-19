@@ -67,10 +67,8 @@ class GAFFERSCENEUI_API SetMembershipInspector : public Inspector
 		GafferScene::SceneAlgo::History::ConstPtr history() const override;
 		IECore::ConstObjectPtr value( const GafferScene::SceneAlgo::History *history) const override;
 		IECore::ConstObjectPtr fallbackValue( const GafferScene::SceneAlgo::History *history, std::string &description ) const override;
-		// We don't have any source plugs we could present to a user directly, so
-		// we return `history->scene` to denote locations where we know an edit has
-		// been made.
-		Gaffer::ValuePlugPtr source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const override;
+
+		bool hasEdit( const GafferScene::SceneAlgo::History *history ) const override;
 
 		void edit( const IECore::Object *value, const GafferScene::SceneAlgo::History *history, bool dryRun ) const override;
 		void edit( const IECore::Object *value, Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history, bool dryRun ) const override;

@@ -274,12 +274,12 @@ IECore::ConstObjectPtr AttributeInspector::fallbackValue( const GafferScene::Sce
 	return nullptr;
 }
 
-Gaffer::ValuePlugPtr AttributeInspector::source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const
+Gaffer::ValuePlugPtr AttributeInspector::acquireEdit( const GafferScene::SceneAlgo::History *history, bool createIfNecessary, bool dryRun ) const
 {
 	auto sceneNode = runTimeCast<SceneNode>( history->scene->node() );
 	if( !sceneNode || history->scene != sceneNode->outPlug() )
 	{
-		return nullptr;
+		return Inspector::acquireEdit( history, createIfNecessary, dryRun );
 	}
 
 	if( auto light = runTimeCast<Light>( sceneNode ) )
@@ -301,7 +301,7 @@ Gaffer::ValuePlugPtr AttributeInspector::source( const GafferScene::SceneAlgo::H
 		{
 			return lightFilter->filteredLightsExclusionsPlug();
 		}
-		return nullptr;
+		return Inspector::acquireEdit( history, createIfNecessary, dryRun );
 	}
 
 	else if( auto camera = runTimeCast<GafferScene::Camera>( sceneNode ) )
@@ -313,7 +313,7 @@ Gaffer::ValuePlugPtr AttributeInspector::source( const GafferScene::SceneAlgo::H
 	{
 		if( attributes->globalPlug()->getValue() || !( attributes->filterPlug()->match( attributes->inPlug() ) & PathMatcher::ExactMatch ) )
 		{
-			return nullptr;
+			return Inspector::acquireEdit( history, createIfNecessary, dryRun );
 		}
 
 		for( const auto &plug : NameValuePlug::Range( *attributes->attributesPlug() ) )
@@ -323,13 +323,6 @@ Gaffer::ValuePlugPtr AttributeInspector::source( const GafferScene::SceneAlgo::H
 				( !plug->enabledPlug() || plug->enabledPlug()->getValue() )
 			)
 			{
-				/// \todo This is overly conservative. We should test to see if there is more than
-				/// one filter match (but make sure to early-out once two are found, rather than test
-				/// the rest of the scene).
-				editWarning = fmt::format(
-					"Edits to \"{}\" may affect other locations in the scene.",
-					m_attribute.string()
-				);
 				return plug;
 			}
 		}
@@ -339,7 +332,7 @@ Gaffer::ValuePlugPtr AttributeInspector::source( const GafferScene::SceneAlgo::H
 	{
 		if( attributeTweaks->globalPlug()->getValue() || !( attributeTweaks->filterPlug()->match( attributeTweaks->inPlug() ) & PathMatcher::ExactMatch ) )
 		{
-			return nullptr;
+			return Inspector::acquireEdit( history, createIfNecessary, dryRun );
 		}
 
 		ConstCompoundObjectPtr attributes;
@@ -373,7 +366,7 @@ Gaffer::ValuePlugPtr AttributeInspector::source( const GafferScene::SceneAlgo::H
 		}
 	}
 
-	return nullptr;
+	return Inspector::acquireEdit( history, createIfNecessary, dryRun );
 }
 
 Gaffer::ValuePlugPtr AttributeInspector::acquireEdit( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history, bool createIfNecessary, bool dryRun ) const
@@ -390,8 +383,6 @@ Gaffer::ValuePlugPtr AttributeInspector::acquireEdit( Gaffer::EditScope *editSco
 		attributeName,
 		/* createIfNecessary = */ false
 	);
-
-	fmt::print( "AttributeInspector::acquireEdit {}\n", plug ? plug->fullName() : "" );
 
 	if( plug || !createIfNecessary )
 	{

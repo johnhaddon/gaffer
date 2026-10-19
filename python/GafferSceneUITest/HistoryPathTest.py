@@ -264,7 +264,6 @@ class HistoryPathTest( GafferSceneTest.SceneTestCase ) :
 		self.assertEqual( c[0].property( "history:fallbackValue" ), None )
 		self.assertEqual( c[0].property( "history:operation" ), Gaffer.TweakPlug.Mode.Create )
 		self.assertEqual( c[0].property( "history:source" ), s["testLight"]["parameters"]["exposure"] )
-		self.assertEqual( c[0].property( "history:editWarning" ), "" )
 
 		self.assertEqual( c[1].property( "name" ), str( c[1][-1] ) )
 		self.assertEqual( c[1].property( "history:node" ), s["tweaks"] )
@@ -272,7 +271,6 @@ class HistoryPathTest( GafferSceneTest.SceneTestCase ) :
 		self.assertEqual( c[1].property( "history:fallbackValue" ), None )
 		self.assertEqual( c[1].property( "history:operation" ), Gaffer.TweakPlug.Mode.Add )
 		self.assertEqual( c[1].property( "history:source" ), exposureTweak )
-		self.assertEqual( c[1].property( "history:editWarning" ), "" )
 
 		self.assertEqual( c[2].property( "name" ), str( c[2][-1] ) )
 		self.assertEqual( c[2].property( "history:node" ), s["editScope"]["LightEdits"] )
@@ -280,7 +278,6 @@ class HistoryPathTest( GafferSceneTest.SceneTestCase ) :
 		self.assertEqual( c[2].property( "history:fallbackValue" ), None )
 		self.assertEqual( c[2].property( "history:operation" ), Gaffer.TweakPlug.Mode.Create )
 		self.assertEqual( c[2].property( "history:source" ), edit )
-		self.assertEqual( c[2].property( "history:editWarning" ), "" )
 
 	@GafferTest.TestRunner.CategorisedTestMethod( { "inspector" } )
 	def testCopy( self ) :
@@ -468,7 +465,6 @@ class HistoryPathTest( GafferSceneTest.SceneTestCase ) :
 		self.assertEqual( c[0].property( "history:fallbackValue" ), 512 )
 		self.assertEqual( c[0].property( "history:operation" ), Gaffer.TweakPlug.Mode.Create )
 		self.assertEqual( c[0].property( "history:source" ), s["testLight"]["visualiserAttributes"]["maxTextureResolution"] )
-		self.assertEqual( c[0].property( "history:editWarning" ), "" )
 
 		self.assertEqual( c[1].property( "name" ), str( c[1][-1] ) )
 		self.assertEqual( c[1].property( "history:node" ), s["group"] )
@@ -476,7 +472,6 @@ class HistoryPathTest( GafferSceneTest.SceneTestCase ) :
 		self.assertEqual( c[1].property( "history:fallbackValue" ), 512 )
 		self.assertEqual( c[1].property( "history:operation" ), None )
 		self.assertEqual( c[1].property( "history:source" ), None )
-		self.assertEqual( c[1].property( "history:editWarning" ), None )
 
 		self.assertEqual( c[2].property( "name" ), str( c[2][-1] ) )
 		self.assertEqual( c[2].property( "history:node" ), s["openGLAttributes"] )
@@ -484,7 +479,6 @@ class HistoryPathTest( GafferSceneTest.SceneTestCase ) :
 		self.assertEqual( c[2].property( "history:fallbackValue" ), 1024 )
 		self.assertEqual( c[2].property( "history:operation" ), Gaffer.TweakPlug.Mode.Create )
 		self.assertEqual( c[2].property( "history:source" ), s["openGLAttributes"]["attributes"]["gl:visualiser:maxTextureResolution"] )
-		self.assertEqual( c[2].property( "history:editWarning" ), "Edits to \"gl:visualiser:maxTextureResolution\" may affect other locations in the scene." )
 
 		s["openGLAttributes"]["enabled"].setValue( False )
 
@@ -501,7 +495,6 @@ class HistoryPathTest( GafferSceneTest.SceneTestCase ) :
 		self.assertEqual( c[0].property( "history:fallbackValue" ), 512 )
 		self.assertEqual( c[0].property( "history:operation" ), Gaffer.TweakPlug.Mode.Create )
 		self.assertEqual( c[0].property( "history:source" ), s["testLight"]["visualiserAttributes"]["maxTextureResolution"] )
-		self.assertEqual( c[0].property( "history:editWarning" ), "" )
 
 		# Disabling the openGLAttributes node results in its `visualiserMaxTextureResolution` plug remaining
 		# in the history but providing no value. We'll be able to see the value set on /group as the fallback
@@ -512,7 +505,6 @@ class HistoryPathTest( GafferSceneTest.SceneTestCase ) :
 		self.assertEqual( c[2].property( "history:fallbackValue" ), 1024 )
 		self.assertEqual( c[2].property( "history:operation" ), Gaffer.TweakPlug.Mode.Create )
 		self.assertEqual( c[2].property( "history:source" ), s["openGLAttributes"]["attributes"]["gl:visualiser:maxTextureResolution"] )
-		self.assertEqual( c[2].property( "history:editWarning" ), "Edits to \"gl:visualiser:maxTextureResolution\" may affect other locations in the scene." )
 
 	@GafferTest.TestRunner.CategorisedTestMethod( { "inspector" } )
 	def testIsLeafAndIsValid( self ) :
@@ -780,7 +772,6 @@ class HistoryPathTest( GafferSceneTest.SceneTestCase ) :
 					self.assertEqual( c[0].property( "history:fallbackValue" ), None )
 					self.assertEqual( c[0].property( "history:operation" ), Gaffer.TweakPlug.Mode.Create )
 					self.assertEqual( c[0].property( "history:source" ), s["light"]["parameters"]["exposure"] )
-					self.assertEqual( c[0].property( "history:editWarning" ), "" )
 
 					if childrenViewable :
 
@@ -790,7 +781,6 @@ class HistoryPathTest( GafferSceneTest.SceneTestCase ) :
 						self.assertEqual( c[1].property( "history:fallbackValue" ), None )
 						self.assertEqual( c[1].property( "history:operation" ), Gaffer.TweakPlug.Mode.Replace )
 						self.assertEqual( c[1].property( "history:source" ), exposureTweak1 )
-						self.assertEqual( c[1].property( "history:editWarning" ), "" )
 
 						self.assertEqual( c[2].property( "name" ), str( c[2][-1] ) )
 						self.assertEqual( c[2].property( "history:node" ), s["b"]["tweaks2"] )
@@ -798,7 +788,6 @@ class HistoryPathTest( GafferSceneTest.SceneTestCase ) :
 						self.assertEqual( c[2].property( "history:fallbackValue" ), None )
 						self.assertEqual( c[2].property( "history:operation" ), Gaffer.TweakPlug.Mode.Add )
 						self.assertEqual( c[2].property( "history:source" ), exposureTweak2 )
-						self.assertEqual( c[2].property( "history:editWarning" ), "" )
 
 					else :
 
@@ -811,7 +800,6 @@ class HistoryPathTest( GafferSceneTest.SceneTestCase ) :
 						self.assertEqual( c[1].property( "history:fallbackValue" ), None )
 						self.assertEqual( c[1].property( "history:operation" ), Gaffer.TweakPlug.Mode.Add )
 						self.assertEqual( c[1].property( "history:source" ), exposureTweak2 )
-						self.assertEqual( c[1].property( "history:editWarning" ), "" )
 
 	@GafferTest.TestRunner.CategorisedTestMethod( { "inspector" } )
 	def testNonViewableInternalsWithVaryingContextVariables( self ) :

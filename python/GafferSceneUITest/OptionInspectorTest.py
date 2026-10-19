@@ -140,7 +140,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 		self.__assertExpectedResult(
 			self.__inspect( s["group"]["out"], "render:camera" ),
-			source = s["standardOptions"]["options"]["render:camera"],
+			source = s["standardOptions"]["out"],
 			sourceType = SourceType.Other,
 			canAcquireEdit = True,
 			edit = s["standardOptions"]["options"]["render:camera"]
@@ -150,7 +150,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 		self.__assertExpectedResult(
 			self.__inspect( s["editScope1"]["out"], "render:camera" ),
-			source = s["standardOptions"]["options"]["render:camera"],
+			source = s["standardOptions"]["out"],
 			sourceType = SourceType.Other,
 			canAcquireEdit = True,
 			edit = s["standardOptions"]["options"]["render:camera"]
@@ -160,7 +160,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 		self.__assertExpectedResult(
 			self.__inspect( s["group"]["out"], "render:camera", s["editScope1"] ),
-			source = s["standardOptions"]["options"]["render:camera"],
+			source = s["standardOptions"]["out"],
 			sourceType = SourceType.Other,
 			canAcquireEdit = False,
 			cantAcquireEditReason = "The target edit scope editScope1 is not in the scene history."
@@ -177,7 +177,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 		self.__assertExpectedResult(
 			inspection,
-			source = s["standardOptions"]["options"]["render:camera"],
+			source = s["standardOptions"]["out"],
 			sourceType = SourceType.Upstream,
 			canAcquireEdit = True
 		)
@@ -215,7 +215,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 		self.__assertExpectedResult(
 			self.__inspect( s["editScope2"]["out"], "render:resolutionMultiplier", s["editScope1"] ),
-			source = s["editScope1"]["standardOptions2"]["options"]["render:resolutionMultiplier"],
+			source = s["editScope1"]["standardOptions2"]["out"],
 			sourceType = SourceType.EditScope,
 			canAcquireEdit = True,
 			edit = s["editScope1"]["standardOptions2"]["options"]["render:resolutionMultiplier"]
@@ -231,7 +231,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 		self.__assertExpectedResult(
 			self.__inspect( s["editScope2"]["out"], "render:camera", s["editScope1"] ),
-			source = cameraEdit,
+			source = cameraEdit.node()["out"].source(),
 			sourceType = SourceType.EditScope,
 			canAcquireEdit = True,
 			edit = cameraEdit
@@ -247,7 +247,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 		self.__assertExpectedResult(
 			self.__inspect( s["editScope2"]["out"], "render:camera", s["editScope1"] ),
-			source = s["editScope1"]["standardOptions3"]["options"]["render:camera"],
+			source = s["editScope1"]["standardOptions3"]["out"],
 			sourceType = SourceType.EditScope,
 			canAcquireEdit = True,
 			edit = s["editScope1"]["standardOptions3"]["options"]["render:camera"]
@@ -262,7 +262,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 		self.__assertExpectedResult(
 			self.__inspect( s["independentOptions"]["out"], "render:camera", None ),
-			source = s["independentOptions"]["options"]["render:camera"],
+			source = s["independentOptions"]["out"],
 			sourceType = SourceType.Other,
 			canAcquireEdit = True,
 			edit = s["independentOptions"]["options"]["render:camera"]
@@ -272,7 +272,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 		self.__assertExpectedResult(
 			self.__inspect( s["independentOptions"]["out"], "render:camera", s["editScope2"] ),
-			source = s["independentOptions"]["options"]["render:camera"],
+			source = s["independentOptions"]["out"],
 			sourceType = SourceType.Downstream,
 			canAcquireEdit = True,
 			edit = optionEditScope2Edit,
@@ -283,7 +283,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 		self.__assertExpectedResult(
 			self.__inspect( s["independentOptions"]["out"], "render:camera", s["editScope2"] ),
-			source = s["independentOptions"]["options"]["render:camera"],
+			source = s["independentOptions"]["out"],
 			sourceType = SourceType.Downstream,
 			canAcquireEdit = False,
 			cantAcquireEditReason = "The target edit scope editScope2 is disabled."
@@ -298,7 +298,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 		self.__assertExpectedResult(
 			self.__inspect( s["editScope2"]["out"], "render:camera", s["editScope2"] ),
-			source = s["editScope1"]["standardOptions3"]["options"]["render:camera"],
+			source = s["editScope1"]["standardOptions3"]["out"],
 			sourceType = SourceType.Upstream,
 			canAcquireEdit = True,
 			edit = optionEditScope2Edit
@@ -309,7 +309,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 		self.__assertExpectedResult(
 			self.__inspect( s["editScope2"]["out"], "render:camera", s["editScope2"] ),
-			source = s["editScope1"]["standardOptions3"]["options"]["render:camera"],
+			source = s["editScope1"]["standardOptions3"]["out"],
 			sourceType = SourceType.Upstream,
 			canAcquireEdit = True,
 			edit = optionEditScope2Edit
@@ -318,7 +318,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 		Gaffer.MetadataAlgo.setReadOnly( s["editScope2"]["OptionEdits"], True )
 		self.__assertExpectedResult(
 			self.__inspect( s["editScope2"]["out"], "render:camera", s["editScope2"] ),
-			source = s["editScope1"]["standardOptions3"]["options"]["render:camera"],
+			source = s["editScope1"]["standardOptions3"]["out"],
 			sourceType = SourceType.Upstream,
 			canAcquireEdit = True,
 			edit = optionEditScope2Edit
@@ -342,7 +342,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 		self.__assertExpectedResult(
 			self.__inspect( s["optionTweaks"]["out"], "render:camera" ),
-			source = cameraTweak,
+			source = s["optionTweaks"]["out"],
 			sourceType = SourceType.Other,
 			canAcquireEdit = True,
 			edit = cameraTweak
@@ -352,7 +352,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 		self.__assertExpectedResult(
 			self.__inspect( s["optionTweaks"]["out"], "render:camera" ),
-			source = s["options"]["options"]["render:camera"],
+			source = s["options"]["out"],
 			sourceType = SourceType.Other,
 			canAcquireEdit = True,
 			edit = s["options"]["options"]["render:camera"]
@@ -479,7 +479,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 		self.__assertExpectedResult(
 			self.__inspect( s["editScope"]["out"], "renderPass:enabled", s["editScope"] ),
-			source = edit,
+			source = edit.node()["out"].source(),
 			sourceType = GafferSceneUI.Private.Inspector.Result.SourceType.EditScope,
 			canAcquireEdit = True,
 			edit = edit
@@ -561,7 +561,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 			self.__assertExpectedResult(
 				self.__inspect( s["group"]["out"], "render:camera", context = context ),
-				source = s["standardOptions"]["options"]["render:camera"],
+				source = s["standardOptions"]["out"],
 				sourceType = SourceType.Other,
 				canAcquireEdit = True,
 				edit = s["standardOptions"]["options"]["render:camera"]
@@ -571,7 +571,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 			self.__assertExpectedResult(
 				self.__inspect( s["editScope1"]["out"], "render:camera", context = context ),
-				source = s["standardOptions"]["options"]["render:camera"],
+				source = s["standardOptions"]["out"],
 				sourceType = SourceType.Other,
 				canAcquireEdit = True,
 				edit = s["standardOptions"]["options"]["render:camera"]
@@ -580,7 +580,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 			# We shouldn't be able to edit it if we've been told to use an EditScope and it isn't in the history
 			self.__assertExpectedResult(
 				self.__inspect( s["group"]["out"], "render:camera", s["editScope1"], context ),
-				source = s["standardOptions"]["options"]["render:camera"],
+				source = s["standardOptions"]["out"],
 				sourceType = SourceType.Other,
 				canAcquireEdit = False,
 				cantAcquireEditReason = "The target edit scope editScope1 is not in the scene history."
@@ -597,7 +597,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 			self.__assertExpectedResult(
 				inspection,
-				source = s["standardOptions"]["options"]["render:camera"],
+				source = s["standardOptions"]["out"],
 				sourceType = SourceType.Upstream,
 				canAcquireEdit = True
 			)
@@ -635,7 +635,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 			self.__assertExpectedResult(
 				self.__inspect( s["editScope2"]["out"], "render:resolutionMultiplier", s["editScope1"], context ),
-				source = s["editScope1"]["standardOptions2"]["options"]["render:resolutionMultiplier"],
+				source = s["editScope1"]["standardOptions2"]["out"],
 				sourceType = SourceType.EditScope,
 				canAcquireEdit = True,
 				edit = s["editScope1"]["standardOptions2"]["options"]["render:resolutionMultiplier"]
@@ -651,7 +651,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 			self.__assertExpectedResult(
 				self.__inspect( s["editScope2"]["out"], "render:camera", s["editScope1"], context ),
-				source = cameraEdit,
+				source = cameraEdit.node()["out"].source(),
 				sourceType = SourceType.EditScope,
 				canAcquireEdit = True,
 				edit = cameraEdit
@@ -667,7 +667,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 			self.__assertExpectedResult(
 				self.__inspect( s["editScope2"]["out"], "render:camera", s["editScope1"], context ),
-				source = s["editScope1"]["standardOptions3"]["options"]["render:camera"],
+				source = s["editScope1"]["standardOptions3"]["out"],
 				sourceType = SourceType.EditScope,
 				canAcquireEdit = True,
 				edit = s["editScope1"]["standardOptions3"]["options"]["render:camera"]
@@ -679,7 +679,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 			self.__assertExpectedResult(
 				self.__inspect( s["editScope2"]["out"], "render:camera", None, context ),
-				source = s["editScope1"]["standardOptions3"]["options"]["render:camera"],
+				source = s["editScope1"]["standardOptions3"]["out"],
 				sourceType = SourceType.Downstream,
 				canAcquireEdit = True,
 				editWarning = "Option has edits downstream in editScope1."
@@ -694,7 +694,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 			self.__assertExpectedResult(
 				self.__inspect( s["independentOptions"]["out"], "render:camera", None, context ),
-				source = s["independentOptions"]["options"]["render:camera"],
+				source = s["independentOptions"]["out"],
 				sourceType = SourceType.Other,
 				canAcquireEdit = True,
 				edit = s["independentOptions"]["options"]["render:camera"]
@@ -704,7 +704,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 			self.__assertExpectedResult(
 				self.__inspect( s["independentOptions"]["out"], "render:camera", s["editScope2"], context ),
-				source = s["independentOptions"]["options"]["render:camera"],
+				source = s["independentOptions"]["out"],
 				sourceType = SourceType.Downstream,
 				canAcquireEdit = True,
 				edit = optionEditScope2Edit,
@@ -715,7 +715,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 			self.__assertExpectedResult(
 				self.__inspect( s["independentOptions"]["out"], "render:camera", s["editScope2"], context ),
-				source = s["independentOptions"]["options"]["render:camera"],
+				source = s["independentOptions"]["out"],
 				sourceType = SourceType.Downstream,
 				canAcquireEdit = False,
 				cantAcquireEditReason = "The target edit scope editScope2 is disabled."
@@ -726,7 +726,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 			self.__assertExpectedResult(
 				self.__inspect( s["editScope2"]["out"], "render:camera", s["editScope2"], context ),
-				source = s["editScope1"]["standardOptions3"]["options"]["render:camera"],
+				source = s["editScope1"]["standardOptions3"]["out"],
 				sourceType = SourceType.Upstream,
 				canAcquireEdit = True,
 				edit = optionEditScope2Edit
@@ -737,7 +737,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 			self.__assertExpectedResult(
 				self.__inspect( s["editScope2"]["out"], "render:camera", s["editScope2"], context ),
-				source = s["editScope1"]["standardOptions3"]["options"]["render:camera"],
+				source = s["editScope1"]["standardOptions3"]["out"],
 				sourceType = SourceType.Upstream,
 				canAcquireEdit = True,
 				edit = optionEditScope2Edit
@@ -746,7 +746,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 			Gaffer.MetadataAlgo.setReadOnly( s["editScope2"]["RenderPassOptionEdits"], True )
 			self.__assertExpectedResult(
 				self.__inspect( s["editScope2"]["out"], "render:camera", s["editScope2"], context ),
-				source = s["editScope1"]["standardOptions3"]["options"]["render:camera"],
+				source = s["editScope1"]["standardOptions3"]["out"],
 				sourceType = SourceType.Upstream,
 				canAcquireEdit = True,
 				edit = optionEditScope2Edit
@@ -929,7 +929,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 		self.__assertExpectedResult(
 			self.__inspect( s["editScope"]["out"], "test:enabled", s["editScope"] ),
-			source = edit,
+			source = edit.node()["out"].source(),
 			sourceType = GafferSceneUI.Private.Inspector.Result.SourceType.EditScope,
 			canAcquireEdit = True,
 			edit = edit
@@ -1151,7 +1151,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 		self.__assertExpectedResult(
 			self.__inspect( s["standardOptions"]["out"], "render:camera", None ),
-			source = s["standardOptions"]["options"]["render:camera"],
+			source = s["standardOptions"]["out"],
 			sourceType = GafferSceneUI.Private.Inspector.Result.SourceType.Other,
 			canAcquireEdit = True,
 			edit = None,
@@ -1160,7 +1160,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 
 		self.__assertExpectedResult(
 			self.__inspect( externalOptionTweaks["out"], "render:camera", None ),
-			source = cameraTweak,
+			source = externalOptionTweaks["out"],
 			sourceType = GafferSceneUI.Private.Inspector.Result.SourceType.External,
 			canAcquireEdit = False,
 			edit = None,
@@ -1189,7 +1189,7 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 		# Our CreateIfMissing tweak should not be the source as the option already exists upstream
 		# so the tweak did not affect the scene.
 		inspection = self.__inspect( s["editScope"]["out"], "render:camera", s["editScope"] )
-		self.assertEqual( inspection.source(), s["standardOptions"]["options"]["render:camera"] )
+		self.assertEqual( inspection.source(), s["standardOptions"]["out"] )
 		self.assertEqual( inspection.sourceType(), inspection.SourceType.Upstream )
 		self.assertEqual( inspection.value(), IECore.StringData( "/defaultCamera" ) )
 
@@ -1198,6 +1198,6 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 		# With the upstream attribute disabled, our tweak should now be the source as it now affects
 		# the scene.
 		inspection = self.__inspect( s["editScope"]["out"], "render:camera", s["editScope"] )
-		self.assertEqual( inspection.source(), tweak )
+		self.assertEqual( inspection.source(), tweak.node()["out"].source() )
 		self.assertEqual( inspection.sourceType(), inspection.SourceType.EditScope )
 		self.assertEqual( inspection.value(), IECore.StringData( "/otherCamera" ) )

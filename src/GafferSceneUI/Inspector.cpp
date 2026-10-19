@@ -118,6 +118,7 @@ Gaffer::Plug *spreadsheetAwareSource( Gaffer::Plug *plug )
 	return sourceInput( plug );
 }
 
+// TODO : DOESN'T NEED TO BE SEPARATE NOW?
 std::string nonShowableReason( const ValuePlug *plug )
 {
 	if( plug->direction() == Plug::Out )
@@ -412,19 +413,23 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 		( !result->m_source || !result->m_editors )
 	)
 	{
-		if( auto dependencyNode = runTimeCast<DependencyNode>( node ) )
+		//if( auto dependencyNode = runTimeCast<DependencyNode>( node ) )
 		{
 			Context::EditableScope scope( history->context.get() );
 			scope.setCanceller( canceller );
-			const BoolPlug *enabledPlug = dependencyNode->enabledPlug();
-			if( !enabledPlug || enabledPlug->getValue() )
+			if( hasEdit( history ) )
 			{
-				source = this->source( history, editWarning );
-				if( source )
-				{
-					source = static_cast<ValuePlug *>( spreadsheetAwareSource( source.get() ) );
-				}
+				source = history->scene;
 			}
+			// const BoolPlug *enabledPlug = dependencyNode->enabledPlug();
+			// if( !enabledPlug || enabledPlug->getValue() )
+			// {
+			// 	source = this->source( history, editWarning );
+			// 	if( source )
+			// 	{
+			// 		source = static_cast<ValuePlug *>( spreadsheetAwareSource( source.get() ) );
+			// 	}
+			// }
 		}
 	}
 
@@ -463,13 +468,32 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 		// Initialise editors from source if we can.
 		if( source && source->ancestor<EditScope>() == result->m_editScope )
 		{
-			auto acquireEditFunction = [source] ( bool createIfNecessary, bool dryRun ) {
-				const std::string nonShowableReason = ::nonShowableReason( source.get() );
-				if( !nonShowableReason.empty() )
+			auto acquireEditFunction = [inspector = ConstInspectorPtr( this ), history = GafferScene::SceneAlgo::History::ConstPtr( history )] ( bool createIfNecessary, bool dryRun ) -> ValuePlugPtr {
+
+				// TODO : PUT SOMEWHERE REUSABLE?
+				if( !history->scene->ancestor<ScriptNode>() )
 				{
-					throw EditDisallowed( nonShowableReason );
+					const GraphComponent *settingsNode = history->scene->ancestor( RunTimeTyped::typeIdFromTypeName( "GafferUI::Editor::Settings" ) );
+					throw EditDisallowed( fmt::format(
+						"{} is external to the script.",
+						MetadataAlgo::firstViewableNode( history->scene.get() )->relativeName( settingsNode )
+					) );
 				}
-				return source;
+				Context::Scope scope( history->context.get() );
+				if( ValuePlugPtr p = inspector->acquireEdit( history.get(), createIfNecessary, dryRun ) )
+				{
+					p = static_cast<ValuePlug *>( spreadsheetAwareSource( p.get() ) );
+					/// TODO : NOT IDEAL THAT WE DO THIS _AFTER_ WE POTENTIALLY CREATED THE
+					/// PLUG. BUT WE ASSUME THAT A NEWLY CREATED PLUG WON'T
+					const std::string r = nonShowableReason( p.get() );
+					if( !r.empty() )
+					{
+						throw EditDisallowed( r );
+					}
+					return p;
+				}
+
+				return nullptr;
 			};
 
 			auto editFunction = [inspector = ConstInspectorPtr( this ), history = GafferScene::SceneAlgo::History::ConstPtr( history )] ( const IECore::Object *value, bool dryRun ) {
@@ -578,9 +602,37 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 	}
 }
 
-Gaffer::ValuePlugPtr Inspector::source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const
+bool Inspector::hasEdit( const GafferScene::SceneAlgo::History *history ) const
 {
-	return nullptr;
+	if( acquireEdit( history, /* createIfNecessary = */ false, /* dryRun = */ true ) )
+	{
+		return true;
+	}
+	// TODO : COMMENT
+	if( history->scene->direction() == Plug::Out )
+	{
+		ConstObjectPtr v = value( history );
+		ConstObjectPtr previousValue;
+		if( history->predecessors.size() )
+		{
+			previousValue = value( history->predecessors.front().get() );
+		}
+		if( (bool)v != bool(previousValue) || (v && !v->isEqualTo( previousValue.get() )) )
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+Gaffer::ValuePlugPtr Inspector::acquireEdit( const GafferScene::SceneAlgo::History *history, bool createIfNecessary, bool dryRun ) const
+{
+	if( !createIfNecessary )
+	{
+		return nullptr; // TODO : DO WE NEED THE SAME IN VERSION BELOW?
+	}
+	throw EditDisallowed( "Editing not supported" );
 }
 
 Gaffer::ValuePlugPtr Inspector::acquireEdit( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history, bool createIfNecessary, bool dryRun ) const
@@ -591,7 +643,8 @@ Gaffer::ValuePlugPtr Inspector::acquireEdit( Gaffer::EditScope *editScope, const
 void Inspector::edit( const IECore::Object *value, const GafferScene::SceneAlgo::History *history, bool dryRun ) const
 {
 	std::string editWarning;
-	auto plug = source( history, editWarning );
+	/// TODO : DON'T WE NEED SPREADSHEETAWARESOURCE HERE?
+	auto plug = acquireEdit( history, /* createIfNecessary = */ true, dryRun );
 	if( !plug )
 	{
 		throw EditDisallowed( "No plug found to edit." );
@@ -635,8 +688,7 @@ void Inspector::edit( const IECore::Object *value, Gaffer::EditScope *editScope,
 
 void Inspector::disableEdit( const GafferScene::SceneAlgo::History *history, bool dryRun ) const
 {
-	std::string editWarning;
-	PlugPtr plug  = source( history, editWarning );
+	PlugPtr plug  = acquireEdit( history, /* createIfNecessary = */ false, dryRun );
 	if( !plug || plug->direction() == Plug::Out )
 	{
 		throw EditDisallowed( "No edit found to disable." );
@@ -845,8 +897,6 @@ struct Inspector::HistoryPath::HistoryProvider
 				return;
 			}
 
-			std::string editWarning;
-
 			std::unordered_set<InternedString> contextVariables;
 			std::unordered_set<InternedString> varyingContextVariables;
 
@@ -874,16 +924,8 @@ struct Inspector::HistoryPath::HistoryProvider
 					{
 						// The result of `inspector->source()` was null on the
 						// previous (`successor`) iteration. But there may still
-						// have been a value change at that point, in which case the
+						// have been a context change at that point, in which case the
 						// `successor` belongs in our history.
-						if(
-							(bool)currentValue != (bool)successorValue ||
-							( currentValue && currentValue->isNotEqualTo( successorValue.get() ) )
-						)
-						{
-							m_historyVector.push_back( successor );
-						}
-
 						if( *successor->context != *current->context )
 						{
 							addVaryingContextVariables( successor->context.get(), current->context.get(), varyingContextVariables );
@@ -894,15 +936,8 @@ struct Inspector::HistoryPath::HistoryProvider
 						}
 					}
 
-					if( inspector->source( current, editWarning ) )
+					if( inspector->hasEdit( current ) )
 					{
-						m_historyVector.push_back( current );
-					}
-					else if( current->predecessors.empty() )
-					{
-						// Make sure we include the tip of the history whether or not
-						// there is an edit there. Among other things this allows us to
-						// show where a value is loaded from a SceneReader.
 						m_historyVector.push_back( current );
 					}
 				}
@@ -1055,8 +1090,7 @@ ConstRunTimeTypedPtr Inspector::HistoryPath::property( const InternedString &nam
 			return m_historyProvider->inspector->fallbackValue( h.get(), fallbackDescription );
 		}
 
-		std::string editWarning;
-		ValuePlugPtr immediateSource = m_historyProvider->inspector->source( h.get(), editWarning );
+		ValuePlugPtr immediateSource = m_historyProvider->inspector->acquireEdit( h.get(), /* createIfNecessary = */ false, /* dryRun = */ true );
 		if( !immediateSource )
 		{
 			return nullptr;
@@ -1067,10 +1101,10 @@ ConstRunTimeTypedPtr Inspector::HistoryPath::property( const InternedString &nam
 		{
 			return source;
 		}
-		else if( name == g_editWarningPropertyName )
-		{
-			return new StringData( editWarning );
-		}
+		// else if( name == g_editWarningPropertyName )
+		// {
+		// 	return new StringData( editWarning );
+		// }
 		else if( name == g_operationPropertyName )
 		{
 			if( auto tweakPlug = runTimeCast<const TweakPlug>( source ) )

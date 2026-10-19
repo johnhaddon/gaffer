@@ -175,6 +175,7 @@ class GAFFERSCENEUI_API Inspector : public IECore::RunTimeTyped, public Gaffer::
 		/// Typically, this description would be used to disambiguate the source of the fallback value.
 		virtual IECore::ConstObjectPtr fallbackValue( const GafferScene::SceneAlgo::History *history, std::string &description ) const;
 
+		/// TODO : DOCS
 		/// Should be implemented by derived classes to return the source for
 		/// the value authored at this point in the history. Optionally,
 		/// `editWarning` may be assigned a warning that will be shown to the
@@ -182,7 +183,7 @@ class GAFFERSCENEUI_API Inspector : public IECore::RunTimeTyped, public Gaffer::
 		/// current context. Default implementation returns null.
 		/// \todo Perhaps this should also be available directly from the
 		/// history class?
-		virtual Gaffer::ValuePlugPtr source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const;
+		virtual bool hasEdit( const GafferScene::SceneAlgo::History *history ) const;
 
 		// using AcquireEditFunction = std::function<Gaffer::ValuePlugPtr ( bool createIfNecessary )>;
 		// using AcquireEditFunctionOrFailure = std::variant<AcquireEditFunction, std::string>;
@@ -197,7 +198,7 @@ class GAFFERSCENEUI_API Inspector : public IECore::RunTimeTyped, public Gaffer::
 		// /// > that edits the processor itself.
 		// virtual AcquireEditFunctionOrFailure acquireEditFunction( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history ) const;
 
-		//virtual Gaffer::ValuePlugPtr acquireEdit( const GafferScene::SceneAlgo::History *history, bool createIfNecessary, bool dryRun ) const;
+		virtual Gaffer::ValuePlugPtr acquireEdit( const GafferScene::SceneAlgo::History *history, bool createIfNecessary, bool dryRun ) const;
 		virtual Gaffer::ValuePlugPtr acquireEdit( Gaffer::EditScope *editScope, const GafferScene::SceneAlgo::History *history, bool createIfNecessary, bool dryRun ) const;
 
 		virtual void edit( const IECore::Object *value, const GafferScene::SceneAlgo::History *history, bool dryRun ) const;

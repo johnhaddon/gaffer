@@ -210,24 +210,24 @@ IECore::ConstObjectPtr SetMembershipInspector::fallbackValue( const GafferScene:
 	return ancestorMatch ? g_true : g_false;
 }
 
-Gaffer::ValuePlugPtr SetMembershipInspector::source( const GafferScene::SceneAlgo::History *history, std::string &editWarning ) const
+bool SetMembershipInspector::hasEdit( const GafferScene::SceneAlgo::History *history ) const
 {
 	auto sceneNode = runTimeCast<SceneNode>( history->scene->node() );
 	if( !sceneNode || history->scene != sceneNode->outPlug() || !sceneNode->enabledPlug()->getValue() )
 	{
-		return nullptr;
+		return false;
 	}
 
 	if( const auto objectSource = runTimeCast<ObjectSource>( sceneNode ) )
 	{
-		return history->scene;
+		return true; // TODO : ONLY IF IN SETS PLUG?
 	}
 	if( const auto setSource = runTimeCast<GafferScene::Set>( sceneNode ) )
 	{
 		const std::string setNamePattern = setSource->namePlug()->getValue();
 		if( !StringAlgo::matchMultiple( m_setName, setNamePattern ) )
 		{
-			return nullptr;
+			return false;
 		}
 
 		unsigned filterResult;
@@ -243,11 +243,11 @@ Gaffer::ValuePlugPtr SetMembershipInspector::source( const GafferScene::SceneAlg
 
 		if( filterResult & PathMatcher::Result::ExactMatch )
 		{
-			return history->scene;
+			return true;
 		}
 	}
 
-	return nullptr;
+	return false;
 }
 
 void SetMembershipInspector::edit( const IECore::Object *value, const GafferScene::SceneAlgo::History *history, bool dryRun ) const
