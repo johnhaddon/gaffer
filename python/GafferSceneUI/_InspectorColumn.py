@@ -167,6 +167,7 @@ def __toggleEditEnabled( pathListing ) :
 				# investigative toggling of edits in the current session while avoiding enabling
 				# edits the user may not expect to exist, such as previously unedited spreadsheet
 				# cells in EditScope processors.
+				## TODO : NEEDS TO CHANGE IF SOURCE BECOMES AN OUTPUT PLUG
 				Gaffer.Metadata.registerValue( inspection.source(), "inspector:disabledEdit", True, persistent = False )
 			else :
 				edit = inspection.acquireEdit( createIfNecessary = False )
@@ -185,6 +186,7 @@ def __removableAttributeInspections( pathListing ) :
 				return []
 			inspection = column.inspect( path )
 			if inspection is not None and inspection.editable() :
+				## TODO : NEEDS TO CHANGE IF SOURCE BECOMES AN OUTPUT PLUG
 				source = inspection.source()
 				if (
 					( isinstance( source, Gaffer.TweakPlug ) and source["mode"].getValue() != Gaffer.TweakPlug.Mode.Remove ) or
@@ -681,6 +683,7 @@ class __InspectionPopupWindow( GafferUI.PopupWindow ) :
 
 				if inspection.fallbackDescription() :
 					GafferUI.Label( inspection.fallbackDescription() )
+				## TODO : SOURCE MIGHT BE GUARANTEED TO BE NON-NULL AT SOME POINT
 				elif inspection.source() is not None :
 					node = Gaffer.MetadataAlgo.firstViewableNode( inspection.source() )
 					nameLabel = GafferUI.NameLabel(
