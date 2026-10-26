@@ -1076,22 +1076,28 @@ def __toggleVisibility( pathListing ) :
 			if inspection is None :
 				continue
 
-			if not inspection.editable() :
-				GafferUI.PopupWindow.showWarning( inspection.nonEditableReason(), parent = pathListing )
-				return
-
 			inspections.append( ( inspection, pathString ) )
 
 	if len( inspections ) == 0 :
 		GafferUI.PopupWindow.showWarning( "The selected cells cannot be edited in the current Edit Scope", parent = pathListing )
 		return
 
-	editor = pathListing.ancestor( GafferUI.Editor )
 	# Default to attempting to make the selection visible if visibility differs.
 	makeVisible = not sole( [ i.value().value for i, _ in inspections ] )
+
+	newValue = IECore.BoolData( makeVisible )
+	for inspection, pathString in inspections :
+		if not inspection.canEdit( newValue ) :
+			GafferUI.PopupWindow.showWarning( inspection.cantEditReason( newValue ), parent = pathListing )
+			return
+
+	editor = pathListing.ancestor( GafferUI.Editor )
+
 	with editor.context() :
 		with Gaffer.UndoScope( editor.scriptNode() ) :
 			for inspection, pathString in inspections :
+				## \todo We should be using the Inspector API to achieve this. Maybe `AttributeInspector.edit()`
+				# could be overridden to use the same logic as `setVisibility()`?
 				GafferScene.EditScopeAlgo.setVisibility( inspection.editScope(), pathString, makeVisible )
 
 		if makeVisible :
