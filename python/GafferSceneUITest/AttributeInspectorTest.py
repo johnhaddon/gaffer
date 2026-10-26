@@ -1257,6 +1257,27 @@ class AttributeInspectorTest( GafferUITest.TestCase ) :
 		self.assertEqual( acquiredEdit["value"].getValue(), 123.0 )
 
 	@GafferTest.TestRunner.CategorisedTestMethod( { "inspector" } )
+	def testEditAttributeWithOnlyFallbackValue( self ) :
+
+		script = Gaffer.ScriptNode()
+		script["sphere"] = GafferScene.Sphere()
+
+		script["editScope"] = Gaffer.EditScope()
+		script["editScope"].setup( script["sphere"]["out"] )
+		script["editScope"]["in"].setInput( script["sphere"]["out"] )
+
+		inspection = self.__inspect( script["editScope"]["out"], "/sphere", "scene:visible", script["editScope"] )
+		self.assertEqual( inspection.value(), IECore.BoolData( True ) )
+		self.assertEqual( inspection.value( useFallbacks = False ), None )
+
+		newValue = IECore.BoolData( False )
+		self.assertTrue( inspection.canEdit( newValue ) )
+		self.assertEqual( inspection.cantEditReason( newValue ), "" )
+
+		inspection.edit( newValue )
+		self.assertEqual( script["editScope"]["out"].attributes( "/sphere" )["scene:visible"], newValue )
+
+	@GafferTest.TestRunner.CategorisedTestMethod( { "inspector" } )
 	def testSourceForEditScopeAttributeRemoval( self ) :
 
 		s = Gaffer.ScriptNode()

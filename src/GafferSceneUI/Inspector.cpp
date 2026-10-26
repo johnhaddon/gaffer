@@ -668,7 +668,14 @@ void Inspector::edit( const IECore::Object *value, Gaffer::EditScope *editScope,
 			// will accept `value`, but since this is a dry run we don't want to actually
 			// create a plug in the graph. Assume that the plug will be typed to match the current
 			// value, and make a temporary plug to use for the check.
-			if( auto currentData = runTimeCast<const IECore::Data>( this->value( history ) ) )
+			ConstObjectPtr currentValue = this->value( history );
+			if( !currentValue )
+			{
+				std::string description;
+				currentValue = this->fallbackValue( history, description );
+			}
+
+			if( auto currentData = runTimeCast<const IECore::Data>( currentValue ) )
 			{
 				plug = PlugAlgo::createPlugFromData( "value", Plug::In, Plug::Default, currentData.get() );
 			}
