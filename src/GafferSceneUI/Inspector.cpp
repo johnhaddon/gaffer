@@ -643,13 +643,13 @@ Gaffer::ValuePlugPtr Inspector::acquireEdit( Gaffer::EditScope *editScope, const
 void Inspector::edit( const IECore::Object *value, const GafferScene::SceneAlgo::History *history, bool dryRun ) const
 {
 	std::string editWarning;
-	/// TODO : DON'T WE NEED SPREADSHEETAWARESOURCE HERE?
 	auto plug = acquireEdit( history, /* createIfNecessary = */ true, dryRun );
 	if( !plug )
 	{
 		throw EditDisallowed( "No plug found to edit." );
 	}
 
+	plug = static_cast<ValuePlug *>( spreadsheetAwareSource( plug.get() ) );
 	setPlugValue( plug.get(), value, dryRun );
 }
 
@@ -660,6 +660,7 @@ void Inspector::edit( const IECore::Object *value, Gaffer::EditScope *editScope,
 		ValuePlugPtr plug = acquireEdit( editScope, history, /* createIfNecessary = */ false, dryRun );
 		if( plug )
 		{
+			plug = static_cast<ValuePlug *>( spreadsheetAwareSource( plug.get() ) );
 			setPlugValue( plug.get(), value, /* dryRun = */ true );
 		}
 		else
@@ -690,6 +691,7 @@ void Inspector::edit( const IECore::Object *value, Gaffer::EditScope *editScope,
 	}
 
 	ValuePlugPtr plug = acquireEdit( editScope, history, /* createIfNecessary = */ true, /* dryRun = */ false );
+	plug = static_cast<ValuePlug *>( spreadsheetAwareSource( plug.get() ) );
 	setPlugValue( plug.get(), value, /* dryRun = */ false );
 }
 

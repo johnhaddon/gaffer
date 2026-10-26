@@ -1266,16 +1266,30 @@ class AttributeInspectorTest( GafferUITest.TestCase ) :
 		script["editScope"].setup( script["sphere"]["out"] )
 		script["editScope"]["in"].setInput( script["sphere"]["out"] )
 
+		# Check we have a value that only exists as a fallback.
+
 		inspection = self.__inspect( script["editScope"]["out"], "/sphere", "scene:visible", script["editScope"] )
 		self.assertEqual( inspection.value(), IECore.BoolData( True ) )
 		self.assertEqual( inspection.value( useFallbacks = False ), None )
 
+		# Edit that value, and check it worked.
+
 		newValue = IECore.BoolData( False )
 		self.assertTrue( inspection.canEdit( newValue ) )
 		self.assertEqual( inspection.cantEditReason( newValue ), "" )
-
 		inspection.edit( newValue )
-		self.assertEqual( script["editScope"]["out"].attributes( "/sphere" )["scene:visible"], newValue )
+
+		inspection = self.__inspect( script["editScope"]["out"], "/sphere", "scene:visible", script["editScope"] )
+		self.assertEqual( inspection.value( useFallbacks = False ), IECore.BoolData( False ) )
+
+		# Edit again, and check that works too.
+
+		newValue = IECore.BoolData( True )
+		self.assertTrue( inspection.canEdit( newValue ) )
+		self.assertEqual( inspection.cantEditReason( newValue ), "" )
+		inspection.edit( newValue )
+
+		self.assertEqual( script["editScope"]["out"].attributes( "/sphere" )["scene:visible"], IECore.BoolData( True ) )
 
 	@GafferTest.TestRunner.CategorisedTestMethod( { "inspector" } )
 	def testSourceForEditScopeAttributeRemoval( self ) :
