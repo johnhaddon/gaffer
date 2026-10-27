@@ -949,6 +949,13 @@ struct Inspector::HistoryPath::HistoryProvider
 					{
 						m_historyVector.push_back( current );
 					}
+					else if( current->predecessors.empty() )
+					{
+						// Make sure we include the tip of the history whether or not
+						// there is an edit there. Among other things this allows us to
+						// show where a value is loaded from a SceneReader.
+						m_historyVector.push_back( current );
+					}
 				}
 
 				if( current->predecessors.size() > 1 )
