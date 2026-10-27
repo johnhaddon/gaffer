@@ -37,6 +37,7 @@
 import ctypes
 import unittest
 import math
+import os
 
 import arnold
 
@@ -1710,3 +1711,61 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 					self.assertEqual( lightNetwork.input( ( "tint", "input1" ) ), ( "correct", "out" ) )
 					self.assertEqual( lightNetwork.input( ( "correct", "input" ) ), ( "texture", "out" ) )
 					self.assertEqual( lightNetwork.input( ( "tint", "input2" ) ), ( "lightTexture", "out" ) )
+
+	def testUSDConformantOSLRampParameter( self ) :
+
+		network = IECoreScene.ShaderNetwork(
+			shaders = {
+				"ramp" : IECoreScene.Shader(
+					# In a live Gaffer session this would currently be `"Pattern/ColorRamp", "osl:shader"`.
+					# But after round-tripping through USD it is just `"ColorRamp", "surface"`. Here we're
+					# testing that we can still process ramps correctly in this form.
+					"ColorRamp", "surface",
+					{
+						"ramp" : IECore.RampfColor3fData( IECore.RampfColor3f(
+							[
+								( 0, imath.Color3f( 1, 0, 0 ) ),
+								( 1, imath.Color3f( 0, 0, 1 ) ),
+							],
+							IECore.RampInterpolation.Linear
+						) )
+					}
+				),
+				"flat" : IECoreScene.Shader( "flat", "ai:surface" )
+			},
+			connections = [
+				( ( "ramp", "c" ), ( "flat", "color" ) )
+			],
+			output = "flat"
+		)
+
+		with IECoreArnold.UniverseBlock( writable = True ) as universe :
+
+			arnold.AiNodeSetStr(
+				arnold.AiUniverseGetOptions( universe ), "plugin_searchpath",
+				os.environ["OSL_SHADER_PATHS"]
+			)
+
+			nodes = IECoreArnold.ShaderNetworkAlgo.convert( network, universe, "test" )
+			self.assertEqual( len( nodes ), 2 )
+			rampNode = nodes[0]
+			self.assertTrue( arnold.AiNodeIs( rampNode, "osl" ) )
+			self.assertEqual( arnold.AiNodeGetStr( rampNode, "shadername" ), "ColorRamp" )
+
+			self.assertEqual( arnold.AiNodeGetStr( rampNode, "param_rampBasis" ), "linear" )
+
+			# Our 2 ramp positions are duplicated out to 4 because OSL discards the first and
+			# last segment of linear curves "To maintain consistency with the other spline types".
+			positionsArray = arnold.AiNodeGetArray( rampNode, "param_rampPositions" )
+			self.assertEqual( arnold.AiArrayGetNumElements( positionsArray ), 4 )
+			self.assertEqual( arnold.AiArrayGetFlt( positionsArray, 0 ), 0 )
+			self.assertEqual( arnold.AiArrayGetFlt( positionsArray, 1 ), 0 )
+			self.assertEqual( arnold.AiArrayGetFlt( positionsArray, 2 ), 1 )
+			self.assertEqual( arnold.AiArrayGetFlt( positionsArray, 3 ), 1 )
+
+			valuesArray = arnold.AiNodeGetArray( rampNode, "param_rampValues" )
+			self.assertEqual( arnold.AiArrayGetNumElements( valuesArray ), 4 )
+			self.assertEqual( arnold.AiArrayGetRGB( valuesArray, 0 ), arnold.AtRGB( 1, 0, 0 ) )
+			self.assertEqual( arnold.AiArrayGetRGB( valuesArray, 1 ), arnold.AtRGB( 1, 0, 0 ) )
+			self.assertEqual( arnold.AiArrayGetRGB( valuesArray, 2 ), arnold.AtRGB( 0, 0, 1 ) )
+			self.assertEqual( arnold.AiArrayGetRGB( valuesArray, 3 ), arnold.AtRGB( 0, 0, 1 ) )
