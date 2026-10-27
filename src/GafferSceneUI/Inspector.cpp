@@ -413,23 +413,11 @@ void Inspector::inspectHistoryWalk( const GafferScene::SceneAlgo::History *histo
 		( !result->m_source || !result->m_editors )
 	)
 	{
-		//if( auto dependencyNode = runTimeCast<DependencyNode>( node ) )
+		Context::EditableScope scope( history->context.get() );
+		scope.setCanceller( canceller );
+		if( hasEdit( history ) )
 		{
-			Context::EditableScope scope( history->context.get() );
-			scope.setCanceller( canceller );
-			if( hasEdit( history ) )
-			{
-				source = history->scene;
-			}
-			// const BoolPlug *enabledPlug = dependencyNode->enabledPlug();
-			// if( !enabledPlug || enabledPlug->getValue() )
-			// {
-			// 	source = this->source( history, editWarning );
-			// 	if( source )
-			// 	{
-			// 		source = static_cast<ValuePlug *>( spreadsheetAwareSource( source.get() ) );
-			// 	}
-			// }
+			source = history->scene;
 		}
 	}
 

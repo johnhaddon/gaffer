@@ -214,13 +214,11 @@ IECore::ConstObjectPtr OptionInspector::fallbackValue( const GafferScene::SceneA
 Gaffer::ValuePlugPtr OptionInspector::acquireEdit( const GafferScene::SceneAlgo::History *history, bool createIfNecessary, bool dryRun ) const
 {
 	auto sceneNode = runTimeCast<SceneNode>( history->scene->node() );
-	if( !sceneNode || history->scene != sceneNode->outPlug() )
+	if( !sceneNode || history->scene != sceneNode->outPlug() || !sceneNode->enabledPlug()->getValue() )
 	{
 		return Inspector::acquireEdit( history, createIfNecessary, dryRun );
 	}
 
-	/// \todo Should we provide an `editWarning` here for render pass specific
-	/// edits that may affect other render passes?
 	if( auto options = runTimeCast<GafferScene::Options>( sceneNode ) )
 	{
 		for( const auto &plug : NameValuePlug::Range( *options->optionsPlug() ) )
@@ -265,7 +263,6 @@ Gaffer::ValuePlugPtr OptionInspector::acquireEdit( Gaffer::EditScope *editScope,
 	// we'll want to make a specific edit for that render pass.
 	const std::string renderPass = history->context->get<std::string>( g_renderPassContextName, g_emptyString );
 
-	fmt::print( "renderPass = {}\n", renderPass );
 	if( !renderPass.empty() )
 	{
 		auto plug = EditScopeAlgo::acquireRenderPassOptionEdit(
@@ -277,7 +274,6 @@ Gaffer::ValuePlugPtr OptionInspector::acquireEdit( Gaffer::EditScope *editScope,
 
 		if( plug || !createIfNecessary )
 		{
-			fmt::print( "returning plug {}\n", plug ? plug->fullName() : "none" );
 			return plug;
 		}
 
@@ -286,7 +282,6 @@ Gaffer::ValuePlugPtr OptionInspector::acquireEdit( Gaffer::EditScope *editScope,
 			renderPass,
 			m_option
 		);
-			fmt::print( "readOnlyReason = \n", readOnlyReason ? readOnlyReason->fullName() : "" );
 
 		if( readOnlyReason )
 		{
@@ -322,13 +317,11 @@ Gaffer::ValuePlugPtr OptionInspector::acquireEdit( Gaffer::EditScope *editScope,
 
 		if( plug || !createIfNecessary )
 		{
-			fmt::print( "returning plug\n", renderPass );
 			return plug;
 		}
 
 		const GraphComponent *readOnlyReason = EditScopeAlgo::optionEditReadOnlyReason( editScope, m_option );
 
-			fmt::print( "readOnlyReason = \n", readOnlyReason ? readOnlyReason->fullName() : "" );
 		if( readOnlyReason )
 		{
 		// TODO : COMMENT NEEDS TWEAKING

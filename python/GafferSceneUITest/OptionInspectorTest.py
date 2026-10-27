@@ -1201,3 +1201,28 @@ class OptionInspectorTest( GafferUITest.TestCase ) :
 		self.assertEqual( inspection.source(), tweak.node()["out"].source() )
 		self.assertEqual( inspection.sourceType(), inspection.SourceType.EditScope )
 		self.assertEqual( inspection.value(), IECore.StringData( "/otherCamera" ) )
+
+	@GafferTest.TestRunner.CategorisedTestMethod( { "inspector" } )
+	def testDisabledNodeIsNotASource( self ) :
+
+		script = Gaffer.ScriptNode()
+
+		script["enabledOptions"] = GafferScene.StandardOptions()
+		script["enabledOptions"]["options"]["render:camera"]["enabled"].setValue( True )
+		script["enabledOptions"]["options"]["render:camera"]["value"].setValue( "/enabledValue" )
+
+		script["disabledOptions"] = GafferScene.StandardOptions()
+		script["disabledOptions"]["in"].setInput( script["enabledOptions"]["out"] )
+		script["disabledOptions"]["options"]["render:camera"]["enabled"].setValue( True )
+		script["disabledOptions"]["options"]["render:camera"]["value"].setValue( "/disabledValue" )
+		script["disabledOptions"]["enabled"].setValue( False )
+
+		self.assertEqual( script["disabledOptions"]["out"].globals()["option:render:camera"].value, "/enabledValue" )
+
+		self.__assertExpectedResult(
+			self.__inspect( script["disabledOptions"]["out"], "render:camera", None ),
+			source = script["enabledOptions"]["out"],
+			sourceType = GafferSceneUI.Private.Inspector.Result.SourceType.Other,
+			canAcquireEdit = True,
+			edit = script["enabledOptions"]["options"]["render:camera"],
+		)
