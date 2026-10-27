@@ -133,7 +133,7 @@ def __toggleableInspections( pathListing ) :
 				continue
 
 			canReenableEdit = False
-			if not inspection.canDisableEdit() and inspection.editable() :
+			if not inspection.canDisableEdit() and inspection.canAcquireEdit( createIfNecessary = False ) :
 				edit = inspection.acquireEdit( createIfNecessary = False )
 				canReenableEdit = isinstance( edit, ( Gaffer.NameValuePlug, Gaffer.OptionalValuePlug, Gaffer.TweakPlug ) ) and Gaffer.Metadata.value( edit, "inspector:disabledEdit" )
 				if canReenableEdit :
@@ -144,7 +144,7 @@ def __toggleableInspections( pathListing ) :
 			elif nonEditableReason == "" :
 				# Prefix reason with the column header to disambiguate when more than one column has selection
 				nonEditableReason = "{} : ".format( column.headerData( rootPath ).value ) if len( [ x for x in pathListing.getSelection() if not x.isEmpty() ] ) > 1 else ""
-				nonEditableReason += inspection.nonDisableableReason() if toggleShouldDisable else inspection.nonEditableReason()
+				nonEditableReason += inspection.nonDisableableReason() if toggleShouldDisable else inspection.cantAcquireEditReason()
 
 	return inspections, nonEditableReason, toggleShouldDisable
 
@@ -161,19 +161,25 @@ def __toggleEditEnabled( pathListing ) :
 	with Gaffer.UndoScope( pathListing.ancestor( GafferUI.Editor ).scriptNode() ) :
 		for inspection in inspections :
 			if shouldDisable :
+				edit = inspection.acquireEdit( createIfNecessary = False )
+				if edit is not None :
+					# We register non-persistent metadata on disabled edits to later determine
+					# whether the disabled edit is a suitable candidate for enabling. This allows
+					# investigative toggling of edits in the current session while avoiding enabling
+					# edits the user may not expect to exist, such as previously unedited spreadsheet
+					# cells in EditScope processors.
+					## \todo This should be dealt with internally by Inspectors, and there should be
+					# a public API point for re-enabling.
+					Gaffer.Metadata.registerValue( edit, "inspector:disabledEdit", True, persistent = False )
 				inspection.disableEdit()
-				# We register non-persistent metadata on disabled edits to later determine
-				# whether the disabled edit is a suitable candidate for enabling. This allows
-				# investigative toggling of edits in the current session while avoiding enabling
-				# edits the user may not expect to exist, such as previously unedited spreadsheet
-				# cells in EditScope processors.
-				## TODO : NEEDS TO CHANGE IF SOURCE BECOMES AN OUTPUT PLUG
-				Gaffer.Metadata.registerValue( inspection.source(), "inspector:disabledEdit", True, persistent = False )
 			else :
 				edit = inspection.acquireEdit( createIfNecessary = False )
 				edit["enabled"].setValue( True )
 				Gaffer.Metadata.deregisterValue( edit, "inspector:disabledEdit" )
 
+## \todo This might be expressed better as a call to `inspection.edit( None )`.
+# Then there would be less special-case code in the UI, and other Inspector
+# subclasses could get in on the act.
 def __removableAttributeInspections( pathListing ) :
 
 	inspections = []
@@ -185,12 +191,11 @@ def __removableAttributeInspections( pathListing ) :
 			if not isinstance( column.inspector( path ), GafferSceneUI.Private.AttributeInspector ) :
 				return []
 			inspection = column.inspect( path )
-			if inspection is not None and inspection.editable() :
-				## TODO : NEEDS TO CHANGE IF SOURCE BECOMES AN OUTPUT PLUG
-				source = inspection.source()
+			if inspection is not None :
+				edit = inspection.acquireEdit( createIfNecessary = False )
 				if (
-					( isinstance( source, Gaffer.TweakPlug ) and source["mode"].getValue() != Gaffer.TweakPlug.Mode.Remove ) or
-					( isinstance( source, Gaffer.ValuePlug ) and len( source.children() ) == 2 and "Added" in source and "Removed" in source ) or
+					( isinstance( edit, Gaffer.TweakPlug ) and edit["mode"].getValue() != Gaffer.TweakPlug.Mode.Remove ) or
+					( isinstance( edit, Gaffer.ValuePlug ) and len( edit.children() ) == 2 and "Added" in edit and "Removed" in edit ) or
 					inspection.editScope() is not None
 				) :
 					inspections.append( inspection )
