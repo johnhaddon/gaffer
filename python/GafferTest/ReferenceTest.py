@@ -234,7 +234,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 		s["n1"] = GafferTest.AddNode()
 
 		b = Gaffer.Box.create( s, Gaffer.StandardSet( [ s["n1"] ] ) )
-		b["myCustomPlug"] = Gaffer.IntPlug( flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		b["myCustomPlug"] = Gaffer.IntPlug()
 		b["__invisiblePlugThatShouldntGetExported"] = Gaffer.IntPlug( flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
 
 		b.exportForReference( self.temporaryDirectory() / "test.grf" )
@@ -290,7 +290,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 
 		s = Gaffer.ScriptNode()
 		s["b"] = Gaffer.Box()
-		s["b"]["p"] = Gaffer.Plug( flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		s["b"]["p"] = Gaffer.Plug()
 
 		Gaffer.Metadata.registerValue( s["b"]["p"], "description", "ddd" )
 
@@ -347,7 +347,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 		s = Gaffer.ScriptNode()
 
 		s["b"] = Gaffer.Box()
-		s["b"]["staticMetadataTestPlug"] = Gaffer.IntPlug( flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		s["b"]["staticMetadataTestPlug"] = Gaffer.IntPlug()
 		s["b"].exportForReference( self.temporaryDirectory() / "test.grf" )
 
 		# Reference it
@@ -402,7 +402,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 
 		s = Gaffer.ScriptNode()
 		s["b"] = Gaffer.Box()
-		s["b"]["p"] = Gaffer.Plug( flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		s["b"]["p"] = Gaffer.Plug()
 		s["b"].exportForReference( self.temporaryDirectory() / "test.grf" )
 
 		s["r"] = Gaffer.Reference()
@@ -419,7 +419,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 
 		s = Gaffer.ScriptNode()
 		s["b"] = Gaffer.Box()
-		s["b"]["p"] = Gaffer.Plug( flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		s["b"]["p"] = Gaffer.Plug()
 		s["b"].exportForReference( self.temporaryDirectory() / "test.grf" )
 
 		s["r"] = Gaffer.Reference()
@@ -529,7 +529,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 		self.assertEqual( s["r"].enabledPlug(), None )
 
 		# add an enabled plug:
-		s["b"]["enabled"] = Gaffer.BoolPlug( flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		s["b"]["enabled"] = Gaffer.BoolPlug()
 		s["b"].exportForReference( self.temporaryDirectory() / "test.grf" )
 
 		# reload reference and test that's now visible via enabledPlug():
@@ -592,9 +592,9 @@ class ReferenceTest( GafferTest.TestCase ) :
 
 		s = Gaffer.ScriptNode()
 		s["b"] = Gaffer.Box()
-		s["b"]["p"] = Gaffer.IntPlug( defaultValue = 1, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		s["b"]["p"] = Gaffer.IntPlug( defaultValue = 1 )
 		s["b"]["p"].setValue( 2 )
-		s["b"]["c"] = Gaffer.Color3fPlug( defaultValue = imath.Color3f( 1 ), flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		s["b"]["c"] = Gaffer.Color3fPlug( defaultValue = imath.Color3f( 1 ) )
 		s["b"]["c"].setValue( imath.Color3f( 0.5 ) )
 		s["b"].exportForReference( self.temporaryDirectory() / "test.grf" )
 
@@ -856,7 +856,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 		s = Gaffer.ScriptNode()
 
 		s["b"] = Gaffer.Box()
-		s["b"]["fileName"] = Gaffer.StringPlug( defaultValue = "iAmUsingThisForMyOwnPurposes", flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		s["b"]["fileName"] = Gaffer.StringPlug( defaultValue = "iAmUsingThisForMyOwnPurposes" )
 		s["b"].exportForReference( self.temporaryDirectory() / "test.grf" )
 
 		s["r"] = Gaffer.Reference()
@@ -868,7 +868,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 
 		s = Gaffer.ScriptNode()
 		s["b"] = Gaffer.Box()
-		s["b"]["p"] = Gaffer.Plug( flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		s["b"]["p"] = Gaffer.Plug()
 		s["b"].exportForReference( self.temporaryDirectory() / "test.grf" )
 
 		s["r"] = Gaffer.Reference()
@@ -881,7 +881,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 
 		s = Gaffer.ScriptNode()
 		s["b"] = Gaffer.Box()
-		s["b"]["p"] = Gaffer.Plug( flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		s["b"]["p"] = Gaffer.Plug()
 		s["b"].exportForReference( self.temporaryDirectory() / "test.grf" )
 
 		s["r"] = Gaffer.Reference()
@@ -970,8 +970,8 @@ class ReferenceTest( GafferTest.TestCase ) :
 		s = Gaffer.ScriptNode()
 
 		s["b"] = Gaffer.Box()
-		s["b"]["array"] = Gaffer.ArrayPlug( elementPrototype = Gaffer.IntPlug(), flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
-		s["b"]["color"] = Gaffer.Color3fPlug( flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		s["b"]["array"] = Gaffer.ArrayPlug( elementPrototype = Gaffer.IntPlug() )
+		s["b"]["color"] = Gaffer.Color3fPlug()
 		s["b"].exportForReference( self.temporaryDirectory() / "test.grf" )
 
 		s["a"] = GafferTest.AddNode()
@@ -994,10 +994,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 		s = Gaffer.ScriptNode()
 
 		s["b"] = Gaffer.Box()
-		s["b"]["color"] = Gaffer.Color3fPlug(
-			direction = Gaffer.Plug.Direction.Out,
-			flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic
-		)
+		s["b"]["color"] = Gaffer.Color3fPlug( direction = Gaffer.Plug.Direction.Out )
 		s["b"].exportForReference( self.temporaryDirectory() / "test.grf" )
 
 		s["a"] = GafferTest.AddNode()
@@ -1063,7 +1060,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 		referenceFile = pathlib.Path( "test.grf" )
 
 		boxA = Gaffer.Box( "BoxA" )
-		boxA["p"] = Gaffer.StringPlug( defaultValue = "a", flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		boxA["p"] = Gaffer.StringPlug( defaultValue = "a" )
 		s.addChild( boxA )
 		boxPathA = self.temporaryDirectory() / "a"
 		os.makedirs( boxPathA )
@@ -1071,7 +1068,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 		boxA.exportForReference( fileA )
 
 		boxB = Gaffer.Box( "BoxB" )
-		boxB["p"] = Gaffer.StringPlug( defaultValue = "b", flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		boxB["p"] = Gaffer.StringPlug( defaultValue = "b" )
 		s.addChild( boxB )
 		boxPathB = self.temporaryDirectory() / "b"
 		os.makedirs( boxPathB )
@@ -1105,8 +1102,8 @@ class ReferenceTest( GafferTest.TestCase ) :
 
 		s = Gaffer.ScriptNode()
 		s["b"] = Gaffer.Box()
-		s["b"]["p1"] = Gaffer.IntPlug( flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
-		s["b"]["p2"] = Gaffer.IntPlug( flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		s["b"]["p1"] = Gaffer.IntPlug()
+		s["b"]["p2"] = Gaffer.IntPlug()
 
 		Gaffer.Metadata.registerValue( s["b"]["p1"], "referenced", "original" )
 		Gaffer.Metadata.registerValue( s["b"]["p2"], "referenced", "original" )
@@ -1177,7 +1174,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 
 		s = Gaffer.ScriptNode()
 		s["b"] = Gaffer.Box()
-		s["b"]["p"] = Gaffer.IntPlug( defaultValue = 1, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		s["b"]["p"] = Gaffer.IntPlug( defaultValue = 1 )
 		Gaffer.Metadata.registerValue( s["b"]["p"], "referenced", "original" )
 
 		s["b"].exportForReference( self.temporaryDirectory() / "test.grf" )
@@ -1208,7 +1205,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 
 		s = Gaffer.ScriptNode()
 		s["b"] = Gaffer.Box()
-		s["b"]["p"] = Gaffer.IntPlug( defaultValue = 1, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		s["b"]["p"] = Gaffer.IntPlug( defaultValue = 1 )
 		Gaffer.Metadata.registerValue( s["b"]["p"], "preset:Red", 0 )
 		Gaffer.Metadata.registerValue( s["b"]["p"], "preset:Green", 1 )
 		Gaffer.Metadata.registerValue( s["b"]["p"], "preset:Blue", 2 )
@@ -1281,7 +1278,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 
 		s = Gaffer.ScriptNode()
 		s["b"] = Gaffer.Box()
-		s["b"]["p"] = Gaffer.Color3fPlug( defaultValue = imath.Color3f( 0 ), flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		s["b"]["p"] = Gaffer.Color3fPlug( defaultValue = imath.Color3f( 0 ) )
 
 		s["b"].exportForReference( self.temporaryDirectory() / "test.grf" )
 
@@ -1326,7 +1323,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 		s = Gaffer.ScriptNode()
 		s["b"] = Gaffer.Box()
 
-		s["b"]["p"] = Gaffer.Color3fPlug( defaultValue = imath.Color3f( 0 ), flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		s["b"]["p"] = Gaffer.Color3fPlug( defaultValue = imath.Color3f( 0 ) )
 		Gaffer.Metadata.registerValue( s["b"]["p"], "isColor", True )
 
 		s["b"].exportForReference( self.temporaryDirectory() / "test.grf" )
@@ -1422,9 +1419,9 @@ class ReferenceTest( GafferTest.TestCase ) :
 		script = Gaffer.ScriptNode()
 		script["box"] = Gaffer.Box()
 
-		script["box"]["t2"] = Gaffer.Transform2DPlug( defaultTranslate = imath.V2f( 10, 11 ), flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		script["box"]["t2"] = Gaffer.Transform2DPlug( defaultTranslate = imath.V2f( 10, 11 ) )
 		script["box"]["t2"]["rotate"].setValue( 10 )
-		script["box"]["t3"] = Gaffer.TransformPlug( defaultTranslate = imath.V3f( 10, 11, 12 ), flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		script["box"]["t3"] = Gaffer.TransformPlug( defaultTranslate = imath.V3f( 10, 11, 12 ) )
 		script["box"]["t3"]["rotate"].setValue( imath.V3f( 1, 2, 3 ) )
 
 		script["box"].exportForReference( self.temporaryDirectory() / "test.grf" )
@@ -1445,7 +1442,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 		script = Gaffer.ScriptNode()
 		script["box"] = Gaffer.Box()
 
-		script["box"]["p"] = Gaffer.CompoundDataPlug( flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		script["box"]["p"] = Gaffer.CompoundDataPlug()
 		script["box"]["p"]["m"] = Gaffer.NameValuePlug( "a", 10, defaultEnabled = True, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
 		self.assertEqual( script["box"]["p"]["m"]["name"].defaultValue(), "a" )
 		self.assertEqual( script["box"]["p"]["m"]["value"].defaultValue(), 10 )
@@ -1569,7 +1566,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 				# Create Box with RampPlug
 
 				script["box"] = Gaffer.Box()
-				script["box"]["ramp"] = Gaffer.RampffPlug( defaultValue = defaultValue, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+				script["box"]["ramp"] = Gaffer.RampffPlug( defaultValue = defaultValue )
 				if nonDefaultAtExport :
 					script["box"]["ramp"].setValue( otherValue )
 				script["box"].exportForReference( fileName )
@@ -1650,7 +1647,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 		# Export a box with a ramp on it
 
 		script["box"] = Gaffer.Box()
-		script["box"]["ramp"] = Gaffer.RampffPlug( defaultValue = defaultOne, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		script["box"]["ramp"] = Gaffer.RampffPlug( defaultValue = defaultOne )
 		script["box"].exportForReference( fileName )
 
 		# Make reference1 at default ramp value, reference2 with modified ramp value
@@ -1703,7 +1700,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 
 		# also test promotion not directly to the box, but to a plug inside the box
 
-		script["box"]["container"] = Gaffer.Plug( flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		script["box"]["container"] = Gaffer.Plug()
 		script["box"]["spreadsheetInPlug"] = Gaffer.Spreadsheet()
 		script["box"]["spreadsheetInPlug"]["rows"].addColumn( Gaffer.IntPlug( "c1" ) )
 		Gaffer.PlugAlgo.promote( script["box"]["spreadsheetInPlug"]["rows"], parent = script["box"]["container"] )
@@ -1720,8 +1717,8 @@ class ReferenceTest( GafferTest.TestCase ) :
 		for i, row in enumerate( script["reference"]["rows"] ) :
 			row["cells"]["c1"]["value"].setValue( i )
 
-		script["reference"]["compoundData"]["m1"] = Gaffer.NameValuePlug( "test1", 10, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
-		script["reference"]["compoundData"]["m2"] = Gaffer.NameValuePlug( "test2", 20, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		script["reference"]["compoundData"]["m1"] = Gaffer.NameValuePlug( "test1", 10 )
+		script["reference"]["compoundData"]["m2"] = Gaffer.NameValuePlug( "test2", 20 )
 
 		script["reference"]["container"]["rows"].addRows( 2 )
 		for i, row in enumerate( script["reference"]["container"]["rows"] ) :
@@ -1867,8 +1864,8 @@ class ReferenceTest( GafferTest.TestCase ) :
 		# Testing both `In` and `Out` plugs, because although logically
 		# outputs should have `direction == Out`, in practice the UI only
 		# lets folks make input plugs, so that's what they use.
-		script["box"]["p1"] = Gaffer.IntPlug( flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
-		script["box"]["p2"] = Gaffer.IntPlug( direction = Gaffer.Plug.Direction.Out, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		script["box"]["p1"] = Gaffer.IntPlug()
+		script["box"]["p2"] = Gaffer.IntPlug( direction = Gaffer.Plug.Direction.Out )
 		script["box"]["__add1"] = GafferTest.AddNode()
 		script["box"]["__add2"] = GafferTest.AddNode()
 		script["box"]["p1"].setInput( script["box"]["__add1"]["sum"] )
@@ -1900,7 +1897,7 @@ class ReferenceTest( GafferTest.TestCase ) :
 		script = Gaffer.ScriptNode()
 
 		script["box"] = Gaffer.Box()
-		script["box"]["p"] = Gaffer.IntPlug( direction = Gaffer.Plug.Direction.Out, flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		script["box"]["p"] = Gaffer.IntPlug( direction = Gaffer.Plug.Direction.Out )
 		script["box"]["__add1"] = GafferTest.AddNode()
 		script["box"]["__add2"] = GafferTest.AddNode()
 		script["box"]["p"].setInput( script["box"]["__add1"]["sum"] )
@@ -1928,8 +1925,8 @@ class ReferenceTest( GafferTest.TestCase ) :
 
 		script = Gaffer.ScriptNode()
 		script["box"] = Gaffer.Box()
-		script["box"]["p1"] = Gaffer.IntPlug( flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
-		script["box"]["p2"] = Gaffer.IntPlug( flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		script["box"]["p1"] = Gaffer.IntPlug()
+		script["box"]["p2"] = Gaffer.IntPlug()
 
 		fileName = self.temporaryDirectory() / "test.grf"
 		script["box"].exportForReference( fileName )

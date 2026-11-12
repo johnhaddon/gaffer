@@ -512,7 +512,7 @@ class BoxTest( GafferTest.TestCase ) :
 		self.assertEqual( s["b"].correspondingInput( outPromoted ), None )
 		self.assertEqual( s["b"].enabledPlug(), None )
 
-		s["b"]["enabled"] = Gaffer.BoolPlug( flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+		s["b"]["enabled"] = Gaffer.BoolPlug()
 
 		self.assertEqual( s["b"].correspondingInput( outPromoted ), None )
 		self.assertTrue( s["b"].enabledPlug().isSame( s["b"]["enabled"] ) )
