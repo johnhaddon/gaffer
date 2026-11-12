@@ -692,33 +692,36 @@ void SubGraph::loadReferenceInternal( const std::filesystem::path &fileName )
 	// when we are undone.
 	UndoScope undoDisabler( script, UndoScope::Disabled );
 
-	// if we're doing a reload, then we want to maintain any values and
-	// connections that our external plugs might have. but we also need to
-	// get those existing plugs out of the way during the load, so that the
-	// incoming plugs don't get renamed.
-
+	// Deal with existing children.
 	std::map<std::string, Plug *> previousPlugs;
-	for( Plug::Iterator it( this ); !it.done(); ++it )
+	for(
+		// Iterating in reverse so that deletion doesn't invalidate the next index.
+		int childIndex = (int)(children().size()) - 1; childIndex >= 0;
+		// Using `min()` to account for signal handlers elsewhere removing
+		// additional children when we remove one.
+		childIndex = std::min( (int)children().size() - 1, childIndex - 1 )
+	)
 	{
-		Plug *plug = it->get();
-		if( isReferenceable( plug ) )
+		if( auto plug = getChild<Plug>( childIndex ) )
 		{
-			previousPlugs[plug->getName()] = plug;
-			plug->setName( "__tmp__" + plug->getName().string() );
+			if( !isReferenceable( plug ) )
+			{
+				continue;
+			}
+			else if( isReference() )
+			{
+				// We're replacing one reference with another, so we want to
+				// maintain any values and connections that our external plugs
+				// might have. But we also need to get those existing plugs out
+				// of the way during the load, so that the incoming plugs don't
+				// get renamed.
+				previousPlugs[plug->getName()] = plug;
+				plug->setName( "__tmp__" + plug->getName().string() );
+				continue;
+			}
 		}
-	}
-
-	// if we're doing a reload, then we also need to delete all our child
-	// nodes to make way for the incoming nodes.
-
-	int i = (int)(children().size()) - 1;
-	while( i >= 0 )
-	{
-		if( Node *node = getChild<Node>( i ) )
-		{
-			removeChild( node );
-		}
-		i--;
+		// Node, or a plug we want to remove.
+		removeChild( getChild( childIndex ) );
 	}
 
 	// Set up a container to catch all the children added during loading.
