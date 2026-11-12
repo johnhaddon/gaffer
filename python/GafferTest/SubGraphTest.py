@@ -2253,5 +2253,29 @@ class SubGraphTest( GafferTest.TestCase ) :
 		assertReferenced()
 		self.assertEqual( len( referenceChangedSlot ), 4 )
 
+	def testSaveAndLoadAfterLocalisation( self ) :
+
+		script = Gaffer.ScriptNode()
+		script["box"] = Gaffer.Box()
+		script["box"]["plug"] = Gaffer.IntPlug( flags = Gaffer.Plug.Flags.Default | Gaffer.Plug.Flags.Dynamic )
+
+		fileName = self.temporaryDirectory() / "test.grf"
+		script["box"].exportReference( fileName )
+
+		script["localised"] = Gaffer.Box()
+		script["localised"].loadReference( fileName )
+		self.__assertGraphsMatch( script["localised"], script["box"] )
+
+		script["localised"].localise()
+		self.__assertGraphsMatch( script["localised"], script["box"] )
+
+		script["box"]["plug"].setValue( 10 )
+		script["localised"]["plug"].setValue( 10 )
+		self.__assertGraphsMatch( script["localised"], script["box"] )
+
+		script2 = Gaffer.ScriptNode()
+		script2.execute( script.serialise() )
+		self.__assertGraphsMatch( script2["localised"], script["localised"] )
+
 if __name__ == "__main__":
 	unittest.main()
