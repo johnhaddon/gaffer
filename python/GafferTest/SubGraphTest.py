@@ -2036,5 +2036,28 @@ class SubGraphTest( GafferTest.TestCase ) :
 		script2.execute( script.serialise() )
 		self.assertEqual( script2["reference"]["p2"].getInput(), script2["reference"]["p1"] )
 
+	def testLoadReferenceOnBoxWithLocalNodes( self ) :
+
+		# Make an empty `.grf` file.
+
+		script = Gaffer.ScriptNode()
+		script["box"] = Gaffer.Box()
+
+		fileName = self.temporaryDirectory() / "test.grf"
+		script["box"].exportReference( fileName )
+
+		# Edit the box to add a BoxIn node.
+
+		script["box"]["boxIn"] = Gaffer.BoxIn()
+		script["box"]["boxIn"]["name"].setValue( "in" )
+		script["box"]["boxIn"].setup( Gaffer.IntPlug() )
+
+		# Load the reference. The existing contents of the
+		# box should have been cleared.
+
+		script["box"].loadReference( fileName )
+		self.assertEqual( script["box"].referenceFileName(), fileName )
+		self.assertEqual( script["box"].keys(), [ "user"] )
+
 if __name__ == "__main__":
 	unittest.main()
