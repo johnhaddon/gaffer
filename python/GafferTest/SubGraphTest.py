@@ -2253,6 +2253,40 @@ class SubGraphTest( GafferTest.TestCase ) :
 		assertReferenced()
 		self.assertEqual( len( referenceChangedSlot ), 4 )
 
+	def testLoadLocaliseReload( self ) :
+
+		# Export a reference.
+
+		script = Gaffer.ScriptNode()
+		script["boxToExport"] = Gaffer.Box()
+
+		script["boxToExport"] = Gaffer.Box()
+		script["boxToExport"]["add"] = GafferTest.AddNode()
+
+		script["boxToExport"]["boxIn"] = Gaffer.BoxIn()
+		script["boxToExport"]["boxIn"]["name"].setValue( "in" )
+		script["boxToExport"]["boxIn"].setup( script["boxToExport"]["add"]["op1"] )
+		script["boxToExport"]["add"]["op1"].setInput( script["boxToExport"]["boxIn"]["out"] )
+
+		script["boxToExport"]["boxOut"] = Gaffer.BoxOut()
+		script["boxToExport"]["boxOut"]["name"].setValue( "out" )
+		script["boxToExport"]["boxOut"].setup( script["boxToExport"]["add"]["sum"] )
+		script["boxToExport"]["boxOut"]["in"].setInput( script["boxToExport"]["add"]["sum"] )
+
+		fileName = self.temporaryDirectory() / "test.grf"
+		script["boxToExport"].exportReference( fileName )
+
+		# Reference it, localise it, then reference it again.
+
+		script["box"] = Gaffer.Box()
+		script["box"].loadReference( fileName )
+		script["box"].localise()
+		script["box"].loadReference( fileName )
+
+		# Check it worked.
+
+		self.__assertGraphsMatch( script["box"], script["boxToExport"] )
+
 	def testSaveAndLoadAfterLocalisation( self ) :
 
 		script = Gaffer.ScriptNode()
