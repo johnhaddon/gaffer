@@ -84,8 +84,8 @@ Gaffer.Metadata.registerNode(
 
 		"*" : {
 
-			"deletable" : True,
-			"renameable" : True,
+			"deletable" : lambda plug : not plug.node().isReference(),
+			"renameable" : lambda plug : not plug.node().isReference(),
 
 		},
 
@@ -474,7 +474,7 @@ def __graphEditorPlugContextMenu( graphEditor, plug, menuDefinition ) :
 
 	readOnly = Gaffer.MetadataAlgo.readOnly( plug )
 
-	if isinstance( plug.node(), Gaffer.Box ) :
+	if isinstance( plug.node(), Gaffer.Box ) and not plug.node.isReference() :
 
 		menuDefinition.append(
 			"/Rename...",
