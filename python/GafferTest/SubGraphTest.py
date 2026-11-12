@@ -1550,6 +1550,10 @@ class SubGraphTest( GafferTest.TestCase ) :
 		self.assertTrue( script["reference"]["p"].isSetToDefault() )
 		self.assertEqual( script["reference"]["p"].defaultHash(), script["box"]["p"].defaultHash() )
 
+		script2 = Gaffer.ScriptNode()
+		script2.execute( script.serialise() )
+		self.assertEqual( script2["reference"]["p"].keys(), script["box"]["p"].keys() )
+
 	def testPromotedSpreadsheetDuplicateAsBox( self ) :
 
 		script = Gaffer.ScriptNode()

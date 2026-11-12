@@ -122,7 +122,7 @@ class GAFFER_API SubGraph : public DependencyNode
 		Plug *correspondingInput( const Plug *output ) override;
 		const Plug *correspondingInput( const Plug *output ) const override;
 
-	private :
+	//private : TODO : FIX ME
 
 		void loadReferenceInternal( const std::filesystem::path &fileName );
 		bool isReferenceable( const GraphComponent *descendant ) const;

@@ -77,12 +77,19 @@ class SubGraphSerialiser : public NodeSerialiser
 
 	bool childNeedsConstruction( const Gaffer::GraphComponent *child, const Serialisation &serialisation ) const override
 	{
+		const SubGraph *subGraph = static_cast<const SubGraph *>( child->parent() );
 		if( child->isInstanceOf( Node::staticTypeId() ) )
 		{
-			const SubGraph *subGraph = static_cast<const SubGraph *>( child->parent() );
 			if( !subGraph->isReference() )
 			{
 				return true;
+			}
+		}
+		else if( auto plug = IECore::runTimeCast<const Plug>( child ) )
+		{
+			if( subGraph->isReferenceable( plug ) )
+			{
+				return !subGraph->isReference();
 			}
 		}
 		return NodeSerialiser::childNeedsConstruction( child, serialisation );

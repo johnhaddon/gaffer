@@ -564,6 +564,7 @@ void SubGraph::loadReference( const std::filesystem::path &fileName )
 	Action::enact(
 		this,
 		boost::bind( &SubGraph::loadReferenceInternal, SubGraphPtr( this ), fileName ),
+		// TODO : IS UNDO DOING WHAT WE WANT? SHOULD WE PREVENT LOCALISED->LOADREFERENCE?
 		boost::bind( &SubGraph::loadReferenceInternal, SubGraphPtr( this ), referenceFileName() )
 	);
 }
@@ -756,39 +757,6 @@ void SubGraph::loadReferenceInternal( const std::filesystem::path &fileName )
 	else
 	{
 		Metadata::deregisterValue( this, g_childNodesAreReadOnlyName );
-	}
-
-	// Do a little bit of post processing on everything that was loaded.
-
-	for( size_t i = 0, e = newChildren->size(); i < e; ++i )
-	{
-		if( Plug *plug = runTimeCast<Plug>( newChildren->member( i ) ) )
-		{
-			// Make the loaded plugs non-dynamic, because we don't want them
-			// to be serialised in the script the reference is in - the whole
-			// point is that they are referenced.
-			/// \todo Plug flags are not working. We need to introduce an
-			/// alternative mechanism based on querying parent nodes/plugs
-			/// for serialisation requirements at the point of serialisation.
-			plug->setFlags( Plug::Dynamic, false );
-
-			if(
-				runTimeCast<const RampffPlug>( plug ) ||
-				runTimeCast<const RampfColor3fPlug>( plug ) ||
-				runTimeCast<const RampfColor4fPlug>( plug )
-			)
-			{
-				// Avoid recursion as it makes it impossible to serialise
-				// the `x/y` children of ramp points. See RampPlugSerialiser
-				// for further details of ramp serialisation.
-				continue;
-			}
-
-			for( Plug::RecursiveIterator it( plug ); !it.done(); ++it )
-			{
-				(*it)->setFlags( Plug::Dynamic, false );
-			}
-		}
 	}
 
 	// Transfer connections, values and metadata from the old plugs onto the corresponding new ones.

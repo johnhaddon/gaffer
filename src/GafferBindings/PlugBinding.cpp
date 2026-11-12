@@ -214,6 +214,13 @@ bool PlugSerialiser::childNeedsConstruction( const Gaffer::GraphComponent *child
 {
 	// cast is safe because of constraints maintained by Plug::acceptsChild().
 	const Plug *childPlug = static_cast<const Plug *>( child );
+	if( auto subGraph = runTimeCast<const SubGraph>( childPlug->node() ) )
+	{
+		if( subGraph->isReference() && subGraph->isReferenceable( childPlug ) )
+		{
+			return subGraph->isChildEdit( childPlug );
+		}
+	}
 	return childPlug->getFlags( Plug::Dynamic | Plug::Serialisable );
 }
 
