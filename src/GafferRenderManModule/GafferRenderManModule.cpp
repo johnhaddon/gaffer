@@ -50,8 +50,67 @@
 #include "GafferBindings/DependencyNodeBinding.h"
 #include "GafferBindings/PlugBinding.h"
 
+#include "IECoreScene/ShaderNetworkAlgo.h"
+
+#include "IECore/MessageHandler.h"
+
 using namespace boost::python;
 using namespace GafferRenderMan;
+using namespace IECoreScene;
+
+namespace
+{
+
+// Shaders that use the `trace()` shadeop.
+const boost::container::flat_set<std::string> g_badShaders = { "PxrDirt", "TextureCameraProjection", "TextureSphericalProjection" };
+
+using ShaderSet = std::unordered_set<IECore::InternedString>;
+
+void findDirtUpstream( const ShaderNetwork *network, IECore::InternedString shaderHandle, IECore::InternedString badParameter, ShaderSet &visited )
+{
+	if( !visited.insert( shaderHandle ).second )
+	{
+		return;
+	}
+
+	const Shader *shader = network->getShader( shaderHandle );
+	if( g_badShaders.contains( shader->getName() ) )
+	{
+		IECore::msg( IECore::Msg::Level::Warning, "Dirt Detector", shader->getName() + " found upstream of " + badParameter.string() );
+	}
+
+	for( const auto &connection : network->inputConnections( shaderHandle ) )
+	{
+		findDirtUpstream( network, connection.source.shader, badParameter, visited );
+	}
+}
+
+const boost::container::flat_set<IECore::InternedString> g_badParameters = { "presence", "dispAmount", "dispScalar", "dispVector", "modelDispVector" };
+
+void pxrDirtDetector( IECoreScene::ShaderNetwork *shaderNetwork, IECore::InternedString attributeName, const IECore::CompoundObject *attributes )
+{
+	for( const auto &[handle, shader] : shaderNetwork->shaders() )
+	{
+		for( const auto &connection : shaderNetwork->inputConnections( handle ) )
+		{
+			auto it = g_badParameters.find( connection.destination.name );
+			if( it != g_badParameters.end() )
+			{
+				ShaderSet visited;
+				findDirtUpstream( shaderNetwork, handle, *it, visited );
+			}
+		}
+	}
+}
+
+void pxrDirtDetectorHash( const IECoreScene::ShaderNetwork *shaderNetwork, IECore::InternedString attributeName, const IECore::CompoundObject *attributes, IECore::MurmurHash &hash )
+{
+	hash.append( "pxrDirtDetector" );
+}
+
+const bool g_registration = []{ IECoreScene::ShaderNetworkAlgo::registerRenderAdaptor( "pxrDirtDetector", pxrDirtDetectorHash, pxrDirtDetector ); return true; } ();
+
+} // namespace
 
 BOOST_PYTHON_MODULE( _GafferRenderMan )
 {

@@ -1487,7 +1487,7 @@ libraries = {
 			"LIBPATH" : [ "$RENDERMAN_ROOT/lib" ],
 		},
 		"pythonEnvAppends" : {
-			"LIBS" : [ "GafferBindings", "GafferDispatch", "GafferRenderMan", "GafferScene" ],
+			"LIBS" : [ "GafferBindings", "GafferDispatch", "GafferRenderMan", "GafferScene", "IECoreScene" ],
 			"LIBPATH" : [ "$RENDERMAN_ROOT/lib" ],
 		},
 		"requiredOptions" : [ "RENDERMAN_ROOT" ],
