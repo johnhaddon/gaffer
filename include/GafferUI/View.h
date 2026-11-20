@@ -71,6 +71,7 @@ namespace GafferUIModule
 // Forward declarations for friendship
 void bindView();
 Gaffer::NodePtr getPreprocessor( GafferUI::View &v );
+void setPreprocessorWrapper( GafferUI::View &v, Gaffer::NodePtr preprocessor );
 
 }
 
@@ -209,6 +210,7 @@ class GAFFERUI_API View : public Gaffer::Node
 
 		friend void GafferUIModule::bindView();
 		friend Gaffer::NodePtr GafferUIModule::getPreprocessor( View & );
+		friend void GafferUIModule::setPreprocessorWrapper( View &, Gaffer::NodePtr );
 
 };
 

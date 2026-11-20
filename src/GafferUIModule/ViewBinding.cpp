@@ -153,6 +153,12 @@ Gaffer::NodePtr getPreprocessor( View &v )
 	return v.getPreprocessor();
 }
 
+void setPreprocessorWrapper( View &v, Gaffer::NodePtr preprocessor )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	v.setPreprocessor( preprocessor );
+}
+
 void bindView()
 {
 	scope s = GafferBindings::NodeClass<View, ViewWrapper>( nullptr, no_init )
@@ -162,7 +168,7 @@ void bindView()
 		.def( "context", &contextWrapper, ( arg( "_copy" ) = true ) )
 		.def( "contextChangedSignal", &View::contextChangedSignal, return_internal_reference<1>() )
 		.def( "viewportGadget", (ViewportGadget *(View::*)())&View::viewportGadget, return_value_policy<IECorePython::CastToIntrusivePtr>() )
-		.def( "_setPreprocessor", &View::setPreprocessor )
+		.def( "_setPreprocessor", &setPreprocessorWrapper )
 		.def( "_getPreprocessor", &getPreprocessor )
 		.def( "create", &create )
 		.staticmethod( "create" )
