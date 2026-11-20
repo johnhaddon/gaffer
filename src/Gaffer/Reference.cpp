@@ -103,7 +103,7 @@ bool conformRampPlugs( const Gaffer::Plug *srcPlug, Gaffer::Plug *dstPlug, bool 
 		for( size_t i = 0, n = typedSrc->numPoints(); i < n; ++i )
 		{
 			const Plug *point = typedSrc->pointPlug( i );
-			typedDest->addChild( point->createCounterpart( point->getName(), point->direction() ) );
+			typedDest->pointsPlug()->addChild( point->createCounterpart( point->getName(), point->direction() ) );
 		}
 		return true;
 	};
