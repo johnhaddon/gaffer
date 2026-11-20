@@ -118,6 +118,12 @@ std::filesystem::path generateFileName2( Catalogue &catalogue, const GafferImage
 	return catalogue.generateFileName( image );
 }
 
+void setDriverWrapper( Display &display, IECoreImage::DisplayDriverPtr driver, bool copy )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	display.setDriver( driver, copy );
+}
+
 } // namespace
 
 void GafferSceneModule::bindCatalogue()
@@ -125,7 +131,7 @@ void GafferSceneModule::bindCatalogue()
 
 	{
 		scope s = GafferBindings::DependencyNodeClass<Display>()
-			.def( "setDriver", &Display::setDriver, ( arg( "driver" ), arg( "copy" ) = false ) )
+			.def( "setDriver", &setDriverWrapper, ( arg( "driver" ), arg( "copy" ) = false ) )
 			.def( "getDriver", (IECoreImage::DisplayDriver *(Display::*)())&Display::getDriver, return_value_policy<CastToIntrusivePtr>() )
 			.def( "driverClosed", &Display::driverClosed )
 			.def( "driverCreatedSignal", &Display::driverCreatedSignal, return_value_policy<reference_existing_object>() ).staticmethod( "driverCreatedSignal" )
