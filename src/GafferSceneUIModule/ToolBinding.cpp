@@ -235,6 +235,24 @@ object acquireTransformEdit( const TransformTool::Selection &s, bool createIfNec
 	return p ? object( *p ) : object();
 }
 
+void translateWrapper( TranslateTool &tool, const Imath::V3f &offset )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	tool.translate( offset );
+}
+
+void scaleWrapper( ScaleTool &tool, const Imath::V3f &scale )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	tool.scale( scale );
+}
+
+void rotateWrapper( RotateTool &tool, const Imath::Eulerf &degrees )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	tool.rotate( degrees );
+}
+
 void registerSelectMode( const std::string &modifierName, object modifier )
 {
 	auto selectModePtr = std::shared_ptr<boost::python::object>(
@@ -375,17 +393,17 @@ void GafferSceneUIModule::bindTools()
 
 	GafferBindings::NodeClass<TranslateTool>( nullptr, no_init )
 		.def( init<SceneView *>() )
-		.def( "translate", &TranslateTool::translate )
+		.def( "translate", &translateWrapper )
 	;
 
 	GafferBindings::NodeClass<ScaleTool>( nullptr, no_init )
 		.def( init<SceneView *>() )
-		.def( "scale", &ScaleTool::scale )
+		.def( "scale", &scaleWrapper )
 	;
 
 	GafferBindings::NodeClass<RotateTool>( nullptr, no_init )
 		.def( init<SceneView *>() )
-		.def( "rotate", &RotateTool::rotate )
+		.def( "rotate", &rotateWrapper )
 	;
 
 	GafferBindings::NodeClass<CameraTool>( nullptr, no_init )

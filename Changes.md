@@ -37,6 +37,7 @@ Fixes
 - DataStore : Fixed potential hang calling `setEntry()` or `removeEntry()` from Python.
 - Plug : Fixed potential hang calling `removeOutputs()` from Python.
 - Display : Fixed potential hang calling `setDriver()` from Python.
+- TranslateTool, ScaleTool, RotateTool : Fixed potential hang calling `translate()`, `scale()` or `rotate()` from Python.
 
 API
 ---
