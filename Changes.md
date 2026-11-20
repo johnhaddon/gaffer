@@ -35,6 +35,7 @@ Fixes
 - Enums : Fixed conversion of `QtCore.Qt.AlignmentFlag.AlignJustify`.
 - Arnold, Cycles, 3Delight : Fixed fallback value for USD DistantLight intensity.
 - DataStore : Fixed potential hang calling `setEntry()` or `removeEntry()` from Python.
+- Plug : Fixed potential hang calling `removeOutputs()` from Python.
 
 API
 ---
