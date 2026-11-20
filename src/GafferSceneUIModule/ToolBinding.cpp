@@ -253,6 +253,24 @@ void rotateWrapper( RotateTool &tool, const Imath::Eulerf &degrees )
 	tool.rotate( degrees );
 }
 
+void positionShadowWrapper( LightPositionTool &tool, const Imath::V3f &shadowPivot, const Imath::V3f &shadowTarget, const float targetDistance )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	tool.positionShadow( shadowPivot, shadowTarget, targetDistance );
+}
+
+void positionHighlightWrapper( LightPositionTool &tool, const Imath::V3f &highlightTarget, const Imath::V3f &viewpoint, const Imath::V3f &normal, const float targetDistance )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	tool.positionHighlight( highlightTarget, viewpoint, normal, targetDistance );
+}
+
+void positionAlongNormalWrapper( LightPositionTool &tool, const Imath::V3f &target, const Imath::V3f &normal, const float targetDistance )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	tool.positionAlongNormal( target, normal, targetDistance );
+}
+
 void registerSelectMode( const std::string &modifierName, object modifier )
 {
 	auto selectModePtr = std::shared_ptr<boost::python::object>(
@@ -417,9 +435,9 @@ void GafferSceneUIModule::bindTools()
 	{
 		scope s = GafferBindings::NodeClass<LightPositionTool>( nullptr, no_init )
 			.def( init<SceneView *>() )
-			.def( "positionShadow", &LightPositionTool::positionShadow )
-			.def( "positionHighlight", &LightPositionTool::positionHighlight )
-			.def( "positionAlongNormal", &LightPositionTool::positionAlongNormal )
+			.def( "positionShadow", &positionShadowWrapper )
+			.def( "positionHighlight", &positionHighlightWrapper )
+			.def( "positionAlongNormal", &positionAlongNormalWrapper )
 		;
 
 		enum_<LightPositionTool::Mode>( "Mode" )
