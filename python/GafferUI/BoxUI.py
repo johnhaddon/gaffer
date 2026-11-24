@@ -59,7 +59,7 @@ Gaffer.Metadata.registerNode(
 	node.
 	""",
 
-	"icon", "boxNode.png",
+	"icon", lambda node : "referenceNode.png" if node.isReference() else "boxNode.png",
 
 	"ui:childNodesAreViewable", True,
 	## \todo Deprecate and remove in favour of `ui:childNodesAreViewable`.

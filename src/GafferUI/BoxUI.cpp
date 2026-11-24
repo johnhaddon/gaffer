@@ -59,14 +59,61 @@ class BoxNodeGadget : public StandardNodeGadget
 
 	public :
 
-		BoxNodeGadget( const Gaffer::BoxPtr &box )
+		BoxNodeGadget( const Gaffer::NodePtr &node )
 			:	StandardNodeGadget( node )
 		{
+			auto box = runTimeCast<Box>( node.get() );
+			if( !box )
+			{
+				throw Exception( "BoxNodeGadget requires a Box" );
+			}
 
+			// Our base class responds to the `icon` metadata, but doesn't know
+			// that it changes based on `Box::isReference()`. Arrange to emit
+			// `Metadata::nodeValueChangedSignal()` whenever that changes. We make
+			// sure we only emit the signal once, even if there are multiple gadgets
+			// in existence.
+			RefCountedConnection &connection = g_connections[box];
+			if( !connection.refCount )
+			{
+				connection.scope = box->referenceChangedSignal().connect( &referenceChanged );
+			}
+			connection.refCount++;
 		}
 
+		~BoxNodeGadget() override
+		{
+			auto it = g_connections.find( node() );
+			assert( it != g_connections.end() && it->second.refCount );
+			it->second.refCount--;
+			if( !it->second.refCount )
+			{
+				g_connections.erase( it );
+			}
+		}
+
+	private :
+
+		struct RefCountedConnection
+		{
+			Signals::ScopedConnection scope;
+			size_t refCount = 0;
+		};
+
+		static std::unordered_map<const Node *, RefCountedConnection> g_connections;
+
+		static void referenceChanged( SubGraph *box )
+		{
+			Metadata::nodeValueChangedSignal( box )( box, "icon", Metadata::ValueChangedReason::InstanceRegistration );
+		}
+
+		static const NodeGadgetTypeDescription<BoxNodeGadget> g_description;
 
 };
+
+std::unordered_map<const Node *, BoxNodeGadget::RefCountedConnection> BoxNodeGadget::g_connections;
+
+const NodeGadget::NodeGadgetTypeDescription<BoxNodeGadget> BoxNodeGadget::g_description( Box::staticTypeId() );
 
 class BoxPlugAdder : public PlugAdder
 {

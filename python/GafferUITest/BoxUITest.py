@@ -34,6 +34,8 @@
 #
 ##########################################################################
 
+import pathlib
+
 import imath
 
 import IECore
@@ -194,3 +196,30 @@ class BoxUITest( GafferUITest.TestCase ) :
 
 		p = Gaffer.PlugAlgo.promote( s["b"]["n"]["user"]["p"] )
 		self.assertNotEqual( Gaffer.Metadata.value( p, "layout:section" ), "SomeWeirdSection" )
+
+	def testIconMetadataSignalling( self ) :
+
+		script = Gaffer.ScriptNode()
+		script["box"] = Gaffer.Box()
+		self.assertEqual( Gaffer.Metadata.value( script["box"], "icon" ), "boxNode.png" )
+
+		gadget1 = GafferUI.NodeGadget.create( script["box"] )
+		gadget2 = GafferUI.NodeGadget.create( script["box"] )
+
+		cs = GafferTest.CapturingSlot( Gaffer.Metadata.nodeValueChangedSignal( script["box"] ) )
+
+		script["box"].loadReference( Gaffer.rootPath() / "python" / "GafferTest" / "references" / "empty.grf" )
+		self.assertEqual( len( [ x for x in cs if x[1] == "icon" ] ), 1 )
+		self.assertEqual( Gaffer.Metadata.value( script["box"], "icon" ), "referenceNode.png" )
+
+		del cs[:]
+		script["box"].localise()
+		self.assertEqual( len( [ x for x in cs if x[1] == "icon" ] ), 1 )
+		self.assertEqual( Gaffer.Metadata.value( script["box"], "icon" ), "boxNode.png" )
+
+		del gadget1
+		del gadget2
+		del cs[:]
+		script["box"].loadReference( Gaffer.rootPath() / "python" / "GafferTest" / "references" / "empty.grf" )
+		self.assertEqual( len( [ x for x in cs if x[1] == "icon" ] ), 0 )
+		self.assertEqual( Gaffer.Metadata.value( script["box"], "icon" ), "referenceNode.png" )
