@@ -54,6 +54,20 @@ using namespace GafferUI;
 namespace
 {
 
+class BoxNodeGadget : public StandardNodeGadget
+{
+
+	public :
+
+		BoxNodeGadget( const Gaffer::BoxPtr &box )
+			:	StandardNodeGadget( node )
+		{
+
+		}
+
+
+};
+
 class BoxPlugAdder : public PlugAdder
 {
 
